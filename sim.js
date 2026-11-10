@@ -931,17 +931,34 @@ function stepPlay() {
     else { sudden = true; timer = 1e9; for (const f of F) { f.pct = 300; f.stocks = 1; } pop(0, 60, 'SUDDEN DEATH', '#ff8a7a'); beep(200, 0.6, 'sawtooth', 0.08, 2); }
   }
 }
+/* Camera numbers, in stage units. padX/padUp/padDown: room kept round each fighter. min/max: how far out and in it may zoom
+   (pixels per unit). lx/ly: how far off stage a fighter is still followed. ex/ey: the furthest the edge of the view may reach. */
+const CAM = { padX: 30, padUp: 34, padDown: 14, min: 2.3, max: 8.6, lx: 200, ly0: -105, ly1: 160, ex: 240, ey0: -135, ey1: 205 };
 function stepFx() {
   for (const p of PART) { p.x += p.vx; p.y += p.vy; p.vx *= 0.94; p.vy *= 0.94; p.life--; }
   PART = PART.filter(p => p.life > 0); for (const p of POPS) { p.y += 0.25; p.life--; } POPS = POPS.filter(p => p.life > 0);
   if (shake > 0) shake--;
   if (!F.length) return;
   const live = F.filter(f => f.state !== 'dead');
-  let x0 = -30, x1 = 30, y0 = 0, y1 = 40;
-  for (const f of live) { x0 = Math.min(x0, clamp(f.x, -210, 210) - 30); x1 = Math.max(x1, clamp(f.x, -210, 210) + 30); y0 = Math.min(y0, clamp(f.y, -110, 170) - 14); y1 = Math.max(y1, clamp(f.y, -110, 170) + 34); }
-  const s = clamp(Math.min(W / (x1 - x0), (H - 110) / (y1 - y0)), 2.2, 4.4);
-  if (slowT > 0 && focus) { cam.x += (focus.x - cam.x) * 0.18; cam.y += (focus.y - cam.y) * 0.18; cam.s += (5.2 - cam.s) * 0.14; return; }
-  cam.x += ((x0 + x1) / 2 - cam.x) * 0.08; cam.y += ((y0 + y1) / 2 - cam.y) * 0.08; cam.s += (s - cam.s) * 0.06;
+  if (slowT > 0 && focus) { cam.x += (focus.x - cam.x) * 0.18; cam.y += (focus.y - cam.y) * 0.18; cam.s += (CAM.max + 1 - cam.s) * 0.14; return; }
+  /* Each fighter carries a box the camera must keep in view: room all round, more in front and in the direction of travel.
+     The view is the tightest frame round those boxes, so it closes in when the fighters are together and opens up as they
+     part. Nothing else is forced into the picture. Fighters past the camera limits are followed no further. */
+  let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+  for (const f of live) {
+    const x = clamp(f.x, -CAM.lx, CAM.lx), y = clamp(f.y, CAM.ly0, CAM.ly1), lead = f.face * 5 + clamp(f.vx * 5, -12, 12);
+    x0 = Math.min(x0, x - CAM.padX + Math.min(lead, 0)); x1 = Math.max(x1, x + CAM.padX + Math.max(lead, 0));
+    y0 = Math.min(y0, y - CAM.padDown + Math.min(f.vy * 4, 0)); y1 = Math.max(y1, y + CAM.padUp + Math.max(f.vy * 3, 0));
+  }
+  if (!live.length) { x0 = -60; x1 = 60; y0 = -10; y1 = 50; }
+  const s = clamp(Math.min(W / (x1 - x0), (H - 110) / (y1 - y0)), CAM.min, CAM.max);
+  cam.s += (s - cam.s) * (s < cam.s ? 0.12 : 0.03);   /* open up quickly so nobody leaves the frame, close in gently */
+  /* aim a little toward the stage, then keep the edges of the view inside the camera limits */
+  const hw = W / 2 / cam.s, up = H * 0.52 / cam.s, down = H * 0.48 / cam.s;
+  let tx = (x0 + x1) / 2 * 0.92, ty = (y0 + y1) / 2 - 69 / cam.s;   /* the damage display covers the bottom strip, so frame the boxes in what is left above it */
+  tx = hw >= CAM.ex ? 0 : clamp(tx, -CAM.ex + hw, CAM.ex - hw);
+  ty = up + down >= CAM.ey1 - CAM.ey0 ? (CAM.ey0 + CAM.ey1) / 2 : clamp(ty, CAM.ey0 + down, CAM.ey1 - up);
+  cam.x += (tx - cam.x) * 0.11; cam.y += (ty - cam.y) * 0.11;
 }
 function step() {
   if (mode === 'select') { stepSelect(); return; }
