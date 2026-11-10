@@ -72,6 +72,7 @@ Spent so far: 237 credits (Flint 135, companions 102). The daily limit was raise
 - Grab: either stick throws, held or flicked, from the 7th frame of the hold; attack pummels. A grab holds for at least 30 frames. The CPU breaks out at a human mashing pace that rises with its level.
 - Flint's down special and Wren's companion swap hang in the air until they finish, once per time off the ground.
 - Only the jump buttons jump.
+- Start screen: Up / Down sets the CPU level, the jump button shows or hides hitboxes (also B on the keyboard, any time), − swaps A and B on a controller.
 
 ## Fighters push each other (2026-11-10)
 

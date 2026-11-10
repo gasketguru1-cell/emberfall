@@ -61,6 +61,13 @@ function drawSelect() {
   g.fillText("Smash: flick the stick with attack, or press attack + special together; keep attack held to charge · after a grab, either stick throws · Up / Down here sets the CPU level", W / 2, 696);
   g.fillStyle = '#8f88aa'; g.fillText('Tools: B shows hitboxes · P freezes · O steps one frame · M switches 2D / 3D', W / 2, 715);
   drawUpdateNote(14);
+  /* hitbox switch, top right: the jump button flips it */
+  { const x = W - 292, y = 20, on = DBG.boxes;
+    g.fillStyle = 'rgba(15,15,30,.8)'; rr(x, y, 272, 58, 12); g.fill(); g.strokeStyle = on ? '#ff6a6a' : 'rgba(255,255,255,.25)'; g.lineWidth = 2; g.stroke();
+    g.textAlign = 'left'; g.font = 'bold 19px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Show hitboxes', x + 16, y + 26);
+    g.fillStyle = on ? '#ff6a6a' : '#555'; rr(x + 196, y + 10, 58, 22, 11); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 243 : x + 207, y + 21, 8, 0, TAU); g.fill();
+    g.font = 'bold 11px system-ui, sans-serif'; g.fillText(on ? 'ON' : 'OFF', on ? x + 204 : x + 222, y + 25);
+    g.font = '13px system-ui, sans-serif'; g.fillStyle = '#bbb'; g.fillText('Jump button (X / Y), or B on the keyboard', x + 16, y + 48); g.textAlign = 'center'; }
 }
 function drawDebugText() {
   if (!DBG.boxes && !DBG.step) return;
