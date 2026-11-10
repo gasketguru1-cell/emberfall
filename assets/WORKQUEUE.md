@@ -81,3 +81,7 @@ Nothing here blocks work; these are things only a person at the machine can judg
   - Hitboxes set by hand on its body (hitboxes.js) and checked with the in-game audit, which now includes it: 20 attacks, both facings, the striking part inside the box every time.
   - Tests: 15 new rule checks (90 in all); it is in the stress test, the recovery test, the movement table, the level test and the balance matrix.
   - Credits used on this fighter: 34 of the 400 the owner cleared.
+- 2026-11-10, done: the owner's moveset document for Flint, Nib, Loom and Hod (details in STATUS.md, "The owner's moveset document"). 112 rule checks, balance level on two seeds.
+- Next, each needing the owner's yes on a concept picture before any 3D model (a model is 30 credits, a picture 4 more; the owner allowed 30 a fighter, so the picture is over that and has to be said):
+  - Sprocket, the handyman from the moveset document (an original design; the document's kit for him is ready to build from).
+  - Three more from the owner's three later documents. Each is built as an original Emberfall fighter with the same kind of play, not a copy of the character the document describes: a sword-and-shield duelist, a mounted fighter who punishes misses, and a low, quick skirmisher.

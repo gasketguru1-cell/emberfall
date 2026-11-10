@@ -26,28 +26,18 @@ vm.runInThisContext(`
   const tap = (at, len) => tt => tt >= at && tt < at + (len || 2);
   const smash = (i, x, y) => { i.lx = x || 0; i.ly = y || 0; i.atk = true; i.sm = true; };   /* a forward (or up / down) smash, as the CPU inputs it */
 
-  /* ---- Armour: Hod's forward smash takes a weak hit without flinching, and a strong one breaks it ---- */
+  /* ---- Armour: Hod's Ram Plate takes one light strike on the ground during frames 13 to 19, and nothing more ---- */
   {
-    const [hod, fl] = setup(HOD, FL, 0, 14); const win = hod.form.moves.fsmash.armor; let during = null;
-    SCRIPT[0] = (i, tt) => { if (tap(0)(tt)) smash(i, 1); };
-    SCRIPT[1] = (i, tt) => { if (tap(win[0] - 2)(tt)) i.atk = true; };
-    run(80, () => { if (hod.pct > 0 && during === null) during = hod.state + ':' + hod.mname + ' at move frame ' + hod.mf; });
-    check('armour: weak hit is absorbed', hod.pct > 0 && during !== null && during.startsWith('attack:fsmash'), 'Hod took ' + hod.pct.toFixed(1) + '% while ' + during + ' (armour frames ' + win.join('-') + ')');
-    check('armour: the smash still comes out and hits', fl.pct > 0, 'Flint took ' + fl.pct.toFixed(1) + '%');
-  }
-  {
-    const [hod, fl] = setup(HOD, FL, 0, 14); hod.pct = 200; let state = null;
-    SCRIPT[0] = (i, tt) => { if (tap(4)(tt)) smash(i, 1); };
-    SCRIPT[1] = (i, tt) => { if (tap(0)(tt)) smash(i, -1); };
-    run(60, () => { if (hod.pct > 200 && state === null) state = hod.state; });
-    check('armour: a strong hit breaks through', state === 'hurt', 'Hod at 200% hit by a forward smash -> ' + state);
-  }
-  {
-    const [hod, fl] = setup(HOD, FL, 0, 14); let state = null;   /* outside the armour window the same weak hit interrupts */
-    SCRIPT[0] = (i, tt) => { if (tap(3)(tt)) smash(i, 1); };
-    SCRIPT[1] = (i, tt) => { if (tap(0)(tt)) i.atk = true; };
-    run(40, () => { if (hod.pct > 0 && state === null) state = hod.state + ' at move frame ' + hod.mf; });
-    check('armour: no protection before the window', state !== null && state.startsWith('hurt'), 'jab landed first -> Hod ' + state);
+    /* Hod is put into Ram Plate at a chosen frame and struck directly, so the timing is exact */
+    const ram = (mf, air, hits) => { const [hod, fl] = setup(HOD, FL, 0, 50); hod.startMove('sspec'); hod.mf = mf; if (air) { hod.grounded = false; hod.plat = null; hod.y = 20; } const p0 = hod.pct, out = [];
+      for (const d of hits) { applyHit(fl, hod, { d, a: 45, b: 20, k: 30, id: 'test:' + d + ':' + out.length }, 1, fl.x, true); out.push(hod.state === 'attack' ? 'kept going' : hod.state); } return { out: out.join(', '), took: hod.pct - p0 }; };
+    const win = ROSTER[1].forms[2].moves.sspec.armor, light = ram(15, false, [8]), two = ram(15, false, [3, 3]), heavy = ram(15, false, [9]), early = ram(win[0] - 1, false, [3]), air = ram(15, true, [3]);
+    check('armour: Ram Plate takes one light strike, and the damage', light.out === 'kept going' && light.took > 8, 'an 8% strike on frame 15: ' + light.out + ', Hod took ' + light.took.toFixed(1) + '% (armour frames ' + win.join('-') + ')');
+    check('armour: a second strike gets through', two.out === 'kept going, hurt', 'two 3% strikes: ' + two.out);
+    check('armour: a stronger hit stops the charge', heavy.out === 'hurt', 'a 9% strike: ' + heavy.out);
+    check('armour: none before the window, none in the air', early.out === 'hurt' && air.out === 'hurt', 'frame ' + (win[0] - 1) + ': ' + early.out + '; in the air: ' + air.out);
+    const [hod, fl] = setup(HOD, FL, 0, 20); SCRIPT[0] = (i, tt) => { if (tap(1)(tt)) { i.lx = 1; i.spc = true; } }; run(60);
+    check('armour: the charge itself hits for 13%', fl.pct > 13 && fl.pct < 18, 'Flint took ' + fl.pct.toFixed(1) + '%');
   }
 
   /* ---- Projectiles: an attack puts out a projectile no more than 9 stronger than itself ---- */
@@ -61,19 +51,22 @@ vm.runInThisContext(`
       tries++; if (fl.pct > 0) hit++; else if (gone) out++;
     }
     check('projectile: a tilt puts a weak shot out', out > 0, out + ' of ' + tries + ' timings stopped the bolt, ' + hit + ' were hit by it');
-    const [nib, fl] = setup(NIB, FL, -34, 0); SCRIPT[0] = (i, tt) => { if (tap(0)(tt)) i.spc = true; }; run(60);
+    const [nib, fl] = setup(NIB, FL, -20, 0); SCRIPT[0] = (i, tt) => { if (tap(0)(tt)) i.spc = true; }; run(60);   /* inside the bolt's short range */
     check('projectile: it hits when nothing meets it', fl.pct > 0, 'Flint took ' + fl.pct.toFixed(1) + '%');
   }
   {
-    let out = 0, hit = 0, tries = 0;
-    for (let d = 10; d <= 44; d += 2) {
-      const [hod, nib] = setup(HOD, NIB, -30, 0); let had = false, gone = false;
-      SCRIPT[0] = (i, tt) => { if (tap(0)(tt)) i.spc = true; };
-      SCRIPT[1] = (i, tt) => { if (tap(d)(tt)) i.atk = true; };
-      run(110, () => { if (PROJ.length) had = true; else if (had) gone = true; });
-      tries++; if (nib.pct > 0) hit++; else if (gone) out++;
-    }
-    check('projectile: a jab cannot stop a boulder', hit > 0 && out === 0, hit + ' of ' + tries + ' timings were hit, ' + out + ' stopped it (jab ' + F[1].form.moves.jab.h[0].d + ' dmg against 12)');
+    const stone = hold => { let out = 0, hit = 0, tries = 0;
+      for (let d = 10; d <= 60; d += 2) {
+        const [hod, nib] = setup(HOD, NIB, -30, 0); let had = false, gone = false;
+        SCRIPT[0] = (i, tt) => { if (tt < (hold ? 20 : 2)) i.spc = true; };
+        SCRIPT[1] = (i, tt) => { if (tap(d)(tt)) i.atk = true; };
+        run(130, () => { if (PROJ.length) had = true; else if (had) gone = true; });
+        tries++; if (nib.pct > 0) hit++; else if (gone) out++;
+      }
+      return { out, hit, tries }; };
+    const small = stone(false), big = stone(true);
+    check('projectile: a jab can knock out the tapped stone', small.out > 0, small.out + ' of ' + small.tries + ' timings stopped the 7% stone, ' + small.hit + ' were hit by it');
+    check('projectile: a jab cannot stop the held stone', big.hit > 0 && big.out === 0, big.hit + ' of ' + big.tries + ' timings were hit by the 11% stone, ' + big.out + ' stopped it');
   }
 
   /* ---- Hitlag nudges: up to three stick flicks during the freeze shift the victim ---- */
@@ -153,14 +146,10 @@ vm.runInThisContext(`
     check('jab: holding attack runs all three', seen.join('>') === 'jab>jab2>jab3', seen.join(' > '));
   }
   {
-    const [nib, b] = setup(NIB, FL, 0, 9); const seen = []; let loops = 0, last = -1;
+    const [nib, b] = setup(NIB, FL, 0, 8); const seen = [];
     SCRIPT[0] = (i, tt) => { if (tt < 60) i.atk = true; };
-    run(110, () => { if (nib.state === 'attack') { if (seen[seen.length - 1] !== nib.mname) seen.push(nib.mname); if (nib.mname === 'jabr' && nib.mf === 1) loops++; } });
-    check('rapid jab: Nib keeps hitting while attack is held', seen.join('>') === 'jab>jabr>jab3' && loops >= 6 && b.pct > 8, seen.join(' > ') + ', ' + loops + ' flurry hits thrown, target at ' + b.pct.toFixed(1) + '%');
-    const [nib2, b2] = setup(NIB, FL, 0, 9); const seen2 = []; let loops2 = 0;
-    SCRIPT[0] = (i, tt) => { if (tt < 2 || (tt >= 8 && tt < 10)) i.atk = true; };
-    run(80, () => { if (nib2.state === 'attack') { if (seen2[seen2.length - 1] !== nib2.mname) seen2.push(nib2.mname); if (nib2.mname === 'jabr' && nib2.mf === 1) loops2++; } });
-    check('rapid jab: two taps give the shortest flurry and the finisher', seen2.join('>') === 'jab>jabr>jab3' && loops2 === 3, seen2.join(' > ') + ', ' + loops2 + ' flurry hits');
+    run(90, () => { if (nib.state === 'attack' && seen[seen.length - 1] !== nib.mname) seen.push(nib.mname); });
+    check('jab: Nib has three hits, 2% 2% 3%', seen.join('>') === 'jab>jab2>jab3' && Math.abs(b.pct - 7 * DMG_1V1) < 0.8, seen.join(' > ') + ', target at ' + b.pct.toFixed(1) + '% (7% before the one-on-one bonus)');
   }
   /* ---- Angled forward tilt: a slight up or down on the stick moves the hit ---- */
   {
@@ -305,10 +294,10 @@ vm.runInThisContext(`
   }
 
   /* ---- Flint's and Wren's down specials hang in the air until they finish, once per time off the ground ---- */
-  for (const [name, A, len] of [['Flint', FL, 56], ['Wren (Nib)', NIB, 34]]) {
-    const [f] = setup(A, FL, 0, 50); airborne(f, 0, 60); f.vy = -1; const fi0 = f.fi; let y0 = null, drop1 = 0, frames1 = 0, drop2 = 0, second = false, n = 0;
-    SCRIPT[0] = (i, tt) => { if ((tt >= 2 && tt < 4) || (tt >= len + 12 && tt < len + 14)) { i.ly = -1; i.spc = true; } };
-    run(len + 30, () => { n++; if (f.state === 'attack' && f.mname === 'dspec') { if (n < len + 8) { if (y0 === null) y0 = f.y; drop1 = Math.max(drop1, y0 - f.y); frames1++; } else { if (!second) { second = true; y0 = f.y; } drop2 = Math.max(drop2, y0 - f.y); } } });
+  for (const [name, A, len, y0s, again] of [['Flint', FL, 49, 60, 61], ['Wren (Nib)', NIB, 32, 150, 70]]) {   /* again: when the second press comes (Wren must wait out the swap lockout) */
+    const [f] = setup(A, FL, 0, 50); airborne(f, 0, y0s); f.vy = -1; const fi0 = f.fi; let y0 = null, drop1 = 0, frames1 = 0, drop2 = 0, second = false, n = 0;
+    SCRIPT[0] = (i, tt) => { if ((tt >= 2 && tt < 4) || (tt >= again && tt < again + 2)) { i.ly = -1; i.spc = true; } };
+    run(again + 24, () => { n++; if (f.state === 'attack' && f.mname === 'dspec') { if (n < again - 2) { if (y0 === null) y0 = f.y; drop1 = Math.max(drop1, y0 - f.y); frames1++; } else { if (!second) { second = true; y0 = f.y; } drop2 = Math.max(drop2, y0 - f.y); } } });
     check(name + ': down special hangs in the air, once', frames1 >= len - 2 && drop1 < 0.01 && second && drop2 > 5 && (A === FL || f.fi !== fi0), 'first use: ' + frames1 + ' frames, fell ' + drop1.toFixed(1) + '; second use before landing: fell ' + drop2.toFixed(1));
   }
 
@@ -316,7 +305,7 @@ vm.runInThisContext(`
   {
     const res = [];
     for (const [name, A] of [['Flint', FL], ['Nib', NIB], ['Loom', LOOM], ['Hod', HOD]]) for (const x of [6, 30, 55, -42]) {
-      const [f] = setup(A, FL, 0, 0); F[1].x = -10; airborne(f, x, -58); f.jumps = 0; let stuck = 0, end = null, lastY = f.y;
+      const [f] = setup(A, FL, 0, 0); F[1].x = -10; airborne(f, x, -Math.round(f.form.aiRise * 0.7)); f.jumps = 0;   /* as deep as its up special can climb out of */ let stuck = 0, end = null, lastY = f.y;
       SCRIPT[0] = (i, tt) => { if (tt >= 1 && tt < 3) { i.ly = 1; i.spc = true; } };
       run(260, () => { if (f.vy > 0.5 && f.y <= lastY + 0.01) stuck++; lastY = f.y; if (end === null && (f.state === 'ledge' || f.grounded)) end = f.state === 'ledge' ? 'ledge' : 'stage'; if (f.state === 'dead' && end === null) end = 'lost'; });
       res.push({ name, x, end, stuck });
@@ -324,6 +313,89 @@ vm.runInThisContext(`
     const failed = res.filter(r => r.end !== 'ledge' && r.end !== 'stage'), blocked = res.filter(r => r.stuck > 0);
     check('island: an up special from underneath always gets out', failed.length === 0, failed.length ? failed.map(r => r.name + ' from x ' + r.x + ' -> ' + r.end).join(', ') : res.length + ' starts beneath the island, all reached the ledge or the stage');
     check('island: rising under it is never stopped', blocked.length === 0, blocked.length ? blocked.map(r => r.name + ' from x ' + r.x + ' held for ' + r.stuck + ' frames').join(', ') : 'no frame with upward speed and no upward movement');
+  }
+
+  /* ---- The owner's moveset document: numbers and specials for Flint, Nib, Loom and Hod ---- */
+  {
+    /* every listed attack has the document's first active frame and damage; late and near parts, throws, pummel and grab too */
+    const wrong = [];
+    for (const def of ROSTER) for (const fm of def.forms) { const K = KIT[fm.name]; if (!K) continue;
+      for (const k in K) { const q = K[k], m = fm.moves[k]; if (!Array.isArray(q)) continue; const h = m.h[0], o = q[2] || {};
+        if (h.f0 !== q[0] || h.d !== q[1]) wrong.push(fm.name + ' ' + k + ' is f' + h.f0 + ' / ' + h.d + '%');
+        if (o.rear && (m.h[1].f0 !== o.rear[0] || m.h[1].d !== o.rear[1])) wrong.push(fm.name + ' ' + k + ' rear');
+        if (o.late !== undefined && !m.h.some(x => x.part === 'late' && x.d === o.late && x.f0 > h.f1 - 1)) wrong.push(fm.name + ' ' + k + ' late');
+        const mid = fm.st.h / 2; if (o.sour !== undefined && !m.h.some(x => x.part === 'near' && x.d === o.sour && Math.hypot(x.x, x.y - mid) < Math.hypot(h.x, h.y - mid))) wrong.push(fm.name + ' ' + k + ' near');
+        if (m.chg && m.chg >= h.f0) wrong.push(fm.name + ' ' + k + ' charges after it hits');
+      }
+      if (fm.moves.grab.h[0].f0 !== K.grab || fm.st.pummel !== K.pummel) wrong.push(fm.name + ' grab or pummel');
+      for (const k in K.throws) if (fm.moves.throws[k].d !== K.throws[k]) wrong.push(fm.name + ' throw ' + k);
+    }
+    check('document: every attack has its listed frame and damage', wrong.length === 0, wrong.length ? wrong.slice(0, 6).join('; ') : 'checked ' + Object.keys(KIT).length + ' fighters against the table');
+  }
+  {
+    /* helpers: one fighter does one special; what happened to it and to a target placed at a distance */
+    const cast = (A, input, dist, n, opt) => { opt = opt || {}; const [f, v] = setup(A, FL, 0, dist); if (opt.air) airborne(f, 0, opt.air); if (opt.vAir) airborne(v, dist, opt.vAir); const x0 = f.x, y0 = f.y; let top = y0, far = 0, back = 0, firstHit = null, vState = '';
+      SCRIPT[0] = (i, tt) => input(i, tt, f); if (opt.v) SCRIPT[1] = opt.v;
+      run(n, () => { top = Math.max(top, f.y); far = Math.max(far, (f.x - x0) * (opt.dir || 1)); back = Math.min(back, f.x - x0); if (opt.vAir && v.state === 'air') { v.y = opt.vAir; v.vy = 0; } if (v.pct > 0 && firstHit === null) { firstHit = { at: t, pct: v.pct / DMG_1V1 }; vState = v.state; } if (opt.each) opt.each(f, v); });
+      return { rise: top - y0, far, back, hit: firstHit, vState, vPct: v.pct / DMG_1V1, f, v }; };
+    const spc = (lx, ly, hold) => (i, tt) => { if (tt >= 2 && tt < (hold || 4)) { i.spc = true; i.lx = lx; i.ly = ly; } };
+    const near = (v, w, tol) => Math.abs(v - w) <= tol, r1 = v => v === null || v === undefined ? 'none' : v.toFixed(1), fr = d => d * FRESH;   /* fr: a move's first use hits 5% harder */
+
+    /* Flint */
+    let patch = null, patchLife = 0; { const [f] = setup(FL, FL, -50, 60); SCRIPT[0] = spc(0, 0); run(130, () => { const q = PROJ.find(x => x.patch); if (q) { patch = q; patchLife++; } }); }   /* thrown from far enough that it lands before reaching anyone */
+    const two = (() => { const [f] = setup(FL, FL, 0, 60); let most = 0; SCRIPT[0] = (i, tt) => { if ((tt >= 2 && tt < 4) || (tt >= 44 && tt < 46)) i.spc = true; }; run(100, () => { most = Math.max(most, PROJ.filter(x => x.owner === 0).length); }); return most; })();
+    check('Flint: Banked Coal leaves one ember for 45 frames, and a new coal clears the old', patch !== null && near(patchLife, 45, 2) && patch.h.d === 4 && two === 1, 'ember lasted ' + patchLife + ' frames at ' + (patch ? patch.h.d : '?') + '%; most of his shots alive at once: ' + two);
+    const rush = cast(FL, spc(1, 0), 60, 60), rushClean = cast(FL, spc(1, 0), 16, 60), rushLate = cast(FL, spc(1, 0), 30, 60);
+    check('Flint: Lamp Rush lunges about 1.1 H, 10% clean and 7% late', near(rush.far, 15.4, 2.5) && near(rushClean.vPct, fr(10), 0.3) && near(rushLate.vPct, fr(7), 0.3), 'travelled ' + r1(rush.far) + ' (15.4); close target ' + r1(rushClean.vPct) + '%, far target ' + r1(rushLate.vPct) + '%');
+    const up = cast(FL, spc(0, 1), 60, 90);
+    check('Flint: Updraft lifts about 2 H', near(up.rise, 28, 2.5), 'rose ' + r1(up.rise) + ' (28)');
+    const cone = cast(FL, spc(0, -1), 12, 70), miss = cast(FL, spc(0, -1), 30, 70);
+    const wave = (() => { const [f, v] = setup(FL, FL, -50, 60); let embers = 0, left = -1; SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 4) i.spc = true; if (tt >= 64 && tt < 66) { i.ly = -1; i.spc = true; } };
+      run(112, () => { const q = PROJ.find(x => x.patch); if (t === 62 && q) { embers = 1; f.x = q.x - 14; v.x = q.x + 16; }   /* Flint steps up to his ember; the target stands beyond the cone */
+        if (t === 96) left = PROJ.filter(x => x.patch).length; }); return { embers, pct: v.pct / DMG_1V1, left }; })();
+    check('Flint: Bellows Burst hits for 15% in a short cone', near(cone.vPct, fr(15), 0.3) && cone.hit && cone.hit.at >= 24 && cone.hit.at <= 29 && miss.vPct === 0, 'in the cone: ' + r1(cone.vPct) + '% on frame ' + (cone.hit ? cone.hit.at - 1 : '?') + '; at 30 away: ' + r1(miss.vPct) + '%');
+    check('Flint: Bellows Burst uses up his ember and sends a flame further', wave.embers === 1 && wave.left === 0 && near(wave.pct, fr(8), 0.3), 'ember there before: ' + wave.embers + ', after: ' + wave.left + '; a target beyond the cone took ' + r1(wave.pct) + '%');
+
+    /* Nib */
+    const boltIn = cast(NIB, spc(0, 0), 20, 40), boltOut = cast(NIB, spc(0, 0), 36, 40);
+    check('Nib: Quick Bolt is fast, weak and short (about 1.8 H)', near(boltIn.vPct, fr(4), 0.2) && boltIn.hit.at <= 18 && boltOut.vPct === 0, 'at 20 away: ' + r1(boltIn.vPct) + '% on frame ' + (boltIn.hit ? boltIn.hit.at : '?') + '; at 36 away: ' + r1(boltOut.vPct) + '%');
+    const pounce = cast(NIB, spc(1, 0), 60, 60), pounceHit = cast(NIB, spc(1, 0), 16, 60); let freeAt = null;
+    const brake = cast(NIB, spc(1, 0, 16), 16, 60, { each: f => { if (freeAt === null && t > 6 && f.state !== 'attack') freeAt = t; } });
+    check('Nib: False Start let go is a pounce of about 1.3 H for 9%', near(pounce.far, 18.2, 3) && near(pounceHit.vPct, fr(9), 0.3), 'travelled ' + r1(pounce.far) + ' (18.2), ' + r1(pounceHit.vPct) + '%');
+    check('Nib: False Start held stops short at about 0.55 H, with no hit', near(brake.far, 7.7, 2) && brake.vPct === 0 && freeAt !== null && freeAt <= 27, 'travelled ' + r1(brake.far) + ' (7.7), ' + r1(brake.vPct) + '%, free on frame ' + (freeAt === null ? 'never' : freeAt - 2));
+    const steep = cast(NIB, spc(0, 1), 60, 80), diag = cast(NIB, (i, tt) => { if (tt >= 2 && tt < 4) { i.ly = 1; i.spc = true; } else if (tt >= 4 && tt < 14) i.lx = 1; }, 60, 80);   /* the direction is chosen during the start-up, after the press */
+    check('Nib: Spring Vault goes steep, or diagonal with the stick', near(steep.rise, 38, 3) && steep.far < 6 && diag.far > 25 && diag.rise < steep.rise && diag.rise > 20, 'steep: up ' + r1(steep.rise) + ', across ' + r1(steep.far) + '; diagonal: up ' + r1(diag.rise) + ', across ' + r1(diag.far));
+
+    /* Loom */
+    const gustIn = cast(LOOM, spc(0, 0), 10, 50), gustAir = cast(LOOM, spc(0, 0), 24, 50, { air: 30, vAir: 30 }), gustGnd = cast(LOOM, spc(0, 0), 24, 50), gustShield = cast(LOOM, spc(0, 0), 24, 50, { v: i => { i.shd = true; } });
+    const pushAir = gustAir.v.x - 24, pushGnd = gustGnd.v.x - 24, pushSh = gustShield.v.x - 24;
+    check('Loom: Crossbreeze deals 3% up close and only pushes further out', near(gustIn.vPct, fr(3), 0.2) && gustAir.vPct === 0 && gustGnd.vPct === 0 && pushAir > 6 && pushGnd > 1 && pushGnd < pushAir, 'close: ' + r1(gustIn.vPct) + '%; pushed in the air ' + r1(pushAir) + ', on the ground ' + r1(pushGnd) + ', no damage');
+    check('Loom: a shield blocks the gust', Math.abs(pushSh) < 0.5, 'a shielding target moved ' + r1(pushSh));
+    const tip = cast(LOOM, spc(1, 0), 16, 60), inner = cast(LOOM, spc(1, 0), 8, 60);
+    const slingAir = (() => { const [f] = setup(LOOM, FL, 0, 60); airborne(f, 0, 90); const xs = []; SCRIPT[0] = (i, tt) => { if ((tt >= 2 && tt < 4) || (tt >= 52 && tt < 54)) { i.lx = 1; i.spc = true; } }; let x0 = 0; run(100, () => { if (t === 20) x0 = f.x; if (t === 30) xs.push(f.x - x0); if (t === 70) x0 = f.x; if (t === 80) xs.push(f.x - x0); }); return xs; })();
+    check('Loom: Ribbon Sling is 11% at the weight and 6% on the inner ribbon', near(tip.vPct, fr(11), 0.3) && near(inner.vPct, fr(6), 0.3), 'well spaced ' + r1(tip.vPct) + '%, close ' + r1(inner.vPct) + '%');
+    check('Loom: the sling recoils about 0.3 H, once per time off the ground', near(-tip.back, 4.2, 1.5) && slingAir[0] < -2.5 && slingAir[1] > -1.5, 'on the ground ' + r1(-tip.back) + ' (4.2); in the air first ' + r1(slingAir[0]) + ', second ' + r1(slingAir[1]));
+    const tap = cast(LOOM, spc(0, 1), 60, 100), held = cast(LOOM, spc(0, 1, 40), 60, 100);
+    check('Loom: Thermal is a short lift on a tap, about 2.4 H held', near(held.rise, 33.6, 3.5) && tap.rise > 6 && tap.rise < held.rise * 0.6, 'tapped: ' + r1(tap.rise) + '; held: ' + r1(held.rise) + ' (33.6)');
+
+    /* Hod */
+    const stone = hold => { const [f, v] = setup(HOD, FL, 0, 30); let at = null, most = 0, began = null, first = null; SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < (hold ? 22 : 4)) i.spc = true; if (!hold && tt >= 50 && tt < 52) i.spc = true; };
+      run(120, () => { if (began === null && f.state === 'attack') began = t; const mine = PROJ.filter(x => x.owner === 0); most = Math.max(most, mine.length); if (mine.length && at === null) at = t - began; if (first === null && v.pct > 0) first = v.pct / DMG_1V1; }); return { at, most, pct: first }; };
+    const small = stone(false), big = stone(true);
+    check('Hod: Boulder Roll is a 7% stone on a tap and an 11% stone held', near(small.pct, fr(7), 0.3) && near(big.pct, fr(11), 0.3) && small.at === 21 && big.at === 35, 'tap: ' + r1(small.pct) + '% released on frame ' + small.at + '; held: ' + r1(big.pct) + '% on frame ' + big.at);
+    check('Hod: one stone at a time', small.most === 1, 'most stones alive at once from two taps: ' + small.most);
+    const step = cast(HOD, spc(0, 1), 60, 90);
+    check('Hod: Stone Step climbs about 1.65 H', near(step.rise, 23.1, 2.5), 'rose ' + r1(step.rise) + ' (23.1)');
+
+    /* Wren's swap */
+    const swap = (hitAt) => { const [f, v] = setup(NIB, FL, 0, 40); let changed = null, freeOn = null, second = null;
+      SCRIPT[0] = (i, tt) => { if ((tt >= 2 && tt < 4) || (tt >= 40 && tt < 42) || (tt >= 70 && tt < 72)) { i.ly = -1; i.spc = true; } };
+      run(110, () => { if (hitAt && t === hitAt) applyHit(v, f, { d: 5, a: 45, b: 30, k: 40, id: 'test' }, -1, v.x, true); if (changed === null && f.fi !== 0) changed = f.mf; if (changed !== null && freeOn === null && f.state !== 'attack') freeOn = t; if (t === 60) second = f.fi; });
+      return { changed, freeOn, second, end: f.fi }; };
+    const clean = swap(0), early = swap(10);
+    check('Wren: the swap hands over on frame 16 and frees her on frame 33', clean.changed === 16 && clean.freeOn !== null && clean.freeOn <= 37, 'changed on move frame ' + clean.changed + ', free on frame ' + (clean.freeOn === null ? 'never' : clean.freeOn - 2));
+    check('Wren: 60 frames must pass before the next swap', clean.second === 1 && clean.end === 2, 'pressed again 38 frames later: still companion ' + clean.second + '; after 68 frames: companion ' + clean.end);
+    check('Wren: a hit before the handover keeps the old companion', early.changed === null || early.second === 0, 'hit on frame 8 of the swap: companion ' + early.second + ' is still in');
   }
 
   /* ---- Potato Sack ---- */

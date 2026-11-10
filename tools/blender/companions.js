@@ -320,7 +320,7 @@ manifest.Loom = { file: 'assets/loom/export/loom-v1.glb', height: 15, faceCamera
   attacks: { jab: A('Flick', 0.28, 0.4, 0, 0.7), ftilt: A('Lash', 0.39, 0.48), utilt: A('UpStrike', 0.39, 0.48), dtilt: A('Spin', 0.34, 0.52), dash: A('Dive', 0.39, 0.5),
     fsmash: A('Dive', 0.39, 0.5), usmash: A('UpStrike', 0.39, 0.48), dsmash: A('Spin', 0.34, 0.52),
     nair: A('Spin', 0.34, 0.52), fair: A('Lash', 0.39, 0.48), bair: A('BackLash', 0.39, 0.48), uair: A('UpStrike', 0.39, 0.48), dair: A('DownLash', 0.39, 0.5),
-    grab: A('Flick', 0.28, 0.4, 0, 0.7), getup: A('Spin', 0.34, 0.52), nspec: A('Lash', 0.39, 0.48), sspec: A('Gust', 0.4, 0.46, 0.1, 1.0), uspec: A('Thermal', 0.2, 0.75), '*': A('Lash', 0.39, 0.48) } };
+    grab: A('Flick', 0.28, 0.4, 0, 0.7), getup: A('Spin', 0.34, 0.52), nspec: A('Gust', 0.4, 0.46, 0.1, 1.0), sspec: A('Lash', 0.39, 0.48), uspec: A('Thermal', 0.2, 0.75), '*': A('Lash', 0.39, 0.48) } };
 
 /* ---------------- Nib: wind-up fox. Its skeleton and first clips were measured and keyed by hand in rig.base.json. ---------------- */
 const nib = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'assets', 'nib', 'work', 'rig.base.json'), 'utf8'));
@@ -401,7 +401,7 @@ manifest.Nib = { file: 'assets/nib/export/nib-v1.glb', height: 10.5, clips: base
   attacks: { jab: A('Swat', 0.28, 0.4, 0, 0.7), jab3: A('Bite', 0.39, 0.46), ftilt: A('Bite', 0.39, 0.46), utilt: A('UpStrike', 0.39, 0.48), dtilt: A('TailWhip', 0.34, 0.52), dash: A('Pounce', 0.39, 0.48),
     fsmash: A('Headbutt', 0.39, 0.5), usmash: A('UpStrike', 0.39, 0.48), dsmash: A('Sweep', 0.34, 0.52),
     nair: A('Flip', 0.31, 0.5), fair: A('Headbutt', 0.39, 0.5), bair: A('BackKick', 0.39, 0.5), uair: A('UpStrike', 0.39, 0.48), dair: A('Pounce', 0.39, 0.48),
-    grab: A('Bite', 0.39, 0.46), getup: A('Sweep', 0.34, 0.52), nspec: A('Spit', 0.28, 0.34, 0.05, 0.7), sspec: A('Pounce', 0.39, 0.48), uspec: A('CoilJump', 0.24, 0.4), '*': A('Bite', 0.39, 0.46) } };
+    grab: A('Bite', 0.39, 0.46), getup: A('Sweep', 0.34, 0.52), nspec: A('Spit', 0.28, 0.34, 0.05, 0.7), sspec: A('Pounce', 0.39, 0.48), sbrake: A('Pounce', 0.2, 0.3, 0, 0.6), uspec: A('CoilJump', 0.24, 0.4), '*': A('Bite', 0.39, 0.46) } };
 
 /* The game's manifest: these three entries are owned by this file; other entries (Flint) are left as they are. */
 const mf = path.join(__dirname, '..', '..', 'assets', 'manifest.json'), current = JSON.parse(fs.readFileSync(mf, 'utf8'));

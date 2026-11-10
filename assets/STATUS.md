@@ -63,6 +63,29 @@ Spent so far: 309 credits (Flint 135, companions 102, stage 38, Potato Sack 34).
 - CPU level 1 to 9, set with Up / Down on the select screen while player 2 is empty, and remembered. Level 7 is the CPU as it always played; every test and balance figure uses it. The numbers for each level are in `CPU_LV` in `sim.js`.
 - Tap jump is removed (owner's request, 2026-11-10): only the jump buttons jump, never the stick. There is no switch for it.
 
+## The owner's moveset document (2026-11-10)
+
+Flint, Nib, Loom and Hod now follow the owner's document (`Emberfall_Fighter_Movesets.pdf`).
+
+- **Where the numbers live.** `KIT` in `sim.js` holds every normal attack's first active frame and damage, throw and pummel damage and grab speed, exactly as listed. The specials are written out in each fighter's block with the document's frames and damage in the comment above each.
+- **Movement and weight** are the document's targets relative to Flint: Nib 78 / 128 / 112 / 108, Loom 86 / 87 / 121 / 73, Hod 132 / 76 / 70 / 122 (weight / ground speed / air drift / gravity).
+- **Specials.** Flint: Banked Coal (leaves a 45-frame ember), Lamp Rush, Updraft (2 H), Bellows Burst (stronger through his own ember). Nib: Quick Bolt, False Start (hold special to brake), Spring Vault (steep or diagonal), a three-hit jab. Loom: Crossbreeze (a push with no damage), Ribbon Sling (11% at the tip, 6% inside, one recoil per time in the air), Thermal (hold to keep rising). Hod: Boulder Roll (tap 7%, hold 11%, rolls about 3 H), Ram Plate (takes one strike of 8% or less on frames 13 to 19, ground only), Stone Step (1.65 H).
+- **Wren.** Swap on frame 16, free on frame 33, 60 frames before the next, open to attack throughout, one special projectile alive across the three.
+- **Kept different from the document, on purpose:**
+  - Wren's swap still hangs in the air (the owner asked for that earlier; the document says it keeps its momentum).
+  - Loom's ribbon has no dead spot at point-blank: two fighters cannot stand closer than its inner part reaches.
+  - The page of third-party adaptations is not built. Emberfall's fighters stay original.
+  - Sprocket is not built yet: he is a new fighter and needs a concept picture approved first.
+- **Set by me where the document leaves it open:**
+  - An up special's wind-up hangs in the air, so its stated height is what you get when falling. Without this Hod's 12-frame wind-up cost 20 of his 23 units.
+  - Ram Plate in the air hangs through its wind-up, travels level through the charge and keeps some speed after (the document says only that it carries a short way). It is Hod's way back sideways.
+  - Launch power and recovery time (`TUNE` in `sim.js`), from balance testing: Flint launches 10% softer and recovers 20% slower after an attack; Nib launches 3% harder; Loom 6% harder and 5% quicker; Hod 27% harder and 20% quicker; Potato Sack launches 10% softer and his damage scale went from 1.10 to 0.94.
+- **Hod's recovery is the shortest by design.** From 25 units below the ledge with his air jump, the CPU gets him back from 80 units out; Flint from 130, Nib 150, Loom 150, Potato Sack 95. About two thirds of Hod's lost stocks are falls after a launch he could not come back from; he is knocked out at about 140% on average, the others at 152 to 176%.
+- **CPU.** It holds special for Thermal and for the big stone (half the time), rolls stones only from 18 to 46 units, uses Ram Plate and the ribbon up close, and a slow drifter spends its side special off stage only while the jump and up special it has left can pay back the drop.
+- **Balance** (CPU against CPU at level 7, 1,500 matches a seed, two seeds): Flint 50 and 53%, Nib 50 and 53%, Loom 54 and 50%, Hod 48 and 48%, Potato Sack 49 and 47%.
+- **Checked:** 112 rule checks (22 new), the stress test, the recovery test (30 of 30), the in-game hitbox audit (282 rows; the only large flag is Crossbreeze's outer gust, which is air by design), one CPU match played in the game with no errors, Ram Plate and Ribbon Sling looked at as still frames with hitboxes shown.
+- **Not checked:** any of it in a person's hands, and the new moves in motion at full speed.
+
 ## Potato Sack (2026-11-10)
 
 An original fighter: a living sack of forge-town potatoes. Heavy and odd to move.
