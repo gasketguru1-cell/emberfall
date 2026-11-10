@@ -13,7 +13,7 @@ Standing instructions from the owner (2026-11-09, about 9 pm): keep working with
 
 ## Queue (take the first unfinished item)
 
-1. [ ] **Retune reach and damage** after the hitboxes moved onto the limbs. Use headless matches for numbers (average hit damage, KO percent per fighter, match length). Each archetype should play at its intended range: Nib close, Flint mid, Hod mid with power, Loom longest.
+1. [x] **Retune reach and damage** after the hitboxes moved onto the limbs. Use headless matches for numbers (average hit damage, KO percent per fighter, match length). Each archetype should play at its intended range: Nib close, Flint mid, Hod mid with power, Loom longest.
 2. [ ] **Check the rules not yet verified**: wall tech, hitlag nudges, attacks putting out projectiles, Hod's armour. Fix what fails.
 3. [ ] **Audit every hitbox against its animation** in the game: for each attack, distance from the hitbox to the nearest striking limb at the active frames; fix any that are more than about 3 units off.
 4. [ ] **More universal mechanics**: ledge protection that shrinks with air time and damage, slower ledge get-ups above 100%, held-attack rapid jabs where it suits the fighter, angled forward tilts, a tap-jump option.
@@ -41,3 +41,4 @@ Standing instructions from the owner (2026-11-09, about 9 pm): keep working with
 
 - 2026-11-09 21:10: queue written; restart set for 21:40 with retries every ten minutes, stop at midnight.
 - 2026-11-09 21:15: item 1 partly done: reach set by archetype (Nib shortest, Loom longest), Hod recovery buffed, CPU now attacks from each fighter's range and recovers from all 24 test positions (tests/recovery.js). Balance numbers in tests/stats.js. Still to do in item 1: damage and KO tuning (Hod still dies off the bottom more than it should; Loom survives longest at about 158%). Stopped here because the usage limit was reached; restart is scheduled for 21:40.
+- 2026-11-09 22:27: item 1 done. Kill power set from a new KO table (tests/kotable.js): forward smash KOs a mid-weight at about 100% mid-stage (was 80%), Hod's back throw at about 150% (was 93%). CPU no longer chases past the ledge or attacks over the void, aims aerials at where the hit will land, and attacks at each fighter's own pace. Over 160 CPU matches: wins Flint 56%, Loom 55%, Hod 48%, Nib 41%; average KO percent Hod 166, Flint 164, Nib 156, Loom 144. Hod still loses about a quarter of its stocks to falling short on recovery, which is its intended weakness. Not checked: how any of this feels with a human playing.
