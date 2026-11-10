@@ -5,3 +5,4 @@ assets/*/raw/
 # secrets never belong in the project
 *.key
 .env*
+assets/_pipeline-test/

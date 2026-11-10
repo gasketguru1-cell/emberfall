@@ -1,3 +1,6 @@
+| Hod | art supplied | concept A **approved** | request ready; waiting on the daily credit cap | custom rig (Blender script ready) | | grey-box capsule |
+| Loom | art supplied | concept A **approved** | request ready; waiting on the daily credit cap | custom rig (Blender script ready) | | grey-box capsule |
+| Nib | art supplied | concept A **approved** | request ready; waiting on the daily credit cap | custom rig (Blender script ready) | | grey-box capsule |
 # Emberfall asset library
 
 One folder per character. Inside each:
@@ -39,3 +42,10 @@ Spent so far: 147 credits (Flint 135, companions 12). Daily cap of 150 reached f
 
 - Done: model, rig, 32 clips in `assets/flint/export/flint-v2.glb`; every ground attack, aerial, special, grab, throw, roll, dodge and ledge hang has its own clip, timed to the move's frame data in `assets/manifest.json`; lantern prop follows the right hand.
 - Not done: coat and scarf weight clean-up (boot clips the coat when running), refinement of anticipation and follow-through per move, effects for the specials.
+
+## Custom rig pipeline (Nib, Hod, Loom)
+
+- `tools/blender/rig.py` builds a skeleton from a JSON spec, weights the mesh, adds keyed clips and writes a GLB. Runs headless in Blender 5.2.
+- Tested end to end on Flint's unrigged mesh with a made-up 11-bone skeleton (`tools/blender/test-spec.json`): result loads in the viewer with textures and a working clip.
+- Finding: Blender's automatic weighting fails directly on Meshy meshes. The script falls back to weighting a voxel copy and transferring the weights, which left no unweighted vertices.
+- Not done: the real skeleton specs and animations for the three companions; they need the generated models first.

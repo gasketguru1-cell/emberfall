@@ -63,11 +63,13 @@ function ledger() {
 }
 function log(rec) { fs.mkdirSync(ASSETS, { recursive: true }); fs.appendFileSync(LEDGER, JSON.stringify(rec) + '\n'); }
 /* Failed and cancelled tasks are refunded by Meshy, so they count as zero. */
+/* A 'day' for the daily limit is the calendar day on this computer, not the UTC day. */
+const localDay = d => { const x = new Date(d); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
 const costOf = t => /FAILED|CANCELED/.test(t.status || '') ? 0 : (typeof t.consumed === 'number' ? t.consumed : t.est);
 function summary() {
-  const b = JSON.parse(fs.readFileSync(BUDGET, 'utf8')), all = Object.values(ledger()), today = new Date().toISOString().slice(0, 10);
+  const b = JSON.parse(fs.readFileSync(BUDGET, 'utf8')), all = Object.values(ledger()), today = localDay(Date.now());
   const inPhase = all.filter(t => t.phase === b.phase);
-  return { budget: b, tasks: all, spentPhase: inPhase.reduce((s, t) => s + costOf(t), 0), spentToday: all.filter(t => (t.time || '').slice(0, 10) === today).reduce((s, t) => s + costOf(t), 0), spentAll: all.reduce((s, t) => s + costOf(t), 0) };
+  return { budget: b, tasks: all, spentPhase: inPhase.reduce((s, t) => s + costOf(t), 0), spentToday: all.filter(t => t.time && localDay(t.time) === today).reduce((s, t) => s + costOf(t), 0), spentAll: all.reduce((s, t) => s + costOf(t), 0) };
 }
 
 function inlineFiles(v) {
