@@ -36,4 +36,13 @@ const HITBOXES = {
     grab: [{ x: 9.2, y: 4.6, r: 5 }], dgrab: [{ x: 11.7, y: 4.6, r: 5 }], pgrab: [{ x: 12.2, y: 4.6, r: 5 }],
     getup: [{ x: 8.8, y: 1, r: 6.3 }, { x: -6.5, y: 1.9, r: 6.3 }], sspec: [{ x: 11, y: 5.3, r: 7 }],
   },
+  /* Potato Sack fights with its body: the boxes sit on the fist for the jab and tilt, on its leading bulk for the slams,
+     at its sides for the low spin, and over its tuft for the upward strikes. Set by hand from the bone positions measured
+     in tools/measure.html, then checked with tools/audit.js. */
+  'Potato Sack': {
+    jab: [{ x: 7.1, y: 6, r: 4.4 }], ftilt: [{ x: 7.2, y: 6, r: 4.9 }], utilt: [{ x: 0, y: 15.5, r: 5.4 }], dtilt: [{ x: 6.6, y: 3.2, r: 4.6 }], dash: [{ x: 7.6, y: 3.5, r: 5.4 }],
+    fsmash: [{ x: 7.6, y: 3.5, r: 6.4 }], usmash: [{ x: 0, y: 16, r: 6.6 }], dsmash: [{ x: 6.8, y: 3.4, r: 5.4 }, { x: -6.8, y: 3.4, r: 5.4 }],
+    nair: [{ x: 0, y: 6, r: 7 }], fair: [{ x: 7.6, y: 3.5, r: 5.4 }], bair: [{ x: -7, y: 5.5, r: 5.4 }], uair: [{ x: 0, y: 15.5, r: 5.9 }], dair: [{ x: 0.2, y: 0.8, r: 5.4 }],
+    grab: [{ x: 7.2, y: 5.6, r: 4.8 }], dgrab: [{ x: 8.6, y: 5.6, r: 4.8 }], pgrab: [{ x: 9.2, y: 5.6, r: 4.8 }], getup: [{ x: 7, y: 3.4, r: 5.9 }, { x: -7, y: 3.4, r: 5.9 }],
+  },
 };

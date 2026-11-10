@@ -1,0 +1,5 @@
+{
+ "base": "work/potato-sack-rigged.glb",
+ "texture": 1024,
+ "out": "export/potato-sack-v1.glb"
+}

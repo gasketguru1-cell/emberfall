@@ -10,7 +10,7 @@ let seed = 5; Math.random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; 
 for (const f of ['hitboxes.js', process.env.EMBERFALL_SIM || 'sim.js']) vm.runInThisContext(fs.readFileSync(path.resolve(root, f), 'utf8'), { filename: f });   /* EMBERFALL_SIM: measure another copy of the rules */
 vm.runInThisContext(`
 (function () {
-  const FORMS = [['Flint', 0, 0], ['Nib', 1, 0], ['Loom', 1, 1], ['Hod', 1, 2]];
+  const FORMS = [['Flint', 0, 0], ['Nib', 1, 0], ['Loom', 1, 1], ['Hod', 1, 2], ['Potato Sack', 2, 0]];
   PLATS.length = 1;   /* measure on the bare main stage, so no jump lands on a platform */
   let SCRIPT = null, t = 0;
   cpuInput = function (f) { const i = blankIn(); if (f.idx === 0 && SCRIPT) SCRIPT(i, t, f); return i; };

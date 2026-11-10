@@ -9,7 +9,7 @@ let seed = 5; Math.random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; 
 for (const f of ['hitboxes.js', 'sim.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 vm.runInThisContext(`
 (function () {
-  const FL = [0, 0], NIB = [1, 0], LOOM = [1, 1], HOD = [1, 2];
+  const FL = [0, 0], NIB = [1, 0], LOOM = [1, 1], HOD = [1, 2], SACK = [2, 0];
   let SCRIPT = [null, null], t = 0; const results = [];
   cpuInput = function (f) { const i = blankIn(); if (SCRIPT[f.idx]) SCRIPT[f.idx](i, t, f); return i; };
   /* Two fighters standing on the main stage, facing each other, both driven by scripts. */
@@ -324,6 +324,60 @@ vm.runInThisContext(`
     const failed = res.filter(r => r.end !== 'ledge' && r.end !== 'stage'), blocked = res.filter(r => r.stuck > 0);
     check('island: an up special from underneath always gets out', failed.length === 0, failed.length ? failed.map(r => r.name + ' from x ' + r.x + ' -> ' + r.end).join(', ') : res.length + ' starts beneath the island, all reached the ledge or the stage');
     check('island: rising under it is never stopped', blocked.length === 0, blocked.length ? blocked.map(r => r.name + ' from x ' + r.x + ' held for ' + r.stuck + ' frames').join(', ') : 'no frame with upward speed and no upward movement');
+  }
+
+  /* ---- Potato Sack ---- */
+  {
+    /* hops: with the stick held it moves in bursts and stands still between them */
+    const hop = (script, n) => { const [f] = setup(SACK, FL, -55, 60); let moving = 0, still = 0, bursts = 0, was = false; SCRIPT[0] = script;
+      run(n, () => { if (t < 30) return; const mv = Math.abs(f.vx) > 0.3; if (mv) moving++; else if (f.vx === 0) still++; if (mv && !was) bursts++; was = mv; }); return { moving, still, bursts, x: f.x + 55, state: f.state }; };
+    const walk = hop((i, tt) => { i.lx = tt < 2 ? 0 : tt < 9 ? 0.4 : 0.9; }, 110), runs = hop((i, tt) => { i.lx = tt < 2 ? 0 : 1; }, 70);
+    check('Potato Sack: walks and runs in hops with a stop between', walk.bursts >= 3 && walk.still >= 12 && runs.bursts >= 2 && runs.still >= 4 && runs.x > walk.x * 0.9, 'walking: ' + walk.bursts + ' hops, ' + walk.still + ' frames stopped of ' + (walk.moving + walk.still) + '; running: ' + runs.bursts + ' hops, ' + runs.still + ' stopped');
+  }
+  {
+    /* tumble: slide on the ground, lift, dive, and cutting it short */
+    const tum = (air, dirs, extra, n) => { const [f, o] = setup(SACK, FL, -40, 50); if (air) airborne(f, -40, 40); const x0 = f.x, y0 = f.y; let top = y0, seen = [], hurt = false, cut = null;
+      SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 4) { i.ly = -1; i.spc = true; } else if (tt >= 4 && tt < 12) { i.lx = dirs[0]; i.ly = dirs[1]; } if (extra) extra(i, tt, f); };
+      run(n || 70, () => { top = Math.max(top, f.y); if (seen[seen.length - 1] !== f.state) seen.push(f.state); if (o.pct > 0) hurt = true; if (cut === null && f.state === 'attack' && f.mname !== 'dspec') cut = { move: f.mname, vx: +Math.abs(f.vx).toFixed(2), at: t }; });
+      return { dx: f.x - x0, rise: top - y0, seen: seen.join('>'), hurt, cut, used: f.burstUsed, kind: f.burstKind }; };
+    const slide = tum(false, [1, 0]), lift = tum(true, [0, 1]), dive = tum(true, [1, 0]), hang = tum(true, [0, 0]);
+    check('Potato Sack: tumble slides along the floor without hurting', slide.kind === 'slide' && slide.dx > 28 && !slide.hurt, 'slid ' + slide.dx.toFixed(1) + ' units (' + slide.seen + ')');
+    check('Potato Sack: tumble lifts straight up in the air', lift.kind === 'lift' && lift.rise > 26 && lift.rise < 34 && Math.abs(lift.dx) < 4, 'rose ' + lift.rise.toFixed(1) + ', drifted ' + lift.dx.toFixed(1));
+    check('Potato Sack: a tumble dive that lands early ends flat on its back', dive.kind === 'dive' && /attack>down/.test(dive.seen), dive.seen);
+    check('Potato Sack: tumble with no direction hangs in the air', hang.kind === 'stall' && hang.rise < 1, 'kind ' + hang.kind + ', rose ' + hang.rise.toFixed(1));
+    const cut = tum(false, [1, 0], (i, tt) => { if (tt >= 19 && tt < 21) i.atk = true; });
+    check('Potato Sack: a slide can be cut short into an attack, keeping speed', cut.cut && cut.cut.at < 30 && cut.cut.vx > 1, cut.cut ? cut.cut.move + ' on frame ' + cut.cut.at + ' still moving at ' + cut.cut.vx : 'no attack came out');
+    const twice = tum(true, [0, 1], (i, tt) => { if (tt >= 40 && tt < 42) { i.ly = -1; i.spc = true; } else if (tt >= 42 && tt < 50) i.ly = 1; }, 60);
+    check('Potato Sack: one tumble per time off the ground', twice.rise < 34 && !/attack>air>attack/.test(twice.seen), 'rose ' + twice.rise.toFixed(1) + ' in all (' + twice.seen + ')');
+  }
+  {
+    /* no ledge: where Flint catches the ledge, the sack falls past it */
+    const drop = A => { const [f] = setup(A, FL, 0, -40); airborne(f, EDGE + f.st.w / 2 + 3, -4); f.vy = -0.5; let ledge = false; run(40, () => { if (f.state === 'ledge') ledge = true; }); return { ledge, y: f.y }; };
+    const fl = drop(FL), sk = drop(SACK);
+    check('Potato Sack: cannot hold the ledge', fl.ledge && !sk.ledge && sk.y < -20, 'Flint caught it: ' + fl.ledge + '; the sack fell to ' + sk.y.toFixed(0));
+  }
+  {
+    /* Bag It: a leaping grab that takes a shielding fighter and flings them; it catches in the air too */
+    const bag = (shield, air) => { const [f, v] = setup(SACK, FL, 0, 26); if (air) { airborne(f, 0, 30); airborne(v, 26, 30); v.vy = 0; } let flung = false, held = false;
+      SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 4) { i.lx = 1; i.spc = true; } }; SCRIPT[1] = i => { if (shield) i.shd = true; };
+      run(70, () => { if (air && v.state === 'air' && !held) { v.y = 30; v.vy = 0; } if (v.state === 'held') held = true; if (v.state === 'hurt' && v.hitstun > 10) flung = true; }); return { held, flung, pct: v.pct }; };
+    const ground = bag(true, false), air = bag(false, true);
+    check('Potato Sack: Bag It grabs through a shield and flings', ground.held && ground.flung && ground.pct > 8, 'caught: ' + ground.held + ', flung: ' + ground.flung + ', ' + ground.pct.toFixed(1) + '% dealt');
+    check('Potato Sack: Bag It catches in the air', air.held && air.flung, 'caught: ' + air.held + ', flung: ' + air.flung);
+  }
+  {
+    /* Hot Potato: the blast throws the sack upward, costs it damage, flies further the more hurt it is, and hits a neighbour */
+    const pop = (pct, lx, near) => { const [f, o] = setup(SACK, FL, 0, near ? 7 : 55); f.pct = pct; const y0 = f.y, p0 = f.pct; let top = y0, launched = false, right = 0;
+      SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 4) { i.ly = 1; i.spc = true; } else if (tt >= 4 && tt < 30) i.lx = lx; };
+      run(150, () => { top = Math.max(top, f.y); if (f.state === 'hurt' && f.vy > 0) launched = true; if (f.y > 20) right = Math.max(right, f.x); }); return { rise: top - y0, cost: f.pct - p0, launched, right, opp: o.pct, used: f.blastUsed }; };
+    const fresh = pop(0, 0, false), worn = pop(100, 0, false), steer = pop(0, 1, false), close = pop(0, 0, true);
+    check('Potato Sack: Hot Potato launches it and costs damage', fresh.launched && fresh.cost === 12 && fresh.rise > 28 && fresh.rise < 60, 'rose ' + fresh.rise.toFixed(1) + ' for ' + fresh.cost + '%');
+    check('Potato Sack: the more hurt, the further the blast throws it', worn.rise > fresh.rise * 1.6, 'at 0%: ' + fresh.rise.toFixed(1) + ', at 100%: ' + worn.rise.toFixed(1));
+    check('Potato Sack: the blast is steered with the stick and hurts a neighbour', steer.right > 8 && close.opp > 10, 'held right: carried ' + steer.right.toFixed(1) + ' sideways; a neighbour took ' + close.opp.toFixed(1) + '%');
+    const again = (() => { const [f] = setup(SACK, FL, 0, 55); airborne(f, 0, 110); let blasts = 0, last = f.pct, landed = false; SCRIPT[0] = (i, tt) => { if ((tt >= 2 && tt < 4) || (tt >= 70 && tt < 72)) { i.ly = 1; i.spc = true; } }; run(90, () => { if (f.pct > last) { blasts++; last = f.pct; } if (f.grounded) landed = true; }); return landed ? -1 : blasts; })();   /* started high enough that both presses come before it lands */
+    check('Potato Sack: one Hot Potato per time off the ground', again === 1, again + ' blast(s) from two presses in the air');
+    const [nf] = setup(SACK, FL, 0, 55); SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 4) i.spc = true; }; let ember = false; run(40, () => { if (PROJ.some(q => q.kind === 'ember' && q.owner === 0)) ember = true; });
+    check('Potato Sack: neutral special is Flint\u2019s ember toss', ember && ROSTER[2].forms[0].moves.nspec === ROSTER[0].forms[0].moves.nspec, 'ember thrown: ' + ember);
   }
 
   const softPlats = PLATS.splice(1);   /* the movement checks run on the bare main stage, so no jump lands on a platform */

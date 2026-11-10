@@ -32,7 +32,7 @@ vm.runInThisContext(`
   const problems = [], longest = {}, seen = new Set(), moves = new Set(); let frames = 0, kos = 0;
   const note = (m, what) => { if (problems.length < 12) problems.push('match ' + m + ' frame ' + frame + ': ' + what); };
   for (let m = 0; m < ${matches}; m++) {
-    slots[0] = { dev: 'kb', pick: m % 2, ready: true }; slots[1] = { dev: 'kb', pick: (m >> 1) % 2, ready: true };
+    slots[0] = { dev: 'kb', pick: m % ROSTER.length, ready: true }; slots[1] = { dev: 'kb', pick: (m >> 1) % ROSTER.length, ready: true };
     startMatch(); F[0].ctl = new Ctl('cpu'); F[1].ctl = new Ctl('cpu');
     hands[0] = hand(pick(['calm', 'mash', 'hold'])); hands[1] = m % 4 === 3 ? null : hand(pick(['calm', 'mash', 'hold']));   /* every fourth match: random input against the CPU */
     let n = 0; const stocks = F.map(f => f.stocks);

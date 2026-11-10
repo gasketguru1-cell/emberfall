@@ -10,12 +10,17 @@
                     stretches the clip's own startup / contact / recovery sections onto the move's real frame data. */
 function animState(f) {
   const st = f.st, s = f.state, t = tick / 60, phase = (a, b) => b > 0 ? Math.min(1, Math.max(0, a / b)) : 1;
+  /* A hopper's walk and run are one hop each: the first 70% of the clip while it is moving, the rest while it is planted. */
+  const hopV = (c, n) => { const len = c[0] + c[1], ph = ((n % len) + len) % len; return ph < c[0] ? ph / c[0] * 0.7 : 0.7 + (ph - c[0]) / c[1] * 0.3; };
   switch (s) {
     case 'idle':
+      if (st.hop && f.grounded && Math.abs(f.ctl.c.lx) > 0.2) return { key: 'walk', mode: 'phase', v: hopV(st.hop.walk, f.hopT - 1) };
       if (f.grounded && Math.abs(f.vx) > 0.25) return { key: 'walk', mode: 'cycle', v: f.x * f.face / 40 };   /* driven by distance travelled */
       if (f.ctl.c.ly < CROUCH_Y) return { key: 'crouch', mode: 'phase', v: 1 };
       return { key: 'idle', mode: 'loop', v: t };
-    case 'dash': case 'run': return { key: 'run', mode: 'cycle', v: f.x * f.face / 46 };
+    case 'dash': case 'run':
+      if (st.hop) return { key: 'run', mode: 'phase', v: s === 'dash' ? phase(f.sf, st.dashF) * 0.7 : hopV(st.hop.run, f.hopT - 1) };
+      return { key: 'run', mode: 'cycle', v: f.x * f.face / 46 };
     case 'brake': return { key: 'brake', mode: 'phase', v: phase(f.sf, 12) };
     case 'jsq': return { key: 'jumpsquat', mode: 'phase', v: phase(f.sf, st.jsq) };
     case 'air': return f.vy > 0.2 ? { key: 'rise', mode: 'phase', v: 1 - phase(f.vy, st.vJump) } : { key: 'fall', mode: 'loop', v: t };

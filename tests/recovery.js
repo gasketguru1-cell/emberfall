@@ -8,7 +8,7 @@ let seed = 99; Math.random = () => { seed = (seed * 1664525 + 1013904223) >>> 0;
 for (const f of ['hitboxes.js', 'sim.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 vm.runInThisContext(`
 (function () {
-  const forms = [[0, 0, 'Flint'], [1, 0, 'Nib'], [1, 1, 'Loom'], [1, 2, 'Hod']], spots = [[30, 20], [50, 0], [70, 30], [40, -30], [20, -45], [90, 40]].map(q => [EDGE + q[0], q[1]])   /* distances out from the ledge */, verbose = process.argv[2] === '-v';
+  const forms = [[0, 0, 'Flint'], [1, 0, 'Nib'], [1, 1, 'Loom'], [1, 2, 'Hod'], [2, 0, 'Potato Sack']], spots = [[30, 20], [50, 0], [70, 30], [40, -30], [20, -45], [90, 40]].map(q => [EDGE + q[0], q[1]])   /* distances out from the ledge */, verbose = process.argv[2] === '-v';
   const table = {};
   for (const A of forms) { const res = [];
     for (const sp of spots) {

@@ -1389,5 +1389,323 @@
     "end": 0.9
    }
   }
+ },
+ "Potato Sack": {
+  "file": "assets/potato-sack/export/potato-sack-v1.glb",
+  "height": 13,
+  "clips": {
+   "idle": {
+    "clip": "Idle"
+   },
+   "walk": {
+    "clip": "Hop"
+   },
+   "run": {
+    "clip": "Hop"
+   },
+   "crouch": {
+    "clip": "Crouch",
+    "at": 0.2
+   },
+   "brake": {
+    "clip": "Land",
+    "from": 0.05,
+    "to": 0.4
+   },
+   "jumpsquat": {
+    "clip": "Crouch",
+    "from": 0,
+    "to": 0.2
+   },
+   "rise": {
+    "clip": "Rise",
+    "from": 0,
+    "to": 0.4
+   },
+   "fall": {
+    "clip": "Fall"
+   },
+   "land": {
+    "clip": "Land",
+    "from": 0,
+    "to": 0.4
+   },
+   "shield": {
+    "clip": "Shield",
+    "from": 0,
+    "to": 0.15
+   },
+   "hit": {
+    "clip": "Hit",
+    "from": 0,
+    "to": 0.6
+   },
+   "tumble": {
+    "clip": "Tumble",
+    "bounce": true
+   },
+   "down": {
+    "clip": "Down",
+    "from": 0,
+    "to": 0.3
+   },
+   "dizzy": {
+    "clip": "Hit",
+    "from": 0,
+    "to": 0.6,
+    "bounce": true
+   },
+   "airdodge": {
+    "clip": "Tumble",
+    "bounce": true
+   },
+   "dodge": {
+    "clip": "Dodge",
+    "from": 0,
+    "to": 0.4
+   },
+   "roll": {
+    "clip": "Tumble",
+    "bounce": true
+   },
+   "ledge": {
+    "clip": "Fall"
+   },
+   "hold": {
+    "clip": "Hold"
+   },
+   "held": {
+    "clip": "Held"
+   },
+   "throw": {
+    "clip": "Slam",
+    "from": 0.2,
+    "to": 0.9
+   },
+   "swap": {
+    "clip": "Tumble",
+    "bounce": true
+   }
+  },
+  "strikers": [
+   {
+    "bone": "fistL",
+    "ext": 1.4
+   },
+   {
+    "bone": "fistR",
+    "ext": 1.4
+   },
+   {
+    "bone": "footL",
+    "ext": 1.2
+   },
+   {
+    "bone": "footR",
+    "ext": 1.2
+   },
+   {
+    "bone": "tuft2",
+    "ext": 1.2
+   },
+   {
+    "bone": "neck",
+    "ext": 2.2
+   }
+  ],
+  "springs": [
+   {
+    "bones": [
+     "tuft1",
+     "tuft2"
+    ],
+    "k": 0.3,
+    "d": 0.66,
+    "max": 0.7,
+    "drag": 0.14
+   }
+  ],
+  "attacks": {
+   "jab": {
+    "clip": "Thump",
+    "start": 0,
+    "contact": [
+     0.28,
+     0.4
+    ],
+    "end": 0.7
+   },
+   "ftilt": {
+    "clip": "Thump",
+    "start": 0,
+    "contact": [
+     0.28,
+     0.4
+    ],
+    "end": 0.7
+   },
+   "utilt": {
+    "clip": "Uppercut",
+    "start": 0,
+    "contact": [
+     0.36,
+     0.48
+    ],
+    "end": 0.9
+   },
+   "dtilt": {
+    "clip": "Sweep",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.52
+    ],
+    "end": 0.9
+   },
+   "dash": {
+    "clip": "Slam",
+    "start": 0,
+    "contact": [
+     0.39,
+     0.52
+    ],
+    "end": 0.9
+   },
+   "fsmash": {
+    "clip": "Slam",
+    "start": 0,
+    "contact": [
+     0.39,
+     0.52
+    ],
+    "end": 0.9
+   },
+   "usmash": {
+    "clip": "Uppercut",
+    "start": 0,
+    "contact": [
+     0.36,
+     0.48
+    ],
+    "end": 0.9
+   },
+   "dsmash": {
+    "clip": "Sweep",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.52
+    ],
+    "end": 0.9
+   },
+   "nair": {
+    "clip": "Spin",
+    "start": 0,
+    "contact": [
+     0.2,
+     0.55
+    ],
+    "end": 0.8
+   },
+   "fair": {
+    "clip": "Slam",
+    "start": 0,
+    "contact": [
+     0.39,
+     0.52
+    ],
+    "end": 0.9
+   },
+   "bair": {
+    "clip": "BackKick",
+    "start": 0,
+    "contact": [
+     0.39,
+     0.52
+    ],
+    "end": 0.9
+   },
+   "uair": {
+    "clip": "Uppercut",
+    "start": 0,
+    "contact": [
+     0.36,
+     0.48
+    ],
+    "end": 0.9
+   },
+   "dair": {
+    "clip": "Stomp",
+    "start": 0,
+    "contact": [
+     0.39,
+     0.52
+    ],
+    "end": 0.9
+   },
+   "grab": {
+    "clip": "Reach",
+    "start": 0,
+    "contact": [
+     0.39,
+     0.5
+    ],
+    "end": 0.9
+   },
+   "getup": {
+    "clip": "Sweep",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.52
+    ],
+    "end": 0.9
+   },
+   "nspec": {
+    "clip": "Toss",
+    "start": 0,
+    "contact": [
+     0.4,
+     0.5
+    ],
+    "end": 0.95
+   },
+   "sspec": {
+    "clip": "Pounce",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.55
+    ],
+    "end": 0.9
+   },
+   "uspec": {
+    "clip": "Cook",
+    "start": 0,
+    "contact": [
+     0.38,
+     0.42
+    ],
+    "end": 0.9
+   },
+   "dspec": {
+    "clip": "Spin",
+    "start": 0,
+    "contact": [
+     0.12,
+     0.5
+    ],
+    "end": 0.8
+   },
+   "*": {
+    "clip": "Thump",
+    "start": 0,
+    "contact": [
+     0.28,
+     0.4
+    ],
+    "end": 0.7
+   }
+  }
  }
 }

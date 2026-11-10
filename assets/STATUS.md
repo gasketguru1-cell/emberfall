@@ -10,7 +10,7 @@ One folder per character. Inside each:
 
 ## Status
 
-The roster is final: Flint, and Wren's three companions Nib, Loom and Hod. No further fighters are planned.
+The roster: Flint, Wren's three companions Nib, Loom and Hod, and (added 2026-11-10 at the owner's request) Potato Sack.
 
 | Character | Brief | Concept image | 3D model | Rig | Animations | In game |
 |---|---|---|---|---|---|---|
@@ -18,6 +18,7 @@ The roster is final: Flint, and Wren's three companions Nib, Loom and Hod. No fu
 | Nib | art supplied | concept A approved (teal and brass) | v1: 31,045 triangles, 1K textures, 2.6 MB | custom 36-bone skeleton with leg IK | 26 hand-keyed clips; tails and ears follow through | **in game** |
 | Loom | art supplied | concept A approved | v1: 30,047 triangles, 1K textures, 2.4 MB | custom 16-bone skeleton with two ribbon chains | 24 hand-keyed clips; ribbons follow through | **in game**, faces the camera |
 | Hod | art supplied | concept A approved | v1: 30,595 triangles, 1K textures, 2.8 MB | custom 27-bone skeleton with leg IK | 26 hand-keyed clips; tail follows through | **in game** |
+| Potato Sack | in WORKQUEUE.md | concept A approved (an original design) | v1: 30,898 triangles, 1K textures, 3.0 MB | custom 13-bone skeleton | 24 hand-keyed clips; tuft follows through; hops tied to the rules | **in game** |
 
 ## Meshy credits
 
@@ -35,8 +36,10 @@ All Meshy calls go through `tools/meshy.js`. Limits are in `assets/meshy-budget.
 | 2026-11-09 | Nib, Hod, Loom | 3D models from the approved concepts (30 each) | 90 |
 | 2026-11-10 | Stage | Backdrop with the island painted out; the island alone (4 each) | 8 |
 | 2026-11-10 | Stage | 3D island from the isolated picture (60k triangles, PBR 2K) | 30 |
+| 2026-11-10 | Potato Sack | Concept picture | 4 |
+| 2026-11-10 | Potato Sack | 3D model from the concept (30k triangles, PBR 2K) | 30 |
 
-Spent so far: 275 credits (Flint 135, companions 102, stage 38). The daily limit was raised to 240 for 2026-11-09 only, at the owner's request; it is 150 on other days. No credits were spent in the unattended session on the evening of 2026-11-09.
+Spent so far: 309 credits (Flint 135, companions 102, stage 38, Potato Sack 34). The owner cleared up to 400 for the Potato Sack project on 2026-11-10; the 150-a-day limit is unchanged (72 used that day). The daily limit was raised to 240 for 2026-11-09 only, at the owner's request; it is 150 on other days. No credits were spent in the unattended session on the evening of 2026-11-09.
 
 ## Flint v3: what is and is not done
 
@@ -59,6 +62,18 @@ Spent so far: 275 credits (Flint 135, companions 102, stage 38). The daily limit
 
 - CPU level 1 to 9, set with Up / Down on the select screen while player 2 is empty, and remembered. Level 7 is the CPU as it always played; every test and balance figure uses it. The numbers for each level are in `CPU_LV` in `sim.js`.
 - Tap jump is removed (owner's request, 2026-11-10): only the jump buttons jump, never the stick. There is no switch for it.
+
+## Potato Sack (2026-11-10)
+
+An original fighter: a living sack of forge-town potatoes. Heavy and odd to move.
+
+- **Movement:** walks and runs in hops with a full stop between them. Cannot hold the ledge; it has to land on the stage.
+- **Neutral special:** Flint's Ember Toss, unchanged.
+- **Tumble (down special):** a burst along the floor, straight up, or diagonally down in the air; a short hang with no direction. From frame 15 it can be cut short into any action, keeping its speed. A dive that lands too early leaves it on its back. Once per time off the ground.
+- **Bag It (side special):** a leaping grab that goes through shields, catches in the air, and flings.
+- **Hot Potato (up special):** a blast that hurts anyone close and throws the sack upward for 12% of its own damage; it flies further the more hurt it is. Once per time off the ground.
+- **Files:** rules in `SACK` (sim.js); model and clips from `tools/blender/sack.js`; hitboxes in hitboxes.js; 2D fallback drawing in render2d.js.
+- **Not done:** nothing about it has been played by a person; its clips were checked as still frames and by measuring bones, not watched in motion.
 
 ## Playing while it is being worked on (2026-11-10)
 
@@ -129,10 +144,10 @@ The movement rules now work the way the reference build's do, with Emberfall's o
 | Tool | What it does | Result on 2026-11-09 |
 |---|---|---|
 | `npm test` | six seeded CPU matches looking for broken states, then `tests/rules.js`, then a 20-match `tests/fuzz.js` | passes |
-| `tests/rules.js` | 75 scripted checks of single rules with exact inputs, including the movement rules from platforms.ini, the match clock and (2026-11-10) each fighter's jump heights, full-hop pop, fast fall and ground speeds, and fighters pushing each other | all pass |
+| `tests/rules.js` | 90 scripted checks of single rules with exact inputs, including the movement rules from platforms.ini, the match clock and (2026-11-10) each fighter's jump heights, full-hop pop, fast fall and ground speeds, and fighters pushing each other | all pass |
 | `tests/movement.js` | measures every fighter's speeds, stopping distance, jump heights and air times in the running rules; `EMBERFALL_SIM=<file>` measures another copy of the rules | see Movement |
 | `tests/fuzz.js` | both fighters driven by random sticks and buttons; looks for crashes, broken numbers, impossible or stuck states | about 880,000 frames of random against random and 730,000 with the CPU on one side in a quarter of the matches, clean |
-| `tests/stats.js` | CPU-versus-CPU balance per form: wins, damage, KO percent, where stocks are lost, who beats whom | on the island with the sloping underside (2026-11-10, latest), over two seeds of 960 matches each (a third was still running): Flint 48 to 53%, Nib 49 to 53%, Loom 48 to 49%, Hod 49 to 52%; average KO percent Flint 159, Hod 156, Loom 152, Nib 147 |
+| `tests/stats.js` | CPU-versus-CPU balance per fighter: wins, damage, KO percent, where stocks are lost, who beats whom | with all five fighters (2026-11-10, latest), over two seeds of 1,500 matches each: Flint 48 to 50%, Nib 51 to 55%, Loom 48 to 50%, Hod 49 to 51%, Potato Sack 48 to 50%. Potato Sack's damage is touchy: 1.12 of the template gave 53 to 54%, 1.07 gave 41 to 44%, 1.10 gave this |
 | `tests/levels.js` | each CPU level against level 7, same fighter on both sides | wins for levels 1 to 9 (before the last weight changes): 0, 0, 0, 3, 15, 30, 53, 63, 83% |
 | `tests/kotable.js` | KO percent of every hit | see Rules |
 | `tests/recovery.js` | CPU recovery from six spots off stage per form | 24 of 24 get back (also after the movement change) |

@@ -147,6 +147,28 @@ const ART = {
     g.fillStyle = OL; g.beginPath(); g.arc(hx + 3.1, 5.3, 0.6, 0, TAU); g.fill(); g.beginPath(); g.ellipse(hx + 0.6, 6.1, 0.36, 0.55, 0, 0, TAU); g.fill();
     g.fillStyle = '#fff'; g.beginPath(); g.arc(hx + 0.7, 6.3, 0.15, 0, TAU); g.fill();
   },
+  /* Potato Sack: a lumpy burlap sack tied with rope, a sewn-on face, a leather patch, knotted corners for fists and feet. */
+  'Potato Sack'(c, t, f) {
+    const sw = gait(f) * 1.1, a = swing(f), bob = Math.sin(t * 0.09) * 0.2, rope = '#b89a5e';
+    g.beginPath(); g.ellipse(-2.9 - sw, 0.7, 1.5, 0.8, 0, 0, TAU); ink(tint(c[0], -0.2), 0.3); g.beginPath(); g.ellipse(2.9 + sw, 0.7, 1.5, 0.8, 0, 0, TAU); ink(tint(c[0], -0.2), 0.3);   /* knotted feet */
+    g.beginPath(); g.arc(-5.5, 6 + bob, 1.3, 0, TAU); ink(tint(c[0], -0.15), 0.3);                                                                                               /* back fist */
+    g.beginPath(); g.moveTo(-4.4, 1.3); g.quadraticCurveTo(-6, 5 + bob, -3.4, 9.8 + bob); g.quadraticCurveTo(-2, 10.9 + bob, -1.3, 10.9 + bob); g.lineTo(1.3, 10.9 + bob);
+    g.quadraticCurveTo(2, 10.9 + bob, 3.4, 9.8 + bob); g.quadraticCurveTo(6, 5 + bob, 4.4, 1.3); g.quadraticCurveTo(0, 0.2, -4.4, 1.3); g.closePath(); ink(vgrad(c[0], 0.8, 11));     /* the sack */
+    g.strokeStyle = tint(c[0], -0.3); g.lineWidth = 0.14; g.beginPath(); for (let y = 2.2; y < 10; y += 1.3) { g.moveTo(-4.6, y); g.quadraticCurveTo(0, y - 0.5, 4.6, y); } g.stroke();   /* weave */
+    for (const q of [[-3.5, 9.7, 1.0, 0.75], [-2.3, 10.2, 0.8, 0.6]]) { g.beginPath(); g.ellipse(q[0], q[1] + bob, q[2], q[3], 0.4, 0, TAU); ink('#c8a46a', 0.25); }                 /* potatoes peeking out */
+    g.fillStyle = '#6fae4e'; g.beginPath(); g.ellipse(-3.9, 10.6 + bob, 0.32, 0.18, -0.6, 0, TAU); g.fill();
+    g.beginPath(); g.moveTo(-1.2, 11.2 + bob); g.lineTo(-2.7, 13.5 + bob); g.quadraticCurveTo(-0.6, 12.8 + bob, 0.2, 13.9 + bob); g.quadraticCurveTo(1.2, 12.9 + bob, 2.9, 13.6 + bob); g.lineTo(1.2, 11.2 + bob); g.closePath(); ink(tint(c[0], -0.1), 0.3);   /* the tied top */
+    g.beginPath(); g.ellipse(0, 11.05 + bob, 1.7, 0.5, 0, 0, TAU); ink(rope, 0.3);
+    g.save(); g.translate(-1.9, 3.6 + bob * 0.5); g.rotate(-0.12); g.beginPath(); g.rect(-1.6, -1.4, 3.2, 2.8); ink(c[1], 0.3);
+    g.strokeStyle = c[2]; g.lineWidth = 0.2; g.beginPath(); for (const q of [[-1.6, -0.8], [-1.6, 0.6], [1.6, -0.8], [1.6, 0.6]]) { g.moveTo(q[0] - 0.4, q[1]); g.lineTo(q[0] + 0.4, q[1]); } for (const x of [-0.8, 0.6]) { g.moveTo(x, -1.8); g.lineTo(x, -1); g.moveTo(x, 1); g.lineTo(x, 1.8); } g.stroke(); g.restore();   /* patch and stitches */
+    for (const q of [[0.5, 7.6, 0.95, '#c9a94e'], [3.1, 7.7, 0.7, '#9a7350']]) {   /* button eyes, one brass, one wooden */
+      g.beginPath(); g.arc(q[0], q[1] + bob, q[2], 0, TAU); ink(q[3], 0.28); g.fillStyle = OL; for (const d of [-0.22, 0.22]) { g.beginPath(); g.arc(q[0] + d, q[1] + bob, 0.11, 0, TAU); g.fill(); }
+    }
+    g.strokeStyle = OL; g.lineWidth = 0.3; g.lineJoin = 'round'; g.beginPath(); g.moveTo(0.1, 5.5 + bob);
+    [[0.7, 5.1], [1.3, 5.6], [1.9, 5.2], [2.5, 5.7], [3.1, 5.4], [3.7, 6.1]].forEach(q => g.lineTo(q[0], q[1] + bob)); g.stroke();   /* stitched grin */
+    const hx = 5.5 + a * 3.2, hy = 6 + bob + a * 1.2;
+    limb(4.2, 6.4 + bob, hx, hy, 1.3, c[0]); g.beginPath(); g.arc(hx, hy, 1.35, 0, TAU); ink(tint(c[0], 0.08), 0.3);   /* front fist, the one that swings */
+  },
 };
 function drawFighter(f, three) {
   if (f.state === 'dead') return;
