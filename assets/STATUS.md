@@ -96,6 +96,7 @@ Measured with tests/combat-audit.js (movement timings, how near and far each att
 
 ## CPU levels and tap jump (2026-11-10)
 
+- Reset shortcut (2026-11-10, for testing): during a match, attack + special + grab pressed together (A + B + L or R on a controller; Z + X + A or S on the keyboard) puts both fighters back at their starting places with full stocks and no damage. The clock keeps running.
 - CPU level 0 (2026-11-10, for testing): the CPU stands still and does nothing. Up / Down on the start screen goes down to it.
 - CPU level 1 to 9, set with Up / Down on the select screen while player 2 is empty, and remembered. Level 7 is the CPU as it always played; every test and balance figure uses it. The numbers for each level are in `CPU_LV` in `sim.js`.
 - Tap jump is removed (owner's request, 2026-11-10): only the jump buttons jump, never the stick. There is no switch for it.
