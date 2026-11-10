@@ -147,15 +147,19 @@ function build() {
   const makeSling = () => {
     const grp = new THREE.Group(), wood = new THREE.MeshStandardMaterial({ color: 0xb8742f, roughness: 0.75 }), dark = new THREE.MeshStandardMaterial({ color: 0x7a3a26, roughness: 0.8 }), band = new THREE.MeshStandardMaterial({ color: 0xc8562c, roughness: 0.6 });
     const stick = (x0, y0, z0, x1, y1, z1, r0, r1, mat) => { const a = new THREE.Vector3(x0, y0, z0), b = new THREE.Vector3(x1, y1, z1), m = new THREE.Mesh(new THREE.CylinderGeometry(r1, r0, a.distanceTo(b), 10), mat); m.position.copy(a).add(b).multiplyScalar(0.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize()); m.castShadow = true; grp.add(m); return m; };
-    stick(0, 0.9, 0, 0, 6.2, 0, 1.5, 1.25, wood); stick(0, 5.6, 0, 0, 14.2, 4.4, 1.2, 0.95, wood); stick(0, 5.6, 0, 0, 14.2, -4.4, 1.2, 0.95, wood);   /* trunk and the two arms of the fork, spread toward and away from the camera */
-    for (const z of [4.4, -4.4]) { const cap = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 1.1, 10), dark); cap.position.set(0, 13.4, z * 0.93); grp.add(cap); stick(0, 13.2, z * 0.9, 0.3, 9.6, z * 0.32, 0.28, 0.28, band); }
+    stick(0, 0.6, 0, 0, 6.4, 0, 0.75, 0.65, wood); stick(0, 6, 0, 0, 14.2, 4.2, 0.6, 0.48, wood); stick(0, 6, 0, 0, 14.2, -4.2, 0.6, 0.48, wood);   /* trunk and the two arms of the fork, spread toward and away from the camera */
+    for (const z of [4.4, -4.4]) { const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.62, 0.9, 10), dark); cap.position.set(0, 13.4, z * 0.93); grp.add(cap); stick(0, 13.2, z * 0.9, 0.3, 9.6, z * 0.32, 0.28, 0.28, band); }
     const pouch = new THREE.Mesh(new THREE.SphereGeometry(2.7, 14, 10, 0, Math.PI * 2, Math.PI * 0.5, Math.PI * 0.5), dark); pouch.position.set(0.2, 10.6, 0); pouch.scale.set(1, 0.8, 1.1); grp.add(pouch);
-    for (const z of [1.2, -1.2]) { const foot = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), wood); foot.scale.set(1.5, 0.6, 1); foot.position.set(0.5, 0.5, z); foot.castShadow = true; grp.add(foot); }
+    for (const z of [1.2, -1.2]) { const foot = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), wood); foot.scale.set(1.0, 0.45, 0.7); foot.position.set(0.5, 0.5, z); foot.castShadow = true; grp.add(foot); }
     const eye = new THREE.MeshBasicMaterial({ color: 0x2a1a12 }); for (const z of [0.5, -0.5]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 6), eye); e.position.set(1.42, 3.6, z); grp.add(e); }
     const out = new THREE.Group(); grp.rotation.y = 0.95; out.add(grp); out.visible = false; return out;   /* turned so the fork shows from the side */
   };
   const shots = new Map();
   const shotMesh = kind => {
+    if (kind === 'pipmate') { const M = MODELS['Pip alone']; if (M && M.ready) { const o = cloneSkinned(M.scene), g2 = new THREE.Group(); o.scale.setScalar(M.cfg.height * 0.8 / M.height); o.rotation.y = Math.PI / 2; o.traverse(q => { if (q.isMesh) { q.castShadow = true; q.frustumCulled = false; } }); g2.add(o); return g2; }
+      return new THREE.Mesh(new THREE.SphereGeometry(2.2, 12, 9), new THREE.MeshStandardMaterial({ color: 0x2bb8b0, roughness: 0.6 })); }
+    if (kind === 'nest') { const g2 = new THREE.Group(), twig = new THREE.MeshStandardMaterial({ color: 0x8a6a3e, roughness: 0.9 }); const ring = new THREE.Mesh(new THREE.TorusGeometry(2.6, 0.9, 6, 14), twig); ring.rotation.x = Math.PI / 2; g2.add(ring);
+      const egg = new THREE.Mesh(new THREE.SphereGeometry(1.2, 12, 9), new THREE.MeshStandardMaterial({ color: 0xf4ead8, roughness: 0.5 })); egg.scale.set(0.8, 1, 0.8); egg.position.y = 0.6; g2.add(egg); return g2; }
     const e = (hex, i) => new THREE.MeshStandardMaterial({ color: hex, emissive: hex, emissiveIntensity: i, roughness: 0.5 });
     if (kind === 'bolt') return new THREE.Mesh(new THREE.CapsuleGeometry(0.9, 4, 4, 10).rotateZ(Math.PI / 2), e(0xffe8a3, 2));
     if (kind === 'gust') return new THREE.Mesh(new THREE.TorusGeometry(4.5, 0.7, 8, 24), new THREE.MeshStandardMaterial({ color: 0xf0dcff, transparent: true, opacity: 0.55, depthWrite: false }));
@@ -244,6 +248,7 @@ function build() {
     if (hasModel) {   /* a model animates itself; only whole-body spins and the swap shrink stay procedural */
       if (f.state === 'roll') return { sx, sy, rot: f.sf * 0.45 * f.rollDir * f.face, oy: h / 2 };
       if (f.state === 'hurt' && !f.grounded && f.tumble) return { sx, sy, rot: f.sf * 0.2, oy: h / 2 };
+      if (f.state === 'attack' && f.move && f.move.spin && f.move.spinAt) return { sx, sy, rot: f.move.spinAt(f, f.mf), oy: FP };   /* Sling Spin and Catapult Cyclone: end over end round the rig's middle */
       if (f.state === 'attack' && f.move && f.move.swap) { const k = 1 - Math.sin(Math.min(1, f.mf / 34) * Math.PI) * 0.7; return { sx: k, sy: k, rot, oy }; }
       return { sx, sy, rot, oy };
     }
@@ -393,7 +398,10 @@ function build() {
       if (v.pad.visible) v.pad.position.set(f.x, f.y - 0.8, 0);
       if (v.springs.length) applySprings(v);
       if (v.prop && !v.hand) {   /* the living slingshot under its bird: it leans into its run and squashes a little in an attack */
-        v.prop.position.set(f.x, f.y, 0); v.prop.rotation.y = f.face > 0 ? 0 : Math.PI; v.prop.rotation.z = clamp(-f.vx * 0.06, -0.3, 0.3) * (f.face > 0 ? 1 : -1); const sq = f.state === 'attack' ? 1 - 0.12 * Math.sin(Math.min(1, f.mf / (f.move ? f.move.t : 1)) * Math.PI) : f.state === 'jsq' || f.state === 'land' ? 0.85 : 1; v.prop.scale.set(1, sq, 1); v.prop.visible = true;
+        const spinning = f.state === 'attack' && f.move && f.move.spin && f.move.spinAt, rot = spinning ? f.move.spinAt(f, f.mf) : 0;
+        v.prop.rotation.y = f.face > 0 ? 0 : Math.PI;
+        if (spinning) { v.prop.rotation.z = -rot; v.prop.position.set(f.x - f.face * FP * Math.sin(rot), f.y + FP - FP * Math.cos(rot), 0); }   /* the handle swings round the same middle, opposite the bird */
+        else { v.prop.position.set(f.x, f.y, 0); v.prop.rotation.z = clamp(-f.vx * 0.06, -0.3, 0.3) * (f.face > 0 ? 1 : -1); } const sq = f.state === 'attack' ? 1 - 0.12 * Math.sin(Math.min(1, f.mf / (f.move ? f.move.t : 1)) * Math.PI) : f.state === 'jsq' || f.state === 'land' ? 0.85 : 1; v.prop.scale.set(1, sq, 1); v.prop.visible = true;
       } else if (v.prop) {
         v.root.updateWorldMatrix(true, true); v.hand.getWorldPosition(v.prop.position);
         v.prop.rotation.z = clamp(-f.vx * 0.12, -0.5, 0.5) + Math.sin(frame * 0.12 + idx) * 0.05;
@@ -410,6 +418,8 @@ function build() {
       m.position.set(p.x, p.y, 0);
       if (p.kind === 'boulder' || p.kind === 'tape') { m.scale.setScalar(p.r); m.rotation.z = -(p.rot || 0); }
       else if (p.kind === 'dummy' || p.kind === 'clone' || p.kind === 'egg') { m.scale.setScalar(p.r); m.rotation.z = -frame * 0.3 * p.face; }
+      else if (p.kind === 'pipmate') { m.position.y = p.y - 3; m.rotation.y = (p.vx || F[p.owner] && F[p.owner].face || 1) < 0 ? Math.PI : 0; m.visible = true; }
+      else if (p.kind === 'nest') { m.position.y = p.y - 1.8; m.scale.setScalar(1 + Math.sin(frame * 0.2) * 0.03); }
       else if (p.kind === 'gust') { m.rotation.y = Math.PI / 2; m.rotation.x = frame * 0.25; }
       else if (p.kind === 'flame') m.scale.set(p.r * 0.8, p.r * (1.1 + Math.sin(frame * 0.5) * 0.3), p.r * 0.8);
       else if (p.kind === 'ember') m.scale.setScalar(p.r * 0.75);

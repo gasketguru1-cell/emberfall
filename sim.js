@@ -304,7 +304,7 @@ function applyKit(fm) {
 const TUNE = {
   Flint: { kb: 0.84, lag: 1.2 }, Nib: { kb: 1.09 }, Loom: { kb: 1.11, lag: 0.95 }, Hod: { kb: 1.31, lag: 0.8 }, 'Potato Sack': { kb: 0.9 }, Sprocket: { kb: 0.8, lag: 1.3 }, Scuttle: { kb: 0.91, lag: 1.2 },
   /* Furious Fowls: the owner asked for 55 to 65% (2026-11-10) */
-  Rusty: { kb: 0.92 }, Cinder: { kb: 0.92 }, Pip: { kb: 1.04 }, Pearl: { kb: 0.95 },
+  Rusty: { kb: 0.92 }, Bolt: { kb: 0.86, lag: 1.15 }, Cinder: { kb: 0.92 }, Pip: { kb: 1.18 }, Pearl: { kb: 1.0 },
 };
 const NORMALS = ['jab', 'jab2', 'jab3', 'dash', 'ftilt', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash', 'nair', 'fair', 'bair', 'uair', 'dair'];
 function applyTune(fm) {
@@ -767,7 +767,7 @@ function makeSolo(name) {
     S.sspec = { t: 48, once: 1, nodrift: 1, h: [{ f0: 13, f1: 20, x: 3, y: 3.5, r: 4.2, d: 7, a: 45, b: 34, k: 70 }],   /* Shoulder Check */
       on(f, n) { if (n === 1) f.scHit = false; if (n >= 13 && n <= 20 && !f.scHit) { f.vx = f.face * 1.9; if (!f.grounded) f.vy = Math.max(f.vy, 0); }
         if (f.hitG.size && !f.scHit) { f.scHit = true; if (blocked(f)) f.vx = 0; else { f.vy = 1.2; f.vx = f.face * 0.6; f.grounded = false; f.plat = null; f.mf += 5; } } if (n === 21) f.vx *= 0.4; } };
-    S.uspec = { t: 35, helpless: 1, ledge: 1, rise: 42, vault: 1, h: [{ f0: 7, f1: 10, x: 0, y: 4, r: 4.5, d: 2, a: 80, b: 40, k: 30 }, { f0: 8, f1: 34, x: 0, y: 4, r: 4.5, d: 2, a: 80, b: 40, k: 30, g: 1, when: a => a.v2 && a.mf <= a.v2 + 3 }],
+    S.uspec = { t: 35, helpless: 1, ledge: 1, rise: 42, vault: 1, twoStep: 1, h: [{ f0: 7, f1: 10, x: 0, y: 4, r: 4.5, d: 2, a: 80, b: 40, k: 30 }, { f0: 8, f1: 34, x: 0, y: 4, r: 4.5, d: 2, a: 80, b: 40, k: 30, g: 1, when: a => a.v2 && a.mf <= a.v2 + 3 }],
       on(f, n, i) { if (n === 1) f.v2 = 0; if (n < 7) hang(f); if (n === 7) { lift(f, jumpV(26, f.st.grav)); f.vx = i.lx * 0.9; }   /* Captain's Vault: a hop, and a second one if special is pressed again within 16 frames */
         if (n > 7 && n <= 23 && !f.v2 && edge(f)) { f.v2 = n; lift(f, jumpV(17, f.st.grav)); f.vx = i.lx * 1.1; spark(f.x, f.y, '#fff', 8, 1.2); }
         if (n === 24 && !f.v2) f.mf = f.move.t - 1; } };
@@ -814,7 +814,7 @@ function makeSolo(name) {
       on(f, n, i) { if (n >= 11 && n <= 14) { f.vx = f.face * 2.4; if (!f.grounded) f.vy = Math.max(f.vy, 0); } if (n === 15) f.vx *= 0.4;
         if (n === 1) { const tx = f.x + f.face * 14, ty = f.y + 3.5 + clamp(i.ly, -1, 1) * 4; [[1, 15], [-1, 19]].forEach(([s, arrive]) => { const x0 = f.x - f.face * 6, y0 = f.y + 3.5 + s * 9;
             pipMate(f, (o, p) => { const k = Math.min(1, p.age / arrive); return [x0 + (tx - x0) * k, y0 + (ty - y0) * k]; }, arrive + 3, { d: 2, a: 50, b: 25, k: 45 }, { hits: 1 }); }); } } };
-    S.uspec = { t: 40, helpless: 1, ledge: 1, rise: 34, h: [{ f0: 8, f1: 11, x: 0, y: 2, r: 4, d: 2, a: 80, b: 35, k: 30 }, { f0: 18, f1: 39, x: 0, y: 2, r: 4, d: 2, a: 80, b: 35, k: 30, g: 1, when: a => a.lad2 && a.mf <= a.lad2 + 3 }],   /* Bird Ladder: bounce off one double, then steer into a second */
+    S.uspec = { t: 40, helpless: 1, ledge: 1, rise: 34, twoStep: 1, h: [{ f0: 8, f1: 11, x: 0, y: 2, r: 4, d: 2, a: 80, b: 35, k: 30 }, { f0: 18, f1: 39, x: 0, y: 2, r: 4, d: 2, a: 80, b: 35, k: 30, g: 1, when: a => a.lad2 && a.mf <= a.lad2 + 3 }],   /* Bird Ladder: bounce off one double, then steer into a second */
       on(f, n, i) { if (n === 1) f.lad2 = 0; if (n < 8) { hang(f); return; }
         if (n === 8) { lift(f, jumpV(20, f.st.grav)); f.vx = i.lx * 0.7; const x = f.x, y = f.y - 3; pipMate(f, () => [x, y], 12, null); }
         if (n >= 18 && n <= 25 && !f.lad2 && edge(f)) { f.lad2 = n; lift(f, jumpV(14, f.st.grav)); f.vx = i.lx * 1.6; const x = f.x, y = f.y - 3; pipMate(f, () => [x, y], 12, null); }
@@ -1604,6 +1604,8 @@ function cpuBrain(f, o, m, L) {
   if (f.state === 'attack' && f.move && f.move.burst && f.mf <= 7) {   /* a tumble picks its direction on frame 6: up when off the stage, toward the opponent on it */
     if (!f.grounded && (Math.abs(f.x) > EDGE - 2 || f.y < 0)) i.ly = 1; else i.lx = dir; return i;
   }
+  if (f.def.fowl && f.state === 'attack' && f.mname === 'uspec' && !f.grounded && !f.move.fowlUp) {   /* a lone bird recovering: steer for the stage, and spend a second hop once the first one tops out */
+    i.ly = 1; i.lx = Math.abs(f.x) > EDGE - 6 ? -sgn(f.x) : 0; if (f.move.twoStep) i.spc = f.mf > 12 && f.vy < 0.6 && m.t % 2 === 0; return i; }
   if (f.state === 'attack' && f.move && f.move.fowlUp) { const off = Math.abs(f.x) > EDGE - 4 || f.y < -2; i.spc = !f.upGo && f.upC < (off ? 34 : 12); i.ly = 1; i.lx = off ? -sgn(f.x) * (f.y < -20 ? 0.5 : 1) : dir * 0.6; return i; }
   if (f.sling && f.grounded && f.state !== 'attack' && (ad > 16 || f.pct > 60)) { const sx = f.sling.x - f.x; if (Math.abs(sx) < 7 && Math.abs(f.sling.y - f.y) < 6) { i.ly = -1; i.spc = m.t % 4 < 2; return i; } if (f.sling.plat && Math.abs(f.sling.y - f.y) < 4) { i.lx = sgn(sx); return i; } }
   if (f.state === 'attack' && f.move && f.move.hold) { i.spc = true; i.lx = Math.abs(f.x) > EDGE - 6 ? -sgn(f.x) * 0.8 : 0; return i; }   /* a rise that lasts while special is held: hold it, and steer for the stage */

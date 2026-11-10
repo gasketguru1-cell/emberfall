@@ -306,7 +306,7 @@ function draw() {
   g.save(); g.translate(SHK.x, SHK.y);
   if (!three) { drawBg(); drawStage(); drawProj(); }
   if (!three) for (const f of F) if (f.sling) { g.save(); g.translate(SX(f.sling.x), SY(f.sling.y)); g.scale(cam.s * f.sling.face, -cam.s); fowlSling2d(); g.restore(); }   /* the empty slingshot, waiting */
-  for (const f of F) drawFighter(f, three); drawFx(three); drawDebug(); g.restore(); drawHud(); drawCombo(); drawDebugText();
+  for (const f of F) drawFighter(f, three); drawFx(three); drawDebug(); g.restore(); drawHud(); drawCombo(); drawFowlWheel(); drawDebugText();
   if (three) window.R3.render();
 }
 

@@ -62,6 +62,16 @@ Spent so far: 535 credits (Flint 135, companions 102, stage 38, Potato Sack 34, 
 - Each companion has its own ledge hang, spot dodge, grab hold and being-held clips. Roll and air dodge use the curled tumble with a spin, on purpose.
 - Follow-through: tails, ears and ribbons are simulated in `render3d.js` (`springs` in the manifest). It is stepped by the game clock, so freezing the game freezes it.
 
+## Furious Fowls v3 (2026-11-10, the owner's overhaul v3 and special-moves bible, in assets/fowls/source/)
+
+- **Slingshot form:** Neutral B is the bird selector (tap for the next bird; hold to open a five-way wheel and point). Side B fires the living bird with no flight timer (Flint bounces off a hit, Bolt has one sharp correction, Cinder dives on down, Pip flies with two doubles, Pearl glides). Up B is Catapult Cyclone: charge, aim, and the whole rig spins end over end along the aim with 2 to 5 dragging hits and a finisher by charge. Neutral air is Sling Spin: the rig turns end over end in place; both the bird end and the handle end hit. Down B is each bird's technique: Brace & Break (a counter), Skitter Step, Anvil Drop, Orbit Parade, Nest Marker. Normals per bird from the overhaul's tables.
+- **Bird alone:** Flint Rally Cry / Shoulder Check / Captain's Vault; Bolt Brake & Burst / Zigzag / Flash Step; Cinder Pressure Cooker / Furnace Roll / Blast Hop; Pip Switcheroo / Trio Relay / Bird Ladder; Pearl Feather Brake / Swoop & Fold / Thermal Rise. Down B hops back into the slingshot within 1.5 widths.
+- **On screen the russet bird is Flint;** internally it stays Rusty because the lamplighter is also Flint.
+- **Left out on purpose:** the overhaul's wooden-ammunition Down B (the bible replaces it). Feather Brake is limited to two uses per time in the air, so it cannot stall for ever. Launch angles and knockback the guides leave open come from the first move data.
+- **Engine additions:** hitboxes worked out each frame (both ends of a spinning rig, tested a third and two thirds of a frame back so nothing passes through), dragging hits that carry the target with the rig, a frontal counter, Pip doubles (the one Pip model, placed by a fixed rule), a nest only grounded attacks can break, low-profile moves.
+- **Balance** (CPU level 7, two seeds of 30 matches a pairing): Flint 62/62, Bolt 63/62, Cinder 64/61, Pip 57/59, Pearl 61/61, inside the owner's 55 to 65%. The other seven fighters sit at 36 to 48% because of it.
+- **Checked:** 18 rule checks of its own (172 in all, including the same inputs giving the same game), stress and recovery tests, contact sheets of the spin, doubles, nest and wheel in the game. **Not checked:** any of it by hand.
+
 ## Furious Fowls (2026-11-10)
 
 Five birds and a living slingshot, from the owner's package (assets/fowls/source/spec.md and move_data.json) and the owner's own line-up art.

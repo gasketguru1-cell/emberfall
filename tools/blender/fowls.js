@@ -76,6 +76,6 @@ for (const key in BIRDS) { const b = BIRDS[key], out = path.join(__dirname, '..'
   const base = { file: 'assets/fowl-' + key + '/export/' + key + '-v1.glb', height: b.h, clips, strikers: [{ bone: 'beak', ext: 0.6 }, { bone: 'crest', ext: 0.6 }, { bone: 'footL', ext: 0.8 }, { bone: 'tail', ext: 0.6 }], springs: [], attacks };
   manifest[b.name + ' alone'] = base;
   /* in the pouch: the same bird, riding high, with the slingshot built by the renderer underneath; charging the up special and firing ammunition use the puff */
-  manifest[b.name] = Object.assign({}, base, { lift: b.lift, prop: { type: 'sling' }, attacks: Object.assign({}, attacks, { uspec: { clip: 'Fly', start: 0, contact: [0.05, 0.28], end: 0.3 }, sspec: A('Puff', 0.4, 0.5) }) });
+  manifest[b.name] = Object.assign({}, base, { lift: b.lift, prop: { type: 'sling' }, attacks: Object.assign({}, attacks, { uspec: A('Hold', 0.3, 0.6, 0, 0.6), nair: A('Hold', 0.3, 0.6, 0, 0.6), sspec: A('Puff', 0.4, 0.5), nspec: A('Idle', 0.3, 0.6), dspec: A('Shield', 0.1, 0.15, 0, 0.15) }) });
   console.log('wrote ' + key + ': ' + s.bones.length + ' bones, ' + Object.keys(s.clips).length + ' clips'); }
 fs.writeFileSync(mf, JSON.stringify(manifest, null, 1) + '\n'); console.log('manifest: ' + Object.keys(manifest).join(', '));
