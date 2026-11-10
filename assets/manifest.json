@@ -1,6 +1,6 @@
 {
  "Flint": {
-  "file": "assets/flint/export/flint-v2.glb",
+  "file": "assets/flint/export/flint-v3.glb",
   "height": 15.2,
   "prop": {
    "type": "lantern",
@@ -327,6 +327,68 @@
    {
     "bone": "LeftToeBase",
     "ext": 0.8
+   }
+  ],
+  "springs": [
+   {
+    "bones": [
+     "coatFR1",
+     "coatFR2"
+    ],
+    "k": 0.24,
+    "d": 0.72,
+    "max": 0.3,
+    "drag": 0.1
+   },
+   {
+    "bones": [
+     "coatR1",
+     "coatR2"
+    ],
+    "k": 0.24,
+    "d": 0.72,
+    "max": 0.4,
+    "drag": 0.1
+   },
+   {
+    "bones": [
+     "coatB1",
+     "coatB2"
+    ],
+    "k": 0.24,
+    "d": 0.72,
+    "max": 0.55,
+    "drag": 0.1
+   },
+   {
+    "bones": [
+     "coatL1",
+     "coatL2"
+    ],
+    "k": 0.24,
+    "d": 0.72,
+    "max": 0.4,
+    "drag": 0.1
+   },
+   {
+    "bones": [
+     "coatFL1",
+     "coatFL2"
+    ],
+    "k": 0.24,
+    "d": 0.72,
+    "max": 0.3,
+    "drag": 0.1
+   },
+   {
+    "bones": [
+     "scarf1",
+     "scarf2"
+    ],
+    "k": 0.2,
+    "d": 0.76,
+    "max": 0.8,
+    "drag": 0.15
    }
   ]
  },

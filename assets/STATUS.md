@@ -14,7 +14,7 @@ The roster is final: Flint, and Wren's three companions Nib, Loom and Hod. No fu
 
 | Character | Brief | Concept image | 3D model | Rig | Animations | In game |
 |---|---|---|---|---|---|---|
-| Flint | written | concept B chosen | v2: 30,791 triangles, 1K textures, 3.5 MB | Meshy auto-rig, 24 bones | 32 clips; every move has its own | **in game** with lantern |
+| Flint | written | concept B chosen | v3: 30,791 triangles, 1K textures, 3.5 MB | Meshy auto-rig, 24 bones, plus 12 coat and scarf bones added by `tools/cloth.mjs` | 32 clips; every move has its own; coat and scarf follow through | **in game** with lantern |
 | Nib | art supplied | concept A approved (teal and brass) | v1: 31,045 triangles, 1K textures, 2.6 MB | custom 36-bone skeleton with leg IK | 26 hand-keyed clips; tails and ears follow through | **in game** |
 | Loom | art supplied | concept A approved | v1: 30,047 triangles, 1K textures, 2.4 MB | custom 16-bone skeleton with two ribbon chains | 24 hand-keyed clips; ribbons follow through | **in game**, faces the camera |
 | Hod | art supplied | concept A approved | v1: 30,595 triangles, 1K textures, 2.8 MB | custom 27-bone skeleton with leg IK | 26 hand-keyed clips; tail follows through | **in game** |
@@ -36,11 +36,12 @@ All Meshy calls go through `tools/meshy.js`. Limits are in `assets/meshy-budget.
 
 Spent so far: 237 credits (Flint 135, companions 102). The daily limit was raised to 240 for 2026-11-09 only, at the owner's request; it is 150 on other days. No credits were spent in the unattended session on the evening of 2026-11-09.
 
-## Flint v2: what is and is not done
+## Flint v3: what is and is not done
 
-- Done: model, rig, 32 clips in `assets/flint/export/flint-v2.glb`; every ground attack, aerial, special, grab, throw, roll, dodge and ledge hang has its own clip, timed to the move's frame data in `assets/manifest.json`; lantern prop follows the right hand.
+- Done: model, rig, 32 clips in `assets/flint/export/flint-v3.glb`; every ground attack, aerial, special, grab, throw, roll, dodge and ledge hang has its own clip, timed to the move's frame data in `assets/manifest.json`; lantern prop follows the right hand.
 - Down smash and get-up attack use the low sweep in the sweep-kick clip, and the model is spun front to back through the two hits (`spin` in the manifest).
-- Not done: coat and scarf weight clean-up (boot clips the coat when running), refinement of anticipation and follow-through per move, effects for the specials.
+- Coat and scarf (2026-11-10): `node tools/cloth.mjs` reads `flint-v2.glb` and writes `flint-v3.glb`. The coat skirt now hangs from the hips on five two-bone chains and the scarf ends from the chest on one, instead of being pulled about by the legs; the hem no longer folds up with the calf. The front panels still mostly follow the thighs so a deep crouch does not push the legs through them. The chains are listed under `springs` in the manifest, so they trail in a run and settle. Checked as still frames in the game (run, brake, jump, down smash, forward smash, crouch, tumble): no tearing. Not watched in motion.
+- Not done: refinement of anticipation and follow-through per move, effects for the specials.
 
 ## Custom rig pipeline (Nib, Hod, Loom)
 

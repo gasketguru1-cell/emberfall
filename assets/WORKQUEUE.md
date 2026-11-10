@@ -19,7 +19,7 @@ Standing instructions from the owner (2026-11-09, about 9 pm): keep working with
 4. [x] **More universal mechanics**: ledge protection that shrinks with air time and damage, slower ledge get-ups above 100%, held-attack rapid jabs where it suits the fighter, angled forward tilts, a tap-jump option.
 5. [x] **Replace stand-in clips** for the companions (roll, spot dodge, air dodge, grab hold, being held, ledge hang) with clips keyed in `tools/blender/companions.js`. No credits needed. Done for ledge hang, spot dodge, grab hold and being held; roll and air dodge keep the curled tumble on purpose.
 6. [x] **Hit effects and stage** in the 3D renderer: hit sparks and launch trails drawn in 3D, a bigger KO burst, more background depth.
-7. [ ] **Flint's coat**: add coat and scarf bones in Blender so they follow through and the boot stops clipping.
+7. [x] **Flint's coat**: add coat and scarf bones in Blender so they follow through and the boot stops clipping.
 8. [x] **Select screen**: update the help lines for the new rules (jab chains, footstool, wall jump, dash grab).
 
 ## Needs the owner
@@ -31,7 +31,7 @@ Nothing here blocks work; these are things only a person at the machine can judg
 - **Wavedash distance against the reference build**: here a long wavedash slides 23.2 units and a short one 7.3 (the main stage is 160 wide, so about a seventh of the stage for the long one). If the reference slides further or less for the same input, say by how much.
 - **Sound**: hits now use a noise-and-thump sound instead of a beep. Nobody has heard it yet. If it is wrong, the old line is one edit away (`thwack` in sim.js).
 - **Feel of the new rules**: shield poke may be too strict or too lenient; Nib's held flurry may be too strong or weak; the KO burst and hit flash may be too bright.
-- **Flint's coat and scarf bones** (item 7): not started. Worth doing with the owner looking, since it is judged by eye.
+- **Flint's coat and scarf bones** (item 7): done on 2026-11-10 without Blender (`tools/cloth.mjs`). Judged from still frames only; worth a look in motion. To go back, set Flint's `file` in `assets/manifest.json` to `flint-v2.glb` and remove his `springs`.
 - **Meshy daily limit**: stays at 150 unless the owner raises it. Nothing was spent in the unattended session.
 
 ## Stopping (midnight, or when told to stop)
@@ -59,3 +59,4 @@ Nothing here blocks work; these are things only a person at the machine can judg
 - 2026-11-09 23:26: one more CPU mistake found in the death traces and fixed: launched high and far, it used its jumps and up special at once and carried itself out through the top (this was behind many of Loom's stocks lost upward). The CPU now knows how high each fighter's air jump and up special carry and falls first. Loom's weight went back to 80, since the earlier raise was compensating for that mistake. Three seeds of 960 matches: Flint 48 to 50%, Nib 48 to 53%, Loom 49 to 53%, Hod 47 to 50%. The hitbox audit now checks both facings (178 checks; only pivot grabs over 3 units). tests/stats.js defaults to 60 matches per pairing.
 - 2026-11-09 23:30: tried two more CPU changes from the death traces (mashing out of grabs with the stick and grab button so no attack is buffered on release; holding a line just outside the stage wall when below the lip). Over three seeds they left the roster less even (45 to 54% instead of 47 to 53%) and cost Hod more stocks, so both were dropped and sim.js was put back to the committed state. Known and left: the CPU can buffer an aerial as it breaks out of a grab at the edge, and can drift under the stage during an up special started very low.
 - 2026-11-09 23:36: the grab mash-out change was retested on its own and kept: the CPU now breaks grabs with the stick and the grab button, so no attack comes out as it gets free. Three seeds of 960 matches: every fighter between 46% and 52%. The wall-line change stays dropped; the CPU can still drift under the stage during an up special started very low.
+- 2026-11-10: A and B swapped on controllers at the owner's request (bottom face button attacks; − still flips it per pad). Item 7 done: Flint's coat and scarf have their own bones (flint-v3.glb, built by tools/cloth.mjs from v2) with follow-through springs. First attempt tore the coat along texture seams because the mesh is split there; weights are now decided per welded point.
