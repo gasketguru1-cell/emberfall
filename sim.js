@@ -238,7 +238,7 @@ const WREN = {
     /* Loom: a kite spirit. Floaty with long ribbons. */
     name: 'Loom', col: ['#7b5cd6', '#f08fc0', '#fdf0ff'], alt: ['#2d7dd2', '#f7d154', '#f0fbff'],
     /* Floaty zoner: light, slow on the ground, drifts well, falls slowly, three small air jumps, long slow ribbon grab. */
-    st: { weight: 80, walk: 1.0, dash: 1.7, run: 1.5, airSpeed: 1.16, airAcc: 0.065, grav: 0.062, fall: 1.15, ffall: 1.85, jump: 2.6, shop: 1.6, djump: 2.3, jsq: 3, trac: 0.07, w: 8, h: 15,
+    st: { weight: 83, walk: 1.0, dash: 1.7, run: 1.5, airSpeed: 1.16, airAcc: 0.065, grav: 0.062, fall: 1.15, ffall: 1.85, jump: 2.6, shop: 1.6, djump: 2.3, jsq: 3, trac: 0.07, w: 8, h: 15,
       jumps: 3, dashF: 16, roll: [32, 1.15, 14], spot: [24, 16] },
     moves: mk(1.3, 1.0, 1.1, 1.05, {
       nspec: { t: 46, h: [{ f0: 14, f1: 17, x: 14, y: 9, r: 5, d: 7, a: 361, b: 30, k: 80 }, { f0: 14, f1: 17, x: 24, y: 9, r: 5, d: 10, a: 361, b: 30, k: 95 }] },

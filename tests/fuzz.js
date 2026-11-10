@@ -1,5 +1,6 @@
 // Stress test: both fighters are driven by random stick and button input, the kind of messy pressing no CPU does.
-// Looks for crashes, broken numbers, impossible states and fighters stuck in one state.
+// Looks for crashes, broken numbers, impossible states and fighters stuck in one state. Every fourth match pits the
+// random hand against the real CPU, so the CPU also meets opponents doing things it would never do itself.
 // Usage: node tests/fuzz.js [matches, default 40] [seed, default 2024]      (exit code 1 on any problem)
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const root = path.join(__dirname, '..'), matches = +process.argv[2] || 40, seed0 = +process.argv[3] || 2024;
@@ -26,13 +27,13 @@ vm.runInThisContext(`
       return Object.assign(blankIn(), s);
     };
   }
-  const hands = [null, null]; cpuInput = f => hands[f.idx]();
+  const hands = [null, null], realCpu = cpuInput; cpuInput = (f, o, m) => hands[f.idx] ? hands[f.idx]() : realCpu(f, o, m);   /* a missing hand means the real CPU plays that side */
   const problems = [], longest = {}, seen = new Set(), moves = new Set(); let frames = 0, kos = 0;
   const note = (m, what) => { if (problems.length < 12) problems.push('match ' + m + ' frame ' + frame + ': ' + what); };
   for (let m = 0; m < ${matches}; m++) {
     slots[0] = { dev: 'kb', pick: m % 2, ready: true }; slots[1] = { dev: 'kb', pick: (m >> 1) % 2, ready: true };
     startMatch(); F[0].ctl = new Ctl('cpu'); F[1].ctl = new Ctl('cpu'); TAPJUMP.cpu = m % 3 === 0;
-    hands[0] = hand(pick(['calm', 'mash', 'hold'])); hands[1] = hand(pick(['calm', 'mash', 'hold']));
+    hands[0] = hand(pick(['calm', 'mash', 'hold'])); hands[1] = m % 4 === 3 ? null : hand(pick(['calm', 'mash', 'hold']));   /* every fourth match: random input against the CPU */
     let n = 0; const stocks = F.map(f => f.stocks);
     try {
       while (mode !== 'over' && n < 8 * 3600 + 600) {
