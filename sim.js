@@ -1491,7 +1491,10 @@ function resetFighters() {
 }
 function stepPlay() {
   if (F.some(f => f.ctl.dev !== 'cpu' && f.ctl.pressed('start'))) { paused = !paused; return; }
-  if (paused) return;
+  if (paused) {   /* paused: Special leaves the match and goes back to the fighter select */
+    if (F.some(f => f.ctl.dev !== 'cpu' && f.ctl.pressed('spc'))) { paused = false; mode = 'select'; for (const s of slots) if (s) s.ready = false; F = []; PROJ = []; PART = []; POPS = []; beep(300, 0.1, 'triangle', 0.05); }
+    return;
+  }
   /* Testing shortcut: attack + special + grab (A + B + L or R on a controller, Z + X + A or S on the keyboard) pressed together puts both
      fighters back where a match starts, with full stocks and no damage. The clock keeps running. */
   if (F.some(f => f.ctl.dev !== 'cpu' && f.ctl.c.atk && f.ctl.c.spc && f.ctl.c.grb && !(f.ctl.p.atk && f.ctl.p.spc && f.ctl.p.grb))) { resetFighters(); return; }
