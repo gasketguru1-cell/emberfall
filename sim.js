@@ -99,10 +99,24 @@ const DBG = { step: false, boxes: false, advance: 0, r3d: true, fx: true };   /*
 try { DBG.boxes = localStorage.getItem('emberfall.boxes') === '1'; } catch (e) { /* no storage */ }
 try { DBG.fx = localStorage.getItem('emberfall.hitfx') !== '0'; } catch (e) { /* no storage */ }
 function setHitFx(on) { DBG.fx = !!on; try { localStorage.setItem('emberfall.hitfx', on ? '1' : '0'); } catch (e) { /* no storage */ } }
+/* Training mode: no clock, stocks never run out, and a true-combo counter. A combo is every hit landed while the target is
+   still in hitstun (or held) from the one before; it ends the moment the target can act again. */
+let TRAINING = false; try { TRAINING = localStorage.getItem('emberfall.training') === '1'; } catch (e) { /* no storage */ }
+function setTraining(on) { TRAINING = !!on; try { localStorage.setItem('emberfall.training', on ? '1' : '0'); } catch (e) { /* no storage */ } }
+const COMBO = [{ hits: 0, dmg: 0, last: null, best: null, t: 0 }, { hits: 0, dmg: 0, last: null, best: null, t: 0 }];   /* per attacker */
+function comboHit(a, v, dmg, chained) {   /* chained: the target had not recovered from the last hit */
+  if (!a || a.idx === undefined) return; const c = COMBO[a.idx]; if (!chained || !c.hits) { c.hits = 0; c.dmg = 0; } c.hits++; c.dmg += dmg; c.t = 0;
+}
+function comboStep() {   /* a combo ends when its target is free to act */
+  for (const a of F) { const c = COMBO[a.idx], v = F[1 - a.idx]; if (!c || !c.hits) continue;
+    if (v && (v.state === 'hurt' || v.state === 'held' || v.hitlag > 0)) continue;
+    c.last = { hits: c.hits, dmg: c.dmg }; if (!c.best || c.hits > c.best.hits || (c.hits === c.best.hits && c.dmg > c.best.dmg)) c.best = { hits: c.hits, dmg: c.dmg }; c.hits = 0; c.dmg = 0; }
+  for (const c of COMBO) c.t++;
+}
 function setBoxes(on) { DBG.boxes = !!on; try { localStorage.setItem('emberfall.boxes', on ? '1' : '0'); } catch (e) { /* no storage */ } }
 function debugKey(code) {
   if (code === 'KeyP') { DBG.step = !DBG.step; DBG.advance = 0; } else if (code === 'KeyO') { if (DBG.step) DBG.advance++; }
-  else if (code === 'KeyB') setBoxes(!DBG.boxes); else if (code === 'KeyH') setHitFx(!DBG.fx); else if (code === 'KeyM') DBG.r3d = !DBG.r3d;
+  else if (code === 'KeyT' && mode === 'select') setTraining(!TRAINING); else if (code === 'KeyB') setBoxes(!DBG.boxes); else if (code === 'KeyH') setHitFx(!DBG.fx); else if (code === 'KeyM') DBG.r3d = !DBG.r3d;
 }
 addEventListener('keyup', e => { keys[e.code] = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
@@ -1101,7 +1115,7 @@ class Fighter {
     beep(90, 0.6, 'sawtooth', 0.1, 0.3); shake = 16; rumble(this.ctl, 400, 1); this.stale = [];
     const o = F[1 - this.idx]; if (o.victim === this) o.victim = null; this.freeVictim();
     if (this.def.fowl) { this.sling = null; if (this.fi >= 5) this.fi -= 5; }   /* a lost stock puts the bird back in the pouch */
-    this.stocks--; F[1 - this.idx].kos++; this.move = null; this.vx = this.vy = 0; this.grounded = false; this.plat = null; this.set('dead'); PROJ = PROJ.filter(p => p.owner !== this.idx);
+    this.stocks--; if (TRAINING) this.stocks = STOCKS; F[1 - this.idx].kos++;   /* training: stocks never run out */ this.move = null; this.vx = this.vy = 0; this.grounded = false; this.plat = null; this.set('dead'); PROJ = PROJ.filter(p => p.owner !== this.idx);
   }
   update() {
     const c = this.ctl, i = c.c;
@@ -1266,7 +1280,7 @@ class Fighter {
         if (this.sf === 10 && v) {
           const h = this.form.moves.throws[this.throwK], id = this.form.name + ':throw' + this.throwK, d = h.d * staleMul(this, id) * DMG_1V1; pushStale(this, id);
           this.victim = null; v.grounded = false; v.plat = null; v.pct = Math.min(999, v.pct + d); v.grabImm = 60;
-          v.launch(knock(v, d, h.b, h.k) * rage(this), h.a * Math.PI / 180, this.face); v.hitlag = 6; this.hitlag = 6; spark(v.x, v.y + 8, '#fff', 12, 1.6); thwack(90);
+          comboHit(this, v, d, true); v.launch(knock(v, d, h.b, h.k) * rage(this), h.a * Math.PI / 180, this.face); v.hitlag = 6; this.hitlag = 6; spark(v.x, v.y + 8, '#fff', 12, 1.6); thwack(90);
         }
         if (!this.grounded) this.vy = 0;   /* a catch in the air hangs there for the fling */
         if (this.sf >= 26) this.set(this.grounded ? 'idle' : 'air');
@@ -1442,7 +1456,8 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke) {
     const hl = Math.min(20, Math.floor((d * 0.65 + 6) * 0.67)); v.hitlag = hl; if (!proj) a.hitlag = hl;
     spark(hx, hy, '#9cf', 6, 1); beep(400, 0.05, 'triangle', 0.04); return;
   }
-  v.pct = Math.min(999, v.pct + d); v.flash = 6; if (!proj && a.move && a.move.cast) a.castHit = true;
+  const chained = v.state === 'hurt' || v.state === 'held' || v.hitlag > 0;
+  v.pct = Math.min(999, v.pct + d); v.flash = 6; if (!proj && a.move && a.move.cast) a.castHit = true; comboHit(a, v, d, chained);
   const crouch = v.grounded && v.state === 'idle' && v.ctl.c.ly < CROUCH_Y, charging = v.state === 'attack' && v.charge > 0;
   const kb = knock(v, d, h.b, h.k) * (h.norage ? 1 : rage(a)) * (crouch ? CROUCH_MUL : 1) * (charging ? CHARGING_MUL : 1);
   const hl = h.hl !== undefined ? h.hl : Math.min(30, Math.floor((d * 0.65 + 6) * (crouch ? 0.67 : 1)));
@@ -1680,6 +1695,7 @@ function startMatch() {
   const s0 = slots[0], s1 = slots[1] || { dev: 'cpu', pick: CPU_PICK >= 0 ? CPU_PICK : Math.random() * ROSTER.length | 0 };   /* the CPU's token, or random */
   const c0 = devCtl(s0.dev), c1 = s1.dev === 'cpu' ? new Ctl('cpu') : devCtl(s1.dev);
   F = [new Fighter(0, ROSTER[s0.pick], c0, false), new Fighter(1, ROSTER[s1.pick], c1, s1.pick === s0.pick)];
+  for (const c of COMBO) Object.assign(c, { hits: 0, dmg: 0, last: null, best: null, t: 0 });
   PROJ = []; PART = []; POPS = []; timer = MATCH_FRAMES; sudden = false; slowT = 0; focus = null; countdown = 190; paused = false; mode = 'countdown'; cam.x = 0; cam.y = 30; cam.s = 3.4;
 }
 /* Start screen: the fighters chosen so far stand on the island, for show only (nothing here is played). They are
@@ -1700,7 +1716,7 @@ function selectPreview() {
 /* The fighter select screen: where each roster tile and the CPU card are (the HUD draws them from the same numbers), and
    which one a player's cursor is over. */
 function rosterTile(k) { const n = ROSTER.length, tw = Math.min(168, (W - 120) / n - 12), gap = 12, x0 = (W - (n * tw + (n - 1) * gap)) / 2; return [x0 + k * (tw + gap), 158, tw, 124]; }
-const CPU_CARD = [W - 44 - 460, 446, 460, 158];
+const CPU_CARD = [W - 44 - 460, 446, 460, 158], TRAIN_PILL = [W - 44 - 214, 100, 214, 34];
 const inBox = (b, x, y) => x >= b[0] && x <= b[0] + b[2] && y >= b[1] && y <= b[1] + b[3];
 function tileUnder(x, y) { for (let k = 0; k < ROSTER.length; k++) if (inBox(rosterTile(k), x, y)) return k; return -1; }
 /* The CPU's token: dragged with the mouse (or a finger) onto a fighter's tile to choose the CPU's fighter. Dropped anywhere
@@ -1729,7 +1745,8 @@ function stepSelect() {
     if (over >= 0 && !sl.ready && sl.pick !== over) { sl.pick = over; beep(440, 0.03, 'square', 0.02); }
     if (c.pressed('start')) { if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; } }
     else if (c.pressed('atk')) {
-      if (onCpu) { setCpuLevel(CPU_LEVEL + 1 > 9 ? 0 : CPU_LEVEL + 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
+      if (inBox(TRAIN_PILL, sl.cx, sl.cy)) { setTraining(!TRAINING); beep(TRAINING ? 700 : 420, 0.05, 'square', 0.03); }
+      else if (onCpu) { setCpuLevel(CPU_LEVEL + 1 > 9 ? 0 : CPU_LEVEL + 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
       else if (over >= 0) { sl.pick = over; sl.ready = true; beep(800, 0.08, 'triangle', 0.05); }
       else if (sl.ready && slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; }
     } else if (c.pressed('spc')) {
@@ -1765,7 +1782,7 @@ function stepPlay() {
   jostle();
   updateProj(); resolveHits();
   for (const f of F) if (f.state !== 'dead' && f.state !== 'respawn' && (f.x < BLAST.l || f.x > BLAST.r || f.y > BLAST.t || f.y < BLAST.b)) f.ko();
-  timer--;
+  if (!TRAINING) timer--; comboStep();
   const out = F.filter(f => f.stocks <= 0);
   if (out.length === 2) finish('DRAW');
   else if (out.length === 1) finish((F[1 - out[0].idx].def.name + ' WINS').toUpperCase());

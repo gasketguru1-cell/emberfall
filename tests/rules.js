@@ -608,6 +608,17 @@ vm.runInThisContext(`
       check('Furious Fowls: the same inputs give the same game (ready for rollback)', a === b, a === b ? 'two runs of 400 frames ended identically' : a + '  vs  ' + b); }
   }
 
+  /* ---- Training mode: endless stocks, no clock, and a true-combo counter ---- */
+  {
+    const was = TRAINING; TRAINING = true;
+    const [f, o] = setup(FL, FL, 0, 9); o.ctl = new Ctl('none'); o.pct = 70; const tm = timer;   /* at 70% each jab still holds the target in hitstun for the next */ let most = 0; SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 40) i.atk = true; }; run(70, () => { most = Math.max(most, COMBO[0].hits); });
+    const chain = COMBO[0].last; SCRIPT[0] = (i, tt) => { if (tap(120)(tt)) i.atk = true; }; run(80); const lone = COMBO[0].last;
+    check('training: a jab string counts as one true combo, with its damage', chain && chain.hits >= 2 && Math.abs(chain.dmg - (o.pct - 70) + (lone ? lone.dmg : 0)) < 0.01 && most === chain.hits, chain ? chain.hits + ' hits for ' + chain.dmg.toFixed(1) + '%' : 'nothing counted');
+    check('training: a hit after the target recovers starts a new combo', lone && lone.hits === 1 && COMBO[0].best.hits === chain.hits, lone ? 'next hit: ' + lone.hits + ' hit, best kept at ' + COMBO[0].best.hits : 'nothing counted');
+    airborne(o, 400, 50); run(20); check('training: no clock, and stocks never run out', o.stocks === STOCKS && timer === tm, 'stocks ' + o.stocks + ' after a KO; clock ' + (timer === tm ? 'stopped' : 'running'));
+    TRAINING = was;
+  }
+
   /* ---- Combat audit (2026-11-10): strike shapes, sweeping, the ledge's open frames, the run turnaround ---- */
   {
     const [sp, o1] = setup(SPR, FL, 0, 7); sp.startMove('utilt'); run(30); const [sp2, o2] = setup(SPR, FL, 0, 30); sp2.startMove('utilt'); run(30);
