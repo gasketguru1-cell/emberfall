@@ -456,8 +456,21 @@ vm.runInThisContext(`
     check('Potato Sack: the blast is steered with the stick and hurts a neighbour', steer.right > 8 && close.opp > 10, 'held right: carried ' + steer.right.toFixed(1) + ' sideways; a neighbour took ' + close.opp.toFixed(1) + '%');
     const again = (() => { const [f] = setup(SACK, FL, 0, 55); airborne(f, 0, 110); let blasts = 0, last = f.pct, landed = false; SCRIPT[0] = (i, tt) => { if ((tt >= 2 && tt < 4) || (tt >= 70 && tt < 72)) { i.ly = 1; i.spc = true; } }; run(90, () => { if (f.pct > last) { blasts++; last = f.pct; } if (f.grounded) landed = true; }); return landed ? -1 : blasts; })();   /* started high enough that both presses come before it lands */
     check('Potato Sack: one Hot Potato per time off the ground', again === 1, again + ' blast(s) from two presses in the air');
-    const [nf] = setup(SACK, FL, 0, 55); SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 4) i.spc = true; }; let ember = false; run(40, () => { if (PROJ.some(q => q.kind === 'ember' && q.owner === 0)) ember = true; });
-    check('Potato Sack: neutral special is Flint\u2019s ember toss', ember && ROSTER[2].forms[0].moves.nspec === ROSTER[0].forms[0].moves.nspec, 'ember thrown: ' + ember);
+    /* Spud Bomb: tapped it is small; held it grows without limit, and hits harder */
+    const bomb = (hold, d, pct) => { const [s, o] = setup(SACK, FL, 0, d); o.ctl = new Ctl('none'); o.pct = pct; SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 2 + hold) i.spc = true; }; run(hold + 240, () => o.stocks === 3); return { dead: o.stocks < 3, pct: o.pct }; };
+    const tapNear = bomb(1, 6, 0), tapFar = bomb(1, 22, 0), bigFar = bomb(240, 22, 0), tapKO = bomb(1, 6, 150), heldKO = bomb(90, 6, 50);
+    check('Potato Sack: Spud Bomb grows the longer it is held', tapNear.pct > 8 && tapFar.pct === 0 && bigFar.pct > tapNear.pct * 3, 'tapped: ' + tapNear.pct.toFixed(1) + '% up close, nothing at 22 away; held 4 seconds: ' + (bigFar.dead ? 'a KO' : bigFar.pct.toFixed(1) + '%') + ' at 22 away');
+    check('Potato Sack: Spud Bomb is a kill move', tapKO.dead && heldKO.dead, 'tapped at 150%: ' + (tapKO.dead ? 'KO' : 'survives') + '; held 1.5 s at 50%: ' + (heldKO.dead ? 'KO' : 'survives'));
+    /* two neutral airs in one short hop */
+    { const [s] = setup(SACK, FL, -40, 60); let nairs = 0, last = ''; SCRIPT[0] = (i, tt) => { if (tt === 2 || tt === 3) i.jmp = true; if (tt === 6 || tt === 7 || tt === 22 || tt === 23) i.atk = true; }; run(60, () => { const tag = s.state === 'attack' ? s.mname + s.mf : ''; if (s.state === 'attack' && s.mname === 'nair' && s.mf === 1) nairs++; });
+      check('Potato Sack: two neutral airs fit in one short hop', nairs === 2, nairs + ' neutral airs before landing'); }
+    /* up special bursts on frame 5 */
+    { const [s] = setup(SACK, FL, 0, 60); let at = -1; SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = 1; i.spc = true; } }; run(20, () => { if (at < 0 && PROJ.some(p => p.kind === 'blast')) at = s.mf; });
+      check('Potato Sack: Hot Potato bursts on frame 5', at === 5, 'burst on frame ' + at); }
+    /* tumble with down held goes through a soft platform; without it he lands as before */
+    { const thru = down => { const [s] = setup(SACK, FL, 0, 60); airborne(s, -42, 36); SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = -1; i.spc = true; } else if (tt >= 4 && tt < 9) { i.lx = 1; } if (down && tt >= 9) i.ly = -1; }; let onPlat = false; run(60, () => { if (s.plat && s.plat.soft) onPlat = true; }); return onPlat; };
+      const held = thru(true), plain = thru(false);
+      check('Potato Sack: a tumble with down held passes through a platform', !held && plain, 'with down held: ' + (held ? 'touched the platform' : 'went straight through') + '; without: ' + (plain ? 'landed on it and slid' : 'went through')); }
   }
 
   /* ---- Sprocket: the handyman from the owner's moveset document ---- */

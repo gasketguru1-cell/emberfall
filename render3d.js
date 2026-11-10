@@ -158,6 +158,7 @@ function build() {
   const shotMesh = kind => {
     if (kind === 'pipmate') { const M = MODELS['Pip alone']; if (M && M.ready) { const o = cloneSkinned(M.scene), g2 = new THREE.Group(); o.scale.setScalar(M.cfg.height * 0.8 / M.height); o.rotation.y = Math.PI / 2; o.traverse(q => { if (q.isMesh) { q.castShadow = true; q.frustumCulled = false; } }); g2.add(o); return g2; }
       return new THREE.Mesh(new THREE.SphereGeometry(2.2, 12, 9), new THREE.MeshStandardMaterial({ color: 0x2bb8b0, roughness: 0.6 })); }
+    if (kind === 'sackglow') { const m = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 14), new THREE.MeshBasicMaterial({ color: 0xffa040, transparent: true, opacity: 0.28, depthWrite: false })); return m; }   /* Potato Sack's swelling Spud Bomb */
     if (kind === 'nest') { const g2 = new THREE.Group(), twig = new THREE.MeshStandardMaterial({ color: 0x8a6a3e, roughness: 0.9 }); const ring = new THREE.Mesh(new THREE.TorusGeometry(2.6, 0.9, 6, 14), twig); ring.rotation.x = Math.PI / 2; g2.add(ring);
       const egg = new THREE.Mesh(new THREE.SphereGeometry(1.2, 12, 9), new THREE.MeshStandardMaterial({ color: 0xf4ead8, roughness: 0.5 })); egg.scale.set(0.8, 1, 0.8); egg.position.y = 0.6; g2.add(egg); return g2; }
     const e = (hex, i) => new THREE.MeshStandardMaterial({ color: hex, emissive: hex, emissiveIntensity: i, roughness: 0.5 });
@@ -419,6 +420,7 @@ function build() {
       if (p.kind === 'boulder' || p.kind === 'tape') { m.scale.setScalar(p.r); m.rotation.z = -(p.rot || 0); }
       else if (p.kind === 'dummy' || p.kind === 'clone' || p.kind === 'egg') { m.scale.setScalar(p.r); m.rotation.z = -frame * 0.3 * p.face; }
       else if (p.kind === 'pipmate') { m.position.y = p.y - 3; m.rotation.y = (p.vx || F[p.owner] && F[p.owner].face || 1) < 0 ? Math.PI : 0; m.visible = true; }
+      else if (p.kind === 'sackglow') { m.scale.setScalar(p.r * (1 + Math.sin(frame * 0.6) * 0.04)); m.material.opacity = 0.2 + Math.min(0.25, p.r / 200); }
       else if (p.kind === 'nest') { m.position.y = p.y - 1.8; m.scale.setScalar(1 + Math.sin(frame * 0.2) * 0.03); }
       else if (p.kind === 'gust') { m.rotation.y = Math.PI / 2; m.rotation.x = frame * 0.25; }
       else if (p.kind === 'flame') m.scale.set(p.r * 0.8, p.r * (1.1 + Math.sin(frame * 0.5) * 0.3), p.r * 0.8);

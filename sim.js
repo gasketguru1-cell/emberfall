@@ -450,11 +450,21 @@ const SACK = {
       jumpX: 0.85, jumpXMul: 0.85, jumpXMax: 1.4, airJumpX: 0.9, jumpH: 31, jumpInit: 17, hopH: 15, airJumpH: 31,
       airMul: 0.055, airAdd: 0.01, airSpeed: 1.02, airBrake: 0.009, grav: 0.104, fall: 1.68, ffall: 2.69, jsq: 3, w: 10, h: 12, jf: 3.8, jb: 2.6,
       jumps: 1, dashF: 13, roll: [30, 1.25, 13], spot: [23, 15] },
-    aiShot: [40, 110],
     moves: mk(0.95, 0.94, 1.1, 0.85, {
-      nspec: FLINT.forms[0].moves.nspec,
+      /* Spud Bomb (owner's request, 2026-11-10): hold special to swell, let go to burst round his body. There is no cap: the longer
+         the hold, the bigger the burst and the harder it hits (about 1.2 more units across and 1.5% more each 10 frames). Tapped it
+         is 8% in a 7-unit ring and KOs a middleweight from roughly 140%; it only grows from there. 4 frames from letting go to the
+         burst, 20 after. */
+      nspec: { t: 40, h: [], on(f, n, i) {
+        if (n === 1) { f.scC = 0; f.scRel = 0; PROJ.push({ x: f.x, y: f.y + 5, vx: 0, vy: 0, grav: 0, life: 99999, owner: f.idx, face: f.face, r: 4, ground: 'pass', plat: null, kind: 'sackglow', ghost: 1, tag: 'glow' + f.idx, track: (o, p) => [o.x, o.y + 5], h: { d: 0, a: 0, b: 0, k: 0 } }); }
+        const glow = PROJ.find(p => p.tag === 'glow' + f.idx);
+        if (!f.scRel) { if (i.spc) { f.scC++; f.mf = 2; if (glow) glow.r = 4 + f.scC * 0.12; return; } f.scRel = f.mf; }
+        if (f.mf === f.scRel + 4) { if (glow) glow.life = 0; const c = f.scC;
+          PROJ.push({ x: f.x, y: f.y + 5, vx: 0, vy: 0, grav: 0, life: 4, owner: f.idx, face: f.face, r: 7 + c * 0.12, ground: 'pass', plat: null, kind: 'blast', h: { d: +(8 + c * 0.15).toFixed(1), a: 50, b: 50, k: 96, id: 'Potato Sack:spudbomb' } });
+          spark(f.x, f.y + 5, '#ffb347', Math.min(80, 20 + c / 4 | 0), 2 + Math.min(6, c / 60)); beep(90, 0.35, 'sawtooth', 0.09, 0.4); shake = Math.max(shake, Math.min(20, 6 + c / 30)); }
+        if (f.mf >= f.scRel + 24) { if (glow) glow.life = 0; f.mf = f.move.t; } } },
       sspec: { t: 50, once: 1, nodrift: 1, ll: 14, h: [{ f0: 10, f1: 22, x: 7, y: 6, r: 6, grab: 1, cmd: 's', d: 0 }], on(f, n) { if (n === 8) { lift(f, 1.6); f.vx = f.face * 2.3; } } },
-      uspec: { t: 40, rise: 40, blast: 1, h: [], on(f, n, i) { if (n < 16 && !f.grounded) f.vy = Math.max(f.vy, -0.5); if (n === 16) sackBlast(f, i); } },
+      uspec: { t: 29, rise: 40, blast: 1, h: [], on(f, n, i) { if (n < 5 && !f.grounded) f.vy = Math.max(f.vy, -0.5); if (n === 5) sackBlast(f, i); } },   /* bursts on frame 5 (owner's request, 2026-11-10) */
       dspec: { t: 38, burst: 1, cancel: 7, nodrift: 1, h: [], on(f, n, i) {
         if (n === 1) { f.burstKind = ''; if (!f.grounded) f.burstUsed = true; }
         if (n < 6 && !f.grounded) { f.vy = Math.max(f.vy, -0.3); f.vx *= 0.9; }
@@ -468,6 +478,7 @@ const SACK = {
           spark(f.x, f.y + 4, '#e6d3a6', 10, 1.4); beep(260, 0.07, 'triangle', 0.05, 1.8);
         }
         if (f.burstKind === 'stall' && n > 6 && n <= 20 && !f.grounded) { f.vy = 0; f.vx *= 0.9; }
+        if (n >= 6 && f.grounded && f.plat && f.plat.soft && i.ly < -0.5) { f.dropPlat = f.plat; f.dropT = 12; f.grounded = false; f.plat = null; f.vy = -0.5; }   /* holding down on a soft platform: the slide drops through it, speed kept */
       } },
     }, { jabs: 1, grab: { t: 34, h: { f0: 7, f1: 9, x: 9.5, r: 4.8 } },
       throws: { f: { d: 9, b: 60, k: 58 }, b: { d: 10, b: 60, k: 62 }, u: { d: 8, b: 58, k: 60 }, d: { d: 6, a: 70, b: 60, k: 30 }, s: { d: 10, a: 48, b: 68, k: 58 } } }),
@@ -890,6 +901,7 @@ const FOWLS = { name: 'Furious Fowls', sub: 'five birds and a slingshot', fowl: 
   });
   FOWLS.forms = combined.concat(solo);
 })();
+{ const nair = SACK.forms[0].moves.nair; nair.t = 15; nair.ll = 5; nair.ac = 10; for (const h of nair.h) { h.f0 = 3; h.f1 = 9; } }   /* Potato Sack's neutral air: 15 frames long, so two fit in one short hop (owner's request, 2026-11-10) */
 const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE, FOWLS];
 /* Hitbox positions measured from the animations (hitboxes.js, written with tools/measure.html). Timing, damage and launch stay as defined above. */
 if (typeof HITBOXES !== 'undefined') for (const def of ROSTER) for (const fm of def.forms) {
@@ -1333,7 +1345,7 @@ class Fighter {
       const pass = i.ly < T.air_pass_stick_y && Math.abs(i.lx) < T.air_pass_max_x && (st === 'air' || st === 'attack' || st === 'helpless');
       for (const p of PLATS) {
         if (py >= p.y && this.y <= p.y && this.x >= p.x0 && this.x <= p.x1) {
-          if (p.soft && (pass || (this.dropT > 0 && p === this.dropPlat))) continue;
+          if (p.soft && (pass || (this.dropT > 0 && p === this.dropPlat) || (st === 'attack' && this.move && this.move.burst && i.ly < -0.5))) continue;   /* a tumble with down held goes through a soft platform */
           this.land(p); return;
         }
       }
