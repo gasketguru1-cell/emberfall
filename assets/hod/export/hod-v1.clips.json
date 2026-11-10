@@ -46,5 +46,23 @@
  },
  "Ram": {
   "seconds": 0.933
+ },
+ "Jab": {
+  "seconds": 0.733
+ },
+ "Headbutt": {
+  "seconds": 0.933
+ },
+ "TailSlam": {
+  "seconds": 0.933
+ },
+ "Toss": {
+  "seconds": 0.967
+ },
+ "Burrow": {
+  "seconds": 0.933
+ },
+ "BellyFlop": {
+  "seconds": 0.933
  }
 }

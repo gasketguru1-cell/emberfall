@@ -674,6 +674,7 @@ function cpuInput(f, o, m) {
 
 /* ---------- Game flow ---------- */
 let sudden = false;
+let tick = 0;   /* counts every step of a match, countdown and finish included; drives idle loops and follow-through, never gameplay */
 let mode = 'select', frame = 0, timer = MATCH_FRAMES, countdown = 0, paused = false, overT = 0, result = '';
 let slots = [null, null], DEVS = {};
 const cam = { x: 0, y: 30, s: 3.4 };
@@ -733,7 +734,7 @@ function stepFx() {
 }
 function step() {
   if (mode === 'select') { stepSelect(); return; }
-  pollMatch();
+  pollMatch(); if (!paused) tick++;
   if (mode === 'countdown') { countdown--; if (countdown === 130 || countdown === 90 || countdown === 50) beep(440, 0.1, 'square', 0.05); if (countdown === 10) beep(880, 0.3, 'square', 0.06); if (countdown <= 10) mode = 'play'; }
   else if (mode === 'play') stepPlay();
   else if (mode === 'over') { overT++; if (overT < 90) { for (const f of F) { if (overT % 3 === 0) f.update(); } } if (overT > 100 && F.some(f => f.ctl.dev !== 'cpu' && (f.ctl.pressed('start') || f.ctl.pressed('atk')))) { mode = 'select'; for (const s of slots) if (s) s.ready = false; F = []; } }

@@ -1,7 +1,7 @@
 /* Emberfall 3D renderer (Three.js). It only reads the simulation: fighters, projectiles, camera. It never writes to it.
    A fighter with an entry in assets/manifest.json is drawn as its rigged model, posed every frame from the simulation's
    own frame counters (see anim.js). Fighters without a model yet are grey-box capsules. */
-/* global W, H, TAU, clamp, MAIN, PLATS, BODY_H, F, PROJ, cam, SHK, frame, mode, cv, animState */
+/* global W, H, TAU, clamp, MAIN, PLATS, BODY_H, F, PROJ, cam, SHK, frame, tick, mode, cv, animState */
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
@@ -91,7 +91,7 @@ function build() {
     const root = new THREE.Group(), pivot = new THREE.Group(); root.add(pivot); scene.add(root);
     const shield = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 18), new THREE.MeshStandardMaterial({ color: PCOL[idx], emissive: PCOL[idx], emissiveIntensity: 0.5, transparent: true, opacity: 0.42, roughness: 0.2, depthWrite: false })); shield.visible = false; scene.add(shield);
     const pad = new THREE.Mesh(new THREE.BoxGeometry(18, 1.4, 10), new THREE.MeshStandardMaterial({ color: 0xffe6a0, emissive: 0xffc860, emissiveIntensity: 1.2 })); pad.visible = false; scene.add(pad);
-    return { root, pivot, shield, pad, key: '', yaw: idx ? Math.PI : 0, mats: [], obj: null, unit: 1, flip: 1, model: null, mixer: null, actions: {}, cur: null, prev: null, prop: null, hand: null };
+    return { root, pivot, shield, pad, key: '', yaw: idx ? Math.PI : 0, mats: [], obj: null, unit: 1, flip: 1, springs: [], springTick: -1, model: null, mixer: null, actions: {}, cur: null, prev: null, prop: null, hand: null };
   });
   /* Flint's lantern: hangs from his hand and stays upright, so swinging the arm swings the light. */
   function makeLantern() {
@@ -110,14 +110,14 @@ function build() {
     if (v.key === k) return; v.key = k;
     while (v.pivot.children.length) { const c = v.pivot.children.pop(); if (c.geometry) c.geometry.dispose(); }
     if (v.mixer) v.mixer.stopAllAction();
-    v.mixer = null; v.model = null; v.actions = {}; v.cur = null; v.prev = null; v.hand = null;
+    v.mixer = null; v.model = null; v.actions = {}; v.cur = null; v.prev = null; v.hand = null; v.springs = []; v.springTick = -1;
     if (v.prop) { scene.remove(v.prop); v.prop = null; }
     if (useModel) {
       /* A copy of the loaded model with its own skeleton, scaled to the fighter's height and turned so its front is +x. */
       const obj = cloneSkinned(M.scene); obj.scale.setScalar(M.cfg.height / M.height); obj.rotation.y = M.cfg.faceCamera ? 0 : Math.PI / 2; v.mats = [];
       v.obj = obj; v.unit = M.cfg.height / M.height; v.flip = f.face;
       obj.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; o.frustumCulled = false; o.material = o.material.clone(); if (f.alt) o.material.color.setRGB(0.78, 0.9, 1.25); v.mats.push(o.material); } });
-      v.pivot.add(obj); v.model = M; v.mixer = new THREE.AnimationMixer(obj);
+      v.pivot.add(obj); v.model = M; v.mixer = new THREE.AnimationMixer(obj); setupSprings(v, M);
       if (M.cfg.prop && M.cfg.prop.type === 'lantern') { v.hand = obj.getObjectByName(M.cfg.prop.bone) || null; if (v.hand) { v.prop = makeLantern(); scene.add(v.prop); } }
       return;
     }
@@ -154,10 +154,10 @@ function build() {
   }
   function applyAnim(v, f) {
     const M = v.model, [name, time] = clipTime(M, animState(f));
-    if (!v.cur || v.cur.name !== name) { v.prev = v.cur; v.cur = { name, time, since: frame }; }
+    if (!v.cur || v.cur.name !== name) { v.prev = v.cur; v.cur = { name, time, since: tick }; }
     v.cur.time = time;
-    /* A change of action is instant in the game; only the picture eases across, over four game frames. */
-    const b = v.prev && mode === 'play' ? clamp((frame - v.cur.since + 1) / 4, 0, 1) : 1;
+    /* A change of action is instant in the game; only the picture eases across, over four steps. */
+    const b = v.prev ? clamp((tick - v.cur.since + 1) / 4, 0, 1) : 1;
     const act = n => v.actions[n] || (v.actions[n] = v.mixer.clipAction(M.clips[n]).play());
     for (const n in v.actions) v.actions[n].setEffectiveWeight(0);
     const set = (c, w) => { const a = act(c.name); a.setEffectiveWeight(w); a.time = clamp(c.time, 0, a.getClip().duration - 1e-4); };
@@ -165,6 +165,47 @@ function build() {
     set(v.cur, v.prev && b < 1 ? b : 1);
     v.mixer.update(0);
     R3.anim = R3.anim || []; R3.anim[f.idx] = name + ' @ ' + time.toFixed(2) + 's';
+  }
+
+  /* ---- follow-through: tails, ears and ribbons lag behind the body and settle on their own ----
+     Each listed bone keeps a simulated tip in world space that is pulled toward where the animation puts it. The bone is
+     then turned to point at that tip. It is stepped once per game step, so freezing the game freezes it too. */
+  const _inv = new THREE.Matrix4(), _m = new THREE.Matrix4(), _p = new THREE.Vector3(), _s = new THREE.Vector3(), _q = new THREE.Quaternion(), _pq = new THREE.Quaternion(), _qd = new THREE.Quaternion();
+  function setupSprings(v, M) {
+    v.springs = (M.cfg.springs || []).map(c => ({ k: c.k || 0.3, d: c.d || 0.7, max: c.max || 1.0, drag: c.drag === undefined ? 0.12 : c.drag,
+      links: c.bones.map(n => v.obj.getObjectByName(n)).filter(Boolean).map(b => ({ bone: b, dir: null, dv: new THREE.Vector3(), lastHead: null, tipLocal: null, animQ: null, setQ: null })) }));
+    for (const ch of v.springs) ch.links.forEach((l, i) => { const next = ch.links[i + 1]; l.tipLocal = next ? next.bone.position.clone() : (i > 0 ? ch.links[i - 1].tipLocal.clone() : new THREE.Vector3(0, 0.2, 0)); });
+    v.springTick = -1;
+  }
+  /* Each bone keeps the direction it is pointing, in world space. That direction is pulled toward where the animation
+     points the bone, carries a little momentum, and is dragged back by how fast the bone's base is travelling, so a tail
+     streams behind a run and swings through when the body stops. Each bone only reads its parent, never the reverse,
+     so the motion always dies away. */
+  function applySprings(v) {
+    const step = tick !== v.springTick; v.springTick = tick;
+    /* The animation system only rewrites a bone when its value changes, so put back the animated value where ours is still there. */
+    for (const ch of v.springs) for (const l of ch.links) { if (l.setQ && l.bone.quaternion.equals(l.setQ)) l.bone.quaternion.copy(l.animQ); else l.animQ = l.bone.quaternion.clone(); }
+    v.root.updateMatrixWorld(true); _inv.copy(v.obj.matrixWorld).invert();
+    for (const ch of v.springs) for (const l of ch.links) {
+      const b = l.bone, head = new THREE.Vector3().setFromMatrixPosition(b.matrixWorld), want = l.tipLocal.clone().applyMatrix4(b.matrixWorld);
+      const len = Math.max(1e-4, want.distanceTo(head)), aim = want.clone().sub(head).divideScalar(len);
+      if (!l.dir || !l.lastHead || l.lastHead.distanceToSquared(head) > 400) { l.dir = aim.clone(); l.dv.set(0, 0, 0); l.lastHead = head.clone(); }   /* first frame, or a respawn */
+      if (step) {
+        const travel = head.clone().sub(l.lastHead); if (travel.lengthSq() > 9) travel.setLength(3);
+        l.dv.addScaledVector(aim.clone().sub(l.dir), ch.k).multiplyScalar(ch.d);
+        l.dir.add(l.dv).addScaledVector(travel, -ch.drag / len).normalize(); l.lastHead.copy(head);
+        const off = aim.angleTo(l.dir); if (off > ch.max) { l.dir.copy(aim).lerp(l.dir, ch.max / off).normalize(); l.dv.multiplyScalar(0.5); }
+      }
+      /* Turn the bone inside the model's own space, where mirroring (Loom turning round) is only a change of position. */
+      const h = head.clone().applyMatrix4(_inv), a = want.applyMatrix4(_inv).sub(h).normalize(), t = head.add(l.dir).applyMatrix4(_inv).sub(h).normalize();
+      if (a.angleTo(t) > 1e-4) {
+        _qd.setFromUnitVectors(a, t);
+        _m.multiplyMatrices(_inv, b.matrixWorld).decompose(_p, _q, _s);
+        _m.multiplyMatrices(_inv, b.parent.matrixWorld).decompose(_p, _pq, _s);
+        b.quaternion.copy(_pq.invert().multiply(_qd.multiply(_q)));
+      }
+      l.setQ = b.quaternion.clone(); b.updateMatrixWorld(true);
+    }
   }
 
   function poseOf(f, hasModel) {
@@ -215,12 +256,13 @@ function build() {
       const flat = v.model && v.model.cfg.faceCamera;
       if (flat) { v.flip += (f.face - v.flip) * 0.3; v.obj.scale.x = v.unit * (Math.abs(v.flip) < 0.08 ? 0.08 * (v.flip < 0 ? -1 : 1) : v.flip); }
       v.root.position.set(f.x, f.y, 0); v.root.rotation.y = flat ? 0.55 * v.flip : v.yaw;
-      v.pivot.position.set(f.hitlag > 0 && f.state === 'hurt' ? ((frame & 1) ? 0.35 : -0.35) : 0, p.oy, 0); v.pivot.rotation.z = -p.rot; v.pivot.scale.set(p.sx, p.sy, p.sx);
+      v.pivot.position.set(f.hitlag > 0 && f.state === 'hurt' ? ((tick & 1) ? 0.35 : -0.35) : 0, p.oy, 0); v.pivot.rotation.z = -p.rot; v.pivot.scale.set(p.sx, p.sy, p.sx);
       v.pivot.children.forEach(c => { if (c.userData.y0 === undefined) c.userData.y0 = c.position.y; c.position.y = c.userData.y0 - p.oy; });
-      const ghost = (f.invuln > 0 && (frame >> 1) % 2) || f.state === 'spot' || f.state === 'airdodge', hot = f.flash > 0 || (f.hitlag > 0 && f.state === 'hurt');
+      const ghost = (f.invuln > 0 && (tick >> 1) % 2) || f.state === 'spot' || f.state === 'airdodge', hot = f.flash > 0 || (f.hitlag > 0 && f.state === 'hurt');
       for (const m of v.mats) { m.transparent = ghost; m.opacity = ghost ? 0.45 : 1; m.emissive.setHex(hot ? 0xffffff : 0x000000); m.emissiveIntensity = hot ? 0.8 : 0; }
       if (v.shield.visible) { const r = 4 + f.shieldHp / 50 * 6; v.shield.scale.setScalar(r); v.shield.position.set(f.x, f.y + st.h / 2, 0); }
       if (v.pad.visible) v.pad.position.set(f.x, f.y - 0.8, 0);
+      if (v.springs.length) applySprings(v);
       if (v.prop) {
         v.root.updateWorldMatrix(true, true); v.hand.getWorldPosition(v.prop.position);
         v.prop.rotation.z = clamp(-f.vx * 0.12, -0.5, 0.5) + Math.sin(frame * 0.12 + idx) * 0.05;
@@ -242,5 +284,6 @@ function build() {
     renderer.render(scene, camera);
     R3.info = { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles };
   };
+  R3.fighters = fighters;   /* for inspection from the console and tests; nothing in the game reads it */
   R3.ready = true;
 }

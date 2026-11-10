@@ -43,5 +43,20 @@
  },
  "Dive": {
   "seconds": 0.933
+ },
+ "Flick": {
+  "seconds": 0.733
+ },
+ "BackLash": {
+  "seconds": 0.933
+ },
+ "DownLash": {
+  "seconds": 0.933
+ },
+ "Gust": {
+  "seconds": 1.033
+ },
+ "Thermal": {
+  "seconds": 0.933
  }
 }

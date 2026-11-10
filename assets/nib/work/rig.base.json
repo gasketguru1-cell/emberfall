@@ -1,0 +1,148 @@
+{
+  "note": "Nib: wind-up fox. Coordinates are metres after 'prep' (feet on y = 0, body along z, facing +Z). Joint positions were measured from the generated mesh.",
+  "prep": { "yaw": -23.7, "translate": [0.018, 0.746, -0.159] },
+  "bones": [
+    { "name": "all",   "head": [0.03, 0, -0.05],   "tail": [0.03, 0.15, -0.05], "parent": null,  "deform": false },
+    { "name": "root",  "head": [0.03, 0.62, -0.1], "tail": [0.03, 0.8, -0.1],   "parent": "all", "deform": false },
+    { "name": "hips",  "head": [0.03, 0.62, -0.36], "tail": [0.03, 0.62, -0.1], "parent": "root" },
+    { "name": "spine", "head": [0.03, 0.62, -0.1],  "tail": [0.03, 0.62, 0.15], "parent": "hips", "connect": true },
+    { "name": "chest", "head": [0.03, 0.62, 0.15],  "tail": [0.03, 0.66, 0.38], "parent": "spine", "connect": true },
+    { "name": "neck",  "head": [0.03, 0.7, 0.38],   "tail": [-0.01, 0.86, 0.47], "parent": "chest" },
+    { "name": "head",  "head": [-0.01, 0.86, 0.47], "tail": [-0.13, 0.85, 0.72], "parent": "neck", "connect": true },
+    { "name": "earL1", "head": [0.12, 1.08, 0.47],  "tail": [0.33, 1.28, 0.47],  "parent": "head" },
+    { "name": "earL2", "head": [0.33, 1.28, 0.47],  "tail": [0.62, 1.25, 0.45],  "parent": "earL1", "connect": true },
+    { "name": "earR1", "head": [-0.1, 1.08, 0.33],  "tail": [-0.2, 1.28, 0.2],   "parent": "head" },
+    { "name": "earR2", "head": [-0.2, 1.28, 0.2],   "tail": [-0.31, 1.46, 0.12], "parent": "earR1", "connect": true },
+    { "name": "key",   "head": [0.0, 0.78, -0.11],  "tail": [0.0, 1.05, -0.11],  "parent": "spine" },
+
+    { "name": "tailL1", "head": [0.03, 0.66, -0.47],  "tail": [0.09, 0.73, -0.7],   "parent": "hips" },
+    { "name": "tailL2", "head": [0.09, 0.73, -0.7],   "tail": [0.115, 0.93, -0.81], "parent": "tailL1", "connect": true },
+    { "name": "tailL3", "head": [0.115, 0.93, -0.81], "tail": [0.17, 1.08, -0.86],  "parent": "tailL2", "connect": true },
+    { "name": "tailL4", "head": [0.17, 1.08, -0.86],  "tail": [0.19, 1.3, -0.93],   "parent": "tailL3", "connect": true },
+    { "name": "tailR1", "head": [-0.05, 0.66, -0.47], "tail": [-0.2, 0.68, -0.78],  "parent": "hips" },
+    { "name": "tailR2", "head": [-0.2, 0.68, -0.78],  "tail": [-0.24, 0.9, -1.0],   "parent": "tailR1", "connect": true },
+    { "name": "tailR3", "head": [-0.24, 0.9, -1.0],   "tail": [-0.28, 1.06, -1.05], "parent": "tailR2", "connect": true },
+    { "name": "tailR4", "head": [-0.28, 1.06, -1.05], "tail": [-0.32, 1.32, -1.14], "parent": "tailR3", "connect": true },
+
+    { "name": "fl_upper", "head": [0.22, 0.56, 0.22],   "tail": [0.175, 0.34, 0.19], "parent": "chest" },
+    { "name": "fl_lower", "head": [0.175, 0.34, 0.19],  "tail": [0.145, 0.09, 0.28], "parent": "fl_upper", "connect": true },
+    { "name": "ik_fl",    "head": [0.145, 0.09, 0.28],  "tail": [0.145, 0.09, 0.4],  "parent": "all", "deform": false },
+    { "name": "fl_paw",   "head": [0.145, 0.09, 0.28],  "tail": [0.156, 0.0, 0.36],  "parent": "ik_fl" },
+    { "name": "fr_upper", "head": [-0.15, 0.56, 0.19],  "tail": [-0.105, 0.34, 0.165], "parent": "chest" },
+    { "name": "fr_lower", "head": [-0.105, 0.34, 0.165], "tail": [-0.09, 0.09, 0.27], "parent": "fr_upper", "connect": true },
+    { "name": "ik_fr",    "head": [-0.09, 0.09, 0.27],  "tail": [-0.09, 0.09, 0.39], "parent": "all", "deform": false },
+    { "name": "fr_paw",   "head": [-0.09, 0.09, 0.27],  "tail": [-0.113, 0.0, 0.35], "parent": "ik_fr" },
+
+    { "name": "rl_upper", "head": [0.14, 0.58, -0.33],  "tail": [0.15, 0.38, -0.285], "parent": "hips" },
+    { "name": "rl_lower", "head": [0.15, 0.38, -0.285], "tail": [0.16, 0.16, -0.345], "parent": "rl_upper", "connect": true },
+    { "name": "ik_rl",    "head": [0.16, 0.16, -0.345], "tail": [0.16, 0.16, -0.225], "parent": "all", "deform": false },
+    { "name": "rl_paw",   "head": [0.16, 0.16, -0.345], "tail": [0.209, 0.0, -0.23],  "parent": "ik_rl" },
+    { "name": "rr_upper", "head": [-0.085, 0.58, -0.39], "tail": [-0.09, 0.4, -0.37],  "parent": "hips" },
+    { "name": "rr_lower", "head": [-0.09, 0.4, -0.37],   "tail": [-0.125, 0.16, -0.465], "parent": "rr_upper", "connect": true },
+    { "name": "ik_rr",    "head": [-0.125, 0.16, -0.465], "tail": [-0.125, 0.16, -0.345], "parent": "all", "deform": false },
+    { "name": "rr_paw",   "head": [-0.125, 0.16, -0.465], "tail": [-0.168, 0.0, -0.39],  "parent": "ik_rr" }
+  ],
+  "ik": [
+    { "name": "ik_fl", "bone": "fl_lower", "chain": 2 },
+    { "name": "ik_fr", "bone": "fr_lower", "chain": 2 },
+    { "name": "ik_rl", "bone": "rl_lower", "chain": 2 },
+    { "name": "ik_rr", "bone": "rr_lower", "chain": 2 }
+  ],
+  "poses": {
+    "stand":  { "all": {}, "root": {}, "hips": {}, "spine": {}, "chest": {}, "neck": {}, "head": {}, "earL1": {}, "earR1": {}, "tailL1": {}, "tailL2": {}, "tailR1": {}, "tailR2": {}, "ik_fl": {}, "ik_fr": {}, "ik_rl": {}, "ik_rr": {}, "key": {} },
+    "crouch": { "root": { "move": [0, -0.17, 0] }, "neck": { "rot": [-14, 0, 0] }, "earL1": { "rot": [0, 0, -18] }, "earR1": { "rot": [14, 0, 0] }, "tailL1": { "rot": [-18, 0, 0] }, "tailR1": { "rot": [-18, 0, 0] } },
+    "tuck":   { "root": { "move": [0, 0.05, 0] }, "hips": { "rot": [18, 0, 0] }, "chest": { "rot": [22, 0, 0] }, "neck": { "rot": [25, 0, 0] }, "head": { "rot": [20, 0, 0] },
+                "ik_fl": { "move": [0, 0.3, -0.12] }, "ik_fr": { "move": [0, 0.3, -0.12] }, "ik_rl": { "move": [0, 0.26, 0.16] }, "ik_rr": { "move": [0, 0.26, 0.2] },
+                "tailL1": { "rot": [-35, 0, 0] }, "tailR1": { "rot": [-35, 0, 0] }, "tailL2": { "rot": [-25, 0, 0] }, "tailR2": { "rot": [-25, 0, 0] } },
+    "stretch": { "hips": { "rot": [-10, 0, 0] }, "chest": { "rot": [-8, 0, 0] }, "neck": { "rot": [-10, 0, 0] },
+                "ik_fl": { "move": [0, 0.2, 0.3] }, "ik_fr": { "move": [0, 0.14, 0.24] }, "ik_rl": { "move": [0, 0.1, -0.28] }, "ik_rr": { "move": [0, 0.14, -0.22] },
+                "tailL1": { "rot": [-30, 0, 0] }, "tailR1": { "rot": [-30, 0, 0] }, "earL1": { "rot": [0, 0, -20] }, "earR1": { "rot": [18, 0, 0] } },
+    "gather":  { "root": { "move": [0, -0.05, 0] }, "hips": { "rot": [14, 0, 0] }, "chest": { "rot": [10, 0, 0] }, "neck": { "rot": [-12, 0, 0] },
+                "ik_fl": { "move": [0, 0.05, -0.2] }, "ik_fr": { "move": [0, 0.1, -0.14] }, "ik_rl": { "move": [0, 0.08, 0.26] }, "ik_rr": { "move": [0, 0.03, 0.3] },
+                "tailL1": { "rot": [-12, 0, 0] }, "tailR1": { "rot": [-12, 0, 0] } }
+  },
+  "clips": {
+    "Idle": { "fps": 30, "keys": [
+      { "t": 0.0, "use": "stand" },
+      { "t": 0.5, "pose": { "root": { "move": [0, -0.012, 0] }, "head": { "rot": [3, 4, 0] }, "tailL1": { "rot": [0, 7, 0] }, "tailR1": { "rot": [0, 5, 0] }, "key": { "rot": [0, 90, 0] } } },
+      { "t": 1.0, "pose": { "root": { "move": [0, -0.02, 0] }, "head": { "rot": [5, 0, 0] }, "tailL1": { "rot": [0, 0, 0] }, "tailR1": { "rot": [0, 0, 0] }, "key": { "rot": [0, 180, 0] }, "earR1": { "rot": [0, 0, 0] } } },
+      { "t": 1.25, "pose": { "earR1": { "rot": [10, 0, 6] } } },
+      { "t": 1.5, "pose": { "root": { "move": [0, -0.012, 0] }, "head": { "rot": [3, -4, 0] }, "tailL1": { "rot": [0, -7, 0] }, "tailR1": { "rot": [0, -5, 0] }, "key": { "rot": [0, 270, 0] }, "earR1": { "rot": [0, 0, 0] } } },
+      { "t": 2.0, "pose": { "root": { "move": [0, 0, 0] }, "head": { "rot": [0, 0, 0] }, "tailL1": { "rot": [0, 0, 0] }, "tailR1": { "rot": [0, 0, 0] }, "key": { "rot": [0, 360, 0] } } }
+    ] },
+    "Walk": { "fps": 30, "keys": [
+      { "t": 0.0, "use": "stand", "pose": { "ik_fl": { "move": [0, 0, 0.13] }, "ik_rr": { "move": [0, 0, 0.13] }, "ik_fr": { "move": [0, 0, -0.13] }, "ik_rl": { "move": [0, 0, -0.13] }, "head": { "rot": [2, 0, 0] } } },
+      { "t": 0.2, "pose": { "ik_fl": { "move": [0, 0, 0] }, "ik_rr": { "move": [0, 0, 0] }, "ik_fr": { "move": [0, 0.09, 0] }, "ik_rl": { "move": [0, 0.08, 0] }, "root": { "move": [0, 0.015, 0] }, "tailL1": { "rot": [0, 6, 0] }, "tailR1": { "rot": [0, 6, 0] } } },
+      { "t": 0.4, "pose": { "ik_fl": { "move": [0, 0, -0.13] }, "ik_rr": { "move": [0, 0, -0.13] }, "ik_fr": { "move": [0, 0, 0.13] }, "ik_rl": { "move": [0, 0, 0.13] }, "root": { "move": [0, 0, 0] } } },
+      { "t": 0.6, "pose": { "ik_fl": { "move": [0, 0.09, 0] }, "ik_rr": { "move": [0, 0.08, 0] }, "ik_fr": { "move": [0, 0, 0] }, "ik_rl": { "move": [0, 0, 0] }, "root": { "move": [0, 0.015, 0] }, "tailL1": { "rot": [0, -6, 0] }, "tailR1": { "rot": [0, -6, 0] } } },
+      { "t": 0.8, "pose": { "ik_fl": { "move": [0, 0, 0.13] }, "ik_rr": { "move": [0, 0, 0.13] }, "ik_fr": { "move": [0, 0, -0.13] }, "ik_rl": { "move": [0, 0, -0.13] }, "root": { "move": [0, 0, 0] }, "tailL1": { "rot": [0, 0, 0] }, "tailR1": { "rot": [0, 0, 0] } } }
+    ] },
+    "Run": { "fps": 30, "keys": [
+      { "t": 0.0, "use": ["stand", "gather"] },
+      { "t": 0.22, "reset": true, "use": "stretch", "pose": { "root": { "move": [0, 0.06, 0] } } },
+      { "t": 0.44, "reset": true, "use": "gather" }
+    ] },
+    "Crouch": { "fps": 30, "keys": [ { "t": 0.0, "use": "stand" }, { "t": 0.2, "use": "crouch" } ] },
+    "Rise": { "fps": 30, "keys": [
+      { "t": 0.0, "use": ["stand", "stretch"], "pose": { "hips": { "rot": [-28, 0, 0] }, "ik_fl": { "move": [0, 0.42, 0.22] }, "ik_fr": { "move": [0, 0.36, 0.18] } } },
+      { "t": 0.4, "reset": true, "use": "tuck", "pose": { "hips": { "rot": [4, 0, 0] }, "chest": { "rot": [6, 0, 0] }, "neck": { "rot": [0, 0, 0] }, "head": { "rot": [0, 0, 0] } } }
+    ] },
+    "Fall": { "fps": 30, "keys": [
+      { "t": 0.0, "use": "stand", "pose": { "hips": { "rot": [10, 0, 0] }, "ik_fl": { "move": [0, 0.06, 0.14] }, "ik_fr": { "move": [0, 0.1, 0.1] }, "ik_rl": { "move": [0, 0.16, -0.08] }, "ik_rr": { "move": [0, 0.12, -0.04] }, "tailL1": { "rot": [22, 0, 0] }, "tailR1": { "rot": [22, 0, 0] }, "earL1": { "rot": [0, 0, 14] }, "earR1": { "rot": [-12, 0, 0] } } },
+      { "t": 0.5, "pose": { "ik_fl": { "move": [0, 0.1, 0.1] }, "ik_fr": { "move": [0, 0.06, 0.14] }, "ik_rl": { "move": [0, 0.12, -0.04] }, "ik_rr": { "move": [0, 0.16, -0.08] }, "tailL1": { "rot": [28, 5, 0] }, "tailR1": { "rot": [28, -5, 0] } } },
+      { "t": 1.0, "pose": { "ik_fl": { "move": [0, 0.06, 0.14] }, "ik_fr": { "move": [0, 0.1, 0.1] }, "ik_rl": { "move": [0, 0.16, -0.08] }, "ik_rr": { "move": [0, 0.12, -0.04] }, "tailL1": { "rot": [22, 0, 0] }, "tailR1": { "rot": [22, 0, 0] } } }
+    ] },
+    "Land": { "fps": 30, "keys": [
+      { "t": 0.0, "use": ["stand", "crouch"], "pose": { "root": { "move": [0, -0.22, 0] }, "head": { "rot": [12, 0, 0] } } },
+      { "t": 0.35, "reset": true, "use": "stand" }
+    ] },
+    "Shield": { "fps": 30, "keys": [
+      { "t": 0.0, "use": "stand" },
+      { "t": 0.15, "use": "crouch", "pose": { "root": { "move": [0, -0.12, -0.04] }, "neck": { "rot": [16, 0, 0] }, "head": { "rot": [14, 0, 0] }, "earL1": { "rot": [0, 0, -30] }, "earR1": { "rot": [26, 0, 0] }, "tailL1": { "rot": [-20, 30, 0] }, "tailR1": { "rot": [-20, 40, 0] } } }
+    ] },
+    "Hit": { "fps": 30, "keys": [
+      { "t": 0.0, "use": "stand", "pose": { "root": { "move": [0, 0.02, -0.1] }, "hips": { "rot": [-8, 0, 0] }, "chest": { "rot": [-12, 0, 0] }, "neck": { "rot": [-25, 0, 0] }, "head": { "rot": [-18, 0, 12] }, "ik_fl": { "move": [0, 0.14, -0.04] }, "ik_fr": { "move": [0, 0.06, -0.02] }, "earL1": { "rot": [0, 0, 20] }, "earR1": { "rot": [-18, 0, 0] }, "tailL1": { "rot": [25, 0, 0] }, "tailR1": { "rot": [25, 0, 0] } } },
+      { "t": 0.25, "pose": { "root": { "move": [0, -0.04, -0.14] }, "ik_fl": { "move": [0, 0, -0.06] }, "ik_fr": { "move": [0, 0, -0.04] }, "neck": { "rot": [-8, 0, 0] }, "head": { "rot": [6, 0, 6] } } },
+      { "t": 0.6, "reset": true, "use": "stand" }
+    ] },
+    "Tumble": { "fps": 30, "keys": [
+      { "t": 0.0, "use": ["stand", "tuck"] },
+      { "t": 0.3, "pose": { "hips": { "rot": [24, 0, 0] }, "chest": { "rot": [16, 0, 0] }, "tailL1": { "rot": [-45, 10, 0] }, "tailR1": { "rot": [-45, -10, 0] }, "earL1": { "rot": [0, 0, 22] }, "earR1": { "rot": [-20, 0, 0] } } },
+      { "t": 0.6, "pose": { "hips": { "rot": [18, 0, 0] }, "chest": { "rot": [22, 0, 0] }, "tailL1": { "rot": [-35, 0, 0] }, "tailR1": { "rot": [-35, 0, 0] }, "earL1": { "rot": [0, 0, 0] }, "earR1": { "rot": [0, 0, 0] } } }
+    ] },
+    "Down": { "fps": 30, "keys": [
+      { "t": 0.0, "use": "stand", "pose": { "root": { "move": [0, -0.2, 0] } } },
+      { "t": 0.3, "pose": { "root": { "move": [0, -0.36, 0] }, "hips": { "rot": [0, 0, 0] }, "chest": { "rot": [8, 0, 0] }, "neck": { "rot": [30, 0, 0] }, "head": { "rot": [20, 0, 0] }, "ik_fl": { "move": [0.08, 0, 0.14] }, "ik_fr": { "move": [-0.08, 0, 0.14] }, "ik_rl": { "move": [0.1, 0, -0.1] }, "ik_rr": { "move": [-0.1, 0, -0.06] }, "tailL1": { "rot": [-50, 15, 0] }, "tailR1": { "rot": [-50, -15, 0] }, "earL1": { "rot": [0, 0, -30] }, "earR1": { "rot": [28, 0, 0] } } }
+    ] },
+    "Bite": { "fps": 30, "keys": [
+      { "t": 0.0, "use": "stand" },
+      { "t": 0.28, "pose": { "root": { "move": [0, -0.07, -0.12] }, "chest": { "rot": [-6, 0, 0] }, "neck": { "rot": [-22, 0, 0] }, "head": { "rot": [-10, 0, 0] }, "earL1": { "rot": [0, 0, -22] }, "earR1": { "rot": [20, 0, 0] }, "tailL1": { "rot": [18, 0, 0] }, "tailR1": { "rot": [18, 0, 0] } } },
+      { "t": 0.36, "pose": { "root": { "move": [0, -0.03, 0.2] }, "chest": { "rot": [8, 0, 0] }, "neck": { "rot": [34, 0, 0] }, "head": { "rot": [-26, 0, 0] }, "ik_fl": { "move": [0, 0, 0.1] }, "ik_fr": { "move": [0, 0, 0.06] }, "tailL1": { "rot": [-25, 0, 0] }, "tailR1": { "rot": [-25, 0, 0] } } },
+      { "t": 0.44, "pose": { "root": { "move": [0, -0.03, 0.22] }, "head": { "rot": [-6, 0, 0] } } },
+      { "t": 0.9, "reset": true, "use": "stand" }
+    ] },
+    "UpStrike": { "fps": 30, "keys": [
+      { "t": 0.0, "use": "stand" },
+      { "t": 0.28, "use": "crouch" },
+      { "t": 0.36, "reset": true, "pose": { "root": { "move": [0, 0.1, -0.06] }, "hips": { "rot": [-48, 0, 0] }, "chest": { "rot": [-12, 0, 0] }, "neck": { "rot": [-20, 0, 0] }, "head": { "rot": [-25, 0, 0] }, "ik_fl": { "move": [0, 0.75, 0.0] }, "ik_fr": { "move": [0, 0.62, -0.04] }, "tailL1": { "rot": [30, 0, 0] }, "tailR1": { "rot": [30, 0, 0] }, "earL1": { "rot": [0, 0, 18] }, "earR1": { "rot": [-16, 0, 0] } } },
+      { "t": 0.46, "pose": { "ik_fl": { "move": [0, 0.82, 0.08] }, "ik_fr": { "move": [0, 0.7, 0.04] } } },
+      { "t": 0.9, "reset": true, "use": "stand" }
+    ] },
+    "Sweep": { "fps": 30, "keys": [
+      { "t": 0.0, "use": "stand" },
+      { "t": 0.28, "pose": { "all": { "rot": [0, -35, 0] }, "root": { "move": [0, -0.08, 0] }, "tailL1": { "rot": [10, -25, 0] }, "tailR1": { "rot": [10, -25, 0] } } },
+      { "t": 0.33, "pose": { "all": { "rot": [0, 90, 0] }, "tailL1": { "rot": [-40, 30, 0] }, "tailR1": { "rot": [-40, 30, 0] }, "tailL2": { "rot": [-25, 0, 0] }, "tailR2": { "rot": [-25, 0, 0] } } },
+      { "t": 0.38, "pose": { "all": { "rot": [0, 180, 0] } } },
+      { "t": 0.43, "pose": { "all": { "rot": [0, 270, 0] } } },
+      { "t": 0.55, "pose": { "all": { "rot": [0, 360, 0] }, "root": { "move": [0, -0.04, 0] }, "tailL1": { "rot": [0, 0, 0] }, "tailR1": { "rot": [0, 0, 0] }, "tailL2": { "rot": [0, 0, 0] }, "tailR2": { "rot": [0, 0, 0] } } },
+      { "t": 0.9, "pose": { "root": { "move": [0, 0, 0] } } }
+    ] },
+    "Pounce": { "fps": 30, "keys": [
+      { "t": 0.0, "use": "stand" },
+      { "t": 0.28, "use": "gather", "pose": { "root": { "move": [0, -0.1, -0.1] } } },
+      { "t": 0.36, "reset": true, "use": "stretch", "pose": { "root": { "move": [0, 0.08, 0.16] }, "hips": { "rot": [16, 0, 0] }, "ik_fl": { "move": [0, 0.16, 0.42] }, "ik_fr": { "move": [0, 0.1, 0.36] }, "neck": { "rot": [14, 0, 0] } } },
+      { "t": 0.46, "pose": { "root": { "move": [0, -0.02, 0.2] }, "ik_fl": { "move": [0, 0, 0.4] }, "ik_fr": { "move": [0, 0, 0.34] } } },
+      { "t": 0.9, "reset": true, "use": "stand" }
+    ] }
+  }
+}

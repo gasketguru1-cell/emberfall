@@ -9,7 +9,7 @@
      mode 'marks' : an attack. seg is 0 startup, 1 active, 2 recovery; v is 0..1 inside that part. The renderer
                     stretches the clip's own startup / contact / recovery sections onto the move's real frame data. */
 function animState(f) {
-  const st = f.st, s = f.state, t = frame / 60, phase = (a, b) => b > 0 ? Math.min(1, Math.max(0, a / b)) : 1;
+  const st = f.st, s = f.state, t = tick / 60, phase = (a, b) => b > 0 ? Math.min(1, Math.max(0, a / b)) : 1;
   switch (s) {
     case 'idle':
       if (f.grounded && Math.abs(f.vx) > 0.25) return { key: 'walk', mode: 'cycle', v: f.x * f.face / 40 };   /* driven by distance travelled */

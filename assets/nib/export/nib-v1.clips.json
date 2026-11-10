@@ -43,5 +43,26 @@
  },
  "Pounce": {
   "seconds": 0.933
+ },
+ "Swat": {
+  "seconds": 0.733
+ },
+ "TailWhip": {
+  "seconds": 0.933
+ },
+ "Headbutt": {
+  "seconds": 0.933
+ },
+ "Flip": {
+  "seconds": 0.933
+ },
+ "BackKick": {
+  "seconds": 0.933
+ },
+ "Spit": {
+  "seconds": 0.833
+ },
+ "CoilJump": {
+  "seconds": 0.933
  }
 }

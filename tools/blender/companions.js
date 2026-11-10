@@ -4,6 +4,14 @@
 const fs = require('fs'), path = require('path');
 const out = (name, spec) => { const f = path.join(__dirname, '..', '..', 'assets', name, 'work', 'rig.json'); fs.writeFileSync(f, JSON.stringify(spec, null, 1) + '\n'); console.log(name + ': ' + spec.bones.length + ' bones, ' + Object.keys(spec.clips).length + ' clips'); };
 const R = (p, y, r) => ({ rot: [p, y || 0, r || 0] }), M = (x, y, z) => ({ move: [x, y, z] });
+/* A somersault for the whole-body bone: pitch it by deg while keeping the body's centre (c = [height, forward] from that bone) in place. */
+const flip = (deg, c) => { const a = deg * Math.PI / 180, cs = Math.cos(a), sn = Math.sin(a); return { rot: [deg, 0, 0], move: [0, c[0] - (c[0] * cs - c[1] * sn), c[1] - (c[1] * cs + c[0] * sn)] }; };
+/* One attack in the game's manifest: which clip, and where its wind-up, contact and recovery fall (seconds). */
+const A = (clip, c0, c1, start, end) => ({ clip, start: start || 0, contact: [c0, c1], end: end || 0.9 });
+const baseClips = (hold, thrown) => ({ idle: { clip: 'Idle' }, walk: { clip: 'Walk' }, run: { clip: 'Run' }, crouch: { clip: 'Crouch', at: 0.2 }, brake: { clip: 'Land', from: 0.1, to: 0.35 }, jumpsquat: { clip: 'Crouch', from: 0, to: 0.2 }, rise: { clip: 'Rise', from: 0, to: 0.4 }, fall: { clip: 'Fall' }, land: { clip: 'Land', from: 0, to: 0.35 },
+  shield: { clip: 'Shield', from: 0, to: 0.15 }, hit: { clip: 'Hit', from: 0, to: 0.6 }, tumble: { clip: 'Tumble', bounce: true }, down: { clip: 'Down', from: 0, to: 0.3 }, dizzy: { clip: 'Hit', from: 0, to: 0.6, bounce: true },
+  airdodge: { clip: 'Tumble', bounce: true }, dodge: { clip: 'Shield', from: 0, to: 0.15 }, roll: { clip: 'Tumble', bounce: true }, ledge: { clip: 'Rise', at: 0.0 }, hold: { clip: hold, at: 0.4 }, held: { clip: 'Tumble', bounce: true }, throw: { clip: thrown, from: 0.2, to: 0.9 }, swap: { clip: 'Tumble', bounce: true } });
+const manifest = {};
 
 /* ---------------- Hod: plated pangolin-badger. Heavy, four legs, long tail. ---------------- */
 const leg = (s, x) => {
@@ -95,7 +103,52 @@ const hod = {
       { t: 0.5, pose: { root: M(0, -0.02, 0.34) } },
       { t: 0.9, reset: true, use: 'stand' }] } },
 };
+const HOD_C = [0.5, 0];
+Object.assign(hod.clips, {
+  Jab: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.18, pose: { root: M(0, -0.02, -0.04), chest: R(-4, 8, 0), ik_fr: M(0, 0.2, -0.04) } },
+    { t: 0.28, pose: { root: M(0, -0.02, 0.06), chest: R(4, -8, 0), ik_fr: M(0.06, 0.24, 0.3) } },
+    { t: 0.38, pose: { ik_fr: M(0.06, 0.1, 0.32) } },
+    { t: 0.7, reset: true, use: 'stand' }] },
+  Headbutt: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.28, pose: { root: M(0, -0.06, -0.1), chest: R(-6), neck: R(-20), head: R(-10) } },
+    { t: 0.36, pose: { root: M(0, -0.03, 0.2), chest: R(8), neck: R(30), head: R(18), tail1: R(14) } },
+    { t: 0.46, pose: { root: M(0, -0.03, 0.22) } },
+    { t: 0.9, reset: true, use: 'stand' }] },
+  TailSlam: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.28, pose: { all: R(0, -25), root: M(0, -0.05, 0), tail1: R(26), tail2: R(16) } },
+    { t: 0.36, pose: { all: R(0, 172), tail1: R(-18), tail2: R(-12), tail3: R(-8) } },
+    { t: 0.48, pose: { all: R(0, 178), tail1: R(-24) } },
+    { t: 0.9, pose: { all: R(0, 0), root: M(0, 0, 0), tail1: R(0), tail2: R(0), tail3: R(0) } }] },
+  Toss: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.3, pose: { root: M(0, 0.06, -0.08), hips: R(-32), chest: R(-12), neck: R(-10), ik_fl: M(0, 0.55, -0.1), ik_fr: M(0, 0.55, -0.1), tail1: R(20) } },
+    { t: 0.42, pose: { root: M(0, 0.0, 0.1), hips: R(-6), chest: R(10), neck: R(12), ik_fl: M(0, 0.3, 0.32), ik_fr: M(0, 0.3, 0.32), tail1: R(-10) } },
+    { t: 0.6, pose: { root: M(0, -0.05, 0.08), hips: R(0), ik_fl: M(0, 0, 0.14), ik_fr: M(0, 0, 0.14) } },
+    { t: 0.95, reset: true, use: 'stand' }] },
+  Burrow: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.26, use: 'crouch', pose: { root: M(0, -0.18, 0) } },
+    { t: 0.34, reset: true, pose: { all: flip(-72, HOD_C), hips: R(-6), chest: R(-8), neck: R(-14), ik_fl: M(0, 0.2, 0.2), ik_fr: M(0, 0.2, 0.2), ik_rl: M(0, -0.02, -0.1), ik_rr: M(0, -0.02, -0.1), tail1: R(-20) } },
+    { t: 0.5, pose: { all: flip(-80, HOD_C) } },
+    { t: 0.9, reset: true, use: 'stand' }] },
+  BellyFlop: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.28, use: 'curl' },
+    { t: 0.36, reset: true, pose: { all: flip(18, HOD_C), hips: R(-6), chest: R(-8), neck: R(-12), ik_fl: M(0.14, 0.16, 0.22), ik_fr: M(-0.14, 0.16, 0.22), ik_rl: M(0.14, 0.16, -0.2), ik_rr: M(-0.14, 0.16, -0.2), tail1: R(14) } },
+    { t: 0.48, pose: { all: flip(24, HOD_C) } },
+    { t: 0.9, reset: true, use: 'stand' }] },
+});
 out('hod', hod);
+manifest.Hod = { file: 'assets/hod/export/hod-v1.glb', height: 11.5, clips: baseClips('Swipe', 'Slam'),
+  springs: [{ bones: ['tail1', 'tail2', 'tail3', 'tail4'], k: 0.3, d: 0.68, max: 0.5, drag: 0.08 }],
+  attacks: { jab: A('Jab', 0.24, 0.4, 0, 0.7), ftilt: A('Headbutt', 0.3, 0.48), utilt: A('UpStrike', 0.3, 0.46), dtilt: A('TailSlam', 0.3, 0.5), dash: A('Ram', 0.3, 0.5),
+    fsmash: A('Slam', 0.3, 0.48), usmash: A('UpStrike', 0.3, 0.46), dsmash: A('Sweep', 0.3, 0.5),
+    nair: A('Sweep', 0.3, 0.5), fair: A('BellyFlop', 0.3, 0.5), bair: A('TailSlam', 0.3, 0.5), uair: A('UpStrike', 0.3, 0.46), dair: A('BellyFlop', 0.3, 0.5),
+    grab: A('Swipe', 0.3, 0.46), getup: A('Sweep', 0.3, 0.5), nspec: A('Toss', 0.4, 0.46, 0, 0.95), sspec: A('Ram', 0.3, 0.5), uspec: A('Burrow', 0.3, 0.5), '*': A('Swipe', 0.3, 0.46) } };
 
 /* ---------------- Loom: kite spirit. Floats, no legs; two ribbon chains. ----------------
    Loom shows its flat face to the camera, so for it "forward" is +X and the game mirrors it when it turns.
@@ -183,4 +236,106 @@ const loom = {
       { t: 0.46, pose: Object.assign({ root: M(0.32, -0.12, 0) }, both(-10, -4, 0, 0, 0)) },
       { t: 0.9, reset: true, use: 'stand' }] } },
 };
+Object.assign(loom.clips, {
+  Flick: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.18, pose: Object.assign({ all: R(0, 0, 6) }, ribs(-28, -16, -10, 0, 0)) },
+    { t: 0.28, pose: Object.assign({ all: R(0, 0, -8), root: M(0.04, 0, 0) }, ribs(72, 18, 8, 0, 0)) },
+    { t: 0.38, pose: Object.assign({}, ribs(60, -8, -10, -4, 0)) },
+    { t: 0.7, reset: true, use: 'stand' }] },
+  BackLash: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.28, pose: Object.assign({ all: R(0, 0, -14), root: M(0.06, 0.02, 0) }, ribsR(40, 30, 20, 10, 6)) },
+    { t: 0.36, pose: Object.assign({ all: R(0, 0, 16), root: M(-0.1, 0, 0) }, ribsR(-86, -10, -4, 0, 0)) },
+    { t: 0.44, pose: Object.assign({}, ribsR(-92, 0, 6, 6, 4)) },
+    { t: 0.9, reset: true, use: 'stand' }] },
+  DownLash: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.28, pose: Object.assign({ root: M(0, 0.08, 0), wingL: R(0, 0, 18), wingR: R(0, 0, -18) }, ribs(74, 30, 20, 10, 0), ribsR(-74, -30, -20, -10, 0)) },
+    { t: 0.36, pose: Object.assign({ root: M(0, -0.12, 0), wingL: R(0, 0, -24), wingR: R(0, 0, 24), top: R(8) }, ribs(-14, -8, -4, 0, 0), ribsR(14, 8, 4, 0, 0)) },
+    { t: 0.46, pose: Object.assign({ root: M(0, -0.14, 0) }, ribs(-18, -4, 4, 4, 0), ribsR(18, 4, -4, -4, 0)) },
+    { t: 0.9, reset: true, use: 'stand' }] },
+  Gust: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.3, pose: Object.assign({ all: R(0, 0, 10), root: M(-0.06, 0.03, 0), wingL: R(0, 44), wingR: R(0, -44) }, both(14, 10, 6, 4, 2)) },
+    { t: 0.43, pose: Object.assign({ all: R(0, 0, -12), root: M(0.1, 0, 0), wingL: R(0, -58), wingR: R(0, 58), top: R(14) }, both(-34, -22, -14, -8, -4)) },
+    { t: 0.6, pose: Object.assign({ wingL: R(0, -40), wingR: R(0, 40) }, both(-16, -10, -6, -2, 0)) },
+    { t: 1.0, reset: true, use: 'stand' }] },
+  Thermal: { fps: 30, keys: [
+    { t: 0, use: ['stand', 'squash'] },
+    { t: 0.15, reset: true, pose: Object.assign({ root: M(0, 0.14, 0), wingL: R(0, 0, -20), wingR: R(0, 0, 20) }, ribs(-8, -4, 0, 0, 0), ribsR(8, 4, 0, 0, 0)) },
+    { t: 0.3, pose: Object.assign({ wingL: R(0, 0, 14), wingR: R(0, 0, -14), top: R(6) }, ribs(6, 8, 4, 0, 0), ribsR(-6, -8, -4, 0, 0)) },
+    { t: 0.45, pose: Object.assign({ wingL: R(0, 0, -20), wingR: R(0, 0, 20), top: R(-6) }, ribs(-8, -4, 0, 0, 0), ribsR(8, 4, 0, 0, 0)) },
+    { t: 0.6, pose: Object.assign({ wingL: R(0, 0, 14), wingR: R(0, 0, -14), top: R(6) }, ribs(6, 8, 4, 0, 0), ribsR(-6, -8, -4, 0, 0)) },
+    { t: 0.75, pose: Object.assign({ wingL: R(0, 0, -20), wingR: R(0, 0, 20), top: R(-6) }, ribs(-8, -4, 0, 0, 0), ribsR(8, 4, 0, 0, 0)) },
+    { t: 0.9, reset: true, use: 'stand' }] },
+});
 out('loom', loom);
+manifest.Loom = { file: 'assets/loom/export/loom-v1.glb', height: 15, faceCamera: true, clips: baseClips('Lash', 'Lash'),
+  springs: [{ bones: ['ribL1', 'ribL2', 'ribL3', 'ribL4', 'ribL5'], k: 0.22, d: 0.74, max: 1.0, drag: 0.16 }, { bones: ['ribR1', 'ribR2', 'ribR3', 'ribR4', 'ribR5'], k: 0.22, d: 0.74, max: 1.0, drag: 0.16 }],
+  attacks: { jab: A('Flick', 0.24, 0.4, 0, 0.7), ftilt: A('Lash', 0.3, 0.46), utilt: A('UpStrike', 0.3, 0.46), dtilt: A('Spin', 0.3, 0.5), dash: A('Dive', 0.3, 0.48),
+    fsmash: A('Dive', 0.3, 0.48), usmash: A('UpStrike', 0.3, 0.46), dsmash: A('Spin', 0.3, 0.5),
+    nair: A('Spin', 0.3, 0.5), fair: A('Lash', 0.3, 0.46), bair: A('BackLash', 0.3, 0.46), uair: A('UpStrike', 0.3, 0.46), dair: A('DownLash', 0.3, 0.48),
+    grab: A('Flick', 0.24, 0.4, 0, 0.7), getup: A('Spin', 0.3, 0.5), nspec: A('Lash', 0.3, 0.46), sspec: A('Gust', 0.4, 0.46, 0.1, 1.0), uspec: A('Thermal', 0.2, 0.75), '*': A('Lash', 0.3, 0.46) } };
+
+/* ---------------- Nib: wind-up fox. Its skeleton and first clips were measured and keyed by hand in rig.base.json. ---------------- */
+const nib = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'assets', 'nib', 'work', 'rig.base.json'), 'utf8'));
+const NIB_C = [0.62, -0.05];
+Object.assign(nib.clips, {
+  Swat: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.18, pose: { root: M(0, -0.02, -0.04), chest: R(-4, -8, 0), ik_fl: M(0, 0.24, -0.05), earL1: R(0, 0, -14) } },
+    { t: 0.28, pose: { root: M(0, -0.02, 0.06), chest: R(4, 8, 0), ik_fl: M(-0.06, 0.32, 0.3) } },
+    { t: 0.38, pose: { ik_fl: M(-0.06, 0.14, 0.34) } },
+    { t: 0.7, reset: true, use: 'stand' }] },
+  TailWhip: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.28, pose: { all: R(0, -25), root: M(0, -0.05, 0), tailL1: R(10, -25), tailR1: R(10, -25) } },
+    { t: 0.36, pose: { all: R(0, 172), tailL1: R(-34, 20), tailR1: R(-34, 20), tailL2: R(-22), tailR2: R(-22) } },
+    { t: 0.48, pose: { all: R(0, 178) } },
+    { t: 0.9, pose: { all: R(0, 0), root: M(0, 0, 0), tailL1: R(0), tailR1: R(0), tailL2: R(0), tailR2: R(0) } }] },
+  Headbutt: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.28, pose: { root: M(0, -0.12, -0.16), hips: R(6), neck: R(18), head: R(22), earL1: R(0, 0, -24), earR1: R(22), tailL1: R(16), tailR1: R(16) } },
+    { t: 0.36, pose: { root: M(0, 0.0, 0.3), hips: R(-4), neck: R(30), head: R(8), ik_fl: M(0, 0, 0.12), ik_fr: M(0, 0, 0.1), tailL1: R(-26), tailR1: R(-26) } },
+    { t: 0.46, pose: { root: M(0, -0.02, 0.32) } },
+    { t: 0.9, reset: true, use: 'stand' }] },
+  Flip: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.26, use: 'tuck', pose: { all: flip(-20, NIB_C) } },
+    { t: 0.32, pose: { all: flip(110, NIB_C) } },
+    { t: 0.38, pose: { all: flip(230, NIB_C) } },
+    { t: 0.46, pose: { all: flip(350, NIB_C) } },
+    { t: 0.6, pose: { all: flip(360, NIB_C) } },
+    { t: 0.9, reset: true, use: 'stand' }] },
+  BackKick: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.28, pose: { root: M(0, -0.05, 0.08), hips: R(12), ik_rl: M(0, 0.2, 0.12), ik_rr: M(0, 0.2, 0.14), neck: R(-10) } },
+    { t: 0.36, pose: { root: M(0, 0.06, -0.06), hips: R(-28), chest: R(10), neck: R(12), ik_rl: M(0, 0.44, -0.44), ik_rr: M(0, 0.4, -0.38), tailL1: R(30), tailR1: R(30) } },
+    { t: 0.46, pose: { ik_rl: M(0, 0.4, -0.46), ik_rr: M(0, 0.44, -0.42) } },
+    { t: 0.9, reset: true, use: 'stand' }] },
+  Spit: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.2, pose: { root: M(0, 0, -0.05), neck: R(-28), head: R(-14), earL1: R(0, 0, 16), earR1: R(-14) } },
+    { t: 0.3, pose: { root: M(0, -0.02, 0.08), neck: R(22), head: R(-20), earL1: R(0, 0, -20), earR1: R(18) } },
+    { t: 0.45, pose: { neck: R(8), head: R(-6) } },
+    { t: 0.8, reset: true, use: 'stand' }] },
+  CoilJump: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.14, use: 'crouch', pose: { root: M(0, -0.24, 0) } },
+    { t: 0.22, reset: true, use: 'stretch', pose: { all: flip(-68, NIB_C), key: R(0, 180, 0) } },
+    { t: 0.5, pose: { all: flip(-74, NIB_C), key: R(0, 360, 0) } },
+    { t: 0.9, reset: true, use: 'stand' }] },
+});
+out('nib', nib);
+manifest.Nib = { file: 'assets/nib/export/nib-v1.glb', height: 10.5, clips: baseClips('Bite', 'Bite'),
+  springs: [{ bones: ['tailL1', 'tailL2', 'tailL3', 'tailL4'], k: 0.26, d: 0.72, max: 0.8, drag: 0.13 }, { bones: ['tailR1', 'tailR2', 'tailR3', 'tailR4'], k: 0.26, d: 0.72, max: 0.8, drag: 0.13 },
+    { bones: ['earL1', 'earL2'], k: 0.4, d: 0.62, max: 0.5, drag: 0.1 }, { bones: ['earR1', 'earR2'], k: 0.4, d: 0.62, max: 0.5, drag: 0.1 }],
+  attacks: { jab: A('Swat', 0.24, 0.4, 0, 0.7), ftilt: A('Bite', 0.3, 0.44), utilt: A('UpStrike', 0.3, 0.46), dtilt: A('TailWhip', 0.3, 0.5), dash: A('Pounce', 0.3, 0.46),
+    fsmash: A('Headbutt', 0.3, 0.48), usmash: A('UpStrike', 0.3, 0.46), dsmash: A('Sweep', 0.3, 0.5),
+    nair: A('Flip', 0.28, 0.5), fair: A('Headbutt', 0.3, 0.48), bair: A('BackKick', 0.3, 0.48), uair: A('Flip', 0.28, 0.5), dair: A('Pounce', 0.3, 0.46),
+    grab: A('Bite', 0.3, 0.44), getup: A('Sweep', 0.3, 0.5), nspec: A('Spit', 0.28, 0.34, 0.05, 0.7), sspec: A('Pounce', 0.3, 0.46), uspec: A('CoilJump', 0.2, 0.34), '*': A('Bite', 0.3, 0.44) } };
+
+/* The game's manifest: these three entries are owned by this file; other entries (Flint) are left as they are. */
+const mf = path.join(__dirname, '..', '..', 'assets', 'manifest.json'), current = JSON.parse(fs.readFileSync(mf, 'utf8'));
+fs.writeFileSync(mf, JSON.stringify(Object.assign(current, manifest), null, 1) + '\n'); console.log('manifest: ' + Object.keys(current).join(', '));

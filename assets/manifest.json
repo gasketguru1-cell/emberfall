@@ -390,62 +390,63 @@
     "bounce": true
    }
   },
+  "springs": [
+   {
+    "bones": [
+     "tailL1",
+     "tailL2",
+     "tailL3",
+     "tailL4"
+    ],
+    "k": 0.26,
+    "d": 0.72,
+    "max": 0.8,
+    "drag": 0.13
+   },
+   {
+    "bones": [
+     "tailR1",
+     "tailR2",
+     "tailR3",
+     "tailR4"
+    ],
+    "k": 0.26,
+    "d": 0.72,
+    "max": 0.8,
+    "drag": 0.13
+   },
+   {
+    "bones": [
+     "earL1",
+     "earL2"
+    ],
+    "k": 0.4,
+    "d": 0.62,
+    "max": 0.5,
+    "drag": 0.1
+   },
+   {
+    "bones": [
+     "earR1",
+     "earR2"
+    ],
+    "k": 0.4,
+    "d": 0.62,
+    "max": 0.5,
+    "drag": 0.1
+   }
+  ],
   "attacks": {
    "jab": {
-    "clip": "Bite",
+    "clip": "Swat",
     "start": 0,
     "contact": [
-     0.3,
-     0.44
+     0.24,
+     0.4
     ],
-    "end": 0.9
+    "end": 0.7
    },
    "ftilt": {
-    "clip": "Bite",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.44
-    ],
-    "end": 0.9
-   },
-   "fsmash": {
-    "clip": "Bite",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.44
-    ],
-    "end": 0.9
-   },
-   "dash": {
-    "clip": "Pounce",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.46
-    ],
-    "end": 0.9
-   },
-   "grab": {
-    "clip": "Bite",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.44
-    ],
-    "end": 0.9
-   },
-   "sspec": {
-    "clip": "Pounce",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.46
-    ],
-    "end": 0.9
-   },
-   "nspec": {
     "clip": "Bite",
     "start": 0,
     "contact": [
@@ -463,39 +464,39 @@
     ],
     "end": 0.9
    },
+   "dtilt": {
+    "clip": "TailWhip",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.5
+    ],
+    "end": 0.9
+   },
+   "dash": {
+    "clip": "Pounce",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.46
+    ],
+    "end": 0.9
+   },
+   "fsmash": {
+    "clip": "Headbutt",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.48
+    ],
+    "end": 0.9
+   },
    "usmash": {
     "clip": "UpStrike",
     "start": 0,
     "contact": [
      0.3,
      0.46
-    ],
-    "end": 0.9
-   },
-   "uair": {
-    "clip": "UpStrike",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.46
-    ],
-    "end": 0.9
-   },
-   "uspec": {
-    "clip": "UpStrike",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.46
-    ],
-    "end": 0.9
-   },
-   "dtilt": {
-    "clip": "Sweep",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.5
     ],
     "end": 0.9
    },
@@ -509,20 +510,56 @@
     "end": 0.9
    },
    "nair": {
-    "clip": "Sweep",
+    "clip": "Flip",
     "start": 0,
     "contact": [
-     0.3,
+     0.28,
      0.5
     ],
     "end": 0.9
    },
-   "bair": {
-    "clip": "Sweep",
+   "fair": {
+    "clip": "Headbutt",
     "start": 0,
     "contact": [
      0.3,
+     0.48
+    ],
+    "end": 0.9
+   },
+   "bair": {
+    "clip": "BackKick",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.48
+    ],
+    "end": 0.9
+   },
+   "uair": {
+    "clip": "Flip",
+    "start": 0,
+    "contact": [
+     0.28,
      0.5
+    ],
+    "end": 0.9
+   },
+   "dair": {
+    "clip": "Pounce",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.46
+    ],
+    "end": 0.9
+   },
+   "grab": {
+    "clip": "Bite",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.44
     ],
     "end": 0.9
    },
@@ -535,7 +572,16 @@
     ],
     "end": 0.9
    },
-   "fair": {
+   "nspec": {
+    "clip": "Spit",
+    "start": 0.05,
+    "contact": [
+     0.28,
+     0.34
+    ],
+    "end": 0.7
+   },
+   "sspec": {
     "clip": "Pounce",
     "start": 0,
     "contact": [
@@ -544,12 +590,12 @@
     ],
     "end": 0.9
    },
-   "dair": {
-    "clip": "Pounce",
+   "uspec": {
+    "clip": "CoilJump",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.2,
+     0.34
     ],
     "end": 0.9
    },
@@ -664,9 +710,41 @@
     "bounce": true
    }
   },
+  "springs": [
+   {
+    "bones": [
+     "tail1",
+     "tail2",
+     "tail3",
+     "tail4"
+    ],
+    "k": 0.3,
+    "d": 0.68,
+    "max": 0.5,
+    "drag": 0.08
+   }
+  ],
   "attacks": {
    "jab": {
-    "clip": "Swipe",
+    "clip": "Jab",
+    "start": 0,
+    "contact": [
+     0.24,
+     0.4
+    ],
+    "end": 0.7
+   },
+   "ftilt": {
+    "clip": "Headbutt",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.48
+    ],
+    "end": 0.9
+   },
+   "utilt": {
+    "clip": "UpStrike",
     "start": 0,
     "contact": [
      0.3,
@@ -674,12 +752,21 @@
     ],
     "end": 0.9
    },
-   "ftilt": {
-    "clip": "Swipe",
+   "dtilt": {
+    "clip": "TailSlam",
     "start": 0,
     "contact": [
      0.3,
-     0.46
+     0.5
+    ],
+    "end": 0.9
+   },
+   "dash": {
+    "clip": "Ram",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.5
     ],
     "end": 0.9
    },
@@ -692,8 +779,62 @@
     ],
     "end": 0.9
    },
-   "dash": {
-    "clip": "Ram",
+   "usmash": {
+    "clip": "UpStrike",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.46
+    ],
+    "end": 0.9
+   },
+   "dsmash": {
+    "clip": "Sweep",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.5
+    ],
+    "end": 0.9
+   },
+   "nair": {
+    "clip": "Sweep",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.5
+    ],
+    "end": 0.9
+   },
+   "fair": {
+    "clip": "BellyFlop",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.5
+    ],
+    "end": 0.9
+   },
+   "bair": {
+    "clip": "TailSlam",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.5
+    ],
+    "end": 0.9
+   },
+   "uair": {
+    "clip": "UpStrike",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.46
+    ],
+    "end": 0.9
+   },
+   "dair": {
+    "clip": "BellyFlop",
     "start": 0,
     "contact": [
      0.3,
@@ -710,96 +851,6 @@
     ],
     "end": 0.9
    },
-   "sspec": {
-    "clip": "Ram",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.5
-    ],
-    "end": 0.9
-   },
-   "nspec": {
-    "clip": "Swipe",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.46
-    ],
-    "end": 0.9
-   },
-   "utilt": {
-    "clip": "UpStrike",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.46
-    ],
-    "end": 0.9
-   },
-   "usmash": {
-    "clip": "UpStrike",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.46
-    ],
-    "end": 0.9
-   },
-   "uair": {
-    "clip": "UpStrike",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.46
-    ],
-    "end": 0.9
-   },
-   "uspec": {
-    "clip": "UpStrike",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.46
-    ],
-    "end": 0.9
-   },
-   "dtilt": {
-    "clip": "Sweep",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.5
-    ],
-    "end": 0.9
-   },
-   "dsmash": {
-    "clip": "Slam",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.48
-    ],
-    "end": 0.9
-   },
-   "nair": {
-    "clip": "Sweep",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.5
-    ],
-    "end": 0.9
-   },
-   "bair": {
-    "clip": "Sweep",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.5
-    ],
-    "end": 0.9
-   },
    "getup": {
     "clip": "Sweep",
     "start": 0,
@@ -809,21 +860,30 @@
     ],
     "end": 0.9
    },
-   "fair": {
-    "clip": "Slam",
+   "nspec": {
+    "clip": "Toss",
+    "start": 0,
+    "contact": [
+     0.4,
+     0.46
+    ],
+    "end": 0.95
+   },
+   "sspec": {
+    "clip": "Ram",
     "start": 0,
     "contact": [
      0.3,
-     0.48
+     0.5
     ],
     "end": 0.9
    },
-   "dair": {
-    "clip": "Slam",
+   "uspec": {
+    "clip": "Burrow",
     "start": 0,
     "contact": [
      0.3,
-     0.48
+     0.5
     ],
     "end": 0.9
    },
@@ -939,62 +999,45 @@
     "bounce": true
    }
   },
+  "springs": [
+   {
+    "bones": [
+     "ribL1",
+     "ribL2",
+     "ribL3",
+     "ribL4",
+     "ribL5"
+    ],
+    "k": 0.22,
+    "d": 0.74,
+    "max": 1,
+    "drag": 0.16
+   },
+   {
+    "bones": [
+     "ribR1",
+     "ribR2",
+     "ribR3",
+     "ribR4",
+     "ribR5"
+    ],
+    "k": 0.22,
+    "d": 0.74,
+    "max": 1,
+    "drag": 0.16
+   }
+  ],
   "attacks": {
    "jab": {
-    "clip": "Lash",
+    "clip": "Flick",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.24,
+     0.4
     ],
-    "end": 0.9
+    "end": 0.7
    },
    "ftilt": {
-    "clip": "Lash",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.46
-    ],
-    "end": 0.9
-   },
-   "fsmash": {
-    "clip": "Lash",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.46
-    ],
-    "end": 0.9
-   },
-   "dash": {
-    "clip": "Dive",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.48
-    ],
-    "end": 0.9
-   },
-   "grab": {
-    "clip": "Lash",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.46
-    ],
-    "end": 0.9
-   },
-   "sspec": {
-    "clip": "Lash",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.46
-    ],
-    "end": 0.9
-   },
-   "nspec": {
     "clip": "Lash",
     "start": 0,
     "contact": [
@@ -1012,39 +1055,39 @@
     ],
     "end": 0.9
    },
-   "usmash": {
-    "clip": "UpStrike",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.46
-    ],
-    "end": 0.9
-   },
-   "uair": {
-    "clip": "UpStrike",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.46
-    ],
-    "end": 0.9
-   },
-   "uspec": {
-    "clip": "UpStrike",
-    "start": 0,
-    "contact": [
-     0.3,
-     0.46
-    ],
-    "end": 0.9
-   },
    "dtilt": {
     "clip": "Spin",
     "start": 0,
     "contact": [
      0.3,
      0.5
+    ],
+    "end": 0.9
+   },
+   "dash": {
+    "clip": "Dive",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.48
+    ],
+    "end": 0.9
+   },
+   "fsmash": {
+    "clip": "Dive",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.48
+    ],
+    "end": 0.9
+   },
+   "usmash": {
+    "clip": "UpStrike",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.46
     ],
     "end": 0.9
    },
@@ -1066,14 +1109,50 @@
     ],
     "end": 0.9
    },
-   "bair": {
-    "clip": "Spin",
+   "fair": {
+    "clip": "Lash",
     "start": 0,
     "contact": [
      0.3,
-     0.5
+     0.46
     ],
     "end": 0.9
+   },
+   "bair": {
+    "clip": "BackLash",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.46
+    ],
+    "end": 0.9
+   },
+   "uair": {
+    "clip": "UpStrike",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.46
+    ],
+    "end": 0.9
+   },
+   "dair": {
+    "clip": "DownLash",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.48
+    ],
+    "end": 0.9
+   },
+   "grab": {
+    "clip": "Flick",
+    "start": 0,
+    "contact": [
+     0.24,
+     0.4
+    ],
+    "end": 0.7
    },
    "getup": {
     "clip": "Spin",
@@ -1084,21 +1163,30 @@
     ],
     "end": 0.9
    },
-   "fair": {
-    "clip": "Dive",
+   "nspec": {
+    "clip": "Lash",
     "start": 0,
     "contact": [
      0.3,
-     0.48
+     0.46
     ],
     "end": 0.9
    },
-   "dair": {
-    "clip": "Dive",
+   "sspec": {
+    "clip": "Gust",
+    "start": 0.1,
+    "contact": [
+     0.4,
+     0.46
+    ],
+    "end": 1
+   },
+   "uspec": {
+    "clip": "Thermal",
     "start": 0,
     "contact": [
-     0.3,
-     0.48
+     0.2,
+     0.75
     ],
     "end": 0.9
    },
