@@ -170,13 +170,11 @@ vm.runInThisContext(`
     check('angled tilt: up, level and down', /^ftilt aim 0 /.test(flat) && /^ftilt aim 1 /.test(up) && /^ftilt aim -1 /.test(down), 'level: ' + flat + ' | up: ' + up + ' | down: ' + down);
     check('angled tilt: a mostly sideways diagonal is still a forward tilt', /^ftilt aim 1 /.test(steep) && /^utilt/.test(high), 'steep diagonal: ' + steep + ' | mostly up: ' + high);
   }
-  /* ---- Tap jump: only when switched on; held is a full hop, flicked is a short hop ---- */
+  /* ---- No tap jump: pushing the stick up never jumps, held or flicked ---- */
   {
-    const hop = (on, hold) => { const [f] = setup(FL, FL, 0, 60); TAPJUMP.cpu = on; let top = 0;
-      SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < (hold ? 30 : 4)) i.ly = 1; };
-      run(60, () => { top = Math.max(top, f.y); }); TAPJUMP.cpu = false; return top; };
-    const off = hop(false, true), full = hop(true, true), short = hop(true, false);
-    check('tap jump: off by default, on jumps', off === 0 && full > 30 && short > 8 && short < full - 10, 'height reached: off ' + off.toFixed(1) + ', held ' + full.toFixed(1) + ', flicked ' + short.toFixed(1));
+    const up = hold => { const [f] = setup(FL, FL, 0, 60); let top = 0, states = new Set(); SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < (hold ? 30 : 4)) i.ly = 1; }; run(60, () => { top = Math.max(top, f.y); states.add(f.state); }); return { top, jumped: states.has('jsq') || states.has('air') }; };
+    const held = up(true), flick = up(false);
+    check('stick up never jumps', held.top === 0 && flick.top === 0 && !held.jumped && !flick.jumped, 'height reached: held ' + held.top.toFixed(1) + ', flicked ' + flick.top.toFixed(1));
   }
 
   /* ---- Shield: a worn shield leaves the feet open to a low attack unless it is tilted down to cover them ---- */

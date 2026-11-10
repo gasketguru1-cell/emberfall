@@ -35,7 +35,7 @@ function drawSelect() {
       for (let n = 1; n <= 9; n++) { g.fillStyle = n <= CPU_LEVEL ? pc : 'rgba(255,255,255,.18)'; rr(x + 220 - 108 + (n - 1) * 24, y + 262, 20, 8, 3); g.fill(); }
       g.font = '16px system-ui, sans-serif'; g.fillStyle = '#bbb'; g.fillText('Up / Down to change  ·  1 easiest, 9 hardest', x + 220, y + 298); }
       continue; }
-    g.textAlign = 'right'; g.font = '18px system-ui, sans-serif'; g.fillStyle = '#ccc'; g.fillText(devName(sl.dev) + (sl.dev !== 'kb' ? (LAYOUT[sl.dev] === 'labels' ? '  ·  A/B swapped' : '  ·  A/B normal') : '') + '  ·  tap jump ' + (TAPJUMP[sl.dev] ? 'on' : 'off'), x + 416, y + 40);
+    g.textAlign = 'right'; g.font = '18px system-ui, sans-serif'; g.fillStyle = '#ccc'; g.fillText(devName(sl.dev) + (sl.dev !== 'kb' ? (LAYOUT[sl.dev] === 'labels' ? '  ·  A/B swapped' : '  ·  A/B normal') : ''), x + 416, y + 40);
     if (sl.dev !== 'kb') { g.font = '12px system-ui, sans-serif'; g.fillStyle = '#888'; g.fillText(padInfo(+sl.dev.slice(3)).slice(0, 46), x + 416, y + 58); }
     g.textAlign = 'center';
     const d = ROSTER[sl.pick]; g.font = 'bold 40px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('‹  ' + d.name + '  ›', x + 220, y + 100);
@@ -52,7 +52,7 @@ function drawSelect() {
   g.fillText("Jump + attack together for a short-hop aerial · hold attack to chain jabs (Nib keeps a flurry going) · tilt the stick slightly up or down to angle a forward tilt", W / 2, 639);
   g.fillText("Grab out of a dash reaches further, out of a turn further still · jump on a head to spring off it · Nib can kick off the stage wall · shield just before a wall or the floor to tech", W / 2, 658);
   g.fillText("A worn shield leaves the head or feet open: tilt the stick gently to move it · back + attack out of a run turns and strikes · above 100% getting up from the ledge is slower", W / 2, 677);
-  g.fillText("On this screen: Up / Down sets the CPU level · the grab button turns tap jump on or off (flick up to jump) · the ledge protects longer after a long fall", W / 2, 696);
+  g.fillText("On this screen: Up / Down sets the CPU level · only the jump buttons jump, never the stick · the ledge protects longer after a long fall and less when damaged", W / 2, 696);
   g.fillStyle = '#8f88aa'; g.fillText('Tools: B shows hitboxes · P freezes · O steps one frame · M switches 2D / 3D', W / 2, 715);
 }
 function drawDebugText() {

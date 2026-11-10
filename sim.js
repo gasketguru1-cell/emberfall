@@ -98,12 +98,6 @@ const PAD = { deadzone: 0, outer: 1, trigger: 0.25 };
 const LAYOUT = {};
 try { Object.assign(LAYOUT, JSON.parse(localStorage.getItem('emberfall.layout') || '{}')); } catch (e) { /* no storage */ }
 function toggleLayout(dev) { LAYOUT[dev] = LAYOUT[dev] === 'labels' ? 'positional' : 'labels'; try { localStorage.setItem('emberfall.layout', JSON.stringify(LAYOUT)); } catch (e) { /* no storage */ } }
-/* Per device: flicking the stick up also jumps ("tap jump"). Off until switched on with the jump button on the select screen. Kept between visits. */
-const TAPJUMP = {};
-/* Off unless switched on with the grab button on the select screen. (It used to be on the jump button, where it was switched on by accident; the storage key was renamed on 2026-11-10 so everyone starts with it off again.) */
-try { Object.assign(TAPJUMP, JSON.parse(localStorage.getItem('emberfall.tapjump2') || '{}')); } catch (e) { /* no storage */ }
-function toggleTapJump(dev) { TAPJUMP[dev] = !TAPJUMP[dev]; try { localStorage.setItem('emberfall.tapjump2', JSON.stringify(TAPJUMP)); } catch (e) { /* no storage */ } }
-const TAP_STATES = { idle: 1, dash: 1, run: 1, brake: 1, land: 1, air: 1, wd: 1, shield: 1, shieldstun: 1, shieldoff: 1, attack: 1 };   /* where an upward flick may mean "jump" */
 function stick(x, y) { const m = Math.hypot(x, y); if (m === 0 || m <= PAD.deadzone) return [0, 0]; const k = Math.min(1, (m - PAD.deadzone) / (PAD.outer - PAD.deadzone)) / m; return [x * k, y * k]; }
 /* Keyboard: the same keys as the reference build. Arrows are the left stick, I J K L the right stick, Shift walks. */
 function readKb() {
@@ -494,7 +488,6 @@ class Fighter {
     if (this.grabImm > 0) this.grabImm--; if (this.wallT > 0) this.wallT--; if (this.techT > 0) this.techT--; if (this.techLock > 0) this.techLock--;
     if (c.pressed('shd')) { if (this.techLock === 0) this.techT = 20; this.techLock = 40; }
     if (this.grounded || this.state === 'ledge' || this.state === 'respawn') this.airT = 0; else this.airT++;   /* frames since last standing on something */
-    if (TAPJUMP[c.dev] && c.upNow && TAP_STATES[this.state]) c.buf.jmp = T.buffer;
     if (this.dodgeStale > 0 && ++this.dodgeT >= 90) { this.dodgeStale--; this.dodgeT = 0; }
     if (this.state !== 'shield' && this.state !== 'shieldstun' && this.shieldHp < SHIELD.hp) this.shieldHp = Math.min(SHIELD.hp, this.shieldHp + SHIELD.regen);
     if (this.hitlag > 0) {
@@ -532,7 +525,7 @@ class Fighter {
         /* Out of a jump's start-up: an up smash, or attack with the jump for a short-hop aerial. */
         if (c.cPress && i.cy > 0.5) { this.startMove('usmash'); break; }
         if (c.buf.atk > 0) { if (i.ly > 0.5 && c.ySmash) { c.buf.atk = 0; this.startMove('usmash'); break; } this.shMacro = true; }
-        if (this.sf >= s.jsq) { this.grounded = false; this.plat = null; this.jumps = s.jumps || 1; this.shortHop = !(i.jmp || (TAPJUMP[c.dev] && i.ly > 0.6)) || this.shMacro; if (this.shortHop) this.vy = s.vHop; else { this.vy = this.jrV = s.boost[0]; this.jr = 1; } this.vx = clamp(this.vx * s.jumpXMul + (Math.abs(i.lx) > 0.2 ? i.lx * s.jumpX : 0), -s.jumpXMax, s.jumpXMax); this.set('air'); beep(420, 0.05, 'sine', 0.03, 1.5); if (this.shMacro) { this.shMacro = false; if (c.take('atk')) this.startMove(this.aerial(i.lx, i.ly)); } }
+        if (this.sf >= s.jsq) { this.grounded = false; this.plat = null; this.jumps = s.jumps || 1; this.shortHop = !i.jmp || this.shMacro; if (this.shortHop) this.vy = s.vHop; else { this.vy = this.jrV = s.boost[0]; this.jr = 1; } this.vx = clamp(this.vx * s.jumpXMul + (Math.abs(i.lx) > 0.2 ? i.lx * s.jumpX : 0), -s.jumpXMax, s.jumpXMax); this.set('air'); beep(420, 0.05, 'sine', 0.03, 1.5); if (this.shMacro) { this.shMacro = false; if (c.take('atk')) this.startMove(this.aerial(i.lx, i.ly)); } }
         break;
       case 'wd':
         this.vx = appr(this.vx, 0, T.wd_friction);
@@ -968,7 +961,6 @@ function stepSelect() {
   for (const dev of allDevs()) {
     const c = devCtl(dev); c.poll(readDev(dev));
     if (c.pressed('sel') && dev !== 'kb') { toggleLayout(dev); beep(520, 0.05, 'square', 0.03); }
-    if (c.pressed('grb')) { toggleTapJump(dev); beep(TAPJUMP[dev] ? 620 : 380, 0.05, 'square', 0.03); }
     let sl = slots.find(s => s && s.dev === dev);
     if (!sl) { if (c.pressed('atk') || c.pressed('start')) { const k = slots[0] ? (slots[1] ? -1 : 1) : 0; if (k >= 0) { slots[k] = { dev, pick: k, ready: false }; beep(600, 0.06, 'triangle', 0.05); } } continue; }
     if (!slots[1] && (c.upNow || c.downNow)) { setCpuLevel(CPU_LEVEL + (c.upNow ? 1 : -1)); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }

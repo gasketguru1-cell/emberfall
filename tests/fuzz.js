@@ -32,7 +32,7 @@ vm.runInThisContext(`
   const note = (m, what) => { if (problems.length < 12) problems.push('match ' + m + ' frame ' + frame + ': ' + what); };
   for (let m = 0; m < ${matches}; m++) {
     slots[0] = { dev: 'kb', pick: m % 2, ready: true }; slots[1] = { dev: 'kb', pick: (m >> 1) % 2, ready: true };
-    startMatch(); F[0].ctl = new Ctl('cpu'); F[1].ctl = new Ctl('cpu'); TAPJUMP.cpu = m % 3 === 0;
+    startMatch(); F[0].ctl = new Ctl('cpu'); F[1].ctl = new Ctl('cpu');
     hands[0] = hand(pick(['calm', 'mash', 'hold'])); hands[1] = m % 4 === 3 ? null : hand(pick(['calm', 'mash', 'hold']));   /* every fourth match: random input against the CPU */
     let n = 0; const stocks = F.map(f => f.stocks);
     try {
@@ -54,7 +54,6 @@ vm.runInThisContext(`
       }
     } catch (e) { note(m, 'CRASH ' + (e.stack || e).toString().split('\\n').slice(0, 3).join(' | ')); }
   }
-  TAPJUMP.cpu = false;
   const stuck = Object.entries(longest).filter(([s, v]) => v > 700).map(([s, v]) => s + ' for ' + v + ' frames');
   console.log(${matches} + ' matches, ' + frames + ' frames, ' + kos + ' stocks lost, ' + seen.size + ' of ' + KNOWN.size + ' states and ' + moves.size + ' different moves reached');
   console.log('never reached: ' + ([...KNOWN].filter(s => !seen.has(s)).join(', ') || 'none'));
