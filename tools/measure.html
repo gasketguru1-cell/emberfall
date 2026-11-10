@@ -64,7 +64,7 @@ for (const def of ROSTER) for (const fm of def.forms) {
     if (boxes.some(Boolean)) set[name] = boxes;
   }
   /* dash and pivot grabs reach a little further than the standing grab */
-  if (set.grab && set.grab[0]) { for (const [k, add] of [['dgrab', 2.5], ['pgrab', 4]]) if (fm.moves[k]) set[k] = [{ ...set.grab[0], x: r1(set.grab[0].x + add) }]; }
+  if (set.grab && set.grab[0]) { for (const [k, add] of [['dgrab', 2.5], ['pgrab', 3]]) if (fm.moves[k]) set[k] = [{ ...set.grab[0], x: r1(set.grab[0].x + add) }]; }
   if (current) current.stop();
 }
 /* Placements set by hand where no single limb describes the hit (body slams, spins, downward lashes). */
@@ -72,8 +72,8 @@ const MANUAL = {
   Flint: { jab2: [{ x: 6.6, y: 11.4, r: 4.5 }], ftilt: [{ x: 6.9, y: 11, r: 5 }], utilt: [{ x: 3.4, y: 12.6, r: 5.5 }], fsmash: [{ x: 7.8, y: 8.5, r: 6.5 }], usmash: [{ x: 1.5, y: 16, r: 7 }], uair: [{ x: 0, y: 15, r: 6 }],
     dair: [{ x: 0.5, y: 2.5, r: 6.5 }], dsmash: [{ x: 7.5, y: 2, r: 5.5 }, { x: -7.5, y: 2, r: 5.5 }], getup: [{ x: 7.5, y: 2.5, r: 6 }, { x: -7.5, y: 2.5, r: 6 }] },
   Loom: { dtilt: [{ x: 8, y: 4.5, r: 5.5 }], dsmash: [{ x: 8, y: 5, r: 6 }, { x: -8, y: 5, r: 6 }], getup: [{ x: 8, y: 5, r: 6 }, { x: -8, y: 5, r: 6 }], dair: [{ x: 0, y: 1.5, r: 6.2 }] },
-  Hod: { dair: [{ x: 1, y: 1.5, r: 7 }], bair: [{ x: -11, y: 3.5, r: 5.7 }], fsmash: [{ x: 9.3, y: 2.4, r: 6.8 }] },
-  Nib: { jab: [{ x: 6.6, y: 6.4, r: 4.2 }], jab2: [{ x: 6.6, y: 6.4, r: 4.2 }] },
+  Hod: { dair: [{ x: 1, y: 1.5, r: 7 }], bair: [{ x: -12.5, y: 2.5, r: 5.7 }], fsmash: [{ x: 9.3, y: 2.4, r: 6.8 }], getup: [{ x: 8.8, y: 1, r: 6.3 }, { x: -6.5, y: 1.9, r: 6.3 }] },
+  Nib: { jab: [{ x: 6.6, y: 6.4, r: 4.2 }], jab2: [{ x: 6.6, y: 6.4, r: 4.2 }], usmash: [{ x: -1.5, y: 12.5, r: 6.5 }] },
 };
 for (const f in MANUAL) for (const k in MANUAL[f]) if (RESULT[f]) RESULT[f][k] = MANUAL[f][k].map(o => ({ ...o, by: 'set by hand', was: '' }));
 window.RESULT = RESULT; window.LOG = LOG;

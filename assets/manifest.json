@@ -173,12 +173,13 @@
    },
    "dsmash": {
     "clip": "Sweep_Kick",
-    "start": 0.7,
+    "start": 1.55,
     "contact": [
-     1.1,
-     1.4
+     2.03,
+     2.15
     ],
-    "end": 2.2
+    "end": 3.3,
+    "spin": 0.5
    },
    "nair": {
     "clip": "360_Power_Spin_Jump",
@@ -237,12 +238,13 @@
    },
    "getup": {
     "clip": "Sweep_Kick",
-    "start": 0.7,
+    "start": 1.5,
     "contact": [
-     1.1,
-     1.4
+     2.03,
+     2.15
     ],
-    "end": 2.2
+    "end": 3.3,
+    "spin": 0.5
    },
    "nspec": {
     "clip": "baseball_pitching",
