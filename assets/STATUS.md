@@ -65,7 +65,7 @@ Spent so far: 237 credits (Flint 135, companions 102). The daily limit was raise
 | `npm test` | six seeded CPU matches looking for broken states, then `tests/rules.js`, then a 20-match `tests/fuzz.js` | passes |
 | `tests/rules.js` | 41 scripted checks of single rules with exact inputs, including the movement rules from platforms.ini and the match clock | all pass |
 | `tests/fuzz.js` | both fighters driven by random sticks and buttons; looks for crashes, broken numbers, impossible or stuck states | about 880,000 frames of random against random and 730,000 with the CPU on one side in a quarter of the matches, clean |
-| `tests/stats.js` | CPU-versus-CPU balance per form: wins, damage, KO percent, where stocks are lost, who beats whom | over three seeds of 960 matches each: Flint 48 to 50%, Nib 48 to 53%, Loom 49 to 53%, Hod 47 to 50%; average KO percent Hod 165, Flint 165, Nib 155, Loom 154 |
+| `tests/stats.js` | CPU-versus-CPU balance per form: wins, damage, KO percent, where stocks are lost, who beats whom | over three seeds of 960 matches each: Flint 48 to 52%, Nib 50 to 52%, Loom 48 to 51%, Hod 46 to 52%; average KO percent Hod 165, Flint 165, Nib 156, Loom 154 |
 | `tests/kotable.js` | KO percent of every hit | see Rules |
 | `tests/recovery.js` | CPU recovery from six spots off stage per form | 24 of 24 get back |
 | `tests/deaths.js` | traces of stocks lost without being in hitstun | found three CPU mistakes on 2026-11-09 (a ledge regrab loop, a tech press that became an air dodge, recovering out through the top), all fixed; what remains is long launches at high percent |
