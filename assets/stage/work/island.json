@@ -1,0 +1,8 @@
+{
+  "ai_model": "nano-banana-2-1",
+  "prompt": "Redraw only the floating forge island from this painting as a clean 3D modelling reference, keeping its design exactly: a wide flat round-cornered stone slab top with an engraved copper ring in the middle, a thick rim of riveted copper and weathered stone with green patina, copper pipes, a barred forge furnace glowing orange at the front centre, and a rough rock underside that tapers to a point with glowing orange cracks. On the back edge of the top keep the small props: a ruined stone arch with a red banner, a bronze gear, a broken curved bronze rail, a blacksmith anvil on a stone block, a small glowing lantern cage. Do NOT include the two small floating slabs above the island. Whole island centred and fully in frame, seen from the front and slightly above so the flat top is visible. Plain light grey background, soft even studio lighting, no mist, no sky, no waterfalls, no text.",
+  "reference_image_urls": [
+    "file:assets/stage/source/concept.webp"
+  ],
+  "aspect_ratio": "16:9"
+}

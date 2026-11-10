@@ -1,0 +1,28 @@
+{
+ "file": "assets/stage/export/stage-v1.glb",
+ "source": "assets/stage/raw/01a1c5ed-957b-70e2-89b5-9e0cfb524284/model_url.glb",
+ "measure": {
+  "box": {
+   "min": [
+    -0.9517,
+    -0.458,
+    -0.8416
+   ],
+   "max": [
+    0.9501,
+    0.4531,
+    0.8358
+   ]
+  },
+  "deckY": 0.105,
+  "deckX": [
+   -0.9049,
+   0.9397
+  ],
+  "deckZ": [
+   -0.7948,
+   0.8127
+  ],
+  "triangles": 60546
+ }
+}

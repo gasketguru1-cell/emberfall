@@ -22,57 +22,67 @@ function build() {
   R3.gpu = ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : 'unknown';
 
   const FOV = 28, LIFT = 0.13;   /* camera sits above the action and looks straight ahead through a shifted lens, so the play plane stays undistorted */
-  const scene = new THREE.Scene(); scene.fog = new THREE.Fog(0x7a4a72, 650, 2900);
+  const scene = new THREE.Scene(); scene.fog = new THREE.Fog(0xb7bedb, 900, 3600); scene.background = new THREE.Color(0xb4bcdc);   /* dawn mist */
   const camera = new THREE.PerspectiveCamera(FOV, 16 / 9, 5, 6000);
   /* Soft all-round reflections, so the models' metal and cloth materials have something to reflect (without it they render near-black). */
   const pmrem = new THREE.PMREMGenerator(renderer); scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.55; pmrem.dispose();
 
-  /* ---- sky, moon, stars, hills ---- */
+  /* ---- backdrop ---- */
   const tex = (w, h, paint) => { const c = document.createElement('canvas'); c.width = w; c.height = h; paint(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; };
-  const sky = new THREE.Mesh(new THREE.PlaneGeometry(9000, 3600), new THREE.MeshBasicMaterial({ fog: false, depthWrite: false, map: tex(4, 512, (g, w, h) => { const q = g.createLinearGradient(0, 0, 0, h); q.addColorStop(0, '#0d1230'); q.addColorStop(0.42, '#2c2356'); q.addColorStop(0.72, '#8a4a6e'); q.addColorStop(1, '#f0a063'); g.fillStyle = q; g.fillRect(0, 0, w, h); }) }));
-  sky.position.set(0, 500, -2600); scene.add(sky);
-  const sp = new Float32Array(500 * 3); for (let k = 0; k < 500; k++) { sp[k * 3] = (Math.random() - 0.5) * 6000; sp[k * 3 + 1] = 250 + Math.random() * 1600; sp[k * 3 + 2] = -2500; }
-  const stars = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(sp, 3)), new THREE.PointsMaterial({ color: 0xfff6e0, size: 2.2, sizeAttenuation: false, fog: false, transparent: true, opacity: 0.8 }));
-  scene.add(stars);
-  const moon = new THREE.Mesh(new THREE.CircleGeometry(95, 48), new THREE.MeshBasicMaterial({ color: 0xfff3d6, fog: false })); moon.position.set(1050, 760, -2450); scene.add(moon);
-  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ fog: false, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, map: tex(256, 256, (g, w) => { const q = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2); q.addColorStop(0, 'rgba(255,230,180,.55)'); q.addColorStop(0.3, 'rgba(255,220,170,.16)'); q.addColorStop(1, 'rgba(255,220,170,0)'); g.fillStyle = q; g.fillRect(0, 0, w, w); }) }));
-  glow.scale.set(900, 900, 1); glow.position.set(1050, 760, -2440); scene.add(glow);
-  [[-330, -70, 0x231a3c, 0], [-760, -20, 0x3a2a58, 2], [-1250, 60, 0x5b3f73, 4]].forEach(([z, base, col, ph]) => {
-    const sh = new THREE.Shape(); sh.moveTo(-4200, -1400);
-    for (let x = -4200; x <= 4200; x += 60) sh.lineTo(x, base + Math.sin(x * 0.0023 + ph) * 120 + Math.sin(x * 0.0061 + ph * 2) * 45 + Math.sin(x * 0.017 + ph) * 12);
-    sh.lineTo(4200, -1400);
-    const m = new THREE.Mesh(new THREE.ShapeGeometry(sh), new THREE.MeshBasicMaterial({ color: col })); m.position.z = z; scene.add(m);
-  });
+  /* The painted dawn gorge, far behind everything. It keeps filling the view as the camera moves and zooms, and drifts a
+     little against the camera so the distance reads. Shown as painted: no fog, no tone mapping. */
+  const backdrop = new THREE.Mesh(new THREE.PlaneGeometry(16, 9), new THREE.MeshBasicMaterial({ color: 0xb4bcdc, fog: false, depthWrite: false, toneMapped: false }));
+  backdrop.position.z = -2600; backdrop.renderOrder = -10; backdrop.frustumCulled = false; scene.add(backdrop);
+  new THREE.TextureLoader().load('assets/stage/export/backdrop.jpg', t => { t.colorSpace = THREE.SRGBColorSpace; backdrop.material.map = t; backdrop.material.color.set(0xffffff); backdrop.material.needsUpdate = true; });
 
   /* ---- stage ---- */
-  const stone = new THREE.MeshStandardMaterial({ color: 0x4d4260, roughness: 0.95, flatShading: true });
+  const stone = new THREE.MeshStandardMaterial({ color: 0x5b5560, roughness: 0.95, flatShading: true }), plain = new THREE.Group(); scene.add(plain);   /* plain: the stand-in stage shown until the island model has loaded */
   const bodyShape = new THREE.Shape([[-EDGE, 0], [EDGE, 0], [EDGE, -RIM], [EDGE - SHOULDER_IN, -SHOULDER], [0, -DEPTH], [-(EDGE - SHOULDER_IN), -SHOULDER], [-EDGE, -RIM]].map(p => new THREE.Vector2(p[0], p[1])));   /* the island's outline, the same as its collision in sim.js */
-  const body = new THREE.Mesh(new THREE.ExtrudeGeometry(bodyShape, { depth: 44, bevelEnabled: false }), stone); body.position.z = -22; body.castShadow = body.receiveShadow = true; scene.add(body);
+  const body = new THREE.Mesh(new THREE.ExtrudeGeometry(bodyShape, { depth: 44, bevelEnabled: false }), stone); body.position.z = -22; body.castShadow = body.receiveShadow = true; plain.add(body);
   const planks = tex(1024, 256, (g, w, h) => { g.fillStyle = '#b7a087'; g.fillRect(0, 0, w, h); for (let x = 0; x < w; x += 64) { g.fillStyle = (x / 64) % 2 ? 'rgba(0,0,0,.05)' : 'rgba(255,255,255,.04)'; g.fillRect(x, 0, 64, h); g.fillStyle = 'rgba(40,28,30,.55)'; g.fillRect(x, 0, 3, h); } for (let k = 0; k < 500; k++) { g.fillStyle = 'rgba(60,40,30,' + (Math.random() * 0.12).toFixed(3) + ')'; g.fillRect(Math.random() * w, Math.random() * h, 1 + Math.random() * 26, 1); } });
   planks.wrapS = planks.wrapT = THREE.RepeatWrapping; planks.repeat.set(2, 1);
-  const deck = new THREE.Mesh(new THREE.BoxGeometry(EDGE * 2 + 4, 3, 48), new THREE.MeshStandardMaterial({ color: 0xffffff, map: planks, roughness: 0.82 })); deck.position.set(0, -1.5, 0); deck.castShadow = deck.receiveShadow = true; scene.add(deck);
-  const wood = new THREE.MeshStandardMaterial({ color: 0xd2b184, roughness: 0.7 }), trim = new THREE.MeshStandardMaterial({ color: 0x5a4638, roughness: 0.8 });
+  const deck = new THREE.Mesh(new THREE.BoxGeometry(EDGE * 2 + 4, 3, 48), new THREE.MeshStandardMaterial({ color: 0xffffff, map: planks, roughness: 0.82 })); deck.position.set(0, -1.5, 0); deck.castShadow = deck.receiveShadow = true; plain.add(deck);
+  /* floating slabs: weathered stone with a copper band and a glowing ember line along the top edge */
+  const slab = new THREE.MeshStandardMaterial({ color: 0x8a8079, roughness: 0.9, flatShading: true }), copper = new THREE.MeshStandardMaterial({ color: 0xa8623a, roughness: 0.45, metalness: 0.7 }), emberLine = new THREE.MeshStandardMaterial({ color: 0xffb060, emissive: 0xff8a30, emissiveIntensity: 2.4, roughness: 0.5 });
   for (const p of PLATS) if (p.soft) {
-    const w = p.x1 - p.x0, m = new THREE.Mesh(new THREE.BoxGeometry(w, 1.8, 15), wood); m.position.set((p.x0 + p.x1) / 2, p.y - 0.9, 0); m.castShadow = m.receiveShadow = true; scene.add(m);
-    for (const ex of [p.x0 + 1, p.x1 - 1]) { const c = new THREE.Mesh(new THREE.BoxGeometry(1.4, 2.4, 16), trim); c.position.set(ex, p.y - 1, 0); c.castShadow = true; scene.add(c); }
+    const w = p.x1 - p.x0, cx = (p.x0 + p.x1) / 2, g = new THREE.Group(); g.position.set(cx, p.y, 0); scene.add(g);
+    const top = new THREE.Mesh(new THREE.BoxGeometry(w, 1.4, 15), slab); top.position.y = -0.7; top.castShadow = top.receiveShadow = true; g.add(top);
+    const sh = new THREE.Shape([[-w / 2 + 1, 0], [w / 2 - 1, 0], [w / 2 - 4, -2.6], [-w / 2 + 4, -2.6]].map(q => new THREE.Vector2(q[0], q[1])));   /* the chamfered underside */
+    const under = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 13, bevelEnabled: false }), slab); under.position.set(0, -1.4, -6.5); under.castShadow = true; g.add(under);
+    const band = new THREE.Mesh(new THREE.BoxGeometry(w + 0.5, 0.7, 15.5), copper); band.position.y = -1.05; g.add(band);
+    for (const z of [7.6, -7.6]) { const l = new THREE.Mesh(new THREE.BoxGeometry(w - 1, 0.28, 0.28), emberLine); l.position.set(0, -0.12, z); g.add(l); }
+    for (const ex of [-w / 2, w / 2]) { const l = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.28, 15), emberLine); l.position.set(ex, -0.12, 0); g.add(l); }
   }
   const iron = new THREE.MeshStandardMaterial({ color: 0x3d3548, roughness: 0.6, metalness: 0.4 }), lampGlass = new THREE.MeshStandardMaterial({ color: 0xffe2a0, emissive: 0xffb85a, emissiveIntensity: 2.2, roughness: 0.4 });
+  /* two warm lights: on lamp posts while the stand-in stage shows, moved to the forge mouth and the lantern once the island has loaded */
   const lamps = [];
   for (const lx of [-(EDGE - 10), EDGE - 10]) {
-    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.6, 19, 10), iron); pole.position.set(lx, 9.5, -17); pole.castShadow = true; scene.add(pole);
-    const foot = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.8, 1.2, 12), iron); foot.position.set(lx, 0.6, -17); scene.add(foot);
-    const glass = new THREE.Mesh(new THREE.BoxGeometry(2.8, 3.6, 2.8), lampGlass); glass.position.set(lx, 21, -17); scene.add(glass);
-    const cap = new THREE.Mesh(new THREE.ConeGeometry(2.6, 2, 4), iron); cap.position.set(lx, 23.8, -17); cap.rotation.y = Math.PI / 4; scene.add(cap);
-    const light = new THREE.PointLight(0xffb866, 2200, 150, 2); light.position.set(lx, 21, -9); scene.add(light); lamps.push(light);
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.6, 19, 10), iron); pole.position.set(lx, 9.5, -17); pole.castShadow = true; plain.add(pole);
+    const foot = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.8, 1.2, 12), iron); foot.position.set(lx, 0.6, -17); plain.add(foot);
+    const glass = new THREE.Mesh(new THREE.BoxGeometry(2.8, 3.6, 2.8), lampGlass); glass.position.set(lx, 21, -17); plain.add(glass);
+    const cap = new THREE.Mesh(new THREE.ConeGeometry(2.6, 2, 4), iron); cap.position.set(lx, 23.8, -17); cap.rotation.y = Math.PI / 4; plain.add(cap);
+    const light = new THREE.PointLight(0xffb866, 2200, 150, 2); light.position.set(lx, 21, -9); light.userData.i = 2200; scene.add(light); lamps.push(light);
   }
 
+  /* ---- the island: a generated model, placed by assets/stage/export/stage.json so its flat top is the floor and its rim the ledges ---- */
+  fetch('assets/stage/export/stage.json').then(r => r.ok ? r.json() : null).then(cfg => {
+    if (!cfg) return;
+    new GLTFLoader().load(cfg.file, g => {
+      const m = g.scene; m.scale.set(cfg.scale[0], cfg.scale[1], cfg.scale[2]); m.position.set(cfg.offset[0], cfg.offset[1], cfg.offset[2]); m.rotation.y = (cfg.yaw || 0) * Math.PI / 180;
+      m.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = true; o.frustumCulled = false; if (o.material) o.material.envMapIntensity = 0.25; } });   /* takes the fighters' shadows; casts none itself, to keep the frame cheap */
+      scene.add(m); plain.visible = false; R3.stage = m;
+      /* the two warm lights move to the forge mouth and the lantern */
+      (cfg.lights || []).forEach((q, k) => { const l = lamps[k]; if (!l) return; l.position.set(q.at[0], q.at[1], q.at[2]); l.color.set(q.color); l.userData.i = q.power; l.distance = q.reach; });
+    }, undefined, e => console.warn('stage model failed to load; the plain stage stays', e));
+  }).catch(() => {});
+
   /* ---- lights ---- */
-  scene.add(new THREE.HemisphereLight(0x9a8fd0, 0x2a2030, 1.15));
-  const key = new THREE.DirectionalLight(0xffe6c8, 2.5); key.position.set(-70, 150, 130); key.target.position.set(0, 10, 0); scene.add(key, key.target);
+  scene.add(new THREE.HemisphereLight(0xcdd6ff, 0x6b5a58, 0.8));   /* dawn: cool sky above, warm rock below */
+  const key = new THREE.DirectionalLight(0xffd9b0, 2.3); key.position.set(-120, 130, 120);   /* low sun from the left */ key.target.position.set(0, 10, 0); scene.add(key, key.target);
   key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004; key.shadow.normalBias = 0.6;
   Object.assign(key.shadow.camera, { left: -150, right: 150, top: 150, bottom: -70, near: 10, far: 520 }); key.shadow.camera.updateProjectionMatrix();
-  const rim = new THREE.DirectionalLight(0x8fa8ff, 1.7); rim.position.set(90, 70, -140); scene.add(rim);
-  const fill = new THREE.DirectionalLight(0xffd9b0, 0.9); fill.position.set(30, 40, 200); scene.add(fill);   /* from the camera side, no shadow: keeps faces readable */
+  const rim = new THREE.DirectionalLight(0xffb7c8, 1.5); rim.position.set(110, 80, -140); scene.add(rim);   /* pink edge light from the clouds behind */
+  const fill = new THREE.DirectionalLight(0xffd9b0, 0.7); fill.position.set(30, 40, 200); scene.add(fill);   /* from the camera side, no shadow: keeps faces readable */
 
   /* ---- models ---- */
   fetch('assets/manifest.json').then(r => r.ok ? r.json() : {}).then(man => {
@@ -273,7 +283,7 @@ function build() {
     const top = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.96, r, r * 0.16, 7), moss); top.position.y = r * 0.08; g.add(top);
     const post = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.02, r * 0.03, r * 0.5, 6), iron); post.position.set(r * 0.3, r * 0.4, 0); g.add(post);
     const lampGlow = new THREE.Sprite(new THREE.SpriteMaterial(glowMat({ map: dot, color: 0xffb866 }))); lampGlow.scale.set(r * 0.9, r * 0.9, 1); lampGlow.position.set(r * 0.3, r * 0.68, 0); g.add(lampGlow);
-    g.position.set(x, y, z); g.rotation.y = k * 1.3; g.userData = { y, ph: k * 2.1 }; scene.add(g); return g;
+    g.position.set(x, y, z); g.rotation.y = k * 1.3; g.userData = { y, ph: k * 2.1 }; g.visible = false; scene.add(g); return g;   /* hidden: the painted backdrop has its own scenery now */
   });
   let fxTick = -1;
   function fxFighter(f, idx, st, alive, v) {
@@ -337,8 +347,11 @@ function build() {
     const s = cam.s, vH = H / s, d = (vH / 2) / Math.tan(THREE.MathUtils.degToRad(FOV / 2)), lift = d * LIFT;
     camera.position.set(cam.x - SHK.x / s, cam.y + (0.02 * H + SHK.y) / s + lift, d); camera.rotation.set(0, 0, 0);
     camera.setViewOffset(w, h, 0, lift / vH * h, w, h);
-    stars.position.x = camera.position.x * 0.9; sky.position.x = camera.position.x; moon.position.x = 1050 + camera.position.x * 0.85; glow.position.x = moon.position.x;
-    lamps.forEach((l, k) => { l.intensity = 2200 * (1 + Math.sin(frame * 0.31 + k * 2) * 0.05); });
+    /* backdrop: a third bigger than the view at its distance, centred on what the shifted lens sees, sliding a little against the camera */
+    { const bd = camera.position.z + 2600, fh = 2 * bd * Math.tan(THREE.MathUtils.degToRad(FOV / 2)), k = 1.34;
+      backdrop.scale.set(fh * k / 9, fh * k / 9, 1);
+      backdrop.position.set(camera.position.x - cam.x * 0.35, camera.position.y - lift / vH * fh - (cam.y - 30) * 0.3 + fh * 0.05, -2600); }
+    lamps.forEach((l, k) => { l.intensity = l.userData.i * (1 + Math.sin(frame * 0.31 + k * 2) * 0.07 + Math.sin(frame * 0.113 + k) * 0.05); });   /* forge and lantern flicker */
 
     F.forEach((f, idx) => {
       const v = fighters[idx], st = f.st, alive = f.state !== 'dead';

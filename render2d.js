@@ -232,7 +232,10 @@ function drawDebug() {
     }
   }
   for (const p of PROJ) { g.fillStyle = 'rgba(255,40,40,.35)'; g.strokeStyle = '#ff3333'; g.beginPath(); g.arc(SX(p.x), SY(p.y), p.r * s, 0, TAU); g.fill(); g.stroke(); }
-  g.strokeStyle = 'rgba(120,255,160,.8)'; g.beginPath(); for (const p of PLATS) { g.moveTo(SX(p.x0), SY(p.y)); g.lineTo(SX(p.x1), SY(p.y)); } g.stroke();
+  g.strokeStyle = 'rgba(120,255,160,.8)'; g.beginPath(); for (const p of PLATS) { g.moveTo(SX(p.x0), SY(p.y)); g.lineTo(SX(p.x1), SY(p.y)); }
+  /* the island's solid outline: rim, shoulder, and the rock tapering to its point */
+  g.moveTo(SX(EDGE), SY(0)); for (const q of [[EDGE, -RIM], [EDGE - SHOULDER_IN, -SHOULDER], [0, -DEPTH], [-(EDGE - SHOULDER_IN), -SHOULDER], [-EDGE, -RIM], [-EDGE, 0]]) g.lineTo(SX(q[0]), SY(q[1]));
+  g.stroke();
 }
 const SHK = { x: 0, y: 0 };
 function draw() {

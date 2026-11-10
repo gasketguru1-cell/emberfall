@@ -1,0 +1,8 @@
+{
+  "ai_model": "nano-banana-2-1",
+  "prompt": "Edit this painting: remove the large floating stone island in the centre, the two small floating slabs above it, and everything standing on the island (arch, banner, gear, anvil, lantern). Fill the space where they were with the same scenery that is behind them: the wide curved waterfall, the lake, the misty gorge and soft fog below. Keep everything else exactly as it is: the dawn sky with pink clouds, the snowy mountain range, the pine-covered cliffs with waterfalls on the left and right, the distant ruined forge castle on the hill with its chimney smoke. Same painterly game-art style, same colours and lighting, no characters, no text.",
+  "reference_image_urls": [
+    "file:assets/stage/source/concept.webp"
+  ],
+  "aspect_ratio": "16:9"
+}

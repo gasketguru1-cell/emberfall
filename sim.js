@@ -281,7 +281,7 @@ const WREN = {
     /* Hod: a stone-backed badger. Heavy, slow, hits hard. */
     name: 'Hod', col: ['#6d6a75', '#a39171', '#f1f1f1'], alt: ['#8a4f3d', '#3d5a6c', '#f1f1f1'],
     /* Heavy: slow, hard to launch, hits and throws hard, armoured smash and dash attack, poor air movement and recovery. */
-    st: { weight: 122, walk: 0.85, walkMul: 0.085, walkAdd: 0.06, trac: 0.1, dash: 1.62, runMul: 0.075, runAdd: 0.02, run: 1.5,
+    st: { weight: 119, walk: 0.85, walkMul: 0.085, walkAdd: 0.06, trac: 0.1, dash: 1.62, runMul: 0.075, runAdd: 0.02, run: 1.5,
       jumpX: 0.75, jumpXMul: 0.75, jumpXMax: 1.15, airJumpX: 0.9, jumpH: 29.5, jumpInit: 16.2, hopH: 14.5, airJumpH: 30,
       airMul: 0.04, airAdd: 0.01, airSpeed: 0.98, airBrake: 0.008, grav: 0.118, fall: 1.78, ffall: 2.85, jsq: 3, w: 12, h: 13, jf: 4.4, jb: 2.8,
       jumps: 1, dashF: 15, roll: [32, 1.15, 12], spot: [24, 14] },

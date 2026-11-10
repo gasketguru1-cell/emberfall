@@ -33,8 +33,10 @@ All Meshy calls go through `tools/meshy.js`. Limits are in `assets/meshy-budget.
 | 2026-11-09 | Flint | 20 more preset animations (attacks, dodges, throw, ledge) | 60 |
 | 2026-11-09 | Hod, Loom, Nib | Concept images from supplied art | 12 |
 | 2026-11-09 | Nib, Hod, Loom | 3D models from the approved concepts (30 each) | 90 |
+| 2026-11-10 | Stage | Backdrop with the island painted out; the island alone (4 each) | 8 |
+| 2026-11-10 | Stage | 3D island from the isolated picture (60k triangles, PBR 2K) | 30 |
 
-Spent so far: 237 credits (Flint 135, companions 102). The daily limit was raised to 240 for 2026-11-09 only, at the owner's request; it is 150 on other days. No credits were spent in the unattended session on the evening of 2026-11-09.
+Spent so far: 275 credits (Flint 135, companions 102, stage 38). The daily limit was raised to 240 for 2026-11-09 only, at the owner's request; it is 150 on other days. No credits were spent in the unattended session on the evening of 2026-11-09.
 
 ## Flint v3: what is and is not done
 
@@ -80,7 +82,10 @@ Two fighters standing on the same ground cannot walk or run through each other. 
 
 ## Stage (2026-11-10)
 
-One stage: a flat main platform 136 wide (15% narrower since 2026-11-10) with two soft platforms side by side (x 15 to 44 on each side, height 26) and no top platform. Everything is placed from `EDGE` (half the width) and `PLATS` in `sim.js`; the blast zones sit 155 beyond the ledges; both renderers build the platforms from that list. The look is Emberfall's own (dusk sky, plank deck, lamps, far islands).
+- **Look:** the forge island from the owner's picture (`assets/stage/source/concept.webp`). The island is a Meshy model made from that picture (`assets/stage/export/stage-v1.glb`, 60,546 triangles, 4.5 MB) placed by `assets/stage/export/stage.json`; the backdrop is the same picture with the island painted out (`backdrop.jpg`). Dawn lighting, warm lights at the forge mouth and the lantern, drifting embers. To rebuild the model file: `node tools/stage.mjs assets/stage/raw/<task>/model_url.glb`.
+- **Shape for play:** a flat main platform 136 wide with two soft platforms side by side (x 15 to 44 on each side, height 26) and no top platform. Everything is placed from `EDGE` (half the width) and `PLATS` in `sim.js`; the blast zones sit 155 beyond the ledges.
+- **The island is solid like this** (`RIM`, `SHOULDER`, `DEPTH`, `stageHalf()` in `sim.js`): a rim 5 thick at full width, a steep shoulder of rock giving way 12 by 22 down (a wall for wall jumps and techs), then rock tapering to a point 45 down. There is no flat underside. A fighter touching any of it is moved out sideways and keeps rising, so coming up from underneath ends beside the ledge; up specials past their hit take the ledge on the way up too; a fighter thrown against the island bounces back out. The hitbox view draws this outline.
+- The 2D fallback view and the start screen still show the old dusk stage.
 
 ## Movement (2026-11-10)
 
@@ -123,7 +128,7 @@ The movement rules now work the way the reference build's do, with Emberfall's o
 | Tool | What it does | Result on 2026-11-09 |
 |---|---|---|
 | `npm test` | six seeded CPU matches looking for broken states, then `tests/rules.js`, then a 20-match `tests/fuzz.js` | passes |
-| `tests/rules.js` | 73 scripted checks of single rules with exact inputs, including the movement rules from platforms.ini, the match clock and (2026-11-10) each fighter's jump heights, full-hop pop, fast fall and ground speeds, and fighters pushing each other | all pass |
+| `tests/rules.js` | 75 scripted checks of single rules with exact inputs, including the movement rules from platforms.ini, the match clock and (2026-11-10) each fighter's jump heights, full-hop pop, fast fall and ground speeds, and fighters pushing each other | all pass |
 | `tests/movement.js` | measures every fighter's speeds, stopping distance, jump heights and air times in the running rules; `EMBERFALL_SIM=<file>` measures another copy of the rules | see Movement |
 | `tests/fuzz.js` | both fighters driven by random sticks and buttons; looks for crashes, broken numbers, impossible or stuck states | about 880,000 frames of random against random and 730,000 with the CPU on one side in a quarter of the matches, clean |
 | `tests/stats.js` | CPU-versus-CPU balance per form: wins, damage, KO percent, where stocks are lost, who beats whom | with grabs that hold and the new attack inputs (2026-11-10, evening state), over three seeds of 960 matches each: Flint 51 to 53%, Nib 46 to 49%, Loom 46 to 49%, Hod 50 to 53%; average KO percent Flint 159, Hod 157, Loom 152, Nib 147 |

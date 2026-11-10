@@ -1,0 +1,37 @@
+{
+ "file": "assets/stage/export/stage-v1.glb",
+ "scale": [
+  75.355,
+  75.355,
+  37.678
+ ],
+ "offset": [
+  -1.311,
+  -7.912,
+  -3.891
+ ],
+ "yaw": 0,
+ "lights": [
+  {
+   "at": [
+    0,
+    -17,
+    46
+   ],
+   "color": "#ff7a2a",
+   "power": 5200,
+   "reach": 170
+  },
+  {
+   "at": [
+    44,
+    9,
+    -22
+   ],
+   "color": "#ffb060",
+   "power": 1500,
+   "reach": 110
+  }
+ ],
+ "note": "scale and offset put the model's flat top at y = 0 and its rim at the ledges (x = +-68); the third scale number squashes it front to back. lights: the forge mouth and the lantern."
+}
