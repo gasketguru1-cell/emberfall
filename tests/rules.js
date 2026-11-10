@@ -249,6 +249,16 @@ vm.runInThisContext(`
     check('jump + attack together: a short-hop aerial', macro.sh === 'nair (short-hop, weaker) in the air', String(macro.sh));
   }
 
+  /* ---- The match clock: 3 stocks, 8 minutes; time-out goes to more stocks, then less damage, then sudden death ---- */
+  {
+    const [a0, b0] = setup(FL, NIB, -30, 30);
+    check('match: starts with 3 stocks and 8 minutes', a0.stocks === 3 && b0.stocks === 3 && STOCKS === 3 && MATCH_FRAMES === 8 * 60 * 60 && timer > MATCH_FRAMES - 30, a0.stocks + ' stocks each, ' + (MATCH_FRAMES / 3600) + ' minutes');
+    const clock = (sa, sb, pa, pb) => { const [a, b] = setup(FL, NIB, -30, 30); a.stocks = sa; b.stocks = sb; a.pct = pa; b.pct = pb; timer = 2; run(4); return { mode, result, sudden, pct: [a.pct, b.pct], stocks: [a.stocks, b.stocks] }; };
+    const byStock = clock(2, 3, 0, 150), byPct = clock(2, 2, 40, 90), tie = clock(2, 2, 50, 50);
+    check('time-out: more stocks wins, then less damage', byStock.mode === 'over' && byStock.result === 'WREN WINS' && byPct.mode === 'over' && byPct.result === 'FLINT WINS', 'stocks 2 v 3: ' + byStock.result + ' | 40% v 90%: ' + byPct.result);
+    check('time-out: a full tie goes to sudden death', tie.mode === 'play' && tie.sudden && tie.pct[0] === 300 && tie.pct[1] === 300 && tie.stocks.join() === '1,1', 'mode ' + tie.mode + ', both at ' + tie.pct.join(' / ') + '%, stocks ' + tie.stocks.join(' / '));
+  }
+
   let bad = 0; for (const [ok, name, detail] of results) { if (!ok) bad++; console.log((ok ? 'pass  ' : 'FAIL  ') + name.padEnd(48) + detail); }
   console.log(bad ? bad + ' of ' + results.length + ' checks failed' : 'all ' + results.length + ' rule checks pass');
   if (bad) process.exitCode = 1;
