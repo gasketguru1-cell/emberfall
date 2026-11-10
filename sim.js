@@ -418,9 +418,13 @@ const WREN = {
      with real knockback that it pays for in damage. The more hurt it is, the further it flies. One use per time off the ground.
    - It has no hands, so it cannot hold the ledge (st.noLedge): it has to land on the stage.
    - Neutral special is Flint's Ember Toss, unchanged. */
+/* Hot Potato's burst on whoever is in reach (owner's numbers, 2026-11-10): the hot middle (sweet) KOs most fighters from about
+   70% and the edge (sour) from about 100 to 125%, both from the victim's own damage; the sweet spot hits about half again
+   as hard as the burst throws the sack itself at the same damage. One hit per target: the middle is tried first. */
+const SACK_BLAST = { sweet: { r: 6, d: 15, a: 75, b: 50, k: 112 }, sour: { r: 12, d: 10, a: 70, b: 35, k: 100 } };   /* measured with no DI at centre stage: sweet KOs at 55-90% (most near 70), sour at 105-130% (heavies later) */
 function sackBlast(f, i) {
   spark(f.x, f.y + 4, '#ffb347', 30, 2.6); beep(120, 0.3, 'sawtooth', 0.08, 0.4); shake = Math.max(shake, 6);
-  shoot(f, { kind: 'blast', ox: 0.01, oy: 4, vx: 0, r: 11, life: 4, h: { d: 13, a: 70, b: 50, k: 78 } });   /* the burst itself, for anyone else in reach */
+  for (const part of ['sweet', 'sour']) { const q = SACK_BLAST[part]; shoot(f, { kind: 'blast', grp: 'hotpotato', ox: 0.01, oy: 4, vx: 0, r: q.r, life: 4, h: { d: q.d, a: q.a, b: q.b, k: q.k, norage: 1 } }); }   /* norage: the sack's own damage does not add to it */
   const d = 12; f.pct = Math.min(999, f.pct + d); f.flash = 6; f.blastUsed = !f.grounded || true;
   f.launch(knock(f, d, 100, 70), (90 - clamp(i.lx, -1, 1) * 28) * Math.PI / 180, 1); f.hitlag = 4;
 }
@@ -1198,7 +1202,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke) {
   }
   v.pct = Math.min(999, v.pct + d); v.flash = 6; if (!proj && a.move && a.move.cast) a.castHit = true;
   const crouch = v.grounded && v.state === 'idle' && v.ctl.c.ly < CROUCH_Y, charging = v.state === 'attack' && v.charge > 0;
-  const kb = knock(v, d, h.b, h.k) * rage(a) * (crouch ? CROUCH_MUL : 1) * (charging ? CHARGING_MUL : 1);
+  const kb = knock(v, d, h.b, h.k) * (h.norage ? 1 : rage(a)) * (crouch ? CROUCH_MUL : 1) * (charging ? CHARGING_MUL : 1);
   const hl = h.hl !== undefined ? h.hl : Math.min(30, Math.floor((d * 0.65 + 6) * (crouch ? 0.67 : 1)));
   /* Armour: a move either shrugs off anything short of a hard launch, or (armorMax) takes one strike of that base damage or less, on the ground only. */
   const am = v.state === 'attack' && v.move && v.move.armor && v.mf >= v.move.armor[0] && v.mf <= v.move.armor[1] ? v.move : null;
@@ -1259,7 +1263,7 @@ function resolveHits() {
   }
   for (const p of PROJ) {
     const v = F[1 - p.owner];
-    if (p.life > 0 && canBeHit(v) && (circRect(p.x, p.y, p.r, ...hurtRect(v)) || (Math.hypot(p.vx, p.vy) > p.r && circRect(p.x - p.vx / 2, p.y - p.vy / 2, p.r, ...hurtRect(v))))) {   /* and halfway back along a fast shot's path */ ev.push([F[p.owner], v, p.h, p.face, p.x, true, pokes(v, p.x, p.y)]); p.life = 0; p.spent = true; }
+    if (p.life > 0 && canBeHit(v) && (circRect(p.x, p.y, p.r, ...hurtRect(v)) || (Math.hypot(p.vx, p.vy) > p.r && circRect(p.x - p.vx / 2, p.y - p.vy / 2, p.r, ...hurtRect(v))))) {   /* and halfway back along a fast shot's path */ ev.push([F[p.owner], v, p.h, p.face, p.x, true, pokes(v, p.x, p.y)]); p.life = 0; p.spent = true; if (p.grp) for (const q of PROJ) if (q.grp === p.grp && q.owner === p.owner) q.life = 0; }   /* grp: parts of one burst, one hit between them */
   }
   for (const e of ev) applyHit(...e);
 }

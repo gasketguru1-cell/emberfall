@@ -155,6 +155,8 @@ A soot crab living in a coal scuttle, one claw grown into fire tongs. A low, qui
 
 ## Potato Sack (2026-11-10)
 
+- **Hot Potato burst (owner's numbers, later 2026-11-10):** two parts that hit once between them. The hot middle (6 across, 15%) KOs most fighters at 55 to 90% (Flint 70, the heavies later); the edge (12 across, 10%) at 105 to 130%. Both grow with the target's damage only: the sack's own damage (rage) does not add. At 70% the middle hits Flint about 20% harder than the burst throws the sack at 70%; making it a full 50% harder at every damage would KO from about 35%, so the KO percents the owner gave were kept instead. Measured standing at centre stage with no DI; good DI or a hit near the ledge changes them.
+
 An original fighter: a living sack of forge-town potatoes. Heavy and odd to move.
 
 - **Movement:** walks and runs in hops with a full stop between them. Cannot hold the ledge; it has to land on the stage.

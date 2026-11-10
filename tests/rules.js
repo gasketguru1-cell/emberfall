@@ -529,6 +529,15 @@ vm.runInThisContext(`
       check('Scuttle: the dive sends an airborne target straight down', d2.pct > 13 && d2.pct < 16.5 && d2.vyHit < -1, 'target in the air took ' + d2.pct.toFixed(1) + '%, sent ' + (d2.vyHit < 0 ? 'down' : 'up')); }
   }
 
+  /* ---- Potato Sack's Hot Potato burst: sweet spot KOs around 70%, sour spot around 100 to 125%, from the victim's damage ---- */
+  {
+    const ko = (pct, d, sackPct) => { const [s, o2] = setup(SACK, FL, 0, d); o2.pct = pct; s.pct = sackPct || 0; s.startMove('uspec'); let hits = 0, was = o2.pct; run(320, () => { if (o2.pct > was) { hits++; was = o2.pct; } return o2.stocks === 3; }); return { dead: o2.stocks < 3, hits }; };
+    const sw60 = ko(60, 1.5), sw80 = ko(80, 1.5), so90 = ko(90, 6 + 4 + 2), so125 = ko(125, 6 + 4 + 2), heavySack = ko(60, 1.5, 150);
+    check('Potato Sack: the hot middle of the burst KOs Flint at about 70%', !sw60.dead && sw80.dead && sw60.hits === 1, 'at 60%: ' + (sw60.dead ? 'KO' : 'survives') + ', at 80%: ' + (sw80.dead ? 'KO' : 'survives') + ', ' + sw60.hits + ' hit');
+    check('Potato Sack: the edge of the burst KOs Flint at about 100 to 125%', !so90.dead && so125.dead, 'at 90%: ' + (so90.dead ? 'KO' : 'survives') + ', at 125%: ' + (so125.dead ? 'KO' : 'survives'));
+    check('Potato Sack: the burst scales with the target’s damage, not the sack’s', !heavySack.dead, 'Flint at 60% with the sack at 150%: ' + (heavySack.dead ? 'KO' : 'survives'));
+  }
+
   /* ---- Furious Fowls: five birds and a slingshot (the owner's document) ---- */
   {
     const FM = ROSTER[5].forms, by = (list, id) => list[id];   /* FOWL is the table tools/fowls-gen.js copies out of the owner's move data */
