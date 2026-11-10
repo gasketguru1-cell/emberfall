@@ -58,6 +58,21 @@ Spent so far: 237 credits (Flint 135, companions 102). The daily limit was raise
 - CPU level 1 to 9, set with Up / Down on the select screen while player 2 is empty, and remembered. Level 7 is the CPU as it always played; every test and balance figure uses it. The numbers for each level are in `CPU_LV` in `sim.js`.
 - Tap jump is removed (owner's request, 2026-11-10): only the jump buttons jump, never the stick. There is no switch for it.
 
+## Playing while it is being worked on (2026-11-10)
+
+- `node serve.js` (or `play.bat`) serves two views: `http://localhost:8317/` is the last finished version (the last git commit), and `http://localhost:8317/dev/` is the files as they are on disk. Half-made edits never reach the first one.
+- Between matches the game shows a green note when a newer finished version exists; refreshing the page loads it. Nothing reloads by itself.
+- Checks in the browser pane are done in a separate tab on `/dev/`, never in the tab the owner is playing in.
+- The long test runs (`stats`, `levels`, `fuzz`, `deaths`, `kotable`) run at low priority so they do not slow a game being played.
+
+## Controls and attacks (2026-11-10)
+
+- Right stick: a tilt on the ground in the direction pushed, an aerial in the air. It no longer smashes.
+- Smash: flick the left stick with attack, or press attack and special together (with a direction, or forward if none). Keep attack held to charge: power grows for one second, and the smash can be held back two more.
+- Grab: either stick throws, held or flicked, from the 7th frame of the hold; attack pummels. A grab holds for at least 30 frames. The CPU breaks out at a human mashing pace that rises with its level.
+- Flint's down special and Wren's companion swap hang in the air until they finish, once per time off the ground.
+- Only the jump buttons jump.
+
 ## Fighters push each other (2026-11-10)
 
 Two fighters standing on the same ground cannot walk or run through each other. Whoever moves in is held back and shoves the other along slowly (a heavier fighter is shoved less); fighters standing inside each other slide apart; nobody standing still is pushed off the solid stage. Ways past: roll, dodge, jump, or hit them. Numbers: `jf` / `jb` in each fighter's `st` and `JOSTLE` in `sim.js`. The box sizes follow the reference build's; the push strength is a guess.
@@ -93,7 +108,7 @@ The movement rules now work the way the reference build's do, with Emberfall's o
 | fall / fast fall | 1.55 / 2.48 | 1.82 / 2.91 | 1.12 / 1.79 | 1.78 / 2.85 | 1.6 / 2.53 |
 
 - Flint sits at the middle of the roster (all-rounder). Nib is near the fast end on the ground and falls fast (rushdown). Loom is slow on the ground, light on gravity, with three smaller air jumps and good drift (floaty). Hod is slow with poor air control and falls hard (heavy).
-- **Changed for balance:** Nib's up special was raised (4.3 to 4.55) to give back the recovery the lower jumps took away; Nib's weight 80 -> 84 and damage 0.9 -> 0.93 of the template; Loom's weight 80 -> 77; Flint's weight 92 -> 95 after the stage was narrowed.
+- **Changed for balance:** Nib's up special was raised (4.3 to 4.55) to give back the recovery the lower jumps took away; Nib's weight 80 -> 84 and damage 0.9 -> 0.93 of the template; Loom's weight 80 -> 77; Flint's weight 92 -> 95 after the stage was narrowed. Then, once grabs held long enough to be thrown (which favoured Hod): Hod's throws weakened (damage 11/13/10/8 to 9/11/9/7, growth 66/69/90/45 to 60/62/80/42) and weights set to Flint 92, Nib 87, Loom 83, Hod 122.
 - **Not known, so guessed:** the file with the build's shared constants (`common.prc`) is not on disk in readable form. Three things come from it: how many frames a dash waits before its burst (set to 1 here), the extra grip while skidding out of a run (set to none), and the turn-around rules. Landing lag (2 frames, 4 after a fast fall) was left as it was.
 
 ## Rules (2026-11-09)
@@ -107,11 +122,11 @@ The movement rules now work the way the reference build's do, with Emberfall's o
 | Tool | What it does | Result on 2026-11-09 |
 |---|---|---|
 | `npm test` | six seeded CPU matches looking for broken states, then `tests/rules.js`, then a 20-match `tests/fuzz.js` | passes |
-| `tests/rules.js` | 63 scripted checks of single rules with exact inputs, including the movement rules from platforms.ini, the match clock and (2026-11-10) each fighter's jump heights, full-hop pop, fast fall and ground speeds, and fighters pushing each other | all pass |
+| `tests/rules.js` | 73 scripted checks of single rules with exact inputs, including the movement rules from platforms.ini, the match clock and (2026-11-10) each fighter's jump heights, full-hop pop, fast fall and ground speeds, and fighters pushing each other | all pass |
 | `tests/movement.js` | measures every fighter's speeds, stopping distance, jump heights and air times in the running rules; `EMBERFALL_SIM=<file>` measures another copy of the rules | see Movement |
 | `tests/fuzz.js` | both fighters driven by random sticks and buttons; looks for crashes, broken numbers, impossible or stuck states | about 880,000 frames of random against random and 730,000 with the CPU on one side in a quarter of the matches, clean |
-| `tests/stats.js` | CPU-versus-CPU balance per form: wins, damage, KO percent, where stocks are lost, who beats whom | on the narrower two-platform stage with the new movement and pushing (2026-11-10), over three seeds of 960 matches each: Flint 46 to 49%, Nib 49 to 52%, Loom 51 to 52%, Hod 50 to 51%; average KO percent Hod 158, Flint 159, Loom 148, Nib 144 |
-| `tests/levels.js` | each CPU level against level 7, same fighter on both sides | wins for levels 1 to 9: 0, 0, 0, 2, 7, 35, 47, 67, 75% |
+| `tests/stats.js` | CPU-versus-CPU balance per form: wins, damage, KO percent, where stocks are lost, who beats whom | with grabs that hold and the new attack inputs (2026-11-10, evening state), over three seeds of 960 matches each: Flint 51 to 53%, Nib 46 to 49%, Loom 46 to 49%, Hod 50 to 53%; average KO percent Flint 159, Hod 157, Loom 152, Nib 147 |
+| `tests/levels.js` | each CPU level against level 7, same fighter on both sides | wins for levels 1 to 9 (before the last weight changes): 0, 0, 0, 3, 15, 30, 53, 63, 83% |
 | `tests/kotable.js` | KO percent of every hit | see Rules |
 | `tests/recovery.js` | CPU recovery from six spots off stage per form | 24 of 24 get back (also after the movement change) |
 | `tests/deaths.js` | traces of stocks lost without being in hitstun | found three CPU mistakes on 2026-11-09 (a ledge regrab loop, a tech press that became an air dodge, recovering out through the top), all fixed; what remains is long launches at high percent |

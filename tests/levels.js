@@ -2,6 +2,7 @@
 // often the level wins. The share should rise with the level and pass 50% at 7.
 // Usage: node tests/levels.js [matchesPerFighterPerLevel, default 15] [seed, default 31]
 const fs = require('fs'), path = require('path'), vm = require('vm');
+try { const os = require('os'); os.setPriority(os.constants.priority.PRIORITY_LOW); } catch (e) { /* fine */ }   // long runs give way to a game being played on this PC
 const root = path.join(__dirname, '..'), per = +process.argv[2] || 15;
 const ctx = new Proxy({}, { get: (t, k) => k in t ? t[k] : (k === 'createLinearGradient' || k === 'createRadialGradient') ? () => ({ addColorStop() {} }) : () => {}, set: (t, k, v) => { t[k] = v; return true; } });
 global.document = { getElementById: () => ({ getContext: () => ctx }) }; global.window = global; global.addEventListener = () => {}; global.requestAnimationFrame = () => {};

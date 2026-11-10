@@ -1,6 +1,7 @@
 // Why does a fighter die without being launched? Plays seeded CPU matches with one form fixed and prints the last
 // state changes before each death that did not happen in hitstun.   node tests/deaths.js <formIndex 0-3> [matches]
 const fs = require('fs'), path = require('path'), vm = require('vm');
+try { const os = require('os'); os.setPriority(os.constants.priority.PRIORITY_LOW); } catch (e) { /* fine */ }   // long runs give way to a game being played on this PC
 const root = path.join(__dirname, '..'), which = +process.argv[2] || 0, count = +process.argv[3] || 6;
 const ctx = new Proxy({}, { get: (t, k) => k in t ? t[k] : () => ({ addColorStop() {} }), set: (t, k, v) => { t[k] = v; return true; } });
 global.document = { getElementById: () => ({ getContext: () => ctx }) }; global.window = global; global.addEventListener = () => {}; global.requestAnimationFrame = () => {};

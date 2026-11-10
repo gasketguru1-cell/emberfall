@@ -3,6 +3,7 @@
 // Two positions: centre stage, and at the edge with the attacker hitting outward.
 // Usage: node tests/kotable.js [victimFormIndex 0-3, default 0 = Flint]
 const fs = require('fs'), path = require('path'), vm = require('vm');
+try { const os = require('os'); os.setPriority(os.constants.priority.PRIORITY_LOW); } catch (e) { /* fine */ }   // long runs give way to a game being played on this PC
 const root = path.join(__dirname, '..'), victim = +process.argv[2] || 0;
 const ctx = new Proxy({}, { get: (t, k) => k in t ? t[k] : () => ({ addColorStop() {} }), set: (t, k, v) => { t[k] = v; return true; } });
 global.document = { getElementById: () => ({ getContext: () => ctx }) }; global.window = global; global.addEventListener = () => {}; global.requestAnimationFrame = () => {};

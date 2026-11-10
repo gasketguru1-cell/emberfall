@@ -18,9 +18,15 @@ function drawHud() {
   g.textAlign = 'center';
   if (mode === 'countdown') { const n = countdown > 130 ? '3' : countdown > 90 ? '2' : countdown > 50 ? '1' : 'GO!'; big(n, H * 0.42, 110); }
   if (paused) { g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(0, 0, W, H); big('PAUSED', H * 0.45, 80); }
-  if (mode === 'over') { big(overT < 90 ? 'GAME!' : result, H * 0.42, 100); if (overT > 100) { g.font = '22px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Press Start or Attack', W / 2, H * 0.42 + 56); } }
+  if (mode === 'over') { big(overT < 90 ? 'GAME!' : result, H * 0.42, 100); if (overT > 100) { g.font = '22px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Press Start or Attack', W / 2, H * 0.42 + 56); drawUpdateNote(H * 0.42 + 80); } }
 }
 function big(t, y, sz) { g.font = `900 ${sz}px system-ui, sans-serif`; g.textAlign = 'center'; g.lineWidth = 10; g.strokeStyle = '#1a1230'; g.strokeText(t, W / 2, y); g.fillStyle = '#ffd98a'; g.fillText(t, W / 2, y); }
+/* Between matches only: a newer finished version of the game is waiting on the server. */
+function drawUpdateNote(y) {
+  if (typeof UPDATE_READY === 'undefined' || !UPDATE_READY) return;
+  g.textAlign = 'center'; g.font = 'bold 18px system-ui, sans-serif'; const t = 'A newer version is ready  ·  refresh this page (F5) to load it', w = g.measureText(t).width + 36;
+  g.fillStyle = 'rgba(40,110,60,.92)'; rr(W / 2 - w / 2, y, w, 32, 16); g.fill(); g.fillStyle = '#eaffea'; g.fillText(t, W / 2, y + 22);
+}
 function drawSelect() {
   const sv = { x: cam.x, y: cam.y, s: cam.s }; cam.x = 0; cam.y = 30; cam.s = 3.4; drawBg(); Object.assign(cam, sv);
   g.fillStyle = 'rgba(8,8,18,.55)'; g.fillRect(0, 0, W, H);
@@ -46,14 +52,15 @@ function drawSelect() {
   g.textAlign = 'center'; g.font = 'bold 22px system-ui, sans-serif'; g.fillStyle = '#fff';
   if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) g.fillText('Press Start (Enter) to fight', W / 2, 556);
   g.font = '15px system-ui, sans-serif'; g.fillStyle = '#cfc8e8';
-  g.fillText("Controller: stick move · A attack · B special · X/Y jump · ZL/ZR shield · L/R grab · right stick smash · + start · − swaps the A/B layout", W / 2, 582);
-  g.fillText("Keyboard: arrows move (Shift = walk) · Z attack · X special · C/V jump · Q/W shield · A/S grab · I J K L smash · Enter start", W / 2, 601);
+  g.fillText("Controller: stick move · A attack · B special · X/Y jump · ZL/ZR shield · L/R grab · right stick tilt · + start · − swaps the A/B layout", W / 2, 582);
+  g.fillText("Keyboard: arrows move (Shift = walk) · Z attack · X special · C/V jump · Q/W shield · A/S grab · I J K L tilt · Enter start", W / 2, 601);
   g.fillText("Jump then shield with a direction to wavedash · flick down to drop through platforms · release shield just before a hit to parry · mash to break a grab", W / 2, 620);
   g.fillText("Jump + attack together for a short-hop aerial · hold attack to chain jabs (Nib keeps a flurry going) · tilt the stick slightly up or down to angle a forward tilt", W / 2, 639);
   g.fillText("Grab out of a dash reaches further, out of a turn further still · jump on a head to spring off it · Nib can kick off the stage wall · shield just before a wall or the floor to tech", W / 2, 658);
   g.fillText("A worn shield leaves the head or feet open: tilt the stick gently to move it · back + attack out of a run turns and strikes · above 100% getting up from the ledge is slower", W / 2, 677);
-  g.fillText("On this screen: Up / Down sets the CPU level · only the jump buttons jump, never the stick · the ledge protects longer after a long fall and less when damaged", W / 2, 696);
+  g.fillText("Smash: flick the stick with attack, or press attack + special together; keep attack held to charge · after a grab, either stick throws · Up / Down here sets the CPU level", W / 2, 696);
   g.fillStyle = '#8f88aa'; g.fillText('Tools: B shows hitboxes · P freezes · O steps one frame · M switches 2D / 3D', W / 2, 715);
+  drawUpdateNote(14);
 }
 function drawDebugText() {
   if (!DBG.boxes && !DBG.step) return;

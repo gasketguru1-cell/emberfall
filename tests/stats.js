@@ -3,6 +3,7 @@
 // Small samples mislead: at 10 matches per pairing the win rates move by 5 points or more between runs, and results
 // shift with the seed. Use 60 or more, and more than one seed, before changing a fighter because of them.
 const fs = require('fs'), path = require('path'), vm = require('vm');
+try { const os = require('os'); os.setPriority(os.constants.priority.PRIORITY_LOW); } catch (e) { /* fine */ }   // long runs give way to a game being played on this PC
 const root = path.join(__dirname, '..'), per = +process.argv[2] || 60;
 const ctx = new Proxy({}, { get: (t, k) => k in t ? t[k] : (k === 'createLinearGradient' || k === 'createRadialGradient') ? () => ({ addColorStop() {} }) : () => {}, set: (t, k, v) => { t[k] = v; return true; } });
 global.document = { getElementById: () => ({ getContext: () => ctx }) };

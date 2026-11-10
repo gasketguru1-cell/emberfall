@@ -3,6 +3,7 @@
 // random hand against the real CPU, so the CPU also meets opponents doing things it would never do itself.
 // Usage: node tests/fuzz.js [matches, default 40] [seed, default 2024]      (exit code 1 on any problem)
 const fs = require('fs'), path = require('path'), vm = require('vm');
+try { const os = require('os'); os.setPriority(os.constants.priority.PRIORITY_LOW); } catch (e) { /* fine */ }   // long runs give way to a game being played on this PC
 const root = path.join(__dirname, '..'), matches = +process.argv[2] || 40, seed0 = +process.argv[3] || 2024;
 const ctx = new Proxy({}, { get: (t, k) => k in t ? t[k] : (k === 'createLinearGradient' || k === 'createRadialGradient') ? () => ({ addColorStop() {} }) : () => {}, set: (t, k, v) => { t[k] = v; return true; } });
 global.document = { getElementById: () => ({ getContext: () => ctx }) }; global.window = global; global.addEventListener = () => {}; global.requestAnimationFrame = () => {};

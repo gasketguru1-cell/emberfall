@@ -24,11 +24,12 @@ vm.runInThisContext(`
   function airborne(f, x, y) { f.x = x; f.y = y; f.vx = f.vy = 0; f.grounded = false; f.plat = null; f.set('air'); }
   function check(name, ok, detail) { results.push([ok, name, detail || '']); }
   const tap = (at, len) => tt => tt >= at && tt < at + (len || 2);
+  const smash = (i, x, y) => { i.lx = x || 0; i.ly = y || 0; i.atk = true; i.sm = true; };   /* a forward (or up / down) smash, as the CPU inputs it */
 
   /* ---- Armour: Hod's forward smash takes a weak hit without flinching, and a strong one breaks it ---- */
   {
     const [hod, fl] = setup(HOD, FL, 0, 14); const win = hod.form.moves.fsmash.armor; let during = null;
-    SCRIPT[0] = (i, tt) => { if (tap(0)(tt)) i.cx = 1; };
+    SCRIPT[0] = (i, tt) => { if (tap(0)(tt)) smash(i, 1); };
     SCRIPT[1] = (i, tt) => { if (tap(win[0] - 2)(tt)) i.atk = true; };
     run(80, () => { if (hod.pct > 0 && during === null) during = hod.state + ':' + hod.mname + ' at move frame ' + hod.mf; });
     check('armour: weak hit is absorbed', hod.pct > 0 && during !== null && during.startsWith('attack:fsmash'), 'Hod took ' + hod.pct.toFixed(1) + '% while ' + during + ' (armour frames ' + win.join('-') + ')');
@@ -36,14 +37,14 @@ vm.runInThisContext(`
   }
   {
     const [hod, fl] = setup(HOD, FL, 0, 14); hod.pct = 200; let state = null;
-    SCRIPT[0] = (i, tt) => { if (tap(4)(tt)) i.cx = 1; };
-    SCRIPT[1] = (i, tt) => { if (tap(0)(tt)) i.cx = -1; };
+    SCRIPT[0] = (i, tt) => { if (tap(4)(tt)) smash(i, 1); };
+    SCRIPT[1] = (i, tt) => { if (tap(0)(tt)) smash(i, -1); };
     run(60, () => { if (hod.pct > 200 && state === null) state = hod.state; });
     check('armour: a strong hit breaks through', state === 'hurt', 'Hod at 200% hit by a forward smash -> ' + state);
   }
   {
     const [hod, fl] = setup(HOD, FL, 0, 14); let state = null;   /* outside the armour window the same weak hit interrupts */
-    SCRIPT[0] = (i, tt) => { if (tap(3)(tt)) i.cx = 1; };
+    SCRIPT[0] = (i, tt) => { if (tap(3)(tt)) smash(i, 1); };
     SCRIPT[1] = (i, tt) => { if (tap(0)(tt)) i.atk = true; };
     run(40, () => { if (hod.pct > 0 && state === null) state = hod.state + ' at move frame ' + hod.mf; });
     check('armour: no protection before the window', state !== null && state.startsWith('hurt'), 'jab landed first -> Hod ' + state);
@@ -80,7 +81,7 @@ vm.runInThisContext(`
     const xs = [];
     for (const flick of [0, 1, -1]) {
       const [fl, nib] = setup(FL, NIB, 0, 10); let k = 0, x = null, n = 0;
-      SCRIPT[0] = (i, tt) => { if (tap(0)(tt)) i.cx = 1; };
+      SCRIPT[0] = (i, tt) => { if (tap(0)(tt)) smash(i, 1); };
       SCRIPT[1] = (i, tt, f) => { if (flick && f.state === 'hurt' && f.hitlag > 0) { if (k++ % 2 === 1) i.lx = flick; } };
       run(70, () => { if (nib.state === 'hurt' && nib.hitlag === 0 && x === null) { x = nib.x; n = nib.sdi; return false; } });
       xs.push([x, n]);
@@ -123,7 +124,7 @@ vm.runInThisContext(`
   /* ---- Clank: two equal ground attacks meeting cancel out ---- */
   {
     const [a, b] = setup(FL, FL, -12, 12); let both = false;
-    SCRIPT[0] = (i, tt) => { if (tap(0)(tt)) i.cx = 1; }; SCRIPT[1] = (i, tt) => { if (tap(0)(tt)) i.cx = -1; };
+    SCRIPT[0] = (i, tt) => { if (tap(0)(tt)) smash(i, 1); }; SCRIPT[1] = (i, tt) => { if (tap(0)(tt)) smash(i, -1); };
     run(50, () => { if (a.state === 'rebound' && b.state === 'rebound') both = true; });
     check('clank: equal smashes cancel, nobody is hurt', both && a.pct === 0 && b.pct === 0, 'both recoiled: ' + both + ', damage ' + a.pct + ' / ' + b.pct);
   }
@@ -272,6 +273,43 @@ vm.runInThisContext(`
     check('push: nobody standing still is shoved off the stage', eb.grounded && eb.x <= EDGE && ea.x < eb.x, 'the one at the edge is at ' + eb.x.toFixed(1) + ' of ' + EDGE + (eb.grounded ? ', standing' : ', FELL'));
     const [la, lb] = setup(FL, FL, 0, 0.5); lb.face = -1; run(30);
     check('push: fighters standing inside each other slide apart', Math.abs(lb.x - la.x) >= la.st.jf + lb.st.jf - 0.01, 'apart by ' + Math.abs(lb.x - la.x).toFixed(1) + ' after 30 frames');
+  }
+
+  /* ---- Grabs and throws: a grab always holds long enough to throw, and either stick throws, held or flicked ---- */
+  {
+    const grab = after => { const [a, v] = setup(FL, FL, 0, 9); let held = 0, thrown = null;
+      SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 4) i.grb = true; if (a.state === 'hold' && after) after(i); };
+      SCRIPT[1] = (i, tt, f) => { if (f.state !== 'held') return; i.grb = tt % 2 === 0; i.atk = tt % 2 === 1; i.lx = tt % 4 < 2 ? 1 : -1; };   /* the victim mashes as hard as anything can, at 0% */
+      run(140, () => { if (a.state === 'hold') held++; if (a.state === 'throw' && thrown === null) thrown = a.throwK; }); return { held, thrown, pct: v.pct }; };
+    const idle = grab(null), stick = grab(i => { i.ly = 1; }), cf = grab(i => { i.cx = 1; }), cb = grab(i => { i.cx = -1; }), cu = grab(i => { i.cy = 1; }), cd = grab(i => { i.cy = -1; });
+    check('grab: holds at least ' + GRAB_MIN + ' frames at 0% against any mashing', idle.thrown === null && idle.held >= GRAB_MIN - 1 && idle.held < 60, 'held for ' + idle.held + ' frames');
+    check('throw: a held left stick throws at 0%', stick.thrown === 'u' && stick.pct > 0 && stick.held < 12, 'threw ' + stick.thrown + ' after ' + stick.held + ' frames of holding, ' + stick.pct.toFixed(1) + '% dealt');
+    check('throw: the right stick throws in all four directions', cf.thrown === 'f' && cb.thrown === 'b' && cu.thrown === 'u' && cd.thrown === 'd' && cf.pct > 0, 'right stick forward / back / up / down -> ' + [cf, cb, cu, cd].map(q => q.thrown).join(' / '));
+  }
+
+  /* ---- Right stick is a tilt stick; smashes come from a flick with attack or attack + special; attack held charges ---- */
+  {
+    const act = (script, n) => { const [f] = setup(FL, FL, 0, 50); let name = null, face = 0, air = false, charge = 0, hold = 0; SCRIPT[0] = script;
+      run(n || 30, () => { if (f.state === 'attack') { if (name === null) { name = f.mname; face = f.face; air = !f.grounded; } charge = Math.max(charge, f.charge); if (f.move && f.move.chg && f.mf === f.move.chg) hold++; } }); return { name, face, air, charge, hold }; };
+    const at = (k, v) => (i, tt) => { if (tt >= 2 && tt < 4) i[k] = v; };
+    const cr = act(at('cx', 1)), cl = act(at('cx', -1)), cu = act(at('cy', 1)), cd = act(at('cy', -1));
+    check('right stick: tilts on the ground', cr.name === 'ftilt' && cr.face === 1 && cl.name === 'ftilt' && cl.face === -1 && cu.name === 'utilt' && cd.name === 'dtilt', 'right / left / up / down -> ' + [cr, cl, cu, cd].map(q => q.name + (q.face < 0 ? ' (turned)' : '')).join(', '));
+    const flick = act((i, tt) => { if (tt >= 2 && tt < 4) { i.lx = 1; i.atk = true; } }), slow = act((i, tt) => { if (tt >= 2) i.lx = 0.5; if (tt >= 12 && tt < 14) i.atk = true; });
+    const flickUp = act((i, tt) => { if (tt >= 2 && tt < 4) { i.ly = 1; i.atk = true; } }), ab = act((i, tt) => { if (tt >= 2 && tt < 4) { i.atk = true; i.spc = true; } }), abUp = act((i, tt) => { if (tt >= 2 && tt < 4) { i.ly = 1; i.atk = true; i.spc = true; } });
+    check('smash: a flick with attack smashes, a held stick tilts', flick.name === 'fsmash' && flickUp.name === 'usmash' && slow.name === 'ftilt', 'flick + attack -> ' + flick.name + ', flick up + attack -> ' + flickUp.name + ', stick held then attack -> ' + slow.name);
+    check('smash: attack + special together', ab.name === 'fsmash' && abUp.name === 'usmash', 'no direction -> ' + ab.name + ', up -> ' + abUp.name);
+    const tapped = act((i, tt) => { if (tt >= 2 && tt < 4) { i.lx = 1; i.atk = true; } }, 80), half = act((i, tt) => { if (tt >= 2 && tt < 4) i.lx = 1; if (tt >= 2 && tt < 40) i.atk = true; }, 120), full = act((i, tt) => { if (tt >= 2 && tt < 4) i.lx = 1; if (tt >= 2) i.atk = true; }, 300);
+    check('smash: holding attack charges for a second, holds for two more', tapped.charge === 0 && half.charge > 20 && half.charge < 40 && full.charge === 60 && full.hold === SMASH_HOLD + 1, 'charge: tapped ' + tapped.charge + ', held 38 frames ' + half.charge + ', held throughout ' + full.charge + ' (released after ' + (full.hold - 1) + ' frames)');
+    const hopAir = act((i, tt) => { if (tt >= 2 && tt < 8) i.jmp = true; if (tt >= 3 && tt < 5) i.cx = 1; }, 20);
+    check('right stick: in the start-up of a jump it gives an aerial', hopAir.name === 'fair' && hopAir.air, String(hopAir.name) + (hopAir.air ? ' in the air' : ' on the ground'));
+  }
+
+  /* ---- Flint's and Wren's down specials hang in the air until they finish, once per time off the ground ---- */
+  for (const [name, A, len] of [['Flint', FL, 56], ['Wren (Nib)', NIB, 34]]) {
+    const [f] = setup(A, FL, 0, 50); airborne(f, 0, 60); f.vy = -1; const fi0 = f.fi; let y0 = null, drop1 = 0, frames1 = 0, drop2 = 0, second = false, n = 0;
+    SCRIPT[0] = (i, tt) => { if ((tt >= 2 && tt < 4) || (tt >= len + 12 && tt < len + 14)) { i.ly = -1; i.spc = true; } };
+    run(len + 30, () => { n++; if (f.state === 'attack' && f.mname === 'dspec') { if (n < len + 8) { if (y0 === null) y0 = f.y; drop1 = Math.max(drop1, y0 - f.y); frames1++; } else { if (!second) { second = true; y0 = f.y; } drop2 = Math.max(drop2, y0 - f.y); } } });
+    check(name + ': down special hangs in the air, once', frames1 >= len - 2 && drop1 < 0.01 && second && drop2 > 5 && (A === FL || f.fi !== fi0), 'first use: ' + frames1 + ' frames, fell ' + drop1.toFixed(1) + '; second use before landing: fell ' + drop2.toFixed(1));
   }
 
   const softPlats = PLATS.splice(1);   /* the movement checks run on the bare main stage, so no jump lands on a platform */
