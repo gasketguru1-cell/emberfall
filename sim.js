@@ -525,14 +525,22 @@ const SCUTTLE = {
 /* FOWL-DATA-BEGIN (written by tools/fowls-gen.js from the owner's move data; do not edit by hand) */
 const FOWL = {"combined":{"jab_1":{"s":3,"a":2,"e":7,"d":2,"ang":68,"k":40,"b":12,"g":{"x":0.78,"y":0.18,"r":0.18,"in":[0.2,0.18]}},"jab_2":{"s":3,"a":2,"e":8,"d":2,"ang":72,"k":40,"b":14,"g":{"x":0.9,"y":0.2,"r":0.18,"in":[0.3,0.2]}},"jab_finisher":{"s":5,"a":3,"e":14,"d":3,"ang":50,"k":98,"b":25,"g":{"x":0.73,"y":0.25,"r":0.36}},"forward_tilt":{"s":7,"a":3,"e":17,"d":8,"ang":42,"k":84,"b":27,"g":{"x":1.4,"y":0.25,"r":0.18,"in":[0.3,0.25]}},"up_tilt":{"s":6,"a":5,"e":16,"d":7,"ang":91,"k":75,"b":19,"g":{"x":0,"y":1.2,"r":0.27,"in":[0.35,0.2]}},"down_tilt":{"s":5,"a":3,"e":14,"d":6,"ang":76,"k":55,"b":18,"g":{"x":0.95,"y":-0.4,"r":0.17,"in":[0.15,-0.4]}},"dash_attack":{"s":9,"a":5,"e":22,"d":9,"ang":52,"k":84,"b":40,"g":{"x":0.62,"y":0.1,"r":0.475}},"forward_smash":{"s":18,"a":3,"e":28,"d":17,"ang":43,"k":108,"b":35,"g":{"x":1,"y":0.3,"r":0.515}},"up_smash":{"s":13,"a":5,"e":27,"d":15,"ang":87,"k":104,"b":32,"g":{"x":0.08,"y":1.09,"r":0.565}},"down_smash":{"s":14,"a":4,"e":28,"d":13,"ang":33,"k":101,"b":37,"g":{"x":1.05,"y":-0.28,"r":0.3,"in":[0.2,-0.28],"rear":[-1.05,-0.28,0.3]}},"neutral_air":{"s":5,"a":10,"e":16,"d":8,"ang":58,"k":78,"b":28,"g":{"x":0,"y":0,"r":0.72}},"forward_air":{"s":9,"a":4,"e":23,"d":10,"ang":48,"k":91,"b":30,"g":{"x":1.5,"y":0.06,"r":0.19,"in":[0.45,0.06]}},"back_air":{"s":7,"a":3,"e":21,"d":11,"ang":35,"k":104,"b":30,"g":{"x":-1.25,"y":0.28,"r":0.25,"in":[-0.25,0.28]}},"up_air":{"s":7,"a":5,"e":18,"d":9,"ang":80,"k":83,"b":24,"g":{"x":0,"y":1.01,"r":0.42500000000000004}},"down_air_wooden_red_dummy":{"s":13,"a":2,"e":24,"d":12,"ang":270,"k":93,"b":21,"g":{"x":0,"y":-0.45,"r":0.22}},"grab":{"s":8,"a":2,"e":22,"d":0,"ang":0,"k":0,"b":0,"g":{"x":1.01,"y":0.19,"r":0.26,"in":[0.22,0.19]}},"pummel":{"s":4,"a":2,"e":8,"d":1.5,"ang":0,"k":0,"b":0,"g":{"x":0,"y":0,"r":0.25}},"forward_throw":{"s":9,"a":1,"e":17,"d":9,"ang":42,"k":100,"b":48,"g":{"x":0,"y":0,"r":0.25}},"back_throw":{"s":11,"a":1,"e":19,"d":10,"ang":138,"k":107,"b":52,"g":{"x":0,"y":0,"r":0.25}},"up_throw":{"s":10,"a":1,"e":16,"d":8,"ang":89,"k":90,"b":50,"g":{"x":0,"y":0,"r":0.25}},"down_throw":{"s":12,"a":1,"e":19,"d":7,"ang":75,"k":60,"b":36,"g":{"x":0,"y":0,"r":0.25}}},"solo":{"jab":{"s":3,"a":2,"e":10,"d":3,"ang":58,"k":50,"b":12,"g":{"x":0.48,"y":0.06,"r":0.25}},"forward_tilt":{"s":6,"a":3,"e":17,"d":5,"ang":45,"k":65,"b":18,"g":{"x":0.54,"y":0.15,"r":0.3}},"up_tilt":{"s":6,"a":4,"e":16,"d":4,"ang":90,"k":60,"b":15,"g":{"x":0.12,"y":0.6,"r":0.33999999999999997}},"down_tilt":{"s":5,"a":3,"e":16,"d":4,"ang":72,"k":52,"b":16,"g":{"x":0.56,"y":-0.31,"r":0.25,"in":[0.12,-0.31]}},"dash_attack":{"s":9,"a":4,"e":23,"d":6,"ang":60,"k":78,"b":25,"g":{"x":0.49,"y":0.04,"r":0.375}},"forward_smash":{"s":15,"a":3,"e":28,"d":9,"ang":42,"k":95,"b":28,"g":{"x":0.62,"y":0.18,"r":0.41000000000000003}},"up_smash":{"s":12,"a":4,"e":26,"d":8,"ang":88,"k":87,"b":25,"g":{"x":0,"y":0.68,"r":0.42500000000000004}},"down_smash":{"s":13,"a":4,"e":27,"d":8,"ang":35,"k":92,"b":27,"g":{"x":0.5,"y":-0.25,"r":0.27,"rear":[-0.5,-0.25,0.27]}},"neutral_air":{"s":6,"a":8,"e":19,"d":5,"ang":62,"k":65,"b":19,"g":{"x":0,"y":0,"r":0.495}},"forward_air":{"s":8,"a":3,"e":22,"d":6,"ang":46,"k":73,"b":22,"g":{"x":0.55,"y":0.07,"r":0.275}},"back_air":{"s":8,"a":3,"e":22,"d":6,"ang":39,"k":76,"b":25,"g":{"x":-0.48,"y":0.1,"r":0.28}},"up_air":{"s":7,"a":4,"e":18,"d":5,"ang":82,"k":62,"b":20,"g":{"x":0.04,"y":0.64,"r":0.31}},"down_air":{"s":13,"a":3,"e":26,"d":6,"ang":270,"k":72,"b":18,"g":{"x":0,"y":-0.6,"r":0.32499999999999996}},"grab":{"s":8,"a":2,"e":24,"d":0,"ang":0,"k":0,"b":0,"g":{"x":0.55,"y":0.05,"r":0.25,"in":[0.2,0.05]}},"pummel":{"s":4,"a":2,"e":9,"d":1,"ang":0,"k":0,"b":0,"g":{"x":0,"y":0,"r":0.25}},"forward_throw":{"s":10,"a":1,"e":20,"d":5,"ang":45,"k":73,"b":28,"g":{"x":0,"y":0,"r":0.25}},"back_throw":{"s":12,"a":1,"e":20,"d":6,"ang":137,"k":78,"b":33,"g":{"x":0,"y":0,"r":0.25}},"up_throw":{"s":11,"a":1,"e":18,"d":5,"ang":89,"k":60,"b":29,"g":{"x":0,"y":0,"r":0.25}},"down_throw":{"s":12,"a":1,"e":18,"d":4,"ang":72,"k":55,"b":25,"g":{"x":0,"y":0,"r":0.25}}},"forms":[{"name":"Rusty","weight":100,"run":1,"air":1,"grav":1,"nb":{"s":10,"e":18,"d":6,"v":[0.38],"life":65,"ang":40},"sb":{"s":12,"aim":20,"d":13,"v":0.55,"ticks":32},"fs":{"damage":18,"startup":18,"reach_W":1.22,"angle":40},"nair":9,"dash":9},{"name":"Bolt","weight":88,"run":1.15,"air":1.11,"grav":1.04,"nb":{"s":8,"e":20,"d":3,"v":[0.42,0.48],"life":52,"ang":62},"sb":{"s":10,"aim":16,"d":9,"v":0.72,"ticks":28},"fs":{"damage":14,"startup":14,"reach_W":1.34,"angle":48},"nair":8,"dash":8},{"name":"Cinder","weight":115,"run":0.86,"air":0.88,"grav":1.08,"nb":{"s":17,"e":25,"d":9,"v":[0.3],"life":50,"ang":50},"sb":{"s":17,"aim":22,"d":18,"v":0.45,"ticks":40},"fs":{"damage":21,"startup":23,"reach_W":1.17,"angle":42},"nair":11,"dash":10},{"name":"Pip","weight":87,"run":1.06,"air":1.12,"grav":0.97,"nb":{"s":12,"e":20,"d":null,"v":[0.34],"life":48,"ang":60},"sb":{"s":12,"aim":18,"d":5,"v":0.54,"ticks":33},"fs":{"damage":15,"startup":18,"reach_W":1.26,"angle":47},"nair":8,"dash":8},{"name":"Pearl","weight":96,"run":0.96,"air":1.08,"grav":0.87,"nb":{"s":15,"e":24,"d":5,"v":[0.28],"life":55,"ang":78},"sb":{"s":13,"aim":20,"d":8,"v":0.47,"ticks":37},"fs":{"damage":16,"startup":18,"reach_W":1.27,"angle":44},"nair":8,"dash":8}],"special":{"Rusty":[{"s":9,"a":3,"e":19,"d":3},{"s":11,"a":5,"e":21,"d":6},{"s":6,"a":1,"e":26,"d":2}],"Bolt":[{"s":7,"a":6,"e":16,"d":5},{"s":9,"a":7,"e":24,"d":5},{"s":8,"a":4,"e":28,"d":3}],"Cinder":[{"s":15,"a":5,"e":25,"d":6},{"s":14,"a":10,"e":31,"d":8},{"s":15,"a":4,"e":32,"d":6}],"Pip":[{"s":12,"a":3,"e":19,"d":5},{"s":10,"a":7,"e":25,"d":6},{"s":8,"a":10,"e":29,"d":3}],"Pearl":[{"s":15,"a":2,"e":27,"d":6},{"s":10,"a":7,"e":23,"d":5},{"s":7,"a":13,"e":31,"d":2}]},"upb":{"name":"Catastrophic Launch","startup":7,"charge_max_frames":45,"manual_release_required":true,"charge_damage_points":[[0,8],[10,8],[25,13],[44,18],[45,24]],"direction":"full 360 degrees, using main stick only after initiating Up+B","flight_ticks":"12-38 depending charge, tune by engine W","initial_velocity_W_per_tick":"0.34-0.80 scaled smoothly with charge","max_active_hitbox":"ellipsoid 0.65W x 0.57W around compound entity, one hit per opponent","landing_lag_frames":28,"ground_collision":"shallow hit -> deterministic skid; steep hit -> 1 reduced-energy bounce, no recursive energy gain","charge_physics":"gravity remains on (reduced 25%) and horizontal traction reduces; cannot suspend indefinitely","state":"unavailable once per airtime; reset on landing/ledge normal recovery; hold charge at cap without auto-launch, until button released or interrupted","kill_tier":"at max charge target around Flare Blitz-level feel, not guaranteed identical damage or KO percent","armor":"none"}};
 /* FOWL-DATA-END */
-/* ---------- Furious Fowls (the owner's document, assets/fowls/source/spec.md) ----------
-   One fighter in two shapes. Combined: a living slingshot with one of five birds in its pouch (forms 0 to 4). Side special
-   fires the bird itself: control goes with the bird, which then fights alone as a smaller, weaker fighter (forms 5 to 9)
-   while the empty slingshot waits where it was. Down special beside the slingshot puts the bird back. Down special while
-   combined changes bird. One damage meter and one set of stocks throughout.
-   Every frame count, damage, angle and knockback number is the document's (FOWL, above). W is the slingshot's width and
-   B a lone bird's; speeds the document gives in W a tick are scaled by FV so a launch crosses about half the stage. */
-const FW = 10, FB = 6.5, FV = 4.5, FUP = 2.5;   /* FUP scales the charged launch: a full charge carries about 75, well short of the ceiling */
+/* ---------- Furious Fowls (the owner's guides: assets/fowls/source/overhaul-v3.md and special-moves-bible-v1.md) ----------
+   One fighter in two shapes. In the slingshot (forms 0 to 4) a skinny living slingshot carries one of five birds in its pouch;
+   alone (forms 5 to 9) the bird fights by itself after Side B fires it, while the empty slingshot waits where it was.
+   One damage meter and one set of stocks throughout. Internally the russet bird is 'Rusty' (the game already has a fighter
+   called Flint); everything the player sees calls it Flint.
+   Slingshot form:  Neutral B  bird selector (tap: next bird; hold: a five-way wheel, point and let go)
+                    Side B     fire the living bird; control goes with it, no flight timer
+                    Up B       Catapult Cyclone: charge, aim, and the whole rig spins end over end along the aim
+                    Down B     each bird's own slingshot technique (Brace & Break, Skitter Step, Anvil Drop, Orbit Parade, Nest Marker)
+                    Neutral air  Sling Spin: the whole rig spins end over end in place, dragging hits and a finisher
+   Bird alone:      Neutral B, Side B, Up B are the bird's own; Down B hops back into the slingshot when close.
+   Frame data, damage and hit counts are the guides'. Launch angles and knockback the guides leave open come from the first
+   move data (FOWL, above). W is the slingshot's width (10) and B a lone bird's (6.5). */
+const FW = 10, FB = 6.5, FUP = 2.5, FP = 7.8;   /* FUP scales the Cyclone's flight; FP is the height of the rig's middle, the pivot of both spins */
+const FOWL_LABEL = { Rusty: 'Flint', Bolt: 'Bolt', Cinder: 'Cinder', Pip: 'Pip', Pearl: 'Pearl' };
+const FOWL_ROLE = { Rusty: 'Brawler', Bolt: 'Speedster', Cinder: 'Heavyweight', Pip: 'Trickster trio', Pearl: 'Aerial control' };
 function fowlHit(q, unit, cy, extra) {
   const g = q.g || { x: 0, y: 0, r: 0.25 }, h = Object.assign({ f0: q.s + 1, f1: q.s + q.a, x: +(g.x * unit).toFixed(1), y: +(cy + g.y * unit).toFixed(1), r: +Math.max(2.4, g.r * unit).toFixed(1), d: q.d, a: q.ang, b: q.b, k: q.k }, extra);
   if (g.in) h.in = [+(g.in[0] * unit).toFixed(1), +(cy + g.in[1] * unit).toFixed(1)]; return h;
@@ -547,89 +555,316 @@ function fowlNormals(m, src, unit, cy, jabs) {
   for (const [k, id] of [['f', 'forward_throw'], ['b', 'back_throw'], ['u', 'up_throw'], ['d', 'down_throw']]) { const q = src[id]; m.throws[k] = { d: q.d, a: q.ang, b: q.b, k: q.k }; }
   return m;
 }
-/* a later, weaker part of a lingering hit */
 function fowlLate(mv, d) { const h = mv.h[0], cut = h.f0 + Math.max(1, Math.round((h.f1 - h.f0) * 0.35)); mv.h.push(Object.assign({}, h, { f0: cut + 1, d, k: Math.round(h.k * 0.8), part: 'late' })); h.f1 = cut; }
 function fowlBoom(p) { const b = p.boom; PROJ.push({ x: p.x, y: p.y, vx: 0, vy: 0, grav: 0, life: 4, owner: p.owner, face: p.face, r: b.r, ground: 'pass', plat: null, kind: 'blast', h: { d: b.d, a: 70, b: 40, k: b.k || 70, id: p.h.id + ':boom' } }); spark(p.x, p.y, '#ffb347', 18, 2); beep(120, 0.2, 'sawtooth', 0.06, 0.5); }
-function fowlAmmo(f, b, second) {
-  const nb = b.nb, v = nb.v[second ? 1 : 0] * FV, base = { kind: 'dummy', tag: 'fowl', oy: 8, vx: v, r: 2.2, life: nb.life };
-  if (b.name === 'Rusty') shoot(f, Object.assign(base, { max: 2, h: { d: nb.d, a: nb.ang, b: 25, k: 90 } }));
-  else if (b.name === 'Bolt') shoot(f, Object.assign(base, { max: 4, r: 1.6, h: { d: nb.d, a: nb.ang, b: 15, k: 40 } }));
-  else if (b.name === 'Cinder') shoot(f, Object.assign(base, { max: 1, r: 2.6, vy: 1.3, grav: 0.07, boom: { r: 0.64 * FW, d: nb.d, k: 80 }, h: { d: nb.d, a: nb.ang, b: 40, k: 80 } }));
-  else if (b.name === 'Pip') shoot(f, Object.assign(base, { max: 3, split: 12, h: { d: 3, a: nb.ang, b: 20, k: 45 } }));
-  else shoot(f, Object.assign(base, { max: 1, boom: { r: 0.55 * FW, d: 5, k: 55 }, h: { d: 5, a: nb.ang, b: 22, k: 50 } }));   /* Pearl: the dummy, then its egg; 10% at most together */
-  beep(480, 0.06, 'triangle', 0.04, 0.9);
-}
-function fowlLaunch(f, b) {
-  const a = (f.fowlAim || 0) * Math.PI / 180, sp = b.sb.v * FV;
-  f.sling = { x: f.x, y: f.y, face: f.face, vy: 0, plat: f.grounded ? f.plat : null, lost: 0 };
-  f.fi += 5; f.y += 6; f.grounded = false; f.plat = null; f.startMove('launch'); f.flyV = [Math.cos(a) * sp * f.face, Math.sin(a) * sp]; f.vx = f.flyV[0]; f.vy = f.flyV[1]; f.flyB = false; f.flyD = b.sb.d;
-  spark(f.x, f.y, '#fff', 14, 2); beep(300, 0.12, 'square', 0.06, 1.6);
-}
-function fowlAbility(f, name) {   /* the one mid-flight action each bird has */
-  f.flyB = true; const id = { id: 'fowl:ability' };
-  if (name === 'Rusty') shoot(f, { kind: 'blast', ox: 0.01, oy: 3, vx: 0, r: 0.85 * FW, life: 3, h: { d: 3, a: 60, b: 45, k: 30 } });
-  else if (name === 'Bolt') { const k = 1 + 0.38 / 0.72; f.flyV = [f.flyV[0] * k, f.flyV[1] * k]; f.flyD = 14; }
-  else if (name === 'Cinder') { shoot(f, { kind: 'blast', ox: 0.01, oy: 3, vx: 0, r: 9, life: 4, h: { d: 16, a: 65, b: 45, k: 92 } }); f.flyV = [f.flyV[0] * 0.2, 0.18 * FV]; f.flyD = 0; f.mf = Math.max(f.mf, f.move.t - 8); shake = Math.max(shake, 6); }
-  else if (name === 'Pip') { for (const dy of [5, -5]) shoot(f, { kind: 'clone', ox: 0.01, oy: 3.5 + dy, vx: Math.abs(f.flyV[0]), vy: f.flyV[1], r: 3, life: 24, h: { d: 3, a: 50, b: 25, k: 40 } }); }
-  else { shoot(f, { kind: 'egg', ox: 0.01, oy: 0, vx: 0, vy: -0.4, grav: 0.09, r: 2.2, life: 90, boom: { r: 0.55 * FW, d: 9, k: 70 }, h: { d: 9, a: 70, b: 35, k: 70 } }); f.flyV = [f.flyV[0], f.flyV[1] + 0.16 * FV]; }
-  spark(f.x, f.y + 3, '#ffe9a8', 12, 1.6); beep(640, 0.08, 'triangle', 0.05, 1.3);
-}
 function fowlRejoin(f) { const s = f.sling; f.x = s.x; f.y = s.y; f.fi -= 5; f.sling = null; f.move = null; f.vx = f.vy = 0; f.grounded = !!s.plat; f.plat = s.plat; f.set(f.grounded ? 'idle' : 'air'); spark(f.x, f.y + 8, '#fff', 12, 1.4); beep(520, 0.08, 'triangle', 0.05, 1.2); }
 function fowlSlings() {   /* the empty slingshot: it falls to the floor, and comes back by the nearest ledge if it is lost */
   for (const f of F) { const s = f.sling; if (!s) continue;
     if (!s.plat) { const y0 = s.y; s.vy = Math.max(s.vy - 0.1, -2.4); s.y += s.vy; for (const q of PLATS) if (y0 >= q.y && s.y <= q.y && s.x >= q.x0 && s.x <= q.x1) { s.plat = q; s.y = q.y; s.vy = 0; } }
     if (s.y < BLAST.b + 10 && ++s.lost > 45) { s.x = clamp(s.x, -EDGE + 8, EDGE - 8); s.y = 0; s.plat = MAIN; s.vy = 0; s.lost = 0; spark(s.x, 6, '#fff', 14, 1.6); } }
 }
+const edge = f => f.ctl.c.spc && !f.ctl.p.spc;   /* special pressed this very frame */
+const opp = f => F[1 - f.idx];
+const blocked = f => { const o = opp(f); return !!o && (o.state === 'shield' || o.state === 'shieldstun'); };
+/* a Pip double: the one Pip model again, moved by a fixed rule (track) from its owner each frame; ghost doubles cannot hit */
+function pipMate(f, track, life, h, extra) { PROJ.push(Object.assign({ x: f.x, y: f.y, vx: 0, vy: 0, grav: 0, life, owner: f.idx, face: f.face, r: 2.6, ground: 'pass', plat: null, kind: 'pipmate', track, ghost: !h, h: h ? Object.assign({ id: 'Pip:mate' }, h) : { d: 0, a: 0, b: 0, k: 0 } }, extra)); }
+
+/* ---- the slingshot's normals, per bird: [first active, last active, damage, recovery after, landing lag] (overhaul v3, section 5) ---- */
+const FN = {
+  Rusty: { jab: [[4, 5, 2], [6, 7, 2], [8, 10, 4]], jr: 14, ftilt: [8, 11, 8, 16], utilt: [7, 10, 7, 17], dtilt: [6, 9, 6, 15], dash: [10, 16, 9, 22, 6], fsmash: [19, 22, 18, 36], usmash: [14, 18, 15, 30], dsmash: [15, 22, 13, 32],
+    fair: [10, 16, 10, 18, 12], bair: [8, 14, 11, 20, 13], uair: [8, 16, 9, 17, 11], dair: [14, 22, 12, 22, 16], grab: 9, thr: [9, 10, 8, 7], pum: 1.5, geo: 1, reach: 1 },
+  Bolt: { jab: [[3, 4, 1.5], [5, 6, 1.5], [7, 9, 3]], jr: 12, ftilt: [6, 8, 7, 14], utilt: [5, 8, 6, 15], dtilt: [5, 8, 5, 13], dash: [7, 12, 8, 18, 5], fsmash: [15, 17, 14, 32], usmash: [10, 14, 12, 27], dsmash: [12, 17, 11, 28],
+    fair: [7, 11, 8, 15, 9], bair: [6, 10, 9, 16, 9], uair: [6, 12, 7, 14, 8], dair: [9, 14, 8, 17, 12], grab: 7, thr: [8, 9, 7, 6], pum: 1, geo: 0.85, reach: 1.15 },
+  Cinder: { jab: [[6, 7, 3], [8, 9, 3], [11, 13, 6]], jr: 20, ftilt: [11, 14, 12, 22], utilt: [10, 13, 10, 22], dtilt: [9, 12, 8, 21], dash: [14, 19, 12, 28], fsmash: [24, 27, 21, 45], usmash: [18, 21, 19, 40], dsmash: [20, 24, 18, 40],
+    fair: [14, 19, 14, 27, 18], bair: [13, 18, 13, 26, 17], uair: [12, 17, 12, 25, 16], dair: [16, 22, 15, 30, 20], grab: 11, thr: [11, 12, 10, 8], pum: 2, geo: 1.15, reach: 1 },
+  Pip: { jab: [[4, 5, 1.5], [6, 7, 1.5], [8, 11, 3.5]], jr: 15, ftilt: [7, 11, 6.5, 16], utilt: [7, 11, 6, 16], dtilt: [6, 10, 6, 16], dash: [9, 15, 7.5, 21], fsmash: [18, 23, 15, 36], usmash: [13, 19, 14, 32], dsmash: [14, 21, 13, 31],
+    fair: [9, 15, 8, 17, 11], bair: [8, 14, 7, 17, 11], uair: [7, 14, 7, 16, 10], dair: [12, 19, 9, 21, 15], grab: 8, thr: [8, 8, 8, 7], pum: 1, geo: 1, reach: 1 },
+  Pearl: { jab: [[4, 5, 2], [6, 7, 2], [9, 11, 3.5]], jr: 16, ftilt: [8, 12, 7.5, 16], utilt: [8, 12, 7, 17], dtilt: [7, 11, 6.5, 16], dash: [11, 18, 8, 21], fsmash: [19, 23, 16, 36], usmash: [14, 19, 13, 31], dsmash: [16, 21, 13, 32],
+    fair: [8, 14, 8, 17, 11], bair: [8, 14, 9, 18, 12], uair: [7, 15, 8, 16, 10], dair: [12, 20, 8, 22, 16], grab: 9, thr: [8, 9, 9, 7], pum: 1.5, geo: 1.05, reach: 1 },
+};
+function fowlApplyNormals(m, row) {
+  ['jab', 'jab2', 'jab3'].forEach((k, n) => { const q = row.jab[n], mv = m[k], h = mv.h[0]; h.f0 = q[0]; h.f1 = q[1]; h.d = q[2]; mv.t = q[1] + (n < 2 ? 10 : row.jr); if (mv.chain !== undefined) mv.chain = q[1] + 1; });
+  for (const k of ['ftilt', 'utilt', 'dtilt', 'dash', 'fsmash', 'usmash', 'dsmash', 'fair', 'bair', 'uair']) { const q = row[k], mv = m[k], h = mv.h[0], len = q[1] - q[0];
+    for (const x of mv.h) { x.f0 = q[0]; x.f1 = q[1]; x.d = q[2]; x.r = +(x.r * row.geo).toFixed(1); }
+    if (k === 'fsmash' && row.reach !== 1) h.x = +(h.x * row.reach).toFixed(1);
+    mv.t = q[1] + q[3]; if (mv.chg) mv.chg = Math.max(2, q[0] - 2); if (mv.air) { mv.ll = q[4]; mv.ac = q[1] + 9; }
+    if (k === 'dash') fowlLate(mv, q[4] || Math.round(q[2] * 0.67)); if (len < 0) h.f1 = h.f0; }
+  for (const [k, add] of [['grab', 0], ['dgrab', 2], ['pgrab', 3]]) { const h = m[k].h[0], w = h.f1 - h.f0; h.f0 = row.grab + add; h.f1 = h.f0 + w; }
+  ['f', 'b', 'u', 'd'].forEach((k, n) => { m.throws[k].d = row.thr[n]; });
+}
+
+/* ---- Sling Spin (neutral air) and Catapult Cyclone (up special): the whole rig turns end over end round its middle ----
+   The bird end sits RB above the middle and the wooden handle end RH below it; both ends hit. A turn of +angle carries the
+   bird end forward over the top. Each hit is tried where the ends were a third and two thirds of a frame ago as well, so a
+   fast spin cannot pass through anyone. */
+const SPIN = {
+  Rusty: { s: 7, w0: 9, re: 4, n: 4, hd: 1.5, fin: 4, rec: 14, ll: 12, turns: 2, sc: 1, fa: 50, fb: 40, fk: 90 },
+  Bolt: { s: 6, w0: 8, re: 3, n: 5, hd: 1.2, fin: 3.5, rec: 10, ll: 9, turns: 3, sc: 0.9, fa: 30, fb: 36, fk: 85 },
+  Cinder: { s: 9, w0: 11, re: 5, n: 3, hd: 2, fin: 7, rec: 22, ll: 18, turns: 1, sc: 1.15, fa: 45, fb: 45, fk: 100 },
+  Pip: { s: 7, w0: 9, re: 3, n: 6, hd: 1, fin: 3.5, rec: 16, ll: 13, turns: 2, sc: 1, fa: 55, fb: 36, fk: 80, mates: 1 },
+  Pearl: { s: 8, w0: 10, re: 4, n: 4, hd: 1.25, fin: 4, rec: 16, ll: 13, turns: 2, sc: 1.05, fa: 70, fb: 36, fk: 75, lift: 1 },
+};
+function rigEnds(a, theta, back, sc, mates) {
+  const ox = a.x - (back ? (a.x - a.px) * back : 0), oy = a.y - (back ? (a.y - a.py) * back : 0) + FP, s = Math.sin(theta), c = Math.cos(theta), RB = 5.2 * sc, RH = 7 * sc;
+  const out = [[ox + RB * s * a.face, oy + RB * c, 4 * sc], [ox - RH * s * a.face, oy - RH * c, 3 * sc]];
+  if (mates) for (const ph of [2.1, -2.1]) out.push([ox + 9 * Math.sin(theta + ph) * a.face, oy + 9 * Math.cos(theta + ph), 2.4]);
+  return out;
+}
+function makeSpin(name) {
+  const P = SPIN[name], fin0 = P.w0 + P.n * P.re, fin1 = fin0 + 1, t = fin1 + P.rec;
+  const spinAt = (f, mf) => mf < P.s ? -0.35 * mf / P.s : mf <= fin1 ? Math.PI * 2 * P.turns * (mf - P.s) / (fin1 - P.s) : 0.18 * Math.sin((mf - fin1) * 0.9) * Math.exp(-(mf - fin1) / 5);
+  const at = (a, back) => rigEnds(a, spinAt(a, a.mf - (back || 0)), back, P.sc, P.mates);
+  const h = [];
+  for (let k = 0; k < P.n; k++) h.push({ f0: P.w0 + k * P.re, f1: P.w0 + k * P.re + P.re - 1, g: k + 1, x: 0, y: FP, r: 6 * P.sc, at, d: P.hd, drag: 1, a: 0, b: 22, k: 0 });
+  h.push({ f0: fin0, f1: fin1, g: 50, x: 0, y: FP, r: 6 * P.sc, at, d: P.fin, a: P.fa, b: P.fb, k: P.fk });
+  return { t, air: 1, ll: P.ll, ac: fin1 + 3, spin: 1, spinAt, h,
+    on(f, n) {
+      if (P.lift && n >= P.w0 && n <= fin1) f.vy = Math.max(f.vy, 0.1);   /* Pearl's spin floats */
+      if (P.mates && n === P.s) for (const ph of [2.1, -2.1]) pipMate(f, (o, p) => { const th = spinAt(o, o.mf) + ph; return [o.x + 9 * Math.sin(th) * o.face, o.y + FP + 9 * Math.cos(th)]; }, fin1 - P.s + 1);
+    } };
+}
+const CY = {   /* Catapult Cyclone, per bird: speed, turn per frame, size, hit damage, hits, finisher */
+  Rusty: { spd: 1, rot: 0.42, sc: 1, dmg: 1, hits: 0, fin: 0 }, Bolt: { spd: 1.18, rot: 0.58, sc: 0.9, dmg: 1, hits: 0, fin: -1.5, flat: 1 },
+  Cinder: { spd: 0.88, rot: 0.3, sc: 1.15, dmg: 1.5, hits: -1, fin: 2 }, Pip: { spd: 1, rot: 0.42, sc: 1, dmg: 1, hits: 0, fin: -0.5, mates: 1 }, Pearl: { spd: 0.92, rot: 0.34, sc: 1.05, dmg: 0.85, hits: 0, fin: -1, float: 1 },
+};
+const CY_TIERS = [[10, 2, 1, 6], [25, 3, 1.5, 8.5], [44, 4, 1.5, 12], [45, 5, 2, 14]];   /* charge up to, light hits, each, finisher (overhaul v3, section 7) */
+function makeCyclone(name) {
+  const V = CY[name], at = (a, back) => rigEnds(a, (a.cyA || 0) - (back || 0) * (a.upGo ? a.cyW : 0), back, V.sc, V.mates);
+  return { t: 56, helpless: 1, ledge: 1, rise: 55, fowlUp: 1, blast: 1, spin: 1, spinAt: f => f.cyA || 0, llf: f => f.cyHit ? 22 : 28,
+    h: [{ f0: 9, f1: 55, x: 0, y: FP, r: 6 * V.sc, at, d: 1, when: a => !!a.cyMode,
+      dyn: a => { a.cyHit = true; return a.cyMode === 'fin' ? { d: a.cy.fin, drag: 0, a: V.flat ? 35 : 55, b: 45, k: 95 } : { d: a.cy.hd, drag: 1, a: 0, b: 22, k: 0 }; } }],
+    on(f, n, i) {
+      if (n === 1) { f.upC = 0; f.upGo = 0; f.upHold = 0; f.cyMode = null; f.cyA = 0; f.cyW = 0; f.cyHit = false; if (!f.grounded) f.blastUsed = true; }
+      if (!f.upGo) {
+        if (n < 8) { hang(f); f.cyA = -0.25 * n / 8; return; }
+        if (i.spc && f.upHold < 240) {   /* charging: the bands stretch, the rig leans back, and it sinks slowly in the air; held at full charge until let go */
+          if (f.upC < 45) f.upC++; f.upHold++; f.mf = 8; f.vx *= 0.9; if (!f.grounded && f.vy < -0.6) f.vy = -0.6; f.cyA = -0.25 - 0.3 * f.upC / 45; return; }
+        const c = f.upC, T = CY_TIERS.find(q => c <= q[0]) || CY_TIERS[3], t01 = c / 45, mag = Math.hypot(i.lx, i.ly), dx = mag > 0.3 ? i.lx / mag : 0, dy = mag > 0.3 ? i.ly / mag : 1, sp = (0.34 + 0.46 * t01) * FUP * V.spd;
+        const hits = Math.max(1, T[1] + V.hits), go = 12 + Math.round(26 * t01);
+        f.cy = { hits, hd: +(T[2] * V.dmg).toFixed(2), fin: +(T[3] * V.dmg + V.fin).toFixed(1), every: Math.max(2, Math.floor(go / (hits + 1))) };
+        f.upV = [dx * sp * (V.flat && Math.abs(dx) > 0.2 ? 1.12 : 1), dy * sp]; f.upGo = go; f.upStart = f.mf; f.upEnd = f.mf + go; f.cyW = V.rot * (0.8 + 0.5 * t01); f.cyMode = 'drag'; f.hitG.clear();
+        if (dx) f.face = sgn(dx); f.grounded = false; f.plat = null; spark(f.x, f.y + 6, '#fff', 16, 2); beep(220, 0.2, 'sawtooth', 0.07, 2);
+      }
+      if (f.upGo) {
+        const k = f.mf - f.upStart;
+        if (f.mf <= f.upEnd) {
+          f.vx = f.upV[0]; f.vy = f.y > BLAST.t - 30 && f.upV[1] > 0 ? 0 : f.upV[1] + (V.float ? 0.25 : 0); f.cyA += f.cyW;   /* it never flies itself out through the top */
+          if (k > 0 && k % f.cy.every === 0 && Math.floor(k / f.cy.every) < f.cy.hits) { f.hitG.clear(); f.cyMode = 'drag'; }
+          if (f.mf === f.upEnd - 1) { f.hitG.clear(); f.cyMode = 'fin'; }
+        } else if (f.upEnd > 0) { f.vx *= 0.4; f.vy *= 0.4; f.upEnd = -99; f.cyMode = null; f.mf = Math.max(f.mf, f.move.t - 1); }   /* the flight is over, once: straight into the fall */
+      }
+    } };
+}
+
+/* ---- Side B: fire the living bird. No flight timer: the bird flies until it lands, hits, or the player acts. ---- */
+const LAUNCH = {
+  Rusty: { s: 13, d: 9, sp: 2.5, g: 0.07, steer: 0.05, r: 4.2, a: 45, b: 40, k: 85 },                       /* Redline Launch: steady arc; bounces off whoever it hits */
+  Bolt: { s: 10, d: 7, sp: 3.3, g: 0.05, steer: 0.03, r: 3, a: 35, b: 35, k: 72, correct: 1 },              /* Needleflash: fastest, narrow; one sharp correction with special that costs speed; carries through */
+  Cinder: { s: 18, d: 15, sp: 2.0, g: 0.1, steer: 0.02, r: 5, a: 45, b: 50, k: 92, dive: 1 },                /* Meteor Launch: slow, heavy; hold down to dive */
+  Pip: { s: 13, d: 5, sp: 2.4, g: 0.07, steer: 0.05, r: 3.5, a: 50, b: 30, k: 60, mates: 1 },              /* Trio Launch: two doubles fly in staggered formation */
+  Pearl: { s: 14, d: 6, sp: 2.2, g: 0.025, gLate: 0.06, steer: 0.085, r: 4, a: 75, b: 30, k: 55 },        /* Glide Release: floaty, the best steering, a soft glancing hit */
+};
+function fowlLaunch(f, name) {
+  const L = LAUNCH[name], a = (f.fowlAim || 0) * Math.PI / 180;
+  f.sling = { x: f.x, y: f.y, face: f.face, vy: 0, plat: f.grounded ? f.plat : null, lost: 0 };
+  f.fi += 5; f.y += 6; f.grounded = false; f.plat = null; f.startMove('launch'); f.vx = Math.cos(a) * L.sp * f.face; f.vy = Math.sin(a) * L.sp; f.flying = true; f.flyFix = false;
+  if (L.mates) for (const side of [1, -1]) pipMate(f, (o, p) => { const sp = Math.hypot(o.vx, o.vy) || 1, ux = o.vx / sp, uy = o.vy / sp;
+      if (p.age > 20 || !o.flying) { p.ghost = true; const th = p.age * 0.3 + (side > 0 ? 0 : Math.PI); return [o.x + 6 * Math.cos(th), o.y + 3.5 + 6 * Math.sin(th)]; }   /* the formation breaks into a close orbit */
+      return [o.x - ux * 6 - uy * 5 * side, o.y + 3.5 - uy * 6 + ux * 5 * side]; }, 50, { d: 2, a: 50, b: 25, k: 40 });
+  spark(f.x, f.y, '#fff', 14, 2); beep(300, 0.12, 'square', 0.06, 1.6);
+}
+function fowlFlyEnd(f, name, how) {   /* how: 'hit', 'shield' or 'free' */
+  f.flying = false; const c = f.ctl.c;
+  if (how === 'shield') { f.vx = -f.face * (name === 'Cinder' ? 0.5 : 1); f.vy = 0.8; f.startMove('flyStop'); return; }   /* stopped by a shield, and open to a punish */
+  if (how === 'hit') {
+    if (name === 'Rusty') { f.vx = -f.face * 0.9 + c.lx * 0.6; f.vy = 1.8; }   /* one recoil bounce, angled with the stick */
+    else if (name === 'Bolt') { f.vx *= 0.85; f.vy *= 0.85; }                 /* carries on through */
+    else if (name === 'Cinder') { f.vx *= 0.3; f.vy = 1.6; }
+    else if (name === 'Pip') { f.vx *= 0.6; f.vy = 1.3; }
+    else { f.vx *= 0.55; f.vy = 1.4; }                                        /* Pearl glances past with a soft lift */
+  }
+  f.move = null; f.set('air');
+}
+function makeLaunch(name) {
+  const L = LAUNCH[name];
+  return { t: 64, nodrift: 1, ll: 10, h: [{ f0: 1, f1: 62, x: 0, y: 3.5, r: L.r, d: L.d, a: L.a, b: L.b, k: L.k, when: a => a.flying }], onLand(f) { f.flying = false; },
+    on(f, n, i) {
+      if (!f.flying) return;
+      if (f.hitG.size) { fowlFlyEnd(f, name, blocked(f) ? 'shield' : 'hit'); return; }
+      f.vy = Math.max(f.vy - (L.gLate && n > 20 ? L.gLate : L.g), -3.2);
+      const st = L.steer * (i.lx * f.vx < 0 ? 0.5 : 1); f.vx += i.lx * st; const sp = Math.hypot(f.vx, f.vy), cap = L.sp * 1.15; if (sp > cap) { f.vx *= cap / sp; f.vy *= cap / sp; }
+      if (L.dive && i.ly < -0.5) f.vy = Math.max(f.vy - 0.25, -4.2);   /* Cinder tucks and drops */
+      if (L.correct && !f.flyFix && n > 3 && f.ctl.take('spc')) {   /* Bolt's one sharp correction: a new heading, at three quarters of the speed */
+        const m = Math.hypot(i.lx, i.ly), s2 = Math.hypot(f.vx, f.vy) * 0.75; if (m > 0.3) { f.vx = i.lx / m * s2; f.vy = i.ly / m * s2; if (i.lx) f.face = sgn(i.lx); } f.flyFix = true; spark(f.x, f.y + 3, '#fff3c4', 10, 1.4); beep(900, 0.04, 'square', 0.03); return; }
+      if (n > 6 && f.airActs()) { f.flying = false; return; }   /* any attack, jump, dodge or special ends the flight */
+      if (n >= 60) fowlFlyEnd(f, name, 'free');   /* a safety cap, so nothing is ever stuck in flight */
+    } };
+}
+
+/* ---- Down B in the slingshot: each bird's own technique (special-moves bible, sections 3 to 7) ---- */
+function makeSlingDown(name) {
+  if (name === 'Rusty') return {   /* Brace & Break: plant and brace; a light frontal hit on frames 8 to 13 is answered with a 10% snap */
+    t: 37, counter: [8, 13], counterMax: 12, h: [], on(f, n, i) { if (n >= 10 && n <= 13 && (f.ctl.take('atk') || !i.spc)) f.startMove('dsnap'); } };
+  if (name === 'Bolt') return {   /* Skitter Step: a low elastic skid; one limited correction; jump at the end for a low hop */
+    t: 30, low: [6, 16], h: [{ f0: 6, f1: 10, x: 4, y: 2.5, r: 4, d: 3, a: 40, b: 30, k: 40 }],
+    on(f, n, i) {
+      if (n === 1) { f.skFix = false; f.skBlk = false; if (!f.grounded) { if (f.airUse.sk) { f.mf = f.move.t; return; } f.airUse.sk = 1; } }
+      if (n === 6) f.vx = f.face * (f.grounded ? 3.4 : 2.4);
+      if (n > 6 && n <= 16) { f.vx *= 0.95; if (!f.skFix && i.lx * f.face < -0.5) { f.vx *= -0.45; f.skFix = true; } if (!f.grounded) f.vy = Math.max(f.vy, -0.4); }
+      if (f.hitG.size && blocked(f) && !f.skBlk) { f.skBlk = true; f.vx = 0; f.mf -= 6; }   /* stopped by a shield: six frames longer to recover */
+      if (n >= 13 && n <= 16 && f.grounded && f.ctl.take('jmp')) { f.grounded = false; f.plat = null; f.vy = 1.5; f.vx *= 0.9; f.move = null; f.set('air'); }
+    } };
+  if (name === 'Cinder') return {   /* Anvil Drop: the handle driven into the floor; a small shock along it on both sides */
+    t: 48, h: [{ f0: 15, f1: 18, x: 2, y: 2, r: 5, d: 8, a: 70, b: 45, k: 80 }, { f0: 16, f1: 19, x: 8, y: 1, r: 3.5, d: 6, a: 75, b: 35, k: 60, g: 1, gndOnly: 1 }, { f0: 16, f1: 19, x: -8, y: 1, r: 3.5, d: 6, a: 105, b: 35, k: 60, g: 1, gndOnly: 1 }],
+    on(f, n) { if (n === 1) f.adHit = false; if (!f.grounded && n >= 8) f.vy = -3.2; if (f.hitG.size && !f.adHit) { f.adHit = true; f.mf += 6; } if (n === 15 && f.grounded) { shake = Math.max(shake, 5); spark(f.x, f.y, '#c9a27a', 14, 1.6); } },
+    onLand(f, mf) { if (mf >= 8) { for (const s of [1, -1]) PROJ.push({ x: f.x + s * 7, y: f.y + 1.5, vx: 0, vy: 0, grav: 0, life: 4, owner: f.idx, face: s, r: 3.5, ground: 'pass', plat: null, kind: 'blast', grp: 'anvil' + f.idx, h: { d: 6, a: 75, b: 35, k: 60, id: 'Cinder:anvil' } }); shake = Math.max(shake, 5); } },
+    llf: f => f.hitG.size ? 16 : 26 };
+  if (name === 'Pip') return {   /* Orbit Parade: two doubles circle the slingshot for 18 frames while it moves at 70%; down + special again pulls them in */
+    t: 43, h: [], on(f, n, i) {
+      if (n === 1) f.opDir = i.lx * f.face < -0.3 ? -1 : 1;
+      if (n === 8) for (const ph of [0, Math.PI]) pipMate(f, (o, p) => { const th = p.age * 0.38 * o.opDir + ph; return [o.x + 8 * Math.sin(th), o.y + 11 + 8 * Math.cos(th)]; }, 18, { d: 1.5, a: 70, b: 25, k: 20 }, { hits: 2, rehit: 8, tag: 'parade' + f.idx });
+      if (n > 8 && n <= 26) { if (f.grounded) f.vx = appr(f.vx, i.lx * f.st.run * 0.7, 0.3);
+        if (n > 10 && i.ly < -0.5 && edge(f)) { for (const p of PROJ) if (p.tag === 'parade' + f.idx) p.life = 0; PROJ.push({ x: f.x, y: f.y + 11, vx: 0, vy: 0, grav: 0, life: 3, owner: f.idx, face: f.face, r: 7, ground: 'pass', plat: null, kind: 'blast', h: { d: 3, a: 80, b: 40, k: 50, id: 'Pip:converge' } }); f.mf = f.move.t - 21; } }
+    } };
+  return {   /* Pearl, Nest Marker: one planted nest; an opponent who walks into it is lifted a little */
+    t: 30, h: [], on(f, n) {
+      if (n !== 12 || PROJ.some(p => p.owner === f.idx && p.kind === 'nest')) return;
+      let fy = null; if (f.grounded) fy = f.y; else for (const q of PLATS) if (f.x >= q.x0 && f.x <= q.x1 && q.y <= f.y && f.y - q.y < 60 && (fy === null || q.y > fy)) fy = q.y;
+      if (fy === null) return;
+      PROJ.push({ x: f.x + f.face * 3, y: fy + 1.8, vx: 0, vy: 0, grav: 0, life: 150, owner: f.idx, face: f.face, r: 4, ground: 'pass', plat: null, kind: 'nest', gndBreak: 1, h: { d: 2, a: 90, b: 48, k: 10, id: 'Pearl:nest' },
+        onHit(p, o) { if (!o.grounded && Math.abs(o.x - p.x) < 25) o.vy = Math.max(o.vy, 1.2); } });   /* Pearl nearby in the air gets a little lift too */
+      beep(560, 0.06, 'triangle', 0.04);
+    } };
+}
+
+/* ---- Bird-alone specials (special-moves bible): three for each bird ---- */
+function makeSolo(name) {
+  const S = {};
+  if (name === 'Rusty') {
+    S.nspec = { t: 30, h: [{ f0: 10, f1: 13, x: 0, y: 3.5, r: 6.5, d: 3, a: 50, b: 30, k: 30 }] };   /* Rally Cry: a pulse round his body */
+    S.sspec = { t: 48, once: 1, nodrift: 1, h: [{ f0: 13, f1: 20, x: 3, y: 3.5, r: 4.2, d: 7, a: 45, b: 34, k: 70 }],   /* Shoulder Check */
+      on(f, n) { if (n === 1) f.scHit = false; if (n >= 13 && n <= 20 && !f.scHit) { f.vx = f.face * 1.9; if (!f.grounded) f.vy = Math.max(f.vy, 0); }
+        if (f.hitG.size && !f.scHit) { f.scHit = true; if (blocked(f)) f.vx = 0; else { f.vy = 1.2; f.vx = f.face * 0.6; f.grounded = false; f.plat = null; f.mf += 5; } } if (n === 21) f.vx *= 0.4; } };
+    S.uspec = { t: 35, helpless: 1, ledge: 1, rise: 42, vault: 1, h: [{ f0: 7, f1: 10, x: 0, y: 4, r: 4.5, d: 2, a: 80, b: 40, k: 30 }, { f0: 8, f1: 34, x: 0, y: 4, r: 4.5, d: 2, a: 80, b: 40, k: 30, g: 1, when: a => a.v2 && a.mf <= a.v2 + 3 }],
+      on(f, n, i) { if (n === 1) f.v2 = 0; if (n < 7) hang(f); if (n === 7) { lift(f, jumpV(26, f.st.grav)); f.vx = i.lx * 0.9; }   /* Captain's Vault: a hop, and a second one if special is pressed again within 16 frames */
+        if (n > 7 && n <= 23 && !f.v2 && edge(f)) { f.v2 = n; lift(f, jumpV(17, f.st.grav)); f.vx = i.lx * 1.1; spark(f.x, f.y, '#fff', 8, 1.2); }
+        if (n === 24 && !f.v2) f.mf = f.move.t - 1; } };
+  } else if (name === 'Bolt') {
+    S.nspec = { t: 27, h: [{ f0: 8, f1: 11, x: 2, y: 3.5, r: 4, d: 3.5, a: 45, b: 30, k: 40 }],   /* Brake & Burst: stop dead, then burst the way the stick points */
+      on(f, n, i) { if (n === 1) { if (!f.grounded) { if (f.airUse.brake) { f.mf = f.move.t; return; } f.airUse.brake = 1; } }
+        if (n <= 7) { f.vx *= 0.55; if (!f.grounded) f.vy = Math.max(f.vy, -0.3) * 0.5; const m = Math.hypot(i.lx, i.ly); f.bDir = m > 0.4 ? [i.lx / m, i.ly / m] : f.bDir && n > 1 ? f.bDir : [f.face, 0]; if (Math.abs(f.bDir[0]) > 0.3) f.face = sgn(f.bDir[0]); }
+        if (n === 8) { f.vx = f.bDir[0] * 2.8; f.vy = f.grounded ? 0 : f.bDir[1] * 2.4; if (f.vy > 0) { f.grounded = false; f.plat = null; } }
+        if (n > 8 && n <= 11) { f.vx *= 0.92; if (f.hitG.size && blocked(f)) f.vx = -f.face * 1.1; } } };
+    S.sspec = { t: 36, once: 1, nodrift: 1, h: [{ f0: 9, f1: 12, x: 2.5, y: 3.5, r: 3.8, d: 5, a: 45, b: 32, k: 60 }, { f0: 13, f1: 16, x: 2.5, y: 3.5, r: 3.8, d: 3, a: 50, b: 30, k: 50, g: 1, when: a => !a.zzBlk && !a.zzStop }],   /* Zigzag */
+      on(f, n, i) { if (n === 1) { f.zzBlk = false; f.zzStop = false; f.zzUp = clamp(i.ly, -1, 1) * 0.35; }
+        if (n >= 9 && n <= 12) { f.vx = f.face * 2.8; f.vy = f.grounded ? 0 : f.zzUp * 2.8; }
+        if (f.hitG.size && blocked(f)) f.zzBlk = true;
+        if (n === 13) { const m = Math.hypot(i.lx, i.ly); if (i.lx * f.face < -0.5) { f.zzStop = true; f.vx = 0; } else if (m > 0.4) { const ux = i.lx / m, uy = i.ly / m; f.vx = (ux * f.face < 0 ? 0.2 * f.face : ux) * 2.6; f.vy = f.grounded && uy < 0 ? 0 : uy * 2.6; if (f.vy > 0) { f.grounded = false; f.plat = null; } } }
+        if (n > 13 && n <= 16 && !f.zzStop) { f.vx *= 0.96; if (!f.grounded) f.vy *= 0.96; }
+        if (n === 17) { f.vx *= 0.4; f.vy *= 0.4; } } };
+    S.uspec = { t: 30, helpless: 1, ledge: 1, rise: 34, h: [{ f0: 10, f1: 13, x: 0, y: 3.5, r: 4, d: 3, a: 70, b: 35, k: 30 }],   /* Flash Step: a launch in one of eight directions, then one small correction */
+      on(f, n, i) { if (n === 1) { f.fsFix = false; f.fsGl = false; } if (n < 9) { hang(f); return; }
+        if (n === 9) { const m = Math.hypot(i.lx, i.ly); let ux = 0, uy = 1; if (m > 0.4) { const a8 = Math.round(Math.atan2(i.ly, i.lx) / (Math.PI / 4)) * Math.PI / 4; ux = Math.cos(a8); uy = Math.sin(a8); } if (uy < 0 && f.grounded) uy = 0; f.vx = ux * 3.1; f.vy = uy * 3.1; if (ux) f.face = sgn(ux); f.grounded = false; f.plat = null; }
+        if (n > 9 && n <= 22) { f.vx *= 0.96; f.vy = f.vy * 0.96 - f.st.grav * 0.3;
+          if (!f.fsFix && n > 13) { const m = Math.hypot(i.lx, i.ly), sp = Math.hypot(f.vx, f.vy); if (m > 0.5 && sp > 0.5) { const cur = Math.atan2(f.vy, f.vx), want = Math.atan2(i.ly, i.lx); let d = want - cur; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; if (Math.abs(d) > 0.3) { const nd = cur + clamp(d, -0.8, 0.8); f.vx = Math.cos(nd) * sp; f.vy = Math.sin(nd) * sp; f.fsFix = true; } } }
+          if (f.hitG.size && !f.fsGl) { f.fsGl = true; f.vy = Math.abs(f.vy) * 0.6 + 0.4; f.vx *= 0.7; } }
+      } };
+  } else if (name === 'Cinder') {
+    S.nspec = { t: 120, armor: [15, 18], armorMax: 8, armorHits: 1, h: [],   /* Pressure Cooker: hold to compress (up to 18 frames), let go to burst round himself */
+      on(f, n, i) { if (n === 1) { f.pcC = 0; f.pcRel = 0; f.pcHit = false; }
+        if (!f.pcRel) { if (i.spc && f.pcC < 60) { f.pcC++; if (f.mf > 19) f.mf = 19; return; } f.pcRel = f.mf; }
+        if (f.mf === f.pcRel + 5) { const c = Math.min(f.pcC, 18) / 18; PROJ.push({ x: f.x, y: f.y + 3.5, vx: 0, vy: 0, grav: 0, life: 4, owner: f.idx, face: f.face, r: 6.5, ground: 'pass', plat: null, kind: 'blast', h: { d: +(6 + 5 * c).toFixed(1), a: 60, b: 40, k: 70 + 25 * c, id: 'Cinder:cooker' }, onHit(p, o, v) { o.pcHit = true; } }); spark(f.x, f.y + 3.5, '#ff9a3c', 16, 1.8); shake = Math.max(shake, 4); }
+        if (f.pcRel && f.mf >= f.pcRel + 8 + (f.pcHit ? 22 : 30)) f.mf = f.move.t; } };
+    S.sspec = { t: 51, once: 1, nodrift: 1, low: [14, 22], armor: [14, 16], armorMax: 8, armorHits: 1, h: [{ f0: 14, f1: 22, x: 2.5, y: 2.5, r: 4.5, d: 9, a: 40, b: 40, k: 70 }],   /* Furnace Roll */
+      on(f, n) { if (n === 1) { f.frHit = false; f.frWall = false; } if (n >= 14 && n <= 22) { f.vx = f.face * 1.7; if (!f.grounded) f.vy = Math.max(f.vy, -0.6);
+          if (!f.frWall && !f.grounded && f.y < 0 && Math.abs(f.x + f.vx) - FB / 2 < stageHalf(f.y)) { f.frWall = true; f.face = -f.face; f.vx = f.face * 0.9; } }   /* bounces once off the island's side */
+        if (f.hitG.size && !f.frHit) { f.frHit = true; f.mf += 5; } if (n === 23) f.vx *= 0.3; } };
+    S.uspec = { t: 45, helpless: 1, ledge: 1, rise: 30, h: [{ f0: 16, f1: 19, x: 0, y: 3, r: 5.5, d: 6, a: 75, b: 45, k: 45 }],   /* Blast Hop */
+      on(f, n, i) { if (n < 16) { hang(f); return; } if (n === 16) { const under = f.y < -4 && Math.abs(f.x) < EDGE + 6; lift(f, jumpV(under ? 18 : 30, f.st.grav)); f.vx = i.lx * 0.5; spark(f.x, f.y, '#ff9a3c', 18, 2); shake = Math.max(shake, 3); } } };
+  } else if (name === 'Pip') {
+    S.nspec = { t: 24, h: [],   /* Switcheroo: two doubles appear either side; Pip swaps places with the one the stick picks */
+      on(f, n, i) { if (n === 1) { if (!f.grounded) { if (f.airUse.sw) { f.mf = f.move.t; return; } f.airUse.sw = 1; } f.swX = f.x; f.swY = f.y; for (const s of [1, -1]) { const x = f.x + s * 14, y = f.y; pipMate(f, () => [x, y + 3.5], 24, null, { tag: 'sw' + f.idx, side: s }); } }
+        if (n === 9) { const s = Math.abs(i.lx) > 0.3 ? sgn(i.lx) : f.face, nx = f.swX + s * 14, mx = (f.x + nx) / 2;
+          for (const p of PROJ) if (p.tag === 'sw' + f.idx && p.side === s) p.life = 0;
+          PROJ.push({ x: mx, y: f.y + 3.5, vx: 0, vy: 0, grav: 0, life: 2, owner: f.idx, face: f.face, r: 7.5, ground: 'pass', plat: null, kind: 'blast', h: { d: 2, a: 60, b: 25, k: 30, id: 'Pip:switch' } });
+          f.x = nx; if (f.grounded && (Math.abs(nx) > EDGE || !f.plat || nx < f.plat.x0 || nx > f.plat.x1)) { f.grounded = false; f.plat = null; } spark(f.x, f.y + 3, '#bfeccd', 10, 1.4); } } };
+    S.sspec = { t: 39, once: 1, nodrift: 1, h: [{ f0: 11, f1: 14, x: 3, y: 3.5, r: 3.8, d: 4, a: 45, b: 30, k: 55 }],   /* Trio Relay: Pip darts in and the doubles sweep in from either side, four frames apart */
+      on(f, n, i) { if (n >= 11 && n <= 14) { f.vx = f.face * 2.4; if (!f.grounded) f.vy = Math.max(f.vy, 0); } if (n === 15) f.vx *= 0.4;
+        if (n === 1) { const tx = f.x + f.face * 14, ty = f.y + 3.5 + clamp(i.ly, -1, 1) * 4; [[1, 15], [-1, 19]].forEach(([s, arrive]) => { const x0 = f.x - f.face * 6, y0 = f.y + 3.5 + s * 9;
+            pipMate(f, (o, p) => { const k = Math.min(1, p.age / arrive); return [x0 + (tx - x0) * k, y0 + (ty - y0) * k]; }, arrive + 3, { d: 2, a: 50, b: 25, k: 45 }, { hits: 1 }); }); } } };
+    S.uspec = { t: 40, helpless: 1, ledge: 1, rise: 34, h: [{ f0: 8, f1: 11, x: 0, y: 2, r: 4, d: 2, a: 80, b: 35, k: 30 }, { f0: 18, f1: 39, x: 0, y: 2, r: 4, d: 2, a: 80, b: 35, k: 30, g: 1, when: a => a.lad2 && a.mf <= a.lad2 + 3 }],   /* Bird Ladder: bounce off one double, then steer into a second */
+      on(f, n, i) { if (n === 1) f.lad2 = 0; if (n < 8) { hang(f); return; }
+        if (n === 8) { lift(f, jumpV(20, f.st.grav)); f.vx = i.lx * 0.7; const x = f.x, y = f.y - 3; pipMate(f, () => [x, y], 12, null); }
+        if (n >= 18 && n <= 25 && !f.lad2 && edge(f)) { f.lad2 = n; lift(f, jumpV(14, f.st.grav)); f.vx = i.lx * 1.6; const x = f.x, y = f.y - 3; pipMate(f, () => [x, y], 12, null); }
+        if (n === 26 && !f.lad2) f.mf = f.move.t - 1; } };
+  } else {
+    S.nspec = { t: 30, h: [],   /* Feather Brake: wings open; slower fall and finer drift for up to 24 frames; let go to stop */
+      on(f, n, i) { if (n === 1) { if (!f.grounded && (f.airUse.fb >= 2 || f.airT < (f.airUse.fbReady || 0))) { f.mf = f.move.t; return; } if (!f.grounded) f.airUse.fb = (f.airUse.fb || 0) + 1; }
+        if (f.grounded) { if (n > 8) f.mf = f.move.t; return; }
+        if (n === 5) { const ex = Math.abs(f.vx) - f.st.airSpeed; if (ex > 0) { f.vy += ex * 0.8; f.vx *= 0.7; } }
+        if (n >= 5) { f.vy = Math.max(f.vy - f.st.grav * 0.3, -0.35); f.vx = appr(f.vx, i.lx * f.st.airSpeed, 0.08); if (!i.spc || n >= 29) { f.airUse.fbReady = f.airT + 18; f.move = null; f.set('air'); } } } };
+    S.sspec = { t: 39, once: 1, nodrift: 1, h: [{ f0: 12, f1: 17, x: 3, y: 3.5, r: 6.5, d: 5, a: 70, b: 32, k: 45 }],   /* Swoop & Fold: a folded glide, then a wide sweep that glances up */
+      on(f, n, i) { if (n === 1) { f.swpA = clamp(i.ly, -1, 1) * 0.6 - 0.25; f.swpHit = false; } if (n === 6) f.swpA = clamp(f.swpA + clamp(i.ly, -1, 1) * 0.3, -0.85, 0.6);
+        if (n <= 17 && !f.swpHit) { f.vx = Math.cos(f.swpA) * 1.8 * f.face; f.vy = f.grounded && f.swpA < 0 ? 0 : Math.sin(f.swpA) * 1.8; if (f.vy > 0) { f.grounded = false; f.plat = null; } }
+        if (f.hitG.size && !f.swpHit) { f.swpHit = true; if (blocked(f)) { f.vx = -f.face * 1; f.vy = 0.5; } else { f.vy = 1.3; f.vx *= 0.5; } } if (n === 18) f.vx *= 0.5; } };
+    S.uspec = { t: 44, helpless: 1, ledge: 1, rise: 44, h: [{ f0: 9, f1: 12, x: 0, y: 4, r: 4.5, d: 2, a: 80, b: 35, k: 25 }],   /* Thermal Rise: a smooth, steerable climb */
+      on(f, n, i) { if (n < 9) { hang(f); return; } if (n === 9) { f.grounded = false; f.plat = null; }
+        if (n <= 34) { f.vy = 1.75 - (n - 9) * 0.03; f.vx = appr(f.vx, i.lx * 1.3, i.lx * f.vx < 0 ? 0.03 : 0.07); } } };
+  }
+  return S;
+}
+
+/* ---- the selector: Neutral B in the slingshot ---- */
+const SELECTOR = { t: 200, h: [], sel: 1,
+  on(f, n, i) {
+    if (n === 1) { f.selOpen = false; f.selPick = f.fi; f.selDone = false; f.selHold = 0; }
+    if (f.selDone) return;
+    if (i.spc && ++f.selHold < 240) {
+      if (n >= 8) { f.selOpen = true; const m = Math.hypot(i.lx, i.ly); if (m > 0.5) f.selPick = ((Math.round(Math.atan2(i.lx, i.ly) / (Math.PI * 2 / 5)) % 5) + 5) % 5; }   /* clockwise from straight up: Flint, Bolt, Cinder, Pip, Pearl */
+      if (n > 9) f.mf = 9; return; }
+    const to = f.selOpen ? f.selPick : (f.fi + 1) % 5; f.selOpen = false; f.selDone = true;
+    if (to !== f.fi) { f.fi = to; spark(f.x, f.y + 12, '#fff', 10, 1.2); beep(660, 0.05, 'triangle', 0.04); }
+    f.mf = f.move.t - 5;   /* a five-frame pouch swap */
+  } };
+
 const FOWLS = { name: 'Furious Fowls', sub: 'five birds and a slingshot', fowl: 1, cycle: 5, forms: [] };
 (function () {
-  const base = FLINT.forms[0].st, UP = FOWL.upb, COL = { Rusty: ['#b5533a', '#f1d7a8', '#f6a623'], Bolt: ['#f2b91e', '#2f6f78', '#fff3c4'], Cinder: ['#3a3134', '#a8623a', '#f26b1d'], Pip: ['#2bb8b0', '#bfeccd', '#ffffff'], Pearl: ['#f3e2cf', '#c9736b', '#ffffff'] };
-  const SOLO = { Rusty: { up: 30, rush: 2.1 }, Bolt: { up: 26, rush: 3.1, diag: 1 }, Cinder: { up: 22, rush: 1.4, armor: [15, 17] }, Pip: { up: 32, rush: 2.3 }, Pearl: { up: 34, rush: 1.6, float: 1 } };
+  const base = FLINT.forms[0].st, COL = { Rusty: ['#b5533a', '#f1d7a8', '#f6a623'], Bolt: ['#f2b91e', '#2f6f78', '#fff3c4'], Cinder: ['#3a3134', '#a8623a', '#f26b1d'], Pip: ['#2bb8b0', '#bfeccd', '#ffffff'], Pearl: ['#f3e2cf', '#c9736b', '#ffffff'] };
+  const UPH = { Rusty: 26, Bolt: 26, Cinder: 30, Pip: 20, Pearl: 34 };
   const stat = (b, solo) => Object.assign({}, base, { weight: Math.round(base.weight * b.weight / 100 * (solo ? 0.8 : 1)), walk: +(base.walk * b.run).toFixed(2), dash: +(base.dash * b.run * (solo ? 1.05 : 1)).toFixed(2), run: +(base.run * b.run * (solo ? 1.05 : 1)).toFixed(2),
     airSpeed: +(base.airSpeed * b.air).toFixed(2), grav: +(base.grav * b.grav).toFixed(3), fall: +(base.fall * b.grav).toFixed(2), ffall: +(base.ffall * b.grav).toFixed(2), w: solo ? FB : FW, h: solo ? 7 : 15, jf: solo ? 2.6 : 3.4, jb: solo ? 1.4 : 2,
-    upH: solo ? SOLO[b.name].up : undefined, pummel: solo ? 1 : 1.5 });
-  const combined = FOWL.forms.map(b => { const C = FOWL.combined, sb = b.sb, nb = b.nb;
+    upH: solo ? UPH[b.name] : undefined, pummel: solo ? 1 : FN[b.name].pum });
+  const combined = FOWL.forms.map(b => { const C = FOWL.combined, nm = b.name, L = LAUNCH[nm];
     const m = fowlNormals(mk(1, 1, 1, 1, {
-      /* neutral special: wooden ammunition, a different kind for each bird */
-      nspec: { t: nb.s + 1 + nb.e, h: [], on(f, n) { if (n === nb.s + 1) fowlAmmo(f, b, false); if (b.name === 'Bolt' && n === nb.s + 7) fowlAmmo(f, b, true); } },
-      /* side special: aim with the stick during the wind-up, then the bird itself is fired and takes the controls with it */
-      sspec: { t: sb.s + 3, h: [], on(f, n, i) { if (n <= sb.s) f.fowlAim = clamp(i.ly, -1, 1) * sb.aim + 8; if (n === sb.s + 1) fowlLaunch(f, b); } },
-      /* up special, the same for all five: hold to charge (up to 45 frames), let go to fly where the stick points */
-      uspec: { t: UP.startup + 1 + 38 + 3, helpless: 1, ledge: 1, ll: UP.landing_lag_frames, rise: 55, fowlUp: 1, blast: 1, h: [{ f0: UP.startup + 2, f1: UP.startup + 40, x: 0, y: 7.5, r: 0.61 * FW, d: 8, dd: a => a.upD || 8, a: 60, b: 42, k: 96 }],
-        on(f, n, i) {
-          if (n === 1) { f.upC = 0; f.upGo = 0; if (!f.grounded) f.blastUsed = true; }
-          if (n > UP.startup && !f.upGo) {
-            if (i.spc) { if (f.upC < UP.charge_max_frames) f.upC++; f.mf = UP.startup + 1; f.vx *= 0.9; if (!f.grounded && f.vy < -0.6) f.vy = -0.6; return; }   /* charging: it sinks slowly, it cannot hang for ever */
-            const c = f.upC, t = c / UP.charge_max_frames, pts = UP.charge_damage_points; let dmg = pts[0][1]; for (let k = 1; k < pts.length; k++) if (c >= pts[k][0]) dmg = pts[k][1]; else { dmg += (pts[k][1] - dmg) * (c - pts[k - 1][0]) / Math.max(1, pts[k][0] - pts[k - 1][0]); break; }
-            const mag = Math.hypot(i.lx, i.ly), dx = mag > 0.3 ? i.lx / mag : 0, dy = mag > 0.3 ? i.ly / mag : 1, sp = (0.34 + 0.46 * t) * FUP;
-            f.upD = Math.round(dmg * 10) / 10; f.upV = [dx * sp, dy * sp]; f.upGo = 12 + Math.round(26 * t); f.upEnd = f.mf + f.upGo; if (dx) f.face = sgn(dx); f.grounded = false; f.plat = null; spark(f.x, f.y + 6, '#fff', 16, 2); beep(220, 0.2, 'sawtooth', 0.07, 2);
-          }
-          if (f.upGo) { if (f.mf <= f.upEnd) { f.vx = f.upV[0]; f.vy = f.y > BLAST.t - 30 && f.upV[1] > 0 ? 0 : f.upV[1]; }   /* it never flies itself out through the top */ else if (f.upEnd > 0) { f.vx *= 0.4; f.vy *= 0.4; f.upEnd = -99; f.mf = Math.max(f.mf, f.move.t - 1); }   /* the flight is over, once: straight into the fall */ }
-        } },
-      /* down special: the next bird (or the one before it, holding back) steps into the pouch; damage and stocks stay as they are */
-      dspec: { t: 6, h: [], on(f, n, i) { if (n === 2) { f.fi = (f.fi + (i.lx * f.face < -0.5 ? 4 : 1)) % 5; spark(f.x, f.y + 10, '#fff', 10, 1.2); beep(660, 0.05, 'triangle', 0.04); } } },
+      nspec: SELECTOR,
+      /* Side B: aim with the stick during the wind-up, then the bird itself is fired and takes the controls with it */
+      sspec: { t: L.s + 3, h: [], nodrift: 1, on(f, n, i) { if (n <= L.s) { f.fowlAim = 25 + clamp(i.ly, -1, 1) * 30;   /* a cannonball arc by default; up or down tilts it */ hang(f); } if (n === L.s + 1) fowlLaunch(f, nm); } },
+      uspec: makeCyclone(nm),
+      dspec: makeSlingDown(nm),
+      dsnap: { t: 21, h: [{ f0: 2, f1: 4, x: 7, y: 9, r: 4.5, d: 6, a: 45, b: 35, k: 60 }] },   /* Brace & Break with nothing to answer: a weaker band snap */
+      dcounter: { t: 22, h: [{ f0: 2, f1: 4, x: 7, y: 9, r: 5.5, d: 10, a: 40, b: 50, k: 80 }], on(f, n) { if (n === 5) { f.vx = -f.face * 1; if (f.grounded) { f.grounded = false; f.plat = null; } f.vy = 1.2; } } },   /* the counter: a 10% snap, then a small rebound back and up */
     }, { jabs: 3 }), Object.assign({}, C, { down_air: null }), FW, 7.5, 3);
-    m.fsmash.t = b.fs.startup + C.forward_smash.a + C.forward_smash.e; Object.assign(m.fsmash.h[0], { f0: b.fs.startup + 1, f1: b.fs.startup + C.forward_smash.a, d: b.fs.damage, a: b.fs.angle, x: +(b.fs.reach_W * FW - m.fsmash.h[0].r).toFixed(1) }); m.fsmash.chg = Math.max(2, b.fs.startup - 1);
-    m.nair.h[0].d = b.nair; fowlLate(m.nair, Math.round(b.nair * 0.62)); if (b.name === 'Cinder') m.nair.h.forEach(h => { h.r = +(h.r * 1.15).toFixed(1); });
-    m.dash.h[0].d = b.dash; fowlLate(m.dash, Math.round(b.dash * 0.67));
-    /* down air: a wooden dummy fired straight down. It spikes for its first five frames, then pops up for 8%. The kick lifts the slingshot, once per time off the ground. */
-    const q = C.down_air_wooden_red_dummy; m.dair = { t: q.s + q.a + q.e, air: 1, ll: 12, ac: q.s + q.a + 9, h: [], on(f, n) { if (n === q.s + 1) { shoot(f, { kind: 'dummy', tag: 'fowldown', max: 1, ox: 0.01, oy: 7.5 - 0.45 * FW, vx: 0, vy: -2.6, r: 0.22 * FW, life: 40, lateAt: 5, lateH: { d: 8, a: 70, b: 30, k: 60 }, h: { d: q.d, a: q.ang, b: q.b, k: q.k } }); if (!f.dairUsed) { f.dairUsed = true; f.vy = Math.max(f.vy, 0) + 0.15 * FV * 2; } } } };
-    return { name: b.name, col: COL[b.name], alt: COL[b.name], reachMul: 1.0, st: stat(b, false), aiShot: [26, 90], aiSide: 1, sling: 1, moves: m };
+    fowlApplyNormals(m, FN[nm]);
+    m.nair = makeSpin(nm);
+    const q = FN[nm].dair, t = q[1] + q[3];
+    if (nm === 'Rusty') { const d0 = C.down_air_wooden_red_dummy; m.dair = { t, air: 1, ll: q[4], ac: q[1] + 9, h: [], on(f, n) { if (n === q[0]) { shoot(f, { kind: 'dummy', tag: 'fowldown', max: 1, ox: 0.01, oy: 7.5 - 0.45 * FW, vx: 0, vy: -2.6, r: 0.22 * FW, life: 40, lateAt: 5, lateH: { d: 8, a: 70, b: 30, k: 60 }, h: { d: q[2], a: d0.ang, b: d0.b, k: d0.k } }); if (!f.dairUsed) { f.dairUsed = true; f.vy = Math.max(f.vy, 0) + 1.35; } } } }; }
+    else if (nm === 'Bolt') m.dair = { t, air: 1, ll: q[4], ac: q[1] + 9, h: [{ f0: q[0], f1: q[1], x: 3, y: 2, r: 4.5, d: q[2], a: 45, b: 30, k: 72 }], on(f, n) { if (n >= q[0] && n <= q[1]) { f.vx = f.face * 2.2; f.vy = -2.4; } } };   /* a fast diagonal dive that keeps its speed */
+    else if (nm === 'Cinder') m.dair = { t, air: 1, ll: q[4], ac: q[1] + 9, h: [{ f0: q[0], f1: q[1], x: 0, y: -1, r: 5.5, d: q[2], a: 270, b: 30, k: 85 }], on(f, n) { if (n >= q[0] && n <= q[1]) f.vy = -3.5; } };   /* an explosive plunge that spikes */
+    else if (nm === 'Pip') m.dair = { t, air: 1, ll: q[4], ac: q[1] + 9, h: [[12, 14, 1], [15, 17, 2], [18, 19, 3]].map(([a0, a1, g]) => ({ f0: a0, f1: a1, g, x: 0, y: -1, r: 4, d: 3, a: g === 3 ? 280 : 70, b: g === 3 ? 30 : 25, k: g === 3 ? 70 : 20 })) };   /* three staggered strikes downward */
+    else m.dair = { t, air: 1, ll: q[4], ac: q[1] + 9, h: [{ f0: q[0], f1: q[1], x: 0, y: -1, r: 4.5, d: q[2], a: 270, b: 25, k: 70 }],   /* Pearl: a strike below, an egg dropped, and a little float */
+      on(f, n) { if (n === q[0]) shoot(f, { kind: 'egg', ox: 0.01, oy: 0, vx: 0, vy: -0.6, grav: 0.09, r: 2, life: 60, boom: { r: 5.5, d: 6, k: 60 }, h: { d: 6, a: 70, b: 30, k: 60 } }); if (n === q[1]) f.vy = Math.max(f.vy, 0.8); } };
+    return { name: nm, label: FOWL_LABEL[nm], role: FOWL_ROLE[nm], col: COL[nm], alt: COL[nm], reachMul: 1.0, st: stat(b, false), aiSide: 1, sling: 1, moves: m };
   });
-  const solo = FOWL.forms.map(b => { const S = FOWL.solo, sp = FOWL.special[b.name], q0 = sp[0], q1 = sp[1], q2 = sp[2], X = SOLO[b.name], sb = b.sb;
-    const m = fowlNormals(mk(1, 1, 1, 1, {
-      nspec: b.name === 'Pearl' ? { t: q0.s + q0.a + q0.e, h: [], on(f, n) { if (n === q0.s + 1) shoot(f, { kind: 'egg', tag: 'egg', max: 1, oy: 4, vx: 1.2, vy: 0.9, grav: 0.08, r: 1.8, life: 70, h: { d: q0.d, a: 60, b: 25, k: 50 } }); } }
-        : { t: q0.s + q0.a + q0.e, h: [{ f0: q0.s + 1, f1: q0.s + q0.a, x: 0, y: 3.5, r: b.name === 'Cinder' ? 0.8 * FB : 0.65 * FB + 1, d: q0.d, a: 60, b: 28, k: 45 }] },
-      sspec: { t: q1.s + q1.a + q1.e, once: 1, nodrift: 1, armor: X.armor, armorMax: X.armor ? 8 : undefined, armorHits: X.armor ? 1 : undefined, h: [{ f0: q1.s + 1, f1: q1.s + q1.a, x: 3, y: 3.5, r: 4, d: q1.d, a: 45, b: 34, k: 70 }],
-        on(f, n) { if (n > q1.s && n <= q1.s + q1.a) { f.vx = f.face * X.rush; if (!f.grounded) f.vy = Math.max(f.vy, X.float ? 0.2 : 0); } if (n === q1.s + q1.a + 1) f.vx *= 0.4; } },
-      uspec: { t: q2.s + q2.a + q2.e, helpless: 1, ledge: 1, h: [{ f0: q2.s + 1, f1: q2.s + q2.a, x: 0, y: 4, r: 4.5, d: q2.d, a: 80, b: 40, k: 40 }],
-        on(f, n, i) { if (n <= q2.s) hang(f); if (n === q2.s + 1) { lift(f, f.st.vUp * (X.diag ? 0.85 : 1)); f.vx = X.diag ? (sgn(i.lx) || f.face) * 2.2 : i.lx * (X.float ? 1.1 : 0.7); } } },
-      /* down special: back into the pouch, when standing beside the slingshot. Anywhere else it does nothing. */
-      dspec: { t: 8, h: [], on(f, n) { if (n === 6 && f.sling && Math.hypot(f.x - f.sling.x, f.y - f.sling.y) < 0.9 * FW + 3) fowlRejoin(f); } },
-      /* the flight out of the pouch: straight along the aim for a set time; special, once, does that bird's own trick */
-      launch: { t: sb.ticks + 1, nodrift: 1, ll: 10, h: [{ f0: 1, f1: sb.ticks, x: 0, y: 3.5, r: 4.2, d: sb.d, dd: a => a.flyD, a: 45, b: 40, k: 88 }],
-        on(f, n) { if (f.flyV) { f.vx = f.flyV[0]; f.vy = f.flyV[1]; } if (n > 2 && !f.flyB && f.ctl.take('spc')) fowlAbility(f, b.name); } },
-    }, { jabs: 1 }), S, FB, 3.5, 1);
-    return { name: b.name + ' alone', col: COL[b.name], alt: COL[b.name], reachMul: 1.0, st: stat(b, true), aiSide: 1, moves: m };
+  const SOLO_N = { jab: [4, 6, 3], ftilt: [7, 11, 5], utilt: [7, 11, 4], dtilt: [6, 10, 4], dash: [10, 16, 6], fsmash: [16, 23, 9], usmash: [13, 20, 8], dsmash: [14, 20, 8], nair: [7, 13, 5], fair: [9, 15, 6], bair: [9, 15, 6], uair: [8, 14, 5], dair: [14, 20, 6] };   /* overhaul v3, section 10 */
+  const solo = FOWL.forms.map(b => { const nm = b.name;
+    const m = fowlNormals(mk(1, 1, 1, 1, Object.assign(makeSolo(nm), {
+      /* Down B: back into the pouch, when close to the slingshot (about one and a half widths). Anywhere else it does nothing. */
+      dspec: { t: 8, h: [], on(f, n) { if (n === 6 && f.sling && Math.hypot(f.x - f.sling.x, f.y - f.sling.y) < 1.5 * FW) fowlRejoin(f); } },
+      launch: makeLaunch(nm),
+      flyStop: { t: nm === 'Cinder' ? 30 : 18, h: [] },
+    })), FOWL.solo, FB, 3.5, 1);
+    for (const k in SOLO_N) { const q = SOLO_N[k], mv = m[k]; if (!mv || !mv.h || !mv.h.length) continue; const rec = mv.t - mv.h[0].f1; for (const h of mv.h) { h.f0 = q[0]; h.f1 = q[1]; h.d = q[2]; } mv.t = q[1] + Math.max(8, rec); if (mv.air) mv.ac = q[1] + 9; }
+    return { name: nm + ' alone', label: FOWL_LABEL[nm] + ' alone', col: COL[nm], alt: COL[nm], reachMul: 1.0, st: stat(b, true), aiSide: 1, moves: m };
   });
   FOWLS.forms = combined.concat(solo);
 })();
@@ -689,7 +924,7 @@ class Fighter {
     this.move = null; this.mf = 0; this.charge = 0; this.hitG = new Set(); this.parriedBy = null; this.victim = null; this.lag = 0; this.flash = 0;
     this.stale = []; this.staled = false; this.staleM = 1; this.shortHop = false; this.moveSH = false; this.shMacro = false; this.grabImm = 0; this.ledgeGrabs = 0;
     this.dodgeStale = 0; this.dodgeT = 0; this.ds = 0; this.tumble = false; this.techT = 0; this.techLock = 0; this.pumT = 0; this.wdHold = false;
-    this.chargeT = 0; this.stalled = false; this.stallOk = false; this.cAir = null; this.hopT = 0; this.sling = null; this.dairUsed = false; this.upC = 0; this.upGo = 0; this.flyV = null; this.flyB = false; this.dove = false; this.burstKind = ''; this.burstX = 0; this.burstDown = false; this.burstUsed = false; this.blastUsed = false; this.swapLock = 0; this.slingUsed = false; this.thermal = false; this.recoil = false; this.bigStone = false; this.armorLeft = 99; this.castHit = false;
+    this.chargeT = 0; this.stalled = false; this.stallOk = false; this.cAir = null; this.hopT = 0; this.airUse = {}; this.flying = false; this.selOpen = false; this.sling = null; this.dairUsed = false; this.upC = 0; this.upGo = 0; this.flyV = null; this.flyB = false; this.dove = false; this.burstKind = ''; this.burstX = 0; this.burstDown = false; this.burstUsed = false; this.blastUsed = false; this.swapLock = 0; this.slingUsed = false; this.thermal = false; this.recoil = false; this.bigStone = false; this.armorLeft = 99; this.castHit = false;
   }
   /* Dodges used back to back protect for less time and leave more lag. */
   dodge() { this.ds = this.dodgeStale; this.dodgeStale = Math.min(5, this.dodgeStale + 1); this.dodgeT = 0; }
@@ -824,13 +1059,13 @@ class Fighter {
     }
     this.vy -= s.grav; const mf = this.ff ? s.ffall : s.fall; if (this.vy < -mf) this.vy = -mf;
   }
-  touchDown(p) { this.grounded = true; this.plat = p; this.y = p.y; this.vy = 0; this.jr = 0; this.stalled = false; this.burstUsed = false; this.blastUsed = false; this.slingUsed = false; this.dairUsed = false; this.wallJumps = 0; this.jumps = this.st.jumps || 1; this.airdodged = false; this.sideUsed = false; this.ledgeUsed = false; this.ledgeGrabs = 0; this.ff = false; this.shortHop = false; }
+  touchDown(p) { this.airUse = {}; this.flying = false; this.grounded = true; this.plat = p; this.y = p.y; this.vy = 0; this.jr = 0; this.stalled = false; this.burstUsed = false; this.blastUsed = false; this.slingUsed = false; this.dairUsed = false; this.wallJumps = 0; this.jumps = this.st.jumps || 1; this.airdodged = false; this.sideUsed = false; this.ledgeUsed = false; this.ledgeGrabs = 0; this.ff = false; this.shortHop = false; }
   land(p) {
     const st = this.state, hard = this.ff; this.touchDown(p);
     if (st === 'attack' && this.move.burst) {   /* a tumble never falls over: a dive that reaches the floor carries on as a slide, anything else lands ready to act */
       if (this.burstKind === 'dive') { this.burstKind = 'slide'; spark(this.x, this.y, '#ddd', 8, 1.2); } else { this.move = null; this.set('idle'); }
     }
-    else if (st === 'attack') { const m = this.move; if (m.onLand) m.onLand(this, this.mf); this.lag = m.air ? (this.mf < (m.h[0] ? m.h[0].f0 : 99) - 1 || this.mf > m.ac ? (hard ? 4 : 2) : m.ll) : (m.ll || 8); this.move = null; this.set('land'); }
+    else if (st === 'attack') { const m = this.move; if (m.onLand) m.onLand(this, this.mf); this.lag = m.air ? (this.mf < (m.h[0] ? m.h[0].f0 : 99) - 1 || this.mf > m.ac ? (hard ? 4 : 2) : m.ll) : (m.ll || 8); if (m.llf) this.lag = m.llf(this); this.move = null; this.set('land'); }
     else if (st === 'airdodge') { if (Math.abs(this.vx) > 0.5) { this.vx = clamp(this.vx, -T.wd_max_speed, T.wd_max_speed); this.set('wd'); } else { this.lag = 10; this.set('land'); } }
     else if (st === 'hurt') {
       /* Launched hard enough to tumble: shield just before touching down to tech (in place or rolling), else lie there. */
@@ -1108,7 +1343,7 @@ class Fighter {
         if (o && o.state === 'ledge' && sgn(o.x) === side) { o.set('air'); o.vy = 1.3; o.vx = side * 0.9; o.ledgeCd = 45; o.invuln = 0; pop(o.x, o.y + 20, 'TRUMP', '#fff'); }
         this.ledgeGrabs++; this.shortHop = false;
         this.x = side * (EDGE + hw + 0.5); this.y = -s.h + 1; this.vx = this.vy = 0; this.face = -side; this.move = null; this.ff = false;
-        this.jumps = s.jumps || 1; this.wallJumps = 0; this.airdodged = false; this.sideUsed = false; this.stalled = false; this.ledgeInv = 0; if (!this.ledgeUsed) { this.ledgeInv = clamp(Math.round(24 + Math.min(this.airT, 300) * 0.1 - Math.min(this.pct, 120) * 0.17), 8, 54); this.ledgeUsed = true; }   /* longer in the air earns more, damage takes it away */
+        this.jumps = s.jumps || 1; this.wallJumps = 0; this.airdodged = false; this.sideUsed = false; this.stalled = false; this.airUse = {}; this.ledgeInv = 0; if (!this.ledgeUsed) { this.ledgeInv = clamp(Math.round(24 + Math.min(this.airT, 300) * 0.1 - Math.min(this.pct, 120) * 0.17), 8, 54); this.ledgeUsed = true; }   /* longer in the air earns more, damage takes it away */
         this.set('ledge'); beep(700, 0.04, 'triangle', 0.03);
       }
     }
@@ -1122,6 +1357,7 @@ function hitY(a, h) { return a.y + h.y + (a.aim || 0) * AIM_Y; }
    to the tip (h.x, h.y), so the whole arm, leg or tool hits and not only its end; the reach is the tip's, unchanged.
    back = 0 is where the attacker is now; back = 1 is where it was a frame ago, used to sweep fast moves. */
 function hitCircles(a, h, back) {
+  if (h.at) return h.at(a, back || 0);   /* a shape worked out from the move itself, such as both ends of a spinning rig */
   const ox = a.x - (back ? (a.x - a.px) * back : 0), oy = a.y - (back ? (a.y - a.py) * back : 0) + (a.aim || 0) * AIM_Y, tx = ox + h.x * a.face, ty = oy + h.y;
   if (!h.in) return [[tx, ty, h.r]];
   const ix = ox + h.in[0] * a.face, iy = oy + h.in[1]; return [[ix, iy, h.r], [(ix + tx) / 2, (iy + ty) / 2, h.r], [tx, ty, h.r]];
@@ -1129,7 +1365,7 @@ function hitCircles(a, h, back) {
 /* Does this hitbox touch that body? Checked where both are now and, if they closed more than a hitbox's width since the
    last frame, at the halfway point too, so nothing fast passes through between frames. */
 function hitTouches(a, h, v) {
-  const rel = Math.hypot((a.x - a.px) - (v.x - v.px), (a.y - a.py) - (v.y - v.py)), steps = rel > h.r && rel < 12 ? [0, 0.5] : [0];   /* a jump of 12 or more is a placement (ledge, respawn), not movement */
+  const rel = Math.hypot((a.x - a.px) - (v.x - v.px), (a.y - a.py) - (v.y - v.py)), steps = h.at ? [0, 0.34, 0.67] : rel > h.r && rel < 12 ? [0, 0.5] : [0];   /* a jump of 12 or more is a placement (ledge, respawn), not movement */
   for (const b of steps) { const r = hurtRect(v), sx = (v.x - v.px) * b, sy = (v.y - v.py) * b; for (const c of hitCircles(a, h, b).reverse()) if (circRect(c[0], c[1], c[2], r[0] - sx, r[1] - sy, r[2] - sx, r[3] - sy)) return c; }
   return null;
 }
@@ -1142,6 +1378,7 @@ function hurtRect(v) {
   else if (v.state === 'down') { h *= 0.42; w *= 1.4; }
   else if (v.state === 'ledge') return [v.x - w / 2, v.y, v.x + w / 2, v.y + h + 3];   /* head and hands show above the lip */
   else if (v.state === 'jsq' || v.state === 'land') h *= 0.86;
+  else if (v.state === 'attack' && v.move && v.move.low && v.mf >= v.move.low[0] && v.mf <= v.move.low[1]) h *= 0.5;   /* a low skid or roll ducks under high attacks */
   return [v.x - w / 2, v.y, v.x + w / 2, v.y + h];
 }
 /* The shield bubble shrinks as the shield wears down and can be shifted a little with the stick, so a worn shield leaves
@@ -1171,6 +1408,7 @@ let slowT = 0, focus = null;   /* slow motion and camera focus after a hit that 
 function canBeHit(v) { return v.invuln === 0 && v.state !== 'dead' && v.state !== 'respawn' && v.state !== 'held'; }
 function applyHit(a, v, h, face, srcX, proj, poke) { sparkOff = !DBG.fx; try { applyHitRaw(a, v, h, face, srcX, proj, poke); } finally { sparkOff = false; } }
 function applyHitRaw(a, v, h, face, srcX, proj, poke) {
+  if (h.dyn) h = Object.assign({}, h, h.dyn(a));   /* a hit whose numbers depend on the moment (the Cyclone's light hits, then its finisher) */
   const hx = v.x, hy = v.y + v.st.h / 2;
   if (h.grab) {
     if (v.state === 'held' || v.state === 'hold' || a.state !== 'attack' || (!a.grounded && !h.cmd)) return;   /* a grab that traded with a hit loses */
@@ -1192,6 +1430,10 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke) {
     v.set('idle'); v.invuln = 4; if (!proj) { a.hitlag = 16; a.parriedBy = v; }
     spark(hx, hy, '#fff', 20, 2); pop(hx, hy + 12, 'PARRY', '#fff'); beep(1200, 0.12, 'triangle', 0.07, 1.3); return;
   }
+  if (!proj && !h.grab && v.state === 'attack' && v.move && v.move.counter && v.mf >= v.move.counter[0] && v.mf <= v.move.counter[1] && sgn(a.x - v.x) === v.face) {
+    if (h.d <= v.move.counterMax) { a.hitlag = 12; v.hitlag = 6; v.startMove('dcounter'); spark(hx, hy, '#ffd98a', 16, 1.8); pop(hx, hy + 12, 'BRACE', '#ffd98a'); beep(880, 0.08, 'triangle', 0.05, 0.6); return; }
+    d *= 0.5;   /* a strong hit overpowers the brace, for half its damage */
+  }
   if (poke) pop(hx, hy + 12, 'POKE', '#9cf');   /* the hit found a part of the body the shield no longer covers */
   if ((v.state === 'shield' || v.state === 'shieldstun') && !poke) {
     v.shieldHp -= d * SHIELD.dmg;
@@ -1211,14 +1453,15 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke) {
   let deg = h.a !== 361 ? h.a : !v.grounded ? 45 : kb < 60 ? 0 : kb >= 88 ? 38 : (kb - 60) / 28 * 38;
   if (!proj && a.aim) deg = Math.max(0, deg + a.aim * 8);   /* an angled tilt sends a little higher or lower */
   let ang = deg * Math.PI / 180;
-  const dir = h.away ? (sgn(v.x - srcX) || face) : face;
+  let dir = h.away ? (sgn(v.x - srcX) || face) : face;
+  if (h.drag) { const tx = a.face * (v.y + v.st.h / 2 - (a.y + FP)), ty = -a.face * (v.x - a.x); ang = Math.atan2(ty, tx); dir = 1; }   /* along the spin: forward over the top, back along the bottom */
   /* Directional influence: the stick bends the launch up to about 10 degrees. */
   const i = v.ctl.c, lx = Math.cos(ang) * dir, ly = Math.sin(ang), perp = i.lx * -ly + i.ly * lx;
   ang += perp * 0.17 * (dir > 0 ? 1 : -1);
   /* Holding up or down stretches or shortens the launch, except for near-vertical ones. */
   const nd = ((ang * 180 / Math.PI) % 360 + 360) % 360, vertical = (nd > 65 && nd < 115) || (nd > 245 && nd < 295);
   const lsi = vertical ? 1 : i.ly > 0.5 ? 1.095 : i.ly < -0.5 ? 0.92 : 1;
-  v.launch(kb, ang, dir, lsi); v.hitlag = hl; if (!proj) a.hitlag = hl; rumble(v.ctl, 60 + kb, Math.min(1, 0.25 + kb / 150)); rumble(a.ctl, 50, 0.25);
+  v.launch(kb, ang, dir, lsi); if (h.drag) { v.vx += a.vx; v.vy += a.vy; }   /* carried along with a travelling rig */ v.hitlag = hl; if (!proj) a.hitlag = hl; rumble(v.ctl, 60 + kb, Math.min(1, 0.25 + kb / 150)); rumble(a.ctl, 50, 0.25);
   if (wouldKO(v)) {   /* a hit that will KO lands harder: longer freeze, a bigger burst, and slow motion if it takes the last stock */
     v.hitlag += 8; if (!proj) a.hitlag += 8; shake = Math.max(shake, 14); rumble(v.ctl, 300, 1);
     spark(hx, hy, '#ff5a4d', 40, 4.2); spark(hx, hy, '#ffe9a8', 24, 2.6); beep(70, 0.5, 'sawtooth', 0.11, 0.5);
@@ -1234,7 +1477,7 @@ function resolveHits() {
   /* Attacks meeting attacks. Two ground attacks whose hitboxes touch cancel out, with both fighters recoiling, when their
      damage is within 9 of each other; otherwise only the weaker one recoils. An attack that touches an enemy projectile
      no more than 9 stronger than it puts the projectile out. */
-  const live = f => f.state === 'attack' && f.move ? f.move.h.filter(h => !h.grab && f.mf >= h.f0 && f.mf <= h.f1) : [];
+  const live = f => f.state === 'attack' && f.move ? f.move.h.filter(h => !h.grab && f.mf >= h.f0 && f.mf <= h.f1 && (!h.when || h.when(f))) : [];
   if (F.length === 2 && F[0].grounded && F[1].grounded && F[0].hitlag === 0 && F[1].hitlag === 0) {
     const [a, b] = F;
     clank: for (const h0 of live(a)) for (const h1 of live(b)) {
@@ -1247,14 +1490,14 @@ function resolveHits() {
     }
   }
   for (const p of PROJ) {
-    const a = F[1 - p.owner]; if (p.life <= 0 || !a) continue;
+    const a = F[1 - p.owner]; if (p.life <= 0 || !a || p.ghost || (p.gndBreak && !a.grounded)) continue;
     for (const h of live(a)) { const dx = a.x + h.x * a.face - p.x, dy = hitY(a, h) - p.y; if (dx * dx + dy * dy <= (h.r + p.r) * (h.r + p.r) && h.d + 9 > p.h.d) { p.life = 0;   /* an attack puts out a projectile less than 9% stronger than itself */ spark(p.x, p.y, '#fff', 8, 1.2); beep(700, 0.04, 'triangle', 0.04); break; } }
   }
   for (const a of F) {
     const v = F[1 - a.idx];
     if (a.state === 'attack' && a.move && canBeHit(v)) {
       for (const h of (a.move.hp || a.move.h)) {   /* hp: the same hitboxes with the parts near the body first */
-        if (a.mf < h.f0 || a.mf > h.f1) continue; const gid = h.g || 0; if (a.hitG.has(gid)) continue;
+        if (a.mf < h.f0 || a.mf > h.f1 || (h.when && !h.when(a))) continue; const gid = h.g || 0; if (a.hitG.has(gid)) continue;
         if (h.grab && ((!a.grounded && !h.cmd) || v.grabImm > 0 || (h.floor && !(a.grounded && v.grounded)))) continue;
         if ((h.airOnly && a.grounded) || (h.gndOnly && !a.grounded)) continue;   /* a hit that only exists in the air, or only on the floor */   /* ordinary grabs are for the ground; a leaping grab catches in the air; a floor grab needs both standing */
         const at = hitTouches(a, h, v); if (at) { ev.push([a, v, h, a.face, a.x, false, !h.grab && pokes(v, at[0], at[1])]); a.hitG.add(gid); break; }
@@ -1263,13 +1506,15 @@ function resolveHits() {
   }
   for (const p of PROJ) {
     const v = F[1 - p.owner];
-    if (p.life > 0 && canBeHit(v) && (circRect(p.x, p.y, p.r, ...hurtRect(v)) || (Math.hypot(p.vx, p.vy) > p.r && circRect(p.x - p.vx / 2, p.y - p.vy / 2, p.r, ...hurtRect(v))))) {   /* and halfway back along a fast shot's path */ ev.push([F[p.owner], v, p.h, p.face, p.x, true, pokes(v, p.x, p.y)]); p.life = 0; p.spent = true; if (p.grp) for (const q of PROJ) if (q.grp === p.grp && q.owner === p.owner) q.life = 0; }   /* grp: parts of one burst, one hit between them */
+    if (p.life > 0 && !p.ghost && !(p.cool > 0) && canBeHit(v) && (circRect(p.x, p.y, p.r, ...hurtRect(v)) || (Math.hypot(p.vx, p.vy) > p.r && circRect(p.x - p.vx / 2, p.y - p.vy / 2, p.r, ...hurtRect(v))))) {   /* and halfway back along a fast shot's path */ ev.push([F[p.owner], v, p.h, p.face, p.x, true, pokes(v, p.x, p.y)]); if (p.onHit) p.onHit(p, F[p.owner], v); if (p.hits > 1) { p.hits--; p.cool = p.rehit || 6; } else { p.life = 0; p.spent = true; } if (p.grp && p.life <= 0) for (const q of PROJ) if (q.grp === p.grp && q.owner === p.owner) q.life = 0; }   /* grp: parts of one burst, one hit between them */
   }
   for (const e of ev) applyHit(...e);
 }
 function updateProj() {
   for (const p of PROJ.slice()) {
     p.life--; p.age = (p.age || 0) + 1; const py = p.y - p.r;
+    if (p.cool > 0) p.cool--;
+    if (p.track) { const ow = F[p.owner]; if (!ow || ow.state === 'dead') { p.life = 0; continue; } const q = p.track(ow, p); p.vx = q[0] - p.x; p.vy = q[1] - p.y; p.x = q[0]; p.y = q[1]; continue; }   /* placed by a rule from its owner (Pip's doubles) */
     if (p.lateAt && p.age === p.lateAt) p.h = Object.assign({ id: p.h.id }, p.lateH);
     if (p.split && p.age === p.split) { p.split = 0; for (const vy of [0.55, -0.55]) PROJ.push(Object.assign({}, p, { vy, age: p.age, h: Object.assign({}, p.h, { d: vy > 0 ? 3 : 2 }) })); }
     if (p.boom && p.life <= 0 && !p.spent) { p.spent = true; fowlBoom(p); }
