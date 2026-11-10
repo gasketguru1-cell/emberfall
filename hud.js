@@ -31,7 +31,7 @@ function drawSelect() {
     g.textAlign = 'left'; g.font = 'bold 24px system-ui, sans-serif'; g.fillStyle = pc; g.fillText('PLAYER ' + (k + 1), x + 24, y + 40);
     g.textAlign = 'center';
     if (!sl) { g.font = '20px system-ui, sans-serif'; g.fillStyle = '#ddd'; g.fillText(k && slots[0] ? 'Press Attack to join' : 'Press Attack to join', x + 220, y + 160); if (k) { g.fillStyle = '#999'; g.fillText('(empty = CPU opponent)', x + 220, y + 192); } continue; }
-    g.textAlign = 'right'; g.font = '18px system-ui, sans-serif'; g.fillStyle = '#ccc'; g.fillText(devName(sl.dev) + (sl.dev !== 'kb' ? (LAYOUT[sl.dev] === 'labels' ? '  ·  A/B by label' : '  ·  A/B by position') : '') + '  ·  tap jump ' + (TAPJUMP[sl.dev] ? 'on' : 'off'), x + 416, y + 40);
+    g.textAlign = 'right'; g.font = '18px system-ui, sans-serif'; g.fillStyle = '#ccc'; g.fillText(devName(sl.dev) + (sl.dev !== 'kb' ? (LAYOUT[sl.dev] === 'labels' ? '  ·  A/B swapped' : '  ·  A/B normal') : '') + '  ·  tap jump ' + (TAPJUMP[sl.dev] ? 'on' : 'off'), x + 416, y + 40);
     if (sl.dev !== 'kb') { g.font = '12px system-ui, sans-serif'; g.fillStyle = '#888'; g.fillText(padInfo(+sl.dev.slice(3)).slice(0, 46), x + 416, y + 58); }
     g.textAlign = 'center';
     const d = ROSTER[sl.pick]; g.font = 'bold 40px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('‹  ' + d.name + '  ›', x + 220, y + 100);

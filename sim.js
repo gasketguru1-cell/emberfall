@@ -106,7 +106,7 @@ function readPad(n) {
   if (b(14)) i.lx = -1; if (b(15)) i.lx = 1; if (b(12)) i.ly = 1; if (b(13)) i.ly = -1;
   const m = Math.hypot(i.lx, i.ly); if (m > 1) { i.lx /= m; i.ly /= m; }
   /* Positional: the right face button attacks and the bottom one is special. Labels swaps those two, for pads that report by printed letter. */
-  const swap = LAYOUT['pad' + n] === 'labels';
+  const swap = LAYOUT['pad' + n] !== 'labels';   /* owner asked for A and B the other way round (2026-11-10): the bottom button now attacks unless toggled */
   i.atk = b(swap ? 0 : 1); i.spc = b(swap ? 1 : 0); i.jmp = b(2) || b(3); i.shd = b(6) || b(7); i.grb = b(4) || b(5); i.start = b(9); i.sel = b(8);
   return i;
 }
