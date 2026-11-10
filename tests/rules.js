@@ -199,6 +199,56 @@ vm.runInThisContext(`
     check('run: back + attack is a turnaround tilt or smash', tilt === 'ftilt facing left' && smash === 'fsmash facing left', 'gentle: ' + tilt + ' | hard: ' + smash);
   }
 
+  /* ---- The player's own movement rules (numbers from platforms.ini). These must not drift. ---- */
+  {
+    const wd = (lx, ly, attackAt) => { const [f] = setup(FL, FL, 0, 60); let first = null, inWd = 0, acted = null; const x0 = f.x;
+      SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 4) i.jmp = true; if (tt >= 4 && tt < 9) { i.shd = true; i.lx = lx; i.ly = ly; } if (attackAt && tt >= attackAt && tt < attackAt + 2) i.atk = true; };
+      run(70, () => { if (f.state === 'wd') { inWd++; if (first === null) first = +Math.abs(f.vx).toFixed(2); } else if (inWd && acted === null) acted = f.state + ' after ' + inWd + ' frames'; });
+      return { speed: first, dist: +(f.x - x0).toFixed(1), acted }; };
+    const long = wd(1, -0.2), short = wd(0.7, -0.7), inPlace = wd(0.1, -1), act = wd(1, -0.2, 7);
+    check('wavedash: long, short and in place', long.speed === T.wd_long_speed && short.speed === T.wd_short_speed && inPlace.speed === 0 && long.dist > short.dist * 2.5,
+      'start speeds ' + long.speed + ' / ' + short.speed + ' / ' + inPlace.speed + ', slides ' + long.dist + ' and ' + short.dist + ' units');
+    check('wavedash: can act on frame ' + T.wd_actionable_frame, act.acted === 'attack after ' + T.wd_actionable_frame + ' frames', 'attack buffered during the slide -> ' + act.acted);
+  }
+  {
+    const onPlat = (script, solid) => { const [f] = setup(FL, FL, 0, 60); if (!solid) { f.y = 24; f.plat = PLATS[1]; } let low = f.y; const seen = [];
+      SCRIPT[0] = script; run(50, () => { low = Math.min(low, f.y); if (seen[seen.length - 1] !== f.state) seen.push(f.state); }); return { y: Math.round(f.y), states: seen.join('>') }; };
+    const flick = onPlat((i, tt) => { if (tt >= 4 && tt < 7) i.ly = -1; }), slow = onPlat((i, tt) => { if (tt >= 4) i.ly = -0.5; });
+    check('platform: a down flick drops through, a slow tilt crouches', flick.y === 0 && slow.y === 24, 'flick ends at height ' + flick.y + ' (' + flick.states + '), slow tilt stays at ' + slow.y);
+    const sd = onPlat((i, tt) => { if (tt < 14) i.shd = true; if (tt >= 10 && tt < 13) i.ly = -1; }), sm = onPlat((i, tt) => { if (tt < 14) i.shd = true; if (tt >= 10 && tt < 13) i.ly = -1; }, true);
+    check('shield drop: down in shield drops through a platform, spot-dodges on the stage', sd.y === 0 && /shield>air/.test(sd.states) && /shield>spot/.test(sm.states), 'on a platform: ' + sd.states + ' | on the stage: ' + sm.states);
+    const fall = hold => { const [f] = setup(FL, FL, 0, 60); airborne(f, 0, 44); SCRIPT[0] = i => { if (hold) i.ly = -1; }; let landed = null; run(80, () => { if (f.grounded && landed === null) landed = Math.round(f.y); }); return landed; };
+    check('platform: holding down in the air falls through it', fall(false) === 24 && fall(true) === 0, 'lands at height ' + fall(false) + ' normally, ' + fall(true) + ' holding down');
+  }
+  {
+    const guard = release => { const [a, v] = setup(FL, FL, 0, 11); let lag = 0, st = null;
+      SCRIPT[0] = (i, tt) => { if (tt >= 10 && tt < 12) i.atk = true; }; SCRIPT[1] = (i, tt) => { if (release !== null && tt < release) i.shd = true; };
+      run(40, () => { lag = Math.max(lag, a.hitlag); if (st === null && (v.pct > 0 || v.state === 'shieldstun')) st = v.state; }); return { pct: +v.pct.toFixed(1), lag, st }; };
+    const open = guard(null), held = guard(99), timed = guard(12);
+    check('parry: releasing shield just before the hit', open.pct > 0 && held.pct === 0 && held.st === 'shieldstun' && timed.pct === 0 && timed.st === null && timed.lag >= 16,
+      'no shield: ' + open.pct + '% | held: ' + held.st + ' | released in time: ' + timed.pct + '%, attacker frozen ' + timed.lag + ' frames');
+  }
+  {
+    const floor = (shield, lx) => { const [a, v] = setup(FL, FL, -60, 0); airborne(v, 0, 22); v.launch(120, -Math.PI / 2, 1); const seen = [];
+      SCRIPT[1] = (i, tt) => { if (shield && tt < 2) i.shd = true; i.lx = lx; }; run(30, () => { if (seen[seen.length - 1] !== v.state) seen.push(v.state); }); return seen.join('>'); };
+    const none = floor(false, 0), tech = floor(true, 0), roll = floor(true, 1);
+    check('tech: shield before hitting the floor', /hurt>down/.test(none) && /hurt>land/.test(tech) && /hurt>roll/.test(roll), 'nothing: ' + none + ' | shield: ' + tech + ' | shield + direction: ' + roll);
+  }
+  {
+    const [a, v] = setup(FL, FL, 0, 11); const got = []; let last = 0;
+    SCRIPT[0] = (i, tt) => { if (tt % 45 >= 2 && tt % 45 < 4) i.atk = true; };
+    run(140, () => { if (v.pct > last + 0.01) { got.push(+(v.pct - last).toFixed(2)); last = v.pct; } });
+    check('stale moves: the same attack weakens when repeated', got.length >= 3 && got[0] > got[1] && got[1] > got[2], 'three jabs did ' + got.slice(0, 3).join(', ') + '%');
+  }
+  {
+    const hop = (hold, withAttack) => { const [f] = setup(FL, FL, 0, 60); let top = 0, sh = null;
+      SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < (hold ? 30 : 4)) i.jmp = true; if (withAttack && tt >= 2 && tt < 4) i.atk = true; };
+      run(60, () => { top = Math.max(top, f.y); if (f.state === 'attack' && sh === null) sh = f.mname + (f.moveSH ? ' (short-hop, weaker)' : '') + (f.grounded ? ' on the ground' : ' in the air'); }); return { top: +top.toFixed(1), sh }; };
+    const full = hop(true), short = hop(false), macro = hop(false, true);
+    check('jump: tap for a short hop, hold for a full one', short.top > 8 && short.top < full.top * 0.6, 'heights ' + short.top + ' and ' + full.top);
+    check('jump + attack together: a short-hop aerial', macro.sh === 'nair (short-hop, weaker) in the air', String(macro.sh));
+  }
+
   let bad = 0; for (const [ok, name, detail] of results) { if (!ok) bad++; console.log((ok ? 'pass  ' : 'FAIL  ') + name.padEnd(48) + detail); }
   console.log(bad ? bad + ' of ' + results.length + ' checks failed' : 'all ' + results.length + ' rule checks pass');
   if (bad) process.exitCode = 1;
