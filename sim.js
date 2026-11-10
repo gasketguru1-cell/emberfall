@@ -178,7 +178,7 @@ const SWAP = { t: 34, swap: 1, h: [], on(f, n) { if (n === 1) f.invuln = Math.ma
 /* ---------- Fighters (all original) ---------- */
 const FLINT = {
   name: 'Flint', sub: 'the lamplighter', forms: [{
-    name: 'Flint', col: ['#1f6f78', '#f2c14e', '#f6e7c1'], alt: ['#7a3b69', '#9be564', '#f6e7c1'],
+    name: 'Flint', col: ['#1f6f78', '#f2c14e', '#f6e7c1'], alt: ['#7a3b69', '#9be564', '#f6e7c1'], reachMul: 1.08,
     /* All-rounder: middling everything, a three-hit jab, a projectile, a dependable recovery. */
     st: { weight: 98, walk: 1.1, dash: 1.95, run: 1.75, airSpeed: 1.12, airAcc: 0.075, grav: 0.095, fall: 1.6, ffall: 2.55, jump: 3.05, shop: 1.85, djump: 2.95, jsq: 3, trac: 0.11, w: 8, h: 14,
       jumps: 1, dashF: 14, roll: [28, 1.35, 13], spot: [22, 15] },
@@ -198,7 +198,7 @@ const FLINT = {
 const WREN = {
   name: 'Wren', sub: 'and her three companions', forms: [{
     /* Nib: a wind-up fox. Light, quick, short reach. */
-    name: 'Nib', col: ['#c9862b', '#6b4a1e', '#ffe8a3'], alt: ['#4f9d8f', '#1f4d47', '#e8fff6'],
+    name: 'Nib', col: ['#c9862b', '#6b4a1e', '#ffe8a3'], alt: ['#4f9d8f', '#1f4d47', '#e8fff6'], reachMul: 0.9,
     /* Rushdown: light and quick, short reach, fast falls, fast dodges, wall jumps, weak throws that set up follow-ups. */
     st: { weight: 80, walk: 1.25, dash: 2.25, run: 2.1, airSpeed: 1.28, airAcc: 0.095, grav: 0.115, fall: 1.85, ffall: 2.95, jump: 3.2, shop: 2.0, djump: 3.1, jsq: 3, trac: 0.13, w: 8, h: 9,
       jumps: 1, wallJump: 1, dashF: 11, roll: [24, 1.6, 11], spot: [20, 14] },
@@ -227,12 +227,12 @@ const WREN = {
     /* Hod: a stone-backed badger. Heavy, slow, hits hard. */
     name: 'Hod', col: ['#6d6a75', '#a39171', '#f1f1f1'], alt: ['#8a4f3d', '#3d5a6c', '#f1f1f1'],
     /* Heavy: slow, hard to launch, hits and throws hard, armoured smash and dash attack, poor air movement and recovery. */
-    st: { weight: 122, walk: 0.9, dash: 1.6, run: 1.45, airSpeed: 0.95, airAcc: 0.05, grav: 0.12, fall: 1.95, ffall: 3.1, jump: 2.95, shop: 1.8, djump: 2.6, jsq: 3, trac: 0.14, w: 12, h: 13,
+    st: { weight: 122, walk: 0.9, dash: 1.6, run: 1.45, airSpeed: 1.0, airAcc: 0.05, grav: 0.12, fall: 1.95, ffall: 3.1, jump: 2.95, shop: 1.8, djump: 2.6, jsq: 3, trac: 0.14, w: 12, h: 13,
       jumps: 1, dashF: 15, roll: [32, 1.15, 12], spot: [24, 14] },
     moves: mk(1.1, 1.3, 1.25, 0.9, {
       nspec: { t: 54, h: [], on(f, n) { if (n === 24) { shoot(f, { kind: 'boulder', oy: 6, vx: 1.5, vy: 0.6, grav: 0.09, r: 4.5, life: 110, ground: 'roll', h: { d: 12, a: 50, b: 40, k: 70 } }); beep(110, 0.15, 'square', 0.06, 0.7); } } },
       sspec: { t: 60, once: 1, nodrift: 1, armor: [10, 34], h: [{ f0: 16, f1: 34, x: 7, y: 6, r: 7, d: 14, a: 45, b: 50, k: 85 }], on(f, n) { if (n >= 16 && n <= 34) { f.vx = f.face * 2.0; if (!f.grounded) f.vy = 0; } if (n === 35) f.vx *= 0.3; } },
-      uspec: { t: 44, helpless: 1, ledge: 1, inv: [6, 11], h: [{ f0: 10, f1: 16, x: 0, y: 7, r: 8, d: 13, a: 80, b: 50, k: 85 }], on(f, n, i) { if (n === 10) { lift(f, 3.4); f.vx = i.lx * 0.7; } } },
+      uspec: { t: 44, helpless: 1, ledge: 1, inv: [6, 11], h: [{ f0: 10, f1: 16, x: 0, y: 7, r: 8, d: 13, a: 80, b: 50, k: 85 }], on(f, n, i) { if (n === 10) { lift(f, 3.75); f.vx = i.lx * 0.8; } } },
       dspec: SWAP,
     }, { jabs: 2, grab: { t: 36, h: { f0: 8, f1: 10, x: 9.5, r: 5 } }, armor: { fsmash: [8, 18], dash: [5, 14] },
       throws: { f: { d: 11, b: 65, k: 75 }, b: { d: 13, b: 70, k: 95 }, u: { d: 10, b: 60, k: 70 }, d: { d: 8, a: 60, b: 60, k: 45 } } }),
@@ -243,6 +243,11 @@ const ROSTER = [FLINT, WREN];
 if (typeof HITBOXES !== 'undefined') for (const def of ROSTER) for (const fm of def.forms) {
   const set = HITBOXES[fm.name]; if (!set) continue;
   for (const k in set) { const mv = fm.moves[k]; if (mv) set[k].forEach((o, n) => { if (mv.h[n]) Object.assign(mv.h[n], o); }); }
+}
+/* Reach by archetype (hitbox size only, grabs excluded), and the distance the CPU likes to attack from. */
+for (const def of ROSTER) for (const fm of def.forms) {
+  if (fm.reachMul) for (const k in fm.moves) { const mv = fm.moves[k]; if (mv && Array.isArray(mv.h)) for (const h of mv.h) if (!h.grab) h.r = Math.round(h.r * fm.reachMul * 10) / 10; }
+  const ft = fm.moves.ftilt.h[0]; fm.aiRange = Math.round(ft.x + ft.r * 0.5 + 3);
 }
 
 /* ---------- Fighter ---------- */
@@ -767,8 +772,17 @@ function cpuInput(f, o, m) {
   if (f.state === 'ledge') { if (f.sf > 20) { if (m.t % 2) i.lx = -sgn(f.x); else i.jmp = true; } return i; }
   if (f.state === 'hold') { if (f.sf > 16) { const r = m.t % 4; if (r === 0) i.lx = f.face; else if (r === 1) i.lx = -f.face; else if (r === 2) i.ly = 1; else i.ly = -1; } return i; }
   if (!f.grounded && (Math.abs(f.x) > 84 || f.y < -3)) {
-    i.lx = -sgn(f.x);
-    if (f.vy < 0 && f.state === 'air' && m.t % 6 === 0) { if (f.jumps > 0 && f.y < 12) i.jmp = true; else if (f.jumps === 0 && f.y < -6) { i.lx = 0; i.ly = 1; i.spc = true; } }
+    /* Getting back. Never drift in under the stage: when below its top and inside its edge, steer back out first.
+       Use the side special only while still high and far out, the air jumps on the way down, and the up special last,
+       pressed with the stick only slightly toward the stage so it is not read as a side special. */
+    const side = sgn(f.x) || 1, edge = 80 + f.st.w / 2 + 2, under = f.y < -2 && Math.abs(f.x) < edge, far = Math.abs(f.x) - 80;
+    i.lx = under ? side : Math.abs(f.x) > edge + 1 ? -side : 0;
+    if (f.state !== 'air' || m.t % 5 !== 0) return i;
+    if (!f.sideUsed && f.form.moves.sspec.once && far > 36 && f.y > 14) { i.lx = -side; i.spc = true; return i; }
+    if (f.vy < 0 && !under) {
+      if (f.jumps > 0 && (f.y < 8 || far > 50)) i.jmp = true;
+      else if (f.jumps === 0 && (f.y < -4 || far > 40)) { i.lx = -side * 0.35; i.ly = 1; i.spc = true; }
+    }
     return i;
   }
   if (o.state === 'dead' || o.state === 'respawn') { if (Math.abs(f.x) > 20) i.lx = -sgn(f.x) * 0.5; return i; }
@@ -777,7 +791,8 @@ function cpuInput(f, o, m) {
     if (dy > 16 && ad < 34) { if (m.cd === 0) { i.jmp = true; m.cd = 22; } i.lx = ad > 6 ? dir : 0; return i; }
     if (dy < -10 && f.plat && f.plat.soft) { if (m.t % 12 < 6) i.ly = -1; return i; }
     if (m.cd === 0 && f.form.aiShot && ad > 40 && ad < 110 && Math.abs(dy) < 10 && f.face === dir && Math.random() < 0.04) { i.spc = true; m.cd = 50; return i; }
-    if (ad > 14) { i.lx = dir; return i; }
+    if (f.def.forms.length > 1 && !f.noSwap && m.cd === 0 && ad > 45 && Math.random() < 0.012) { i.ly = -1; i.spc = true; m.cd = 70; return i; }   /* swap companion at a safe distance */
+    if (ad > (f.form.aiRange || 14)) { i.lx = dir; return i; }
     if (f.face !== dir) { i.lx = dir * 0.5; return i; }
     if (m.cd === 0) {
       const r = Math.random(); m.cd = 22 + (Math.random() * 30 | 0);
@@ -788,7 +803,11 @@ function cpuInput(f, o, m) {
     return i;
   }
   i.lx = ad > 6 ? dir : 0;
-  if (m.cd === 0 && ad < 16 && Math.abs(dy) < 16 && f.state === 'air') { m.cd = 30; if (dy > 6) i.cy = 1; else if (dy < -6) i.cy = -1; else i.cx = dir; }
+  if (m.cd === 0 && f.state === 'air') {
+    if (ad < 8 && dy > 5 && dy < 22) { m.cd = 30; i.cy = 1; }
+    else if (ad < 6 && dy < -11 && dy > -26 && f.vy > -0.7) { m.cd = 40; i.cy = -1; }   /* only with room to finish the attack before landing */
+    else if (ad < (f.form.aiRange || 14) + 2 && Math.abs(dy) < 8) { m.cd = 30; i.cx = dir; }
+  }
   if (dy > 20 && f.jumps > 0 && f.vy < 0 && m.t % 20 === 0) i.jmp = true;
   return i;
 }

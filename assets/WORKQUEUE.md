@@ -40,3 +40,4 @@ Standing instructions from the owner (2026-11-09, about 9 pm): keep working with
 ## Log
 
 - 2026-11-09 21:10: queue written; restart set for 21:40 with retries every ten minutes, stop at midnight.
+- 2026-11-09 21:15: item 1 partly done: reach set by archetype (Nib shortest, Loom longest), Hod recovery buffed, CPU now attacks from each fighter's range and recovers from all 24 test positions (tests/recovery.js). Balance numbers in tests/stats.js. Still to do in item 1: damage and KO tuning (Hod still dies off the bottom more than it should; Loom survives longest at about 158%). Stopped here because the usage limit was reached; restart is scheduled for 21:40.
