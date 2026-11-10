@@ -94,13 +94,15 @@ function thwack(kb) {
 const keys = {};
 addEventListener('keydown', e => { keys[e.code] = true; if (/^(Arrow|Space|Enter|Backspace)/.test(e.code)) e.preventDefault(); if (!e.repeat || e.code === 'KeyO') debugKey(e.code); });
 /* Debug tools: B shows hitboxes and hurtboxes, P freezes the game, O advances one frame, M switches between the 2D and 3D renderers. */
-const DBG = { step: false, boxes: false, advance: 0, r3d: true };
+const DBG = { step: false, boxes: false, advance: 0, r3d: true, fx: true };   /* fx: the burst of sparks and the flash of light where a hit lands */
 /* Showing hitboxes: switched with the jump button on the start screen or B on the keyboard, and remembered. */
 try { DBG.boxes = localStorage.getItem('emberfall.boxes') === '1'; } catch (e) { /* no storage */ }
+try { DBG.fx = localStorage.getItem('emberfall.hitfx') !== '0'; } catch (e) { /* no storage */ }
+function setHitFx(on) { DBG.fx = !!on; try { localStorage.setItem('emberfall.hitfx', on ? '1' : '0'); } catch (e) { /* no storage */ } }
 function setBoxes(on) { DBG.boxes = !!on; try { localStorage.setItem('emberfall.boxes', on ? '1' : '0'); } catch (e) { /* no storage */ } }
 function debugKey(code) {
   if (code === 'KeyP') { DBG.step = !DBG.step; DBG.advance = 0; } else if (code === 'KeyO') { if (DBG.step) DBG.advance++; }
-  else if (code === 'KeyB') setBoxes(!DBG.boxes); else if (code === 'KeyM') DBG.r3d = !DBG.r3d;
+  else if (code === 'KeyB') setBoxes(!DBG.boxes); else if (code === 'KeyH') setHitFx(!DBG.fx); else if (code === 'KeyM') DBG.r3d = !DBG.r3d;
 }
 addEventListener('keyup', e => { keys[e.code] = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
@@ -171,7 +173,9 @@ class Ctl {
 
 /* ---------- Effects ---------- */
 let PART = [], POPS = [], shake = 0;
+let sparkOff = false;   /* set while a hit is being worked out with hit effects switched off */
 function spark(x, y, col, n, sp) {
+  if (sparkOff) return;
   for (let k = 0; k < n; k++) { const a = Math.random() * TAU, s = (0.3 + Math.random()) * (sp || 1); PART.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 14 + Math.random() * 14, col, r: 0.6 + Math.random() * 1.2 }); }
 }
 function pop(x, y, text, col) { POPS.push({ x, y, text, col, life: 50 }); }
@@ -1016,7 +1020,8 @@ function wouldKO(v) {
 }
 let slowT = 0, focus = null;   /* slow motion and camera focus after a hit that will take the last stock */
 function canBeHit(v) { return v.invuln === 0 && v.state !== 'dead' && v.state !== 'respawn' && v.state !== 'held'; }
-function applyHit(a, v, h, face, srcX, proj, poke) {
+function applyHit(a, v, h, face, srcX, proj, poke) { sparkOff = !DBG.fx; try { applyHitRaw(a, v, h, face, srcX, proj, poke); } finally { sparkOff = false; } }
+function applyHitRaw(a, v, h, face, srcX, proj, poke) {
   const hx = v.x, hy = v.y + v.st.h / 2;
   if (h.grab) {
     if (v.state === 'held' || v.state === 'hold' || a.state !== 'attack' || (!a.grounded && !h.cmd)) return;   /* a grab that traded with a hit loses */
@@ -1296,6 +1301,7 @@ function stepSelect() {
     const c = devCtl(dev); c.poll(readDev(dev));
     if (c.pressed('sel') && dev !== 'kb') { toggleLayout(dev); beep(520, 0.05, 'square', 0.03); }
     if (c.pressed('jmp')) { setBoxes(!DBG.boxes); beep(DBG.boxes ? 700 : 420, 0.05, 'square', 0.03); }   /* jump button: show or hide hitboxes */
+    if (c.pressed('shd')) { setHitFx(!DBG.fx); beep(DBG.fx ? 700 : 420, 0.05, 'square', 0.03); }   /* shield button: hit sparks and flash on or off */
     let sl = slots.find(s => s && s.dev === dev);
     if (!sl) { if (c.pressed('atk') || c.pressed('start')) { const k = slots[0] ? (slots[1] ? -1 : 1) : 0; if (k >= 0) { slots[k] = { dev, pick: k, ready: false }; beep(600, 0.06, 'triangle', 0.05); } } continue; }
     if (!slots[1] && (c.upNow || c.downNow)) { setCpuLevel(CPU_LEVEL + (c.upNow ? 1 : -1)); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }

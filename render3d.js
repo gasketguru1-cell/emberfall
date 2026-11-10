@@ -290,7 +290,7 @@ function build() {
   function fxFighter(f, idx, st, alive, v) {
     /* hit flash: when the freeze of a hit begins */
     const lag = alive && f.hitlag > 0 && f.state === 'hurt';
-    if (lag && !v.lagged) { const l = flashes[idx]; l.position.set(f.x, f.y + st.h / 2, 12); l.userData.i = 700 + f.hitlag * 190; }   /* stronger hits freeze longer, so they flash brighter */
+    if (lag && !v.lagged && DBG.fx) { const l = flashes[idx]; l.position.set(f.x, f.y + st.h / 2, 12); l.userData.i = 700 + f.hitlag * 190; }   /* stronger hits freeze longer, so they flash brighter */
     v.lagged = lag;
     /* launch trail */
     const tr = trails[idx], fast = alive && f.state === 'hurt' && !f.grounded && Math.hypot(f.vx, f.vy) > 1.5;

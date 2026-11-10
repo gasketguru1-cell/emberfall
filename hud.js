@@ -142,6 +142,11 @@ function drawSelect(three) {
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Hitboxes', x + 16, y + 22);
     g.fillStyle = on ? '#ff6a6a' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
     g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('X / Y  or  B key', x + 130, y + 22); }
+  { const on = DBG.fx, w = 214, x = W - 44 - w, y = 60;   /* hit effects switch: the sparks and flash where a hit lands */
+    g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = on ? '#ffd166' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
+    g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Hit sparks', x + 12, y + 22);
+    g.fillStyle = on ? '#ffd166' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
+    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('Shield  or  H key', x + 128, y + 22); }
   g.textAlign = 'center'; drawUpdateNote(14);
 }
 function drawDebugText() {
