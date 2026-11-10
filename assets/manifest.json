@@ -205,7 +205,8 @@
      1.2,
      1.4
     ],
-    "end": 1.63
+    "end": 1.63,
+    "flip": true
    },
    "uair": {
     "clip": "Rising_Flying_Kick",
@@ -287,8 +288,45 @@
      0.68
     ],
     "end": 1.05
+   },
+   "jab2": {
+    "clip": "Left_Hook_from_Guard",
+    "start": 0.1,
+    "contact": [
+     0.28,
+     0.42
+    ],
+    "end": 0.85
+   },
+   "jab3": {
+    "clip": "Right_Uppercut_from_Guard",
+    "start": 0.25,
+    "contact": [
+     0.5,
+     0.68
+    ],
+    "end": 0.95
    }
-  }
+  },
+  "strikers": [
+   {
+    "bone": "RightHand",
+    "ext": 1,
+    "drop": 1.6
+   },
+   {
+    "bone": "LeftHand",
+    "ext": 1
+   },
+   {
+    "bone": "RightToeBase",
+    "ext": 0.8
+   },
+   {
+    "bone": "LeftToeBase",
+    "ext": 0.8
+   }
+  ]
  },
  "Nib": {
   "file": "assets/nib/export/nib-v1.glb",
@@ -390,6 +428,36 @@
     "bounce": true
    }
   },
+  "strikers": [
+   {
+    "bone": "head",
+    "ext": 3.2
+   },
+   {
+    "bone": "fl_paw",
+    "ext": 0.9
+   },
+   {
+    "bone": "fr_paw",
+    "ext": 0.9
+   },
+   {
+    "bone": "rl_paw",
+    "ext": 0.9
+   },
+   {
+    "bone": "rr_paw",
+    "ext": 0.9
+   },
+   {
+    "bone": "tailL4",
+    "ext": 1.8
+   },
+   {
+    "bone": "tailR4",
+    "ext": 1.8
+   }
+  ],
   "springs": [
    {
     "bones": [
@@ -441,17 +509,26 @@
     "clip": "Swat",
     "start": 0,
     "contact": [
-     0.24,
+     0.28,
      0.4
     ],
     "end": 0.7
+   },
+   "jab3": {
+    "clip": "Bite",
+    "start": 0,
+    "contact": [
+     0.39,
+     0.46
+    ],
+    "end": 0.9
    },
    "ftilt": {
     "clip": "Bite",
     "start": 0,
     "contact": [
-     0.3,
-     0.44
+     0.39,
+     0.46
     ],
     "end": 0.9
    },
@@ -459,8 +536,8 @@
     "clip": "UpStrike",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.39,
+     0.48
     ],
     "end": 0.9
    },
@@ -468,8 +545,8 @@
     "clip": "TailWhip",
     "start": 0,
     "contact": [
-     0.3,
-     0.5
+     0.34,
+     0.52
     ],
     "end": 0.9
    },
@@ -477,8 +554,8 @@
     "clip": "Pounce",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.39,
+     0.48
     ],
     "end": 0.9
    },
@@ -486,8 +563,8 @@
     "clip": "Headbutt",
     "start": 0,
     "contact": [
-     0.3,
-     0.48
+     0.39,
+     0.5
     ],
     "end": 0.9
    },
@@ -495,8 +572,8 @@
     "clip": "UpStrike",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.39,
+     0.48
     ],
     "end": 0.9
    },
@@ -504,8 +581,8 @@
     "clip": "Sweep",
     "start": 0,
     "contact": [
-     0.3,
-     0.5
+     0.34,
+     0.52
     ],
     "end": 0.9
    },
@@ -513,7 +590,7 @@
     "clip": "Flip",
     "start": 0,
     "contact": [
-     0.28,
+     0.31,
      0.5
     ],
     "end": 0.9
@@ -522,8 +599,8 @@
     "clip": "Headbutt",
     "start": 0,
     "contact": [
-     0.3,
-     0.48
+     0.39,
+     0.5
     ],
     "end": 0.9
    },
@@ -531,17 +608,17 @@
     "clip": "BackKick",
     "start": 0,
     "contact": [
-     0.3,
-     0.48
+     0.39,
+     0.5
     ],
     "end": 0.9
    },
    "uair": {
-    "clip": "Flip",
+    "clip": "UpStrike",
     "start": 0,
     "contact": [
-     0.28,
-     0.5
+     0.39,
+     0.48
     ],
     "end": 0.9
    },
@@ -549,8 +626,8 @@
     "clip": "Pounce",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.39,
+     0.48
     ],
     "end": 0.9
    },
@@ -558,8 +635,8 @@
     "clip": "Bite",
     "start": 0,
     "contact": [
-     0.3,
-     0.44
+     0.39,
+     0.46
     ],
     "end": 0.9
    },
@@ -567,8 +644,8 @@
     "clip": "Sweep",
     "start": 0,
     "contact": [
-     0.3,
-     0.5
+     0.34,
+     0.52
     ],
     "end": 0.9
    },
@@ -585,8 +662,8 @@
     "clip": "Pounce",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.39,
+     0.48
     ],
     "end": 0.9
    },
@@ -594,8 +671,8 @@
     "clip": "CoilJump",
     "start": 0,
     "contact": [
-     0.2,
-     0.34
+     0.24,
+     0.4
     ],
     "end": 0.9
    },
@@ -603,8 +680,8 @@
     "clip": "Bite",
     "start": 0,
     "contact": [
-     0.3,
-     0.44
+     0.39,
+     0.46
     ],
     "end": 0.9
    }
@@ -710,6 +787,32 @@
     "bounce": true
    }
   },
+  "strikers": [
+   {
+    "bone": "head",
+    "ext": 2.4
+   },
+   {
+    "bone": "fl_paw",
+    "ext": 1.8
+   },
+   {
+    "bone": "fr_paw",
+    "ext": 1.8
+   },
+   {
+    "bone": "rl_paw",
+    "ext": 1.2
+   },
+   {
+    "bone": "rr_paw",
+    "ext": 1.2
+   },
+   {
+    "bone": "tail4",
+    "ext": 2.6
+   }
+  ],
   "springs": [
    {
     "bones": [
@@ -729,17 +832,26 @@
     "clip": "Jab",
     "start": 0,
     "contact": [
-     0.24,
+     0.28,
      0.4
     ],
     "end": 0.7
+   },
+   "jab3": {
+    "clip": "Swipe",
+    "start": 0,
+    "contact": [
+     0.39,
+     0.48
+    ],
+    "end": 0.9
    },
    "ftilt": {
     "clip": "Headbutt",
     "start": 0,
     "contact": [
-     0.3,
-     0.48
+     0.39,
+     0.5
     ],
     "end": 0.9
    },
@@ -747,8 +859,8 @@
     "clip": "UpStrike",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.39,
+     0.48
     ],
     "end": 0.9
    },
@@ -756,8 +868,8 @@
     "clip": "TailSlam",
     "start": 0,
     "contact": [
-     0.3,
-     0.5
+     0.34,
+     0.52
     ],
     "end": 0.9
    },
@@ -765,8 +877,8 @@
     "clip": "Ram",
     "start": 0,
     "contact": [
-     0.3,
-     0.5
+     0.34,
+     0.52
     ],
     "end": 0.9
    },
@@ -774,8 +886,8 @@
     "clip": "Slam",
     "start": 0,
     "contact": [
-     0.3,
-     0.48
+     0.39,
+     0.5
     ],
     "end": 0.9
    },
@@ -783,8 +895,8 @@
     "clip": "UpStrike",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.39,
+     0.48
     ],
     "end": 0.9
    },
@@ -792,8 +904,8 @@
     "clip": "Sweep",
     "start": 0,
     "contact": [
-     0.3,
-     0.5
+     0.34,
+     0.52
     ],
     "end": 0.9
    },
@@ -801,8 +913,8 @@
     "clip": "Sweep",
     "start": 0,
     "contact": [
-     0.3,
-     0.5
+     0.34,
+     0.52
     ],
     "end": 0.9
    },
@@ -810,17 +922,17 @@
     "clip": "BellyFlop",
     "start": 0,
     "contact": [
-     0.3,
-     0.5
+     0.34,
+     0.52
     ],
     "end": 0.9
    },
    "bair": {
-    "clip": "TailSlam",
+    "clip": "Sweep",
     "start": 0,
     "contact": [
-     0.3,
-     0.5
+     0.34,
+     0.52
     ],
     "end": 0.9
    },
@@ -828,8 +940,8 @@
     "clip": "UpStrike",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.39,
+     0.48
     ],
     "end": 0.9
    },
@@ -837,8 +949,8 @@
     "clip": "BellyFlop",
     "start": 0,
     "contact": [
-     0.3,
-     0.5
+     0.34,
+     0.52
     ],
     "end": 0.9
    },
@@ -846,8 +958,8 @@
     "clip": "Swipe",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.39,
+     0.48
     ],
     "end": 0.9
    },
@@ -855,8 +967,8 @@
     "clip": "Sweep",
     "start": 0,
     "contact": [
-     0.3,
-     0.5
+     0.34,
+     0.52
     ],
     "end": 0.9
    },
@@ -873,8 +985,8 @@
     "clip": "Ram",
     "start": 0,
     "contact": [
-     0.3,
-     0.5
+     0.34,
+     0.52
     ],
     "end": 0.9
    },
@@ -882,8 +994,8 @@
     "clip": "Burrow",
     "start": 0,
     "contact": [
-     0.3,
-     0.5
+     0.34,
+     0.52
     ],
     "end": 0.9
    },
@@ -891,8 +1003,8 @@
     "clip": "Swipe",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.39,
+     0.48
     ],
     "end": 0.9
    }
@@ -999,6 +1111,28 @@
     "bounce": true
    }
   },
+  "strikers": [
+   {
+    "bone": "top",
+    "ext": 3.6
+   },
+   {
+    "bone": "ribL5",
+    "ext": 1.5
+   },
+   {
+    "bone": "ribR5",
+    "ext": 1.5
+   },
+   {
+    "bone": "wingL",
+    "ext": 3.8
+   },
+   {
+    "bone": "wingR",
+    "ext": 3.8
+   }
+  ],
   "springs": [
    {
     "bones": [
@@ -1032,7 +1166,7 @@
     "clip": "Flick",
     "start": 0,
     "contact": [
-     0.24,
+     0.28,
      0.4
     ],
     "end": 0.7
@@ -1041,8 +1175,8 @@
     "clip": "Lash",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.39,
+     0.48
     ],
     "end": 0.9
    },
@@ -1050,8 +1184,8 @@
     "clip": "UpStrike",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.39,
+     0.48
     ],
     "end": 0.9
    },
@@ -1059,8 +1193,8 @@
     "clip": "Spin",
     "start": 0,
     "contact": [
-     0.3,
-     0.5
+     0.34,
+     0.52
     ],
     "end": 0.9
    },
@@ -1068,8 +1202,8 @@
     "clip": "Dive",
     "start": 0,
     "contact": [
-     0.3,
-     0.48
+     0.39,
+     0.5
     ],
     "end": 0.9
    },
@@ -1077,8 +1211,8 @@
     "clip": "Dive",
     "start": 0,
     "contact": [
-     0.3,
-     0.48
+     0.39,
+     0.5
     ],
     "end": 0.9
    },
@@ -1086,8 +1220,8 @@
     "clip": "UpStrike",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.39,
+     0.48
     ],
     "end": 0.9
    },
@@ -1095,8 +1229,8 @@
     "clip": "Spin",
     "start": 0,
     "contact": [
-     0.3,
-     0.5
+     0.34,
+     0.52
     ],
     "end": 0.9
    },
@@ -1104,8 +1238,8 @@
     "clip": "Spin",
     "start": 0,
     "contact": [
-     0.3,
-     0.5
+     0.34,
+     0.52
     ],
     "end": 0.9
    },
@@ -1113,8 +1247,8 @@
     "clip": "Lash",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.39,
+     0.48
     ],
     "end": 0.9
    },
@@ -1122,8 +1256,8 @@
     "clip": "BackLash",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.39,
+     0.48
     ],
     "end": 0.9
    },
@@ -1131,8 +1265,8 @@
     "clip": "UpStrike",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.39,
+     0.48
     ],
     "end": 0.9
    },
@@ -1140,8 +1274,8 @@
     "clip": "DownLash",
     "start": 0,
     "contact": [
-     0.3,
-     0.48
+     0.39,
+     0.5
     ],
     "end": 0.9
    },
@@ -1149,7 +1283,7 @@
     "clip": "Flick",
     "start": 0,
     "contact": [
-     0.24,
+     0.28,
      0.4
     ],
     "end": 0.7
@@ -1158,8 +1292,8 @@
     "clip": "Spin",
     "start": 0,
     "contact": [
-     0.3,
-     0.5
+     0.34,
+     0.52
     ],
     "end": 0.9
    },
@@ -1167,8 +1301,8 @@
     "clip": "Lash",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.39,
+     0.48
     ],
     "end": 0.9
    },
@@ -1194,8 +1328,8 @@
     "clip": "Lash",
     "start": 0,
     "contact": [
-     0.3,
-     0.46
+     0.39,
+     0.48
     ],
     "end": 0.9
    }

@@ -3,7 +3,7 @@
 // Prints one line per match; the same seed and the same rules must give the same lines.
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const root = path.join(__dirname, '..');
-const files = process.argv.length > 2 ? process.argv.slice(2) : ['sim.js', 'anim.js', 'render2d.js', 'hud.js'].map(f => path.join(root, f));
+const files = process.argv.length > 2 ? process.argv.slice(2) : ['hitboxes.js', 'sim.js', 'anim.js', 'render2d.js', 'hud.js'].map(f => path.join(root, f));
 const ctx = new Proxy({}, { get: (t, k) => k in t ? t[k] : (k === 'createLinearGradient' || k === 'createRadialGradient') ? () => ({ addColorStop() {} }) : () => {}, set: (t, k, v) => { t[k] = v; return true; } });
 global.document = { getElementById: () => ({ getContext: () => ctx }) };
 global.window = global; global.addEventListener = () => {}; global.requestAnimationFrame = () => {};

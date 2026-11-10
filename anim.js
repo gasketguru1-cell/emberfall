@@ -13,7 +13,7 @@ function animState(f) {
   switch (s) {
     case 'idle':
       if (f.grounded && Math.abs(f.vx) > 0.25) return { key: 'walk', mode: 'cycle', v: f.x * f.face / 40 };   /* driven by distance travelled */
-      if (f.ctl.c.ly < -0.6) return { key: 'crouch', mode: 'phase', v: 1 };
+      if (f.ctl.c.ly < CROUCH_Y) return { key: 'crouch', mode: 'phase', v: 1 };
       return { key: 'idle', mode: 'loop', v: t };
     case 'dash': case 'run': return { key: 'run', mode: 'cycle', v: f.x * f.face / 46 };
     case 'brake': return { key: 'brake', mode: 'phase', v: phase(f.sf, 12) };
@@ -35,6 +35,7 @@ function animState(f) {
     case 'held': return { key: 'held', mode: 'loop', v: t };
     case 'throw': return { key: 'throw', mode: 'phase', v: phase(f.sf, 26) };
     case 'respawn': return { key: 'idle', mode: 'loop', v: t };
+    case 'rebound': return { key: 'hit', mode: 'phase', v: phase(f.sf, Math.max(8, f.lag)) };
     case 'attack': {
       const m = f.move; if (!m) break;
       if (m.swap) return { key: 'swap', mode: 'phase', v: phase(f.mf, m.t) };

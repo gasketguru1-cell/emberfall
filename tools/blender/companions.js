@@ -144,11 +144,12 @@ Object.assign(hod.clips, {
 });
 out('hod', hod);
 manifest.Hod = { file: 'assets/hod/export/hod-v1.glb', height: 11.5, clips: baseClips('Swipe', 'Slam'),
+  strikers: [{ bone: 'head', ext: 2.4 }, { bone: 'fl_paw', ext: 1.8 }, { bone: 'fr_paw', ext: 1.8 }, { bone: 'rl_paw', ext: 1.2 }, { bone: 'rr_paw', ext: 1.2 }, { bone: 'tail4', ext: 2.6 }],
   springs: [{ bones: ['tail1', 'tail2', 'tail3', 'tail4'], k: 0.3, d: 0.68, max: 0.5, drag: 0.08 }],
-  attacks: { jab: A('Jab', 0.24, 0.4, 0, 0.7), ftilt: A('Headbutt', 0.3, 0.48), utilt: A('UpStrike', 0.3, 0.46), dtilt: A('TailSlam', 0.3, 0.5), dash: A('Ram', 0.3, 0.5),
-    fsmash: A('Slam', 0.3, 0.48), usmash: A('UpStrike', 0.3, 0.46), dsmash: A('Sweep', 0.3, 0.5),
-    nair: A('Sweep', 0.3, 0.5), fair: A('BellyFlop', 0.3, 0.5), bair: A('TailSlam', 0.3, 0.5), uair: A('UpStrike', 0.3, 0.46), dair: A('BellyFlop', 0.3, 0.5),
-    grab: A('Swipe', 0.3, 0.46), getup: A('Sweep', 0.3, 0.5), nspec: A('Toss', 0.4, 0.46, 0, 0.95), sspec: A('Ram', 0.3, 0.5), uspec: A('Burrow', 0.3, 0.5), '*': A('Swipe', 0.3, 0.46) } };
+  attacks: { jab: A('Jab', 0.28, 0.4, 0, 0.7), jab3: A('Swipe', 0.39, 0.48), ftilt: A('Headbutt', 0.39, 0.5), utilt: A('UpStrike', 0.39, 0.48), dtilt: A('TailSlam', 0.34, 0.52), dash: A('Ram', 0.34, 0.52),
+    fsmash: A('Slam', 0.39, 0.5), usmash: A('UpStrike', 0.39, 0.48), dsmash: A('Sweep', 0.34, 0.52),
+    nair: A('Sweep', 0.34, 0.52), fair: A('BellyFlop', 0.34, 0.52), bair: A('Sweep', 0.34, 0.52), uair: A('UpStrike', 0.39, 0.48), dair: A('BellyFlop', 0.34, 0.52),
+    grab: A('Swipe', 0.39, 0.48), getup: A('Sweep', 0.34, 0.52), nspec: A('Toss', 0.4, 0.46, 0, 0.95), sspec: A('Ram', 0.34, 0.52), uspec: A('Burrow', 0.34, 0.52), '*': A('Swipe', 0.39, 0.48) } };
 
 /* ---------------- Loom: kite spirit. Floats, no legs; two ribbon chains. ----------------
    Loom shows its flat face to the camera, so for it "forward" is +X and the game mirrors it when it turns.
@@ -272,11 +273,12 @@ Object.assign(loom.clips, {
 });
 out('loom', loom);
 manifest.Loom = { file: 'assets/loom/export/loom-v1.glb', height: 15, faceCamera: true, clips: baseClips('Lash', 'Lash'),
+  strikers: [{ bone: 'top', ext: 3.6 }, { bone: 'ribL5', ext: 1.5 }, { bone: 'ribR5', ext: 1.5 }, { bone: 'wingL', ext: 3.8 }, { bone: 'wingR', ext: 3.8 }],
   springs: [{ bones: ['ribL1', 'ribL2', 'ribL3', 'ribL4', 'ribL5'], k: 0.22, d: 0.74, max: 1.0, drag: 0.16 }, { bones: ['ribR1', 'ribR2', 'ribR3', 'ribR4', 'ribR5'], k: 0.22, d: 0.74, max: 1.0, drag: 0.16 }],
-  attacks: { jab: A('Flick', 0.24, 0.4, 0, 0.7), ftilt: A('Lash', 0.3, 0.46), utilt: A('UpStrike', 0.3, 0.46), dtilt: A('Spin', 0.3, 0.5), dash: A('Dive', 0.3, 0.48),
-    fsmash: A('Dive', 0.3, 0.48), usmash: A('UpStrike', 0.3, 0.46), dsmash: A('Spin', 0.3, 0.5),
-    nair: A('Spin', 0.3, 0.5), fair: A('Lash', 0.3, 0.46), bair: A('BackLash', 0.3, 0.46), uair: A('UpStrike', 0.3, 0.46), dair: A('DownLash', 0.3, 0.48),
-    grab: A('Flick', 0.24, 0.4, 0, 0.7), getup: A('Spin', 0.3, 0.5), nspec: A('Lash', 0.3, 0.46), sspec: A('Gust', 0.4, 0.46, 0.1, 1.0), uspec: A('Thermal', 0.2, 0.75), '*': A('Lash', 0.3, 0.46) } };
+  attacks: { jab: A('Flick', 0.28, 0.4, 0, 0.7), ftilt: A('Lash', 0.39, 0.48), utilt: A('UpStrike', 0.39, 0.48), dtilt: A('Spin', 0.34, 0.52), dash: A('Dive', 0.39, 0.5),
+    fsmash: A('Dive', 0.39, 0.5), usmash: A('UpStrike', 0.39, 0.48), dsmash: A('Spin', 0.34, 0.52),
+    nair: A('Spin', 0.34, 0.52), fair: A('Lash', 0.39, 0.48), bair: A('BackLash', 0.39, 0.48), uair: A('UpStrike', 0.39, 0.48), dair: A('DownLash', 0.39, 0.5),
+    grab: A('Flick', 0.28, 0.4, 0, 0.7), getup: A('Spin', 0.34, 0.52), nspec: A('Lash', 0.39, 0.48), sspec: A('Gust', 0.4, 0.46, 0.1, 1.0), uspec: A('Thermal', 0.2, 0.75), '*': A('Lash', 0.39, 0.48) } };
 
 /* ---------------- Nib: wind-up fox. Its skeleton and first clips were measured and keyed by hand in rig.base.json. ---------------- */
 const nib = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'assets', 'nib', 'work', 'rig.base.json'), 'utf8'));
@@ -329,12 +331,13 @@ Object.assign(nib.clips, {
 });
 out('nib', nib);
 manifest.Nib = { file: 'assets/nib/export/nib-v1.glb', height: 10.5, clips: baseClips('Bite', 'Bite'),
+  strikers: [{ bone: 'head', ext: 3.2 }, { bone: 'fl_paw', ext: 0.9 }, { bone: 'fr_paw', ext: 0.9 }, { bone: 'rl_paw', ext: 0.9 }, { bone: 'rr_paw', ext: 0.9 }, { bone: 'tailL4', ext: 1.8 }, { bone: 'tailR4', ext: 1.8 }],
   springs: [{ bones: ['tailL1', 'tailL2', 'tailL3', 'tailL4'], k: 0.26, d: 0.72, max: 0.8, drag: 0.13 }, { bones: ['tailR1', 'tailR2', 'tailR3', 'tailR4'], k: 0.26, d: 0.72, max: 0.8, drag: 0.13 },
     { bones: ['earL1', 'earL2'], k: 0.4, d: 0.62, max: 0.5, drag: 0.1 }, { bones: ['earR1', 'earR2'], k: 0.4, d: 0.62, max: 0.5, drag: 0.1 }],
-  attacks: { jab: A('Swat', 0.24, 0.4, 0, 0.7), ftilt: A('Bite', 0.3, 0.44), utilt: A('UpStrike', 0.3, 0.46), dtilt: A('TailWhip', 0.3, 0.5), dash: A('Pounce', 0.3, 0.46),
-    fsmash: A('Headbutt', 0.3, 0.48), usmash: A('UpStrike', 0.3, 0.46), dsmash: A('Sweep', 0.3, 0.5),
-    nair: A('Flip', 0.28, 0.5), fair: A('Headbutt', 0.3, 0.48), bair: A('BackKick', 0.3, 0.48), uair: A('Flip', 0.28, 0.5), dair: A('Pounce', 0.3, 0.46),
-    grab: A('Bite', 0.3, 0.44), getup: A('Sweep', 0.3, 0.5), nspec: A('Spit', 0.28, 0.34, 0.05, 0.7), sspec: A('Pounce', 0.3, 0.46), uspec: A('CoilJump', 0.2, 0.34), '*': A('Bite', 0.3, 0.44) } };
+  attacks: { jab: A('Swat', 0.28, 0.4, 0, 0.7), jab3: A('Bite', 0.39, 0.46), ftilt: A('Bite', 0.39, 0.46), utilt: A('UpStrike', 0.39, 0.48), dtilt: A('TailWhip', 0.34, 0.52), dash: A('Pounce', 0.39, 0.48),
+    fsmash: A('Headbutt', 0.39, 0.5), usmash: A('UpStrike', 0.39, 0.48), dsmash: A('Sweep', 0.34, 0.52),
+    nair: A('Flip', 0.31, 0.5), fair: A('Headbutt', 0.39, 0.5), bair: A('BackKick', 0.39, 0.5), uair: A('UpStrike', 0.39, 0.48), dair: A('Pounce', 0.39, 0.48),
+    grab: A('Bite', 0.39, 0.46), getup: A('Sweep', 0.34, 0.52), nspec: A('Spit', 0.28, 0.34, 0.05, 0.7), sspec: A('Pounce', 0.39, 0.48), uspec: A('CoilJump', 0.24, 0.4), '*': A('Bite', 0.39, 0.46) } };
 
 /* The game's manifest: these three entries are owned by this file; other entries (Flint) are left as they are. */
 const mf = path.join(__dirname, '..', '..', 'assets', 'manifest.json'), current = JSON.parse(fs.readFileSync(mf, 'utf8'));

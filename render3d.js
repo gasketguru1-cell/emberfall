@@ -143,7 +143,9 @@ function build() {
   const lerp = (a, b, t) => a + (b - a) * t, frac = x => x - Math.floor(x);
   function clipTime(M, a) {
     if (a.key === 'attack') {
-      const at = M.cfg.attacks[a.move] || M.cfg.attacks['*'];
+      /* Moves without a clip of their own borrow a related one: later jabs use the jab, dash and pivot grabs use the grab. */
+      const at = M.cfg.attacks[a.move] || M.cfg.attacks[{ jab2: 'jab', jab3: 'jab', dgrab: 'grab', pgrab: 'grab' }[a.move]] || M.cfg.attacks['*'];
+      clipTime.flip = !!at.flip;
       return [at.clip, a.whole ? lerp(at.start, at.end, a.v) : a.seg === 0 ? lerp(at.start, at.contact[0], a.v) : a.seg === 1 ? lerp(at.contact[0], at.contact[1], a.v) : lerp(at.contact[1], at.end, a.v)];
     }
     const sp = M.cfg.clips[a.key] || M.cfg.clips.idle, clip = M.clips[sp.clip], from = sp.from || 0, to = sp.to !== undefined ? sp.to : clip.duration, span = Math.max(1e-3, to - from);
@@ -153,7 +155,7 @@ function build() {
     return [sp.clip, from + clamp(a.v, 0, 1) * span];
   }
   function applyAnim(v, f) {
-    const M = v.model, [name, time] = clipTime(M, animState(f));
+    clipTime.flip = false; const M = v.model, [name, time] = clipTime(M, animState(f)); v.turned = clipTime.flip;   /* some attacks are played facing backward */
     if (!v.cur || v.cur.name !== name) { v.prev = v.cur; v.cur = { name, time, since: tick }; }
     v.cur.time = time;
     /* A change of action is instant in the game; only the picture eases across, over four steps. */
@@ -225,7 +227,7 @@ function build() {
     else if (f.state === 'attack' && f.move && f.move.swap) sx = sy = 1 - Math.sin(Math.min(1, f.mf / 34) * Math.PI) * 0.7;
     else if (f.state === 'attack' && f.move) rot = Math.sin(Math.min(1, f.mf / f.move.t) * Math.PI) * 0.22;
     else if (f.state === 'air') sy = 1 + clamp(Math.abs(f.vy) * 0.03, 0, 0.12);
-    else if (f.state === 'idle' && f.ctl.c.ly < -0.6) { sy = 0.72; sx = 1.1; }
+    else if (f.state === 'idle' && f.ctl.c.ly < CROUCH_Y) { sy = 0.72; sx = 1.1; }
     else if (f.state === 'down') { sy = 0.45; sx = 1.25; }
     return { sx, sy, rot, oy };
   }
@@ -255,7 +257,7 @@ function build() {
          mirrored to turn round, flipping through edge-on like a kite. Its clips treat +X as forward. */
       const flat = v.model && v.model.cfg.faceCamera;
       if (flat) { v.flip += (f.face - v.flip) * 0.3; v.obj.scale.x = v.unit * (Math.abs(v.flip) < 0.08 ? 0.08 * (v.flip < 0 ? -1 : 1) : v.flip); }
-      v.root.position.set(f.x, f.y, 0); v.root.rotation.y = flat ? 0.55 * v.flip : v.yaw;
+      v.root.position.set(f.x, f.y, 0); v.root.rotation.y = (flat ? 0.55 * v.flip : v.yaw) + (v.model && v.turned ? Math.PI : 0);
       v.pivot.position.set(f.hitlag > 0 && f.state === 'hurt' ? ((tick & 1) ? 0.35 : -0.35) : 0, p.oy, 0); v.pivot.rotation.z = -p.rot; v.pivot.scale.set(p.sx, p.sy, p.sx);
       v.pivot.children.forEach(c => { if (c.userData.y0 === undefined) c.userData.y0 = c.position.y; c.position.y = c.userData.y0 - p.oy; });
       const ghost = (f.invuln > 0 && (tick >> 1) % 2) || f.state === 'spot' || f.state === 'airdodge', hot = f.flash > 0 || (f.hitlag > 0 && f.state === 'hurt');

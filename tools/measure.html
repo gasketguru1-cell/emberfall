@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Emberfall hitbox measure</title>
+<style>body { margin: 12px; background: #1b1f2e; color: #dfe; font: 12px Consolas, monospace; white-space: pre; }</style>
+<script type="importmap">
+{ "imports": { "three": "../node_modules/three/build/three.module.js", "three/addons/": "../node_modules/three/examples/jsm/" } }
+</script>
+</head>
+<body>measuring…
+<script src="../sim.js"></script>
+<script type="module">
+/* Finds, for every attack of every fighter, where the striking limb is while the attack is active, and proposes a hitbox
+   there. It poses each model exactly as the game does at the middle of each hitbox's active frames, then picks the limb
+   reaching furthest in the direction that hitbox is meant to cover. Timing, damage and launch are not touched.
+   The result is left in window.RESULT; copy it into hitboxes.js.  (sim.js is loaded without hitboxes.js, so the
+   move data read here is the unmeasured template.) */
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+const man = await (await fetch('../assets/manifest.json')).json();
+const ALIAS = { jab2: 'jab', jab3: 'jab', dgrab: 'grab', pgrab: 'grab' };
+const RESULT = {}, LOG = [];
+const r1 = v => Math.round(v * 10) / 10;
+for (const def of ROSTER) for (const fm of def.forms) {
+  const cfg = man[fm.name]; if (!cfg || !cfg.strikers) { LOG.push(fm.name + ': no model or no strikers listed'); continue; }
+  const gltf = await new GLTFLoader().loadAsync('../' + cfg.file), root = gltf.scene, mixer = new THREE.AnimationMixer(root);
+  const box = new THREE.Box3().setFromObject(root), unit = cfg.height / (box.max.y - box.min.y), flat = !!cfg.faceCamera, turn = flat ? 0.85 : 0.94;
+  const clips = Object.fromEntries(gltf.animations.map(c => [c.name, c])), st = fm.st, mid = [0, st.h / 2];
+  const strikers = cfg.strikers.map(s => ({ ...s, node: root.getObjectByName(s.bone) })).filter(s => s.node || LOG.push(fm.name + ': bone not found: ' + s.bone) < 0);
+  let current = null;
+  const pose = (clip, t) => { if (current) current.stop(); current = mixer.clipAction(clips[clip]); current.play(); current.time = Math.min(Math.max(t, 0), clips[clip].duration - 1e-4); mixer.update(0); root.updateMatrixWorld(true); };
+  const tip = s => {   /* the limb's end: its joint, pushed out along the bone, in game units with x = forward and y = up */
+    const p = new THREE.Vector3().setFromMatrixPosition(s.node.matrixWorld), q = new THREE.Vector3().setFromMatrixPosition(s.node.parent.matrixWorld);
+    const d = p.clone().sub(q); if (d.lengthSq() > 1e-9) d.normalize(); p.multiplyScalar(unit).addScaledVector(d, s.ext || 0);
+    return [(flat ? p.x : p.z) * turn, p.y - (s.drop || 0) * 0.5];
+  };
+  const set = RESULT[fm.name] = {};
+  for (const [name, mv] of Object.entries(fm.moves)) {
+    if (!mv || !Array.isArray(mv.h) || !mv.h.length || mv.swap) continue;
+    const at = cfg.attacks[name] || cfg.attacks[ALIAS[name]] || cfg.attacks['*']; if (!clips[at.clip]) { LOG.push(fm.name + ' ' + name + ': clip missing ' + at.clip); continue; }
+    const a0 = Math.min(...mv.h.map(h => h.f0)), a1 = Math.max(...mv.h.map(h => h.f1)), boxes = [];
+    mv.h.forEach((h, n) => {
+      const want = [h.x, h.y - mid[1]], reach = Math.hypot(want[0], want[1]);
+      if (reach < 2.5 || (Math.abs(h.x) < 2.5 && h.r >= 6.5)) { boxes.push(null); return; }   /* a burst centred on the body: leave it where it is */
+      const dirv = [want[0] / reach, want[1] / reach], u = Math.min(1, Math.max(0, ((h.f0 + h.f1) / 2 - a0) / (a1 - a0 + 1))), tc = at.contact[0] + u * (at.contact[1] - at.contact[0]);
+      let best = null;
+      for (const s of strikers) {
+        let x = 0, y = 0; for (const dt of [0, 0.03]) { pose(at.clip, tc + dt); const p = tip(s); x += (at.flip ? -p[0] : p[0]) / 2; y += p[1] / 2; }
+        const score = (x - mid[0]) * dirv[0] + (y - mid[1]) * dirv[1];
+        if (!best || score > best.score) best = { score, x, y, s };
+      }
+      let x = best.x, y = best.y, r = Math.max(3.5, h.r, best.s.drop ? 4.4 : 0), note = best.s.bone;
+      const prev = mv.h[n - 1];
+      if (prev && prev.f0 === h.f0 && prev.f1 === h.f1 && Math.sign(prev.x) === Math.sign(h.x) && boxes[n - 1]) {   /* inner and tip of the same swing */
+        const b = boxes[n - 1]; b.x = r1(mid[0] + (x - mid[0]) * 0.55); b.y = r1(mid[1] + (y - mid[1]) * 0.55); b.by += ' (inner)'; note += ' (tip)';
+      }
+      /* an attack has to reach past the attacker's own body to be usable */
+      const least = st.w / 2 + r * 0.45; if (Math.abs(h.x) > st.w / 2 + 1 && Math.abs(x) < least) { x = Math.sign(h.x) * least; note += ' [pushed out]'; }
+      if (h.grab) y = Math.max(y, st.h * 0.35);
+      y = Math.max(y, 0.8);   /* never below the floor */
+      boxes.push({ x: r1(x), y: r1(y), r: r1(r), by: note, was: r1(h.x) + ',' + r1(h.y) + ' r' + r1(h.r) });
+    });
+    if (boxes.some(Boolean)) set[name] = boxes;
+  }
+  /* dash and pivot grabs reach a little further than the standing grab */
+  if (set.grab && set.grab[0]) { for (const [k, add] of [['dgrab', 2.5], ['pgrab', 4]]) if (fm.moves[k]) set[k] = [{ ...set.grab[0], x: r1(set.grab[0].x + add) }]; }
+  if (current) current.stop();
+}
+/* Placements set by hand where no single limb describes the hit (body slams, spins, downward lashes). */
+const MANUAL = {
+  Flint: { jab2: [{ x: 6.6, y: 11.4, r: 4.5 }], ftilt: [{ x: 6.9, y: 11, r: 5 }], utilt: [{ x: 3.4, y: 12.6, r: 5.5 }], fsmash: [{ x: 7.8, y: 8.5, r: 6.5 }], usmash: [{ x: 1.5, y: 16, r: 7 }], uair: [{ x: 0, y: 15, r: 6 }],
+    dair: [{ x: 0.5, y: 2.5, r: 6.5 }], dsmash: [{ x: 7.5, y: 2, r: 5.5 }, { x: -7.5, y: 2, r: 5.5 }], getup: [{ x: 7.5, y: 2.5, r: 6 }, { x: -7.5, y: 2.5, r: 6 }] },
+  Loom: { dtilt: [{ x: 8, y: 4.5, r: 5.5 }], dsmash: [{ x: 8, y: 5, r: 6 }, { x: -8, y: 5, r: 6 }], getup: [{ x: 8, y: 5, r: 6 }, { x: -8, y: 5, r: 6 }], dair: [{ x: 0, y: 1.5, r: 6.2 }] },
+  Hod: { dair: [{ x: 1, y: 1.5, r: 7 }], bair: [{ x: -11, y: 3.5, r: 5.7 }], fsmash: [{ x: 9.3, y: 2.4, r: 6.8 }] },
+  Nib: { jab: [{ x: 6.6, y: 6.4, r: 4.2 }], jab2: [{ x: 6.6, y: 6.4, r: 4.2 }] },
+};
+for (const f in MANUAL) for (const k in MANUAL[f]) if (RESULT[f]) RESULT[f][k] = MANUAL[f][k].map(o => ({ ...o, by: 'set by hand', was: '' }));
+window.RESULT = RESULT; window.LOG = LOG;
+document.body.textContent = (LOG.length ? LOG.join('\n') + '\n\n' : '') + Object.entries(RESULT).map(([f, s]) => f + '\n' + Object.entries(s).map(([k, b]) => '  ' + k.padEnd(7) + b.map(o => o ? (o.x + ',' + o.y + ' r' + o.r + '  <- ' + o.was + '  ' + o.by) : '(body)').join('   |   ')).join('\n')).join('\n\n');
+</script>
+</body>
+</html>

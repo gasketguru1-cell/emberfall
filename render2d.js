@@ -164,7 +164,7 @@ function drawFighter(f, three) {
   else if (f.state === 'helpless') rot = 0.35;
   else if (f.state === 'attack' && f.move && f.move.swap) { sx = sy = 1 - Math.sin(Math.min(1, f.mf / 34) * Math.PI) * 0.7; }
   else if (f.state === 'air') sy = 1 + clamp(Math.abs(f.vy) * 0.03, 0, 0.12);
-  else if (f.state === 'idle' && f.ctl.c.ly < -0.6) { sy = 0.72; sx = 1.1; }
+  else if (f.state === 'idle' && f.ctl.c.ly < CROUCH_Y) { sy = 0.72; sx = 1.1; }
   else if (f.state === 'down') { sy = 0.45; sx = 1.25; }
   if (!f.grounded && f.state !== 'ledge' && f.state !== 'hurt' && f.state !== 'roll') oy = 0;
   g.scale(s * f.face, -s);
@@ -225,7 +225,7 @@ function drawDebug() {
   if (!DBG.boxes) return; const s = cam.s; g.lineWidth = 1.5;
   for (const f of F) {
     if (f.state === 'dead') continue; const st = f.st;
-    g.strokeStyle = f.invuln > 0 ? '#55ccff' : '#ffee00'; g.strokeRect(SX(f.x - st.w / 2), SY(f.y + st.h), st.w * s, st.h * s);
+    const hr = hurtRect(f); g.strokeStyle = f.invuln > 0 ? '#55ccff' : '#ffee00'; g.strokeRect(SX(hr[0]), SY(hr[3]), (hr[2] - hr[0]) * s, (hr[3] - hr[1]) * s);
     if (f.state === 'attack' && f.move) for (const h of f.move.h) if (f.mf >= h.f0 && f.mf <= h.f1) {
       g.fillStyle = h.grab ? 'rgba(200,80,255,.45)' : 'rgba(255,40,40,.45)'; g.strokeStyle = h.grab ? '#cc55ff' : '#ff3333';
       g.beginPath(); g.arc(SX(f.x + h.x * f.face), SY(f.y + h.y), h.r * s, 0, TAU); g.fill(); g.stroke();

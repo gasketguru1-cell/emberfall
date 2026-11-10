@@ -57,3 +57,12 @@ Spent so far: 237 credits (Flint 135, companions 102). The daily limit was raise
 - Follow-through: tails, ears and ribbons are simulated in `render3d.js` (`springs` in the manifest). They trail when the fighter moves and settle when it stops. It is stepped by the game clock, so freezing the game freezes it.
 - Still stand-ins for the companions: roll, dodge, air dodge, grab hold, being held and the ledge hang reuse other clips.
 - Not checked: every state of every companion in the game. Idle and one attack each were looked at; the rest use the same mechanism.
+
+## Rules and hitboxes (2026-11-09)
+
+- **Hitboxes follow the animations.** `tools/measure.html` poses each model at the middle of each hitbox's active frames and puts the hitbox on the limb that reaches furthest in the direction the move is meant to cover. The result is in `hitboxes.js`. Eleven placements are set by hand in the tool (body slams, spins, downward lashes and a few of Flint's punches). Reach is shorter than before, because limbs do not extend as far as the old template boxes did.
+- **Contact timing** for the companions' hand-keyed clips was moved later so the first active frame shows the limb extended.
+- **Archetypes** (`st` and the kit passed to `mk()` in `sim.js`): Flint all-rounder with a three-hit jab; Nib rushdown with fast dodges, a wall jump, a quick short grab and weak set-up throws; Loom floaty zoner with three air jumps, slow fall, and a long slow ribbon grab; Hod heavy with armour on forward smash and dash attack and strong throws.
+- **New rules:** jab chains, clanks between ground attacks, attacks putting out projectiles, footstool jumps, wall techs, wall jumps (Nib), dash and pivot grabs, turnaround specials, hitlag nudges, brief intangibility on Flint's and Hod's up specials, smaller hurtbox when crouching or lying down, and a lethal-hit effect with slow motion on the last stock.
+- **Checked by script in the game:** jab chain, clank, footstool, Loom's three air jumps, Nib's wall jump (and that Flint has none), dash and pivot grabs, crouch box, turnaround special, lethal-hit slow motion to match end. Overlays looked at: Flint forward smash, Loom forward tilt.
+- **Not checked:** wall tech, hitlag nudges, projectile clashes, the armour on Hod's moves, most hitbox overlays, and balance. Reach and damage have not been retuned after the hitboxes moved.
