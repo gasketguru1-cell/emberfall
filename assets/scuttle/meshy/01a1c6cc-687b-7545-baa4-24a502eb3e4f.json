@@ -1,0 +1,29 @@
+{
+  "character": "scuttle",
+  "endpoint": "text-to-image",
+  "params": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "Full-body character design: a small, low, wide creature, a soot-black crab that lives inside a dented copper coal scuttle, the bucket worn on its back as a shell with the slanted pouring lip forward like a visor and the hoop handle folded back. Two glowing ember-orange eyes on short stalks peer out from under the lip. Six stubby jointed legs. Its left claw is small; its right claw is oversized and shaped like a pair of blacksmith's iron fire tongs. A few lumps of coal sit in the scuttle behind its head, one faintly glowing. Cheeky, alert expression. Three-quarter front view, crouched low on the ground with the big claw raised. Chunky stylised proportions, clean readable shapes, hand-painted look, an original character for a stylised 3D video game set in a mountain forge town. Soft even studio lighting, plain light grey background, no text, no cast shadows."
+  },
+  "estimate": 4,
+  "consumed": 4,
+  "files": [
+    "assets/scuttle/raw/01a1c6cc-687b-7545-baa4-24a502eb3e4f/image_urls.0.png"
+  ],
+  "task": {
+    "id": "01a1c6cc-687b-7545-baa4-24a502eb3e4f",
+    "type": "text-to-image",
+    "ai_model": "nano-banana-2-1",
+    "prompt": "Full-body character design: a small, low, wide creature, a soot-black crab that lives inside a dented copper coal scuttle, the bucket worn on its back as a shell with the slanted pouring lip forward like a visor and the hoop handle folded back. Two glowing ember-orange eyes on short stalks peer out from under the lip. Six stubby jointed legs. Its left claw is small; its right claw is oversized and shaped like a pair of blacksmith's iron fire tongs. A few lumps of coal sit in the scuttle behind its head, one faintly glowing. Cheeky, alert expression. Three-quarter front view, crouched low on the ground with the big claw raised. Chunky stylised proportions, clean readable shapes, hand-painted look, an original character for a stylised 3D video game set in a mountain forge town. Soft even studio lighting, plain light grey background, no text, no cast shadows.",
+    "status": "SUCCEEDED",
+    "progress": 100,
+    "created_at": 1794336647302,
+    "started_at": 1794336647489,
+    "finished_at": 1794336676214,
+    "expires_at": 1794595876214,
+    "image_urls": [
+      "https://assets.meshy.ai/9b63c3ed-0b38-42c8-922f-bcc56f30de31/uploads/image_01a1c6cc-687b-7545-baa4-24a502eb3e4f_0.png"
+    ],
+    "consumed_credits": 4
+  }
+}

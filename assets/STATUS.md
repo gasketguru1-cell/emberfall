@@ -38,8 +38,9 @@ All Meshy calls go through `tools/meshy.js`. Limits are in `assets/meshy-budget.
 | 2026-11-10 | Stage | 3D island from the isolated picture (60k triangles, PBR 2K) | 30 |
 | 2026-11-10 | Potato Sack | Concept picture | 4 |
 | 2026-11-10 | Potato Sack | 3D model from the concept (30k triangles, PBR 2K) | 30 |
+| 2026-11-10 | Sprocket, Brand, Tilt, Scuttle | Concept pictures (4 each), awaiting the owner's yes | 16 |
 
-Spent so far: 309 credits (Flint 135, companions 102, stage 38, Potato Sack 34). The owner cleared up to 400 for the Potato Sack project on 2026-11-10; the 150-a-day limit is unchanged (72 used that day). The daily limit was raised to 240 for 2026-11-09 only, at the owner's request; it is 150 on other days. No credits were spent in the unattended session on the evening of 2026-11-09.
+Spent so far: 325 credits (Flint 135, companions 102, stage 38, Potato Sack 34, concept pictures for four new fighters 16). The owner cleared up to 400 for the Potato Sack project on 2026-11-10; the 150-a-day limit is unchanged (88 used that day). The daily limit was raised to 240 for 2026-11-09 only, at the owner's request; it is 150 on other days. No credits were spent in the unattended session on the evening of 2026-11-09.
 
 ## Flint v3: what is and is not done
 
