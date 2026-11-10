@@ -1,0 +1,5 @@
+{
+  "base": "work/loom-rigged.glb",
+  "texture": 1024,
+  "out": "export/loom-v1.glb"
+}

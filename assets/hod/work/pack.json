@@ -1,0 +1,5 @@
+{
+  "base": "work/hod-rigged.glb",
+  "texture": 1024,
+  "out": "export/hod-v1.glb"
+}

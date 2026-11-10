@@ -82,7 +82,8 @@ function frame() {
       action.time = Math.min(times[k], action.getClip().duration - 1e-4); mixer.update(0);
       const x = (k % cols) * vw, y = h - (Math.floor(k / cols) + 1) * vh;
       renderer.setViewport(x, y, vw, vh); renderer.setScissor(x, y, vw, vh);
-      cam.aspect = vw / vh; cam.position.set(-dist * 0.96, centre.y + 0.1, dist * 0.28); cam.lookAt(0, centre.y + 0.05, 0); cam.updateProjectionMatrix();
+      cam.aspect = vw / vh; if (q.get('view') === 'front') cam.position.set(dist * 0.2, centre.y + 0.1, dist * 0.98); else cam.position.set(-dist * 0.96, centre.y + 0.1, dist * 0.28);   /* view=front for fighters that face the camera */
+      cam.lookAt(0, centre.y + 0.05, 0); cam.updateProjectionMatrix();
       key.position.set(-dist, dist, dist); renderer.render(scene, cam);
     }
     requestAnimationFrame(frame); return;

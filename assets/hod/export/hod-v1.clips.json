@@ -1,0 +1,50 @@
+{
+ "Idle": {
+  "seconds": 2.433
+ },
+ "Walk": {
+  "seconds": 1.033
+ },
+ "Run": {
+  "seconds": 0.567
+ },
+ "Crouch": {
+  "seconds": 0.233
+ },
+ "Rise": {
+  "seconds": 0.433
+ },
+ "Fall": {
+  "seconds": 1.033
+ },
+ "Land": {
+  "seconds": 0.433
+ },
+ "Shield": {
+  "seconds": 0.167
+ },
+ "Hit": {
+  "seconds": 0.633
+ },
+ "Tumble": {
+  "seconds": 0.633
+ },
+ "Down": {
+  "seconds": 0.333
+ },
+ "Swipe": {
+  "seconds": 0.933
+ },
+ "UpStrike": {
+  "seconds": 0.933
+ },
+ "Sweep": {
+  "seconds": 0.933
+ },
+ "Slam": {
+  "seconds": 0.933
+ },
+ "Ram": {
+  "seconds": 0.933
+ }
+}

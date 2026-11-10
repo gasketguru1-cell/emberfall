@@ -91,7 +91,7 @@ function build() {
     const root = new THREE.Group(), pivot = new THREE.Group(); root.add(pivot); scene.add(root);
     const shield = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 18), new THREE.MeshStandardMaterial({ color: PCOL[idx], emissive: PCOL[idx], emissiveIntensity: 0.5, transparent: true, opacity: 0.42, roughness: 0.2, depthWrite: false })); shield.visible = false; scene.add(shield);
     const pad = new THREE.Mesh(new THREE.BoxGeometry(18, 1.4, 10), new THREE.MeshStandardMaterial({ color: 0xffe6a0, emissive: 0xffc860, emissiveIntensity: 1.2 })); pad.visible = false; scene.add(pad);
-    return { root, pivot, shield, pad, key: '', yaw: idx ? Math.PI : 0, mats: [], model: null, mixer: null, actions: {}, cur: null, prev: null, prop: null, hand: null };
+    return { root, pivot, shield, pad, key: '', yaw: idx ? Math.PI : 0, mats: [], obj: null, unit: 1, flip: 1, model: null, mixer: null, actions: {}, cur: null, prev: null, prop: null, hand: null };
   });
   /* Flint's lantern: hangs from his hand and stays upright, so swinging the arm swings the light. */
   function makeLantern() {
@@ -114,7 +114,8 @@ function build() {
     if (v.prop) { scene.remove(v.prop); v.prop = null; }
     if (useModel) {
       /* A copy of the loaded model with its own skeleton, scaled to the fighter's height and turned so its front is +x. */
-      const obj = cloneSkinned(M.scene); obj.scale.setScalar(M.cfg.height / M.height); obj.rotation.y = Math.PI / 2; v.mats = [];
+      const obj = cloneSkinned(M.scene); obj.scale.setScalar(M.cfg.height / M.height); obj.rotation.y = M.cfg.faceCamera ? 0 : Math.PI / 2; v.mats = [];
+      v.obj = obj; v.unit = M.cfg.height / M.height; v.flip = f.face;
       obj.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; o.frustumCulled = false; o.material = o.material.clone(); if (f.alt) o.material.color.setRGB(0.78, 0.9, 1.25); v.mats.push(o.material); } });
       v.pivot.add(obj); v.model = M; v.mixer = new THREE.AnimationMixer(obj);
       if (M.cfg.prop && M.cfg.prop.type === 'lantern') { v.hand = obj.getObjectByName(M.cfg.prop.bone) || null; if (v.hand) { v.prop = makeLantern(); scene.add(v.prop); } }
@@ -209,7 +210,11 @@ function build() {
       if (v.model) applyAnim(v, f);
       const p = poseOf(f, !!v.model), want = f.face > 0 ? -0.35 : Math.PI + 0.35;
       v.yaw += (want - v.yaw) * 0.4;
-      v.root.position.set(f.x, f.y, 0); v.root.rotation.y = v.yaw;
+      /* A fighter that faces the camera (Loom) is not turned side-on: it angles a little toward where it is heading and is
+         mirrored to turn round, flipping through edge-on like a kite. Its clips treat +X as forward. */
+      const flat = v.model && v.model.cfg.faceCamera;
+      if (flat) { v.flip += (f.face - v.flip) * 0.3; v.obj.scale.x = v.unit * (Math.abs(v.flip) < 0.08 ? 0.08 * (v.flip < 0 ? -1 : 1) : v.flip); }
+      v.root.position.set(f.x, f.y, 0); v.root.rotation.y = flat ? 0.55 * v.flip : v.yaw;
       v.pivot.position.set(f.hitlag > 0 && f.state === 'hurt' ? ((frame & 1) ? 0.35 : -0.35) : 0, p.oy, 0); v.pivot.rotation.z = -p.rot; v.pivot.scale.set(p.sx, p.sy, p.sx);
       v.pivot.children.forEach(c => { if (c.userData.y0 === undefined) c.userData.y0 = c.position.y; c.position.y = c.userData.y0 - p.oy; });
       const ghost = (f.invuln > 0 && (frame >> 1) % 2) || f.state === 'spot' || f.state === 'airdodge', hot = f.flash > 0 || (f.hitlag > 0 && f.state === 'hurt');
