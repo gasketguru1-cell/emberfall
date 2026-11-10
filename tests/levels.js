@@ -11,7 +11,7 @@ let seed = +process.argv[3] || 31; Math.random = () => { seed = (seed * 1664525 
 for (const f of ['hitboxes.js', 'sim.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 vm.runInThisContext(`
 (function () {
-  const forms = [[0, 0, 'Flint'], [1, 0, 'Nib'], [1, 1, 'Loom'], [1, 2, 'Hod'], [2, 0, 'Potato Sack']], rows = {};
+  const forms = [[0, 0, 'Flint'], [1, 0, 'Nib'], [1, 1, 'Loom'], [1, 2, 'Hod'], [2, 0, 'Potato Sack'], [3, 0, 'Sprocket']], rows = {};
   for (let lv = 1; lv <= 9; lv++) {
     let wins = 0, games = 0, stocks = 0, dmg = 0, frames = 0;
     for (const A of forms) for (let m = 0; m < ${per}; m++) {

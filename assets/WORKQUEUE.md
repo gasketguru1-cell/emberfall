@@ -82,10 +82,10 @@ Nothing here blocks work; these are things only a person at the machine can judg
   - Tests: 15 new rule checks (90 in all); it is in the stress test, the recovery test, the movement table, the level test and the balance matrix.
   - Credits used on this fighter: 34 of the 400 the owner cleared.
 - 2026-11-10, done: the owner's moveset document for Flint, Nib, Loom and Hod (details in STATUS.md, "The owner's moveset document"). 112 rule checks, balance level on two seeds.
-- 2026-11-10: concept pictures made for four new fighters, all original designs, each in `assets/<name>/source/concept-a.png`. WAITING for the owner's yes on each before any 3D model. A model is 30 credits; with the 4 already spent on its picture that is 34 a fighter, 4 over the 30 the owner allowed, so ask. Today's limit of 150 has 88 used: room for two models today, the other two tomorrow, unless the owner raises the day's limit.
-  - Sprocket: the handyman from the moveset document. Wrench-range brawler; the document's kit for him is ready to build from.
-  - Brand: captain of the night watch, stove-door shield and a forge-hot blade. A sword-and-shield duelist.
-  - Tilt: a courier on a mountain ram with a lamplighter's pole. A mounted fighter who punishes misses; rider and ram are one fighter.
-  - Scuttle: a soot crab living in a coal scuttle, with a fire-tongs claw. A low, quick skirmisher.
-  - Brand, Tilt and Scuttle take their frame data, damage and movement targets from the owner's three later documents, with their own names, looks and moves: the documents describe existing characters, and Emberfall's fighters stay original.
-  - After a yes, each needs what Potato Sack needed: model, rig, clips, hitboxes, kit in sim.js, CPU, rule checks, balance.
+- 2026-11-10: four new fighters, all original designs. The owner saw the four concept pictures and said to carry on.
+  - [x] Sprocket: done and in the game (details in STATUS.md).
+  - [ ] Scuttle (a soot crab in a coal scuttle with a fire-tongs claw; a low, quick skirmisher): 3D model made (`assets/scuttle/raw/01a1c6dd-bad6-7497-80ec-e83dcf30a442/model_url.glb`). Still to do: kit in sim.js from the owner's document for fighter 01 (frames, damage and movement targets; his own names and moves), rig spec, clips, hitboxes, 2D picture, CPU, rule checks, balance.
+  - [ ] Brand (night-watch captain, stove-door shield and forge-hot blade; the sword-and-shield duelist, the owner's document for fighter 03): concept picture only. Model is 30 credits; the day's limit of 150 was used up on 2026-11-10.
+  - [ ] Tilt (a courier on a mountain ram with a lamplighter's pole; the mounted fighter, the owner's document for fighter 02): concept picture only. Same wait.
+  - The three documents describe existing characters; these three take the documents' numbers and kind of play, with their own names, looks and moves.
+  - For a new two-legged fighter, copy `tools/blender/sprocket.js`: hand and foot targets, `copyrot` for a held tool, `rigid` boxes. To look at poses, hold a pose with `tick++; draw();` a dozen times (the picture blends by tick), and put a marker bone at a tool's tip so `tools/measure.html` measures the tip.

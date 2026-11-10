@@ -1716,5 +1716,326 @@
     "end": 0.7
    }
   }
+ },
+ "Sprocket": {
+  "file": "assets/sprocket/export/sprocket-v1.glb",
+  "height": 14,
+  "clips": {
+   "idle": {
+    "clip": "Idle"
+   },
+   "walk": {
+    "clip": "Walk"
+   },
+   "run": {
+    "clip": "Run"
+   },
+   "crouch": {
+    "clip": "Crouch",
+    "at": 0.2
+   },
+   "brake": {
+    "clip": "Land",
+    "from": 0.05,
+    "to": 0.4
+   },
+   "jumpsquat": {
+    "clip": "Crouch",
+    "from": 0,
+    "to": 0.2
+   },
+   "rise": {
+    "clip": "Rise",
+    "from": 0,
+    "to": 0.4
+   },
+   "fall": {
+    "clip": "Fall"
+   },
+   "land": {
+    "clip": "Land",
+    "from": 0,
+    "to": 0.4
+   },
+   "shield": {
+    "clip": "Shield",
+    "from": 0,
+    "to": 0.15
+   },
+   "hit": {
+    "clip": "Hit",
+    "from": 0,
+    "to": 0.6
+   },
+   "tumble": {
+    "clip": "Tumble",
+    "bounce": true
+   },
+   "down": {
+    "clip": "Down",
+    "from": 0,
+    "to": 0.3
+   },
+   "dizzy": {
+    "clip": "Hit",
+    "from": 0,
+    "to": 0.6,
+    "bounce": true
+   },
+   "airdodge": {
+    "clip": "Tumble",
+    "bounce": true
+   },
+   "dodge": {
+    "clip": "Dodge",
+    "from": 0,
+    "to": 0.4
+   },
+   "roll": {
+    "clip": "Tumble",
+    "bounce": true
+   },
+   "ledge": {
+    "clip": "Ledge"
+   },
+   "hold": {
+    "clip": "Hold"
+   },
+   "held": {
+    "clip": "Held"
+   },
+   "throw": {
+    "clip": "Shove",
+    "from": 0.1,
+    "to": 0.7
+   },
+   "swap": {
+    "clip": "Tumble",
+    "bounce": true
+   }
+  },
+  "strikers": [
+   {
+    "bone": "wrenchTip",
+    "ext": 0.4
+   },
+   {
+    "bone": "handL",
+    "ext": 1.2
+   },
+   {
+    "bone": "footL",
+    "ext": 1.8
+   },
+   {
+    "bone": "footR",
+    "ext": 1.8
+   },
+   {
+    "bone": "head",
+    "ext": 1
+   }
+  ],
+  "springs": [],
+  "attacks": {
+   "jab": {
+    "clip": "Jab",
+    "start": 0,
+    "contact": [
+     0.17,
+     0.27
+    ],
+    "end": 0.5
+   },
+   "jab2": {
+    "clip": "Jab",
+    "start": 0,
+    "contact": [
+     0.17,
+     0.27
+    ],
+    "end": 0.5
+   },
+   "jab3": {
+    "clip": "Shove",
+    "start": 0,
+    "contact": [
+     0.25,
+     0.36
+    ],
+    "end": 0.7
+   },
+   "ftilt": {
+    "clip": "Poke",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.42
+    ],
+    "end": 0.8
+   },
+   "utilt": {
+    "clip": "Crank",
+    "start": 0,
+    "contact": [
+     0.36,
+     0.5
+    ],
+    "end": 0.9
+   },
+   "dtilt": {
+    "clip": "Scrape",
+    "start": 0,
+    "contact": [
+     0.32,
+     0.42
+    ],
+    "end": 0.75
+   },
+   "dash": {
+    "clip": "Slide",
+    "start": 0,
+    "contact": [
+     0.35,
+     0.6
+    ],
+    "end": 0.9
+   },
+   "fsmash": {
+    "clip": "Hammer",
+    "start": 0,
+    "contact": [
+     0.6,
+     0.75
+    ],
+    "end": 1.2
+   },
+   "usmash": {
+    "clip": "Jack",
+    "start": 0,
+    "contact": [
+     0.42,
+     0.58
+    ],
+    "end": 1
+   },
+   "dsmash": {
+    "clip": "BenchSweep",
+    "start": 0,
+    "contact": [
+     0.38,
+     0.74
+    ],
+    "end": 1.2
+   },
+   "nair": {
+    "clip": "Turn",
+    "start": 0,
+    "contact": [
+     0.15,
+     0.6
+    ],
+    "end": 0.8
+   },
+   "fair": {
+    "clip": "Arc",
+    "start": 0,
+    "contact": [
+     0.37,
+     0.5
+    ],
+    "end": 0.9
+   },
+   "bair": {
+    "clip": "Heel",
+    "start": 0,
+    "contact": [
+     0.4,
+     0.52
+    ],
+    "end": 0.9
+   },
+   "uair": {
+    "clip": "Flip",
+    "start": 0,
+    "contact": [
+     0.4,
+     0.52
+    ],
+    "end": 0.8
+   },
+   "dair": {
+    "clip": "Drop",
+    "start": 0,
+    "contact": [
+     0.48,
+     0.6
+    ],
+    "end": 1
+   },
+   "grab": {
+    "clip": "Reach",
+    "start": 0,
+    "contact": [
+     0.36,
+     0.48
+    ],
+    "end": 0.8
+   },
+   "getup": {
+    "clip": "BenchSweep",
+    "start": 0,
+    "contact": [
+     0.38,
+     0.74
+    ],
+    "end": 1.2
+   },
+   "nspec": {
+    "clip": "Flick",
+    "start": 0,
+    "contact": [
+     0.4,
+     0.5
+    ],
+    "end": 0.95
+   },
+   "sspec": {
+    "clip": "Hook",
+    "start": 0,
+    "contact": [
+     0.42,
+     0.52
+    ],
+    "end": 1
+   },
+   "uspec": {
+    "clip": "Ratchet",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.45
+    ],
+    "end": 1
+   },
+   "dspec": {
+    "clip": "Vise",
+    "start": 0,
+    "contact": [
+     0.4,
+     0.5
+    ],
+    "end": 1.1
+   },
+   "*": {
+    "clip": "Jab",
+    "start": 0,
+    "contact": [
+     0.17,
+     0.27
+    ],
+    "end": 0.5
+   }
+  }
  }
 }

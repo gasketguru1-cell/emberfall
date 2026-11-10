@@ -5,6 +5,8 @@
 # The spec is written in the model's own coordinates (metres, Y up, the character faces +Z):
 #   "prep":  { "yaw": degrees, "translate": [x,y,z] }   turn and move the mesh first (applied in that order), so it stands at the origin facing +Z
 #   "ik":    [ { "name": control bone, "bone": lower leg bone, "chain": 2, "paw": paw bone } ]   leg reach: the lower bone's tip follows the control
+#   "copyrot": [ { "bone": name, "from": control bone } ]   the bone points the way its control points, whatever its parents do (a held tool aimed directly)
+#   "rigid": [ { "bone": name, "box": [[x,y,z],[x,y,z]] } ]   every vertex inside the box follows that bone alone (a tool that must not bend)
 #   "poses": { "<name>": { "<bone>": {...} } }   named poses a key can start from with "use"
 #   "bones": [ { "name", "head": [x,y,z], "tail": [x,y,z], "parent": name or null, "connect": bool, "deform": bool } ]
 #   "clips": { "<name>": { "fps": 30, "loop": bool, "keys": [ { "t": seconds, "pose": { "<bone>": { "rot": [pitch, yaw, roll], "move": [x,y,z] } } } ] } }
@@ -82,11 +84,23 @@ bpy.ops.object.select_all(action='DESELECT'); mesh.select_set(True); bpy.context
 bpy.ops.object.vertex_group_limit_total(group_select_mode='ALL', limit=4); bpy.ops.object.vertex_group_normalize_all(group_select_mode='ALL', lock_active=False)
 print('rig: weights by %s; %d bones, %d groups, %d vertices unweighted' % (method, len(arm.bones), len(mesh.vertex_groups), missing))
 
+# ---- rigid parts: vertices inside a box follow one bone only ----
+bpy.ops.object.mode_set(mode='OBJECT')
+for rg in spec.get('rigid', []):
+    a, b = conv(rg['box'][0]), conv(rg['box'][1]); mn = [min(a[i], b[i]) for i in range(3)]; mx = [max(a[i], b[i]) for i in range(3)]
+    idx = [v.index for v in mesh.data.vertices if all(mn[i] <= v.co[i] <= mx[i] for i in range(3))]
+    for vg in mesh.vertex_groups: vg.remove(idx)
+    mesh.vertex_groups[rg['bone']].add(idx, 1.0, 'REPLACE')
+    print('rig: %d vertices rigid on %s' % (len(idx), rg['bone']))
+
 # ---- leg reach (IK): the lower leg's tip follows a control bone; the exporter bakes the result into plain rotations ----
 bpy.context.view_layer.objects.active = rig
 for ik in spec.get('ik', []):
     c = rig.pose.bones[ik['bone']].constraints.new('IK'); c.target = rig; c.subtarget = ik['name']; c.chain_count = ik.get('chain', 2)
 if spec.get('ik'): print('rig: %d IK chains' % len(spec['ik']))
+for cr in spec.get('copyrot', []):
+    c = rig.pose.bones[cr['bone']].constraints.new('COPY_ROTATION'); c.target = rig; c.subtarget = cr['from']; c.target_space = 'WORLD'; c.owner_space = 'WORLD'; c.mix_mode = 'REPLACE'
+if spec.get('copyrot'): print('rig: %d aimed bones' % len(spec['copyrot']))
 
 # ---- animation ----
 def delta(rot):
@@ -99,7 +113,7 @@ for name, clip in spec.get('clips', {}).items():
     fps = clip.get('fps', 30); scene.render.fps = fps
     act = bpy.data.actions.new(name); ad.action = act
     for pb in rig.pose.bones: pb.rotation_mode = 'QUATERNION'; pb.rotation_quaternion = Quaternion(); pb.location = Vector()
-    state = {}
+    state = {}; lastq = {}
     for key in clip['keys']:
         f = round(key['t'] * fps) + 1; last = max(last, f)
         if key.get('reset'): state = {b: {} for b in state}
@@ -108,7 +122,9 @@ for name, clip in spec.get('clips', {}).items():
         state.update(key.get('pose', {}))
         for bname, tr in state.items():
             pb = rig.pose.bones[bname]; R = rest[bname]
-            pb.rotation_quaternion = (R.inverted() @ delta(tr.get('rot', [0, 0, 0])) @ R).to_quaternion()
+            q = (R.inverted() @ delta(tr.get('rot', [0, 0, 0])) @ R).to_quaternion()
+            if bname in lastq and lastq[bname].dot(q) < 0: q.negate()   # keep to the near side of the last key, so a turn goes the short way round
+            lastq[bname] = q.copy(); pb.rotation_quaternion = q
             pb.location = R.inverted() @ conv(tr.get('move', [0, 0, 0]))
             pb.keyframe_insert('rotation_quaternion', frame=f); pb.keyframe_insert('location', frame=f)
     track = ad.nla_tracks.new(); track.name = name; track.strips.new(name, 1, act); ad.action = None

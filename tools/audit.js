@@ -15,7 +15,7 @@ async function auditHitboxes(limit) {
   const man = await (await fetch('assets/manifest.json')).json(), R = window.R3;
   if (!R || !R.ready) throw new Error('3D renderer is not ready');
   DBG.step = true; DBG.advance = 0; DBG.r3d = true;
-  const forms = [[0, 0], [1, 0], [1, 1], [1, 2], [2, 0]], rows = [], r1 = v => Math.round(v * 10) / 10;
+  const forms = [[0, 0], [1, 0], [1, 1], [1, 2], [2, 0], [3, 0]], rows = [], r1 = v => Math.round(v * 10) / 10;
   const wp = new (R.fighters[0].root.position.constructor)(), wq = wp.clone();
   for (const A of forms) {
     slots[0] = { dev: 'kb', pick: A[0], ready: true }; slots[1] = { dev: 'kb', pick: 0, ready: true };

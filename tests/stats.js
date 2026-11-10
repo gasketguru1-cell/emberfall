@@ -13,7 +13,7 @@ let seed = +process.argv[3] || 777; Math.random = () => { seed = (seed * 1664525
 for (const f of ['hitboxes.js', 'sim.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 vm.runInThisContext(`
 (function () {
-  const forms = [[0, 0, 'Flint'], [1, 0, 'Nib'], [1, 1, 'Loom'], [1, 2, 'Hod'], [2, 0, 'Potato Sack']], S = {}, M = {};
+  const forms = [[0, 0, 'Flint'], [1, 0, 'Nib'], [1, 1, 'Loom'], [1, 2, 'Hod'], [2, 0, 'Potato Sack'], [3, 0, 'Sprocket']], S = {}, M = {};
   for (const a of forms) { M[a[2]] = {}; for (const b of forms) M[a[2]][b[2]] = 0; }
   for (const f of forms) S[f[2]] = { wins: 0, games: 0, started: 0, hits: 0, dmg: 0, koAt: [], frames: 0, byMove: {} };
   const _apply = applyHit, _start = Fighter.prototype.startMove, _ko = Fighter.prototype.ko;

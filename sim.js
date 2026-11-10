@@ -252,6 +252,10 @@ const KIT = {
     fsmash: [23, 20, { sour: 16 }], usmash: [17, 18], dsmash: [16, 16, { rear: [23, 13] }],
     nair: [7, 11, { late: 7 }], fair: [13, 14, { sour: 10 }], bair: [12, 15, { late: 9 }], uair: [10, 11], dair: [17, 14, { sour: 9 }],
     grab: 8, pummel: 1.6, throws: { f: 10, b: 12, u: 9, d: 8 } },
+  Sprocket: { jab: [5, 2], jab2: [4, 3], jab3: [6, 5], dash: [12, 12, { late: 7 }], ftilt: [8, 10, { sour: 7 }], utilt: [10, 8], dtilt: [9, 7],
+    fsmash: [21, 20, { sour: 15 }], usmash: [15, 17], dsmash: [16, 15, { rear: [24, 13] }],
+    nair: [7, 9, { late: 6 }], fair: [11, 13, { sour: 8 }], bair: [10, 14, { late: 8 }], uair: [10, 10], dair: [16, 15, { sour: 8 }],
+    grab: 7, pummel: 1.5, throws: { f: 9, b: 11, u: 8, d: 7 } },
 };
 function applyKit(fm) {
   const K = KIT[fm.name], mv = fm.moves; if (!K) return;
@@ -275,7 +279,7 @@ function applyKit(fm) {
 /* What the document leaves open, set by balance testing (CPU against CPU, 60 matches a pairing): kb scales how hard every
    hit and throw launches, lag scales the time after an attack's last active frame. */
 const TUNE = {
-  Flint: { kb: 0.9, lag: 1.2 }, Nib: { kb: 1.03 }, Loom: { kb: 1.06, lag: 0.95 }, Hod: { kb: 1.27, lag: 0.8 }, 'Potato Sack': { kb: 0.87 },
+  Flint: { kb: 0.9, lag: 1.2 }, Nib: { kb: 1.03 }, Loom: { kb: 1.06, lag: 0.95 }, Hod: { kb: 1.27, lag: 0.8 }, 'Potato Sack': { kb: 0.85 }, Sprocket: { kb: 0.85, lag: 1.3 },
 };
 const NORMALS = ['jab', 'jab2', 'jab3', 'dash', 'ftilt', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash', 'nair', 'fair', 'bair', 'uair', 'dair'];
 function applyTune(fm) {
@@ -440,7 +444,38 @@ const SACK = {
       throws: { f: { d: 9, b: 60, k: 58 }, b: { d: 10, b: 60, k: 62 }, u: { d: 8, b: 58, k: 60 }, d: { d: 6, a: 70, b: 48, k: 30 }, s: { d: 10, a: 48, b: 68, k: 58 } } }),
   }],
 };
-const ROSTER = [FLINT, WREN, SACK];
+/* Sprocket: the forge town's handyman, a wrench-range brawler (the owner's moveset document). Jumping over the tape roll
+   puts you in the wrench's path, shielding too long invites the vise, and swinging early lets him step back and land the
+   wrench's head. He hits harder than Flint at that range and takes longer to recover when he guesses wrong. */
+const SPROCKET = {
+  name: 'Sprocket', sub: 'the handyman', forms: [{
+    name: 'Sprocket', col: ['#c9972c', '#2f6f6a', '#f1e3c4'], alt: ['#7a4a2a', '#3d5a6c', '#f1e3c4'], reachMul: 1.0,
+    /* the document's targets against Flint: weight 112, ground speed 88, air drift 82, gravity 110. Short bursts, committed jumps. */
+    st: { weight: 103, walk: 0.99, walkMul: 0.13, walkAdd: 0.09, trac: 0.11, dash: 1.69, runMul: 0.1, runAdd: 0.04, run: 1.53,
+      jumpX: 0.85, jumpXMul: 0.8, jumpXMax: 1.2, airJumpX: 0.9, jumpH: 32, jumpInit: 17.6, hopH: 15.5, airJumpH: 32, upH: 24,
+      airMul: 0.055, airAdd: 0.01, airSpeed: 0.9, airBrake: 0.01, grav: 0.099, fall: 1.66, ffall: 2.66, jsq: 3, w: 9, h: 14, jf: 3.2, jb: 1.4,
+      jumps: 1, dashF: 12, roll: [30, 1.25, 13], spot: [23, 15] },
+    aiShot: [26, 58], aiSide: 1, aiVise: 1,
+    moves: mk(1.15, 1, 1.15, 1, {
+      /* Tape Roll: flicked low on frame 16. On flat ground it runs outward for about 22 frames, then curls back toward where
+         it was let go. From the air it drops to the floor first. 6%; breaks on a fighter or a shield, or falls away at the
+         ledge. One roll at a time. */
+      nspec: { t: 42, h: [], on(f, n) { if (n === 16) { shoot(f, { kind: 'tape', solo: 1, oy: 3, vx: 1.3, vy: 0.2, grav: 0.09, r: 2.4, life: 130, ground: 'roll', back: 22, h: { d: 6, a: 60, b: 30, k: 40 } }); beep(420, 0.07, 'triangle', 0.04, 0.8); } } },
+      /* Hook Wrench: plants the lead foot and reaches up and forward with the open wrench, frames 16 to 19. The head deals 9%
+         and tugs the target a little inward; the handle deals 7% and pushes outward. About 22 frames after the swing. */
+      sspec: { t: 41, h: [{ f0: 16, f1: 19, x: 12, y: 15, r: 5, d: 9, a: 115, b: 38, k: 22 }, { f0: 16, f1: 19, x: 6.5, y: 11, r: 4.5, d: 7, a: 40, b: 40, k: 60, part: 'near' }] },
+      /* Ratchet Spin: straight up or a diagonal, chosen during the wind-up, then rides that arc. One 8% hit from frame 10
+         covers the start. Carries further sideways and less high than Flint's Updraft. Special fall after. */
+      uspec: { t: 40, helpless: 1, ledge: 1, h: [{ f0: 10, f1: 16, x: 0, y: 8, r: 8, d: 8, a: 80, b: 50, k: 45 }],
+        on(f, n, i) { if (n < 10) hang(f); if (n === 10) { const diag = Math.abs(i.lx) > 0.5; lift(f, f.st.vUp * (diag ? 0.82 : 1)); f.vx = diag ? sgn(i.lx) * 1.8 : i.lx * 0.4; } } },
+      /* Bench Vise: steps in and closes the open wrench on a standing opponent, frames 18 and 19, reaching about 1 H from
+         where he started (the document says roughly 0.9 H; the wrench is that long). It goes through a shield and throws low behind him for 12%. A jump or a dodge beats it, and a miss
+         leaves about 30 frames. Ground only: in the air it catches nothing. */
+      dspec: { t: 49, h: [{ f0: 18, f1: 19, x: 10, y: 6, r: 4, grab: 1, cmd: 'v', floor: 1, d: 0 }] },   /* the step is in the picture only: the wrench is long enough */
+    }, { jabs: 3, grab: { t: 34, h: { f0: 7, f1: 9, x: 8.5, r: 4.5 } }, throws: { v: { d: 12, a: 158, b: 62, k: 52 } } }),
+  }],
+};
+const ROSTER = [FLINT, WREN, SACK, SPROCKET];
 /* Hitbox positions measured from the animations (hitboxes.js, written with tools/measure.html). Timing, damage and launch stay as defined above. */
 if (typeof HITBOXES !== 'undefined') for (const def of ROSTER) for (const fm of def.forms) {
   const set = HITBOXES[fm.name]; if (!set) continue;
@@ -1029,7 +1064,7 @@ function resolveHits() {
     if (a.state === 'attack' && a.move && canBeHit(v)) {
       for (const h of (a.move.hp || a.move.h)) {   /* hp: the same hitboxes with the parts near the body first */
         if (a.mf < h.f0 || a.mf > h.f1) continue; const gid = h.g || 0; if (a.hitG.has(gid)) continue;
-        if (h.grab && ((!a.grounded && !h.cmd) || v.grabImm > 0)) continue;   /* ordinary grabs are for the ground; a leaping grab catches in the air */
+        if (h.grab && ((!a.grounded && !h.cmd) || v.grabImm > 0 || (h.floor && !(a.grounded && v.grounded)))) continue;   /* ordinary grabs are for the ground; a leaping grab catches in the air; a floor grab needs both standing */
         if (circRect(a.x + h.x * a.face, hitY(a, h), h.r, ...hurtRect(v))) { ev.push([a, v, h, a.face, a.x, false, !h.grab && pokes(v, a.x + h.x * a.face, hitY(a, h))]); a.hitG.add(gid); break; }
       }
     }
@@ -1043,6 +1078,8 @@ function resolveHits() {
 function updateProj() {
   for (const p of PROJ) {
     p.life--; const py = p.y - p.r;
+    if (p.x0 === undefined) p.x0 = p.x;
+    if (p.plat && p.back) { p.rollF = (p.rollF || 0) + 1; if (p.rollF === 1) p.v0 = Math.abs(p.vx); if (p.rollF > p.back) { p.vx = appr(p.vx, -p.face * p.v0, 0.2); if ((p.x - p.x0) * p.face <= 0) p.life = 0; } }   /* the tape curls back to where it was let go */
     if (p.plat) { p.x += p.vx; p.rot = (p.rot || 0) + p.vx * 0.2; p.rolled = (p.rolled || 0) + Math.abs(p.vx); if (p.reach && p.rolled > p.reach) p.life = 0; if (p.x < p.plat.x0 || p.x > p.plat.x1) p.plat = null; continue; }   /* a rolling stone crumbles after its reach */
     p.vy -= p.grav; p.x += p.vx; p.y += p.vy;
     if (p.grav && p.vy <= 0) {
@@ -1142,6 +1179,7 @@ function cpuBrain(f, o, m, L) {
     if (f.def.forms.length > 1 && !f.noSwap && m.cd === 0 && ad > 45 && Math.random() < 0.012) { i.ly = -1; i.spc = true; m.cd = 70; return i; }   /* swap companion at a safe distance */
     if (ad > (f.form.aiRange || 14)) { i.lx = dir; return i; }
     if (f.face !== dir) { i.lx = dir * 0.5; return i; }
+    if (m.cd === 0 && f.form.aiVise && o.state === 'shield' && o.grounded && ad < 13 && Math.abs(dy) < 6 && Math.random() < L.punish * 0.5) { i.ly = -1; i.spc = true; m.cd = 50; return i; }   /* a held shield invites the vise */
     if (m.cd === 0 && (o.state === 'shield' || o.state === 'shieldstun') && f.form.moves.grab.h[0].f0 <= 9 && ad < f.form.moves.grab.h[0].x + 3 && Math.abs(dy) < 6 && Math.random() < L.punish) { i.grb = true; m.cd = 36; return i; }   /* a shield is there to be grabbed, by those whose grab is quick enough */
     if (m.cd === 0) {
       const r = Math.random(); m.cd = Math.round((22 + (Math.random() * 30 | 0)) * (f.form.aiTempo || 1));

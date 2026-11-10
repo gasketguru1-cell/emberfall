@@ -148,6 +148,21 @@ const ART = {
     g.fillStyle = '#fff'; g.beginPath(); g.arc(hx + 0.7, 6.3, 0.15, 0, TAU); g.fill();
   },
   /* Potato Sack: a lumpy burlap sack tied with rope, a sewn-on face, a leather patch, knotted corners for fists and feet. */
+  Sprocket(c, t, f) {
+    const sw = gait(f) * 1.4, a = swing(f), bob = Math.sin(t * 0.08) * 0.15, skin = '#e0a98a', iron = '#5b5f6b', copper = '#b87333';
+    for (const s of [-1, 1]) { g.beginPath(); g.rect(s * 1.9 - 1.1 + s * sw * 0.5, 1.2, 2.2, 3.6); ink('#3a3a40', 0.3); g.beginPath(); g.ellipse(s * 1.9 + s * sw + 0.5, 0.8, 1.9, 0.9, 0, 0, TAU); ink(iron, 0.3); }   /* legs and steel-capped boots */
+    g.beginPath(); g.moveTo(-4.2, 3.6); g.lineTo(-3.6, 10.6 + bob); g.quadraticCurveTo(0, 11.8 + bob, 3.6, 10.6 + bob); g.lineTo(4.2, 3.6); g.closePath(); ink(vgrad(c[0], 3.6, 11));   /* work coat */
+    g.beginPath(); g.moveTo(-1.3, 11 + bob); g.lineTo(0.2, 6.2); g.lineTo(1.7, 11 + bob); g.closePath(); ink(c[1], 0.25);   /* shirt */
+    g.beginPath(); g.rect(-4.2, 5, 8.4, 1.1); ink('#4a3426', 0.25); g.beginPath(); g.rect(-0.2, 4.9, 1.2, 1.3); ink(iron, 0.2);   /* tool belt */
+    g.save(); g.translate(3.4, 8.2 + bob); g.rotate(-0.2 - a * 1.9);   /* the wrench arm: hangs at rest, swings over in an attack */
+    g.beginPath(); g.rect(-0.45, -8.6, 0.9, 8.2); ink(copper, 0.28); g.beginPath(); g.arc(0, -9.2, 1.35, Math.PI * 0.75, Math.PI * 2.25); g.lineTo(0, -8.9); g.closePath(); ink(copper, 0.28);
+    g.beginPath(); g.arc(0, 0, 1.25, 0, TAU); ink('#c2a45a', 0.3); g.restore();
+    g.beginPath(); g.arc(-4.4, 6.6 + bob, 1.2, 0, TAU); ink('#c2a45a', 0.3);   /* back glove */
+    g.beginPath(); g.arc(0.2, 12.6 + bob, 2.3, 0, TAU); ink(skin, 0.3);   /* head */
+    g.beginPath(); g.arc(0.5, 11.9 + bob, 1.9, Math.PI * 1.05, Math.PI * 1.95, false); g.closePath(); ink('#b9b4ac', 0.25);   /* beard */
+    for (const x of [0.2, 1.9]) { g.beginPath(); g.arc(x, 14.2 + bob, 0.7, 0, TAU); ink('#3c4a4a', 0.25); g.strokeStyle = '#c9a94e'; g.lineWidth = 0.22; g.stroke(); }   /* goggles pushed up */
+    g.fillStyle = OL; for (const x of [0.6, 1.9]) { g.beginPath(); g.arc(x, 12.9 + bob, 0.2, 0, TAU); g.fill(); }
+  },
   'Potato Sack'(c, t, f) {
     const sw = gait(f) * 1.1, a = swing(f), bob = Math.sin(t * 0.09) * 0.2, rope = '#b89a5e';
     g.beginPath(); g.ellipse(-2.9 - sw, 0.7, 1.5, 0.8, 0, 0, TAU); ink(tint(c[0], -0.2), 0.3); g.beginPath(); g.ellipse(2.9 + sw, 0.7, 1.5, 0.8, 0, 0, TAU); ink(tint(c[0], -0.2), 0.3);   /* knotted feet */
@@ -223,6 +238,7 @@ function drawProj() {
       const fl = p.kind === 'flame' ? 1 + Math.sin(frame * 0.5) * 0.25 : 1; g.fillStyle = 'rgba(255,170,60,.35)'; g.beginPath(); g.arc(x, y, p.r * 1.8 * s, 0, TAU); g.fill();
       g.fillStyle = '#ffb347'; g.beginPath(); g.ellipse(x, y - (fl - 1) * 2 * s, p.r * 0.7 * s, p.r * 0.9 * s * fl, 0, 0, TAU); g.fill(); g.fillStyle = '#fff3c4'; g.beginPath(); g.arc(x, y, p.r * 0.35 * s, 0, TAU); g.fill();
     } else if (p.kind === 'bolt') { g.strokeStyle = '#ffe8a3'; g.lineWidth = 1.4 * s; g.lineCap = 'round'; g.beginPath(); g.moveTo(x - 3 * s * p.face, y); g.lineTo(x + 2 * s * p.face, y); g.stroke(); g.lineCap = 'butt'; }
+    else if (p.kind === 'tape') { g.beginPath(); g.arc(x, y, p.r * s, 0, TAU); g.fillStyle = '#d9c24a'; g.fill(); g.strokeStyle = '#4a4d57'; g.lineWidth = 0.5 * s; g.stroke(); g.beginPath(); g.moveTo(x - Math.cos(p.rot || 0) * p.r * s, y + Math.sin(p.rot || 0) * p.r * s); g.lineTo(x + Math.cos(p.rot || 0) * p.r * s, y - Math.sin(p.rot || 0) * p.r * s); g.stroke(); }
     else if (p.kind === 'gust') { g.strokeStyle = 'rgba(240,220,255,.7)'; g.lineWidth = 0.7 * s; for (let k = -1; k <= 1; k++) { g.beginPath(); g.arc(x - k * 2 * s, y + k * 3 * s, 3 * s, -1 + frame * 0.2, 1.4 + frame * 0.2); g.stroke(); } }
     else { g.save(); g.translate(x, y); g.rotate(p.rot || 0); g.fillStyle = '#8d8794'; g.beginPath(); for (let k = 0; k < 7; k++) { const a = k / 7 * TAU, r = p.r * s * (k % 2 ? 0.85 : 1); g.lineTo(Math.cos(a) * r, Math.sin(a) * r); } g.closePath(); g.fill(); g.strokeStyle = '#4c4855'; g.lineWidth = 2; g.stroke(); g.restore(); }
   }

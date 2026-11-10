@@ -45,4 +45,13 @@ const HITBOXES = {
     nair: [{ x: 0, y: 6, r: 7 }], fair: [{ x: 7.6, y: 3.5, r: 5.4 }], bair: [{ x: -7, y: 5.5, r: 5.4 }], uair: [{ x: 0, y: 15.5, r: 5.9 }], dair: [{ x: 0.2, y: 0.8, r: 5.4 }],
     grab: [{ x: 7.2, y: 5.6, r: 4.8 }], dgrab: [{ x: 8.6, y: 5.6, r: 4.8 }], pgrab: [{ x: 9.2, y: 5.6, r: 4.8 }], getup: [{ x: 7, y: 3.4, r: 5.9 }, { x: -7, y: 3.4, r: 5.9 }],
   },
+  /* Sprocket: measured on the wrench's head (tools/measure.html), then set by hand where an attack sweeps through an arc.
+     Where the document gives a weaker hit on the handle or haft, that part is added halfway in toward him by the rules. */
+  Sprocket: {
+    jab: [{ x: 6.7, y: 9.6, r: 4.8 }], jab2: [{ x: 6.7, y: 9.6, r: 4.8 }], jab3: [{ x: 7.5, y: 9, r: 5.6 }], ftilt: [{ x: 14.4, y: 8.9, r: 4.8 }], utilt: [{ x: -0.9, y: 20.5, r: 5.9 }], dtilt: [{ x: 9.5, y: 1.6, r: 4.8 }], dash: [{ x: 7.2, y: 2.6, r: 5.9 }],
+    fsmash: [{ x: 12.1, y: 3.6, r: 6.9 }], usmash: [{ x: 1.5, y: 19.5, r: 7 }], dsmash: [{ x: 9.3, y: 1.6, r: 5.9 }, { x: -7.2, y: 2.6, r: 5.9 }],
+    fair: [{ x: 13, y: 5.6, r: 5.9 }], bair: [{ x: -7.2, y: 4.6, r: 5.9 }], uair: [{ x: -0.4, y: 21, r: 6.4 }], dair: [{ x: 2, y: -1, r: 5.9 }],
+    grab: [{ x: 7, y: 8.4, r: 4.5 }], dgrab: [{ x: 9.5, y: 8.4, r: 4.5 }], pgrab: [{ x: 10, y: 8.4, r: 4.5 }], getup: [{ x: 7.4, y: 1.6, r: 6.4 }, { x: -7.4, y: 1.6, r: 6.4 }],
+    sspec: [{ x: 11.1, y: 18.2, r: 5 }, { x: 6.1, y: 13.1, r: 4.5 }], dspec: [{ x: 10, y: 6, r: 4 }],
+  },
 };

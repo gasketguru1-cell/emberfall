@@ -146,6 +146,7 @@ function build() {
     if (kind === 'bolt') return new THREE.Mesh(new THREE.CapsuleGeometry(0.9, 4, 4, 10).rotateZ(Math.PI / 2), e(0xffe8a3, 2));
     if (kind === 'gust') return new THREE.Mesh(new THREE.TorusGeometry(4.5, 0.7, 8, 24), new THREE.MeshStandardMaterial({ color: 0xf0dcff, transparent: true, opacity: 0.55, depthWrite: false }));
     if (kind === 'boulder') { const m = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 0), new THREE.MeshStandardMaterial({ color: 0x8d8794, roughness: 0.95, flatShading: true })); m.castShadow = true; return m; }
+    if (kind === 'tape') { const m = new THREE.Group(), rim = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.55, 18).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xd9c24a, roughness: 0.45, metalness: 0.5 })), hub = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.3, 0.62), new THREE.MeshStandardMaterial({ color: 0x4a4d57, roughness: 0.6 })); rim.castShadow = true; m.add(rim, hub); return m; }   /* Sprocket's tape roll: a steel reel with a dark bar across it, so its turning shows */
     return new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), e(0xffa040, 2.6));   /* ember and flame */
   };
 
@@ -388,7 +389,7 @@ function build() {
     for (const p of PROJ) {
       let m = shots.get(p); if (!m || m.userData.kind !== p.kind) { if (m) { scene.remove(m); } m = shotMesh(p.kind); m.userData.kind = p.kind; shots.set(p, m); scene.add(m); }
       m.position.set(p.x, p.y, 0);
-      if (p.kind === 'boulder') { m.scale.setScalar(p.r); m.rotation.z = -(p.rot || 0); }
+      if (p.kind === 'boulder' || p.kind === 'tape') { m.scale.setScalar(p.r); m.rotation.z = -(p.rot || 0); }
       else if (p.kind === 'gust') { m.rotation.y = Math.PI / 2; m.rotation.x = frame * 0.25; }
       else if (p.kind === 'flame') m.scale.set(p.r * 0.8, p.r * (1.1 + Math.sin(frame * 0.5) * 0.3), p.r * 0.8);
       else if (p.kind === 'ember') m.scale.setScalar(p.r * 0.75);

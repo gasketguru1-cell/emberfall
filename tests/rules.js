@@ -9,7 +9,7 @@ let seed = 5; Math.random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; 
 for (const f of ['hitboxes.js', 'sim.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 vm.runInThisContext(`
 (function () {
-  const FL = [0, 0], NIB = [1, 0], LOOM = [1, 1], HOD = [1, 2], SACK = [2, 0];
+  const FL = [0, 0], NIB = [1, 0], LOOM = [1, 1], HOD = [1, 2], SACK = [2, 0], SPR = [3, 0];
   let SCRIPT = [null, null], t = 0; const results = [];
   cpuInput = function (f) { const i = blankIn(); if (SCRIPT[f.idx]) SCRIPT[f.idx](i, t, f); return i; };
   /* Two fighters standing on the main stage, facing each other, both driven by scripts. */
@@ -458,6 +458,43 @@ vm.runInThisContext(`
     check('Potato Sack: one Hot Potato per time off the ground', again === 1, again + ' blast(s) from two presses in the air');
     const [nf] = setup(SACK, FL, 0, 55); SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 4) i.spc = true; }; let ember = false; run(40, () => { if (PROJ.some(q => q.kind === 'ember' && q.owner === 0)) ember = true; });
     check('Potato Sack: neutral special is Flint\u2019s ember toss', ember && ROSTER[2].forms[0].moves.nspec === ROSTER[0].forms[0].moves.nspec, 'ember thrown: ' + ember);
+  }
+
+  /* ---- Sprocket: the handyman from the owner's moveset document ---- */
+  {
+    const SP = ROSTER[3].forms[0], mvs = SP.moves, fl = ROSTER[0].forms[0].st, st = SP.st, near = (a, b, tol) => Math.abs(a - b) <= (tol || 0.011);
+    check('Sprocket: frames and damage are the document\u2019s', mvs.jab.h[0].f0 === 5 && mvs.ftilt.h[0].f0 === 8 && mvs.ftilt.h[0].d === 10 && mvs.ftilt.h.some(h => h.part === 'near' && h.d === 7) && mvs.fsmash.h[0].f0 === 21 && mvs.fsmash.h[0].d === 20 && mvs.usmash.h[0].d === 17 && mvs.grab.h[0].f0 === 7 && mvs.throws.b.d === 11 && st.pummel === 1.5,
+      'jab f' + mvs.jab.h[0].f0 + ', forward tilt f' + mvs.ftilt.h[0].f0 + ' ' + mvs.ftilt.h[0].d + '% (handle ' + (mvs.ftilt.h.find(h => h.part === 'near') || {}).d + '%), forward smash f' + mvs.fsmash.h[0].f0 + ' ' + mvs.fsmash.h[0].d + '%, grab f' + mvs.grab.h[0].f0);
+    check('Sprocket: weight and movement against Flint', near(st.weight / fl.weight, 1.12) && near(st.run / fl.run, 0.88) && near(st.airSpeed / fl.airSpeed, 0.82) && near(st.grav / fl.grav, 1.1),
+      'weight ' + (st.weight / fl.weight * 100).toFixed(0) + ', ground speed ' + (st.run / fl.run * 100).toFixed(0) + ', air drift ' + (st.airSpeed / fl.airSpeed * 100).toFixed(0) + ', gravity ' + (st.grav / fl.grav * 100).toFixed(0) + ' (targets 112, 88, 82, 110)');
+    /* Tape Roll */
+    { const [s] = setup(SPR, FL, -40, 60); let born = -1, x0 = 0, out = 0, last = 0, most = 0;
+      SCRIPT[0] = (i, tt) => { if (tap(2)(tt) || tap(125)(tt)) i.spc = true; };
+      run(124, () => { const tp = PROJ.filter(q => q.kind === 'tape'); most = Math.max(most, tp.length); if (tp[0]) { if (born < 0) { born = t; x0 = tp[0].x; } out = Math.max(out, tp[0].x - x0); last = tp[0].x - x0; } });
+      const gone = !PROJ.some(q => q.kind === 'tape'); run(60, () => { most = Math.max(most, PROJ.filter(q => q.kind === 'tape').length); });
+      check('Sprocket: the tape rolls out, curls back and ends where it was let go', born >= 17 && born <= 20 && out > 22 && Math.abs(last) < 6 && gone, 'thrown on frame ' + (born - 2) + ', ran out ' + out.toFixed(1) + ', last seen ' + last.toFixed(1) + ' from the start, gone: ' + gone);
+      check('Sprocket: one tape at a time', most === 1, most + ' at once after two throws');
+      const [s2, o2] = setup(SPR, FL, 0, 24); SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) i.spc = true; }; run(80);
+      check('Sprocket: the tape hits for 6% and breaks', o2.pct > 6.5 && o2.pct < 8.5 && !PROJ.some(q => q.kind === 'tape'), 'target at ' + o2.pct.toFixed(1) + '% (6% before the one-on-one bonus)'); }
+    /* Hook Wrench */
+    { const hook = (x, y) => { const [s, o2] = setup(SPR, FL, 0, x); if (y) airborne(o2, x, y); let vx = null; SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.lx = 1; i.spc = true; } };
+        run(40, () => { if (vx === null && o2.pct > 0) vx = o2.vx; }); return { pct: o2.pct, vx }; };
+      const head = hook(15.5, 24), handle = hook(6.5, 0);
+      check('Sprocket: the wrench head hooks for 9% and tugs inward', head.pct > 10 && head.pct < 12.5 && head.vx < 0, 'target above and ahead: ' + head.pct.toFixed(1) + '%, sent ' + (head.vx < 0 ? 'toward him' : 'away'));
+      check('Sprocket: the handle hits for 7% and pushes outward', handle.pct > 7.8 && handle.pct < 9.8 && handle.vx > 0, 'target close in: ' + handle.pct.toFixed(1) + '%, sent ' + (handle.vx > 0 ? 'away' : 'toward him')); }
+    /* Ratchet Spin */
+    { const spin = lx => { const [s] = setup(SPR, FL, 0, 60); airborne(s, 0, 30); const y0 = s.y; let top = y0; SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = 1; i.spc = true; } else if (tt >= 4 && tt < 16) i.lx = lx; };
+        run(70, () => { top = Math.max(top, s.y); }); return { rise: top - y0, dx: s.x, helpless: s.state === 'helpless' || s.grounded }; };
+      const up = spin(0), diag = spin(1), flintUp = ROSTER[0].forms[0].st.upH;
+      check('Sprocket: Ratchet Spin goes straight up or on a diagonal', up.rise > 20 && up.rise < flintUp && Math.abs(up.dx) < 3 && diag.dx > 30 && diag.rise < up.rise && up.helpless,
+        'straight: rose ' + up.rise.toFixed(1) + ' (Flint\u2019s Updraft ' + flintUp + '), drifted ' + up.dx.toFixed(1) + '; diagonal: rose ' + diag.rise.toFixed(1) + ', carried ' + diag.dx.toFixed(1)); }
+    /* Bench Vise */
+    { const vise = (their, air) => { const [s, o2] = setup(SPR, FL, 0, 11); if (air) { airborne(s, 0, 30); airborne(o2, 10, 30); } let held = false, behind = false; SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = -1; i.spc = true; } }; SCRIPT[1] = their;
+        run(110, () => { if (o2.state === 'held') held = true; if (held && o2.x < s.x - 4) behind = true; }); return { held, behind, pct: o2.pct }; };
+      const shield = vise((i, tt) => { i.shd = true; }), jump = vise((i, tt) => { if (tt >= 12 && tt < 16) i.jmp = true; }), air = vise(null, true), m = mvs.dspec;
+      check('Sprocket: the vise takes a shielding opponent and throws them behind for 12%', shield.held && shield.behind && shield.pct > 13.5 && shield.pct < 16, 'caught: ' + shield.held + ', thrown behind: ' + shield.behind + ', ' + shield.pct.toFixed(1) + '% (12% before the one-on-one bonus)');
+      check('Sprocket: a jump beats the vise, and it catches nothing in the air', !jump.held && jump.pct === 0 && !air.held, 'jumped: caught ' + jump.held + '; both in the air: caught ' + air.held);
+      check('Sprocket: a missed vise leaves 30 frames', m.t - m.h[0].f1 === 30 && m.h[0].f0 === 18 && m.h[0].f1 === 19, 'active ' + m.h[0].f0 + ' to ' + m.h[0].f1 + ', ' + (m.t - m.h[0].f1) + ' frames after'); }
   }
 
   const softPlats = PLATS.splice(1);   /* the movement checks run on the bare main stage, so no jump lands on a platform */

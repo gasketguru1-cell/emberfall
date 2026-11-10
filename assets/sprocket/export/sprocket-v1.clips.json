@@ -1,0 +1,104 @@
+{
+ "Idle": {
+  "seconds": 2.433
+ },
+ "Walk": {
+  "seconds": 1.033
+ },
+ "Run": {
+  "seconds": 0.733
+ },
+ "Crouch": {
+  "seconds": 0.233
+ },
+ "Rise": {
+  "seconds": 0.433
+ },
+ "Fall": {
+  "seconds": 0.533
+ },
+ "Land": {
+  "seconds": 0.433
+ },
+ "Shield": {
+  "seconds": 0.167
+ },
+ "Hit": {
+  "seconds": 0.633
+ },
+ "Tumble": {
+  "seconds": 0.633
+ },
+ "Down": {
+  "seconds": 0.333
+ },
+ "Dodge": {
+  "seconds": 0.433
+ },
+ "Ledge": {
+  "seconds": 1.233
+ },
+ "Hold": {
+  "seconds": 0.633
+ },
+ "Held": {
+  "seconds": 0.533
+ },
+ "Jab": {
+  "seconds": 0.533
+ },
+ "Shove": {
+  "seconds": 0.733
+ },
+ "Poke": {
+  "seconds": 0.833
+ },
+ "Crank": {
+  "seconds": 0.933
+ },
+ "Scrape": {
+  "seconds": 0.767
+ },
+ "Slide": {
+  "seconds": 0.933
+ },
+ "Hammer": {
+  "seconds": 1.233
+ },
+ "Jack": {
+  "seconds": 1.033
+ },
+ "BenchSweep": {
+  "seconds": 1.233
+ },
+ "Turn": {
+  "seconds": 0.833
+ },
+ "Arc": {
+  "seconds": 0.933
+ },
+ "Heel": {
+  "seconds": 0.933
+ },
+ "Flip": {
+  "seconds": 0.833
+ },
+ "Drop": {
+  "seconds": 1.033
+ },
+ "Reach": {
+  "seconds": 0.833
+ },
+ "Flick": {
+  "seconds": 0.967
+ },
+ "Hook": {
+  "seconds": 1.033
+ },
+ "Ratchet": {
+  "seconds": 1.033
+ },
+ "Vise": {
+  "seconds": 1.133
+ }
+}

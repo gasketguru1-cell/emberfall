@@ -10,7 +10,7 @@ One folder per character. Inside each:
 
 ## Status
 
-The roster: Flint, Wren's three companions Nib, Loom and Hod, and (added 2026-11-10 at the owner's request) Potato Sack.
+The roster: Flint, Wren's three companions Nib, Loom and Hod, and (added 2026-11-10 at the owner's request) Potato Sack and Sprocket. Three more are on the way: Scuttle (model made), Brand and Tilt (concept pictures only).
 
 | Character | Brief | Concept image | 3D model | Rig | Animations | In game |
 |---|---|---|---|---|---|---|
@@ -19,6 +19,7 @@ The roster: Flint, Wren's three companions Nib, Loom and Hod, and (added 2026-11
 | Loom | art supplied | concept A approved | v1: 30,047 triangles, 1K textures, 2.4 MB | custom 16-bone skeleton with two ribbon chains | 24 hand-keyed clips; ribbons follow through | **in game**, faces the camera |
 | Hod | art supplied | concept A approved | v1: 30,595 triangles, 1K textures, 2.8 MB | custom 27-bone skeleton with leg IK | 26 hand-keyed clips; tail follows through | **in game** |
 | Potato Sack | in WORKQUEUE.md | concept A approved (an original design) | v1: 30,898 triangles, 1K textures, 3.0 MB | custom 13-bone skeleton | 24 hand-keyed clips; tuft follows through; hops tied to the rules | **in game** |
+| Sprocket | the owner's moveset document | concept A (an original design) | v1: 30,732 triangles, 1K textures, 2.9 MB | custom 24-bone skeleton: hand and foot targets, a rigid wrench aimed directly | 34 hand-keyed clips | **in game** |
 
 ## Meshy credits
 
@@ -38,9 +39,10 @@ All Meshy calls go through `tools/meshy.js`. Limits are in `assets/meshy-budget.
 | 2026-11-10 | Stage | 3D island from the isolated picture (60k triangles, PBR 2K) | 30 |
 | 2026-11-10 | Potato Sack | Concept picture | 4 |
 | 2026-11-10 | Potato Sack | 3D model from the concept (30k triangles, PBR 2K) | 30 |
-| 2026-11-10 | Sprocket, Brand, Tilt, Scuttle | Concept pictures (4 each), awaiting the owner's yes | 16 |
+| 2026-11-10 | Sprocket, Brand, Tilt, Scuttle | Concept pictures (4 each) | 16 |
+| 2026-11-10 | Sprocket, Scuttle | 3D models from the concepts (30 each), after the owner said to carry on | 60 |
 
-Spent so far: 325 credits (Flint 135, companions 102, stage 38, Potato Sack 34, concept pictures for four new fighters 16). The owner cleared up to 400 for the Potato Sack project on 2026-11-10; the 150-a-day limit is unchanged (88 used that day). The daily limit was raised to 240 for 2026-11-09 only, at the owner's request; it is 150 on other days. No credits were spent in the unattended session on the evening of 2026-11-09.
+Spent so far: 385 credits (Flint 135, companions 102, stage 38, Potato Sack 34, Sprocket 34, Scuttle 34, concept pictures for Brand and Tilt 8). The owner cleared up to 400 for the Potato Sack project on 2026-11-10; the 150-a-day limit is unchanged (148 used that day, so Brand's and Tilt's models wait for another day). The daily limit was raised to 240 for 2026-11-09 only, at the owner's request; it is 150 on other days. No credits were spent in the unattended session on the evening of 2026-11-09.
 
 ## Flint v3: what is and is not done
 
@@ -86,6 +88,19 @@ Flint, Nib, Loom and Hod now follow the owner's document (`Emberfall_Fighter_Mov
 - **Balance** (CPU against CPU at level 7, 1,500 matches a seed, two seeds): Flint 50 and 53%, Nib 50 and 53%, Loom 54 and 50%, Hod 48 and 48%, Potato Sack 49 and 47%.
 - **Checked:** 112 rule checks (22 new), the stress test, the recovery test (30 of 30), the in-game hitbox audit (282 rows; the only large flag is Crossbreeze's outer gust, which is air by design), one CPU match played in the game with no errors, Ram Plate and Ribbon Sling looked at as still frames with hitboxes shown.
 - **Not checked:** any of it in a person's hands, and the new moves in motion at full speed.
+
+## Sprocket (2026-11-10)
+
+The forge town's handyman, a wrench-range brawler, built from the owner's moveset document. An original design.
+
+- **Rules** (`SPROCKET` and `KIT.Sprocket` in `sim.js`): every normal's first active frame and damage, the throws, pummel and grab speed are the document's. Weight 112, ground speed 88, air drift 82, gravity 110 against Flint's 100.
+- **Specials.** Tape Roll: flicked on frame 16, runs out about 39 units, curls back and ends where it was let go; 6%, one at a time. Hook Wrench: frames 16 to 19, the head 9% with a tug inward, the handle 7% pushing out. Ratchet Spin: straight up (about 1.7 H) or a diagonal chosen in the wind-up, 8% at the start, special fall after. Bench Vise: a command grab on frames 18 and 19 that goes through a shield and throws low behind for 12%; ground only, 30 frames if it misses.
+- **Different from the document:** the vise reaches about 1 H from where he stands instead of 0.9 H, because the wrench is that long, and he does not slide forward during it. Launch power is 15% softer and the time after an attack 30% longer than the engine's defaults (`TUNE`), from balance testing: with the document's numbers alone he won 68%.
+- **Model:** one concept picture and one 3D model (34 credits). Rigged with `tools/blender/sprocket.js` + `rig.py`, which gained three things for him: hand and foot targets for a two-legged body, a tool aimed directly whatever the arm does (`copyrot`), and rigid parts (`rigid`). The rig also now always turns the short way between keys.
+- **Hitboxes** measured on the wrench's head and checked with the in-game audit (346 rows for six fighters; his worst gap is 1.7 units, on the handle parts, which sit on the shaft).
+- **CPU:** rolls tape from 26 to 58 units, uses Hook Wrench up close and the vise on a held shield. It gets back from all six recovery test spots.
+- **Balance** with six fighters (CPU level 7, 2,160 matches a seed, two seeds): Flint 50 and 53%, Nib 51 and 51%, Loom 53 and 49%, Hod 50 and 48%, Potato Sack 50 and 51%, Sprocket 47 and 48%.
+- **Checked:** 11 rule checks of his own (127 in all), the stress test, a full CPU match in the game with no errors, two contact sheets of his poses. **Not checked:** him in a person's hands, and his animation in motion at full speed. His coat has no bones of its own, so the hem moves with his legs.
 
 ## Potato Sack (2026-11-10)
 
