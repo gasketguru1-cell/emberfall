@@ -3,6 +3,9 @@
 #   blender -b --factory-startup --python tools/blender/rig.py -- --mesh in.glb --spec spec.json --out out.glb
 #
 # The spec is written in the model's own coordinates (metres, Y up, the character faces +Z):
+#   "prep":  { "yaw": degrees, "translate": [x,y,z] }   turn and move the mesh first (applied in that order), so it stands at the origin facing +Z
+#   "ik":    [ { "name": control bone, "bone": lower leg bone, "chain": 2, "paw": paw bone } ]   leg reach: the lower bone's tip follows the control
+#   "poses": { "<name>": { "<bone>": {...} } }   named poses a key can start from with "use"
 #   "bones": [ { "name", "head": [x,y,z], "tail": [x,y,z], "parent": name or null, "connect": bool, "deform": bool } ]
 #   "clips": { "<name>": { "fps": 30, "loop": bool, "keys": [ { "t": seconds, "pose": { "<bone>": { "rot": [pitch, yaw, roll], "move": [x,y,z] } } } ] } }
 # "rot" is in degrees about the model's own axes (pitch = about the right axis, yaw = about up, roll = about forward),
@@ -31,6 +34,10 @@ mesh = bpy.context.view_layer.objects.active
 for o in [o for o in bpy.context.scene.objects if o.type not in ('MESH',)]: bpy.data.objects.remove(o, do_unlink=True)
 for vg in list(mesh.vertex_groups): mesh.vertex_groups.remove(vg)
 for m in list(mesh.modifiers): mesh.modifiers.remove(m)
+prep = spec.get('prep')
+if prep:
+    M = Matrix.Translation(conv(prep.get('translate', [0, 0, 0]))) @ Matrix.Rotation(math.radians(prep.get('yaw', 0)), 4, UP)
+    mesh.data.transform(M); mesh.data.update()
 lo = [min(v.co[i] for v in mesh.data.vertices) for i in range(3)]; hi = [max(v.co[i] for v in mesh.data.vertices) for i in range(3)]
 print('rig: mesh %d verts, %d faces, size %.3f x %.3f x %.3f (model x, y up, z)' % (len(mesh.data.vertices), len(mesh.data.polygons), hi[0] - lo[0], hi[2] - lo[2], hi[1] - lo[1]))
 
@@ -42,6 +49,7 @@ for b in spec['bones']:
     if b.get('parent'): eb.parent = arm.edit_bones[b['parent']]; eb.use_connect = bool(b.get('connect', False))
 bpy.ops.object.mode_set(mode='OBJECT')
 for b in spec['bones']: arm.bones[b['name']].use_deform = b.get('deform', True)
+print('rig: skeleton %d bones (%d deform)' % (len(arm.bones), sum(1 for b in arm.bones if b.use_deform)))
 
 # ---- weights: automatic (heat) on the mesh itself; if that leaves gaps, weight a clean voxel copy and transfer ----
 def auto_weight(target):
@@ -74,6 +82,12 @@ bpy.ops.object.select_all(action='DESELECT'); mesh.select_set(True); bpy.context
 bpy.ops.object.vertex_group_limit_total(group_select_mode='ALL', limit=4); bpy.ops.object.vertex_group_normalize_all(group_select_mode='ALL', lock_active=False)
 print('rig: weights by %s; %d bones, %d groups, %d vertices unweighted' % (method, len(arm.bones), len(mesh.vertex_groups), missing))
 
+# ---- leg reach (IK): the lower leg's tip follows a control bone; the exporter bakes the result into plain rotations ----
+bpy.context.view_layer.objects.active = rig
+for ik in spec.get('ik', []):
+    c = rig.pose.bones[ik['bone']].constraints.new('IK'); c.target = rig; c.subtarget = ik['name']; c.chain_count = ik.get('chain', 2)
+if spec.get('ik'): print('rig: %d IK chains' % len(spec['ik']))
+
 # ---- animation ----
 def delta(rot):
     p, y, r = (math.radians(a) for a in rot)
@@ -88,6 +102,9 @@ for name, clip in spec.get('clips', {}).items():
     state = {}
     for key in clip['keys']:
         f = round(key['t'] * fps) + 1; last = max(last, f)
+        if key.get('reset'): state = {b: {} for b in state}
+        if key.get('use'):
+            for u in ([key['use']] if isinstance(key['use'], str) else key['use']): state.update(spec['poses'][u])
         state.update(key.get('pose', {}))
         for bname, tr in state.items():
             pb = rig.pose.bones[bname]; R = rest[bname]
@@ -100,5 +117,5 @@ for pb in rig.pose.bones: pb.rotation_quaternion = Quaternion(); pb.location = V
 scene.frame_start = 1; scene.frame_end = last
 
 bpy.ops.export_scene.gltf(filepath=opt['out'], export_format='GLB', export_animations=True, export_animation_mode='NLA_TRACKS',
-                          export_skins=True, export_yup=True, export_frame_range=False, export_force_sampling=True)
+                          export_skins=True, export_yup=True, export_frame_range=False, export_force_sampling=True, export_def_bones=True)
 print('rig: wrote ' + opt['out'])

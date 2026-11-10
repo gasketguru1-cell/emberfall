@@ -32,9 +32,10 @@ for (const extra of cfg.extra || []) {
 
 /* Root bone: the reference standing height comes from the first frame of the stand clip. */
 const rootTrack = a => a.listChannels().find(ch => ch.getTargetPath() === 'translation' && ch.getTargetNode() && ch.getTargetNode().getName() === cfg.root);
-const standClip = root.listAnimations().find(a => a.getName() === cfg.stand), stand = rootTrack(standClip).getSampler().getOutput().getArray();
-const ref = [cfg.ref[0], stand[1], cfg.ref[2]]; const report = {};
-for (const a of root.listAnimations()) {
+/* Characters rigged by tools/blender/rig.py have no root travel to remove: leave 'root' out of their config. */
+const report = {}; let ref = [0, 0, 0];
+if (cfg.root) { const standClip = root.listAnimations().find(a => a.getName() === cfg.stand), stand = rootTrack(standClip).getSampler().getOutput().getArray(); ref = [cfg.ref[0], stand[1], cfg.ref[2]]; }
+for (const a of cfg.root ? root.listAnimations() : []) {
   const ch = rootTrack(a), rule = (cfg.clips && cfg.clips[a.getName()]) || {}; if (!ch) continue;
   const acc = ch.getSampler().getOutput(), v = acc.getArray().slice(), times = ch.getSampler().getInput().getArray(); let hi = -1e9, lo = 1e9, tHi = 0, tLo = 0;
   for (let i = 0; i < v.length; i += 3) {
@@ -45,7 +46,8 @@ for (const a of root.listAnimations()) {
   acc.setArray(v); let dur = times[times.length - 1];
   report[a.getName()] = { seconds: +dur.toFixed(3), rootY: rule.y || 'keep', highestAt: +tHi.toFixed(2), lowestAt: +tLo.toFixed(2), high: +hi.toFixed(1), low: +lo.toFixed(1) };
 }
-console.log('standing root height ' + ref[1].toFixed(2)); console.table(report);
+if (cfg.root) { console.log('standing root height ' + ref[1].toFixed(2)); console.table(report); }
+else for (const a of root.listAnimations()) { let dur = 0; for (const ch of a.listChannels()) { const t = ch.getSampler().getInput().getArray(); dur = Math.max(dur, t[t.length - 1]); } report[a.getName()] = { seconds: +dur.toFixed(3) }; }
 
 await doc.transform(resample(), dedup(), prune(), textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [cfg.texture || 1024, cfg.texture || 1024], quality: 88 }));
 const out = path.join(dir, cfg.out); fs.mkdirSync(path.dirname(out), { recursive: true }); await io.write(out, doc);

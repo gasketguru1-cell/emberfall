@@ -68,6 +68,8 @@ const localDay = d => { const x = new Date(d); return x.getFullYear() + '-' + St
 const costOf = t => /FAILED|CANCELED/.test(t.status || '') ? 0 : (typeof t.consumed === 'number' ? t.consumed : t.est);
 function summary() {
   const b = JSON.parse(fs.readFileSync(BUDGET, 'utf8')), all = Object.values(ledger()), today = localDay(Date.now());
+  /* A one-day exception to the daily limit, by date, leaves the standing limit as it is. */
+  if (b.perDayOverride && b.perDayOverride[today]) b.perDayMax = b.perDayOverride[today];
   const inPhase = all.filter(t => t.phase === b.phase);
   return { budget: b, tasks: all, spentPhase: inPhase.reduce((s, t) => s + costOf(t), 0), spentToday: all.filter(t => t.time && localDay(t.time) === today).reduce((s, t) => s + costOf(t), 0), spentAll: all.reduce((s, t) => s + costOf(t), 0) };
 }

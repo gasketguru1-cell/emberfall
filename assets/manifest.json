@@ -1,53 +1,567 @@
 {
-  "Flint": {
-    "file": "assets/flint/export/flint-v2.glb",
-    "height": 15.2,
-    "prop": { "type": "lantern", "bone": "RightHand" },
-    "clips": {
-      "idle": { "clip": "Idle" },
-      "walk": { "clip": "Walk" },
-      "run": { "clip": "Run" },
-      "crouch": { "clip": "Regular_Jump", "at": 0.3 },
-      "brake": { "clip": "Regular_Jump", "from": 1.3, "to": 1.6 },
-      "jumpsquat": { "clip": "Regular_Jump", "from": 0.05, "to": 0.33 },
-      "rise": { "clip": "Regular_Jump", "from": 0.47, "to": 0.8 },
-      "fall": { "clip": "Fall1" },
-      "land": { "clip": "Regular_Jump", "from": 1.2, "to": 1.75 },
-      "shield": { "clip": "Block1", "from": 1.05, "to": 1.37 },
-      "hit": { "clip": "Hit_Reaction", "from": 0.0, "to": 1.2 },
-      "tumble": { "clip": "BeHit_FlyUp", "from": 0.12, "to": 0.9, "bounce": true },
-      "down": { "clip": "Knock_Down", "from": 0.95, "to": 1.5 },
-      "dizzy": { "clip": "Hit_Reaction", "from": 0.0, "to": 1.5, "bounce": true },
-      "airdodge": { "clip": "Stand_Dodge", "from": 0.1, "to": 1.2 },
-      "dodge": { "clip": "Stand_Dodge", "from": 0.1, "to": 1.2 },
-      "roll": { "clip": "Roll_Dodge", "from": 0.55, "to": 1.7 },
-      "ledge": { "clip": "Bar_Hang_Idle" },
-      "hold": { "clip": "Right_Jab_from_Guard", "at": 0.63 },
-      "held": { "clip": "Hit_Reaction", "from": 0.1, "to": 0.9, "bounce": true },
-      "throw": { "clip": "Grip_and_Throw_Down", "from": 3.1, "to": 4.0 },
-      "swap": { "clip": "Idle" }
-    },
-    "attacks": {
-      "jab":    { "clip": "Right_Jab_from_Guard", "start": 0.3, "contact": [0.47, 0.68], "end": 1.05 },
-      "ftilt":  { "clip": "Left_Hook_from_Guard", "start": 0.1, "contact": [0.28, 0.42], "end": 0.85 },
-      "utilt":  { "clip": "Right_Uppercut_from_Guard", "start": 0.25, "contact": [0.5, 0.68], "end": 0.95 },
-      "dtilt":  { "clip": "Leg_Sweep", "start": 0.35, "contact": [0.65, 0.95], "end": 1.3 },
-      "dash":   { "clip": "Lunge_Roundhouse_Kick", "start": 1.7, "contact": [2.15, 2.35], "end": 2.8 },
-      "fsmash": { "clip": "Charged_Slash", "start": 0.6, "contact": [1.12, 1.32], "end": 1.9 },
-      "usmash": { "clip": "Charged_Upward_Slash", "start": 0.45, "contact": [0.95, 1.15], "end": 1.9 },
-      "dsmash": { "clip": "Sweep_Kick", "start": 0.7, "contact": [1.1, 1.4], "end": 2.2 },
-      "nair":   { "clip": "360_Power_Spin_Jump", "start": 0.85, "contact": [1.05, 1.6], "end": 2.1 },
-      "fair":   { "clip": "Jumping_Punch", "start": 0.9, "contact": [1.2, 1.4], "end": 1.9 },
-      "bair":   { "clip": "Lunge_Spin_Kick", "start": 0.85, "contact": [1.2, 1.4], "end": 1.63 },
-      "uair":   { "clip": "Rising_Flying_Kick", "start": 0.1, "contact": [0.35, 0.6], "end": 1.1 },
-      "dair":   { "clip": "Jump_and_Slam_Back_Down", "start": 0.45, "contact": [0.75, 1.1], "end": 1.3 },
-      "grab":   { "clip": "Right_Jab_from_Guard", "start": 0.3, "contact": [0.5, 0.63], "end": 1.05 },
-      "getup":  { "clip": "Sweep_Kick", "start": 0.7, "contact": [1.1, 1.4], "end": 2.2 },
-      "nspec":  { "clip": "baseball_pitching", "start": 1.1, "contact": [1.6, 1.75], "end": 2.67 },
-      "sspec":  { "clip": "Thrust_Slash", "start": 0.3, "contact": [0.7, 0.95], "end": 1.7 },
-      "uspec":  { "clip": "Jump_with_Arms_Open", "start": 1.0, "contact": [1.25, 1.6], "end": 2.4 },
-      "dspec":  { "clip": "Charged_Ground_Slam", "start": 0.6, "contact": [1.6, 1.85], "end": 2.7 },
-      "*":      { "clip": "Right_Jab_from_Guard", "start": 0.3, "contact": [0.47, 0.68], "end": 1.05 }
-    }
+ "Flint": {
+  "file": "assets/flint/export/flint-v2.glb",
+  "height": 15.2,
+  "prop": {
+   "type": "lantern",
+   "bone": "RightHand"
+  },
+  "clips": {
+   "idle": {
+    "clip": "Idle"
+   },
+   "walk": {
+    "clip": "Walk"
+   },
+   "run": {
+    "clip": "Run"
+   },
+   "crouch": {
+    "clip": "Regular_Jump",
+    "at": 0.3
+   },
+   "brake": {
+    "clip": "Regular_Jump",
+    "from": 1.3,
+    "to": 1.6
+   },
+   "jumpsquat": {
+    "clip": "Regular_Jump",
+    "from": 0.05,
+    "to": 0.33
+   },
+   "rise": {
+    "clip": "Regular_Jump",
+    "from": 0.47,
+    "to": 0.8
+   },
+   "fall": {
+    "clip": "Fall1"
+   },
+   "land": {
+    "clip": "Regular_Jump",
+    "from": 1.2,
+    "to": 1.75
+   },
+   "shield": {
+    "clip": "Block1",
+    "from": 1.05,
+    "to": 1.37
+   },
+   "hit": {
+    "clip": "Hit_Reaction",
+    "from": 0,
+    "to": 1.2
+   },
+   "tumble": {
+    "clip": "BeHit_FlyUp",
+    "from": 0.12,
+    "to": 0.9,
+    "bounce": true
+   },
+   "down": {
+    "clip": "Knock_Down",
+    "from": 0.95,
+    "to": 1.5
+   },
+   "dizzy": {
+    "clip": "Hit_Reaction",
+    "from": 0,
+    "to": 1.5,
+    "bounce": true
+   },
+   "airdodge": {
+    "clip": "Stand_Dodge",
+    "from": 0.1,
+    "to": 1.2
+   },
+   "dodge": {
+    "clip": "Stand_Dodge",
+    "from": 0.1,
+    "to": 1.2
+   },
+   "roll": {
+    "clip": "Roll_Dodge",
+    "from": 0.55,
+    "to": 1.7
+   },
+   "ledge": {
+    "clip": "Bar_Hang_Idle"
+   },
+   "hold": {
+    "clip": "Right_Jab_from_Guard",
+    "at": 0.63
+   },
+   "held": {
+    "clip": "Hit_Reaction",
+    "from": 0.1,
+    "to": 0.9,
+    "bounce": true
+   },
+   "throw": {
+    "clip": "Grip_and_Throw_Down",
+    "from": 3.1,
+    "to": 4
+   },
+   "swap": {
+    "clip": "Idle"
+   }
+  },
+  "attacks": {
+   "jab": {
+    "clip": "Right_Jab_from_Guard",
+    "start": 0.3,
+    "contact": [
+     0.47,
+     0.68
+    ],
+    "end": 1.05
+   },
+   "ftilt": {
+    "clip": "Left_Hook_from_Guard",
+    "start": 0.1,
+    "contact": [
+     0.28,
+     0.42
+    ],
+    "end": 0.85
+   },
+   "utilt": {
+    "clip": "Right_Uppercut_from_Guard",
+    "start": 0.25,
+    "contact": [
+     0.5,
+     0.68
+    ],
+    "end": 0.95
+   },
+   "dtilt": {
+    "clip": "Leg_Sweep",
+    "start": 0.35,
+    "contact": [
+     0.65,
+     0.95
+    ],
+    "end": 1.3
+   },
+   "dash": {
+    "clip": "Lunge_Roundhouse_Kick",
+    "start": 1.7,
+    "contact": [
+     2.15,
+     2.35
+    ],
+    "end": 2.8
+   },
+   "fsmash": {
+    "clip": "Charged_Slash",
+    "start": 0.6,
+    "contact": [
+     1.12,
+     1.32
+    ],
+    "end": 1.9
+   },
+   "usmash": {
+    "clip": "Charged_Upward_Slash",
+    "start": 0.45,
+    "contact": [
+     0.95,
+     1.15
+    ],
+    "end": 1.9
+   },
+   "dsmash": {
+    "clip": "Sweep_Kick",
+    "start": 0.7,
+    "contact": [
+     1.1,
+     1.4
+    ],
+    "end": 2.2
+   },
+   "nair": {
+    "clip": "360_Power_Spin_Jump",
+    "start": 0.85,
+    "contact": [
+     1.05,
+     1.6
+    ],
+    "end": 2.1
+   },
+   "fair": {
+    "clip": "Jumping_Punch",
+    "start": 0.9,
+    "contact": [
+     1.2,
+     1.4
+    ],
+    "end": 1.9
+   },
+   "bair": {
+    "clip": "Lunge_Spin_Kick",
+    "start": 0.85,
+    "contact": [
+     1.2,
+     1.4
+    ],
+    "end": 1.63
+   },
+   "uair": {
+    "clip": "Rising_Flying_Kick",
+    "start": 0.1,
+    "contact": [
+     0.35,
+     0.6
+    ],
+    "end": 1.1
+   },
+   "dair": {
+    "clip": "Jump_and_Slam_Back_Down",
+    "start": 0.45,
+    "contact": [
+     0.75,
+     1.1
+    ],
+    "end": 1.3
+   },
+   "grab": {
+    "clip": "Right_Jab_from_Guard",
+    "start": 0.3,
+    "contact": [
+     0.5,
+     0.63
+    ],
+    "end": 1.05
+   },
+   "getup": {
+    "clip": "Sweep_Kick",
+    "start": 0.7,
+    "contact": [
+     1.1,
+     1.4
+    ],
+    "end": 2.2
+   },
+   "nspec": {
+    "clip": "baseball_pitching",
+    "start": 1.1,
+    "contact": [
+     1.6,
+     1.75
+    ],
+    "end": 2.67
+   },
+   "sspec": {
+    "clip": "Thrust_Slash",
+    "start": 0.3,
+    "contact": [
+     0.7,
+     0.95
+    ],
+    "end": 1.7
+   },
+   "uspec": {
+    "clip": "Jump_with_Arms_Open",
+    "start": 1,
+    "contact": [
+     1.25,
+     1.6
+    ],
+    "end": 2.4
+   },
+   "dspec": {
+    "clip": "Charged_Ground_Slam",
+    "start": 0.6,
+    "contact": [
+     1.6,
+     1.85
+    ],
+    "end": 2.7
+   },
+   "*": {
+    "clip": "Right_Jab_from_Guard",
+    "start": 0.3,
+    "contact": [
+     0.47,
+     0.68
+    ],
+    "end": 1.05
+   }
   }
+ },
+ "Nib": {
+  "file": "assets/nib/export/nib-v1.glb",
+  "height": 10.5,
+  "clips": {
+   "idle": {
+    "clip": "Idle"
+   },
+   "walk": {
+    "clip": "Walk"
+   },
+   "run": {
+    "clip": "Run"
+   },
+   "crouch": {
+    "clip": "Crouch",
+    "at": 0.2
+   },
+   "brake": {
+    "clip": "Land",
+    "from": 0.1,
+    "to": 0.35
+   },
+   "jumpsquat": {
+    "clip": "Crouch",
+    "from": 0,
+    "to": 0.2
+   },
+   "rise": {
+    "clip": "Rise",
+    "from": 0,
+    "to": 0.4
+   },
+   "fall": {
+    "clip": "Fall"
+   },
+   "land": {
+    "clip": "Land",
+    "from": 0,
+    "to": 0.35
+   },
+   "shield": {
+    "clip": "Shield",
+    "from": 0,
+    "to": 0.15
+   },
+   "hit": {
+    "clip": "Hit",
+    "from": 0,
+    "to": 0.6
+   },
+   "tumble": {
+    "clip": "Tumble",
+    "bounce": true
+   },
+   "down": {
+    "clip": "Down",
+    "from": 0,
+    "to": 0.3
+   },
+   "dizzy": {
+    "clip": "Hit",
+    "from": 0,
+    "to": 0.6,
+    "bounce": true
+   },
+   "airdodge": {
+    "clip": "Tumble",
+    "bounce": true
+   },
+   "dodge": {
+    "clip": "Shield",
+    "from": 0,
+    "to": 0.15
+   },
+   "roll": {
+    "clip": "Tumble",
+    "bounce": true
+   },
+   "ledge": {
+    "clip": "Rise",
+    "at": 0
+   },
+   "hold": {
+    "clip": "Bite",
+    "at": 0.4
+   },
+   "held": {
+    "clip": "Tumble",
+    "bounce": true
+   },
+   "throw": {
+    "clip": "Bite",
+    "from": 0.2,
+    "to": 0.9
+   },
+   "swap": {
+    "clip": "Tumble",
+    "bounce": true
+   }
+  },
+  "attacks": {
+   "jab": {
+    "clip": "Bite",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "ftilt": {
+    "clip": "Bite",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "fsmash": {
+    "clip": "Bite",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "dash": {
+    "clip": "Pounce",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.46
+    ],
+    "end": 0.9
+   },
+   "grab": {
+    "clip": "Bite",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "sspec": {
+    "clip": "Pounce",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.46
+    ],
+    "end": 0.9
+   },
+   "nspec": {
+    "clip": "Bite",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "utilt": {
+    "clip": "UpStrike",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.46
+    ],
+    "end": 0.9
+   },
+   "usmash": {
+    "clip": "UpStrike",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.46
+    ],
+    "end": 0.9
+   },
+   "uair": {
+    "clip": "UpStrike",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.46
+    ],
+    "end": 0.9
+   },
+   "uspec": {
+    "clip": "UpStrike",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.46
+    ],
+    "end": 0.9
+   },
+   "dtilt": {
+    "clip": "Sweep",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.5
+    ],
+    "end": 0.9
+   },
+   "dsmash": {
+    "clip": "Sweep",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.5
+    ],
+    "end": 0.9
+   },
+   "nair": {
+    "clip": "Sweep",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.5
+    ],
+    "end": 0.9
+   },
+   "bair": {
+    "clip": "Sweep",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.5
+    ],
+    "end": 0.9
+   },
+   "getup": {
+    "clip": "Sweep",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.5
+    ],
+    "end": 0.9
+   },
+   "fair": {
+    "clip": "Pounce",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.46
+    ],
+    "end": 0.9
+   },
+   "dair": {
+    "clip": "Pounce",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.46
+    ],
+    "end": 0.9
+   },
+   "*": {
+    "clip": "Bite",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.44
+    ],
+    "end": 0.9
+   }
+  }
+ }
 }

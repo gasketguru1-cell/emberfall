@@ -6,3 +6,4 @@ assets/*/raw/
 *.key
 .env*
 assets/_pipeline-test/
+assets/*/work/*.glb

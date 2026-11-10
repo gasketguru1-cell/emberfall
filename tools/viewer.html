@@ -15,6 +15,7 @@
 <body>
 <div id="info">loading…</div>
 <canvas id="v"></canvas>
+<canvas id="grid" style="position:absolute;left:0;top:0;pointer-events:none"></canvas>
 <script type="module">
 /* Inspection page for a generated model: four views side by side (front, right, back, left), plus counts.
    ?file=assets/flint/raw/<task>/model.glb   &clip=<n> plays animation clip n   &t=<0..1> holds the clip at that point   &wire=1 shows the mesh lines */
@@ -84,6 +85,34 @@ function frame() {
       cam.aspect = vw / vh; cam.position.set(-dist * 0.96, centre.y + 0.1, dist * 0.28); cam.lookAt(0, centre.y + 0.05, 0); cam.updateProjectionMatrix();
       key.position.set(-dist, dist, dist); renderer.render(scene, cam);
     }
+    requestAnimationFrame(frame); return;
+  }
+  /* ?blueprint=1 : measured drawings. Side (forward to the right), front and top views without perspective, on a grid
+     labelled in metres, plus one perspective view. Used to read off joint positions for a custom skeleton. */
+  if (q.has('blueprint') && root) {
+    const gc = document.getElementById('grid'); if (gc.width !== w || gc.height !== h) { gc.width = w; gc.height = h; gc.style.width = w + 'px'; gc.style.height = h + 'px'; }
+    const g2 = gc.getContext('2d'); g2.clearRect(0, 0, w, h); g2.font = '10px Consolas, monospace';
+    const vw = w / 2, vh = h / 2, step = +q.get('blueprint') > 0.01 && +q.get('blueprint') < 1 ? +q.get('blueprint') : 0.2;
+    const views = [
+      { name: 'SIDE  (z forward ->, y up)', u: 'z', v: 'y', pos: [-50, 0, 0], up: [0, 1, 0], flipU: false },
+      { name: 'FRONT (x ->, y up)', u: 'x', v: 'y', pos: [0, 0, 50], up: [0, 1, 0], flipU: false },
+      { name: 'TOP   (z forward ->, x down)', u: 'z', v: 'x', pos: [0, 50, 0], up: [1, 0, 0], flipU: false } ];
+    const ax = { x: 0, y: 1, z: 2 }, c = centre.toArray(), sz = size.toArray();
+    views.forEach((V, k) => {
+      const px = (k % 2) * vw, py = Math.floor(k / 2) * vh, su = sz[ax[V.u]], sv = sz[ax[V.v]], half = Math.max(su / (vw / vh), sv) * 0.58, hw = half * vw / vh;
+      const oc = new THREE.OrthographicCamera(-hw, hw, half, -half, 0.1, 200);
+      oc.position.set(c[0] + V.pos[0], c[1] + V.pos[1], c[2] + V.pos[2]); oc.up.set(V.up[0], V.up[1], V.up[2]); oc.lookAt(c[0], c[1], c[2]); oc.updateProjectionMatrix();
+      renderer.setViewport(px, h - py - vh, vw, vh); renderer.setScissor(px, h - py - vh, vw, vh); key.position.copy(oc.position); renderer.render(scene, oc);
+      /* grid: project two world points to find the scale and where each axis runs on screen */
+      const P = (pt) => { const v = new THREE.Vector3(pt[0], pt[1], pt[2]).project(oc); return [px + (v.x + 1) / 2 * vw, py + (1 - v.y) / 2 * vh]; };
+      g2.strokeStyle = 'rgba(255,255,255,.16)'; g2.fillStyle = '#9fd'; g2.lineWidth = 1;
+      const cu = c[ax[V.u]], cv = c[ax[V.v]];
+      for (let m = Math.ceil((cu - hw * 1.5) / step) * step; m <= cu + hw * 1.5; m += step) { const a = c.slice(), b = c.slice(); a[ax[V.u]] = b[ax[V.u]] = m; a[ax[V.v]] = cv - 9; b[ax[V.v]] = cv + 9; const A = P(a), B = P(b); if (Math.min(A[0], B[0]) < px || Math.max(A[0], B[0]) > px + vw) continue; g2.beginPath(); g2.moveTo(A[0], py); g2.lineTo(A[0], py + vh); g2.stroke(); g2.fillText(m.toFixed(1), A[0] + 2, py + vh - 4); }
+      for (let m = Math.ceil((cv - half * 1.5) / step) * step; m <= cv + half * 1.5; m += step) { const a = c.slice(); a[ax[V.v]] = m; const A = P(a); if (A[1] < py || A[1] > py + vh) continue; g2.beginPath(); g2.moveTo(px, A[1]); g2.lineTo(px + vw, A[1]); g2.stroke(); g2.fillText(m.toFixed(1), px + 3, A[1] - 2); }
+      g2.fillStyle = '#fff'; g2.fillText(V.name, px + 6, py + (k < 2 ? 86 : 14));
+    });
+    renderer.setViewport(vw, 0, vw, vh); renderer.setScissor(vw, 0, vw, vh);
+    const dd = Math.max(size.x, size.y, size.z) * 2.6; cam.aspect = vw / vh; cam.position.set(centre.x - dd * 0.7, centre.y + dd * 0.25, centre.z + dd * 0.65); cam.lookAt(centre); cam.updateProjectionMatrix(); key.position.copy(cam.position); renderer.render(scene, cam);
     requestAnimationFrame(frame); return;
   }
   for (let k = 0; k < 4; k++) {

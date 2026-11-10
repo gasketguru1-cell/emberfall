@@ -5,5 +5,8 @@
   "perDayMax": 150,
   "maxModelAttemptsPerCharacter": 3,
   "keepBalanceAbove": 1000,
-  "note": "tools/meshy.js refuses any task that would break one of these. ceiling = total credits for this phase; perTaskMax = most a single task may cost; perDayMax = most in one calendar day; maxModelAttemptsPerCharacter = 3D generations per character before asking; keepBalanceAbove = never let the account balance fall below this."
+  "note": "tools/meshy.js refuses any task that would break one of these. ceiling = total credits for this phase; perTaskMax = most a single task may cost; perDayMax = most in one calendar day; maxModelAttemptsPerCharacter = 3D generations per character before asking; keepBalanceAbove = never let the account balance fall below this. perDayOverride = a higher daily limit for one named date only, set when the owner asks.",
+  "perDayOverride": {
+    "2026-11-09": 240
+  }
 }
