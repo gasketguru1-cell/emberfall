@@ -155,6 +155,11 @@ function drawSelect(three) {
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.font = '12px system-ui, sans-serif'; g.fillText('Show Hitboxes', x - 22, y + 22);
     g.fillStyle = on ? '#ff6a6a' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
     g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('X / Y  or  B key', x + 130, y + 22); }
+  { const on = TRAINING, w = 214, x = W - 44 - w, y = 100;   /* training mode switch */
+    g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = on ? '#9be564' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
+    g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Training', x + 12, y + 22);
+    g.fillStyle = on ? '#9be564' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
+    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point + A  or  T key', x + 128, y + 22); }
   { const on = DBG.fx, w = 214, x = W - 44 - w, y = 60;   /* hit effects switch: the sparks and flash where a hit lands */
     g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = on ? '#ffd166' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Hit sparks', x + 12, y + 22);
@@ -176,6 +181,21 @@ function drawSelect(three) {
     g.strokeStyle = hov ? '#ffd98a' : '#fff'; g.lineWidth = 2.5; g.beginPath(); g.arc(x + 24, y + 24 - lift, 18, 0, TAU); g.stroke();
     g.textAlign = 'center'; g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#16121f'; g.fillText('CPU', x + 24, y + 28 - lift); }
   g.textAlign = 'center'; drawUpdateNote(14);
+}
+/* Training: the true-combo counter at the top right, one panel per player who is landing hits. */
+function drawCombo() {
+  if (!TRAINING || !F.length || F.preview) return; let y = 16;
+  g.save(); g.textAlign = 'right'; g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#9be564'; g.fillText('TRAINING  ·  no clock, endless stocks  ·  A + B + L resets', W - 18, y + 4); y += 12;
+  for (const f of F) { const c = COMBO[f.idx]; if (!c || (!c.hits && !c.last)) continue; const pc = f.idx ? '#6cb4ff' : '#ff7b6c', live = c.hits > 0, n = live ? c.hits : c.last.hits, dm = live ? c.dmg : c.last.dmg, w = 230, x = W - 18 - w, fade = live ? 1 : Math.max(0.55, 1 - c.t / 240);
+    g.globalAlpha = fade; g.fillStyle = 'rgba(14,10,26,.78)'; rr(x, y, w, 86, 12); g.fill(); g.fillStyle = pc; rr(x, y + 10, 4, 66, 2); g.fill();
+    g.textAlign = 'left'; g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = pc; g.fillText((f.ctl.dev === 'cpu' ? 'CPU' : 'P' + (f.idx + 1)) + (live ? '  COMBO' : '  LAST COMBO'), x + 16, y + 20);
+    g.font = '900 40px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(String(n), x + 16, y + 62); const nw = g.measureText(String(n)).width;
+    g.font = 'bold 15px system-ui, sans-serif'; g.fillStyle = '#ffd98a'; g.fillText(n === 1 ? 'hit' : 'hits', x + 22 + nw, y + 62);
+    g.textAlign = 'right'; g.font = '900 26px system-ui, sans-serif'; g.fillStyle = '#ffd98a'; g.fillText(dm.toFixed(1) + '%', x + w - 14, y + 50);
+    g.font = '12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('damage dealt', x + w - 14, y + 66);
+    if (c.best) { g.fillText('best ' + c.best.hits + ' hits, ' + c.best.dmg.toFixed(1) + '%', x + w - 14, y + 80); }
+    g.globalAlpha = 1; y += 94; }
+  g.restore();
 }
 function drawDebugText() {
   if (!DBG.boxes && !DBG.step) return;
