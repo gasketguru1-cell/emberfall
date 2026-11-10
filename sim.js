@@ -624,6 +624,10 @@ function rigEnds(a, theta, back, sc, mates) {
   if (mates) for (const ph of [2.1, -2.1]) out.push([ox + 9 * Math.sin(theta + ph) * a.face, oy + 9 * Math.cos(theta + ph), 2.4]);
   return out;
 }
+/* A target hit by a dragging spin hit is carried a little along with the rig until its short hitstun ends: its speed eases toward the
+   rig's and it is drawn gently back toward the rig's middle if it drifts far out. Weak enough that SDI and DI still decide where it goes. */
+function fowlCarry(f) { const o = opp(f); if (!o || o.dragBy !== f.idx || o.state !== 'hurt' || o.hitlag > 0) return; const cx = f.x - o.x, cy = f.y + FP - (o.y + o.st.h / 2), dd = Math.hypot(cx, cy);
+  o.vx = appr(o.vx, f.vx, 0.35); o.vy = appr(o.vy, f.vy, 0.35); if (dd > 6) { o.vx += cx / dd * 0.18; o.vy += cy / dd * 0.18; } }
 function makeSpin(name) {
   const P = SPIN[name], fin0 = P.w0 + P.n * P.re, fin1 = fin0 + 1, t = fin1 + P.rec;
   const spinAt = (f, mf) => mf < P.s ? -0.35 * mf / P.s : mf <= fin1 ? Math.PI * 2 * P.turns * (mf - P.s) / (fin1 - P.s) : 0.18 * Math.sin((mf - fin1) * 0.9) * Math.exp(-(mf - fin1) / 5);
@@ -634,6 +638,7 @@ function makeSpin(name) {
   return { t, air: 1, ll: P.ll, ac: fin1 + 3, spin: 1, spinAt, h,
     on(f, n) {
       if (P.lift && n >= P.w0 && n <= fin1) f.vy = Math.max(f.vy, 0.1);   /* Pearl's spin floats */
+      if (n >= P.w0 && n < fin0) fowlCarry(f);
       if (P.mates && n === P.s) for (const ph of [2.1, -2.1]) pipMate(f, (o, p) => { const th = spinAt(o, o.mf) + ph; return [o.x + 9 * Math.sin(th) * o.face, o.y + FP + 9 * Math.cos(th)]; }, fin1 - P.s + 1);
     } };
 }
@@ -663,6 +668,7 @@ function makeCyclone(name) {
         const k = f.mf - f.upStart;
         if (f.mf <= f.upEnd) {
           f.vx = f.upV[0]; f.vy = f.y > BLAST.t - 30 && f.upV[1] > 0 ? 0 : f.upV[1] + (V.float ? 0.25 : 0); f.cyA += f.cyW;   /* it never flies itself out through the top */
+          fowlCarry(f);
           if (k > 0 && k % f.cy.every === 0 && Math.floor(k / f.cy.every) < f.cy.hits) { f.hitG.clear(); f.cyMode = 'drag'; }
           if (f.mf === f.upEnd - 1) { f.hitG.clear(); f.cyMode = 'fin'; }
         } else if (f.upEnd > 0) { f.vx *= 0.4; f.vy *= 0.4; f.upEnd = -99; f.cyMode = null; f.mf = Math.max(f.mf, f.move.t - 1); }   /* the flight is over, once: straight into the fall */
@@ -681,7 +687,7 @@ const LAUNCH = {
 function fowlLaunch(f, name) {
   const L = LAUNCH[name], a = (f.fowlAim || 0) * Math.PI / 180;
   f.sling = { x: f.x, y: f.y, face: f.face, vy: 0, plat: f.grounded ? f.plat : null, lost: 0 };
-  f.fi += 5; f.y += 6; f.grounded = false; f.plat = null; f.startMove('launch'); f.vx = Math.cos(a) * L.sp * f.face; f.vy = Math.sin(a) * L.sp; f.flying = true; f.flyFix = false;
+  f.fi += 5; f.y += 6; f.grounded = false; f.plat = null; f.startMove('launch'); f.vx = Math.cos(a) * L.sp * f.face; f.vy = Math.sin(a) * L.sp; f.flyV = [f.vx, f.vy]; f.flying = true; f.flyFix = false;
   if (L.mates) for (const side of [1, -1]) pipMate(f, (o, p) => { const sp = Math.hypot(o.vx, o.vy) || 1, ux = o.vx / sp, uy = o.vy / sp;
       if (p.age > 20 || !o.flying) { p.ghost = true; const th = p.age * 0.3 + (side > 0 ? 0 : Math.PI); return [o.x + 6 * Math.cos(th), o.y + 3.5 + 6 * Math.sin(th)]; }   /* the formation breaks into a close orbit */
       return [o.x - ux * 6 - uy * 5 * side, o.y + 3.5 - uy * 6 + ux * 5 * side]; }, 50, { d: 2, a: 50, b: 25, k: 40 });
@@ -704,13 +710,15 @@ function makeLaunch(name) {
   return { t: 64, nodrift: 1, ll: 10, h: [{ f0: 1, f1: 62, x: 0, y: 3.5, r: L.r, d: L.d, a: L.a, b: L.b, k: L.k, when: a => a.flying }], onLand(f) { f.flying = false; },
     on(f, n, i) {
       if (!f.flying) return;
+      if (f.flyV) { f.vx = f.flyV[0]; f.vy = f.flyV[1]; }   /* the flight keeps its own speed: the attack state's ordinary air physics does not get a say */
       if (f.hitG.size) { fowlFlyEnd(f, name, blocked(f) ? 'shield' : 'hit'); return; }
       f.vy = Math.max(f.vy - (L.gLate && n > 20 ? L.gLate : L.g), -3.2);
       const st = L.steer * (i.lx * f.vx < 0 ? 0.5 : 1); f.vx += i.lx * st; const sp = Math.hypot(f.vx, f.vy), cap = L.sp * 1.15; if (sp > cap) { f.vx *= cap / sp; f.vy *= cap / sp; }
       if (L.dive && i.ly < -0.5) f.vy = Math.max(f.vy - 0.25, -4.2);   /* Cinder tucks and drops */
       if (L.correct && !f.flyFix && n > 3 && f.ctl.take('spc')) {   /* Bolt's one sharp correction: a new heading, at three quarters of the speed */
-        const m = Math.hypot(i.lx, i.ly), s2 = Math.hypot(f.vx, f.vy) * 0.75; if (m > 0.3) { f.vx = i.lx / m * s2; f.vy = i.ly / m * s2; if (i.lx) f.face = sgn(i.lx); } f.flyFix = true; spark(f.x, f.y + 3, '#fff3c4', 10, 1.4); beep(900, 0.04, 'square', 0.03); return; }
+        const m = Math.hypot(i.lx, i.ly), s2 = Math.hypot(f.vx, f.vy) * 0.75; if (m > 0.3) { f.vx = i.lx / m * s2; f.vy = i.ly / m * s2; if (i.lx) f.face = sgn(i.lx); } f.flyV = [f.vx, f.vy]; f.flyFix = true; spark(f.x, f.y + 3, '#fff3c4', 10, 1.4); beep(900, 0.04, 'square', 0.03); return; }
       if (n > 6 && f.airActs()) { f.flying = false; return; }   /* any attack, jump, dodge or special ends the flight */
+      f.flyV = [f.vx, f.vy];
       if (n >= 60) fowlFlyEnd(f, name, 'free');   /* a safety cap, so nothing is ever stuck in flight */
     } };
 }
@@ -1476,7 +1484,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke) {
   /* Holding up or down stretches or shortens the launch, except for near-vertical ones. */
   const nd = ((ang * 180 / Math.PI) % 360 + 360) % 360, vertical = (nd > 65 && nd < 115) || (nd > 245 && nd < 295);
   const lsi = vertical ? 1 : i.ly > 0.5 ? 1.095 : i.ly < -0.5 ? 0.92 : 1;
-  v.launch(kb, ang, dir, lsi); if (h.drag) { v.vx += a.vx; v.vy += a.vy; }   /* carried along with a travelling rig */ v.hitlag = hl; if (!proj) a.hitlag = hl; rumble(v.ctl, 60 + kb, Math.min(1, 0.25 + kb / 150)); rumble(a.ctl, 50, 0.25);
+  v.launch(kb, ang, dir, lsi); if (h.drag) { v.vx += a.vx; v.vy += a.vy; v.dragBy = a.idx; } else v.dragBy = -1;   /* carried along with a travelling rig (see fowlCarry) */ v.hitlag = hl; if (!proj) a.hitlag = hl; rumble(v.ctl, 60 + kb, Math.min(1, 0.25 + kb / 150)); rumble(a.ctl, 50, 0.25);
   if (wouldKO(v)) {   /* a hit that will KO lands harder: longer freeze, a bigger burst, and slow motion if it takes the last stock */
     v.hitlag += 8; if (!proj) a.hitlag += 8; shake = Math.max(shake, 14); rumble(v.ctl, 300, 1);
     spark(hx, hy, '#ff5a4d', 40, 4.2); spark(hx, hy, '#ffe9a8', 24, 2.6); beep(70, 0.5, 'sawtooth', 0.11, 0.5);
