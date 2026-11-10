@@ -2037,5 +2037,327 @@
     "end": 0.5
    }
   }
+ },
+ "Scuttle": {
+  "file": "assets/scuttle/export/scuttle-v1.glb",
+  "height": 11.4,
+  "clips": {
+   "idle": {
+    "clip": "Idle"
+   },
+   "walk": {
+    "clip": "Scuttle"
+   },
+   "run": {
+    "clip": "Scuttle"
+   },
+   "crouch": {
+    "clip": "Crouch",
+    "at": 0.2
+   },
+   "brake": {
+    "clip": "Land",
+    "from": 0.05,
+    "to": 0.4
+   },
+   "jumpsquat": {
+    "clip": "Crouch",
+    "from": 0,
+    "to": 0.2
+   },
+   "rise": {
+    "clip": "Rise",
+    "from": 0,
+    "to": 0.4
+   },
+   "fall": {
+    "clip": "Fall"
+   },
+   "land": {
+    "clip": "Land",
+    "from": 0,
+    "to": 0.4
+   },
+   "shield": {
+    "clip": "Shield",
+    "from": 0,
+    "to": 0.15
+   },
+   "hit": {
+    "clip": "Hit",
+    "from": 0,
+    "to": 0.6
+   },
+   "tumble": {
+    "clip": "Tumble",
+    "bounce": true
+   },
+   "down": {
+    "clip": "Down",
+    "from": 0,
+    "to": 0.3
+   },
+   "dizzy": {
+    "clip": "Hit",
+    "from": 0,
+    "to": 0.6,
+    "bounce": true
+   },
+   "airdodge": {
+    "clip": "Tumble",
+    "bounce": true
+   },
+   "dodge": {
+    "clip": "Dodge",
+    "from": 0,
+    "to": 0.4
+   },
+   "roll": {
+    "clip": "Tumble",
+    "bounce": true
+   },
+   "ledge": {
+    "clip": "Rise",
+    "at": 0.4
+   },
+   "hold": {
+    "clip": "Hold"
+   },
+   "held": {
+    "clip": "Held"
+   },
+   "throw": {
+    "clip": "Lunge",
+    "from": 0.25,
+    "to": 0.95
+   },
+   "swap": {
+    "clip": "Tumble",
+    "bounce": true
+   }
+  },
+  "strikers": [
+   {
+    "bone": "tongsTip",
+    "ext": 0.4
+   },
+   {
+    "bone": "clawS",
+    "ext": 2.4
+   },
+   {
+    "bone": "legL2",
+    "ext": 2.6
+   },
+   {
+    "bone": "legR2",
+    "ext": 2.6
+   },
+   {
+    "bone": "body",
+    "ext": 6
+   }
+  ],
+  "springs": [],
+  "attacks": {
+   "jab": {
+    "clip": "Snip",
+    "start": 0,
+    "contact": [
+     0.2,
+     0.3
+    ],
+    "end": 0.55
+   },
+   "jab2": {
+    "clip": "Jab2",
+    "start": 0,
+    "contact": [
+     0.18,
+     0.28
+    ],
+    "end": 0.5
+   },
+   "jab3": {
+    "clip": "Snip",
+    "start": 0,
+    "contact": [
+     0.2,
+     0.3
+    ],
+    "end": 0.55
+   },
+   "ftilt": {
+    "clip": "Snip",
+    "start": 0,
+    "contact": [
+     0.2,
+     0.3
+    ],
+    "end": 0.55
+   },
+   "utilt": {
+    "clip": "Lift",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "dtilt": {
+    "clip": "Sweep",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.46
+    ],
+    "end": 0.85
+   },
+   "dash": {
+    "clip": "Spin",
+    "start": 0,
+    "contact": [
+     0.2,
+     0.45
+    ],
+    "end": 0.7
+   },
+   "fsmash": {
+    "clip": "Lunge",
+    "start": 0,
+    "contact": [
+     0.4,
+     0.54
+    ],
+    "end": 0.95
+   },
+   "usmash": {
+    "clip": "Lift",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "dsmash": {
+    "clip": "Sweep",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.46
+    ],
+    "end": 0.85
+   },
+   "nair": {
+    "clip": "Spin",
+    "start": 0,
+    "contact": [
+     0.15,
+     0.45
+    ],
+    "end": 0.7
+   },
+   "fair": {
+    "clip": "Snip",
+    "start": 0,
+    "contact": [
+     0.2,
+     0.3
+    ],
+    "end": 0.55
+   },
+   "bair": {
+    "clip": "BackKick",
+    "start": 0,
+    "contact": [
+     0.38,
+     0.5
+    ],
+    "end": 0.9
+   },
+   "uair": {
+    "clip": "Lift",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "dair": {
+    "clip": "Stamp",
+    "start": 0,
+    "contact": [
+     0.4,
+     0.55
+    ],
+    "end": 0.95
+   },
+   "grab": {
+    "clip": "Snip",
+    "start": 0,
+    "contact": [
+     0.2,
+     0.3
+    ],
+    "end": 0.55
+   },
+   "getup": {
+    "clip": "Sweep",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.46
+    ],
+    "end": 0.85
+   },
+   "nspec": {
+    "clip": "Reach",
+    "start": 0,
+    "contact": [
+     0.5,
+     0.6
+    ],
+    "end": 1.1
+   },
+   "sspec": {
+    "clip": "Roll",
+    "start": 0,
+    "contact": [
+     0.25,
+     0.7
+    ],
+    "end": 1
+   },
+   "uspec": {
+    "clip": "Pop",
+    "start": 0,
+    "contact": [
+     0.3,
+     0.4
+    ],
+    "end": 0.8
+   },
+   "dspec": {
+    "clip": "Drop",
+    "start": 0,
+    "contact": [
+     0.58,
+     0.7
+    ],
+    "end": 1.4
+   },
+   "*": {
+    "clip": "Snip",
+    "start": 0,
+    "contact": [
+     0.2,
+     0.3
+    ],
+    "end": 0.55
+   }
+  }
  }
 }

@@ -9,7 +9,7 @@ let seed = 5; Math.random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; 
 for (const f of ['hitboxes.js', 'sim.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 vm.runInThisContext(`
 (function () {
-  const FL = [0, 0], NIB = [1, 0], LOOM = [1, 1], HOD = [1, 2], SACK = [2, 0], SPR = [3, 0];
+  const FL = [0, 0], NIB = [1, 0], LOOM = [1, 1], HOD = [1, 2], SACK = [2, 0], SPR = [3, 0], SCU = [4, 0];
   let SCRIPT = [null, null], t = 0; const results = [];
   cpuInput = function (f) { const i = blankIn(); if (SCRIPT[f.idx]) SCRIPT[f.idx](i, t, f); return i; };
   /* Two fighters standing on the main stage, facing each other, both driven by scripts. */
@@ -495,6 +495,38 @@ vm.runInThisContext(`
       check('Sprocket: the vise takes a shielding opponent and throws them behind for 12%', shield.held && shield.behind && shield.pct > 13.5 && shield.pct < 16, 'caught: ' + shield.held + ', thrown behind: ' + shield.behind + ', ' + shield.pct.toFixed(1) + '% (12% before the one-on-one bonus)');
       check('Sprocket: a jump beats the vise, and it catches nothing in the air', !jump.held && jump.pct === 0 && !air.held, 'jumped: caught ' + jump.held + '; both in the air: caught ' + air.held);
       check('Sprocket: a missed vise leaves 30 frames', m.t - m.h[0].f1 === 30 && m.h[0].f0 === 18 && m.h[0].f1 === 19, 'active ' + m.h[0].f0 + ' to ' + m.h[0].f1 + ', ' + (m.t - m.h[0].f1) + ' frames after'); }
+  }
+
+  /* ---- Scuttle: the coal crab (numbers from the owner's document for fighter 01) ---- */
+  {
+    const SC = ROSTER[4].forms[0], mvs = SC.moves, fl = ROSTER[0].forms[0].st, st = SC.st, near = (a, b, tol) => Math.abs(a - b) <= (tol || 0.012);
+    check('Scuttle: frames and damage are the document\u2019s', mvs.jab.h[0].f0 === 3 && mvs.ftilt.h[0].f0 === 6 && mvs.ftilt.h[0].d === 7 && mvs.fsmash.h[0].f0 === 16 && mvs.fsmash.h[0].d === 17 && mvs.usmash.h[0].d === 13 && mvs.bair.h[0].d === 12 && mvs.grab.h[0].f0 === 6 && mvs.throws.b.d === 10,
+      'jab f' + mvs.jab.h[0].f0 + ', forward tilt f' + mvs.ftilt.h[0].f0 + ' ' + mvs.ftilt.h[0].d + '%, forward smash f' + mvs.fsmash.h[0].f0 + ' ' + mvs.fsmash.h[0].d + '%, up smash ' + mvs.usmash.h[0].d + '%, grab f' + mvs.grab.h[0].f0);
+    check('Scuttle: weight and movement against Flint', near(st.weight / fl.weight, 0.82) && near(st.run / fl.run, 1.16) && near(st.dash / fl.dash, 1.27) && near(st.airSpeed / fl.airSpeed, 1.1) && near(st.grav / fl.grav, 1.07) && st.h < fl.h * 0.8,
+      'weight ' + (st.weight / fl.weight * 100).toFixed(0) + ', run ' + (st.run / fl.run * 100).toFixed(0) + ', dash ' + (st.dash / fl.dash * 100).toFixed(0) + ', air drift ' + (st.airSpeed / fl.airSpeed * 100).toFixed(0) + ', gravity ' + (st.grav / fl.grav * 100).toFixed(0) + ', height ' + (st.h / fl.h).toFixed(2) + ' H');
+    /* Tongs Snatch */
+    { const snatch = (their, air) => { const [s, o2] = setup(SCU, FL, 0, 10); if (air) { airborne(s, 0, 30); airborne(o2, 9, 31); } let held = false; SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) i.spc = true; }; SCRIPT[1] = their; run(90, () => { if (o2.state === 'held') held = true; }); return { held, pct: o2.pct }; };
+      const shield = snatch((i) => { i.shd = true; }), air = snatch(null, true);
+      check('Scuttle: the tongs take a shielding opponent and fling them for 8%', shield.held && shield.pct > 9 && shield.pct < 11, 'caught: ' + shield.held + ', ' + shield.pct.toFixed(1) + '% (8% before the one-on-one bonus)');
+      check('Scuttle: in the air the tongs swipe for 5% instead', !air.held && air.pct > 5.5 && air.pct < 7.2, 'caught: ' + air.held + ', ' + air.pct.toFixed(1) + '%'); }
+    /* Scuttle Roll */
+    { const roll = air => { const [s] = setup(SCU, FL, -40, 60); if (air) airborne(s, -40, 40); const x0 = s.x; SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.lx = 1; i.spc = true; } }; let x24 = 0; run(27, () => { if (s.state === 'attack' && s.mf === 24) x24 = s.x - x0; }); return x24 || s.x - x0; };
+      const g = roll(false), a = roll(true), H = fl.h;
+      check('Scuttle: the roll covers about 1.65 H on the floor and 0.9 H in the air', near(g / H, 1.65, 0.12) && near(a / H, 0.9, 0.12), 'floor ' + (g / H).toFixed(2) + ' H, air ' + (a / H).toFixed(2) + ' H');
+      const [s2, o2] = setup(SCU, FL, 0, 9); SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.lx = 1; i.spc = true; } }; run(50);
+      check('Scuttle: the roll hits once, 10% clean', o2.pct > 11.5 && o2.pct < 13.5, 'target at ' + o2.pct.toFixed(1) + '% (10% before the one-on-one bonus)'); }
+    /* Steam Pop */
+    { const [s] = setup(SCU, FL, 0, 60); airborne(s, 0, 30); let top = 30; SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = 1; i.spc = true; } }; run(60, () => { top = Math.max(top, s.y); });
+      check('Scuttle: Steam Pop lifts about 2.15 H', near((top - 30) / fl.h, 2.15, 0.15), 'rose ' + ((top - 30) / fl.h).toFixed(2) + ' H'); }
+    /* Bucket Drop */
+    { const [s, o2] = setup(SCU, FL, 0, 4); SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = -1; i.spc = true; } }; run(60);
+      const ground = o2.pct;
+      const dive = (targetY) => { const [s3, o3] = setup(SCU, FL, 0, targetY ? 0.5 : 10); airborne(s3, 0, 40); if (targetY) airborne(o3, 0.5, targetY); let maxDown = 0, vyHit = null, landed = -1; SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = -1; i.spc = true; } };
+        run(80, () => { maxDown = Math.max(maxDown, -s3.vy); if (vyHit === null && o3.pct > 0) vyHit = o3.vy; if (landed < 0 && s3.grounded) landed = t; }); return { maxDown, pct: o3.pct, vyHit, lag: s3.state, again: s3.blastUsed }; };
+      const d1 = dive(0), d2 = dive(22);
+      check('Scuttle: Bucket Drop on the floor hits for 13%', ground > 14.5 && ground < 17, 'target at ' + ground.toFixed(1) + '%');
+      check('Scuttle: the air dive falls at 1.4 times fast fall and thumps where it lands', near(d1.maxDown / st.ffall, 1.4, 0.03) && d1.pct > 11 && d1.pct < 13.5, 'fell at ' + (d1.maxDown / st.ffall).toFixed(2) + ' times fast fall; a target standing beside the landing took ' + d1.pct.toFixed(1) + '% (10% before the bonus)');
+      check('Scuttle: the dive sends an airborne target straight down', d2.pct > 13 && d2.pct < 16.5 && d2.vyHit < -1, 'target in the air took ' + d2.pct.toFixed(1) + '%, sent ' + (d2.vyHit < 0 ? 'down' : 'up')); }
   }
 
   const softPlats = PLATS.splice(1);   /* the movement checks run on the bare main stage, so no jump lands on a platform */

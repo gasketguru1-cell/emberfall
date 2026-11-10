@@ -1,0 +1,77 @@
+{
+ "Idle": {
+  "seconds": 2.033
+ },
+ "Scuttle": {
+  "seconds": 0.333
+ },
+ "Crouch": {
+  "seconds": 0.233
+ },
+ "Rise": {
+  "seconds": 0.433
+ },
+ "Fall": {
+  "seconds": 0.533
+ },
+ "Land": {
+  "seconds": 0.433
+ },
+ "Shield": {
+  "seconds": 0.167
+ },
+ "Hit": {
+  "seconds": 0.633
+ },
+ "Tumble": {
+  "seconds": 0.633
+ },
+ "Down": {
+  "seconds": 0.333
+ },
+ "Dodge": {
+  "seconds": 0.433
+ },
+ "Hold": {
+  "seconds": 0.633
+ },
+ "Held": {
+  "seconds": 0.433
+ },
+ "Snip": {
+  "seconds": 0.567
+ },
+ "Jab2": {
+  "seconds": 0.533
+ },
+ "Lift": {
+  "seconds": 0.933
+ },
+ "Sweep": {
+  "seconds": 0.9
+ },
+ "Lunge": {
+  "seconds": 0.967
+ },
+ "Spin": {
+  "seconds": 0.733
+ },
+ "Roll": {
+  "seconds": 1.033
+ },
+ "BackKick": {
+  "seconds": 0.933
+ },
+ "Stamp": {
+  "seconds": 0.967
+ },
+ "Reach": {
+  "seconds": 1.133
+ },
+ "Pop": {
+  "seconds": 0.833
+ },
+ "Drop": {
+  "seconds": 1.433
+ }
+}

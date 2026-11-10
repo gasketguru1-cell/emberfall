@@ -84,7 +84,7 @@ Nothing here blocks work; these are things only a person at the machine can judg
 - 2026-11-10, done: the owner's moveset document for Flint, Nib, Loom and Hod (details in STATUS.md, "The owner's moveset document"). 112 rule checks, balance level on two seeds.
 - 2026-11-10: four new fighters, all original designs. The owner saw the four concept pictures and said to carry on.
   - [x] Sprocket: done and in the game (details in STATUS.md).
-  - [ ] Scuttle (a soot crab in a coal scuttle with a fire-tongs claw; a low, quick skirmisher): 3D model made (`assets/scuttle/raw/01a1c6dd-bad6-7497-80ec-e83dcf30a442/model_url.glb`). Still to do: kit in sim.js from the owner's document for fighter 01 (frames, damage and movement targets; his own names and moves), rig spec, clips, hitboxes, 2D picture, CPU, rule checks, balance.
+  - [x] Scuttle: done and in the game (details in STATUS.md). Still worth doing: run the in-game hitbox audit for him.
   - [ ] Brand (night-watch captain, stove-door shield and forge-hot blade; the sword-and-shield duelist, the owner's document for fighter 03): concept picture only. Model is 30 credits; the day's limit of 150 was used up on 2026-11-10.
   - [ ] Tilt (a courier on a mountain ram with a lamplighter's pole; the mounted fighter, the owner's document for fighter 02): concept picture only. Same wait.
   - The three documents describe existing characters; these three take the documents' numbers and kind of play, with their own names, looks and moves.

@@ -10,7 +10,7 @@ let seed = 4242; Math.random = () => { seed = (seed * 1664525 + 1013904223) >>> 
 for (const f of ['hitboxes.js', 'sim.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 vm.runInThisContext(`
 (function () {
-  const forms = [[0, 0], [1, 0], [1, 1], [1, 2], [2, 0], [3, 0]], A = forms[${which}]; let shown = 0, fell = 0, launched = 0;
+  const forms = [[0, 0], [1, 0], [1, 1], [1, 2], [2, 0], [3, 0], [4, 0]], A = forms[${which}]; let shown = 0, fell = 0, launched = 0;
   for (let m = 0; m < ${count}; m++) {
     const B = forms[m % forms.length];
     slots[0] = { dev: 'kb', pick: A[0], ready: true }; slots[1] = { dev: 'kb', pick: B[0], ready: true };

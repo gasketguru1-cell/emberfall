@@ -148,6 +148,15 @@ const ART = {
     g.fillStyle = '#fff'; g.beginPath(); g.arc(hx + 0.7, 6.3, 0.15, 0, TAU); g.fill();
   },
   /* Potato Sack: a lumpy burlap sack tied with rope, a sewn-on face, a leather patch, knotted corners for fists and feet. */
+  Scuttle(c, t, f) {
+    const sw = gait(f) * 0.9, a = swing(f), bob = Math.sin(t * 0.1) * 0.15, shell = '#2b2a2e';
+    g.strokeStyle = shell; g.lineWidth = 0.7; g.lineCap = 'round'; for (const k of [-1, 0, 1]) for (const s of [-1, 1]) { g.beginPath(); g.moveTo(s * 2.2 + k, 2.6); g.lineTo(s * (4.6 + k * 0.6) + sw * s * (k ? 1 : -1), 0.3); g.stroke(); }   /* legs */
+    g.beginPath(); g.ellipse(0, 3.2 + bob, 3.6, 1.9, 0, 0, TAU); ink(shell, 0.3);   /* the crab */
+    g.beginPath(); g.moveTo(-3.6, 4.2 + bob); g.lineTo(-3.1, 9 + bob); g.lineTo(3.3, 9.4 + bob); g.lineTo(4.6, 3.8 + bob); g.closePath(); ink(vgrad(c[0], 4, 9.5));   /* the scuttle */
+    g.fillStyle = shell; for (const q of [[-1.5, 9.5], [0.3, 10], [1.8, 9.6]]) { g.beginPath(); g.arc(q[0], q[1] + bob, 1, 0, TAU); g.fill(); } g.fillStyle = c[2]; g.beginPath(); g.arc(0.5, 9.8 + bob, 0.4, 0, TAU); g.fill();   /* coal */
+    g.fillStyle = c[2]; for (const x of [1.6, 3]) { g.beginPath(); g.arc(x, 4.1 + bob, 0.38, 0, TAU); g.fill(); }   /* eyes under the lip */
+    g.save(); g.translate(4.2, 3.4 + bob); g.rotate(-1.2 * a + 0.5); g.strokeStyle = '#4a4d57'; g.lineWidth = 0.55; g.beginPath(); g.moveTo(0, 0); g.lineTo(0, 5.2); g.moveTo(0, 3.4); g.lineTo(-0.7, 6); g.moveTo(0, 3.4); g.lineTo(0.7, 6); g.stroke(); g.restore();   /* fire tongs */
+  },
   Sprocket(c, t, f) {
     const sw = gait(f) * 1.4, a = swing(f), bob = Math.sin(t * 0.08) * 0.15, skin = '#e0a98a', iron = '#5b5f6b', copper = '#b87333';
     for (const s of [-1, 1]) { g.beginPath(); g.rect(s * 1.9 - 1.1 + s * sw * 0.5, 1.2, 2.2, 3.6); ink('#3a3a40', 0.3); g.beginPath(); g.ellipse(s * 1.9 + s * sw + 0.5, 0.8, 1.9, 0.9, 0, 0, TAU); ink(iron, 0.3); }   /* legs and steel-capped boots */

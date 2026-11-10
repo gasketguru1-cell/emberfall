@@ -54,4 +54,13 @@ const HITBOXES = {
     grab: [{ x: 7, y: 8.4, r: 4.5 }], dgrab: [{ x: 9.5, y: 8.4, r: 4.5 }], pgrab: [{ x: 10, y: 8.4, r: 4.5 }], getup: [{ x: 7.4, y: 1.6, r: 6.4 }, { x: -7.4, y: 1.6, r: 6.4 }],
     sspec: [{ x: 11.1, y: 18.2, r: 5 }, { x: 6.1, y: 13.1, r: 4.5 }], dspec: [{ x: 10, y: 6, r: 4 }],
   },
+  /* Scuttle: its tongs reach further in the picture than its normals do in the owner's document, so these sit on the tongs
+     but short of the tip: the document's short reach is kept. */
+  Scuttle: {
+    jab: [{ x: 7.5, y: 3, r: 4.1 }], jab2: [{ x: 6.5, y: 3.5, r: 4.1 }], jab3: [{ x: 8, y: 3, r: 4.7 }], ftilt: [{ x: 9.5, y: 2.5, r: 4.6 }], utilt: [{ x: 0.5, y: 14, r: 5 }], dtilt: [{ x: 6.5, y: 2, r: 4.1 }], dash: [{ x: 5.5, y: 4.5, r: 5 }],
+    fsmash: [{ x: 8.9, y: 3, r: 5.9 }], usmash: [{ x: 0.5, y: 14.5, r: 6.4 }], dsmash: [{ x: 6.8, y: 2, r: 5 }, { x: -6.7, y: 2, r: 5 }],
+    fair: [{ x: 8.5, y: 3, r: 5 }], bair: [{ x: -7, y: 6, r: 5 }], uair: [{ x: 0.5, y: 14, r: 5.5 }], dair: [{ x: 0.5, y: 0, r: 5 }],
+    grab: [{ x: 8, y: 3.7, r: 4.2 }], dgrab: [{ x: 10, y: 3.7, r: 4.2 }], pgrab: [{ x: 10.5, y: 3.7, r: 4.2 }], getup: [{ x: 7, y: 2.2, r: 5.5 }, { x: -7, y: 2.2, r: 5.5 }],
+    nspec: [{ x: 10, y: 3, r: 4.2 }, { x: 9.5, y: 3, r: 4.5 }],
+  },
 };

@@ -10,7 +10,7 @@ One folder per character. Inside each:
 
 ## Status
 
-The roster: Flint, Wren's three companions Nib, Loom and Hod, and (added 2026-11-10 at the owner's request) Potato Sack and Sprocket. Three more are on the way: Scuttle (model made), Brand and Tilt (concept pictures only).
+The roster: Flint, Wren's three companions Nib, Loom and Hod, and (added 2026-11-10 at the owner's request) Potato Sack, Sprocket and Scuttle. Two more are on the way: Brand and Tilt (concept pictures only).
 
 | Character | Brief | Concept image | 3D model | Rig | Animations | In game |
 |---|---|---|---|---|---|---|
@@ -20,6 +20,7 @@ The roster: Flint, Wren's three companions Nib, Loom and Hod, and (added 2026-11
 | Hod | art supplied | concept A approved | v1: 30,595 triangles, 1K textures, 2.8 MB | custom 27-bone skeleton with leg IK | 26 hand-keyed clips; tail follows through | **in game** |
 | Potato Sack | in WORKQUEUE.md | concept A approved (an original design) | v1: 30,898 triangles, 1K textures, 3.0 MB | custom 13-bone skeleton | 24 hand-keyed clips; tuft follows through; hops tied to the rules | **in game** |
 | Sprocket | the owner's moveset document | concept A (an original design) | v1: 30,732 triangles, 1K textures, 2.9 MB | custom 24-bone skeleton: hand and foot targets, a rigid wrench aimed directly | 34 hand-keyed clips | **in game** |
+| Scuttle | the owner's document for fighter 01 (numbers only) | concept A (an original design) | v1: 31,029 triangles, 1K textures, 2.4 MB | custom 11-bone skeleton, rigid tongs | 25 hand-keyed clips | **in game** |
 
 ## Meshy credits
 
@@ -101,6 +102,17 @@ The forge town's handyman, a wrench-range brawler, built from the owner's movese
 - **CPU:** rolls tape from 26 to 58 units, uses Hook Wrench up close and the vise on a held shield. It gets back from all six recovery test spots.
 - **Balance** with six fighters (CPU level 7, 2,160 matches a seed, two seeds): Flint 50 and 53%, Nib 51 and 51%, Loom 53 and 49%, Hod 50 and 48%, Potato Sack 50 and 51%, Sprocket 47 and 48%.
 - **Checked:** 11 rule checks of his own (127 in all), the stress test, a full CPU match in the game with no errors, two contact sheets of his poses. **Not checked:** him in a person's hands, and his animation in motion at full speed. His coat has no bones of its own, so the hem moves with his legs.
+
+## Scuttle (2026-11-10)
+
+A soot crab living in a coal scuttle, one claw grown into fire tongs. A low, quick skirmisher. An original design: the owner's document for fighter 01 describes an existing character, so Scuttle takes that document's frame data, damage and movement targets with his own name, look and moves.
+
+- **Rules** (`SCUTTLE` and `KIT.Scuttle` in `sim.js`): weight 82, walk 115, run 116, dash 127, air drift 110, gravity 107 against Flint's 100; 0.75 H tall. Normals' first active frames and damage are the document's.
+- **Specials.** Tongs Snatch: frames 16 to 18; on the floor it takes a standing opponent, shield or not, and flings them for 8%; in the air it is a 5% swipe. Scuttle Roll: 1.65 H along the floor or 0.9 H in the air, 10% then 6%, once per time off the ground. Steam Pop: lifts 2.15 H from frame 8 with a 7% hit, special fall after. Bucket Drop: 13% on the floor on frames 18 to 20; in the air a dive at 1.4 times fast fall that sends an airborne target straight down for 12%, and a 10% thump where it lands for anyone the dive missed.
+- **Left out or simplified from the document:** the up smash's small 3% scoop before the burst; separate meteor and body parts on the down air (it has a strong and a weak part instead); knockback numbers (the engine's, scaled by `TUNE`: launches 10% softer, 20% longer after an attack). His hitboxes sit on the tongs but short of the tip, to keep the document's short reach.
+- **Model:** 34 credits. Rigged with `tools/blender/scuttle.js`.
+- **Balance** with seven fighters (CPU level 7, 2,940 matches a seed, two seeds): Flint 50 and 50%, Nib 50 and 55%, Loom 52 and 51%, Hod 45 and 48%, Potato Sack 52 and 48%, Sprocket 48 and 46%, Scuttle 53 and 51%. Flint's and Hod's launch power were nudged again for this (Flint 12% softer, Hod 30% harder).
+- **Checked:** 11 rule checks of his own (137 in all), the stress test, the recovery test, a CPU match in the game with no errors, one contact sheet of his poses. **Not checked:** him in a person's hands, the in-game hitbox audit for him, and his animation in motion.
 
 ## Potato Sack (2026-11-10)
 

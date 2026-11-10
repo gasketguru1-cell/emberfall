@@ -256,6 +256,10 @@ const KIT = {
     fsmash: [21, 20, { sour: 15 }], usmash: [15, 17], dsmash: [16, 15, { rear: [24, 13] }],
     nair: [7, 9, { late: 6 }], fair: [11, 13, { sour: 8 }], bair: [10, 14, { late: 8 }], uair: [10, 10], dair: [16, 15, { sour: 8 }],
     grab: 7, pummel: 1.5, throws: { f: 9, b: 11, u: 8, d: 7 } },
+  Scuttle: { jab: [3, 2], jab2: [4, 2], jab3: [6, 4], dash: [7, 9, { late: 5 }], ftilt: [6, 7], utilt: [5, 6], dtilt: [5, 6],
+    fsmash: [16, 17, { late: 11 }], usmash: [11, 13], dsmash: [13, 13, { rear: [18, 11] }],
+    nair: [4, 8, { late: 4 }], fair: [6, 8], bair: [8, 12, { sour: 8 }], uair: [5, 7], dair: [13, 11, { sour: 8 }],
+    grab: 6, pummel: 1.2, throws: { f: 7, b: 10, u: 7, d: 6 } },
 };
 function applyKit(fm) {
   const K = KIT[fm.name], mv = fm.moves; if (!K) return;
@@ -279,7 +283,7 @@ function applyKit(fm) {
 /* What the document leaves open, set by balance testing (CPU against CPU, 60 matches a pairing): kb scales how hard every
    hit and throw launches, lag scales the time after an attack's last active frame. */
 const TUNE = {
-  Flint: { kb: 0.9, lag: 1.2 }, Nib: { kb: 1.03 }, Loom: { kb: 1.06, lag: 0.95 }, Hod: { kb: 1.27, lag: 0.8 }, 'Potato Sack': { kb: 0.85 }, Sprocket: { kb: 0.85, lag: 1.3 },
+  Flint: { kb: 0.88, lag: 1.2 }, Nib: { kb: 1.03 }, Loom: { kb: 1.06, lag: 0.95 }, Hod: { kb: 1.3, lag: 0.8 }, 'Potato Sack': { kb: 0.85 }, Sprocket: { kb: 0.85, lag: 1.3 }, Scuttle: { kb: 0.9, lag: 1.2 },
 };
 const NORMALS = ['jab', 'jab2', 'jab3', 'dash', 'ftilt', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash', 'nair', 'fair', 'bair', 'uair', 'dair'];
 function applyTune(fm) {
@@ -475,7 +479,39 @@ const SPROCKET = {
     }, { jabs: 3, grab: { t: 34, h: { f0: 7, f1: 9, x: 8.5, r: 4.5 } }, throws: { v: { d: 12, a: 158, b: 62, k: 52 } } }),
   }],
 };
-const ROSTER = [FLINT, WREN, SACK, SPROCKET];
+/* Scuttle: a soot crab living in a coal scuttle, with one claw grown into a pair of fire tongs. A low, quick skirmisher
+   (frames, damage and movement from the owner's document for fighter 01; the names, look and moves are Emberfall's own).
+   Gets under a swing, makes two quick hits count, and calls the landing with its up smash. Short reach and light. */
+function scuttleImpact(f) { shoot(f, { kind: 'blast', ox: 0.01, oy: 2, vx: 0, r: 8, life: 3, h: { d: 10, a: 63, b: 39, k: 74 } }); spark(f.x, f.y + 1, '#c9c2b8', 18, 2); beep(110, 0.18, 'square', 0.06, 0.5); shake = Math.max(shake, 4); }
+const SCUTTLE = {
+  name: 'Scuttle', sub: 'the coal crab', forms: [{
+    name: 'Scuttle', col: ['#b5692f', '#2b2a2e', '#ff9a3c'], alt: ['#6f7f86', '#2b2a2e', '#7fe0ff'], reachMul: 1.0,
+    /* against Flint's 100: weight 82, walk 115, run 116, dash 127, air drift 110, gravity 107, fast fall 111, hops 91 and 96, air jump 94 */
+    st: { weight: 75, walk: 1.29, walkMul: 0.16, walkAdd: 0.12, trac: 0.12, dash: 2.44, runMul: 0.13, runAdd: 0.05, run: 2.02,
+      jumpX: 1.0, jumpXMul: 0.85, jumpXMax: 1.45, airJumpX: 0.95, jumpH: 32.6, jumpInit: 17.9, hopH: 15, airJumpH: 32.4, upH: 30,
+      airMul: 0.07, airAdd: 0.012, airSpeed: 1.21, airBrake: 0.011, grav: 0.096, fall: 1.66, ffall: 2.75, jsq: 3, w: 9, h: 10.5, jf: 3.2, jb: 2,
+      jumps: 1, dashF: 11, roll: [26, 1.45, 12], spot: [21, 14] },
+    aiSide: 1, aiVise: 'n',
+    moves: mk(0.8, 1, 0.9, 0.7, {
+      /* Tongs Snatch: a slow reach with the tongs, frames 16 to 18. On the ground it catches a standing opponent, shield or
+         not, and flings them up and away for 8%. In the air it is a 5% swipe instead. */
+      nspec: { t: 44, ll: 17, h: [{ f0: 16, f1: 18, x: 8.5, y: 4.5, r: 4.2, grab: 1, cmd: 'n', floor: 1, d: 0 }, { f0: 16, f1: 18, x: 7.5, y: 5, r: 4.5, d: 5, a: 41, b: 27, k: 55, airOnly: 1 }] },
+      /* Scuttle Roll: pulls into the scuttle and rolls, frames 9 to 23: about 1.65 H along the floor, 0.9 H in the air.
+         10% on frames 11 to 15, 6% after. Once per time off the ground. */
+      sspec: { t: 42, once: 1, nodrift: 1, ll: 18, h: [{ f0: 11, f1: 15, x: 1.5, y: 4.5, r: 5.5, d: 10, a: 44, b: 38, k: 76 }, { f0: 16, f1: 22, x: 1.2, y: 4, r: 4.8, d: 6, a: 56, b: 29, k: 57, part: 'late' }],
+        on(f, n) { if (n >= 9 && n <= 23) { f.vx = f.face * (f.grounded ? 1.55 : 0.85); if (!f.grounded) f.vy = Math.max(f.vy, -0.4); } if (n === 24) f.vx *= 0.3; } },
+      /* Steam Pop: a jet from the scuttle on frame 8 lifts it about 2.15 H, with a 7% hit at the start. Special fall after. */
+      uspec: { t: 24, helpless: 1, ledge: 1, h: [{ f0: 8, f1: 10, x: 1, y: 5, r: 5, d: 7, a: 72, b: 35, k: 62 }], on(f, n, i) { if (n < 8) hang(f); if (n === 8) { lift(f, f.st.vUp); f.vx = i.lx * 0.55; } } },
+      /* Bucket Drop: on the ground, rears up and drops the scuttle for 13% on frames 18 to 20. In the air it dives from
+         frame 12 at 1.4 times its fast fall: 12% and straight down on someone in the air, and a 10% thump where it lands.
+         One dive per time off the ground; 24 frames to get up after landing. */
+      dspec: { t: 45, blast: 1, ll: 24, h: [{ f0: 18, f1: 20, x: 3, y: 3.5, r: 6, d: 13, a: 65, b: 40, k: 84, gndOnly: 1 }, { f0: 12, f1: 23, x: 0.5, y: -1, r: 5, d: 12, a: 285, b: 27, k: 85, airOnly: 1 }],
+        on(f, n) { if (n === 1) { f.dove = !f.grounded; if (f.dove) f.blastUsed = true; } if (!f.dove || f.grounded) return; if (n < 12) hang(f); else if (n <= 23) { f.vy = -f.st.ffall * 1.4; f.vx *= 0.9; } else { f.move = null; f.set('helpless'); } },
+        onLand(f, mf) { if (f.dove && mf >= 12 && mf <= 23 && !f.hitG.size) scuttleImpact(f); } },   /* the thump shares the dive's one hit: no second hit on whoever the dive already caught */
+    }, { jabs: 3, grab: { t: 28, h: { f0: 6, f1: 7, x: 7.5, r: 4.2 } }, throws: { n: { d: 8, a: 62, b: 42, k: 62 } } }),
+  }],
+};
+const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE];
 /* Hitbox positions measured from the animations (hitboxes.js, written with tools/measure.html). Timing, damage and launch stay as defined above. */
 if (typeof HITBOXES !== 'undefined') for (const def of ROSTER) for (const fm of def.forms) {
   const set = HITBOXES[fm.name]; if (!set) continue;
@@ -522,7 +558,7 @@ class Fighter {
     this.move = null; this.mf = 0; this.charge = 0; this.hitG = new Set(); this.parriedBy = null; this.victim = null; this.lag = 0; this.flash = 0;
     this.stale = []; this.staled = false; this.staleM = 1; this.shortHop = false; this.moveSH = false; this.shMacro = false; this.grabImm = 0; this.ledgeGrabs = 0;
     this.dodgeStale = 0; this.dodgeT = 0; this.ds = 0; this.tumble = false; this.techT = 0; this.techLock = 0; this.pumT = 0; this.wdHold = false;
-    this.chargeT = 0; this.stalled = false; this.stallOk = false; this.cAir = null; this.hopT = 0; this.burstKind = ''; this.burstX = 0; this.burstDown = false; this.burstUsed = false; this.blastUsed = false; this.swapLock = 0; this.slingUsed = false; this.thermal = false; this.recoil = false; this.bigStone = false; this.armorLeft = 99; this.castHit = false;
+    this.chargeT = 0; this.stalled = false; this.stallOk = false; this.cAir = null; this.hopT = 0; this.dove = false; this.burstKind = ''; this.burstX = 0; this.burstDown = false; this.burstUsed = false; this.blastUsed = false; this.swapLock = 0; this.slingUsed = false; this.thermal = false; this.recoil = false; this.bigStone = false; this.armorLeft = 99; this.castHit = false;
   }
   /* Dodges used back to back protect for less time and leave more lag. */
   dodge() { this.ds = this.dodgeStale; this.dodgeStale = Math.min(5, this.dodgeStale + 1); this.dodgeT = 0; }
@@ -663,7 +699,7 @@ class Fighter {
     if (st === 'attack' && this.move.burst) {   /* a tumble never falls over: a dive that reaches the floor carries on as a slide, anything else lands ready to act */
       if (this.burstKind === 'dive') { this.burstKind = 'slide'; spark(this.x, this.y, '#ddd', 8, 1.2); } else { this.move = null; this.set('idle'); }
     }
-    else if (st === 'attack') { const m = this.move; this.lag = m.air ? (this.mf < m.h[0].f0 - 1 || this.mf > m.ac ? (hard ? 4 : 2) : m.ll) : (m.ll || 8); this.move = null; this.set('land'); }
+    else if (st === 'attack') { const m = this.move; if (m.onLand) m.onLand(this, this.mf); this.lag = m.air ? (this.mf < m.h[0].f0 - 1 || this.mf > m.ac ? (hard ? 4 : 2) : m.ll) : (m.ll || 8); this.move = null; this.set('land'); }
     else if (st === 'airdodge') { if (Math.abs(this.vx) > 0.5) { this.vx = clamp(this.vx, -T.wd_max_speed, T.wd_max_speed); this.set('wd'); } else { this.lag = 10; this.set('land'); } }
     else if (st === 'hurt') {
       /* Launched hard enough to tumble: shield just before touching down to tech (in place or rolling), else lie there. */
@@ -1064,7 +1100,8 @@ function resolveHits() {
     if (a.state === 'attack' && a.move && canBeHit(v)) {
       for (const h of (a.move.hp || a.move.h)) {   /* hp: the same hitboxes with the parts near the body first */
         if (a.mf < h.f0 || a.mf > h.f1) continue; const gid = h.g || 0; if (a.hitG.has(gid)) continue;
-        if (h.grab && ((!a.grounded && !h.cmd) || v.grabImm > 0 || (h.floor && !(a.grounded && v.grounded)))) continue;   /* ordinary grabs are for the ground; a leaping grab catches in the air; a floor grab needs both standing */
+        if (h.grab && ((!a.grounded && !h.cmd) || v.grabImm > 0 || (h.floor && !(a.grounded && v.grounded)))) continue;
+        if ((h.airOnly && a.grounded) || (h.gndOnly && !a.grounded)) continue;   /* a hit that only exists in the air, or only on the floor */   /* ordinary grabs are for the ground; a leaping grab catches in the air; a floor grab needs both standing */
         if (circRect(a.x + h.x * a.face, hitY(a, h), h.r, ...hurtRect(v))) { ev.push([a, v, h, a.face, a.x, false, !h.grab && pokes(v, a.x + h.x * a.face, hitY(a, h))]); a.hitG.add(gid); break; }
       }
     }
@@ -1179,7 +1216,7 @@ function cpuBrain(f, o, m, L) {
     if (f.def.forms.length > 1 && !f.noSwap && m.cd === 0 && ad > 45 && Math.random() < 0.012) { i.ly = -1; i.spc = true; m.cd = 70; return i; }   /* swap companion at a safe distance */
     if (ad > (f.form.aiRange || 14)) { i.lx = dir; return i; }
     if (f.face !== dir) { i.lx = dir * 0.5; return i; }
-    if (m.cd === 0 && f.form.aiVise && o.state === 'shield' && o.grounded && ad < 13 && Math.abs(dy) < 6 && Math.random() < L.punish * 0.5) { i.ly = -1; i.spc = true; m.cd = 50; return i; }   /* a held shield invites the vise */
+    if (m.cd === 0 && f.form.aiVise && o.state === 'shield' && o.grounded && ad < 13 && Math.abs(dy) < 6 && Math.random() < L.punish * 0.5) { i.ly = f.form.aiVise === 'n' ? 0 : -1; i.spc = true; m.cd = 50; return i; }   /* a held shield invites the vise */
     if (m.cd === 0 && (o.state === 'shield' || o.state === 'shieldstun') && f.form.moves.grab.h[0].f0 <= 9 && ad < f.form.moves.grab.h[0].x + 3 && Math.abs(dy) < 6 && Math.random() < L.punish) { i.grb = true; m.cd = 36; return i; }   /* a shield is there to be grabbed, by those whose grab is quick enough */
     if (m.cd === 0) {
       const r = Math.random(); m.cd = Math.round((22 + (Math.random() * 30 | 0)) * (f.form.aiTempo || 1));
