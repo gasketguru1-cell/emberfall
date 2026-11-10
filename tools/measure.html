@@ -19,7 +19,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 const man = await (await fetch('../assets/manifest.json')).json();
-const ALIAS = { jab2: 'jab', jab3: 'jab', dgrab: 'grab', pgrab: 'grab' };
+const ALIAS = { jab2: 'jab', jab3: 'jab', jabr: 'jab', dgrab: 'grab', pgrab: 'grab' };
 const RESULT = {}, LOG = [];
 const r1 = v => Math.round(v * 10) / 10;
 for (const def of ROSTER) for (const fm of def.forms) {

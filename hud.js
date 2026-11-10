@@ -31,7 +31,7 @@ function drawSelect() {
     g.textAlign = 'left'; g.font = 'bold 24px system-ui, sans-serif'; g.fillStyle = pc; g.fillText('PLAYER ' + (k + 1), x + 24, y + 40);
     g.textAlign = 'center';
     if (!sl) { g.font = '20px system-ui, sans-serif'; g.fillStyle = '#ddd'; g.fillText(k && slots[0] ? 'Press Attack to join' : 'Press Attack to join', x + 220, y + 160); if (k) { g.fillStyle = '#999'; g.fillText('(empty = CPU opponent)', x + 220, y + 192); } continue; }
-    g.textAlign = 'right'; g.font = '18px system-ui, sans-serif'; g.fillStyle = '#ccc'; g.fillText(devName(sl.dev) + (sl.dev !== 'kb' ? (LAYOUT[sl.dev] === 'labels' ? '  ·  A/B by label' : '  ·  A/B by position') : ''), x + 416, y + 40);
+    g.textAlign = 'right'; g.font = '18px system-ui, sans-serif'; g.fillStyle = '#ccc'; g.fillText(devName(sl.dev) + (sl.dev !== 'kb' ? (LAYOUT[sl.dev] === 'labels' ? '  ·  A/B by label' : '  ·  A/B by position') : '') + '  ·  tap jump ' + (TAPJUMP[sl.dev] ? 'on' : 'off'), x + 416, y + 40);
     if (sl.dev !== 'kb') { g.font = '12px system-ui, sans-serif'; g.fillStyle = '#888'; g.fillText(padInfo(+sl.dev.slice(3)).slice(0, 46), x + 416, y + 58); }
     g.textAlign = 'center';
     const d = ROSTER[sl.pick]; g.font = 'bold 40px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('‹  ' + d.name + '  ›', x + 220, y + 100);
@@ -41,12 +41,14 @@ function drawSelect() {
   }
   g.textAlign = 'center'; g.font = 'bold 22px system-ui, sans-serif'; g.fillStyle = '#fff';
   if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) g.fillText('Press Start (Enter) to fight', W / 2, 556);
-  g.font = '16px system-ui, sans-serif'; g.fillStyle = '#cfc8e8';
-  g.fillText('Controller: stick move · A attack · B special · X/Y jump · ZL/ZR shield · L/R grab · right stick smash · + start · − swaps the A/B layout', W / 2, 606);
-  g.fillText('Keyboard: arrows move (Shift = walk) · Z attack · X special · C/V jump · Q/W shield · A/S grab · I J K L smash · Enter start', W / 2, 630);
-  g.fillText('Jump then shield with a direction to wavedash · flick down to drop through platforms · release shield just before a hit to parry', W / 2, 654);
-  g.fillText('Jump + attack together for a short-hop aerial · shield just before hitting the floor to tech · mash buttons to break a grab', W / 2, 678);
-  g.fillStyle = '#8f88aa'; g.fillText('Tools: B shows hitboxes · P freezes · O steps one frame · M switches 2D / 3D', W / 2, 704);
+  g.font = '15px system-ui, sans-serif'; g.fillStyle = '#cfc8e8';
+  g.fillText("Controller: stick move · A attack · B special · X/Y jump · ZL/ZR shield · L/R grab · right stick smash · + start · − swaps the A/B layout", W / 2, 586);
+  g.fillText("Keyboard: arrows move (Shift = walk) · Z attack · X special · C/V jump · Q/W shield · A/S grab · I J K L smash · Enter start", W / 2, 607);
+  g.fillText("Jump then shield with a direction to wavedash · flick down to drop through platforms · release shield just before a hit to parry · mash to break a grab", W / 2, 628);
+  g.fillText("Jump + attack together for a short-hop aerial · hold attack to chain jabs (Nib keeps a flurry going) · tilt the stick slightly up or down to angle a forward tilt", W / 2, 649);
+  g.fillText("Grab out of a dash reaches further, out of a turn further still · jump on a head to spring off it · Nib can kick off the stage wall · shield just before a wall or the floor to tech", W / 2, 670);
+  g.fillText("Jump button on this screen: tap jump on or off (flick up to jump) · the ledge protects longer after a long fall, less when damaged · above 100% getting up is slower", W / 2, 691);
+  g.fillStyle = '#8f88aa'; g.fillText('Tools: B shows hitboxes · P freezes · O steps one frame · M switches 2D / 3D', W / 2, 712);
 }
 function drawDebugText() {
   if (!DBG.boxes && !DBG.step) return;

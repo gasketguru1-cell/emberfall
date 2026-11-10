@@ -178,7 +178,7 @@ function drawFighter(f, three) {
   }
   /* Attack arcs. */
   if (f.state === 'attack' && f.move) for (const h of f.move.h) if (f.mf >= h.f0 && f.mf <= h.f1 && !h.grab) {
-    const hx = SX(f.x + h.x * f.face), hy = SY(f.y + h.y), k = (f.mf - h.f0 + 1) / (h.f1 - h.f0 + 1);
+    const hx = SX(f.x + h.x * f.face), hy = SY(hitY(f, h)), k = (f.mf - h.f0 + 1) / (h.f1 - h.f0 + 1);
     g.strokeStyle = col[1]; g.globalAlpha = 0.85 - k * 0.5; g.lineWidth = 1.6 * s; g.beginPath(); g.arc(hx, hy, h.r * s * 0.8, -1.2 + k * 2.4 * f.face, 1.2 + k * 2.4 * f.face); g.stroke();
     g.fillStyle = col[2]; g.globalAlpha = 0.18; g.beginPath(); g.arc(hx, hy, h.r * s, 0, TAU); g.fill(); g.globalAlpha = 1;
   }
@@ -228,7 +228,7 @@ function drawDebug() {
     const hr = hurtRect(f); g.strokeStyle = f.invuln > 0 ? '#55ccff' : '#ffee00'; g.strokeRect(SX(hr[0]), SY(hr[3]), (hr[2] - hr[0]) * s, (hr[3] - hr[1]) * s);
     if (f.state === 'attack' && f.move) for (const h of f.move.h) if (f.mf >= h.f0 && f.mf <= h.f1) {
       g.fillStyle = h.grab ? 'rgba(200,80,255,.45)' : 'rgba(255,40,40,.45)'; g.strokeStyle = h.grab ? '#cc55ff' : '#ff3333';
-      g.beginPath(); g.arc(SX(f.x + h.x * f.face), SY(f.y + h.y), h.r * s, 0, TAU); g.fill(); g.stroke();
+      g.beginPath(); g.arc(SX(f.x + h.x * f.face), SY(hitY(f, h)), h.r * s, 0, TAU); g.fill(); g.stroke();
     }
   }
   for (const p of PROJ) { g.fillStyle = 'rgba(255,40,40,.35)'; g.strokeStyle = '#ff3333'; g.beginPath(); g.arc(SX(p.x), SY(p.y), p.r * s, 0, TAU); g.fill(); g.stroke(); }

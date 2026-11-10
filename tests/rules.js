@@ -128,6 +128,57 @@ vm.runInThisContext(`
     check('clank: equal smashes cancel, nobody is hurt', both && a.pct === 0 && b.pct === 0, 'both recoiled: ' + both + ', damage ' + a.pct + ' / ' + b.pct);
   }
 
+  /* ---- Ledge protection: more after a long time in the air, less when damaged ---- */
+  {
+    const grab = (airT, pct) => { const [f] = setup(FL, FL, 0, -40); airborne(f, 80 + f.st.w / 2 + 3, -6); f.vy = -0.5; f.airT = airT; f.pct = pct; let inv = null; run(6, () => { if (f.state === 'ledge' && inv === null) { inv = f.invuln; return false; } }); return inv; };
+    const short = grab(20, 0), long = grab(300, 0), worn = grab(20, 120);
+    check('ledge: protection grows with air time, shrinks with damage', short !== null && long > short + 15 && worn < short - 10 && worn >= 7, 'frames protected: short hop ' + short + ', long fall ' + long + ', at 120% ' + worn);
+  }
+  /* ---- Ledge get-ups are slower above 100% ---- */
+  {
+    const climb = (pct, how) => { const [f] = setup(FL, FL, 0, -40); f.x = 80 + f.st.w / 2 + 0.5; f.y = -f.st.h + 1; f.grounded = false; f.plat = null; f.pct = pct; f.set('ledge'); let n = 0, done = null, hitAt = null;
+      SCRIPT[0] = (i, tt) => { if (tt >= 12 && tt < 14) { if (how === 'climb') i.lx = -1; else i.atk = true; } };
+      run(90, () => { if (t >= 12) n++; if (how === 'attack' && hitAt === null && f.state === 'attack' && f.mf >= f.move.h[0].f0) { hitAt = n; return false; } if (how === 'climb' && f.state === 'idle') { done = n; return false; } });
+      return how === 'climb' ? done : hitAt; };
+    const c0 = climb(0, 'climb'), c1 = climb(120, 'climb'), a0 = climb(0, 'attack'), a1 = climb(120, 'attack');
+    check('ledge: climbing up is slower above 100%', c0 !== null && c1 === c0 + 8, 'frames to stand: ' + c0 + ' fresh, ' + c1 + ' at 120%');
+    check('ledge: get-up attack comes out later above 100%', a0 !== null && a1 === a0 + 8, 'first active frame after ' + a0 + ' fresh, ' + a1 + ' at 120%');
+  }
+  /* ---- Jabs: holding attack runs the chain; Nib's becomes a flurry that ends when the button is let go ---- */
+  {
+    const [fl, b] = setup(FL, FL, 0, 11); const seen = [];
+    SCRIPT[0] = (i, tt) => { if (tt < 70) i.atk = true; };
+    run(90, () => { if (fl.state === 'attack' && seen[seen.length - 1] !== fl.mname) seen.push(fl.mname); });
+    check('jab: holding attack runs all three', seen.join('>') === 'jab>jab2>jab3', seen.join(' > '));
+  }
+  {
+    const [nib, b] = setup(NIB, FL, 0, 9); const seen = []; let loops = 0, last = -1;
+    SCRIPT[0] = (i, tt) => { if (tt < 60) i.atk = true; };
+    run(110, () => { if (nib.state === 'attack') { if (seen[seen.length - 1] !== nib.mname) seen.push(nib.mname); if (nib.mname === 'jabr' && nib.mf === 1) loops++; } });
+    check('rapid jab: Nib keeps hitting while attack is held', seen.join('>') === 'jab>jabr>jab3' && loops >= 6 && b.pct > 8, seen.join(' > ') + ', ' + loops + ' flurry hits thrown, target at ' + b.pct.toFixed(1) + '%');
+    const [nib2, b2] = setup(NIB, FL, 0, 9); const seen2 = []; let loops2 = 0;
+    SCRIPT[0] = (i, tt) => { if (tt < 2 || (tt >= 8 && tt < 10)) i.atk = true; };
+    run(80, () => { if (nib2.state === 'attack') { if (seen2[seen2.length - 1] !== nib2.mname) seen2.push(nib2.mname); if (nib2.mname === 'jabr' && nib2.mf === 1) loops2++; } });
+    check('rapid jab: two taps give the shortest flurry and the finisher', seen2.join('>') === 'jab>jabr>jab3' && loops2 === 3, seen2.join(' > ') + ', ' + loops2 + ' flurry hits');
+  }
+  /* ---- Angled forward tilt: a slight up or down on the stick moves the hit ---- */
+  {
+    const tilt = (lx, ly) => { const [f] = setup(FL, FL, 0, 60); let got = null;
+      SCRIPT[0] = (i, tt) => { if (tt < 10) { i.lx = 0.4; i.ly = ly * 0.4; } else { i.lx = lx; i.ly = ly; } if (tt >= 12 && tt < 14) i.atk = true; };
+      run(24, () => { if (f.state === 'attack' && got === null) got = f.mname + ' aim ' + f.aim + ' y ' + hitY(f, f.move.h[0]).toFixed(1); }); return got; };
+    const flat = tilt(0.6, 0), up = tilt(0.6, 0.35), down = tilt(0.6, -0.35), steep = tilt(0.9, 0.55), high = tilt(0.4, 0.9);
+    check('angled tilt: up, level and down', /^ftilt aim 0 /.test(flat) && /^ftilt aim 1 /.test(up) && /^ftilt aim -1 /.test(down), 'level: ' + flat + ' | up: ' + up + ' | down: ' + down);
+    check('angled tilt: a mostly sideways diagonal is still a forward tilt', /^ftilt aim 1 /.test(steep) && /^utilt/.test(high), 'steep diagonal: ' + steep + ' | mostly up: ' + high);
+  }
+  /* ---- Tap jump: only when switched on; held is a full hop, flicked is a short hop ---- */
+  {
+    const hop = (on, hold) => { const [f] = setup(FL, FL, 0, 60); TAPJUMP.cpu = on; let top = 0;
+      SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < (hold ? 30 : 4)) i.ly = 1; };
+      run(60, () => { top = Math.max(top, f.y); }); TAPJUMP.cpu = false; return top; };
+    const off = hop(false, true), full = hop(true, true), short = hop(true, false);
+    check('tap jump: off by default, on jumps', off === 0 && full > 30 && short > 8 && short < full - 10, 'height reached: off ' + off.toFixed(1) + ', held ' + full.toFixed(1) + ', flicked ' + short.toFixed(1));
+  }
+
   let bad = 0; for (const [ok, name, detail] of results) { if (!ok) bad++; console.log((ok ? 'pass  ' : 'FAIL  ') + name.padEnd(48) + detail); }
   console.log(bad ? bad + ' of ' + results.length + ' checks failed' : 'all ' + results.length + ' rule checks pass');
   if (bad) process.exitCode = 1;
