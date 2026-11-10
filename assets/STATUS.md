@@ -85,7 +85,7 @@ Two fighters standing on the same ground cannot walk or run through each other. 
 - **Look:** the forge island from the owner's picture (`assets/stage/source/concept.webp`). The island is a Meshy model made from that picture (`assets/stage/export/stage-v1.glb`, 60,546 triangles, 4.5 MB) placed by `assets/stage/export/stage.json`; the backdrop is the same picture with the island painted out (`backdrop.jpg`). Dawn lighting, warm lights at the forge mouth and the lantern, drifting embers. To rebuild the model file: `node tools/stage.mjs assets/stage/raw/<task>/model_url.glb`.
 - **Shape for play:** a flat main platform 136 wide with two soft platforms side by side (x 15 to 44 on each side, height 26) and no top platform. Everything is placed from `EDGE` (half the width) and `PLATS` in `sim.js`; the blast zones sit 155 beyond the ledges.
 - **The island is solid like this** (`RIM`, `SHOULDER`, `DEPTH`, `stageHalf()` in `sim.js`): a rim 5 thick at full width, a steep shoulder of rock giving way 12 by 22 down (a wall for wall jumps and techs), then rock tapering to a point 45 down. There is no flat underside. A fighter touching any of it is moved out sideways and keeps rising, so coming up from underneath ends beside the ledge; up specials past their hit take the ledge on the way up too; a fighter thrown against the island bounces back out. The hitbox view draws this outline.
-- The 2D fallback view and the start screen still show the old dusk stage.
+- The start screen shows the island live in 3D with the chosen fighters standing on it (the owner's stage picture without 3D). The 2D fallback view of a match (M) still draws the old dusk stage.
 
 ## Movement (2026-11-10)
 

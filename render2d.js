@@ -241,8 +241,10 @@ const SHK = { x: 0, y: 0 };
 function draw() {
   fit(); g.setTransform(RS, 0, 0, RS, 0, 0);
   const three = !!(DBG.r3d && window.R3 && window.R3.ready);
-  if (window.R3) window.R3.show(three && mode !== 'select');
-  if (mode === 'select') { drawSelect(); return; }
+  if (window.R3) window.R3.show(three);
+  if (mode === 'select') {   /* start screen: over the live island in 3D, over the stage picture otherwise */
+    SHK.x = SHK.y = 0; if (three) g.clearRect(0, 0, W, H); drawSelect(three); if (three) window.R3.render(); return;
+  }
   if (three) g.clearRect(0, 0, W, H);
   SHK.x = shake > 0 ? (Math.random() - 0.5) * shake : 0; SHK.y = shake > 0 ? (Math.random() - 0.5) * shake : 0;
   g.save(); g.translate(SHK.x, SHK.y);

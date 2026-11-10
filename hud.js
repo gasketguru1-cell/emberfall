@@ -27,47 +27,122 @@ function drawUpdateNote(y) {
   g.textAlign = 'center'; g.font = 'bold 18px system-ui, sans-serif'; const t = 'A newer version is ready  ·  refresh this page (F5) to load it', w = g.measureText(t).width + 36;
   g.fillStyle = 'rgba(40,110,60,.92)'; rr(W / 2 - w / 2, y, w, 32, 16); g.fill(); g.fillStyle = '#eaffea'; g.fillText(t, W / 2, y + 22);
 }
-function drawSelect() {
-  const sv = { x: cam.x, y: cam.y, s: cam.s }; cam.x = 0; cam.y = 30; cam.s = 3.4; drawBg(); Object.assign(cam, sv);
-  g.fillStyle = 'rgba(8,8,18,.55)'; g.fillRect(0, 0, W, H);
-  big('EMBERFALL', 110, 84); g.font = '22px system-ui, sans-serif'; g.fillStyle = '#f6e7c1'; g.fillText('3 stocks  ·  8 minutes', W / 2, 150);
-  for (let k = 0; k < 2; k++) {
-    const sl = slots[k], x = W / 2 + (k ? 40 : -480), y = 190, pc = k ? '#6cb4ff' : '#ff7b6c';
-    g.fillStyle = 'rgba(15,15,30,.75)'; rr(x, y, 440, 330, 16); g.fill(); g.strokeStyle = pc; g.lineWidth = 3; g.stroke();
-    g.textAlign = 'left'; g.font = 'bold 24px system-ui, sans-serif'; g.fillStyle = pc; g.fillText('PLAYER ' + (k + 1), x + 24, y + 40);
-    g.textAlign = 'center';
-    if (!sl) { g.font = '20px system-ui, sans-serif'; g.fillStyle = '#ddd'; g.fillText(k && slots[0] ? 'Press Attack to join' : 'Press Attack to join', x + 220, y + 160); if (k) { g.fillStyle = '#999'; g.fillText('(empty = CPU opponent)', x + 220, y + 192);
-      g.font = 'bold 30px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('CPU level  ' + CPU_LEVEL, x + 220, y + 248);
-      for (let n = 1; n <= 9; n++) { g.fillStyle = n <= CPU_LEVEL ? pc : 'rgba(255,255,255,.18)'; rr(x + 220 - 108 + (n - 1) * 24, y + 262, 20, 8, 3); g.fill(); }
-      g.font = '16px system-ui, sans-serif'; g.fillStyle = '#bbb'; g.fillText('Up / Down to change  ·  1 easiest, 9 hardest', x + 220, y + 298); }
-      continue; }
-    g.textAlign = 'right'; g.font = '18px system-ui, sans-serif'; g.fillStyle = '#ccc'; g.fillText(devName(sl.dev) + (sl.dev !== 'kb' ? (LAYOUT[sl.dev] === 'labels' ? '  ·  A/B swapped' : '  ·  A/B normal') : ''), x + 416, y + 40);
-    if (sl.dev !== 'kb') { g.font = '12px system-ui, sans-serif'; g.fillStyle = '#888'; g.fillText(padInfo(+sl.dev.slice(3)).slice(0, 46), x + 416, y + 58); }
-    g.textAlign = 'center';
-    const d = ROSTER[sl.pick]; g.font = 'bold 40px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('‹  ' + d.name + '  ›', x + 220, y + 100);
-    g.font = '18px system-ui, sans-serif'; g.fillStyle = '#f6e7c1'; g.fillText(d.sub, x + 220, y + 128);
-    d.forms.forEach((fm, q) => { g.save(); g.translate(x + 220 + (q - (d.forms.length - 1) / 2) * 120, y + 250); g.scale(6, -6); ART[fm.name](k && slots[0] && slots[0].pick === sl.pick ? fm.alt : fm.col, frame, null); g.restore(); if (d.forms.length > 1) { g.font = '15px system-ui, sans-serif'; g.fillStyle = '#ccc'; g.fillText(fm.name, x + 220 + (q - 1) * 120, y + 276); } });
-    g.font = 'bold 22px system-ui, sans-serif'; g.fillStyle = sl.ready ? '#9be564' : '#ffd98a'; g.fillText(sl.ready ? 'READY' : 'Left / Right to choose, Attack to confirm', x + 220, y + 312);
+/* ---------- Start screen ----------
+   In 3D the forge island is live behind it, with the chosen fighters standing on it (sim.js: selectPreview), so the middle
+   of the screen is left clear. Without 3D the stage picture is the background and the fighters are drawn on their cards. */
+const TITLE_ART = typeof Image !== 'undefined' ? new Image() : null; if (TITLE_ART) TITLE_ART.src = 'assets/stage/source/concept.webp';
+const TIPS = [
+  'Smash: flick the stick with attack, or press attack + special together. Keep attack held to charge it.',
+  'After a grab, push either stick to throw. Keep the stick still if you want to pummel first.',
+  'Wren swaps companions with down + special: Nib is quick, Loom floats, Hod hits hard.',
+  'Jump, then shield with a direction just as you leave the ground, to wavedash.',
+  'Flick down to drop through a platform. Down while shielding on one drops through too.',
+  'Let go of shield just before a hit lands to parry it.',
+  'Jump + attack together gives a short-hop aerial.',
+  'Hold attack to chain jabs. Nib keeps a flurry going for as long as it is held.',
+  'Tilt the stick slightly up or down to angle a forward tilt.',
+  'You cannot run through an opponent: roll, jump, or hit your way past.',
+  'A grab out of a dash reaches further, and out of a turn further still.',
+  'Shield just before hitting a wall or the floor to tech. Nib can also kick off the island’s wall.',
+  'Coming up from under the island slides you out to the ledge: there is no ceiling to hit.',
+  'A worn shield leaves your head or feet open. Tilt the stick gently to move it.',
+  'Flint’s down special and Wren’s swap hang in the air once each time you leave the ground.',
+  'Back + attack out of a run turns and strikes. Jump on a head to spring off it.',
+  'Above 100%, getting up from the ledge is slower and less protected.',
+  'Keyboard tools: B hitboxes · P freeze · O step one frame · M switch 2D / 3D.',
+];
+function spaced(px) { if ('letterSpacing' in g) g.letterSpacing = px + 'px'; }
+/* A key cap with its action after it; returns the x where the next one starts. */
+function keyHint(x, y, cap, action) {
+  g.font = 'bold 12px system-ui, sans-serif'; const w = g.measureText(cap).width + 14;
+  g.fillStyle = 'rgba(255,255,255,.12)'; rr(x, y - 13, w, 19, 5); g.fill(); g.strokeStyle = 'rgba(255,255,255,.28)'; g.lineWidth = 1; g.stroke();
+  g.textAlign = 'center'; g.fillStyle = '#fff'; g.fillText(cap, x + w / 2, y + 1);
+  g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#cfc8e8'; g.fillText(action, x + w + 6, y + 1);
+  return x + w + 6 + g.measureText(action).width + 16;
+}
+function drawSelect(three) {
+  const t = tick, PC = ['#ff7b6c', '#6cb4ff'], serif = '"Palatino Linotype", "Book Antiqua", Georgia, serif';
+  /* ---- background (2D only; in 3D the live island shows through) ---- */
+  if (!three) {
+    if (TITLE_ART && TITLE_ART.complete && TITLE_ART.naturalWidth) { const k = Math.max(W / TITLE_ART.naturalWidth, H / TITLE_ART.naturalHeight), w = TITLE_ART.naturalWidth * k, h = TITLE_ART.naturalHeight * k; g.drawImage(TITLE_ART, (W - w) / 2, (H - h) / 2, w, h); }
+    else { const sv = { x: cam.x, y: cam.y, s: cam.s }; cam.x = 0; cam.y = 30; cam.s = 3.4; drawBg(); Object.assign(cam, sv); }
   }
-  g.textAlign = 'center'; g.font = 'bold 22px system-ui, sans-serif'; g.fillStyle = '#fff';
-  if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) g.fillText('Press Start (Enter) to fight', W / 2, 556);
-  g.font = '15px system-ui, sans-serif'; g.fillStyle = '#cfc8e8';
-  g.fillText("Controller: stick move · A attack · B special · X/Y jump · ZL/ZR shield · L/R grab · right stick tilt · + start · − swaps the A/B layout", W / 2, 582);
-  g.fillText("Keyboard: arrows move (Shift = walk) · Z attack · X special · C/V jump · Q/W shield · A/S grab · I J K L tilt · Enter start", W / 2, 601);
-  g.fillText("Jump then shield with a direction to wavedash · flick down to drop through platforms · release shield just before a hit to parry · mash to break a grab", W / 2, 620);
-  g.fillText("Jump + attack together for a short-hop aerial · hold attack to chain jabs (Nib keeps a flurry going) · tilt the stick slightly up or down to angle a forward tilt", W / 2, 639);
-  g.fillText("Grab out of a dash reaches further, out of a turn further still · jump on a head to spring off it · Nib can kick off the stage wall · shield just before a wall or the floor to tech", W / 2, 658);
-  g.fillText("A worn shield leaves the head or feet open: tilt the stick gently to move it · back + attack out of a run turns and strikes · above 100% getting up from the ledge is slower", W / 2, 677);
-  g.fillText("Smash: flick the stick with attack, or press attack + special together; keep attack held to charge · after a grab, either stick throws · Up / Down here sets the CPU level", W / 2, 696);
-  g.fillStyle = '#8f88aa'; g.fillText('Tools: B shows hitboxes · P freezes · O steps one frame · M switches 2D / 3D', W / 2, 715);
-  drawUpdateNote(14);
-  /* hitbox switch, top right: the jump button flips it */
-  { const x = W - 292, y = 20, on = DBG.boxes;
-    g.fillStyle = 'rgba(15,15,30,.8)'; rr(x, y, 272, 58, 12); g.fill(); g.strokeStyle = on ? '#ff6a6a' : 'rgba(255,255,255,.25)'; g.lineWidth = 2; g.stroke();
-    g.textAlign = 'left'; g.font = 'bold 19px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Show hitboxes', x + 16, y + 26);
-    g.fillStyle = on ? '#ff6a6a' : '#555'; rr(x + 196, y + 10, 58, 22, 11); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 243 : x + 207, y + 21, 8, 0, TAU); g.fill();
-    g.font = 'bold 11px system-ui, sans-serif'; g.fillText(on ? 'ON' : 'OFF', on ? x + 204 : x + 222, y + 25);
-    g.font = '13px system-ui, sans-serif'; g.fillStyle = '#bbb'; g.fillText('Jump button (X / Y), or B on the keyboard', x + 16, y + 48); g.textAlign = 'center'; }
+  /* shade the top and the bottom so the words read; the middle stays clear */
+  let q = g.createLinearGradient(0, 0, 0, 250); q.addColorStop(0, 'rgba(14,10,26,.86)'); q.addColorStop(0.55, 'rgba(14,10,26,.42)'); q.addColorStop(1, 'rgba(14,10,26,0)'); g.fillStyle = q; g.fillRect(0, 0, W, 250);
+  q = g.createLinearGradient(0, 390, 0, H); q.addColorStop(0, 'rgba(14,10,26,0)'); q.addColorStop(0.4, 'rgba(14,10,26,.72)'); q.addColorStop(1, 'rgba(14,10,26,.95)'); g.fillStyle = q; g.fillRect(0, 390, W, H - 390);
+
+  /* ---- title ---- */
+  g.textAlign = 'center'; g.font = '900 84px ' + serif; spaced(12);
+  g.save(); g.shadowColor = 'rgba(255,130,40,.65)'; g.shadowBlur = 34 + Math.sin(t * 0.05) * 8;
+  q = g.createLinearGradient(0, 40, 0, 112); q.addColorStop(0, '#fff6dc'); q.addColorStop(0.5, '#ffc56a'); q.addColorStop(1, '#f0702c');
+  g.lineWidth = 7; g.strokeStyle = '#2a1410'; g.lineJoin = 'round'; g.strokeText('EMBERFALL', W / 2 + 6, 104); g.fillStyle = q; g.fillText('EMBERFALL', W / 2 + 6, 104); g.restore();
+  g.font = 'bold 14px system-ui, sans-serif'; spaced(4); g.fillStyle = '#f3dfb6'; g.fillText('3 STOCKS   ·   8 MINUTES   ·   THE FORGE ISLE', W / 2 + 2, 138); spaced(0);
+  for (const dir of [-1, 1]) { q = g.createLinearGradient(W / 2 + dir * 250, 0, W / 2 + dir * 430, 0); q.addColorStop(0, 'rgba(255,170,90,.85)'); q.addColorStop(1, 'rgba(255,170,90,0)'); g.fillStyle = q; g.fillRect(dir > 0 ? W / 2 + 250 : W / 2 - 430, 132, 180, 2); }
+
+  /* ---- player cards ---- */
+  for (let k = 0; k < 2; k++) {
+    const sl = slots[k], cw = 460, ch = 158, x = k ? W - 44 - cw : 44, y = 446, pc = PC[k];
+    g.fillStyle = 'rgba(20,17,36,.84)'; rr(x, y, cw, ch, 14); g.fill(); g.strokeStyle = sl && sl.ready ? '#9be564' : 'rgba(255,255,255,.14)'; g.lineWidth = sl && sl.ready ? 2.5 : 1; g.stroke();
+    g.fillStyle = pc; rr(x, y + 14, 5, ch - 28, 2.5); g.fill();
+    g.textAlign = 'left'; g.font = 'bold 13px system-ui, sans-serif'; spaced(3); g.fillStyle = pc; g.fillText(!sl && k ? 'PLAYER 2  /  CPU' : 'PLAYER ' + (k + 1), x + 24, y + 30); spaced(0);
+    if (!sl) {
+      const pulse = 0.6 + 0.4 * Math.sin(t * 0.07);
+      if (!k) { g.textAlign = 'center'; g.font = 'bold 26px system-ui, sans-serif'; g.fillStyle = 'rgba(255,255,255,' + pulse.toFixed(2) + ')'; g.fillText('Press Attack to join', x + cw / 2, y + 92); g.font = '14px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('A on a controller  ·  Z on the keyboard', x + cw / 2, y + 120); continue; }
+      /* empty second slot: the CPU and its level */
+      g.font = 'bold 34px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('CPU', x + 24, y + 78);
+      g.font = '15px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('picks a fighter at random', x + 24, y + 102);
+      g.textAlign = 'right'; g.font = 'bold 13px system-ui, sans-serif'; spaced(2); g.fillStyle = '#f3dfb6'; g.fillText('LEVEL', x + cw - 86, y + 62); spaced(0);
+      g.font = '900 44px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(String(CPU_LEVEL), x + cw - 30, y + 74);
+      for (let n = 1; n <= 9; n++) { g.fillStyle = n <= CPU_LEVEL ? pc : 'rgba(255,255,255,.16)'; rr(x + cw - 30 - (10 - n) * 21, y + 88, 17, 7, 3); g.fill(); }
+      g.font = '13px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('Up / Down to change', x + cw - 30, y + 116);
+      g.textAlign = 'left'; g.fillStyle = 'rgba(255,255,255,' + (0.45 + 0.3 * pulse).toFixed(2) + ')'; g.fillText('or press Attack on another controller to join', x + 24, y + 140);
+      continue;
+    }
+    const d = ROSTER[sl.pick], same = k && slots[0] && slots[0].pick === sl.pick;
+    g.textAlign = 'right'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(devName(sl.dev) + (sl.dev !== 'kb' ? (LAYOUT[sl.dev] === 'labels' ? '  ·  A/B swapped' : '  ·  A/B normal') : ''), x + cw - 20, y + 30);
+    g.textAlign = 'left'; g.font = 'bold 44px ' + serif; g.fillStyle = '#fff'; g.fillText(d.name, x + 52, y + 84);
+    const nw = g.measureText(d.name).width; g.font = 'bold 30px system-ui, sans-serif'; g.fillStyle = sl.ready ? 'rgba(255,255,255,.18)' : '#ffd98a'; g.fillText('‹', x + 24, y + 81); g.fillText('›', x + 62 + nw, y + 81);
+    g.font = 'italic 16px ' + serif; g.fillStyle = '#f3dfb6'; g.fillText(d.sub, x + 26, y + 110);
+    if (d.forms.length > 1) {   /* the companions; in 3D the one standing on the island is lit */
+      const now = Math.floor(t / 170) % d.forms.length; let fx = x + 26;
+      d.forms.forEach((fm, n) => { g.font = (three && n === now ? 'bold ' : '') + '13px system-ui, sans-serif'; const w = g.measureText(fm.name).width + 18; g.fillStyle = three && n === now ? pc : 'rgba(255,255,255,.1)'; rr(fx, y + 120, w, 22, 11); g.fill(); g.fillStyle = three && n === now ? '#16121f' : '#d8d2ee'; g.textAlign = 'center'; g.fillText(fm.name, fx + w / 2, y + 135); g.textAlign = 'left'; fx += w + 6; });
+    }
+    if (!three) d.forms.forEach((fm, n) => { g.save(); g.translate(x + cw - 60 - (d.forms.length - 1 - n) * 62, y + 112); g.scale(3.4, -3.4); ART[fm.name](same ? fm.alt : fm.col, frame, null); g.restore(); });
+    g.textAlign = 'right';
+    if (sl.ready) { g.fillStyle = '#9be564'; rr(x + cw - 108, y + 118, 88, 26, 13); g.fill(); g.font = 'bold 14px system-ui, sans-serif'; spaced(2); g.fillStyle = '#12200c'; g.textAlign = 'center'; g.fillText('READY', x + cw - 63, y + 136); spaced(0); }
+    else if (three || d.forms.length === 1) { g.font = '13px system-ui, sans-serif'; g.fillStyle = '#cfc8e8'; g.fillText('Left / Right  ·  Attack to confirm', x + cw - 20, y + 136); }
+  }
+
+  /* ---- start prompt, between the cards ---- */
+  g.textAlign = 'center';
+  const go = slots[0] && slots[0].ready && (!slots[1] || slots[1].ready);
+  if (go) {
+    const p = 0.5 + 0.5 * Math.sin(t * 0.09), bw = 236, bx = W / 2 - bw / 2, by = 486;
+    g.save(); g.shadowColor = 'rgba(255,140,50,' + (0.5 + 0.4 * p).toFixed(2) + ')'; g.shadowBlur = 26; q = g.createLinearGradient(0, by, 0, by + 56); q.addColorStop(0, '#ffc867'); q.addColorStop(1, '#ef6d2a'); g.fillStyle = q; rr(bx, by, bw, 56, 28); g.fill(); g.restore();
+    g.font = '900 26px system-ui, sans-serif'; spaced(4); g.fillStyle = '#2a1208'; g.fillText('FIGHT', W / 2 + 2, by + 36); spaced(0);
+    g.font = '13px system-ui, sans-serif'; g.fillStyle = '#f3dfb6'; g.fillText('Start on a controller  ·  Enter on the keyboard', W / 2, by + 80);
+  } else if (slots[0]) { g.fillStyle = 'rgba(20,17,36,.72)'; rr(W / 2 - 108, 492, 216, 54, 14); g.fill(); g.font = '14px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Choose a fighter,', W / 2, 515); g.fillText('then Attack to confirm', W / 2, 535); }
+
+  /* ---- controls and a tip ---- */
+  const px = 44, py = 620, pw = W - 88;
+  g.fillStyle = 'rgba(12,10,22,.7)'; rr(px, py, pw, 88, 12); g.fill(); g.strokeStyle = 'rgba(255,255,255,.1)'; g.lineWidth = 1; g.stroke();
+  const rows = [['CONTROLLER', [['Stick', 'Move'], ['A', 'Attack'], ['B', 'Special'], ['X / Y', 'Jump'], ['ZL / ZR', 'Shield'], ['L / R', 'Grab'], ['R Stick', 'Tilt'], ['+', 'Start'], ['−', 'Swap A/B']]],
+                ['KEYBOARD', [['Arrows', 'Move'], ['Z', 'Attack'], ['X', 'Special'], ['C / V', 'Jump'], ['Q / W', 'Shield'], ['A / S', 'Grab'], ['I J K L', 'Tilt'], ['Enter', 'Start'], ['Shift', 'Walk']]]];
+  rows.forEach(([label, keys], r) => {
+    const y = py + 24 + r * 26; g.textAlign = 'left'; g.font = 'bold 11px system-ui, sans-serif'; spaced(2); g.fillStyle = '#ffb86b'; g.fillText(label, px + 18, y + 1); spaced(0);
+    let x = px + 126; for (const [cap, action] of keys) x = keyHint(x, y, cap, action);
+  });
+  const n = Math.floor(t / 420) % TIPS.length, ph = (t % 420) / 420, a = Math.min(1, ph * 8, (1 - ph) * 8);
+  g.textAlign = 'left'; g.font = 'bold 11px system-ui, sans-serif'; spaced(2); g.fillStyle = '#ffb86b'; g.fillText('TIP', px + 18, py + 77); spaced(0);
+  g.font = '14px system-ui, sans-serif'; g.fillStyle = 'rgba(255,255,255,' + a.toFixed(2) + ')'; g.fillText(TIPS[n], px + 126, py + 77);
+
+  /* ---- hitbox switch (top right) and the note about a newer version (top middle) ---- */
+  { const on = DBG.boxes, w = 214, x = W - 44 - w, y = 20;
+    g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = on ? '#ff6a6a' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
+    g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Hitboxes', x + 16, y + 22);
+    g.fillStyle = on ? '#ff6a6a' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
+    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('X / Y  or  B key', x + 130, y + 22); }
+  g.textAlign = 'center'; drawUpdateNote(14);
 }
 function drawDebugText() {
   if (!DBG.boxes && !DBG.step) return;

@@ -1010,7 +1010,22 @@ function startMatch() {
   F = [new Fighter(0, ROSTER[s0.pick], c0, false), new Fighter(1, ROSTER[s1.pick], c1, s1.pick === s0.pick)];
   PROJ = []; PART = []; POPS = []; timer = MATCH_FRAMES; sudden = false; slowT = 0; focus = null; countdown = 190; paused = false; mode = 'countdown'; cam.x = 0; cam.y = 30; cam.s = 3.4;
 }
+/* Start screen: the fighters chosen so far stand on the island, for show only (nothing here is played). They are
+   rebuilt whenever a choice changes; Wren's three companions take turns. The camera sits close on the island. */
+let PREVIEW = null;
+function selectPreview() {
+  tick++;
+  const key = slots.map(s => s ? s.pick : '-').join(',');
+  if (key !== PREVIEW || !F.preview) {
+    PREVIEW = key; const list = [];
+    slots.forEach((s, k) => { if (!s) return; const n = list.length, f = new Fighter(n, ROSTER[s.pick], new Ctl('cpu'), k === 1 && !!slots[0] && slots[0].pick === s.pick); f.x = n ? 16 : -16; f.face = n ? -1 : 1; list.push(f); });
+    F = list; F.preview = true; PROJ = []; PART = []; POPS = [];
+  }
+  for (const f of F) if (f.def.forms.length > 1) f.fi = Math.floor(tick / 170) % f.def.forms.length;
+  cam.x = Math.sin(tick * 0.004) * 3; cam.y = 5; cam.s = 9;
+}
 function stepSelect() {
+  selectPreview();
   for (const dev of allDevs()) {
     const c = devCtl(dev); c.poll(readDev(dev));
     if (c.pressed('sel') && dev !== 'kb') { toggleLayout(dev); beep(520, 0.05, 'square', 0.03); }
