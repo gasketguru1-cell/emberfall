@@ -63,6 +63,7 @@ Spent so far: 275 credits (Flint 135, companions 102, stage 38). The daily limit
 ## Playing while it is being worked on (2026-11-10)
 
 - `node serve.js` (or `play.bat`) serves two views: `http://localhost:8317/` is the last finished version (the last git commit), and `http://localhost:8317/dev/` is the files as they are on disk. Half-made edits never reach the first one.
+- The address always works on this PC: a shortcut in the Windows Startup folder ("Emberfall game server") starts the server quietly at sign-in through `tools/start-server.vbs`. Extra copies of the server (from `play.bat` or the editor) stand by and take over if the one serving stops. To stop it starting with Windows, delete that shortcut.
 - Between matches the game shows a green note when a newer finished version exists; refreshing the page loads it. Nothing reloads by itself.
 - Checks in the browser pane are done in a separate tab on `/dev/`, never in the tab the owner is playing in.
 - The long test runs (`stats`, `levels`, `fuzz`, `deaths`, `kotable`) run at low priority so they do not slow a game being played.

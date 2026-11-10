@@ -5,6 +5,8 @@
 //   http://localhost:8317/dev/    the files exactly as they are on disk right now (for checking work in progress).
 //   http://localhost:8317/__version   a short id of the finished version; the game asks for it and says when a newer one is ready.
 // Files git does not keep (node_modules) always come from disk. Without git, everything comes from disk.
+// Windows starts a copy of this quietly at sign-in (tools/start-server.vbs, from a shortcut in the Startup folder),
+// so the address works all the time. play.bat and the editor can start their own copies too: extra copies stand by.
 const http = require('http'), fs = require('fs'), path = require('path'), { execFile, execFileSync } = require('child_process');
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.glb': 'model/gltf-binary', '.gltf': 'model/gltf+json', '.bin': 'application/octet-stream', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.ktx2': 'image/ktx2', '.wasm': 'application/wasm' };
 const PORT = +process.env.EMBERFALL_PORT || 8317;   /* another port only for trying the server itself */
@@ -20,7 +22,7 @@ function fromDisk(res, rel) {
   if (file !== root && !file.startsWith(root + path.sep)) { res.writeHead(403); res.end('Forbidden'); return; }   // only files inside the game folder
   fs.readFile(file, (err, data) => { if (err) { res.writeHead(404); res.end('Not found'); } else send(res, file, data); });
 }
-http.createServer((req, res) => {
+const server = http.createServer((req, res) => {
   let rel; try { rel = decodeURIComponent(req.url.split('?')[0]); } catch (e) { res.writeHead(400); res.end('Bad request'); return; }
   if (rel === '/__version') { res.writeHead(200, { 'Content-Type': 'text/plain', 'Cache-Control': 'no-store' }); res.end(commit().slice(0, 12) || 'disk'); return; }
   const dev = rel === '/dev' || rel.startsWith('/dev/'); if (dev) rel = rel.slice(4) || '/';
@@ -33,4 +35,14 @@ http.createServer((req, res) => {
     if (err) { fromDisk(res, rel); return; }   /* not in the finished version (a new or untracked file): fall back to disk */
     if (cache.size > 400) cache.clear(); cache.set(key, data); send(res, rel, data);
   });
-}).listen(PORT, '127.0.0.1', () => console.log('Emberfall running at http://localhost:' + PORT + '  (work in progress: http://localhost:' + PORT + '/dev/)'));
+});
+/* If another copy of this server already has the port (the one Windows starts at sign-in, say), this one does not give up:
+   it waits and takes over the moment the port is free. So the address always answers, whoever started first. */
+let waiting = false;
+server.on('listening', () => console.log('Emberfall running at http://localhost:' + PORT + '  (work in progress: http://localhost:' + PORT + '/dev/)'));
+server.on('error', e => {
+  if (e.code !== 'EADDRINUSE') throw e;
+  if (!waiting) console.log('http://localhost:' + PORT + ' is already being served by another copy; standing by to take over if it stops');
+  waiting = true; setTimeout(() => server.listen(PORT, '127.0.0.1'), 4000);
+});
+server.listen(PORT, '127.0.0.1');
