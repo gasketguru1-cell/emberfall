@@ -205,9 +205,9 @@ function drawProj() {
     else { g.save(); g.translate(x, y); g.rotate(p.rot || 0); g.fillStyle = '#8d8794'; g.beginPath(); for (let k = 0; k < 7; k++) { const a = k / 7 * TAU, r = p.r * s * (k % 2 ? 0.85 : 1); g.lineTo(Math.cos(a) * r, Math.sin(a) * r); } g.closePath(); g.fill(); g.strokeStyle = '#4c4855'; g.lineWidth = 2; g.stroke(); g.restore(); }
   }
 }
-function drawFx() {
+function drawFx(three) {
   g.lineCap = 'round';
-  for (const p of PART) {
+  for (const p of three ? [] : PART) {   /* in 3D the sparks are drawn in the scene instead */
     g.globalAlpha = Math.min(1, p.life / 12); const x = SX(p.x), y = SY(p.y), sp = Math.hypot(p.vx, p.vy);
     if (sp > 0.25) { g.strokeStyle = p.col; g.lineWidth = p.r * cam.s; g.beginPath(); g.moveTo(x, y); g.lineTo(x - p.vx * 2.4 * cam.s, y + p.vy * 2.4 * cam.s); g.stroke(); }
     else { g.fillStyle = p.col; g.beginPath(); g.arc(x, y, p.r * cam.s, 0, TAU); g.fill(); }
@@ -244,7 +244,7 @@ function draw() {
   SHK.x = shake > 0 ? (Math.random() - 0.5) * shake : 0; SHK.y = shake > 0 ? (Math.random() - 0.5) * shake : 0;
   g.save(); g.translate(SHK.x, SHK.y);
   if (!three) { drawBg(); drawStage(); drawProj(); }
-  for (const f of F) drawFighter(f, three); drawFx(); drawDebug(); g.restore(); drawHud(); drawDebugText();
+  for (const f of F) drawFighter(f, three); drawFx(three); drawDebug(); g.restore(); drawHud(); drawDebugText();
   if (three) window.R3.render();
 }
 

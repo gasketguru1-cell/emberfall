@@ -235,6 +235,99 @@ function build() {
     return { sx, sy, rot, oy };
   }
 
+  /* ---- effects drawn in the scene: sparks, hit flashes, launch trails, KO bursts, drifting embers, far islands.
+     Picture only: everything here reads the simulation and never writes to it. ---- */
+  const dot = tex(64, 64, (c, w) => { const q = c.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2); q.addColorStop(0, 'rgba(255,255,255,1)'); q.addColorStop(0.35, 'rgba(255,255,255,.55)'); q.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = q; c.fillRect(0, 0, w, w); });
+  const glowMat = o => Object.assign({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }, o);
+  /* sparks: the simulation's particles, as glowing points with a little depth */
+  const SPARKS = 700, spPos = new Float32Array(SPARKS * 3), spCol = new Float32Array(SPARKS * 3), sparkGeo = new THREE.BufferGeometry(), spZ = new WeakMap();
+  sparkGeo.setAttribute('position', new THREE.BufferAttribute(spPos, 3)); sparkGeo.setAttribute('color', new THREE.BufferAttribute(spCol, 3));
+  const sparks = new THREE.Points(sparkGeo, new THREE.PointsMaterial(glowMat({ size: 4.4, map: dot, vertexColors: true }))); sparks.frustumCulled = false; scene.add(sparks);
+  const colCache = new Map(), colOf = s => { let c = colCache.get(s); if (!c) { const m = /^rgba?\(([^)]+)\)/.exec(s); c = new THREE.Color(); if (m) { const p = m[1].split(',').map(Number); c.setRGB(p[0] / 255, p[1] / 255, p[2] / 255, THREE.SRGBColorSpace); } else c.set(s); colCache.set(s, c); } return c; };
+  /* a flash of light on each hit, so the fighters and the deck light up */
+  const flashes = [0, 1].map(() => { const l = new THREE.PointLight(0xfff0d0, 0, 80, 2); l.userData.i = 0; scene.add(l); return l; });
+  /* a ribbon of light behind a fighter that has been launched */
+  const TR = 16;
+  const trails = [0, 1].map(idx => {
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(TR * 6), 3)); geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(TR * 6), 3));
+    const ix = []; for (let k = 0; k < TR - 1; k++) ix.push(k * 2, k * 2 + 1, k * 2 + 2, k * 2 + 1, k * 2 + 3, k * 2 + 2); geo.setIndex(ix);
+    const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial(glowMat({ vertexColors: true, side: THREE.DoubleSide }))); mesh.frustumCulled = false; mesh.visible = false; scene.add(mesh);
+    return { mesh, pts: [], col: new THREE.Color(PCOL[idx]), last: -1 };
+  });
+  /* the KO burst: a ring that swells from where the fighter left, and a flare pointing back at the stage */
+  const beamTex = tex(64, 256, (c, w, h) => { const q = c.createLinearGradient(0, 0, w, 0); q.addColorStop(0, 'rgba(255,255,255,0)'); q.addColorStop(0.5, 'rgba(255,255,255,1)'); q.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = q; c.fillRect(0, 0, w, h); const f = c.createLinearGradient(0, 0, 0, h); f.addColorStop(0, 'rgba(0,0,0,1)'); f.addColorStop(0.14, 'rgba(0,0,0,0)'); f.addColorStop(1, 'rgba(0,0,0,1)');   /* soft at both ends */ c.globalCompositeOperation = 'destination-out'; c.fillStyle = f; c.fillRect(0, 0, w, h); });
+  const bursts = [0, 1].map(idx => {
+    const ring = new THREE.Sprite(new THREE.SpriteMaterial(glowMat({ map: dot, color: PCOL[idx] }))), core = new THREE.Sprite(new THREE.SpriteMaterial(glowMat({ map: dot, color: 0xffffff })));
+    const beam = new THREE.Mesh(new THREE.PlaneGeometry(1, 1).translate(0, -0.5, 0), new THREE.MeshBasicMaterial(glowMat({ map: beamTex, color: PCOL[idx], side: THREE.DoubleSide })));
+    const light = new THREE.PointLight(PCOL[idx], 0, 420, 1.6); ring.visible = core.visible = beam.visible = false; scene.add(ring, core, beam, light);
+    return { ring, core, beam, light, t0: -999, x: 0, y: 0, was: true };
+  });
+  /* depth: embers drifting down behind the stage, and three far islands with a lamp each */
+  const EMB = 260, ePos = new Float32Array(EMB * 3), eVar = new Float32Array(EMB * 2);
+  for (let k = 0; k < EMB; k++) { const dz = Math.random(); ePos[k * 3] = (Math.random() - 0.5) * 1700; ePos[k * 3 + 1] = -170 + Math.random() * 660; ePos[k * 3 + 2] = -45 - dz * dz * 760; eVar[k * 2] = 0.1 + Math.random() * 0.3; eVar[k * 2 + 1] = Math.random() * 6.28; }
+  const emberGeo = new THREE.BufferGeometry(); emberGeo.setAttribute('position', new THREE.BufferAttribute(ePos, 3));
+  const embers = new THREE.Points(emberGeo, new THREE.PointsMaterial(glowMat({ size: 3.6, map: dot, color: 0xff9a44, opacity: 0.8 }))); embers.frustumCulled = false; scene.add(embers);
+  const rock = new THREE.MeshStandardMaterial({ color: 0x3b3152, roughness: 1, flatShading: true }), moss = new THREE.MeshStandardMaterial({ color: 0x4f5a4a, roughness: 1, flatShading: true });
+  const islands = [[-250, 34, -230, 44, 70], [285, 78, -380, 62, 96], [-470, 128, -640, 84, 130]].map(([x, y, z, r, h], k) => {
+    const g = new THREE.Group(), under = new THREE.Mesh(new THREE.ConeGeometry(r, h, 7), rock); under.rotation.x = Math.PI; under.position.y = -h / 2; g.add(under);
+    const top = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.96, r, r * 0.16, 7), moss); top.position.y = r * 0.08; g.add(top);
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.02, r * 0.03, r * 0.5, 6), iron); post.position.set(r * 0.3, r * 0.4, 0); g.add(post);
+    const lampGlow = new THREE.Sprite(new THREE.SpriteMaterial(glowMat({ map: dot, color: 0xffb866 }))); lampGlow.scale.set(r * 0.9, r * 0.9, 1); lampGlow.position.set(r * 0.3, r * 0.68, 0); g.add(lampGlow);
+    g.position.set(x, y, z); g.rotation.y = k * 1.3; g.userData = { y, ph: k * 2.1 }; scene.add(g); return g;
+  });
+  let fxTick = -1;
+  function fxFighter(f, idx, st, alive, v) {
+    /* hit flash: when the freeze of a hit begins */
+    const lag = alive && f.hitlag > 0 && f.state === 'hurt';
+    if (lag && !v.lagged) { const l = flashes[idx]; l.position.set(f.x, f.y + st.h / 2, 12); l.userData.i = 700 + f.hitlag * 190; }   /* stronger hits freeze longer, so they flash brighter */
+    v.lagged = lag;
+    /* launch trail */
+    const tr = trails[idx], fast = alive && f.state === 'hurt' && !f.grounded && Math.hypot(f.vx, f.vy) > 1.5;
+    if (tick !== tr.last) {
+      tr.last = tick; const cx = f.x, cy = f.y + st.h / 2, p0 = tr.pts[0];
+      if (fast) { if (!p0 || Math.hypot(p0[0] - cx, p0[1] - cy) > 0.4) tr.pts.unshift([cx, cy]); } else tr.pts.pop();
+      if (tr.pts.length > TR) tr.pts.length = TR;
+    }
+    const n = tr.pts.length; tr.mesh.visible = n > 1;
+    if (n > 1) {
+      const pos = tr.mesh.geometry.attributes.position, col = tr.mesh.geometry.attributes.color, wide = st.h * 0.36;
+      for (let k = 0; k < TR; k++) {
+        const q = Math.min(k, n - 1), a = tr.pts[Math.max(0, q - 1)], b = tr.pts[Math.min(n - 1, q + 1)], p = tr.pts[q];
+        let dx = b[0] - a[0], dy = b[1] - a[1]; const len = Math.hypot(dx, dy) || 1; dx /= len; dy /= len;
+        const w = k < n ? wide * (1 - q / n) : 0, br = k < n ? 0.75 * (1 - q / n) : 0;
+        pos.setXYZ(k * 2, p[0] - dy * w, p[1] + dx * w, -1.5); pos.setXYZ(k * 2 + 1, p[0] + dy * w, p[1] - dx * w, -1.5);
+        col.setXYZ(k * 2, tr.col.r * br, tr.col.g * br, tr.col.b * br); col.setXYZ(k * 2 + 1, tr.col.r * br, tr.col.g * br, tr.col.b * br);
+      }
+      pos.needsUpdate = true; col.needsUpdate = true;
+    }
+    /* KO burst: starts the moment the fighter is lost */
+    const b = bursts[idx]; if (!alive && b.was) { b.t0 = tick; b.x = clamp(f.x, BLAST.l, BLAST.r); b.y = clamp(f.y, BLAST.b, BLAST.t); } b.was = alive;
+  }
+  function fxFrame() {
+    const dt = fxTick < 0 ? 0 : Math.min(4, tick - fxTick); fxTick = tick;
+    let n = 0;
+    for (const p of PART) {
+      if (n >= SPARKS) break; let z = spZ.get(p); if (z === undefined) { z = (Math.random() - 0.5) * 12; spZ.set(p, z); }
+      const c = colOf(p.col), a = Math.min(1, p.life / 12) * Math.min(1.4, 0.5 + p.r * 0.5);
+      spPos[n * 3] = p.x; spPos[n * 3 + 1] = p.y; spPos[n * 3 + 2] = 2 + z; spCol[n * 3] = c.r * a; spCol[n * 3 + 1] = c.g * a; spCol[n * 3 + 2] = c.b * a; n++;
+    }
+    sparkGeo.setDrawRange(0, n); sparkGeo.attributes.position.needsUpdate = true; sparkGeo.attributes.color.needsUpdate = true;
+    for (const l of flashes) { l.intensity = l.userData.i; if (dt) l.userData.i *= Math.pow(0.7, dt); if (l.userData.i < 20) l.userData.i = 0; }
+    for (const b of bursts) {
+      const age = tick - b.t0, on = age >= 0 && age < 50; b.ring.visible = b.core.visible = b.beam.visible = on; b.light.intensity = 0;
+      if (!on) continue; const k = age / 50, fade = Math.pow(1 - k, 1.6);
+      b.ring.position.set(b.x, b.y, 4); b.ring.scale.setScalar(70 + 430 * Math.sqrt(k)); b.ring.material.opacity = fade * 0.9;
+      b.core.position.set(b.x, b.y, 5); b.core.scale.setScalar(150 * (1 - k) + 20); b.core.material.opacity = fade;
+      const ang = Math.atan2(30 - b.y, 0 - b.x); b.beam.position.set(b.x, b.y, 3); b.beam.rotation.z = ang + Math.PI / 2; b.beam.scale.set(26 + 70 * (1 - k), 300 + 260 * k, 1); b.beam.material.opacity = fade;
+      b.light.position.set(clamp(b.x, -150, 150), clamp(b.y, -40, 120), 30); b.light.intensity = 26000 * fade;
+    }
+    if (dt) {
+      for (let k = 0; k < EMB; k++) { let y = ePos[k * 3 + 1] - eVar[k * 2] * dt; if (y < -170) y += 660; ePos[k * 3 + 1] = y; ePos[k * 3] += Math.sin(tick * 0.013 + eVar[k * 2 + 1]) * 0.07 * dt; }
+      emberGeo.attributes.position.needsUpdate = true;
+    }
+    for (const g of islands) g.position.y = g.userData.y + Math.sin(tick * 0.008 + g.userData.ph) * 2.2;
+  }
+
   let lastW = 0, lastH = 0;
   R3.show = on => { glc.style.visibility = on ? 'visible' : 'hidden'; };
   R3.render = () => {
@@ -249,6 +342,7 @@ function build() {
 
     F.forEach((f, idx) => {
       const v = fighters[idx], st = f.st, alive = f.state !== 'dead';
+      fxFighter(f, idx, st, alive, v);
       if (v.prop && !alive) v.prop.visible = false;
       v.root.visible = alive; v.shield.visible = alive && (f.state === 'shield' || f.state === 'shieldstun'); v.pad.visible = f.state === 'respawn';
       if (!alive) return;
@@ -287,9 +381,11 @@ function build() {
       else if (p.kind === 'ember') m.scale.setScalar(p.r * 0.75);
       else if (p.kind === 'bolt') m.scale.x = p.face;
     }
+    fxFrame();
     renderer.render(scene, camera);
     R3.info = { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles };
   };
   R3.fighters = fighters;   /* for inspection from the console and tests; nothing in the game reads it */
+  R3.fx = { bursts, trails, flashes, sparks, embers, islands };
   R3.ready = true;
 }
