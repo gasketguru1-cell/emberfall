@@ -5,7 +5,7 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "node tests/headless.js && node tests/rules.js",
+    "test": "node tests/headless.js && node tests/rules.js && node tests/fuzz.js 20",
     "start": "node serve.js"
   },
   "type": "commonjs",
