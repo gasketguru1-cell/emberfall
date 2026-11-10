@@ -18,7 +18,7 @@ function animState(f) {
     case 'dash': case 'run': return { key: 'run', mode: 'cycle', v: f.x * f.face / 46 };
     case 'brake': return { key: 'brake', mode: 'phase', v: phase(f.sf, 12) };
     case 'jsq': return { key: 'jumpsquat', mode: 'phase', v: phase(f.sf, st.jsq) };
-    case 'air': return f.vy > 0.2 ? { key: 'rise', mode: 'phase', v: 1 - phase(f.vy, st.jump) } : { key: 'fall', mode: 'loop', v: t };
+    case 'air': return f.vy > 0.2 ? { key: 'rise', mode: 'phase', v: 1 - phase(f.vy, st.vJump) } : { key: 'fall', mode: 'loop', v: t };
     case 'helpless': return { key: 'fall', mode: 'loop', v: t * 1.6 };
     case 'land': return { key: 'land', mode: 'phase', v: phase(f.sf, Math.max(4, f.lag)) };
     case 'wd': return { key: 'land', mode: 'phase', v: 0.25 };

@@ -259,6 +259,31 @@ vm.runInThisContext(`
     check('time-out: a full tie goes to sudden death', tie.mode === 'play' && tie.sudden && tie.pct[0] === 300 && tie.pct[1] === 300 && tie.stocks.join() === '1,1', 'mode ' + tie.mode + ', both at ' + tie.pct.join(' / ') + '%, stocks ' + tie.stocks.join(' / '));
   }
 
+  /* ---- Movement model: jumps are given as heights; a full hop pops off the floor; fast fall is instant; speeds ramp ---- */
+  for (const [name, A] of [['Flint', FL], ['Nib', NIB], ['Loom', LOOM], ['Hod', HOD]]) {
+    const jump = script => { const [f] = setup(A, FL, -70, 70); const st = f.st, ys = []; SCRIPT[0] = (i, tt) => script(i, tt, f); run(160, () => { ys.push(f.y); }); const up = ys.findIndex(y => y > 0); return { st, top: Math.max(...ys), y4: ys[up + 3], air: ys.slice(up).findIndex(y => y === 0) }; };
+    const full = jump((i, tt) => { i.jmp = tt >= 2; }), short = jump((i, tt) => { i.jmp = tt === 2 || tt === 3; }), st = full.st;
+    const twice = jump((i, tt, f) => { i.jmp = (tt >= 2 && tt < 8) || (tt > 10 && tt < 70 && !f.grounded && f.vy <= 0 && f.jumps === (st.jumps || 1)); });
+    const ff = jump((i, tt, f) => { i.jmp = tt >= 2; if (!f.grounded && f.vy <= 0) i.ly = -1; });
+    const near = (v, w) => Math.abs(v - w) < 0.15;
+    check(name + ': hop heights match the numbers', near(full.top, st.jumpH) && near(short.top, st.hopH) && near(twice.top, st.jumpH + st.airJumpH), 'full ' + full.top.toFixed(1) + ' (' + st.jumpH + '), short ' + short.top.toFixed(1) + ' (' + st.hopH + '), with air jump ' + twice.top.toFixed(1) + ' (' + (st.jumpH + st.airJumpH) + ')');
+    check(name + ': a full hop pops off the floor', near(full.y4, st.jumpInit), full.y4.toFixed(1) + ' high after four frames (' + st.jumpInit + ')');
+    check(name + ': fast fall drops at full speed at once', ff.air < full.air - 8, 'air time ' + full.air + ' frames, ' + ff.air + ' with a fast fall from the top');
+    { /* dash burst, settle to run speed, slide to a stop; walking is slower and follows the stick */
+      const [f] = setup(A, FL, -70, 70); let peak = 0, runV = 0, walkV = 0;
+      SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 50) i.lx = 1; };
+      run(49, () => { if (t <= 12) peak = Math.max(peak, f.vx); }); runV = f.vx; run(40); const stopped = f.vx === 0 && f.state === 'idle';
+      const [g] = setup(A, FL, -70, 70); SCRIPT[0] = (i, tt) => { i.lx = tt < 2 ? 0 : tt < 9 ? 0.4 : 0.6; }; run(70); walkV = g.vx;
+      check(name + ': dash, run, walk and stop speeds', near(peak, st.dash) && near(runV, st.run) && near(walkV, st.walk * 0.6) && stopped, 'dash ' + peak.toFixed(2) + ' (' + st.dash + '), run ' + runV.toFixed(2) + ' (' + st.run + '), walk at 60% stick ' + walkV.toFixed(2) + ' (' + (st.walk * 0.6).toFixed(2) + '), stopped ' + stopped);
+    }
+  }
+  { /* air: drift tops out at the fighter's air speed; a running jump carries ground speed, capped */
+    const [f] = setup(FL, FL, -70, 70), st = f.st; let top = 0, atJump = null;
+    SCRIPT[0] = (i, tt) => { if (tt >= 2) i.lx = 1; i.jmp = tt >= 30; };
+    run(60, () => { if (!f.grounded) { if (atJump === null) atJump = f.vx; else if (t > 50) top = Math.max(top, f.vx); } });
+    check('air: a running jump carries speed, then settles to air speed', Math.abs(atJump - st.jumpXMax) < 0.01 && Math.abs(top - st.airSpeed) < 0.12, 'left the ground at ' + atJump.toFixed(2) + ' (cap ' + st.jumpXMax + '), ' + top.toFixed(2) + ' later (air speed ' + st.airSpeed + ')');
+  }
+
   let bad = 0; for (const [ok, name, detail] of results) { if (!ok) bad++; console.log((ok ? 'pass  ' : 'FAIL  ') + name.padEnd(48) + detail); }
   console.log(bad ? bad + ' of ' + results.length + ' checks failed' : 'all ' + results.length + ' rule checks pass');
   if (bad) process.exitCode = 1;

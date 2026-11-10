@@ -53,6 +53,36 @@ Spent so far: 237 credits (Flint 135, companions 102). The daily limit was raise
 - Each companion has its own ledge hang, spot dodge, grab hold and being-held clips. Roll and air dodge use the curled tumble with a spin, on purpose.
 - Follow-through: tails, ears and ribbons are simulated in `render3d.js` (`springs` in the manifest). It is stepped by the game clock, so freezing the game freezes it.
 
+## Movement (2026-11-10)
+
+The movement rules now work the way the reference build's do, with Emberfall's own numbers for each fighter.
+
+- **Where the model came from:** the reference build's fighter attribute table (`fighter_param.prc`, found under `C:\OpenSmash\mods`; read with a small parser, names from `SwitchProject\research\param-labels`). It gives every fighter the same set of movement numbers. How the engine applies them was read from the research sources on this PC and the SmashWiki jump page. Nothing from that table is copied into Emberfall; it was used for the list of parameters and the range each one covers across the roster.
+- **The model** (comment block at the top of `sim.js`, numbers in each fighter's `st`):
+  - Walk and run: the speed limit follows how far the stick is pushed; the push is a fixed part plus a part that grows with the stick; over the limit, or with the stick let go, the floor's grip slows the fighter.
+  - Dash: a burst to dash speed one frame after the flick, then settling to run speed. A dash the other way adds to the old speed instead of replacing it.
+  - Jumps are heights, not speeds. The launch speed is worked out from the height and the fighter's gravity. A full hop from the ground covers its first 55% in four frames, then rises the rest under gravity. Short hops and air jumps have no such pop.
+  - Sideways speed at a jump is ground speed times a carry factor plus the stick, up to a cap. An air jump with the stick held resets sideways speed.
+  - Air: speed limit and push follow the stick the same way as on the ground, with a small air brake.
+  - Fast fall: a downward flick while falling drops at full fast-fall speed at once, also during an aerial.
+- **What changed in play** (`tests/movement.js` measures this; before -> after for Flint): full hop 50.5 high in 72 frames of air time -> 34 high in 52; height after four frames 11.6 -> 18.7; short hop 19 -> 16.5; hop plus air jump 97.7 -> 68.5; air time with a fast fall 65 -> 36 frames; stop from a run 20 -> 17 frames. Top speeds barely moved (they were already close).
+
+| | Flint | Nib | Loom | Hod | reference roster, middle (10th to 90th percentile) |
+|---|---|---|---|---|---|
+| walk speed | 1.12 | 1.3 | 0.9 | 0.85 | 1.12 (0.82 to 1.39) |
+| dash burst | 1.92 | 2.2 | 1.65 | 1.62 | 1.90 (1.68 to 2.21) |
+| run speed | 1.74 | 2.15 | 1.45 | 1.5 | 1.72 (1.43 to 2.2) |
+| grip | 0.105 | 0.128 | 0.08 | 0.1 | 0.11 (0.085 to 0.13) |
+| full hop / short hop / air jump | 34 / 16.5 / 34.5 | 35 / 15 / 36 | 30 / 13.5 / 27 x3 | 29.5 / 14.5 / 30 | 32.8 / 16 / 33.7 |
+| air speed | 1.1 | 1.2 | 1.12 | 0.98 | 1.05 (0.88 to 1.24) |
+| air push (fixed + stick) | 0.01 + 0.065 | 0.015 + 0.085 | 0.01 + 0.075 | 0.01 + 0.04 | 0.01 + 0.06 |
+| gravity | 0.09 | 0.125 | 0.062 | 0.118 | 0.092 (0.071 to 0.13) |
+| fall / fast fall | 1.55 / 2.48 | 1.82 / 2.91 | 1.12 / 1.79 | 1.78 / 2.85 | 1.6 / 2.53 |
+
+- Flint sits at the middle of the roster (all-rounder). Nib is near the fast end on the ground and falls fast (rushdown). Loom is slow on the ground, light on gravity, with three smaller air jumps and good drift (floaty). Hod is slow with poor air control and falls hard (heavy).
+- **Kept the same for balance:** Nib's up special was raised (4.3 to 4.55) to give back the recovery the lower jumps took away; Nib's weight 80 -> 84 and Loom's 80 -> 77.
+- **Not known, so guessed:** the file with the build's shared constants (`common.prc`) is not on disk in readable form. Three things come from it: how many frames a dash waits before its burst (set to 1 here), the extra grip while skidding out of a run (set to none), and the turn-around rules. Landing lag (2 frames, 4 after a fast fall) was left as it was.
+
 ## Rules (2026-11-09)
 
 - **Archetypes** (`st` and the kit passed to `mk()` in `sim.js`): Flint all-rounder with a three-hit jab; Nib rushdown with fast dodges, a wall jump, a rapid jab, a quick short grab and weak set-up throws; Loom floaty zoner with three air jumps, slow fall, and a long slow ribbon grab; Hod heavy with armour on forward smash and dash attack and strong throws.
@@ -64,11 +94,12 @@ Spent so far: 237 credits (Flint 135, companions 102). The daily limit was raise
 | Tool | What it does | Result on 2026-11-09 |
 |---|---|---|
 | `npm test` | six seeded CPU matches looking for broken states, then `tests/rules.js`, then a 20-match `tests/fuzz.js` | passes |
-| `tests/rules.js` | 41 scripted checks of single rules with exact inputs, including the movement rules from platforms.ini and the match clock | all pass |
+| `tests/rules.js` | 58 scripted checks of single rules with exact inputs, including the movement rules from platforms.ini, the match clock and (2026-11-10) each fighter's jump heights, full-hop pop, fast fall and ground speeds | all pass |
+| `tests/movement.js` | measures every fighter's speeds, stopping distance, jump heights and air times in the running rules; `EMBERFALL_SIM=<file>` measures another copy of the rules | see Movement |
 | `tests/fuzz.js` | both fighters driven by random sticks and buttons; looks for crashes, broken numbers, impossible or stuck states | about 880,000 frames of random against random and 730,000 with the CPU on one side in a quarter of the matches, clean |
-| `tests/stats.js` | CPU-versus-CPU balance per form: wins, damage, KO percent, where stocks are lost, who beats whom | over three seeds of 960 matches each: Flint 48 to 52%, Nib 50 to 52%, Loom 48 to 51%, Hod 46 to 52%; average KO percent Hod 165, Flint 165, Nib 156, Loom 154 |
+| `tests/stats.js` | CPU-versus-CPU balance per form: wins, damage, KO percent, where stocks are lost, who beats whom | after the movement change (2026-11-10), over three seeds of 960 matches each: Flint 49 to 53%, Nib 45 to 48%, Loom 51 to 53%, Hod 48 to 53%; average KO percent Hod 163, Flint 159, Loom 149, Nib 148 |
 | `tests/kotable.js` | KO percent of every hit | see Rules |
-| `tests/recovery.js` | CPU recovery from six spots off stage per form | 24 of 24 get back |
+| `tests/recovery.js` | CPU recovery from six spots off stage per form | 24 of 24 get back (also after the movement change) |
 | `tests/deaths.js` | traces of stocks lost without being in hitstun | found three CPU mistakes on 2026-11-09 (a ledge regrab loop, a tech press that became an air dodge, recovering out through the top), all fixed; what remains is long launches at high percent |
 | `tools/audit.js` (in the game) | distance from each hitbox to the nearest limb tip while the attack is active, measured through the real renderer | 178 checks (89 hitboxes, facing right and left); only pivot grabs are over 3 units (3.2 to 3.5), by design |
 
