@@ -1,0 +1,8 @@
+{
+  "ai_model": "nano-banana-2-1",
+  "prompt": "Redraw this kite spirit keeping its design exactly: a lilac silk kite body with cream stitched seams and pale cloud-swirl print, a small calm face in the centre, two long purple ribbon tails ending in gold triangular weights. New pose: floating upright, seen straight from the front, symmetrical, ribbons hanging down relaxed on each side. Remove the wind swirls and the cloud puff. Clean character reference sheet for 3D modelling: stylised 3D game creature, smooth readable shapes. Plain light grey background, soft even studio lighting, no text, no logo, no ground, no dust, no cast shadows, whole body in frame.",
+  "reference_image_urls": [
+    "file:assets/loom/source/art.webp"
+  ],
+  "aspect_ratio": "3:4"
+}

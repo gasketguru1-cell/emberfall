@@ -12,11 +12,11 @@ One folder per character. Inside each:
 
 | Character | Brief | Concept image | 3D model | Rig | Animations | In game |
 |---|---|---|---|---|---|---|
-| Flint | written | concept B chosen | v1: 30,791 triangles, 1K textures, 2.6 MB | Meshy auto-rig, 24 bones | 12 clips (10 presets + walk, run) | **in game**, proof of concept |
+| Flint | written | concept B chosen | v2: 30,791 triangles, 1K textures, 3.5 MB | Meshy auto-rig, 24 bones | 32 clips; every move has its own | **in game** with lantern |
 | Wren (handler) | not started | | | | | not shown |
-| Nib | art supplied; palette to change | | | | | grey-box capsule |
-| Loom | art supplied | | | | | grey-box capsule |
-| Hod | art supplied | | | | | grey-box capsule |
+| Nib | art supplied | concept A made (new teal and brass palette), waiting for approval | | custom rig needed (Blender) | | grey-box capsule |
+| Loom | art supplied | concept A made, waiting for approval | | custom rig needed (Blender) | | grey-box capsule |
+| Hod | art supplied | concept A made, waiting for approval | | custom rig needed (Blender) | | grey-box capsule |
 | Sprocket | outline only | | | | | not in roster |
 
 ## Meshy credits
@@ -30,11 +30,12 @@ All Meshy calls go through `tools/meshy.js`. Limits are in `assets/meshy-budget.
 | 2026-11-09 | Flint | 3D model from concept B (meshy-7.1, 30k triangles, PBR 2K) | 30 |
 | 2026-11-09 | Flint | Auto-rig (includes walk and run clips) | 5 |
 | 2026-11-09 | Flint | 10 preset animations | 30 |
+| 2026-11-09 | Flint | 20 more preset animations (attacks, dodges, throw, ledge) | 60 |
+| 2026-11-09 | Hod, Loom, Nib | Concept images from supplied art | 12 |
 
-Spent so far: 75 credits. Ceiling for the Flint proof of concept: 300.
+Spent so far: 147 credits (Flint 135, companions 12). Daily cap of 150 reached for 2026-11-09.
 
-## Flint v1: what is and is not done
+## Flint v2: what is and is not done
 
-- Done: model, rig, 12 clips packed into `assets/flint/export/flint-v1.glb` by `tools/pack.mjs`; clip-to-action mapping in `assets/manifest.json`.
-- Forward smash uses its own clip (Charged_Slash) locked to the move's startup, active and recovery frames. Every other attack currently shares the jab clip.
-- Not done: lantern prop, per-move attack animations, dodge and roll animations, ledge and grab poses, coat and scarf weight clean-up.
+- Done: model, rig, 32 clips in `assets/flint/export/flint-v2.glb`; every ground attack, aerial, special, grab, throw, roll, dodge and ledge hang has its own clip, timed to the move's frame data in `assets/manifest.json`; lantern prop follows the right hand.
+- Not done: coat and scarf weight clean-up (boot clips the coat when running), refinement of anticipation and follow-through per move, effects for the specials.

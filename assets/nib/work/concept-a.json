@@ -1,0 +1,8 @@
+{
+  "ai_model": "nano-banana-2-1",
+  "prompt": "Redraw this wind-up fox creature with a new colour scheme: verdigris teal-green fur, cream chest, cream inside the ears, brass-gold tail tips and brass-gold bands on the legs, warm amber eyes, plain face with no markings around the eyes. Keep the shape: slim fox body, very long pointed ears with one ear bent, two bushy tails, and a large brass wind-up key in the middle of its back. New pose: standing calmly on all four legs, body side-on facing right, head turned slightly toward the viewer, friendly expression. Clean character reference sheet for 3D modelling: stylised 3D game creature, smooth readable shapes. Plain light grey background, soft even studio lighting, no text, no logo, no ground, no dust, no cast shadows, whole body in frame.",
+  "reference_image_urls": [
+    "file:assets/nib/source/art.webp"
+  ],
+  "aspect_ratio": "4:3"
+}

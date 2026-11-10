@@ -1,0 +1,33 @@
+{
+  "character": "nib",
+  "endpoint": "image-to-image",
+  "params": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "Redraw this wind-up fox creature with a new colour scheme: verdigris teal-green fur, cream chest, cream inside the ears, brass-gold tail tips and brass-gold bands on the legs, warm amber eyes, plain face with no markings around the eyes. Keep the shape: slim fox body, very long pointed ears with one ear bent, two bushy tails, and a large brass wind-up key in the middle of its back. New pose: standing calmly on all four legs, body side-on facing right, head turned slightly toward the viewer, friendly expression. Clean character reference sheet for 3D modelling: stylised 3D game creature, smooth readable shapes. Plain light grey background, soft even studio lighting, no text, no logo, no ground, no dust, no cast shadows, whole body in frame.",
+    "reference_image_urls": [
+      "file:assets/nib/source/art.webp"
+    ],
+    "aspect_ratio": "4:3"
+  },
+  "estimate": 4,
+  "consumed": 4,
+  "files": [
+    "assets/nib/raw/01a1c2ee-57f9-7649-b18e-df8ab0d1fd24/image_urls.0.png"
+  ],
+  "task": {
+    "id": "01a1c2ee-57f9-7649-b18e-df8ab0d1fd24",
+    "type": "image-to-image",
+    "ai_model": "nano-banana-2-1",
+    "prompt": "Redraw this wind-up fox creature with a new colour scheme: verdigris teal-green fur, cream chest, cream inside the ears, brass-gold tail tips and brass-gold bands on the legs, warm amber eyes, plain face with no markings around the eyes. Keep the shape: slim fox body, very long pointed ears with one ear bent, two bushy tails, and a large brass wind-up key in the middle of its back. New pose: standing calmly on all four legs, body side-on facing right, head turned slightly toward the viewer, friendly expression. Clean character reference sheet for 3D modelling: stylised 3D game creature, smooth readable shapes. Plain light grey background, soft even studio lighting, no text, no logo, no ground, no dust, no cast shadows, whole body in frame.",
+    "status": "SUCCEEDED",
+    "progress": 100,
+    "created_at": 1794271762764,
+    "started_at": 1794271762773,
+    "finished_at": 1794271774699,
+    "expires_at": 1794530974699,
+    "image_urls": [
+      "https://assets.meshy.ai/9b63c3ed-0b38-42c8-922f-bcc56f30de31/uploads/image_01a1c2ee-57f9-7649-b18e-df8ab0d1fd24_0.png"
+    ],
+    "consumed_credits": 4
+  }
+}

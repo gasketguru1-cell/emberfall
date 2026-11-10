@@ -1,6 +1,6 @@
 {
-  "phase": "flint-poc",
-  "ceiling": 300,
+  "phase": "companions",
+  "ceiling": 450,
   "perTaskMax": 40,
   "perDayMax": 150,
   "maxModelAttemptsPerCharacter": 3,

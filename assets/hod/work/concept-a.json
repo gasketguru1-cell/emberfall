@@ -1,0 +1,8 @@
+{
+  "ai_model": "nano-banana-2-1",
+  "prompt": "Redraw this creature keeping its design exactly: a stocky pangolin-badger with overlapping rust-brown plates covering its back and tail, a few grey stones set among the plates, tan fur, cream belly, cream face with a dark brown mask stripe, large cream digging claws. New pose: standing calmly on all four legs, body side-on facing right, head turned slightly toward the viewer, mouth closed, tail level behind. Clean character reference sheet for 3D modelling: stylised 3D game creature, smooth readable shapes. Plain light grey background, soft even studio lighting, no text, no logo, no ground, no dust, no cast shadows, whole body in frame.",
+  "reference_image_urls": [
+    "file:assets/hod/source/art.webp"
+  ],
+  "aspect_ratio": "4:3"
+}
