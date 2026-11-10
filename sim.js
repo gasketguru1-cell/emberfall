@@ -36,7 +36,15 @@ const EDGE = 68;   /* half the width of the main stage (it was 80 until 2026-11-
 const MAIN = { x0: -EDGE, x1: EDGE, y: 0, soft: false };
 /* Two soft platforms side by side, low enough for every fighter's full hop and too high for any short hop. No top platform. */
 const PLATS = [MAIN, { x0: -44, x1: -15, y: 26, soft: true }, { x0: 15, x1: 44, y: 26, soft: true }];
-const BODY_H = 24;
+/* The main stage is an island: a rim RIM thick at full width; under it a steep shoulder of rock that gives way SHOULDER_IN
+   by SHOULDER down (still a wall to kick off or tech against); then rock that narrows to a point DEPTH down.
+   There is no flat underside to hit a head on: a fighter rising beneath it is turned outward along the rock and arrives
+   beside the ledge. stageHalf(y) is how far the solid reaches from the middle at height y (below 0), or -1 where there is none. */
+const RIM = 5, SHOULDER = 22, SHOULDER_IN = 12, DEPTH = 45, BODY_H = DEPTH;
+function stageHalf(y) {
+  if (y > 0 || y < -DEPTH) return -1; if (y >= -RIM) return EDGE;
+  return y >= -SHOULDER ? EDGE - SHOULDER_IN * (-RIM - y) / (SHOULDER - RIM) : (EDGE - SHOULDER_IN) * (DEPTH + y) / (DEPTH - SHOULDER);
+}
 const BLAST = { l: -(EDGE + 155), r: EDGE + 155, t: 200, b: -140 };   /* the same distance beyond the ledges as before the stage shrank */
 
 /* ---------- Combat rules ---------- */
@@ -691,24 +699,28 @@ class Fighter {
         }
       }
     }
-    /* Solid underside and walls of the main stage. */
-    const hw = s.w / 2;
-    if (this.x + hw > MAIN.x0 && this.x - hw < MAIN.x1 && this.y < 0 && this.y + s.h > -BODY_H) {
-      if (py + s.h <= -BODY_H + 0.01) { this.y = -BODY_H - s.h; if (this.vy > 0) this.vy = st === 'hurt' ? -this.vy * 0.6 : 0; }
-      else {
-        const side = px < 0 ? -1 : 1; this.x = side * (EDGE + hw);
+    /* The solid island: its rim is a wall, and the rock under it slopes. Whoever touches either is moved out sideways to
+       the surface and keeps rising or falling, so coming up from underneath ends beside the ledge, never against a ceiling. */
+    const hw = s.w / 2, top = Math.min(this.y + s.h, 0), half = this.y < 0 ? stageHalf(top) : -1;
+    if (half >= 0 && Math.abs(this.x) - hw < half) {
+      {
+        const side = this.x !== 0 ? sgn(this.x) : px < 0 ? -1 : 1; this.x = side * (half + hw);
         if (st === 'hurt') {
           /* Launched into the stage wall: shield just before impact to tech it (hold jump or up to spring off), otherwise bounce. */
           if (this.techT > 0 && Math.abs(this.vx) > 0.8) {
             this.techT = 0; this.vx = 0; this.vy = Math.max(this.vy, 0); this.invuln = 14; this.set('air');
             if (i.jmp || i.ly > 0.5) { this.vy = s.vJump * 0.9; this.vx = side * 1.1; }
             spark(this.x, this.y + s.h / 2, '#9ff', 12, 1.4); pop(this.x, this.y + s.h + 4, 'TECH', '#9ff'); beep(900, 0.05, 'triangle', 0.04);
-          } else { if (Math.abs(this.vx) > 1.5) spark(this.x, this.y + s.h / 2, '#ddd', 8, 1.2); this.vx = -this.vx * 0.7; }
-        } else { this.vx = 0; this.wall = side; this.wallT = 8; }
+          } else {
+            if (Math.abs(this.vx) > 1.5) spark(this.x, this.y + s.h / 2, '#ddd', 8, 1.2);
+            if (this.vx * side < 0) this.vx = -this.vx * 0.7;   /* thrown against the island, rim or rock: back out the way they came, never down under it */
+          }
+        } else { if (this.vx * side < 0) this.vx = 0; this.wall = side; this.wallT = 8; }
       }
     }
     /* Ledges. */
-    if (this.vy < 0 && this.ledgeCd === 0 && i.ly > -0.5 && (st === 'air' || st === 'helpless' || (st === 'attack' && this.move && this.move.ledge))) {
+    const snap = st === 'attack' && this.move && this.move.ledge && this.mf > (this.move.h[0] ? this.move.h[0].f1 : 8);   /* an up special past its hit takes the ledge on the way up too */
+    if ((this.vy < 0 || snap) && this.ledgeCd === 0 && i.ly > -0.5 && (st === 'air' || st === 'helpless' || (st === 'attack' && this.move && this.move.ledge))) {
       const side = sgn(this.x), out = Math.abs(this.x) - EDGE, hand = this.y + s.h, o = F[1 - this.idx];
       if (side && out > -1 && out < 13 && hand > -9 && hand < 9 && this.ledgeGrabs < 6) {
         if (o && o.state === 'ledge' && sgn(o.x) === side) { o.set('air'); o.vy = 1.3; o.vx = side * 0.9; o.ledgeCd = 45; o.invuln = 0; pop(o.x, o.y + 20, 'TRUMP', '#fff'); }
@@ -859,7 +871,7 @@ function updateProj() {
         }
       }
     }
-    if (p.x + p.r > MAIN.x0 && p.x - p.r < MAIN.x1 && p.y < -1 && p.y > -BODY_H) p.life = 0;
+    if (p.y < -1 && Math.abs(p.x) - p.r < stageHalf(p.y)) p.life = 0;   /* into the side or underside of the island */
   }
   PROJ = PROJ.filter(p => p.life > 0 && p.y > BLAST.b && Math.abs(p.x) < BLAST.r);
 }
@@ -914,7 +926,7 @@ function cpuBrain(f, o, m, L) {
     /* Getting back. Never drift in under the stage: when below its top and inside its edge, steer back out first.
        Use the side special only while still high and far out, the air jumps on the way down, and the up special last,
        pressed with the stick only slightly toward the stage so it is not read as a side special. */
-    const side = sgn(f.x) || 1, edge = EDGE + f.st.w / 2 + 2, under = f.y + f.st.h < -BODY_H + 4 && Math.abs(f.x) < edge, far = Math.abs(f.x) - EDGE;
+    const side = sgn(f.x) || 1, edge = EDGE + f.st.w / 2 + 2, under = false, far = Math.abs(f.x) - EDGE;   /* the island's underside slopes, so rising from beneath it just slides out to the ledge */
     i.lx = under ? side : (f.y > -3 || Math.abs(f.x) > edge + 1) ? -side : 0;   /* beside the wall and below the lip: stay off it and let the ledge or a jump do the work */
     if (f.state !== 'air' || m.t % 5 !== 0) return i;
     if (!f.sideUsed && f.form.moves.sspec.once && far > 36 && f.y > 14) { i.lx = -side; i.spc = true; return i; }

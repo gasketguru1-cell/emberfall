@@ -51,7 +51,7 @@ function drawStage() {
   const s = cam.s, x0 = SX(-EDGE), x1 = SX(EDGE), y = SY(0), bh = BODY_H * s, K = EDGE / 80;   /* the stage art was drawn for a half-width of 80 */
   g.lineJoin = 'round';
   const rg = g.createLinearGradient(0, y, 0, y + bh); rg.addColorStop(0, '#43374f'); rg.addColorStop(1, '#15111f');
-  g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.lineTo(x1, y + bh * 0.55); g.lineTo(SX(54 * K), y + bh * 0.8); g.lineTo(SX(38 * K), y + bh); g.lineTo(SX(-38 * K), y + bh); g.lineTo(SX(-54 * K), y + bh * 0.8); g.lineTo(x0, y + bh * 0.55); g.closePath();
+  g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.lineTo(x1, y + RIM * s); g.lineTo(SX(EDGE - SHOULDER_IN), y + SHOULDER * s); g.lineTo(SX(0), y + bh); g.lineTo(SX(-(EDGE - SHOULDER_IN)), y + SHOULDER * s); g.lineTo(x0, y + RIM * s); g.closePath();   /* the island's outline, the same as its collision */
   g.fillStyle = rg; g.fill(); g.strokeStyle = OL; g.lineWidth = 0.5 * s; g.stroke();
   g.strokeStyle = 'rgba(255,255,255,.07)'; g.lineWidth = 0.3 * s; g.beginPath();
   for (const q of [[-66, 4, -52, 15], [-34, 4, -24, 22], [6, 4, -4, 21], [30, 4, 42, 20], [64, 4, 55, 13], [-10, 12, -18, 23], [18, 10, 24, 23]]) { g.moveTo(SX(q[0] * K), y + q[1] * s); g.lineTo(SX(q[2] * K), y + q[3] * s); }

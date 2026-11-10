@@ -112,7 +112,7 @@ vm.runInThisContext(`
   {
     const res = {};
     for (const [name, P] of [['Nib', NIB], ['Flint', FL]]) {
-      const [a, b] = setup(P, FL, -40, 0); airborne(a, EDGE + a.st.w / 2 + 0.3, -26); let best = -9, touched = false;
+      const [a, b] = setup(P, FL, -40, 0); airborne(a, stageHalf(Math.min(-26 + a.st.h, 0)) + a.st.w / 2 + 0.3, -26); let best = -9, touched = false;   /* beside the sloping rock, below the ledge's reach */
       SCRIPT[0] = (i, tt) => { if (tt < 8) i.lx = -1; else if (tt === 8) i.lx = 0; else if (tt < 12) i.lx = 1; };
       run(16, () => { best = Math.max(best, a.vy); if (a.wallT > 0) touched = true; });
       res[name] = best; res[name + 'Touched'] = touched;
@@ -310,6 +310,20 @@ vm.runInThisContext(`
     SCRIPT[0] = (i, tt) => { if ((tt >= 2 && tt < 4) || (tt >= len + 12 && tt < len + 14)) { i.ly = -1; i.spc = true; } };
     run(len + 30, () => { n++; if (f.state === 'attack' && f.mname === 'dspec') { if (n < len + 8) { if (y0 === null) y0 = f.y; drop1 = Math.max(drop1, y0 - f.y); frames1++; } else { if (!second) { second = true; y0 = f.y; } drop2 = Math.max(drop2, y0 - f.y); } } });
     check(name + ': down special hangs in the air, once', frames1 >= len - 2 && drop1 < 0.01 && second && drop2 > 5 && (A === FL || f.fi !== fi0), 'first use: ' + frames1 + ' frames, fell ' + drop1.toFixed(1) + '; second use before landing: fell ' + drop2.toFixed(1));
+  }
+
+  /* ---- Under the island: nothing to hit a head on. An up special from anywhere beneath it slides out and takes the ledge ---- */
+  {
+    const res = [];
+    for (const [name, A] of [['Flint', FL], ['Nib', NIB], ['Loom', LOOM], ['Hod', HOD]]) for (const x of [6, 30, 55, -42]) {
+      const [f] = setup(A, FL, 0, 0); F[1].x = -10; airborne(f, x, -58); f.jumps = 0; let stuck = 0, end = null, lastY = f.y;
+      SCRIPT[0] = (i, tt) => { if (tt >= 1 && tt < 3) { i.ly = 1; i.spc = true; } };
+      run(260, () => { if (f.vy > 0.5 && f.y <= lastY + 0.01) stuck++; lastY = f.y; if (end === null && (f.state === 'ledge' || f.grounded)) end = f.state === 'ledge' ? 'ledge' : 'stage'; if (f.state === 'dead' && end === null) end = 'lost'; });
+      res.push({ name, x, end, stuck });
+    }
+    const failed = res.filter(r => r.end !== 'ledge' && r.end !== 'stage'), blocked = res.filter(r => r.stuck > 0);
+    check('island: an up special from underneath always gets out', failed.length === 0, failed.length ? failed.map(r => r.name + ' from x ' + r.x + ' -> ' + r.end).join(', ') : res.length + ' starts beneath the island, all reached the ledge or the stage');
+    check('island: rising under it is never stopped', blocked.length === 0, blocked.length ? blocked.map(r => r.name + ' from x ' + r.x + ' held for ' + r.stuck + ' frames').join(', ') : 'no frame with upward speed and no upward movement');
   }
 
   const softPlats = PLATS.splice(1);   /* the movement checks run on the bare main stage, so no jump lands on a platform */

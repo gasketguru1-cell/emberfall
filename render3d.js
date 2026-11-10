@@ -1,7 +1,7 @@
 /* Emberfall 3D renderer (Three.js). It only reads the simulation: fighters, projectiles, camera. It never writes to it.
    A fighter with an entry in assets/manifest.json is drawn as its rigged model, posed every frame from the simulation's
    own frame counters (see anim.js). Fighters without a model yet are grey-box capsules. */
-/* global W, H, TAU, clamp, MAIN, EDGE, PLATS, BODY_H, F, PROJ, cam, SHK, frame, tick, mode, cv, animState */
+/* global W, H, TAU, clamp, MAIN, EDGE, PLATS, BODY_H, RIM, DEPTH, SHOULDER, SHOULDER_IN, F, PROJ, cam, SHK, frame, tick, mode, cv, animState */
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
@@ -46,7 +46,7 @@ function build() {
 
   /* ---- stage ---- */
   const stone = new THREE.MeshStandardMaterial({ color: 0x4d4260, roughness: 0.95, flatShading: true });
-  const bodyShape = new THREE.Shape([[-80, 0], [80, 0], [80, -13], [54, -19], [38, -BODY_H], [-38, -BODY_H], [-54, -19], [-80, -13]].map(p => new THREE.Vector2(p[0] * EDGE / 80, p[1])));   /* drawn for a half-width of 80, scaled to the stage */
+  const bodyShape = new THREE.Shape([[-EDGE, 0], [EDGE, 0], [EDGE, -RIM], [EDGE - SHOULDER_IN, -SHOULDER], [0, -DEPTH], [-(EDGE - SHOULDER_IN), -SHOULDER], [-EDGE, -RIM]].map(p => new THREE.Vector2(p[0], p[1])));   /* the island's outline, the same as its collision in sim.js */
   const body = new THREE.Mesh(new THREE.ExtrudeGeometry(bodyShape, { depth: 44, bevelEnabled: false }), stone); body.position.z = -22; body.castShadow = body.receiveShadow = true; scene.add(body);
   const planks = tex(1024, 256, (g, w, h) => { g.fillStyle = '#b7a087'; g.fillRect(0, 0, w, h); for (let x = 0; x < w; x += 64) { g.fillStyle = (x / 64) % 2 ? 'rgba(0,0,0,.05)' : 'rgba(255,255,255,.04)'; g.fillRect(x, 0, 64, h); g.fillStyle = 'rgba(40,28,30,.55)'; g.fillRect(x, 0, 3, h); } for (let k = 0; k < 500; k++) { g.fillStyle = 'rgba(60,40,30,' + (Math.random() * 0.12).toFixed(3) + ')'; g.fillRect(Math.random() * w, Math.random() * h, 1 + Math.random() * 26, 1); } });
   planks.wrapS = planks.wrapT = THREE.RepeatWrapping; planks.repeat.set(2, 1);
