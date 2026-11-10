@@ -42,13 +42,14 @@ function drawSelect() {
   g.textAlign = 'center'; g.font = 'bold 22px system-ui, sans-serif'; g.fillStyle = '#fff';
   if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) g.fillText('Press Start (Enter) to fight', W / 2, 556);
   g.font = '15px system-ui, sans-serif'; g.fillStyle = '#cfc8e8';
-  g.fillText("Controller: stick move · A attack · B special · X/Y jump · ZL/ZR shield · L/R grab · right stick smash · + start · − swaps the A/B layout", W / 2, 586);
-  g.fillText("Keyboard: arrows move (Shift = walk) · Z attack · X special · C/V jump · Q/W shield · A/S grab · I J K L smash · Enter start", W / 2, 607);
-  g.fillText("Jump then shield with a direction to wavedash · flick down to drop through platforms · release shield just before a hit to parry · mash to break a grab", W / 2, 628);
-  g.fillText("Jump + attack together for a short-hop aerial · hold attack to chain jabs (Nib keeps a flurry going) · tilt the stick slightly up or down to angle a forward tilt", W / 2, 649);
-  g.fillText("Grab out of a dash reaches further, out of a turn further still · jump on a head to spring off it · Nib can kick off the stage wall · shield just before a wall or the floor to tech", W / 2, 670);
-  g.fillText("Jump button on this screen: tap jump on or off (flick up to jump) · the ledge protects longer after a long fall, less when damaged · above 100% getting up is slower", W / 2, 691);
-  g.fillStyle = '#8f88aa'; g.fillText('Tools: B shows hitboxes · P freezes · O steps one frame · M switches 2D / 3D', W / 2, 712);
+  g.fillText("Controller: stick move · A attack · B special · X/Y jump · ZL/ZR shield · L/R grab · right stick smash · + start · − swaps the A/B layout", W / 2, 582);
+  g.fillText("Keyboard: arrows move (Shift = walk) · Z attack · X special · C/V jump · Q/W shield · A/S grab · I J K L smash · Enter start", W / 2, 601);
+  g.fillText("Jump then shield with a direction to wavedash · flick down to drop through platforms · release shield just before a hit to parry · mash to break a grab", W / 2, 620);
+  g.fillText("Jump + attack together for a short-hop aerial · hold attack to chain jabs (Nib keeps a flurry going) · tilt the stick slightly up or down to angle a forward tilt", W / 2, 639);
+  g.fillText("Grab out of a dash reaches further, out of a turn further still · jump on a head to spring off it · Nib can kick off the stage wall · shield just before a wall or the floor to tech", W / 2, 658);
+  g.fillText("A worn shield leaves the head or feet open: tilt the stick gently to move it · back + attack out of a run turns and strikes · above 100% getting up from the ledge is slower", W / 2, 677);
+  g.fillText("Jump button on this screen: tap jump on or off (flick up to jump) · the ledge protects longer after a long fall and less when damaged", W / 2, 696);
+  g.fillStyle = '#8f88aa'; g.fillText('Tools: B shows hitboxes · P freezes · O steps one frame · M switches 2D / 3D', W / 2, 715);
 }
 function drawDebugText() {
   if (!DBG.boxes && !DBG.step) return;

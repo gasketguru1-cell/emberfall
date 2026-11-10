@@ -185,7 +185,7 @@ function drawFighter(f, three) {
   if (f.state === 'attack' && f.move && f.move.h[0] && f.move.h[0].grab && f.mf >= 5 && f.mf <= 10) { g.strokeStyle = '#fff'; g.lineWidth = 0.8 * s; g.beginPath(); g.moveTo(x + 3 * s * f.face, y - 7 * s); g.lineTo(x + 11 * s * f.face, y - 7 * s); g.stroke(); }
   if (f.charge > 0 && (frame >> 1) % 2) { g.strokeStyle = '#ffd166'; g.lineWidth = 2; g.beginPath(); g.arc(x, y - st.h * s / 2, (st.h * 0.7 + f.charge * 0.05) * s, 0, TAU); g.stroke(); }
   if (!three && (f.state === 'shield' || f.state === 'shieldstun')) {
-    const r = (4 + f.shieldHp / 50 * 6) * s; g.fillStyle = f.idx ? 'rgba(110,180,255,.45)' : 'rgba(255,125,110,.45)'; g.beginPath(); g.arc(x, y - st.h * s / 2, r, 0, TAU); g.fill();
+    const sc = shieldCircle(f); g.fillStyle = f.idx ? 'rgba(110,180,255,.45)' : 'rgba(255,125,110,.45)'; g.beginPath(); g.arc(SX(sc[0]), SY(sc[1]), sc[2] * s, 0, TAU); g.fill();
     g.strokeStyle = 'rgba(255,255,255,.7)'; g.lineWidth = 2; g.stroke();
   }
   if (f.state === 'broken') { g.fillStyle = '#ffe066'; for (let k = 0; k < 3; k++) { const a = frame * 0.15 + k * TAU / 3; g.beginPath(); g.arc(x + Math.cos(a) * 5 * s, y - (st.h + 3) * s + Math.sin(a) * 1.5 * s, 0.9 * s, 0, TAU); g.fill(); } }

@@ -14,7 +14,7 @@ vm.runInThisContext(`
   for (const a of forms) { M[a[2]] = {}; for (const b of forms) M[a[2]][b[2]] = 0; }
   for (const f of forms) S[f[2]] = { wins: 0, games: 0, started: 0, hits: 0, dmg: 0, koAt: [], frames: 0, byMove: {} };
   const _apply = applyHit, _start = Fighter.prototype.startMove, _ko = Fighter.prototype.ko;
-  applyHit = function (a, v, h, face, srcX, proj) { const p0 = v.pct, st0 = v.state; _apply(a, v, h, face, srcX, proj); if (v.pct > p0) { const s = S[a.form.name]; s.hits++; s.dmg += v.pct - p0; const k = h.id ? h.id.split(':')[1] : a.mname; s.byMove[k] = (s.byMove[k] || 0) + 1; v.lastHit = [a.form.name, k]; } };
+  applyHit = function (a, v, h, face, srcX, proj, poke) { const p0 = v.pct, st0 = v.state; _apply(a, v, h, face, srcX, proj, poke); if (v.pct > p0) { const s = S[a.form.name]; s.hits++; s.dmg += v.pct - p0; const k = h.id ? h.id.split(':')[1] : a.mname; s.byMove[k] = (s.byMove[k] || 0) + 1; v.lastHit = [a.form.name, k]; } };
   Fighter.prototype.startMove = function (n) { if (!this.form.moves[n].swap) { const s = S[this.form.name]; s.started++; s.tried = s.tried || {}; s.tried[n] = (s.tried[n] || 0) + 1; } return _start.call(this, n); };
   Fighter.prototype.ko = function () { const s = S[this.form.name]; if (this.lastHit) { const k = S[this.lastHit[0]]; k.kills = k.kills || {}; k.kills[this.lastHit[1]] = (k.kills[this.lastHit[1]] || 0) + 1; this.lastHit = null; } s.koAt.push(this.pct); s.zone = s.zone || { top: 0, side: 0, bottom: 0, launched: 0, fell: 0 }; s.zone[this.y > BLAST.t ? 'top' : this.y < BLAST.b ? 'bottom' : 'side']++; s.zone[this.state === 'hurt' ? 'launched' : 'fell']++; return _ko.call(this); };
   for (const A of forms) for (const B of forms) for (let m = 0; m < ${per}; m++) {

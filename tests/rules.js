@@ -179,6 +179,26 @@ vm.runInThisContext(`
     check('tap jump: off by default, on jumps', off === 0 && full > 30 && short > 8 && short < full - 10, 'height reached: off ' + off.toFixed(1) + ', held ' + full.toFixed(1) + ', flicked ' + short.toFixed(1));
   }
 
+  /* ---- Shield: a worn shield leaves the feet open to a low attack unless it is tilted down to cover them ---- */
+  {
+    const low = (hp, tilt) => { const [a, v] = setup(FL, FL, 0, 9); v.shieldHp = hp; let res = null;
+      SCRIPT[1] = (i, tt) => { i.shd = true; i.ly = tilt; };
+      SCRIPT[0] = (i, tt) => { if (tt < 12) i.ly = -1; if (tt >= 10 && tt < 12) i.atk = true; };
+      run(40, () => { if (res === null && (v.pct > 0 || v.state === 'shieldstun' || v.state === 'broken')) res = v.state + (v.pct > 0 ? ' hit' : v.state === 'broken' ? ' shield broke' : ' blocked'); }); return res + ' (' + a.mname + ')'; };
+    const full = low(50, 0), worn = low(14, 0), tilted = low(14, -0.5);
+    check('shield: a full shield blocks a low attack', /blocked/.test(full), full);
+    check('shield: a worn shield gets poked at the feet', /hurt hit/.test(worn), worn);
+    check('shield: tilting the worn shield down covers them', /blocked/.test(tilted), tilted);
+  }
+  /* ---- Attacking while turning out of a run gives a turnaround tilt or smash, not a dash attack ---- */
+  {
+    const turn = back => { const [f] = setup(FL, FL, -40, 60); let got = null;
+      SCRIPT[0] = (i, tt) => { if (tt < 30) i.lx = 1; else if (tt < 32) { i.lx = back; i.atk = true; } };
+      run(40, () => { if (got === null && f.state === 'attack') got = f.mname + ' facing ' + (f.face > 0 ? 'right' : 'left'); }); return got; };
+    const tilt = turn(-0.7), smash = turn(-1);
+    check('run: back + attack is a turnaround tilt or smash', tilt === 'ftilt facing left' && smash === 'fsmash facing left', 'gentle: ' + tilt + ' | hard: ' + smash);
+  }
+
   let bad = 0; for (const [ok, name, detail] of results) { if (!ok) bad++; console.log((ok ? 'pass  ' : 'FAIL  ') + name.padEnd(48) + detail); }
   console.log(bad ? bad + ' of ' + results.length + ' checks failed' : 'all ' + results.length + ' rule checks pass');
   if (bad) process.exitCode = 1;

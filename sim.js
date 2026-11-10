@@ -311,7 +311,8 @@ class Fighter {
   groundAttack(moving) {
     const c = this.ctl, i = c.c; let n;
     const fwd = Math.abs(i.lx) > 0.3 && Math.abs(i.lx) > Math.abs(i.ly) * 1.6;   /* mostly sideways counts as forward, angled by the rest */
-    if (moving && this.state === 'dash' && this.sf <= 5 && c.xSmash && Math.abs(i.ly) < 0.5) n = 'fsmash';
+    if (moving && i.lx * this.face < -0.5 && Math.abs(i.ly) < 0.5) { this.face = -this.face; this.vx *= 0.4; n = c.xSmash ? 'fsmash' : 'ftilt'; }   /* attacking while turning out of a run: a turnaround tilt or smash, not a dash attack */
+    else if (moving && this.state === 'dash' && this.sf <= 5 && c.xSmash && Math.abs(i.ly) < 0.5) n = 'fsmash';
     else if (moving && Math.abs(i.ly) < 0.5) n = 'dash';
     else if (i.ly > 0.5 && !fwd) n = c.ySmash ? 'usmash' : 'utilt';
     else if (i.ly < -0.5 && !fwd) n = c.ySmash ? 'dsmash' : 'dtilt';
@@ -658,6 +659,16 @@ function hurtRect(v) {
   else if (v.state === 'jsq' || v.state === 'land') h *= 0.86;
   return [v.x - w / 2, v.y, v.x + w / 2, v.y + h];
 }
+/* The shield bubble shrinks as the shield wears down and can be shifted a little with the stick, so a worn shield leaves
+   the head or feet uncovered unless it is tilted to cover them. */
+const SHIELD_TILT = 3;
+function shieldCircle(v) { const i = v.ctl.c; return [v.x + clamp(i.lx, -1, 1) * SHIELD_TILT, v.y + v.st.h / 2 + clamp(i.ly, -1, 1) * SHIELD_TILT, 4 + v.shieldHp / SHIELD.hp * 6]; }
+/* Does an attack centred at (hx, hy) reach a part of a shielding fighter's body that the bubble does not cover? */
+function pokes(v, hx, hy) {
+  if (v.state !== 'shield' && v.state !== 'shieldstun') return false;
+  const [x0, y0, x1, y1] = hurtRect(v), [sx, sy, sr] = shieldCircle(v), px = clamp(hx, x0, x1), py = clamp(hy, y0, y1);
+  return Math.hypot(px - sx, py - sy) > sr + 0.5;
+}
 /* Would this launch carry the victim past a blast zone before it could recover? Used only for the lethal-hit effect. */
 function wouldKO(v) {
   if (v.grounded) return false;
@@ -673,7 +684,7 @@ function wouldKO(v) {
 }
 let slowT = 0, focus = null;   /* slow motion and camera focus after a hit that will take the last stock */
 function canBeHit(v) { return v.invuln === 0 && v.state !== 'dead' && v.state !== 'respawn' && v.state !== 'held'; }
-function applyHit(a, v, h, face, srcX, proj) {
+function applyHit(a, v, h, face, srcX, proj, poke) {
   const hx = v.x, hy = v.y + v.st.h / 2;
   if (h.grab) {
     if (v.state === 'held' || v.state === 'hold' || a.state !== 'attack' || !a.grounded) return;   /* a grab that traded with a hit loses */
@@ -687,7 +698,8 @@ function applyHit(a, v, h, face, srcX, proj) {
     v.set('idle'); v.invuln = 4; if (!proj) { a.hitlag = 16; a.parriedBy = v; }
     spark(hx, hy, '#fff', 20, 2); pop(hx, hy + 12, 'PARRY', '#fff'); beep(1200, 0.12, 'triangle', 0.07, 1.3); return;
   }
-  if (v.state === 'shield' || v.state === 'shieldstun') {
+  if (poke) pop(hx, hy + 12, 'POKE', '#9cf');   /* the hit found a part of the body the shield no longer covers */
+  if ((v.state === 'shield' || v.state === 'shieldstun') && !poke) {
     v.shieldHp -= d * SHIELD.dmg;
     const sm = proj ? SHIELD.stun.proj : a.move && a.move.air ? SHIELD.stun.air : a.move && a.move.chg ? SHIELD.stun.smash : SHIELD.stun.ground;
     if (v.shieldHp <= 0) v.breakShield(); else { v.stunT = Math.floor(d * sm) + 2; v.set('shieldstun'); v.vx = (sgn(v.x - srcX) || face) * (0.3 + d * 0.04); }
@@ -747,13 +759,13 @@ function resolveHits() {
       for (const h of a.move.h) {
         if (a.mf < h.f0 || a.mf > h.f1) continue; const gid = h.g || 0; if (a.hitG.has(gid)) continue;
         if (h.grab && (!a.grounded || v.grabImm > 0)) continue;
-        if (circRect(a.x + h.x * a.face, hitY(a, h), h.r, ...hurtRect(v))) { ev.push([a, v, h, a.face, a.x, false]); a.hitG.add(gid); break; }
+        if (circRect(a.x + h.x * a.face, hitY(a, h), h.r, ...hurtRect(v))) { ev.push([a, v, h, a.face, a.x, false, !h.grab && pokes(v, a.x + h.x * a.face, hitY(a, h))]); a.hitG.add(gid); break; }
       }
     }
   }
   for (const p of PROJ) {
     const v = F[1 - p.owner];
-    if (p.life > 0 && canBeHit(v) && circRect(p.x, p.y, p.r, ...hurtRect(v))) { ev.push([F[p.owner], v, p.h, p.face, p.x, true]); p.life = 0; }
+    if (p.life > 0 && canBeHit(v) && circRect(p.x, p.y, p.r, ...hurtRect(v))) { ev.push([F[p.owner], v, p.h, p.face, p.x, true, pokes(v, p.x, p.y)]); p.life = 0; }
   }
   for (const e of ev) applyHit(...e);
 }
