@@ -79,6 +79,19 @@ function drawSelect(three) {
   g.font = 'bold 14px system-ui, sans-serif'; spaced(4); g.fillStyle = '#f3dfb6'; g.fillText('3 STOCKS   ·   8 MINUTES   ·   THE FORGE ISLE', W / 2 + 2, 138); spaced(0);
   for (const dir of [-1, 1]) { q = g.createLinearGradient(W / 2 + dir * 250, 0, W / 2 + dir * 430, 0); q.addColorStop(0, 'rgba(255,170,90,.85)'); q.addColorStop(1, 'rgba(255,170,90,0)'); g.fillStyle = q; g.fillRect(dir > 0 ? W / 2 + 250 : W / 2 - 430, 132, 180, 2); }
 
+  /* ---- the roster: one portrait tile for each fighter, with each player's marker on the one they are on ---- */
+  { const n = ROSTER.length, tw = Math.min(168, (W - 120) / n - 12), th = 124, gap = 12, x0 = (W - (n * tw + (n - 1) * gap)) / 2, y0 = 158;
+    ROSTER.forEach((d, k) => { const x = x0 + k * (tw + gap), fm = d.forms[d.forms.length > 1 ? Math.floor(t / 170) % (d.cycle || d.forms.length) : 0], on = [0, 1].filter(q => slots[q] && slots[q].pick === k);
+      q = g.createLinearGradient(0, y0, 0, y0 + th); q.addColorStop(0, 'rgba(46,38,72,.92)'); q.addColorStop(1, 'rgba(18,15,32,.94)'); g.fillStyle = q; rr(x, y0, tw, th, 10); g.fill();
+      g.save(); rr(x, y0, tw, th, 10); g.clip(); g.fillStyle = fm.col[0]; g.globalAlpha = 0.16; g.beginPath(); g.arc(x + tw / 2, y0 + th * 0.62, tw * 0.46, 0, TAU); g.fill(); g.globalAlpha = 1;
+      const k2 = Math.min(5.2, 74 / (fm.st.h + 3)); g.translate(x + tw / 2, y0 + th - 30); g.scale(k2, -k2); ART[fm.name](fm.col, frame + k * 30, null); g.restore();
+      g.fillStyle = 'rgba(10,8,20,.82)'; rr(x, y0 + th - 26, tw, 26, 10); g.fill(); g.fillRect(x, y0 + th - 26, tw, 10);
+      g.textAlign = 'center'; g.font = 'bold 14px system-ui, sans-serif'; g.fillStyle = on.length ? '#fff' : '#d8d2ee'; g.fillText(d.name, x + tw / 2, y0 + th - 8);
+      g.strokeStyle = 'rgba(255,255,255,.14)'; g.lineWidth = 1; rr(x, y0, tw, th, 10); g.stroke();
+      on.forEach((pk, m) => { const pc = PC[pk], sl = slots[pk], pulse = sl.ready ? 1 : 0.65 + 0.35 * Math.sin(t * 0.12 + pk); g.globalAlpha = pulse; g.strokeStyle = pc; g.lineWidth = 4; rr(x - 3 - m * 5, y0 - 3 - m * 5, tw + 6 + m * 10, th + 6 + m * 10, 12 + m * 3); g.stroke(); g.globalAlpha = 1;
+        const bx = pk ? x + tw - 44 : x + 6; g.fillStyle = pc; rr(bx, y0 + 6, 38, 20, 10); g.fill(); g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#16121f'; g.fillText(sl.ready ? 'P' + (pk + 1) + ' ✓' : 'P' + (pk + 1), bx + 19, y0 + 20); });
+    }); }
+
   /* ---- player cards ---- */
   for (let k = 0; k < 2; k++) {
     const sl = slots[k], cw = 460, ch = 158, x = k ? W - 44 - cw : 44, y = 446, pc = PC[k];
@@ -110,7 +123,7 @@ function drawSelect(three) {
     if (!three) d.forms.slice(0, d.cycle || 99).forEach((fm, n) => { g.save(); g.translate(x + cw - 60 - (d.forms.length - 1 - n) * 62, y + 112); g.scale(3.4, -3.4); ART[fm.name](same ? fm.alt : fm.col, frame, null); g.restore(); });
     g.textAlign = 'right';
     if (sl.ready) { g.fillStyle = '#9be564'; rr(x + cw - 108, y + 118, 88, 26, 13); g.fill(); g.font = 'bold 14px system-ui, sans-serif'; spaced(2); g.fillStyle = '#12200c'; g.textAlign = 'center'; g.fillText('READY', x + cw - 63, y + 136); spaced(0); }
-    else if (three || d.forms.length === 1) { g.font = '13px system-ui, sans-serif'; g.fillStyle = '#cfc8e8'; g.fillText('Left / Right  ·  Attack to confirm', x + cw - 20, y + 136); }
+    else if ((three || d.forms.length === 1) && (d.cycle || d.forms.length) < 4) { g.font = '13px system-ui, sans-serif'; g.fillStyle = '#cfc8e8'; g.fillText('Left / Right  ·  Attack to confirm', x + cw - 20, y + 136); }
   }
 
   /* ---- start prompt, between the cards ---- */

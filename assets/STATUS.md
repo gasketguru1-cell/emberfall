@@ -89,6 +89,10 @@ Measured with tests/combat-audit.js (movement timings, how near and far each att
 - **Balance after all of it** (two seeds of 2,940 matches): Flint 49 and 51%, Nib 52 and 51%, Loom 49 and 49%, Hod 49 and 50%, Potato Sack 50 and 51%, Sprocket 51 and 47%, Scuttle 50 and 52%.
 - **Not done:** hitboxes do not track a bone frame by frame through a swing; the shape is fixed for the active frames. Hurtboxes are still one box per fighter. Nothing here was tried by a person, and none of it is measured against the reference build itself running.
 
+## Fighter select (2026-11-10)
+
+- The start screen shows the roster as a row of portrait tiles (drawn with each fighter's 2D picture), with a P1 and P2 marker on the tile each player is on and a tick when they have confirmed. Choosing is unchanged: Left / Right, Attack to confirm, Special to go back. The layout is Emberfall's own; it follows the usual portrait-grid idea, not another game's art.
+
 ## Hit sparks switch (2026-11-10)
 
 - The start screen has a second switch under Hitboxes: Hit sparks. Off, a hit throws no sparks and no flash of light where it lands (KO hits included); damage, launch, sound and the hit freeze are unchanged. Shield button on the start screen, or the H key at any time. Remembered (stored as emberfall.hitfx), on by default.
