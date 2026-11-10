@@ -238,7 +238,7 @@ const WREN = {
     /* Loom: a kite spirit. Floaty with long ribbons. */
     name: 'Loom', col: ['#7b5cd6', '#f08fc0', '#fdf0ff'], alt: ['#2d7dd2', '#f7d154', '#f0fbff'],
     /* Floaty zoner: light, slow on the ground, drifts well, falls slowly, three small air jumps, long slow ribbon grab. */
-    st: { weight: 83, walk: 1.0, dash: 1.7, run: 1.5, airSpeed: 1.16, airAcc: 0.065, grav: 0.062, fall: 1.15, ffall: 1.85, jump: 2.6, shop: 1.6, djump: 2.3, jsq: 3, trac: 0.07, w: 8, h: 15,
+    st: { weight: 80, walk: 1.0, dash: 1.7, run: 1.5, airSpeed: 1.16, airAcc: 0.065, grav: 0.062, fall: 1.15, ffall: 1.85, jump: 2.6, shop: 1.6, djump: 2.3, jsq: 3, trac: 0.07, w: 8, h: 15,
       jumps: 3, dashF: 16, roll: [32, 1.15, 14], spot: [24, 16] },
     moves: mk(1.3, 1.0, 1.1, 1.05, {
       nspec: { t: 46, h: [{ f0: 14, f1: 17, x: 14, y: 9, r: 5, d: 7, a: 361, b: 30, k: 80 }, { f0: 14, f1: 17, x: 24, y: 9, r: 5, d: 10, a: 361, b: 30, k: 95 }] },
@@ -273,6 +273,11 @@ for (const def of ROSTER) for (const fm of def.forms) {
   if (fm.reachMul) for (const k in fm.moves) { const mv = fm.moves[k]; if (mv && Array.isArray(mv.h)) for (const h of mv.h) if (!h.grab) h.r = Math.round(h.r * fm.reachMul * 10) / 10; }
   const ft = fm.moves.ftilt.h[0]; fm.aiRange = Math.round(ft.x + ft.r * 0.5 + 3);
   fm.aiTempo = fm.moves.ftilt.t / 27;   /* quick fighters attack more often, slow ones less */
+  /* How high the up special and an air jump carry, found by running the up special on a stand-in. The CPU uses these so it
+     never recovers itself into the top blast zone. */
+  const u = fm.moves.uspec, d = { vx: 0, vy: 0, grounded: false, plat: null, face: 1 }; let y = 0, top = 0;
+  for (let n = 1; n <= 120; n++) { if (n <= u.t && u.on) u.on(d, n, { lx: 0, ly: 0 }); d.vy = Math.max(d.vy - fm.st.grav, -fm.st.fall); y += d.vy; top = Math.max(top, y); }
+  fm.aiRise = top; fm.aiHop = fm.st.djump * fm.st.djump / (2 * fm.st.grav);
 }
 
 /* ---------- Fighter ---------- */
@@ -833,8 +838,9 @@ function cpuInput(f, o, m) {
     if (f.state !== 'air' || m.t % 5 !== 0) return i;
     if (!f.sideUsed && f.form.moves.sspec.once && far > 36 && f.y > 14) { i.lx = -side; i.spc = true; return i; }
     if (f.vy < 0 && !under) {
-      if (f.jumps > 0 && (f.y < 8 || far > 50)) i.jmp = true;
-      else if (f.jumps === 0 && (f.y < -4 || far > 40)) { i.lx = -side * 0.35; i.ly = 1; i.spc = true; }
+      const roof = BLAST.t - 28;   /* when launched high, fall first: rising from up there would go out through the top */
+      if (f.jumps > 0) { if ((f.y < 8 || far > 50) && f.y + f.form.aiHop < roof) i.jmp = true; }
+      else if ((f.y < -4 || far > 40) && f.y + f.form.aiRise < roof) { i.lx = -side * 0.35; i.ly = 1; i.spc = true; }
     }
     return i;
   }
@@ -870,7 +876,7 @@ function cpuInput(f, o, m) {
     else if (Math.abs(dn[0]) < 6 && dn[1] < -11 && dn[1] > -26 && f.vy > -0.7) { m.cd = 40; i.cy = -1; }   /* only with room to finish the attack before landing */
     else if (Math.abs(fw[0]) < (f.form.aiRange || 14) + 2 && Math.abs(fw[1]) < 8 && room) { m.cd = 30; i.cx = sgn(fw[0]) || dir; }
   }
-  if (dy > 20 && f.jumps > 0 && f.vy < 0 && m.t % 20 === 0) i.jmp = true;
+  if (dy > 20 && f.jumps > 0 && f.vy < 0 && m.t % 20 === 0 && f.y + f.form.aiHop < BLAST.t - 28) i.jmp = true;
   return i;
 }
 

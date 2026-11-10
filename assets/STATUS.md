@@ -65,10 +65,10 @@ Spent so far: 237 credits (Flint 135, companions 102). The daily limit was raise
 | `npm test` | six seeded CPU matches looking for broken states, then `tests/rules.js`, then a 20-match `tests/fuzz.js` | passes |
 | `tests/rules.js` | 41 scripted checks of single rules with exact inputs, including the movement rules from platforms.ini and the match clock | all pass |
 | `tests/fuzz.js` | both fighters driven by random sticks and buttons; looks for crashes, broken numbers, impossible or stuck states | about 880,000 frames of random against random and 730,000 with the CPU on one side in a quarter of the matches, clean |
-| `tests/stats.js` | CPU-versus-CPU balance per form: wins, damage, KO percent, where stocks are lost, who beats whom | over three seeds of 960 matches each: Flint 49 to 54%, Nib 50 to 53%, Loom 49 to 51%, Hod 46 to 50%; average KO percent Hod 165, Flint 164, Nib 154, Loom 149 |
+| `tests/stats.js` | CPU-versus-CPU balance per form: wins, damage, KO percent, where stocks are lost, who beats whom | over three seeds of 960 matches each: Flint 48 to 50%, Nib 48 to 53%, Loom 49 to 53%, Hod 47 to 50%; average KO percent Hod 165, Flint 165, Nib 155, Loom 154 |
 | `tests/kotable.js` | KO percent of every hit | see Rules |
 | `tests/recovery.js` | CPU recovery from six spots off stage per form | 24 of 24 get back |
-| `tests/deaths.js` | traces of stocks lost without being in hitstun | Hod loses about a quarter of its stocks to short recoveries after long launches |
+| `tests/deaths.js` | traces of stocks lost without being in hitstun | found three CPU mistakes on 2026-11-09 (a ledge regrab loop, a tech press that became an air dodge, recovering out through the top), all fixed; what remains is long launches at high percent |
 | `tools/audit.js` (in the game) | distance from each hitbox to the nearest limb tip while the attack is active, measured through the real renderer | 178 checks (89 hitboxes, facing right and left); only pivot grabs are over 3 units (3.2 to 3.5), by design |
 
 ## Not checked by anyone yet
