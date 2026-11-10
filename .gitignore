@@ -1,3 +1,7 @@
 node_modules/
 assets/*/raw/
 *.blend1
+
+# secrets never belong in the project
+*.key
+.env*

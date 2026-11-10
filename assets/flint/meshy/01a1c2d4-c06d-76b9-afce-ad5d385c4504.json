@@ -1,0 +1,30 @@
+{
+  "character": "flint",
+  "endpoint": "text-to-image",
+  "params": {
+    "ai_model": "nano-banana-2",
+    "prompt": "Full-body character design for a stylised 3D video game, an original character: a lamplighter. Sturdy adult man, clean-shaven, warm brown skin, calm friendly expression. Long teal greatcoat with a flared hem and brass buttons, amber scarf, wide-brimmed slightly battered teal hat with an amber band, dark trousers, heavy brown work boots, fingerless gloves. Empty open hands, no props. Chunky stylised proportions with large hands and boots, clean readable shapes, smooth surfaces, hand-painted look. Front view, symmetrical, arms held away from the body, legs slightly apart. Soft even studio lighting, plain light grey background, no text, no cast shadows.",
+    "pose_mode": "a-pose"
+  },
+  "estimate": 6,
+  "consumed": 6,
+  "files": [
+    "assets/flint/raw/01a1c2d4-c06d-76b9-afce-ad5d385c4504/image_urls.0.png"
+  ],
+  "task": {
+    "id": "01a1c2d4-c06d-76b9-afce-ad5d385c4504",
+    "type": "text-to-image",
+    "ai_model": "nano-banana-2",
+    "prompt": "Full-body character design for a stylised 3D video game, an original character: a lamplighter. Sturdy adult man, clean-shaven, warm brown skin, calm friendly expression. Long teal greatcoat with a flared hem and brass buttons, amber scarf, wide-brimmed slightly battered teal hat with an amber band, dark trousers, heavy brown work boots, fingerless gloves. Empty open hands, no props. Chunky stylised proportions with large hands and boots, clean readable shapes, smooth surfaces, hand-painted look. Front view, symmetrical, arms held away from the body, legs slightly apart. Soft even studio lighting, plain light grey background, no text, no cast shadows.",
+    "status": "SUCCEEDED",
+    "progress": 100,
+    "created_at": 1794270085711,
+    "started_at": 1794270085733,
+    "finished_at": 1794270101412,
+    "expires_at": 1794529301412,
+    "image_urls": [
+      "https://assets.meshy.ai/9b63c3ed-0b38-42c8-922f-bcc56f30de31/uploads/image_01a1c2d4-c06d-76b9-afce-ad5d385c4504_0.png"
+    ],
+    "consumed_credits": 6
+  }
+}
