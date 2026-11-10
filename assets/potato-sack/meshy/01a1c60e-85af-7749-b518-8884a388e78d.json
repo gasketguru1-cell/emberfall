@@ -1,0 +1,29 @@
+{
+  "character": "potato-sack",
+  "endpoint": "text-to-image",
+  "params": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "Full-body character design for a stylised 3D video game, an original character: a living sack of potatoes from a forge town. A squat, lumpy sack of coarse brown jute burlap, wider at the bottom than the top, tied shut at the top with a frayed rope so the gathered cloth makes a floppy tuft. The two bottom corners are knotted into stubby feet and the two upper corners are knotted into small round fists that stick out at the sides. A large square leather patch is stitched onto its belly with thick uneven thread, and a faded stencilled potato emblem sits beside it. Its face is sewn on: two mismatched buttons for eyes, one large brass button and one smaller wooden button, and a short zigzag stitched mouth with a confident grin. Two real potatoes with small green sprouts peek out of a tear near its shoulder. Soot smudges and a few scorched threads. Chunky stylised proportions, clean readable shapes, hand-painted look. Front view, standing upright, fists held away from the body, feet slightly apart. Soft even studio lighting, plain light grey background, no text, no cast shadows."
+  },
+  "estimate": 4,
+  "consumed": 4,
+  "files": [
+    "assets/potato-sack/raw/01a1c60e-85af-7749-b518-8884a388e78d/image_urls.0.png"
+  ],
+  "task": {
+    "id": "01a1c60e-85af-7749-b518-8884a388e78d",
+    "type": "text-to-image",
+    "ai_model": "nano-banana-2-1",
+    "prompt": "Full-body character design for a stylised 3D video game, an original character: a living sack of potatoes from a forge town. A squat, lumpy sack of coarse brown jute burlap, wider at the bottom than the top, tied shut at the top with a frayed rope so the gathered cloth makes a floppy tuft. The two bottom corners are knotted into stubby feet and the two upper corners are knotted into small round fists that stick out at the sides. A large square leather patch is stitched onto its belly with thick uneven thread, and a faded stencilled potato emblem sits beside it. Its face is sewn on: two mismatched buttons for eyes, one large brass button and one smaller wooden button, and a short zigzag stitched mouth with a confident grin. Two real potatoes with small green sprouts peek out of a tear near its shoulder. Soot smudges and a few scorched threads. Chunky stylised proportions, clean readable shapes, hand-painted look. Front view, standing upright, fists held away from the body, feet slightly apart. Soft even studio lighting, plain light grey background, no text, no cast shadows.",
+    "status": "SUCCEEDED",
+    "progress": 100,
+    "created_at": 1794324202956,
+    "started_at": 1794324202970,
+    "finished_at": 1794324223112,
+    "expires_at": 1794583423112,
+    "image_urls": [
+      "https://assets.meshy.ai/9b63c3ed-0b38-42c8-922f-bcc56f30de31/uploads/image_01a1c60e-85af-7749-b518-8884a388e78d_0.png"
+    ],
+    "consumed_credits": 4
+  }
+}
