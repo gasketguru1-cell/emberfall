@@ -17,7 +17,7 @@ Standing instructions from the owner (2026-11-09, about 9 pm): keep working with
 2. [x] **Check the rules not yet verified**: wall tech, hitlag nudges, attacks putting out projectiles, Hod's armour. Fix what fails.
 3. [x] **Audit every hitbox against its animation** in the game: for each attack, distance from the hitbox to the nearest striking limb at the active frames; fix any that are more than about 3 units off.
 4. [x] **More universal mechanics**: ledge protection that shrinks with air time and damage, slower ledge get-ups above 100%, held-attack rapid jabs where it suits the fighter, angled forward tilts, a tap-jump option.
-5. [x] **Replace stand-in clips** for the companions (roll, spot dodge, air dodge, grab hold, being held, ledge hang) with clips keyed in `tools/blender/companions.js`. No credits needed.
+5. [x] **Replace stand-in clips** for the companions (roll, spot dodge, air dodge, grab hold, being held, ledge hang) with clips keyed in `tools/blender/companions.js`. No credits needed. Done for ledge hang, spot dodge, grab hold and being held; roll and air dodge keep the curled tumble on purpose.
 6. [x] **Hit effects and stage** in the 3D renderer: hit sparks and launch trails drawn in 3D, a bigger KO burst, more background depth.
 7. [ ] **Flint's coat**: add coat and scarf bones in Blender so they follow through and the boot stops clipping.
 8. [x] **Select screen**: update the help lines for the new rules (jab chains, footstool, wall jump, dash grab).
