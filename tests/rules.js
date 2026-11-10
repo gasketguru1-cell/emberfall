@@ -124,7 +124,7 @@ vm.runInThisContext(`
 
   /* ---- Ledge protection: more after a long time in the air, less when damaged ---- */
   {
-    const grab = (airT, pct) => { const [f] = setup(FL, FL, 0, -40); airborne(f, EDGE + f.st.w / 2 + 3, -6); f.vy = -0.5; f.airT = airT; f.pct = pct; let inv = null; run(6, () => { if (f.state === 'ledge' && inv === null) { inv = f.invuln; return false; } }); return inv; };
+    const grab = (airT, pct) => { const [f] = setup(FL, FL, 0, -40); airborne(f, EDGE + f.st.w / 2 + 3, -6); f.vy = -0.5; f.airT = airT; f.pct = pct; let inv = null; let open = 0; run(12, () => { if (f.state === 'ledge') { if (f.invuln === 0 && f.sf <= 2) open++; if (f.sf === 2 && inv === null) { inv = f.invuln + 2; return false; } } }); grab.open = open; return inv; };
     const short = grab(20, 0), long = grab(300, 0), worn = grab(20, 120);
     check('ledge: protection grows with air time, shrinks with damage', short !== null && long > short + 15 && worn < short - 10 && worn >= 7, 'frames protected: short hop ' + short + ', long fall ' + long + ', at 120% ' + worn);
   }
@@ -294,7 +294,7 @@ vm.runInThisContext(`
   }
 
   /* ---- Flint's and Wren's down specials hang in the air until they finish, once per time off the ground ---- */
-  for (const [name, A, len, y0s, again] of [['Flint', FL, 49, 60, 61], ['Wren (Nib)', NIB, 32, 150, 70]]) {   /* again: when the second press comes (Wren must wait out the swap lockout) */
+  for (const [name, A, len, y0s, again] of [['Flint', FL, 49, 60, 61], ['Wren (Nib)', NIB, 32, 125, 70]]) {   /* again: when the second press comes (Wren must wait out the swap lockout) */
     const [f] = setup(A, FL, 0, 50); airborne(f, 0, y0s); f.vy = -1; const fi0 = f.fi; let y0 = null, drop1 = 0, frames1 = 0, drop2 = 0, second = false, n = 0;
     SCRIPT[0] = (i, tt) => { if ((tt >= 2 && tt < 4) || (tt >= again && tt < again + 2)) { i.ly = -1; i.spc = true; } };
     run(again + 24, () => { n++; if (f.state === 'attack' && f.mname === 'dspec') { if (n < again - 2) { if (y0 === null) y0 = f.y; drop1 = Math.max(drop1, y0 - f.y); frames1++; } else { if (!second) { second = true; y0 = f.y; } drop2 = Math.max(drop2, y0 - f.y); } } });
@@ -527,6 +527,20 @@ vm.runInThisContext(`
       check('Scuttle: Bucket Drop on the floor hits for 13%', ground > 14.5 && ground < 17, 'target at ' + ground.toFixed(1) + '%');
       check('Scuttle: the air dive falls at 1.4 times fast fall and thumps where it lands', near(d1.maxDown / st.ffall, 1.4, 0.03) && d1.pct > 11 && d1.pct < 13.5, 'fell at ' + (d1.maxDown / st.ffall).toFixed(2) + ' times fast fall; a target standing beside the landing took ' + d1.pct.toFixed(1) + '% (10% before the bonus)');
       check('Scuttle: the dive sends an airborne target straight down', d2.pct > 13 && d2.pct < 16.5 && d2.vyHit < -1, 'target in the air took ' + d2.pct.toFixed(1) + '%, sent ' + (d2.vyHit < 0 ? 'down' : 'up')); }
+  }
+
+  /* ---- Combat audit (2026-11-10): strike shapes, sweeping, the ledge's open frames, the run turnaround ---- */
+  {
+    const [sp, o1] = setup(SPR, FL, 0, 7); sp.startMove('utilt'); run(30); const [sp2, o2] = setup(SPR, FL, 0, 30); sp2.startMove('utilt'); run(30);
+    check('audit: an up tilt hits someone standing beside the attacker, and still misses out of reach', o1.pct > 0 && o2.pct === 0, 'beside: ' + o1.pct.toFixed(1) + '%, 30 away: ' + o2.pct.toFixed(1) + '%');
+    const reach = name => { let far = 0; for (let d = 6; d <= 30; d++) { const [a, b] = setup(FL, FL, 0, d); a.startMove(name); run(30); if (b.pct > 0) far = d; } return far; };
+    check('audit: covering the limb does not lengthen an attack', reach('ftilt') <= 16 && reach('fsmash') <= 19, 'Flint forward tilt reaches ' + reach('ftilt') + ', forward smash ' + reach('fsmash'));
+    const [fa, fb] = setup(FL, FL, 0, 30); PROJ.push({ x: 20, y: 7, vx: 14, vy: 0, grav: 0, life: 5, owner: 0, face: 1, r: 1.5, ground: 'die', plat: null, kind: 'bolt', h: { d: 3, a: 45, b: 10, k: 10, id: 'test' } }); run(3);
+    check('audit: a fast shot cannot pass through a body between frames', fb.pct > 0, 'a shot moving 14 a frame at a body 8 wide: ' + (fb.pct > 0 ? 'hit' : 'passed through'));
+    const [g1] = setup(FL, FL, 0, -40); airborne(g1, EDGE + g1.st.w / 2 + 3, -6); g1.vy = -0.5; let open = 0, shut = 0; run(14, () => { if (g1.state === 'ledge') { if (g1.invuln === 0) open++; else shut++; } });
+    check('audit: a ledge grab can be hit for its first two frames', open === 2 && shut > 5, open + ' open frames, then protected');
+    const [r1] = setup(FL, FL, -50, 60); let back = -1; SCRIPT[0] = (i, tt) => { i.lx = tt < 2 ? 0 : tt < 50 ? 1 : tt === 50 ? 0 : -1; }; run(110, () => { if (back < 0 && t > 51 && r1.vx <= -r1.st.run * 0.9) back = t - 51; });
+    check('audit: turning round out of a full run takes a skid', back >= 14 && back <= 30, back + ' frames to be running the other way');
   }
 
   const softPlats = PLATS.splice(1);   /* the movement checks run on the bare main stage, so no jump lands on a platform */

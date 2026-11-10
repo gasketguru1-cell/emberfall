@@ -275,7 +275,7 @@ function drawDebug() {
     const hr = hurtRect(f); g.strokeStyle = f.invuln > 0 ? '#55ccff' : '#ffee00'; g.strokeRect(SX(hr[0]), SY(hr[3]), (hr[2] - hr[0]) * s, (hr[3] - hr[1]) * s);
     if (f.state === 'attack' && f.move) for (const h of f.move.h) if (f.mf >= h.f0 && f.mf <= h.f1) {
       g.fillStyle = h.grab ? 'rgba(200,80,255,.45)' : 'rgba(255,40,40,.45)'; g.strokeStyle = h.grab ? '#cc55ff' : '#ff3333';
-      g.beginPath(); g.arc(SX(f.x + h.x * f.face), SY(hitY(f, h)), h.r * s, 0, TAU); g.fill(); g.stroke();
+      for (const c of hitCircles(f, h, 0)) { g.beginPath(); g.arc(SX(c[0]), SY(c[1]), c[2] * s, 0, TAU); g.fill(); g.stroke(); }
     }
   }
   for (const p of PROJ) { g.fillStyle = 'rgba(255,40,40,.35)'; g.strokeStyle = '#ff3333'; g.beginPath(); g.arc(SX(p.x), SY(p.y), p.r * s, 0, TAU); g.fill(); g.stroke(); }

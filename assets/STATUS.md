@@ -62,6 +62,20 @@ Spent so far: 385 credits (Flint 135, companions 102, stage 38, Potato Sack 34, 
 - Each companion has its own ledge hang, spot dodge, grab hold and being-held clips. Roll and air dodge use the curled tumble with a spin, on purpose.
 - Follow-through: tails, ears and ribbons are simulated in `render3d.js` (`springs` in the manifest). It is stepped by the game clock, so freezing the game freezes it.
 
+## Combat audit (2026-11-10, branch combat-audit)
+
+Measured with tests/combat-audit.js (movement timings, how near and far each attack hits, holes, frames the attacker is ahead after a starter, reach at the ledge). Hitstun (0.4 x knockback), hit freeze, launch speed and its decay already matched the reference and were left alone, as were the input thresholds (the owner's own platforms.ini values) and wavedashing.
+
+- **Strike shapes.** A hitbox used to be one circle at the tip of the limb or tool. Now a strike whose tip is clear of the body also covers the 45% of the way back toward the body (three circles, hitCircles in sim.js); outer reach is unchanged. Found by: Sprocket's up tilt and up air could not hit someone standing beside him, and Nib's up tilt only hit behind. Moves with a weaker part near the body keep that part instead.
+- **Sweeping.** Hits are also checked halfway between frames when attacker and target close by more than a hitbox's radius in one frame, and fast shots halfway along their path. A shot moving 14 a frame used to pass through an 8-wide body.
+- **Combos.** The extra recovery added for CPU balance (TUNE lag) had been applied to every normal; Flint's forward tilt was 22 frames behind on hit at 20% and his down tilt 1 behind. It now applies only to smashes and dash attacks. Down throws got a set pop that barely grows (Flint +4 to +11 frames ahead at 20%). Launch power was retuned to keep balance.
+- **Run turnaround.** Reversing out of a full run took 7 frames to be at 90% speed the other way. The dash back now waits for the skid to bleed the run to a quarter (about 17 frames). Jump, attack, shield and grab out of the skid are unchanged, and so is dash dancing inside a dash.
+- **Ledge.** A ledge grab had its protection from the first frame; now the first two frames can be hit. A hanger's head and hands count 3 units above the lip, so every forward smash can reach one (Flint's and Nib's could not).
+- **Ceiling.** Top blast zone 200 to 140 (owner's request), camera limits to match.
+- **Show Hitboxes** is the start-screen switch's label; off by default, remembered, X / Y on the start screen or the B key at any time. It draws the new strike shapes.
+- **Balance after all of it** (two seeds of 2,940 matches): Flint 49 and 51%, Nib 52 and 51%, Loom 49 and 49%, Hod 49 and 50%, Potato Sack 50 and 51%, Sprocket 51 and 47%, Scuttle 50 and 52%.
+- **Not done:** hitboxes do not track a bone frame by frame through a swing; the shape is fixed for the active frames. Hurtboxes are still one box per fighter. Nothing here was tried by a person, and none of it is measured against the reference build itself running.
+
 ## Hit sparks switch (2026-11-10)
 
 - The start screen has a second switch under Hitboxes: Hit sparks. Off, a hit throws no sparks and no flash of light where it lands (KO hits included); damage, launch, sound and the hit freeze are unchanged. Shield button on the start screen, or the H key at any time. Remembered (stored as emberfall.hitfx), on by default.

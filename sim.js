@@ -45,7 +45,7 @@ function stageHalf(y) {
   if (y > 0 || y < -DEPTH) return -1; if (y >= -RIM) return EDGE;
   return y >= -SHOULDER ? EDGE - SHOULDER_IN * (-RIM - y) / (SHOULDER - RIM) : (EDGE - SHOULDER_IN) * (DEPTH + y) / (DEPTH - SHOULDER);
 }
-const BLAST = { l: -(EDGE + 155), r: EDGE + 155, t: 200, b: -140 };   /* the same distance beyond the ledges as before the stage shrank */
+const BLAST = { l: -(EDGE + 155), r: EDGE + 155, t: 140, b: -140 };   /* the ceiling was 200 until 2026-11-10: lowered 30% at the owner's request */  //   /* the same distance beyond the ledges as before the stage shrank */
 
 /* ---------- Combat rules ---------- */
 const DMG_1V1 = 1.2;                 /* one-on-one damage bonus */
@@ -215,7 +215,7 @@ function mk(R, P, S, Y, special, kit) {
   /* Aerials land without lag before the hit comes out or once it is well over. */
   for (const k of ['nair', 'fair', 'bair', 'uair', 'dair']) m[k].ac = Math.max(...m[k].h.map(h => h.f1)) + F(9);
   const th = (d, a, b, k) => ({ d: Math.round(d * P * 10) / 10, a, b, k });
-  m.throws = { f: th(8, 45, 60, 60), b: th(9, 135, 60, 65), u: th(7, 88, 55, 55), d: th(5, 75, 45, 30) };
+  m.throws = { f: th(8, 45, 60, 60), b: th(9, 135, 60, 65), u: th(7, 88, 55, 55), d: th(5, 75, 62, 30) };   /* down throw: a set pop that barely grows, so it starts combos at any damage */
   /* Per-fighter kit: how many jabs chain, grab reach and speed, throw strengths, armoured moves. */
   kit = kit || {};
   if (kit.rapid) m.jabr = { t: F(6), rapid: 1, next: 'jab3', h: [hb(2, 3, 9.5, 8, 4.5, 0.8, 80, 16, 0, { hl: 2 })] };   /* a flurry of light hits that hold the target in place */
@@ -287,13 +287,13 @@ function applyKit(fm) {
 /* What the document leaves open, set by balance testing (CPU against CPU, 60 matches a pairing): kb scales how hard every
    hit and throw launches, lag scales the time after an attack's last active frame. */
 const TUNE = {
-  Flint: { kb: 0.88, lag: 1.2 }, Nib: { kb: 1.03 }, Loom: { kb: 1.06, lag: 0.95 }, Hod: { kb: 1.3, lag: 0.8 }, 'Potato Sack': { kb: 0.85 }, Sprocket: { kb: 0.85, lag: 1.3 }, Scuttle: { kb: 0.9, lag: 1.2 },
+  Flint: { kb: 0.84, lag: 1.2 }, Nib: { kb: 1.09 }, Loom: { kb: 1.11, lag: 0.95 }, Hod: { kb: 1.31, lag: 0.8 }, 'Potato Sack': { kb: 0.9 }, Sprocket: { kb: 0.8, lag: 1.3 }, Scuttle: { kb: 0.91, lag: 1.2 },
 };
 const NORMALS = ['jab', 'jab2', 'jab3', 'dash', 'ftilt', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash', 'nair', 'fair', 'bair', 'uair', 'dair'];
 function applyTune(fm) {
   const T = TUNE[fm.name], mv = fm.moves; if (!T) return;
   if (T.kb) { for (const k in mv) { const m = mv[k]; if (m && Array.isArray(m.h)) for (const h of m.h) if (h.k) h.k = Math.round(h.k * T.kb); } for (const k in mv.throws) mv.throws[k].k = Math.round(mv.throws[k].k * T.kb); }
-  if (T.lag) for (const k of NORMALS) { const m = mv[k]; if (!m || !m.h || !m.h[0]) continue; const last = Math.max(...m.h.map(x => x.f1)); m.t = last + Math.max(6, Math.round((m.t - last) * T.lag)); }
+  if (T.lag) for (const k of ['dash', 'fsmash', 'usmash', 'dsmash']) {   /* committal moves only: tilts, jabs and aerials keep their recovery, so hits lead to follow-ups */ const m = mv[k]; if (!m || !m.h || !m.h[0]) continue; const last = Math.max(...m.h.map(x => x.f1)); m.t = last + Math.max(6, Math.round((m.t - last) * T.lag)); }
 }
 
 /* ---------- Fighters (all original) ---------- */
@@ -352,7 +352,7 @@ const WREN = {
         on(f, n, i) { if (n < 8) hang(f); if (n === 8) { const diag = Math.abs(i.lx) > 0.5; lift(f, f.st.vUp * (diag ? 0.84 : 1)); f.vx = diag ? sgn(i.lx) * 2.0 : i.lx * 0.6; } } },
       dspec: SWAP,
     }, { jabs: 3, grab: { t: 26, h: { f0: 5, f1: 7, x: 6.5, r: 4 } }, dgrab: { t: 34, h: { f0: 7, f1: 9, x: 8.5, r: 4.2 } }, pgrab: { t: 36, h: { f0: 8, f1: 10, x: 9.5, r: 4.2 } },
-      throws: { f: { b: 45, k: 45 }, b: { b: 50, k: 50 }, u: { b: 48, k: 28 }, d: { a: 70, b: 40, k: 22 } } }),
+      throws: { f: { b: 45, k: 45 }, b: { b: 50, k: 50 }, u: { b: 48, k: 28 }, d: { a: 70, b: 58, k: 22 } } }),
   }, {
     /* Loom: ribbon spacer. Wants the opponent at the far end of a ribbon; light, and slow up close. */
     name: 'Loom', col: ['#7b5cd6', '#f08fc0', '#fdf0ff'], alt: ['#2d7dd2', '#f7d154', '#f0fbff'],
@@ -375,7 +375,7 @@ const WREN = {
         on(f, n, i) { if (n === 9) { lift(f, 1.87); f.thermal = true; } if (n > 9 && n <= 26 && f.thermal) { if (n > 13 && !i.spc) { f.thermal = false; f.vy = 0.3; } else { f.vy = 1.87; f.vx = i.lx * 0.8; } } if (n === 27 && f.thermal) { f.thermal = false; f.vy = 0.3; } } },   /* the climb ends with the lift: no coasting on */
       dspec: SWAP,
     }, { jabs: 2, grab: { t: 44, h: { f0: 12, f1: 15, x: 13, r: 4.5 } }, dgrab: { t: 52, h: { f0: 14, f1: 17, x: 15, r: 4.5 } }, pgrab: { t: 54, h: { f0: 15, f1: 18, x: 16.5, r: 4.5 } },
-      throws: { f: { a: 40, b: 60, k: 55 }, b: { b: 60, k: 60 }, u: { a: 90, b: 70, k: 60 }, d: { a: 60, b: 50, k: 25 } } }),
+      throws: { f: { a: 40, b: 60, k: 55 }, b: { b: 60, k: 60 }, u: { a: 90, b: 70, k: 60 }, d: { a: 60, b: 60, k: 25 } } }),
   }, {
     /* Hod: armoured ground bully. Takes ground behind a rolling stone; once off the stage it can really be lost. */
     name: 'Hod', col: ['#6d6a75', '#a39171', '#f1f1f1'], alt: ['#8a4f3d', '#3d5a6c', '#f1f1f1'],
@@ -449,7 +449,7 @@ const SACK = {
         if (f.burstKind === 'stall' && n > 6 && n <= 20 && !f.grounded) { f.vy = 0; f.vx *= 0.9; }
       } },
     }, { jabs: 1, grab: { t: 34, h: { f0: 7, f1: 9, x: 9.5, r: 4.8 } },
-      throws: { f: { d: 9, b: 60, k: 58 }, b: { d: 10, b: 60, k: 62 }, u: { d: 8, b: 58, k: 60 }, d: { d: 6, a: 70, b: 48, k: 30 }, s: { d: 10, a: 48, b: 68, k: 58 } } }),
+      throws: { f: { d: 9, b: 60, k: 58 }, b: { d: 10, b: 60, k: 62 }, u: { d: 8, b: 58, k: 60 }, d: { d: 6, a: 70, b: 60, k: 30 }, s: { d: 10, a: 48, b: 68, k: 58 } } }),
   }],
 };
 /* Sprocket: the forge town's handyman, a wrench-range brawler (the owner's moveset document). Jumping over the tape roll
@@ -525,6 +525,15 @@ for (const def of ROSTER) for (const fm of def.forms) {
   applyKit(fm); applyTune(fm);
   /* where an attack has a weaker part near the body, that part is tried first: a close target takes the weak hit, and only a well-spaced one takes the tip */
   for (const k in fm.moves) { const m = fm.moves[k]; if (m && Array.isArray(m.h) && m.h.some(x => x.part === 'near')) m.hp = m.h.filter(x => x.part === 'near').concat(m.h.filter(x => x.part !== 'near')); }
+}
+/* Strike shapes (combat audit, 2026-11-10).
+   - A strike whose tip is clear of the body also covers the 45% of the way back toward the body's middle (h.in): the
+     arm, leg or tool hits, not only its end. Moves that already have a weaker part near the body keep that instead. */
+for (const def of ROSTER) for (const fm of def.forms) for (const k in fm.moves) {
+  const m = fm.moves[k], st = fm.st; if (!m || !Array.isArray(m.h) || k === 'throws') continue; const sour = m.h.some(h => h.part === 'near');
+  for (const h of m.h) { if (h.grab || h.wind || h.away || h.airOnly && h.a > 180) continue;
+    const cx = 0, cy = st.h * 0.5, d = Math.hypot(h.x - cx, h.y - cy); if (sour || d < h.r + 2) continue;
+    h.in = [Math.round((h.x + (cx - h.x) * 0.45) * 10) / 10, Math.round((h.y + (cy - h.y) * 0.45) * 10) / 10]; }
 }
 /* Reach by archetype (hitbox size only, grabs excluded), and the distance the CPU likes to attack from. */
 for (const def of ROSTER) for (const fm of def.forms) {
@@ -777,7 +786,11 @@ class Fighter {
         break;
       }
       case 'brake':   /* skidding to a stop out of a run; a back flick here is a dash back */
-        this.vx = appr(this.vx, 0, s.trac); if (this.groundActs(false)) break;
+        this.vx = appr(this.vx, 0, s.trac);
+        /* Turning round out of a full run takes a skid first: the dash back waits until the run has bled off to 40% (about
+           ten frames). Everything else (jump, attack, shield, grab) is free at once, and dash dancing inside a dash is untouched. */
+        if (c.dashDir && c.dashDir * this.vx < 0 && Math.abs(this.vx) > s.run * 0.25) { c.xFired = false; c.xT = 0; c.dashDir = 0; }
+        if (this.groundActs(false)) break;
         if (this.sf >= 12 || this.vx === 0) this.set('idle');
         break;
       case 'jsq':
@@ -907,6 +920,7 @@ class Fighter {
       }
       case 'ledge': {
         const side = sgn(this.x); this.vx = this.vy = 0;
+        if (this.sf === 2 && this.ledgeInv) { this.invuln = Math.max(this.invuln, this.ledgeInv - 2); this.ledgeInv = 0; }   /* the protection starts on the third frame: the grab itself can be hit */
         if (this.sf > 8) {
           const toward = -side * i.lx, slow = this.pct >= 100;   /* worn down: every way up is slower and less protected */
           if (c.take('jmp')) { this.vy = s.vJump * 1.05; this.vx = -side * 0.7; this.ledgeCd = 30; this.set('air'); }
@@ -975,7 +989,7 @@ class Fighter {
         if (o && o.state === 'ledge' && sgn(o.x) === side) { o.set('air'); o.vy = 1.3; o.vx = side * 0.9; o.ledgeCd = 45; o.invuln = 0; pop(o.x, o.y + 20, 'TRUMP', '#fff'); }
         this.ledgeGrabs++; this.shortHop = false;
         this.x = side * (EDGE + hw + 0.5); this.y = -s.h + 1; this.vx = this.vy = 0; this.face = -side; this.move = null; this.ff = false;
-        this.jumps = s.jumps || 1; this.wallJumps = 0; this.airdodged = false; this.sideUsed = false; this.stalled = false; if (!this.ledgeUsed) { this.invuln = clamp(Math.round(24 + Math.min(this.airT, 300) * 0.1 - Math.min(this.pct, 120) * 0.17), 8, 54); this.ledgeUsed = true; }   /* longer in the air earns more, damage takes it away */
+        this.jumps = s.jumps || 1; this.wallJumps = 0; this.airdodged = false; this.sideUsed = false; this.stalled = false; this.ledgeInv = 0; if (!this.ledgeUsed) { this.ledgeInv = clamp(Math.round(24 + Math.min(this.airT, 300) * 0.1 - Math.min(this.pct, 120) * 0.17), 8, 54); this.ledgeUsed = true; }   /* longer in the air earns more, damage takes it away */
         this.set('ledge'); beep(700, 0.04, 'triangle', 0.03);
       }
     }
@@ -985,6 +999,21 @@ class Fighter {
 /* ---------- Combat ---------- */
 const AIM_Y = 3.2;   /* how far an angled forward tilt lifts or lowers its hitbox */
 function hitY(a, h) { return a.y + h.y + (a.aim || 0) * AIM_Y; }
+/* The circles a hitbox is made of this frame, in the world. Most strikes are a run of three from near the body (h.in) out
+   to the tip (h.x, h.y), so the whole arm, leg or tool hits and not only its end; the reach is the tip's, unchanged.
+   back = 0 is where the attacker is now; back = 1 is where it was a frame ago, used to sweep fast moves. */
+function hitCircles(a, h, back) {
+  const ox = a.x - (back ? (a.x - a.px) * back : 0), oy = a.y - (back ? (a.y - a.py) * back : 0) + (a.aim || 0) * AIM_Y, tx = ox + h.x * a.face, ty = oy + h.y;
+  if (!h.in) return [[tx, ty, h.r]];
+  const ix = ox + h.in[0] * a.face, iy = oy + h.in[1]; return [[ix, iy, h.r], [(ix + tx) / 2, (iy + ty) / 2, h.r], [tx, ty, h.r]];
+}
+/* Does this hitbox touch that body? Checked where both are now and, if they closed more than a hitbox's width since the
+   last frame, at the halfway point too, so nothing fast passes through between frames. */
+function hitTouches(a, h, v) {
+  const rel = Math.hypot((a.x - a.px) - (v.x - v.px), (a.y - a.py) - (v.y - v.py)), steps = rel > h.r && rel < 12 ? [0, 0.5] : [0];   /* a jump of 12 or more is a placement (ledge, respawn), not movement */
+  for (const b of steps) { const r = hurtRect(v), sx = (v.x - v.px) * b, sy = (v.y - v.py) * b; for (const c of hitCircles(a, h, b).reverse()) if (circRect(c[0], c[1], c[2], r[0] - sx, r[1] - sy, r[2] - sx, r[3] - sy)) return c; }
+  return null;
+}
 function knock(v, d, b, k) { const p = v.pct; return ((((p / 10 + p * d / 20) * 200 / (v.st.weight + 100) * 1.4) + 18) * k / 100) + b; }
 function circRect(cx, cy, r, x0, y0, x1, y1) { const dx = cx - clamp(cx, x0, x1), dy = cy - clamp(cy, y0, y1); return dx * dx + dy * dy <= r * r; }
 /* The body's hittable box. It shrinks when crouching or lying down, which is how a crouch slips under high attacks. */
@@ -992,6 +1021,7 @@ function hurtRect(v) {
   const st = v.st; let w = st.w, h = st.h;
   if (v.grounded && v.state === 'idle' && v.ctl.c.ly < CROUCH_Y) h *= 0.62;
   else if (v.state === 'down') { h *= 0.42; w *= 1.4; }
+  else if (v.state === 'ledge') return [v.x - w / 2, v.y, v.x + w / 2, v.y + h + 3];   /* head and hands show above the lip */
   else if (v.state === 'jsq' || v.state === 'land') h *= 0.86;
   return [v.x - w / 2, v.y, v.x + w / 2, v.y + h];
 }
@@ -1080,6 +1110,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke) {
   thwack(kb);
 }
 function resolveHits() {
+  for (const f of F) { if (f.px === undefined) { f.px = f.x; f.py = f.y; } }
   const ev = [];
   /* Attacks meeting attacks. Two ground attacks whose hitboxes touch cancel out, with both fighters recoiling, when their
      damage is within 9 of each other; otherwise only the weaker one recoils. An attack that touches an enemy projectile
@@ -1107,13 +1138,13 @@ function resolveHits() {
         if (a.mf < h.f0 || a.mf > h.f1) continue; const gid = h.g || 0; if (a.hitG.has(gid)) continue;
         if (h.grab && ((!a.grounded && !h.cmd) || v.grabImm > 0 || (h.floor && !(a.grounded && v.grounded)))) continue;
         if ((h.airOnly && a.grounded) || (h.gndOnly && !a.grounded)) continue;   /* a hit that only exists in the air, or only on the floor */   /* ordinary grabs are for the ground; a leaping grab catches in the air; a floor grab needs both standing */
-        if (circRect(a.x + h.x * a.face, hitY(a, h), h.r, ...hurtRect(v))) { ev.push([a, v, h, a.face, a.x, false, !h.grab && pokes(v, a.x + h.x * a.face, hitY(a, h))]); a.hitG.add(gid); break; }
+        const at = hitTouches(a, h, v); if (at) { ev.push([a, v, h, a.face, a.x, false, !h.grab && pokes(v, at[0], at[1])]); a.hitG.add(gid); break; }
       }
     }
   }
   for (const p of PROJ) {
     const v = F[1 - p.owner];
-    if (p.life > 0 && canBeHit(v) && circRect(p.x, p.y, p.r, ...hurtRect(v))) { ev.push([F[p.owner], v, p.h, p.face, p.x, true, pokes(v, p.x, p.y)]); p.life = 0; }
+    if (p.life > 0 && canBeHit(v) && (circRect(p.x, p.y, p.r, ...hurtRect(v)) || (Math.hypot(p.vx, p.vy) > p.r && circRect(p.x - p.vx / 2, p.y - p.vy / 2, p.r, ...hurtRect(v))))) {   /* and halfway back along a fast shot's path */ ev.push([F[p.owner], v, p.h, p.face, p.x, true, pokes(v, p.x, p.y)]); p.life = 0; }
   }
   for (const e of ev) applyHit(...e);
 }
@@ -1322,6 +1353,7 @@ function stepPlay() {
   if (paused) return;
   if (slowT > 0) { slowT--; if (slowT % 3) return; }   /* one step in three while the finishing hit plays out */
   frame++;
+  for (const f of F) { f.px = f.x; f.py = f.y; }   /* where each was before this frame, for sweeping hits */
   for (const f of F) f.update();
   jostle();
   updateProj(); resolveHits();
@@ -1338,7 +1370,7 @@ function stepPlay() {
 }
 /* Camera numbers, in stage units. padX/padUp/padDown: room kept round each fighter. min/max: how far out and in it may zoom
    (pixels per unit). lx/ly: how far off stage a fighter is still followed. ex/ey: the furthest the edge of the view may reach. */
-const CAM = { padX: 30, padUp: 34, padDown: 14, min: 2.3, max: 8.6, lx: EDGE + 120, ly0: -105, ly1: 160, ex: EDGE + 160, ey0: -135, ey1: 205 };
+const CAM = { padX: 30, padUp: 34, padDown: 14, min: 2.3, max: 8.6, lx: EDGE + 120, ly0: -105, ly1: 112, ex: EDGE + 160, ey0: -135, ey1: 145 };
 function stepFx() {
   for (const p of PART) { p.x += p.vx; p.y += p.vy; p.vx *= 0.94; p.vy *= 0.94; p.life--; }
   PART = PART.filter(p => p.life > 0); for (const p of POPS) { p.y += 0.25; p.life--; } POPS = POPS.filter(p => p.life > 0);
