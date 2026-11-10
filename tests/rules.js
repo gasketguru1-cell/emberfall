@@ -408,14 +408,22 @@ vm.runInThisContext(`
   }
   {
     /* tumble: slide on the ground, lift, dive, and cutting it short */
-    const tum = (air, dirs, extra, n) => { const [f, o] = setup(SACK, FL, -40, 50); if (air) airborne(f, -40, 40); const x0 = f.x, y0 = f.y; let top = y0, seen = [], hurt = false, cut = null;
+    const tum = (air, dirs, extra, n) => { const [f, o] = setup(SACK, FL, -40, 50); if (air) airborne(f, -40, air === true ? 40 : air); const x0 = f.x, y0 = f.y; let top = y0, seen = [], hurt = false, cut = null;
       SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 4) { i.ly = -1; i.spc = true; } else if (tt >= 4 && tt < 12) { i.lx = dirs[0]; i.ly = dirs[1]; } if (extra) extra(i, tt, f); };
       run(n || 70, () => { top = Math.max(top, f.y); if (seen[seen.length - 1] !== f.state) seen.push(f.state); if (o.pct > 0) hurt = true; if (cut === null && f.state === 'attack' && f.mname !== 'dspec') cut = { move: f.mname, vx: +Math.abs(f.vx).toFixed(2), at: t }; });
       return { dx: f.x - x0, rise: top - y0, seen: seen.join('>'), hurt, cut, used: f.burstUsed, kind: f.burstKind }; };
     const slide = tum(false, [1, 0]), lift = tum(true, [0, 1]), dive = tum(true, [1, 0]), hang = tum(true, [0, 0]);
     check('Potato Sack: tumble slides along the floor without hurting', slide.kind === 'slide' && slide.dx > 28 && !slide.hurt, 'slid ' + slide.dx.toFixed(1) + ' units (' + slide.seen + ')');
     check('Potato Sack: tumble lifts straight up in the air', lift.kind === 'lift' && lift.rise > 26 && lift.rise < 34 && Math.abs(lift.dx) < 4, 'rose ' + lift.rise.toFixed(1) + ', drifted ' + lift.dx.toFixed(1));
-    check('Potato Sack: a tumble dive that lands early ends flat on its back', dive.kind === 'dive' && /attack>down/.test(dive.seen), dive.seen);
+    const low = tum(3, [1, 0]), lands = [dive, low, tum(12, [1, 0]), tum(25, [1, 0]), tum(8, [0, 1]), tum(6, [0, 0])];
+    check('Potato Sack: a tumble dive that reaches the floor carries on as a slide', dive.kind === 'slide' && dive.dx > 30 && low.kind === 'slide' && low.dx > 20, 'from 40 up: went ' + dive.dx.toFixed(1) + ' (' + dive.seen + '); from 3 up: went ' + low.dx.toFixed(1) + ' (' + low.seen + ')');
+    check('Potato Sack: a tumble never ends on its back, from any height', lands.every(q => !/down/.test(q.seen)), lands.map(q => q.seen).join(' / '));
+    const quick = tum(false, [1, 0], (i, tt) => { if (tt >= 9 && tt < 11) i.atk = true; }), jumpOut = tum(false, [1, 0], (i, tt) => { if (tt >= 9 && tt < 11) i.jmp = true; }), shieldOut = tum(false, [1, 0], (i, tt) => { if (tt >= 9) i.shd = true; }, 24);
+    check('Potato Sack: any action comes out the frame after the burst', quick.cut && quick.cut.at <= 12 && quick.cut.vx > 2 && /attack>jsq/.test(jumpOut.seen) && /attack>shield/.test(shieldOut.seen), (quick.cut ? quick.cut.move + ' on frame ' + quick.cut.at + ' moving at ' + quick.cut.vx : 'no attack') + '; jump: ' + jumpOut.seen + '; shield: ' + shieldOut.seen);
+    const after = tum(12, [1, 0], (i, tt, f) => { if (f.grounded && f.burstKind === 'slide' && tt > 6) i.atk = true; }, 40);
+    check('Potato Sack: can act the moment a dive touches down', after.cut && !/down|land/.test(after.seen), after.cut ? after.cut.move + ' on frame ' + after.cut.at + ' (' + after.seen + ')' : 'no attack came out (' + after.seen + ')');
+    const turn = tum(false, [1, 0], (i, tt) => { if (tt >= 14) i.lx = -1; }, 30), keep = tum(false, [1, 0], (i, tt) => { if (tt >= 12) i.lx = 1; }, 30);
+    check('Potato Sack: a push the other way ends a slide, holding the same way does not', turn.dx < keep.dx - 8 && turn.kind === 'slide', 'turned back after ' + turn.dx.toFixed(1) + ' units, kept going for ' + keep.dx.toFixed(1));
     check('Potato Sack: tumble with no direction hangs in the air', hang.kind === 'stall' && hang.rise < 1, 'kind ' + hang.kind + ', rose ' + hang.rise.toFixed(1));
     const cut = tum(false, [1, 0], (i, tt) => { if (tt >= 19 && tt < 21) i.atk = true; });
     check('Potato Sack: a slide can be cut short into an attack, keeping speed', cut.cut && cut.cut.at < 30 && cut.cut.vx > 1, cut.cut ? cut.cut.move + ' on frame ' + cut.cut.at + ' still moving at ' + cut.cut.vx : 'no attack came out');

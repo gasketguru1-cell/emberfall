@@ -275,7 +275,7 @@ function applyKit(fm) {
 /* What the document leaves open, set by balance testing (CPU against CPU, 60 matches a pairing): kb scales how hard every
    hit and throw launches, lag scales the time after an attack's last active frame. */
 const TUNE = {
-  Flint: { kb: 0.9, lag: 1.2 }, Nib: { kb: 1.03 }, Loom: { kb: 1.06, lag: 0.95 }, Hod: { kb: 1.27, lag: 0.8 }, 'Potato Sack': { kb: 0.9 },
+  Flint: { kb: 0.9, lag: 1.2 }, Nib: { kb: 1.03 }, Loom: { kb: 1.06, lag: 0.95 }, Hod: { kb: 1.27, lag: 0.8 }, 'Potato Sack': { kb: 0.87 },
 };
 const NORMALS = ['jab', 'jab2', 'jab3', 'dash', 'ftilt', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash', 'nair', 'fair', 'bair', 'uair', 'dair'];
 function applyTune(fm) {
@@ -395,8 +395,9 @@ const WREN = {
 /* Potato Sack: a living sack of forge-town potatoes. A heavy trickster.
    - It moves in hops with a full stop between them (st.hop), so it cannot simply walk someone down.
    - Tumble (down special) is how it really gets about: a burst along the floor, up, or diagonally down in the air, or a
-     short hang with no direction. From frame 15 it can be cut short into any action, keeping its speed. Landing a dive
-     too early leaves it flat on its back. One use per time off the ground.
+     short hang with no direction. From the frame after the burst it can be cut short into any action, keeping its
+     speed, and a new push of the stick ends it too. It never falls over: a dive that reaches the floor carries on as a
+     slide, with no timing needed. One use per time off the ground.
    - Bag It (side special) is a leaping grab: it goes through shields and flings whoever it catches.
    - Hot Potato (up special) cooks a potato until it bursts: the blast hurts anyone close, and throws the sack upward
      with real knockback that it pays for in damage. The more hurt it is, the further it flies. One use per time off the ground.
@@ -421,7 +422,7 @@ const SACK = {
       nspec: FLINT.forms[0].moves.nspec,
       sspec: { t: 50, once: 1, nodrift: 1, ll: 14, h: [{ f0: 10, f1: 22, x: 7, y: 6, r: 6, grab: 1, cmd: 's', d: 0 }], on(f, n) { if (n === 8) { lift(f, 1.6); f.vx = f.face * 2.3; } } },
       uspec: { t: 40, rise: 40, blast: 1, h: [], on(f, n, i) { if (n < 16 && !f.grounded) f.vy = Math.max(f.vy, -0.5); if (n === 16) sackBlast(f, i); } },
-      dspec: { t: 38, burst: 1, cancel: 15, nodrift: 1, ll: 6, h: [], on(f, n, i) {
+      dspec: { t: 38, burst: 1, cancel: 7, nodrift: 1, h: [], on(f, n, i) {
         if (n === 1) { f.burstKind = ''; if (!f.grounded) f.burstUsed = true; }
         if (n < 6 && !f.grounded) { f.vy = Math.max(f.vy, -0.3); f.vx *= 0.9; }
         if (n === 6) {
@@ -430,6 +431,7 @@ const SACK = {
           else if (x && f.grounded) { f.burstKind = 'slide'; f.face = x; f.vx = x * 3.1; }
           else if (x) { f.burstKind = 'dive'; f.face = x; f.vx = x * 2.3; f.vy = -2.2; }
           else { f.burstKind = 'stall'; if (f.grounded) f.mf = f.move.t - 10; }
+          f.burstX = x; f.burstDown = i.ly < -0.5;   /* where the stick was when it went off: only a new push ends it */
           spark(f.x, f.y + 4, '#e6d3a6', 10, 1.4); beep(260, 0.07, 'triangle', 0.05, 1.8);
         }
         if (f.burstKind === 'stall' && n > 6 && n <= 20 && !f.grounded) { f.vy = 0; f.vx *= 0.9; }
@@ -485,7 +487,7 @@ class Fighter {
     this.move = null; this.mf = 0; this.charge = 0; this.hitG = new Set(); this.parriedBy = null; this.victim = null; this.lag = 0; this.flash = 0;
     this.stale = []; this.staled = false; this.staleM = 1; this.shortHop = false; this.moveSH = false; this.shMacro = false; this.grabImm = 0; this.ledgeGrabs = 0;
     this.dodgeStale = 0; this.dodgeT = 0; this.ds = 0; this.tumble = false; this.techT = 0; this.techLock = 0; this.pumT = 0; this.wdHold = false;
-    this.chargeT = 0; this.stalled = false; this.stallOk = false; this.cAir = null; this.hopT = 0; this.burstKind = ''; this.burstUsed = false; this.blastUsed = false; this.swapLock = 0; this.slingUsed = false; this.thermal = false; this.recoil = false; this.bigStone = false; this.armorLeft = 99; this.castHit = false;
+    this.chargeT = 0; this.stalled = false; this.stallOk = false; this.cAir = null; this.hopT = 0; this.burstKind = ''; this.burstX = 0; this.burstDown = false; this.burstUsed = false; this.blastUsed = false; this.swapLock = 0; this.slingUsed = false; this.thermal = false; this.recoil = false; this.bigStone = false; this.armorLeft = 99; this.castHit = false;
   }
   /* Dodges used back to back protect for less time and leave more lag. */
   dodge() { this.ds = this.dodgeStale; this.dodgeStale = Math.min(5, this.dodgeStale + 1); this.dodgeT = 0; }
@@ -623,7 +625,9 @@ class Fighter {
   touchDown(p) { this.grounded = true; this.plat = p; this.y = p.y; this.vy = 0; this.jr = 0; this.stalled = false; this.burstUsed = false; this.blastUsed = false; this.slingUsed = false; this.wallJumps = 0; this.jumps = this.st.jumps || 1; this.airdodged = false; this.sideUsed = false; this.ledgeUsed = false; this.ledgeGrabs = 0; this.ff = false; this.shortHop = false; }
   land(p) {
     const st = this.state, hard = this.ff; this.touchDown(p);
-    if (st === 'attack' && this.move.burst && this.burstKind === 'dive' && this.mf < this.move.cancel + 8) { this.move = null; this.vx *= 0.4; spark(this.x, this.y, '#ddd', 10, 1.4); beep(130, 0.08, 'square', 0.05); this.set('down'); }
+    if (st === 'attack' && this.move.burst) {   /* a tumble never falls over: a dive that reaches the floor carries on as a slide, anything else lands ready to act */
+      if (this.burstKind === 'dive') { this.burstKind = 'slide'; spark(this.x, this.y, '#ddd', 8, 1.2); } else { this.move = null; this.set('idle'); }
+    }
     else if (st === 'attack') { const m = this.move; this.lag = m.air ? (this.mf < m.h[0].f0 - 1 || this.mf > m.ac ? (hard ? 4 : 2) : m.ll) : (m.ll || 8); this.move = null; this.set('land'); }
     else if (st === 'airdodge') { if (Math.abs(this.vx) > 0.5) { this.vx = clamp(this.vx, -T.wd_max_speed, T.wd_max_speed); this.set('wd'); } else { this.lag = 10; this.set('land'); } }
     else if (st === 'hurt') {
@@ -737,6 +741,10 @@ class Fighter {
         if (this.state === 'attack' && this.move === m && m.cancel && this.mf >= m.cancel) {   /* cut short into any action, keeping the speed */
           if (this.grounded) { if (this.groundActs(false)) break; }
           else { const j = this.jumps; if (this.airActs()) break; if (this.jumps < j) { this.endMove(); break; } }
+          if (m.burst) {   /* the stick ends a tumble too: a push to a new side, or down again in the air */
+            const sx = Math.abs(i.lx) > 0.5 ? sgn(i.lx) : 0, down = i.ly < -0.5; if (!down) this.burstDown = false;
+            if ((sx && sx !== this.burstX) || (down && !this.burstDown && !this.grounded)) { this.endMove(); break; }
+          }
         }
         /* jab chain: attack again once the jab allows it and the next hit comes out */
         /* rapid jab: loops while attack is held (three at least, fourteen at most), then the finisher */

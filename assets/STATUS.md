@@ -80,7 +80,7 @@ Flint, Nib, Loom and Hod now follow the owner's document (`Emberfall_Fighter_Mov
 - **Set by me where the document leaves it open:**
   - An up special's wind-up hangs in the air, so its stated height is what you get when falling. Without this Hod's 12-frame wind-up cost 20 of his 23 units.
   - Ram Plate in the air hangs through its wind-up, travels level through the charge and keeps some speed after (the document says only that it carries a short way). It is Hod's way back sideways.
-  - Launch power and recovery time (`TUNE` in `sim.js`), from balance testing: Flint launches 10% softer and recovers 20% slower after an attack; Nib launches 3% harder; Loom 6% harder and 5% quicker; Hod 27% harder and 20% quicker; Potato Sack launches 10% softer and his damage scale went from 1.10 to 0.94.
+  - Launch power and recovery time (`TUNE` in `sim.js`), from balance testing: Flint launches 10% softer and recovers 20% slower after an attack; Nib launches 3% harder; Loom 6% harder and 5% quicker; Hod 27% harder and 20% quicker; Potato Sack launches 13% softer and his damage scale went from 1.10 to 0.94 (retuned after his Tumble was freed up: 52 and 53%, with Flint 50 and 52, Nib 50 and 48, Loom 46 and 51, Hod 52 and 47).
 - **Hod's recovery is the shortest by design.** From 25 units below the ledge with his air jump, the CPU gets him back from 80 units out; Flint from 130, Nib 150, Loom 150, Potato Sack 95. About two thirds of Hod's lost stocks are falls after a launch he could not come back from; he is knocked out at about 140% on average, the others at 152 to 176%.
 - **CPU.** It holds special for Thermal and for the big stone (half the time), rolls stones only from 18 to 46 units, uses Ram Plate and the ribbon up close, and a slow drifter spends its side special off stage only while the jump and up special it has left can pay back the drop.
 - **Balance** (CPU against CPU at level 7, 1,500 matches a seed, two seeds): Flint 50 and 53%, Nib 50 and 53%, Loom 54 and 50%, Hod 48 and 48%, Potato Sack 49 and 47%.
@@ -93,7 +93,7 @@ An original fighter: a living sack of forge-town potatoes. Heavy and odd to move
 
 - **Movement:** walks and runs in hops with a full stop between them. Cannot hold the ledge; it has to land on the stage.
 - **Neutral special:** Flint's Ember Toss, unchanged.
-- **Tumble (down special):** a burst along the floor, straight up, or diagonally down in the air; a short hang with no direction. From frame 15 it can be cut short into any action, keeping its speed. A dive that lands too early leaves it on its back. Once per time off the ground.
+- **Tumble (down special):** a burst along the floor, straight up, or diagonally down in the air; a short hang with no direction. From the frame after the burst (frame 7) any action cuts it short, keeping its speed, and so does a new push of the stick (to another side, or down again in the air). It never falls over: a dive that reaches the floor carries on as a slide, whatever height it started from, and there is no landing lag (owner's request, 2026-11-10). Once per time off the ground.
 - **Bag It (side special):** a leaping grab that goes through shields, catches in the air, and flings.
 - **Hot Potato (up special):** a blast that hurts anyone close and throws the sack upward for 12% of its own damage; it flies further the more hurt it is. Once per time off the ground.
 - **Files:** rules in `SACK` (sim.js); model and clips from `tools/blender/sack.js`; hitboxes in hitboxes.js; 2D fallback drawing in render2d.js.
