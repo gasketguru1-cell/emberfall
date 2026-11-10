@@ -17,10 +17,10 @@ vm.runInThisContext(`
   function setup(pick, fi) {
     slots[0] = { dev: 'kb', pick, ready: true }; slots[1] = { dev: 'kb', pick: 0, ready: true };
     startMatch(); let g = 0; while (mode !== 'play' && g++ < 400) step();
-    F[0].ctl = new Ctl('cpu'); F[1].ctl = new Ctl('cpu'); F[0].fi = fi; F[0].x = -75; F[0].face = 1; F[1].x = 78; t = 0; SCRIPT = null; return F[0];
+    F[0].ctl = new Ctl('cpu'); F[1].ctl = new Ctl('cpu'); F[0].fi = fi; F[0].x = -(EDGE - 3); F[0].face = 1; t = 0; SCRIPT = null; return F[0];
   }
   /* Run a script for n frames; returns per-frame samples of the first fighter. */
-  function run(n, script) { SCRIPT = script; const out = []; for (let k = 0; k < n; k++) { step(); t++; const f = F[0]; out.push({ x: f.x, y: f.y, vx: f.vx, vy: f.vy, state: f.state, g: f.grounded }); } return out; }
+  function run(n, script) { SCRIPT = script; const out = [], o = F[1]; for (let k = 0; k < n; k++) { o.x = 0; o.y = 150; o.vx = o.vy = 0; o.grounded = false; o.plat = null; o.state = 'air'; step(); t++;   /* the other fighter is parked in the air, out of the way */ const f = F[0]; out.push({ x: f.x, y: f.y, vx: f.vx, vy: f.vy, state: f.state, g: f.grounded }); } return out; }
   const r1 = v => Math.round(v * 10) / 10, r2 = v => Math.round(v * 100) / 100;
   function jump(f, script, n) {
     const y0 = f.y, s = run(n || 220, script), up = s.findIndex(q => !q.g), down = s.findIndex((q, k) => k > up && q.g);
@@ -34,13 +34,13 @@ vm.runInThisContext(`
     let f = setup(pick, fi), s = run(110, (i, tt) => { i.lx = tt < 3 ? 0 : tt < 10 ? 0.4 : 1; });                /* eased push: walk */
     row['walk top'] = r2(Math.max(...s.map(q => q.vx)));
     f = setup(pick, fi); s = run(123, (i, tt) => { i.lx = tt < 3 ? 0 : 1; }).slice(3);                    /* flick and hold: dash, then run */
-    const x0 = -75, top = Math.max(...s.slice(40).map(q => q.vx));
+    const x0 = -(EDGE - 3), top = Math.max(...s.slice(40).map(q => q.vx));
     row['dash peak'] = r2(Math.max(...s.slice(0, 20).map(q => q.vx))); row['dash at f'] = s.findIndex(q => q.state === 'dash' && q.vx >= row['dash peak'] - 0.001) + 1;
     row['run top'] = r2(top);
     row['units in 30f'] = r1(s[29].x - x0); row['units in 60f'] = r1(s[59].x - x0);
-    f = setup(pick, fi); s = run(143, (i, tt) => { if (tt >= 3 && tt < 63) i.lx = 1; });                 /* let go at full run: how long to stop */
-    const stop = s.findIndex((q, k) => k >= 63 && q.vx === 0);
-    row['stop frames'] = stop - 62; row['stop slide'] = r1(s[stop].x - s[62].x);
+    f = setup(pick, fi); s = run(123, (i, tt) => { if (tt >= 3 && tt < 43) i.lx = 1; });                 /* let go at full run: how long to stop */
+    const stop = s.findIndex((q, k) => k >= 43 && q.vx === 0);
+    row['stop frames'] = stop - 42; row['stop slide'] = r1(s[stop].x - s[42].x);
     f = setup(pick, fi); let j = jump(f, (i, tt) => { i.jmp = tt >= 5; });                             /* jump held: full hop */
     row['full hop'] = j.top; row['after 4f'] = j.y4; row['to top'] = j.toTop; row['air time'] = j.air;
     f = setup(pick, fi); j = jump(f, (i, tt) => { i.jmp = tt === 5 || tt === 6; });                    /* jump tapped: short hop */
@@ -52,13 +52,13 @@ vm.runInThisContext(`
     row['ff air time'] = j.air;
     f = setup(pick, fi); j = jump(f, (i, tt) => { i.jmp = tt >= 5; if (tt >= 5) i.lx = 1; });        /* standing full hop holding forward */
     row['hop drift'] = j.dx;
-    f = setup(pick, fi); j = jump(f, (i, tt) => { i.lx = tt < 3 ? 0 : 1; i.jmp = tt >= 33; });           /* running full hop */
+    f = setup(pick, fi); j = jump(f, (i, tt) => { i.lx = tt < 3 ? 0 : 1; i.jmp = tt >= 23; });           /* running full hop */
     row['run hop dist'] = j.dx;
     rows.push(row);
   }
   const keys = Object.keys(rows[0]), w = keys.map(k => Math.max(k.length, ...rows.map(r => String(r[k]).length)));
   console.log(keys.map((k, n) => k.padEnd(w[n])).join('  '));
   for (const r of rows) console.log(keys.map((k, n) => String(r[k]).padEnd(w[n])).join('  '));
-  console.log('\\nSpeeds are stage units per frame, distances stage units (the main stage is 160 wide), times frames at 60 per second.');
+  console.log('\\nSpeeds are stage units per frame, distances stage units (the main stage is ' + EDGE * 2 + ' wide), times frames at 60 per second.');
 })();
 `);

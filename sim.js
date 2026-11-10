@@ -32,11 +32,12 @@ const T = {
 };
 
 /* ---------- Stage (y is up; feet position) ---------- */
-const MAIN = { x0: -80, x1: 80, y: 0, soft: false };
+const EDGE = 68;   /* half the width of the main stage (it was 80 until 2026-11-10; everything about the stage is placed from this number) */
+const MAIN = { x0: -EDGE, x1: EDGE, y: 0, soft: false };
 /* Two soft platforms side by side, low enough for every fighter's full hop and too high for any short hop. No top platform. */
-const PLATS = [MAIN, { x0: -52, x1: -18, y: 26, soft: true }, { x0: 18, x1: 52, y: 26, soft: true }];
+const PLATS = [MAIN, { x0: -44, x1: -15, y: 26, soft: true }, { x0: 15, x1: 44, y: 26, soft: true }];
 const BODY_H = 24;
-const BLAST = { l: -235, r: 235, t: 200, b: -140 };
+const BLAST = { l: -(EDGE + 155), r: EDGE + 155, t: 200, b: -140 };   /* the same distance beyond the ledges as before the stage shrank */
 
 /* ---------- Combat rules ---------- */
 const DMG_1V1 = 1.2;                 /* one-on-one damage bonus */
@@ -217,7 +218,7 @@ const FLINT = {
     /* All-rounder: middling everything, a three-hit jab, a projectile, a dependable recovery. */
     st: { weight: 92, walk: 1.12, walkMul: 0.14, walkAdd: 0.1, trac: 0.105, dash: 1.92, runMul: 0.11, runAdd: 0.044, run: 1.74,
       jumpX: 0.95, jumpXMul: 0.8, jumpXMax: 1.3, airJumpX: 0.9, jumpH: 34, jumpInit: 18.7, hopH: 16.5, airJumpH: 34.5,
-      airMul: 0.065, airAdd: 0.01, airSpeed: 1.1, airBrake: 0.01, grav: 0.09, fall: 1.55, ffall: 2.48, jsq: 3, w: 8, h: 14,
+      airMul: 0.065, airAdd: 0.01, airSpeed: 1.1, airBrake: 0.01, grav: 0.09, fall: 1.55, ffall: 2.48, jsq: 3, w: 8, h: 14, jf: 3, jb: 1.2,
       jumps: 1, dashF: 12, roll: [28, 1.35, 13], spot: [22, 15] },
     aiShot: 1,
     moves: mk(1, 1, 1, 1, {
@@ -239,7 +240,7 @@ const WREN = {
     /* Rushdown: light and quick, short reach, fast falls, fast dodges, wall jumps, weak throws that set up follow-ups. */
     st: { weight: 84, walk: 1.3, walkMul: 0.2, walkAdd: 0.105, trac: 0.128, dash: 2.2, runMul: 0.13, runAdd: 0.044, run: 2.15,
       jumpX: 0.95, jumpXMul: 0.85, jumpXMax: 1.55, airJumpX: 1, jumpH: 35, jumpInit: 19.25, hopH: 15, airJumpH: 36,
-      airMul: 0.085, airAdd: 0.015, airSpeed: 1.2, airBrake: 0.012, grav: 0.125, fall: 1.82, ffall: 2.91, jsq: 3, w: 8, h: 9,
+      airMul: 0.085, airAdd: 0.015, airSpeed: 1.2, airBrake: 0.012, grav: 0.125, fall: 1.82, ffall: 2.91, jsq: 3, w: 8, h: 9, jf: 3.2, jb: 2,
       jumps: 1, wallJump: 1, dashF: 10, roll: [24, 1.6, 11], spot: [20, 14] },
     aiShot: 1,
     moves: mk(0.85, 0.93, 0.85, 0.65, {
@@ -255,7 +256,7 @@ const WREN = {
     /* Floaty zoner: light, slow on the ground, drifts well, falls slowly, three small air jumps, long slow ribbon grab. */
     st: { weight: 77, walk: 0.9, walkMul: 0.09, walkAdd: 0.09, trac: 0.08, dash: 1.65, runMul: 0.08, runAdd: 0.03, run: 1.45,
       jumpX: 0.8, jumpXMul: 0.75, jumpXMax: 1.1, airJumpX: 1, jumpH: 30, jumpInit: 16.5, hopH: 13.5, airJumpH: 27,
-      airMul: 0.075, airAdd: 0.01, airSpeed: 1.12, airBrake: 0.006, grav: 0.062, fall: 1.12, ffall: 1.79, jsq: 3, w: 8, h: 15,
+      airMul: 0.075, airAdd: 0.01, airSpeed: 1.12, airBrake: 0.006, grav: 0.062, fall: 1.12, ffall: 1.79, jsq: 3, w: 8, h: 15, jf: 2.6, jb: 1,
       jumps: 3, dashF: 14, roll: [32, 1.15, 14], spot: [24, 16] },
     moves: mk(1.3, 1.0, 1.1, 1.05, {
       nspec: { t: 46, h: [{ f0: 14, f1: 17, x: 14, y: 9, r: 5, d: 7, a: 361, b: 30, k: 80 }, { f0: 14, f1: 17, x: 24, y: 9, r: 5, d: 10, a: 361, b: 30, k: 95 }] },
@@ -270,7 +271,7 @@ const WREN = {
     /* Heavy: slow, hard to launch, hits and throws hard, armoured smash and dash attack, poor air movement and recovery. */
     st: { weight: 130, walk: 0.85, walkMul: 0.085, walkAdd: 0.06, trac: 0.1, dash: 1.62, runMul: 0.075, runAdd: 0.02, run: 1.5,
       jumpX: 0.75, jumpXMul: 0.75, jumpXMax: 1.15, airJumpX: 0.9, jumpH: 29.5, jumpInit: 16.2, hopH: 14.5, airJumpH: 30,
-      airMul: 0.04, airAdd: 0.01, airSpeed: 0.98, airBrake: 0.008, grav: 0.118, fall: 1.78, ffall: 2.85, jsq: 3, w: 12, h: 13,
+      airMul: 0.04, airAdd: 0.01, airSpeed: 0.98, airBrake: 0.008, grav: 0.118, fall: 1.78, ffall: 2.85, jsq: 3, w: 12, h: 13, jf: 4.4, jb: 2.8,
       jumps: 1, dashF: 15, roll: [32, 1.15, 12], spot: [24, 14] },
     moves: mk(1.1, 1.3, 1.25, 0.9, {
       nspec: { t: 54, h: [], on(f, n) { if (n === 24) { shoot(f, { kind: 'boulder', oy: 6, vx: 1.5, vy: 0.6, grav: 0.09, r: 4.5, life: 110, ground: 'roll', h: { d: 12, a: 50, b: 40, k: 70 } }); beep(110, 0.15, 'square', 0.06, 0.7); } } },
@@ -312,7 +313,7 @@ class Fighter {
   get form() { return this.def.forms[this.fi]; }
   get st() { return this.form.st; }
   spawn(first) {
-    this.x = first ? (this.idx ? 32 : -32) : 0; this.y = first ? 0 : 82; this.vx = this.vy = 0;
+    this.x = first ? (this.idx ? 28 : -28) : 0; this.y = first ? 0 : 82; this.vx = this.vy = 0;
     if (first) this.face = this.idx ? -1 : 1;
     this.grounded = !!first; this.plat = first ? MAIN : null; this.state = first ? 'idle' : 'respawn'; this.sf = 0;
     this.jumps = this.st.jumps || 1; this.airdodged = false; this.sideUsed = false; this.ledgeUsed = false; this.ff = false;
@@ -636,9 +637,9 @@ class Fighter {
         if (this.sf > 8) {
           const toward = -side * i.lx, slow = this.pct >= 100;   /* worn down: every way up is slower and less protected */
           if (c.take('jmp')) { this.vy = s.vJump * 1.05; this.vx = -side * 0.7; this.ledgeCd = 30; this.set('air'); }
-          else if (i.shd) { this.x = side * 58; this.touchDown(MAIN); this.ledgeUsed = true; this.lag = slow ? 26 : 18; this.invuln = slow ? 20 : 18; this.set('land'); }
-          else if (c.take('atk')) { this.x = side * 74; this.touchDown(MAIN); this.ledgeUsed = true; this.startMove('getup'); if (slow) this.mf = -8; }
-          else if (toward > 0.5 || i.ly > 0.5) { this.x = side * 75; this.touchDown(MAIN); this.ledgeUsed = true; this.lag = slow ? 22 : 14; this.invuln = slow ? 16 : 14; this.set('land'); }
+          else if (i.shd) { this.x = side * (EDGE - 22); this.touchDown(MAIN); this.ledgeUsed = true; this.lag = slow ? 26 : 18; this.invuln = slow ? 20 : 18; this.set('land'); }
+          else if (c.take('atk')) { this.x = side * (EDGE - 6); this.touchDown(MAIN); this.ledgeUsed = true; this.startMove('getup'); if (slow) this.mf = -8; }
+          else if (toward > 0.5 || i.ly > 0.5) { this.x = side * (EDGE - 5); this.touchDown(MAIN); this.ledgeUsed = true; this.lag = slow ? 22 : 14; this.invuln = slow ? 16 : 14; this.set('land'); }
           else if (toward < -0.5 || i.ly < -0.5 || this.sf > 240) { this.ledgeCd = 30; this.vy = -0.5; this.x += side * 2; this.set('air'); }
         }
         break;
@@ -679,7 +680,7 @@ class Fighter {
     if (this.x + hw > MAIN.x0 && this.x - hw < MAIN.x1 && this.y < 0 && this.y + s.h > -BODY_H) {
       if (py + s.h <= -BODY_H + 0.01) { this.y = -BODY_H - s.h; if (this.vy > 0) this.vy = st === 'hurt' ? -this.vy * 0.6 : 0; }
       else {
-        const side = px < 0 ? -1 : 1; this.x = side * (80 + hw);
+        const side = px < 0 ? -1 : 1; this.x = side * (EDGE + hw);
         if (st === 'hurt') {
           /* Launched into the stage wall: shield just before impact to tech it (hold jump or up to spring off), otherwise bounce. */
           if (this.techT > 0 && Math.abs(this.vx) > 0.8) {
@@ -692,11 +693,11 @@ class Fighter {
     }
     /* Ledges. */
     if (this.vy < 0 && this.ledgeCd === 0 && i.ly > -0.5 && (st === 'air' || st === 'helpless' || (st === 'attack' && this.move && this.move.ledge))) {
-      const side = sgn(this.x), out = Math.abs(this.x) - 80, hand = this.y + s.h, o = F[1 - this.idx];
+      const side = sgn(this.x), out = Math.abs(this.x) - EDGE, hand = this.y + s.h, o = F[1 - this.idx];
       if (side && out > -1 && out < 13 && hand > -9 && hand < 9 && this.ledgeGrabs < 6) {
         if (o && o.state === 'ledge' && sgn(o.x) === side) { o.set('air'); o.vy = 1.3; o.vx = side * 0.9; o.ledgeCd = 45; o.invuln = 0; pop(o.x, o.y + 20, 'TRUMP', '#fff'); }
         this.ledgeGrabs++; this.shortHop = false;
-        this.x = side * (80 + hw + 0.5); this.y = -s.h + 1; this.vx = this.vy = 0; this.face = -side; this.move = null; this.ff = false;
+        this.x = side * (EDGE + hw + 0.5); this.y = -s.h + 1; this.vx = this.vy = 0; this.face = -side; this.move = null; this.ff = false;
         this.jumps = s.jumps || 1; this.wallJumps = 0; this.airdodged = false; this.sideUsed = false; if (!this.ledgeUsed) { this.invuln = clamp(Math.round(24 + Math.min(this.airT, 300) * 0.1 - Math.min(this.pct, 120) * 0.17), 8, 54); this.ledgeUsed = true; }   /* longer in the air earns more, damage takes it away */
         this.set('ledge'); beep(700, 0.04, 'triangle', 0.03);
       }
@@ -736,7 +737,7 @@ function wouldKO(v) {
     else { vx *= 0.96; vy = Math.max(vy - v.st.grav, -v.st.fall); }
     x += vx; y += vy;
     if (x < BLAST.l || x > BLAST.r || y > BLAST.t || y < BLAST.b) return true;
-    if (n > 2 && vy <= 0 && y <= 0 && Math.abs(x) <= 80) return false;
+    if (n > 2 && vy <= 0 && y <= 0 && Math.abs(x) <= EDGE) return false;
   }
   return false;
 }
@@ -872,7 +873,7 @@ function cpuInput(f, o, m) {
   if (L.nap > 0) {
     if (m.nap > 0) m.nap--; else if (m.t % 60 === 0 && Math.random() < L.nap) m.nap = L.napLen;
     /* napping: standing safely on the stage it throws nothing out, and only ambles */
-    if (m.nap > 0 && f.grounded && NAP_STATES[f.state] && Math.abs(f.x) < 72) { i.atk = i.spc = i.grb = i.jmp = false; i.cx = i.cy = 0; i.lx *= 0.45; if (i.ly > 0) i.ly = 0; }
+    if (m.nap > 0 && f.grounded && NAP_STATES[f.state] && Math.abs(f.x) < EDGE - 8) { i.atk = i.spc = i.grb = i.jmp = false; i.cx = i.cy = 0; i.lx *= 0.45; if (i.ly > 0) i.ly = 0; }
   }
   return i;
 }
@@ -892,11 +893,11 @@ function cpuBrain(f, o, m, L) {
   if (f.state === 'down') { if (f.sf > 24) { const r = m.t % 3; if (r === 0) i.ly = 1; else if (r === 1) i.lx = -dir; else i.atk = true; } return i; }
   if (f.state === 'ledge') { if (f.sf > 20) { if (m.t % 2) i.lx = -sgn(f.x); else i.jmp = true; } return i; }
   if (f.state === 'hold') { if (f.sf > 16) { const r = m.t % 4; if (r === 0) i.lx = f.face; else if (r === 1) i.lx = -f.face; else if (r === 2) i.ly = 1; else i.ly = -1; } return i; }
-  if (!f.grounded && (Math.abs(f.x) > 84 || f.y < -3)) {
+  if (!f.grounded && (Math.abs(f.x) > EDGE + 4 || f.y < -3)) {
     /* Getting back. Never drift in under the stage: when below its top and inside its edge, steer back out first.
        Use the side special only while still high and far out, the air jumps on the way down, and the up special last,
        pressed with the stick only slightly toward the stage so it is not read as a side special. */
-    const side = sgn(f.x) || 1, edge = 80 + f.st.w / 2 + 2, under = f.y + f.st.h < -BODY_H + 4 && Math.abs(f.x) < edge, far = Math.abs(f.x) - 80;
+    const side = sgn(f.x) || 1, edge = EDGE + f.st.w / 2 + 2, under = f.y + f.st.h < -BODY_H + 4 && Math.abs(f.x) < edge, far = Math.abs(f.x) - EDGE;
     i.lx = under ? side : (f.y > -3 || Math.abs(f.x) > edge + 1) ? -side : 0;   /* beside the wall and below the lip: stay off it and let the ledge or a jump do the work */
     if (f.state !== 'air' || m.t % 5 !== 0) return i;
     if (!f.sideUsed && f.form.moves.sspec.once && far > 36 && f.y > 14) { i.lx = -side; i.spc = true; return i; }
@@ -911,7 +912,7 @@ function cpuBrain(f, o, m, L) {
   if (f.grounded && o.state === 'attack' && ad < 24 && Math.abs(dy) < 20) { if (m.def == null) m.def = Math.random() < L.guard; if (m.def) { i.shd = true; return i; } } else m.def = null;
   if (f.grounded) {
     /* The opponent is off stage: hold the ledge instead of following them out, and swing as they come back. */
-    if ((Math.abs(o.x) > 84 || o.y < -5) && Math.abs(f.x) > 58 && sgn(f.x) === sgn(o.x)) {
+    if ((Math.abs(o.x) > EDGE + 4 || o.y < -5) && Math.abs(f.x) > EDGE - 22 && sgn(f.x) === sgn(o.x)) {
       if (f.face !== dir) i.lx = dir * 0.5; else if (m.cd === 0 && ad < (f.form.aiRange || 14) + 6 && Math.abs(dy) < 14) { i.cx = dir; m.cd = 55; }
       return i;
     }
@@ -931,7 +932,7 @@ function cpuBrain(f, o, m, L) {
     return i;
   }
   i.lx = ad > 6 ? dir : 0;
-  if (Math.abs(f.x) > 66) { i.lx = -sgn(f.x); return i; }   /* airborne near the edge: drift back over the stage, no attacks */
+  if (Math.abs(f.x) > EDGE - 14) { i.lx = -sgn(f.x); return i; }   /* airborne near the edge: drift back over the stage, no attacks */
   if (m.cd === 0 && f.state === 'air' && (L.air >= 1 || Math.random() < L.air)) {
     const mv = f.form.moves, lead = n => mv[n].h[0].f0 + 1, at = n => { const t = lead(n); return [dx + (o.vx - f.vx) * t, dy + (o.vy - f.vy) * t + (o.grounded ? 0.5 * f.st.grav * t * t : 0)]; };
     const up = at('uair'), dn = at('dair'), fw = at('fair'), room = f.y + f.vy * mv.fair.h[0].f1 > 3 || o.y > 6;
@@ -941,6 +942,29 @@ function cpuBrain(f, o, m, L) {
   }
   if (dy > 20 && f.jumps > 0 && f.vy < 0 && m.t % 20 === 0 && f.y + f.form.aiHop < BLAST.t - 28) i.jmp = true;
   return i;
+}
+
+/* ---------- Fighters push each other ----------
+   Two fighters standing on the same ground cannot walk or run through each other. Each has a small box round its feet
+   (`jf` in front, `jb` behind). Where the boxes would overlap, whoever is walking in is held back and shoves the other
+   along at a fraction of that speed (a heavier pusher shoves faster); boxes already overlapping slide apart. Nothing is
+   pushed off the solid stage unless it could walk off itself. Rolls, dodges, jumps, launches, grabs and anyone lying
+   down are not blocked, so those are the ways past. */
+const JOSTLE = { push: 0.36, sep: 0.9 };
+const JOSTLE_STATES = { idle: 1, dash: 1, run: 1, brake: 1, jsq: 1, land: 1, wd: 1, attack: 1, shield: 1, shieldstun: 1, shieldoff: 1, rebound: 1, broken: 1 };
+function jostles(f) { return f.grounded && f.plat && JOSTLE_STATES[f.state] === 1; }
+function jostle() {
+  const a = F[0], b = F[1]; if (!jostles(a) || !jostles(b) || a.plat !== b.plat) return;
+  const dir = b.x !== a.x ? sgn(b.x - a.x) : 1;   /* which side of a the other fighter is on */
+  const need = (a.face === dir ? a.st.jf : a.st.jb) + (b.face === -dir ? b.st.jf : b.st.jb), over = need - Math.abs(b.x - a.x);
+  if (over <= 0) return;
+  const wa = a.st.weight, wb = b.st.weight, cA = Math.max(0, a.vx * dir), cB = Math.max(0, -b.vx * dir), closing = cA + cB;
+  const closePart = Math.min(over, closing), sepPart = Math.min(over - closePart, JOSTLE.sep), k = closing > 0 ? closePart / closing : 0;
+  const kA = JOSTLE.push * wa / (wa + wb), kB = JOSTLE.push * wb / (wa + wb);
+  let backA = k * (cA * (1 - kA) + cB * kB) + sepPart * wb / (wa + wb), fwdB = k * (cB * (1 - kB) + cA * kA) + sepPart * wa / (wa + wb);
+  a.x -= dir * backA; b.x += dir * fwdB;
+  /* someone who cannot leave the platform stays on it, and the other gives way instead */
+  for (const [f, g] of [[a, b], [b, a]]) { const p = f.plat; if ((f.x < p.x0 || f.x > p.x1) && !f.canFall()) { const nx = clamp(f.x, p.x0, p.x1); g.x += nx - f.x; f.x = nx; } }
 }
 
 /* ---------- Game flow ---------- */
@@ -982,6 +1006,7 @@ function stepPlay() {
   if (slowT > 0) { slowT--; if (slowT % 3) return; }   /* one step in three while the finishing hit plays out */
   frame++;
   for (const f of F) f.update();
+  jostle();
   updateProj(); resolveHits();
   for (const f of F) if (f.state !== 'dead' && f.state !== 'respawn' && (f.x < BLAST.l || f.x > BLAST.r || f.y > BLAST.t || f.y < BLAST.b)) f.ko();
   timer--;
@@ -996,7 +1021,7 @@ function stepPlay() {
 }
 /* Camera numbers, in stage units. padX/padUp/padDown: room kept round each fighter. min/max: how far out and in it may zoom
    (pixels per unit). lx/ly: how far off stage a fighter is still followed. ex/ey: the furthest the edge of the view may reach. */
-const CAM = { padX: 30, padUp: 34, padDown: 14, min: 2.3, max: 8.6, lx: 200, ly0: -105, ly1: 160, ex: 240, ey0: -135, ey1: 205 };
+const CAM = { padX: 30, padUp: 34, padDown: 14, min: 2.3, max: 8.6, lx: EDGE + 120, ly0: -105, ly1: 160, ex: EDGE + 160, ey0: -135, ey1: 205 };
 function stepFx() {
   for (const p of PART) { p.x += p.vx; p.y += p.vy; p.vx *= 0.94; p.vy *= 0.94; p.life--; }
   PART = PART.filter(p => p.life > 0); for (const p of POPS) { p.y += 0.25; p.life--; } POPS = POPS.filter(p => p.life > 0);

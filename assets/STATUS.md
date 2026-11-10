@@ -58,9 +58,13 @@ Spent so far: 237 credits (Flint 135, companions 102). The daily limit was raise
 - CPU level 1 to 9, set with Up / Down on the select screen while player 2 is empty, and remembered. Level 7 is the CPU as it always played; every test and balance figure uses it. The numbers for each level are in `CPU_LV` in `sim.js`.
 - Tap jump is removed (owner's request, 2026-11-10): only the jump buttons jump, never the stick. There is no switch for it.
 
+## Fighters push each other (2026-11-10)
+
+Two fighters standing on the same ground cannot walk or run through each other. Whoever moves in is held back and shoves the other along slowly (a heavier fighter is shoved less); fighters standing inside each other slide apart; nobody standing still is pushed off the solid stage. Ways past: roll, dodge, jump, or hit them. Numbers: `jf` / `jb` in each fighter's `st` and `JOSTLE` in `sim.js`. The box sizes follow the reference build's; the push strength is a guess.
+
 ## Stage (2026-11-10)
 
-One stage: a flat main platform 160 wide with two soft platforms side by side (x 18 to 52 on each side, height 26) and no top platform. The sizes are in `PLATS` in `sim.js`; both renderers build the platforms from that list. The look is Emberfall's own (dusk sky, plank deck, lamps, far islands).
+One stage: a flat main platform 136 wide (15% narrower since 2026-11-10) with two soft platforms side by side (x 15 to 44 on each side, height 26) and no top platform. Everything is placed from `EDGE` (half the width) and `PLATS` in `sim.js`; the blast zones sit 155 beyond the ledges; both renderers build the platforms from that list. The look is Emberfall's own (dusk sky, plank deck, lamps, far islands).
 
 ## Movement (2026-11-10)
 
@@ -103,7 +107,7 @@ The movement rules now work the way the reference build's do, with Emberfall's o
 | Tool | What it does | Result on 2026-11-09 |
 |---|---|---|
 | `npm test` | six seeded CPU matches looking for broken states, then `tests/rules.js`, then a 20-match `tests/fuzz.js` | passes |
-| `tests/rules.js` | 58 scripted checks of single rules with exact inputs, including the movement rules from platforms.ini, the match clock and (2026-11-10) each fighter's jump heights, full-hop pop, fast fall and ground speeds | all pass |
+| `tests/rules.js` | 63 scripted checks of single rules with exact inputs, including the movement rules from platforms.ini, the match clock and (2026-11-10) each fighter's jump heights, full-hop pop, fast fall and ground speeds, and fighters pushing each other | all pass |
 | `tests/movement.js` | measures every fighter's speeds, stopping distance, jump heights and air times in the running rules; `EMBERFALL_SIM=<file>` measures another copy of the rules | see Movement |
 | `tests/fuzz.js` | both fighters driven by random sticks and buttons; looks for crashes, broken numbers, impossible or stuck states | about 880,000 frames of random against random and 730,000 with the CPU on one side in a quarter of the matches, clean |
 | `tests/stats.js` | CPU-versus-CPU balance per form: wins, damage, KO percent, where stocks are lost, who beats whom | on the two-platform stage with the new movement (2026-11-10), over three seeds of 960 matches each: Flint 49 to 51%, Nib 48 to 52%, Loom 48 to 50%, Hod 49 to 52%; average KO percent Hod 163, Flint 159, Loom 150, Nib 147 |

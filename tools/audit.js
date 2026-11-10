@@ -20,7 +20,7 @@ async function auditHitboxes(limit) {
   for (const A of forms) {
     slots[0] = { dev: 'kb', pick: A[0], ready: true }; slots[1] = { dev: 'kb', pick: 0, ready: true };
     startMatch(); let g = 0; while (mode !== 'play' && g++ < 400) step();
-    const f = F[0], o = F[1]; f.fi = A[1]; o.x = 70; f.x = 0; f.face = 1; f.invuln = 0;
+    const f = F[0], o = F[1]; f.fi = A[1]; o.x = 60; f.x = 0; f.face = 1; f.invuln = 0;
     const cfg = man[f.form.name], v = R.fighters[0];
     for (let k = 0; k < 14; k++) { tick++; draw(); }   /* let the model load in and turn to face right */
     if (!v.model) { rows.push({ fighter: f.form.name, move: '(no model loaded)' }); continue; }

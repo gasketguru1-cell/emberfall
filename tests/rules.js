@@ -93,7 +93,7 @@ vm.runInThisContext(`
   {
     const out = {};
     for (const mode2 of ['none', 'tech', 'jump', 'late']) {
-      const [fl, nib] = setup(FL, NIB, -40, 0); airborne(nib, 100, -12); nib.launch(110, Math.PI, 1); let seen = null;
+      const [fl, nib] = setup(FL, NIB, -40, 0); airborne(nib, EDGE + 20, -12); nib.launch(110, Math.PI, 1); let seen = null;
       SCRIPT[1] = (i, tt) => { if (mode2 === 'tech' && tap(0)(tt)) i.shd = true; if (mode2 === 'jump') { if (tap(0)(tt)) i.shd = true; i.jmp = true; } };
       if (mode2 === 'late') nib.techLock = 40;   /* a shield press already spent: mashing must not tech */
       if (mode2 === 'late') SCRIPT[1] = (i, tt) => { if (tap(0)(tt)) i.shd = true; };
@@ -111,7 +111,7 @@ vm.runInThisContext(`
   {
     const res = {};
     for (const [name, P] of [['Nib', NIB], ['Flint', FL]]) {
-      const [a, b] = setup(P, FL, -40, 0); airborne(a, 80 + a.st.w / 2 + 0.3, -26); let best = -9, touched = false;
+      const [a, b] = setup(P, FL, -40, 0); airborne(a, EDGE + a.st.w / 2 + 0.3, -26); let best = -9, touched = false;
       SCRIPT[0] = (i, tt) => { if (tt < 8) i.lx = -1; else if (tt === 8) i.lx = 0; else if (tt < 12) i.lx = 1; };
       run(16, () => { best = Math.max(best, a.vy); if (a.wallT > 0) touched = true; });
       res[name] = best; res[name + 'Touched'] = touched;
@@ -130,13 +130,13 @@ vm.runInThisContext(`
 
   /* ---- Ledge protection: more after a long time in the air, less when damaged ---- */
   {
-    const grab = (airT, pct) => { const [f] = setup(FL, FL, 0, -40); airborne(f, 80 + f.st.w / 2 + 3, -6); f.vy = -0.5; f.airT = airT; f.pct = pct; let inv = null; run(6, () => { if (f.state === 'ledge' && inv === null) { inv = f.invuln; return false; } }); return inv; };
+    const grab = (airT, pct) => { const [f] = setup(FL, FL, 0, -40); airborne(f, EDGE + f.st.w / 2 + 3, -6); f.vy = -0.5; f.airT = airT; f.pct = pct; let inv = null; run(6, () => { if (f.state === 'ledge' && inv === null) { inv = f.invuln; return false; } }); return inv; };
     const short = grab(20, 0), long = grab(300, 0), worn = grab(20, 120);
     check('ledge: protection grows with air time, shrinks with damage', short !== null && long > short + 15 && worn < short - 10 && worn >= 7, 'frames protected: short hop ' + short + ', long fall ' + long + ', at 120% ' + worn);
   }
   /* ---- Ledge get-ups are slower above 100% ---- */
   {
-    const climb = (pct, how) => { const [f] = setup(FL, FL, 0, -40); f.x = 80 + f.st.w / 2 + 0.5; f.y = -f.st.h + 1; f.grounded = false; f.plat = null; f.pct = pct; f.set('ledge'); let n = 0, done = null, hitAt = null;
+    const climb = (pct, how) => { const [f] = setup(FL, FL, 0, -40); f.x = EDGE + f.st.w / 2 + 0.5; f.y = -f.st.h + 1; f.grounded = false; f.plat = null; f.pct = pct; f.set('ledge'); let n = 0, done = null, hitAt = null;
       SCRIPT[0] = (i, tt) => { if (tt >= 12 && tt < 14) { if (how === 'climb') i.lx = -1; else i.atk = true; } };
       run(90, () => { if (t >= 12) n++; if (how === 'attack' && hitAt === null && f.state === 'attack' && f.mf >= f.move.h[0].f0) { hitAt = n; return false; } if (how === 'climb' && f.state === 'idle') { done = n; return false; } });
       return how === 'climb' ? done : hitAt; };
@@ -258,9 +258,26 @@ vm.runInThisContext(`
     check('time-out: a full tie goes to sudden death', tie.mode === 'play' && tie.sudden && tie.pct[0] === 300 && tie.pct[1] === 300 && tie.stocks.join() === '1,1', 'mode ' + tie.mode + ', both at ' + tie.pct.join(' / ') + '%, stocks ' + tie.stocks.join(' / '));
   }
 
+  /* ---- Fighters block and push each other on the ground ---- */
+  {
+    const into = (A, B, script, n, from) => { const [a, b] = setup(A, B, from || -30, 0); const b0 = b.x; SCRIPT[0] = script; let passed = false; run(n || 70, () => { if (a.x > b.x) passed = true; }); return { passed, gap: b.x - a.x, shove: b.x - b0, ax: a.x }; };
+    const dashIn = (i, tt) => { if (tt >= 2) i.lx = 1; };
+    const fl = into(FL, FL, dashIn), heavy = into(FL, HOD, dashIn), light = into(FL, NIB, dashIn);
+    check('push: running into a standing fighter does not pass through', !fl.passed && fl.gap > 3 && !heavy.passed && !light.passed, 'Flint ends ' + fl.gap.toFixed(1) + ' behind the other, who was shoved ' + fl.shove.toFixed(1));
+    check('push: the one run into is shoved along, a heavy one less', fl.shove > 3 && fl.shove < 25 && light.shove > heavy.shove * 1.15, 'Flint shoves in 70 frames: Flint ' + fl.shove.toFixed(1) + ', Nib ' + light.shove.toFixed(1) + ', Hod ' + heavy.shove.toFixed(1));
+    const roll = into(FL, FL, (i, tt) => { if (tt >= 2 && tt < 40) i.shd = true; if (tt >= 8 && tt < 12) i.lx = 1; }, 60, -12);
+    const [ja, jb] = setup(FL, FL, -30, 0); SCRIPT[0] = (i, tt) => { if (tt >= 2) i.lx = 1; i.jmp = tt >= 6 && tt < 30; }; let over = false; run(60, () => { if (ja.x > jb.x) over = true; });
+    check('push: a roll goes through and a jump goes over', roll.passed && over, 'roll passed: ' + roll.passed + ', jump passed: ' + over);
+    const [ea, eb] = setup(FL, FL, EDGE - 20, EDGE - 2); SCRIPT[0] = dashIn; run(80);
+    check('push: nobody standing still is shoved off the stage', eb.grounded && eb.x <= EDGE && ea.x < eb.x, 'the one at the edge is at ' + eb.x.toFixed(1) + ' of ' + EDGE + (eb.grounded ? ', standing' : ', FELL'));
+    const [la, lb] = setup(FL, FL, 0, 0.5); lb.face = -1; run(30);
+    check('push: fighters standing inside each other slide apart', Math.abs(lb.x - la.x) >= la.st.jf + lb.st.jf - 0.01, 'apart by ' + Math.abs(lb.x - la.x).toFixed(1) + ' after 30 frames');
+  }
+
+  const softPlats = PLATS.splice(1);   /* the movement checks run on the bare main stage, so no jump lands on a platform */
   /* ---- Movement model: jumps are given as heights; a full hop pops off the floor; fast fall is instant; speeds ramp ---- */
   for (const [name, A] of [['Flint', FL], ['Nib', NIB], ['Loom', LOOM], ['Hod', HOD]]) {
-    const jump = script => { const [f] = setup(A, FL, -70, 70); const st = f.st, ys = []; SCRIPT[0] = (i, tt) => script(i, tt, f); run(160, () => { ys.push(f.y); }); const up = ys.findIndex(y => y > 0); return { st, top: Math.max(...ys), y4: ys[up + 3], air: ys.slice(up).findIndex(y => y === 0) }; };
+    const jump = script => { const [f] = setup(A, FL, -60, 60); const st = f.st, ys = []; SCRIPT[0] = (i, tt) => script(i, tt, f); run(160, () => { ys.push(f.y); }); const up = ys.findIndex(y => y > 0); return { st, top: Math.max(...ys), y4: ys[up + 3], air: ys.slice(up).findIndex(y => y === 0) }; };
     const full = jump((i, tt) => { i.jmp = tt >= 2; }), short = jump((i, tt) => { i.jmp = tt === 2 || tt === 3; }), st = full.st;
     const twice = jump((i, tt, f) => { i.jmp = (tt >= 2 && tt < 8) || (tt > 10 && tt < 70 && !f.grounded && f.vy <= 0 && f.jumps === (st.jumps || 1)); });
     const ff = jump((i, tt, f) => { i.jmp = tt >= 2; if (!f.grounded && f.vy <= 0) i.ly = -1; });
@@ -269,20 +286,21 @@ vm.runInThisContext(`
     check(name + ': a full hop pops off the floor', near(full.y4, st.jumpInit), full.y4.toFixed(1) + ' high after four frames (' + st.jumpInit + ')');
     check(name + ': fast fall drops at full speed at once', ff.air < full.air - 8, 'air time ' + full.air + ' frames, ' + ff.air + ' with a fast fall from the top');
     { /* dash burst, settle to run speed, slide to a stop; walking is slower and follows the stick */
-      const [f] = setup(A, FL, -70, 70); let peak = 0, runV = 0, walkV = 0;
+      const [f] = setup(A, FL, -60, 60); let peak = 0, runV = 0, walkV = 0;
       SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 50) i.lx = 1; };
       run(49, () => { if (t <= 12) peak = Math.max(peak, f.vx); }); runV = f.vx; run(40); const stopped = f.vx === 0 && f.state === 'idle';
-      const [g] = setup(A, FL, -70, 70); SCRIPT[0] = (i, tt) => { i.lx = tt < 2 ? 0 : tt < 9 ? 0.4 : 0.6; }; run(70); walkV = g.vx;
+      const [g] = setup(A, FL, -60, 60); SCRIPT[0] = (i, tt) => { i.lx = tt < 2 ? 0 : tt < 9 ? 0.4 : 0.6; }; run(70); walkV = g.vx;
       check(name + ': dash, run, walk and stop speeds', near(peak, st.dash) && near(runV, st.run) && near(walkV, st.walk * 0.6) && stopped, 'dash ' + peak.toFixed(2) + ' (' + st.dash + '), run ' + runV.toFixed(2) + ' (' + st.run + '), walk at 60% stick ' + walkV.toFixed(2) + ' (' + (st.walk * 0.6).toFixed(2) + '), stopped ' + stopped);
     }
   }
   { /* air: drift tops out at the fighter's air speed; a running jump carries ground speed, capped */
-    const [f] = setup(FL, FL, -70, 70), st = f.st; let top = 0, atJump = null;
+    const [f] = setup(FL, FL, -60, 60), st = f.st; let top = 0, atJump = null;
     SCRIPT[0] = (i, tt) => { if (tt >= 2) i.lx = 1; i.jmp = tt >= 30; };
     run(60, () => { if (!f.grounded) { if (atJump === null) atJump = f.vx; else if (t > 50) top = Math.max(top, f.vx); } });
     check('air: a running jump carries speed, then settles to air speed', Math.abs(atJump - st.jumpXMax) < 0.01 && Math.abs(top - st.airSpeed) < 0.12, 'left the ground at ' + atJump.toFixed(2) + ' (cap ' + st.jumpXMax + '), ' + top.toFixed(2) + ' later (air speed ' + st.airSpeed + ')');
   }
 
+  PLATS.push(...softPlats);
   let bad = 0; for (const [ok, name, detail] of results) { if (!ok) bad++; console.log((ok ? 'pass  ' : 'FAIL  ') + name.padEnd(48) + detail); }
   console.log(bad ? bad + ' of ' + results.length + ' checks failed' : 'all ' + results.length + ' rule checks pass');
   if (bad) process.exitCode = 1;

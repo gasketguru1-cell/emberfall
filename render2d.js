@@ -48,19 +48,19 @@ function lampPost(lx, y, s) {
   g.fillStyle = '#4a4058'; g.beginPath(); g.moveTo(SX(lx) - 2.2 * s, SY(23)); g.lineTo(SX(lx), SY(25.2)); g.lineTo(SX(lx) + 2.2 * s, SY(23)); g.closePath(); g.fill(); g.stroke();
 }
 function drawStage() {
-  const s = cam.s, x0 = SX(-80), x1 = SX(80), y = SY(0), bh = BODY_H * s;
+  const s = cam.s, x0 = SX(-EDGE), x1 = SX(EDGE), y = SY(0), bh = BODY_H * s, K = EDGE / 80;   /* the stage art was drawn for a half-width of 80 */
   g.lineJoin = 'round';
   const rg = g.createLinearGradient(0, y, 0, y + bh); rg.addColorStop(0, '#43374f'); rg.addColorStop(1, '#15111f');
-  g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.lineTo(x1, y + bh * 0.55); g.lineTo(SX(54), y + bh * 0.8); g.lineTo(SX(38), y + bh); g.lineTo(SX(-38), y + bh); g.lineTo(SX(-54), y + bh * 0.8); g.lineTo(x0, y + bh * 0.55); g.closePath();
+  g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.lineTo(x1, y + bh * 0.55); g.lineTo(SX(54 * K), y + bh * 0.8); g.lineTo(SX(38 * K), y + bh); g.lineTo(SX(-38 * K), y + bh); g.lineTo(SX(-54 * K), y + bh * 0.8); g.lineTo(x0, y + bh * 0.55); g.closePath();
   g.fillStyle = rg; g.fill(); g.strokeStyle = OL; g.lineWidth = 0.5 * s; g.stroke();
   g.strokeStyle = 'rgba(255,255,255,.07)'; g.lineWidth = 0.3 * s; g.beginPath();
-  for (const q of [[-66, 4, -52, 15], [-34, 4, -24, 22], [6, 4, -4, 21], [30, 4, 42, 20], [64, 4, 55, 13], [-10, 12, -18, 23], [18, 10, 24, 23]]) { g.moveTo(SX(q[0]), y + q[1] * s); g.lineTo(SX(q[2]), y + q[3] * s); }
+  for (const q of [[-66, 4, -52, 15], [-34, 4, -24, 22], [6, 4, -4, 21], [30, 4, 42, 20], [64, 4, 55, 13], [-10, 12, -18, 23], [18, 10, 24, 23]]) { g.moveTo(SX(q[0] * K), y + q[1] * s); g.lineTo(SX(q[2] * K), y + q[3] * s); }
   g.stroke();
   const dg = g.createLinearGradient(0, y, 0, y + 3.4 * s); dg.addColorStop(0, '#d2bd9f'); dg.addColorStop(0.3, '#a08b74'); dg.addColorStop(1, '#6a594d');
-  rr(x0 - 2 * s, y, 164 * s, 3.4 * s, 1.2 * s); g.fillStyle = dg; g.fill(); g.strokeStyle = OL; g.lineWidth = 0.45 * s; g.stroke();
-  g.strokeStyle = 'rgba(40,28,30,.4)'; g.lineWidth = 0.22 * s; g.beginPath(); for (let x = -72; x <= 72; x += 12) { g.moveTo(SX(x), y + 1 * s); g.lineTo(SX(x), y + 3.2 * s); } g.stroke();
-  g.fillStyle = 'rgba(255,244,220,.6)'; g.fillRect(x0 - 1 * s, y + 0.25 * s, 162 * s, 0.32 * s);
-  lampPost(-70, y, s); lampPost(70, y, s);
+  rr(x0 - 2 * s, y, (EDGE * 2 + 4) * s, 3.4 * s, 1.2 * s); g.fillStyle = dg; g.fill(); g.strokeStyle = OL; g.lineWidth = 0.45 * s; g.stroke();
+  g.strokeStyle = 'rgba(40,28,30,.4)'; g.lineWidth = 0.22 * s; g.beginPath(); for (let x = -60; x <= 60; x += 12) { g.moveTo(SX(x), y + 1 * s); g.lineTo(SX(x), y + 3.2 * s); } g.stroke();
+  g.fillStyle = 'rgba(255,244,220,.6)'; g.fillRect(x0 - 1 * s, y + 0.25 * s, (EDGE * 2 + 2) * s, 0.32 * s);
+  lampPost(-(EDGE - 10), y, s); lampPost(EDGE - 10, y, s);
   for (const p of PLATS) if (p.soft) {
     const px = SX(p.x0), py = SY(p.y), pw = (p.x1 - p.x0) * s, hov = g.createRadialGradient(px + pw / 2, py + 2.4 * s, 0, px + pw / 2, py + 2.4 * s, pw * 0.55);
     hov.addColorStop(0, 'rgba(255,205,110,.22)'); hov.addColorStop(1, 'rgba(255,205,110,0)'); g.fillStyle = hov; g.fillRect(px - pw * 0.1, py, pw * 1.2, 7 * s);
