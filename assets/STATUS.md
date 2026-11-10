@@ -64,7 +64,7 @@ Spent so far: 385 credits (Flint 135, companions 102, stage 38, Potato Sack 34, 
 
 ## Hit sparks switch (2026-11-10)
 
-- The start screen has a second switch under Hitboxes: Hit sparks. Off, a hit throws no sparks and no flash of light where it lands (KO hits included); damage, launch, sound and the hit freeze are unchanged. Shield button on the start screen, or the H key at any time. Remembered (), on by default.
+- The start screen has a second switch under Hitboxes: Hit sparks. Off, a hit throws no sparks and no flash of light where it lands (KO hits included); damage, launch, sound and the hit freeze are unchanged. Shield button on the start screen, or the H key at any time. Remembered (stored as emberfall.hitfx), on by default.
 - Found while checking it: a background check tab still receives the owner's controller, so their presses on its start screen can flip the stored hitbox switch and CPU level. Keep check tabs off the start screen, and close them quickly.
 
 ## CPU levels and tap jump (2026-11-10)
