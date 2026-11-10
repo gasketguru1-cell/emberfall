@@ -211,14 +211,15 @@ vm.runInThisContext(`
     check('wavedash: can act on frame ' + T.wd_actionable_frame, act.acted === 'attack after ' + T.wd_actionable_frame + ' frames', 'attack buffered during the slide -> ' + act.acted);
   }
   {
-    const onPlat = (script, solid) => { const [f] = setup(FL, FL, 0, 60); if (!solid) { f.y = 24; f.plat = PLATS[1]; } let low = f.y; const seen = [];
+    const P = PLATS[1], px = (P.x0 + P.x1) / 2;   /* a soft platform and its middle */
+    const onPlat = (script, solid) => { const [f] = setup(FL, FL, solid ? 0 : px, 60); if (!solid) { f.y = P.y; f.plat = P; } let low = f.y; const seen = [];
       SCRIPT[0] = script; run(50, () => { low = Math.min(low, f.y); if (seen[seen.length - 1] !== f.state) seen.push(f.state); }); return { y: Math.round(f.y), states: seen.join('>') }; };
     const flick = onPlat((i, tt) => { if (tt >= 4 && tt < 7) i.ly = -1; }), slow = onPlat((i, tt) => { if (tt >= 4) i.ly = -0.5; });
-    check('platform: a down flick drops through, a slow tilt crouches', flick.y === 0 && slow.y === 24, 'flick ends at height ' + flick.y + ' (' + flick.states + '), slow tilt stays at ' + slow.y);
+    check('platform: a down flick drops through, a slow tilt crouches', flick.y === 0 && slow.y === P.y, 'flick ends at height ' + flick.y + ' (' + flick.states + '), slow tilt stays at ' + slow.y);
     const sd = onPlat((i, tt) => { if (tt < 14) i.shd = true; if (tt >= 10 && tt < 13) i.ly = -1; }), sm = onPlat((i, tt) => { if (tt < 14) i.shd = true; if (tt >= 10 && tt < 13) i.ly = -1; }, true);
     check('shield drop: down in shield drops through a platform, spot-dodges on the stage', sd.y === 0 && /shield>air/.test(sd.states) && /shield>spot/.test(sm.states), 'on a platform: ' + sd.states + ' | on the stage: ' + sm.states);
-    const fall = hold => { const [f] = setup(FL, FL, 0, 60); airborne(f, 0, 44); SCRIPT[0] = i => { if (hold) i.ly = -1; }; let landed = null; run(80, () => { if (f.grounded && landed === null) landed = Math.round(f.y); }); return landed; };
-    check('platform: holding down in the air falls through it', fall(false) === 24 && fall(true) === 0, 'lands at height ' + fall(false) + ' normally, ' + fall(true) + ' holding down');
+    const fall = hold => { const [f] = setup(FL, FL, px, 60); airborne(f, px, P.y + 20); SCRIPT[0] = i => { if (hold) i.ly = -1; }; let landed = null; run(80, () => { if (f.grounded && landed === null) landed = Math.round(f.y); }); return landed; };
+    check('platform: holding down in the air falls through it', fall(false) === P.y && fall(true) === 0, 'lands at height ' + fall(false) + ' normally, ' + fall(true) + ' holding down');
   }
   {
     const guard = release => { const [a, v] = setup(FL, FL, 0, 11); let lag = 0, st = null;

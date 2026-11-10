@@ -33,7 +33,8 @@ const T = {
 
 /* ---------- Stage (y is up; feet position) ---------- */
 const MAIN = { x0: -80, x1: 80, y: 0, soft: false };
-const PLATS = [MAIN, { x0: -19, x1: 19, y: 24, soft: true }, { x0: -64, x1: -34, y: 44, soft: true }, { x0: 34, x1: 64, y: 44, soft: true }];
+/* Two soft platforms side by side, low enough for every fighter's full hop and too high for any short hop. No top platform. */
+const PLATS = [MAIN, { x0: -52, x1: -18, y: 26, soft: true }, { x0: 18, x1: 52, y: 26, soft: true }];
 const BODY_H = 24;
 const BLAST = { l: -235, r: 235, t: 200, b: -140 };
 

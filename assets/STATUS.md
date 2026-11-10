@@ -53,6 +53,10 @@ Spent so far: 237 credits (Flint 135, companions 102). The daily limit was raise
 - Each companion has its own ledge hang, spot dodge, grab hold and being-held clips. Roll and air dodge use the curled tumble with a spin, on purpose.
 - Follow-through: tails, ears and ribbons are simulated in `render3d.js` (`springs` in the manifest). It is stepped by the game clock, so freezing the game freezes it.
 
+## Stage (2026-11-10)
+
+One stage: a flat main platform 160 wide with two soft platforms side by side (x 18 to 52 on each side, height 26) and no top platform. The sizes are in `PLATS` in `sim.js`; both renderers build the platforms from that list. The look is Emberfall's own (dusk sky, plank deck, lamps, far islands).
+
 ## Movement (2026-11-10)
 
 The movement rules now work the way the reference build's do, with Emberfall's own numbers for each fighter.
