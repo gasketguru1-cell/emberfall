@@ -93,7 +93,7 @@ The movement rules now work the way the reference build's do, with Emberfall's o
 | fall / fast fall | 1.55 / 2.48 | 1.82 / 2.91 | 1.12 / 1.79 | 1.78 / 2.85 | 1.6 / 2.53 |
 
 - Flint sits at the middle of the roster (all-rounder). Nib is near the fast end on the ground and falls fast (rushdown). Loom is slow on the ground, light on gravity, with three smaller air jumps and good drift (floaty). Hod is slow with poor air control and falls hard (heavy).
-- **Changed for balance:** Nib's up special was raised (4.3 to 4.55) to give back the recovery the lower jumps took away; Nib's weight 80 -> 84 and damage 0.9 -> 0.93 of the template; Loom's weight 80 -> 77.
+- **Changed for balance:** Nib's up special was raised (4.3 to 4.55) to give back the recovery the lower jumps took away; Nib's weight 80 -> 84 and damage 0.9 -> 0.93 of the template; Loom's weight 80 -> 77; Flint's weight 92 -> 95 after the stage was narrowed.
 - **Not known, so guessed:** the file with the build's shared constants (`common.prc`) is not on disk in readable form. Three things come from it: how many frames a dash waits before its burst (set to 1 here), the extra grip while skidding out of a run (set to none), and the turn-around rules. Landing lag (2 frames, 4 after a fast fall) was left as it was.
 
 ## Rules (2026-11-09)
@@ -110,7 +110,7 @@ The movement rules now work the way the reference build's do, with Emberfall's o
 | `tests/rules.js` | 63 scripted checks of single rules with exact inputs, including the movement rules from platforms.ini, the match clock and (2026-11-10) each fighter's jump heights, full-hop pop, fast fall and ground speeds, and fighters pushing each other | all pass |
 | `tests/movement.js` | measures every fighter's speeds, stopping distance, jump heights and air times in the running rules; `EMBERFALL_SIM=<file>` measures another copy of the rules | see Movement |
 | `tests/fuzz.js` | both fighters driven by random sticks and buttons; looks for crashes, broken numbers, impossible or stuck states | about 880,000 frames of random against random and 730,000 with the CPU on one side in a quarter of the matches, clean |
-| `tests/stats.js` | CPU-versus-CPU balance per form: wins, damage, KO percent, where stocks are lost, who beats whom | on the two-platform stage with the new movement (2026-11-10), over three seeds of 960 matches each: Flint 49 to 51%, Nib 48 to 52%, Loom 48 to 50%, Hod 49 to 52%; average KO percent Hod 163, Flint 159, Loom 150, Nib 147 |
+| `tests/stats.js` | CPU-versus-CPU balance per form: wins, damage, KO percent, where stocks are lost, who beats whom | on the narrower two-platform stage with the new movement and pushing (2026-11-10), over three seeds of 960 matches each: Flint 46 to 49%, Nib 49 to 52%, Loom 51 to 52%, Hod 50 to 51%; average KO percent Hod 158, Flint 159, Loom 148, Nib 144 |
 | `tests/levels.js` | each CPU level against level 7, same fighter on both sides | wins for levels 1 to 9: 0, 0, 0, 2, 7, 35, 47, 67, 75% |
 | `tests/kotable.js` | KO percent of every hit | see Rules |
 | `tests/recovery.js` | CPU recovery from six spots off stage per form | 24 of 24 get back (also after the movement change) |
