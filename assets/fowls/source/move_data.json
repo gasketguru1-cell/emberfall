@@ -1,0 +1,1030 @@
+{
+  "version": "1.0 proposed",
+  "simulation_hz": 60,
+  "normalized_geometry": "W = total combined sling character width; B = solo bird visual body width; x positive toward facing; y positive upward",
+  "frame_semantics": "Startup N ticks with no active hitbox, next A ticks active, then E ticks recovery. First actionable frame = N+A+E+1; 60 ticks/sec. All tentative and require engine calibration.",
+  "knockback_semantics": "kbg/bkb are fictional balancing parameters in an engine-normalized 0-150 range; map through existing game knockback model. No claim of exact Smash Ultimate values.",
+  "combined_moves": [
+    {
+      "id": "jab_1",
+      "name": "Jab 1",
+      "category": "combined_normal",
+      "startup_frames": 3,
+      "active_frames": 2,
+      "endlag_frames": 7,
+      "first_actionable_frame": 13,
+      "damage_percent": 2,
+      "launch_angle_degrees": 68,
+      "knockback_growth": 40,
+      "base_knockback": 12,
+      "hitbox_W": "capsule forward x=0.20..0.78, y=0.18, radius=.18",
+      "notes": "Links to jab 2 during 5f input window; do not allow infinite jab 1.",
+      "hit_type": "melee",
+      "max_hits": 1
+    },
+    {
+      "id": "jab_2",
+      "name": "Jab 2",
+      "category": "combined_normal",
+      "startup_frames": 3,
+      "active_frames": 2,
+      "endlag_frames": 8,
+      "first_actionable_frame": 14,
+      "damage_percent": 2,
+      "launch_angle_degrees": 72,
+      "knockback_growth": 40,
+      "base_knockback": 14,
+      "hitbox_W": "capsule x=.30..0.90 y=.20 radius=.18",
+      "notes": "Links to jab finisher.",
+      "hit_type": "melee",
+      "max_hits": 1
+    },
+    {
+      "id": "jab_finisher",
+      "name": "Jab Finisher",
+      "category": "combined_normal",
+      "startup_frames": 5,
+      "active_frames": 3,
+      "endlag_frames": 14,
+      "first_actionable_frame": 23,
+      "damage_percent": 3,
+      "launch_angle_degrees": 50,
+      "knockback_growth": 98,
+      "base_knockback": 25,
+      "hitbox_W": "ellipse center x=.73 y=.25 radii=.42/.30",
+      "notes": "Strong enough to finish the jab reliably but not kill early.",
+      "hit_type": "melee",
+      "max_hits": 1
+    },
+    {
+      "id": "forward_tilt",
+      "name": "Forward Tilt",
+      "category": "combined_normal",
+      "startup_frames": 7,
+      "active_frames": 3,
+      "endlag_frames": 17,
+      "first_actionable_frame": 28,
+      "damage_percent": 8,
+      "launch_angle_degrees": 42,
+      "knockback_growth": 84,
+      "base_knockback": 27,
+      "hitbox_W": "capsule x=.30..1.40 y=.25 radius=.18",
+      "notes": "Band whip; distal final 20% of reach is optional tipper +1.5%, never double-hit.",
+      "hit_type": "melee",
+      "max_hits": 1
+    },
+    {
+      "id": "up_tilt",
+      "name": "Up Tilt",
+      "category": "combined_normal",
+      "startup_frames": 6,
+      "active_frames": 5,
+      "endlag_frames": 16,
+      "first_actionable_frame": 28,
+      "damage_percent": 7,
+      "launch_angle_degrees": 91,
+      "knockback_growth": 75,
+      "base_knockback": 19,
+      "hitbox_W": "swept arc centers from (.35,.20) to (.00,1.20), radius=.27",
+      "notes": "Reliable juggle; hits once.",
+      "hit_type": "melee",
+      "max_hits": 1
+    },
+    {
+      "id": "down_tilt",
+      "name": "Down Tilt",
+      "category": "combined_normal",
+      "startup_frames": 5,
+      "active_frames": 3,
+      "endlag_frames": 14,
+      "first_actionable_frame": 23,
+      "damage_percent": 6,
+      "launch_angle_degrees": 76,
+      "knockback_growth": 55,
+      "base_knockback": 18,
+      "hitbox_W": "capsule x=.15..0.95 y=-.40 radius=.17",
+      "notes": "Safe-ish spacing and low-percent combo starter.",
+      "hit_type": "melee",
+      "max_hits": 1
+    },
+    {
+      "id": "dash_attack",
+      "name": "Dash Attack",
+      "category": "combined_normal",
+      "startup_frames": 9,
+      "active_frames": 5,
+      "endlag_frames": 22,
+      "first_actionable_frame": 37,
+      "damage_percent": 9,
+      "launch_angle_degrees": 52,
+      "knockback_growth": 84,
+      "base_knockback": 40,
+      "hitbox_W": "ellipse center x=.62 y=.10 radii=.53/.42",
+      "notes": "Tumbling frame; early clean 9%, late 6% within same active span.",
+      "hit_type": "melee",
+      "max_hits": 1
+    },
+    {
+      "id": "forward_smash",
+      "name": "Forward Smash",
+      "category": "combined_smash",
+      "startup_frames": 18,
+      "active_frames": 3,
+      "endlag_frames": 28,
+      "first_actionable_frame": 50,
+      "damage_percent": 17,
+      "launch_angle_degrees": 43,
+      "knockback_growth": 108,
+      "base_knockback": 35,
+      "hitbox_W": "ellipse x=1.00 y=.30 radii=.55/.48",
+      "notes": "Bird head sling strike; per-bird modifiers override damage and geometry. 0.4x~1.4x charge multiplier per engine conventions.",
+      "hit_type": "melee",
+      "max_hits": 1
+    },
+    {
+      "id": "up_smash",
+      "name": "Up Smash",
+      "category": "combined_smash",
+      "startup_frames": 13,
+      "active_frames": 5,
+      "endlag_frames": 27,
+      "first_actionable_frame": 46,
+      "damage_percent": 15,
+      "launch_angle_degrees": 87,
+      "knockback_growth": 104,
+      "base_knockback": 32,
+      "hitbox_W": "ellipse x=.08 y=1.09 radii=.48/.65",
+      "notes": "Head-in-pouch overhead release; no detachable bird.",
+      "hit_type": "melee",
+      "max_hits": 1
+    },
+    {
+      "id": "down_smash",
+      "name": "Down Smash",
+      "category": "combined_smash",
+      "startup_frames": 14,
+      "active_frames": 4,
+      "endlag_frames": 28,
+      "first_actionable_frame": 47,
+      "damage_percent": 13,
+      "launch_angle_degrees": 33,
+      "knockback_growth": 101,
+      "base_knockback": 37,
+      "hitbox_W": "two capsules left x=-1.05..-.20 and right x=.20..1.05 y=-.28 radius=.30",
+      "notes": "Simultaneous two-sided hit; same victim max once.",
+      "hit_type": "melee",
+      "max_hits": 1
+    },
+    {
+      "id": "neutral_air",
+      "name": "Neutral Air",
+      "category": "combined_aerial",
+      "startup_frames": 5,
+      "active_frames": 10,
+      "endlag_frames": 16,
+      "first_actionable_frame": 32,
+      "damage_percent": 8,
+      "launch_angle_degrees": 58,
+      "knockback_growth": 78,
+      "base_knockback": 28,
+      "hitbox_W": "rotating ring radius=.72 around torso, thickness=.20",
+      "notes": "Early clean 8%, later 5%; one hit max.",
+      "hit_type": "melee",
+      "max_hits": 1,
+      "landing_lag_frames": 10
+    },
+    {
+      "id": "forward_air",
+      "name": "Forward Air",
+      "category": "combined_aerial",
+      "startup_frames": 9,
+      "active_frames": 4,
+      "endlag_frames": 23,
+      "first_actionable_frame": 37,
+      "damage_percent": 10,
+      "launch_angle_degrees": 48,
+      "knockback_growth": 91,
+      "base_knockback": 30,
+      "hitbox_W": "capsule x=.45..1.50 y=.06 radius=.19",
+      "notes": "Spacing aerial, optional tipper +2.",
+      "hit_type": "melee",
+      "max_hits": 1,
+      "landing_lag_frames": 12
+    },
+    {
+      "id": "back_air",
+      "name": "Back Air",
+      "category": "combined_aerial",
+      "startup_frames": 7,
+      "active_frames": 3,
+      "endlag_frames": 21,
+      "first_actionable_frame": 32,
+      "damage_percent": 11,
+      "launch_angle_degrees": 35,
+      "knockback_growth": 104,
+      "base_knockback": 30,
+      "hitbox_W": "capsule x=-1.25..-.25 y=.28 radius=.25",
+      "notes": "Primary air-to-air kill option.",
+      "hit_type": "melee",
+      "max_hits": 1,
+      "landing_lag_frames": 11
+    },
+    {
+      "id": "up_air",
+      "name": "Up Air",
+      "category": "combined_aerial",
+      "startup_frames": 7,
+      "active_frames": 5,
+      "endlag_frames": 18,
+      "first_actionable_frame": 31,
+      "damage_percent": 9,
+      "launch_angle_degrees": 80,
+      "knockback_growth": 83,
+      "base_knockback": 24,
+      "hitbox_W": "ellipse center x=.00 y=1.01 radii=.53/.32",
+      "notes": "Anti-air / juggle.",
+      "hit_type": "melee",
+      "max_hits": 1,
+      "landing_lag_frames": 9
+    },
+    {
+      "id": "down_air_wooden_red_dummy",
+      "name": "Down Air / Wooden Red Dummy",
+      "category": "combined_aerial",
+      "startup_frames": 13,
+      "active_frames": 2,
+      "endlag_frames": 24,
+      "first_actionable_frame": 40,
+      "damage_percent": 12,
+      "launch_angle_degrees": 270,
+      "knockback_growth": 93,
+      "base_knockback": 21,
+      "hitbox_W": "spawn wooden dummy at x=0 y=-.45, projectile radius=.22W",
+      "notes": "Initial 5 travel ticks spike on clean hit, later 8%/70deg pop; recoil +.15W/tick vertical once per airtime; dummy persists up to 55 ticks or first terrain collision; shatters.",
+      "hit_type": "projectile",
+      "max_hits": 1,
+      "landing_lag_frames": 14
+    },
+    {
+      "id": "grab",
+      "name": "Grab",
+      "category": "combined_grab",
+      "startup_frames": 8,
+      "active_frames": 2,
+      "endlag_frames": 22,
+      "first_actionable_frame": 33,
+      "damage_percent": 0,
+      "launch_angle_degrees": 0,
+      "knockback_growth": 0,
+      "base_knockback": 0,
+      "hitbox_W": "capsule x=.22..1.01 y=.19 radius=.26",
+      "notes": "Whip pouch around target. Pivot to grab capture state.",
+      "hit_type": "grab",
+      "max_hits": 1
+    },
+    {
+      "id": "pummel",
+      "name": "Pummel",
+      "category": "combined_throw",
+      "startup_frames": 4,
+      "active_frames": 2,
+      "endlag_frames": 8,
+      "first_actionable_frame": 15,
+      "damage_percent": 1.5,
+      "launch_angle_degrees": 0,
+      "knockback_growth": 0,
+      "base_knockback": 0,
+      "hitbox_W": "captured target",
+      "notes": "One pummel each press, conventional escape scaling.",
+      "hit_type": "melee",
+      "max_hits": 1
+    },
+    {
+      "id": "forward_throw",
+      "name": "Forward Throw",
+      "category": "combined_throw",
+      "startup_frames": 9,
+      "active_frames": 1,
+      "endlag_frames": 17,
+      "first_actionable_frame": 28,
+      "damage_percent": 9,
+      "launch_angle_degrees": 42,
+      "knockback_growth": 100,
+      "base_knockback": 48,
+      "hitbox_W": "captured target",
+      "notes": "Shoot opponent as projectile-looking knockback, without converting victim to true projectile.",
+      "hit_type": "melee",
+      "max_hits": 1
+    },
+    {
+      "id": "back_throw",
+      "name": "Back Throw",
+      "category": "combined_throw",
+      "startup_frames": 11,
+      "active_frames": 1,
+      "endlag_frames": 19,
+      "first_actionable_frame": 32,
+      "damage_percent": 10,
+      "launch_angle_degrees": 138,
+      "knockback_growth": 107,
+      "base_knockback": 52,
+      "hitbox_W": "captured target",
+      "notes": "Wood frame twists and snaps target backward.",
+      "hit_type": "melee",
+      "max_hits": 1
+    },
+    {
+      "id": "up_throw",
+      "name": "Up Throw",
+      "category": "combined_throw",
+      "startup_frames": 10,
+      "active_frames": 1,
+      "endlag_frames": 16,
+      "first_actionable_frame": 28,
+      "damage_percent": 8,
+      "launch_angle_degrees": 89,
+      "knockback_growth": 90,
+      "base_knockback": 50,
+      "hitbox_W": "captured target",
+      "notes": "Juggle starter at low percent.",
+      "hit_type": "melee",
+      "max_hits": 1
+    },
+    {
+      "id": "down_throw",
+      "name": "Down Throw",
+      "category": "combined_throw",
+      "startup_frames": 12,
+      "active_frames": 1,
+      "endlag_frames": 19,
+      "first_actionable_frame": 33,
+      "damage_percent": 7,
+      "launch_angle_degrees": 75,
+      "knockback_growth": 60,
+      "base_knockback": 36,
+      "hitbox_W": "captured target",
+      "notes": "Bounce into techable state at higher percent; no guaranteed long chains.",
+      "hit_type": "melee",
+      "max_hits": 1
+    }
+  ],
+  "solo_moves": [
+    {
+      "id": "jab",
+      "name": "Jab",
+      "startup_frames": 3,
+      "active_frames": 2,
+      "endlag_frames": 10,
+      "first_actionable_frame": 16,
+      "damage_percent": 3,
+      "launch_angle_degrees": 58,
+      "knockback_growth": 50,
+      "base_knockback": 12,
+      "hitbox_bird_width_B": "ellipse x=.48 y=.06 radii=.30/.20"
+    },
+    {
+      "id": "forward_tilt",
+      "name": "Forward Tilt",
+      "startup_frames": 6,
+      "active_frames": 3,
+      "endlag_frames": 17,
+      "first_actionable_frame": 27,
+      "damage_percent": 5,
+      "launch_angle_degrees": 45,
+      "knockback_growth": 65,
+      "base_knockback": 18,
+      "hitbox_bird_width_B": "ellipse x=.54 y=.15 radii=.37/.23"
+    },
+    {
+      "id": "up_tilt",
+      "name": "Up Tilt",
+      "startup_frames": 6,
+      "active_frames": 4,
+      "endlag_frames": 16,
+      "first_actionable_frame": 27,
+      "damage_percent": 4,
+      "launch_angle_degrees": 90,
+      "knockback_growth": 60,
+      "base_knockback": 15,
+      "hitbox_bird_width_B": "ellipse x=.12 y=.60 radii=.35/.33"
+    },
+    {
+      "id": "down_tilt",
+      "name": "Down Tilt",
+      "startup_frames": 5,
+      "active_frames": 3,
+      "endlag_frames": 16,
+      "first_actionable_frame": 25,
+      "damage_percent": 4,
+      "launch_angle_degrees": 72,
+      "knockback_growth": 52,
+      "base_knockback": 16,
+      "hitbox_bird_width_B": "capsule x=.12.. .56 y=-.31 r=.15"
+    },
+    {
+      "id": "dash_attack",
+      "name": "Dash Attack",
+      "startup_frames": 9,
+      "active_frames": 4,
+      "endlag_frames": 23,
+      "first_actionable_frame": 37,
+      "damage_percent": 6,
+      "launch_angle_degrees": 60,
+      "knockback_growth": 78,
+      "base_knockback": 25,
+      "hitbox_bird_width_B": "ellipse x=.49 y=.04 radii=.44/.31"
+    },
+    {
+      "id": "forward_smash",
+      "name": "Forward Smash",
+      "startup_frames": 15,
+      "active_frames": 3,
+      "endlag_frames": 28,
+      "first_actionable_frame": 47,
+      "damage_percent": 9,
+      "launch_angle_degrees": 42,
+      "knockback_growth": 95,
+      "base_knockback": 28,
+      "hitbox_bird_width_B": "ellipse x=.62 y=.18 radii=.46/.36"
+    },
+    {
+      "id": "up_smash",
+      "name": "Up Smash",
+      "startup_frames": 12,
+      "active_frames": 4,
+      "endlag_frames": 26,
+      "first_actionable_frame": 43,
+      "damage_percent": 8,
+      "launch_angle_degrees": 88,
+      "knockback_growth": 87,
+      "base_knockback": 25,
+      "hitbox_bird_width_B": "ellipse x=0 y=.68 radii=.40/.45"
+    },
+    {
+      "id": "down_smash",
+      "name": "Down Smash",
+      "startup_frames": 13,
+      "active_frames": 4,
+      "endlag_frames": 27,
+      "first_actionable_frame": 45,
+      "damage_percent": 8,
+      "launch_angle_degrees": 35,
+      "knockback_growth": 92,
+      "base_knockback": 27,
+      "hitbox_bird_width_B": "two ellipses x=+-.50 y=-.25 radii=.32/.22"
+    },
+    {
+      "id": "neutral_air",
+      "name": "Neutral Air",
+      "startup_frames": 6,
+      "active_frames": 8,
+      "endlag_frames": 19,
+      "first_actionable_frame": 34,
+      "damage_percent": 5,
+      "launch_angle_degrees": 62,
+      "knockback_growth": 65,
+      "base_knockback": 19,
+      "hitbox_bird_width_B": "ellipse centered 0,0 radii=.53/.46",
+      "landing_lag_frames": 11
+    },
+    {
+      "id": "forward_air",
+      "name": "Forward Air",
+      "startup_frames": 8,
+      "active_frames": 3,
+      "endlag_frames": 22,
+      "first_actionable_frame": 34,
+      "damage_percent": 6,
+      "launch_angle_degrees": 46,
+      "knockback_growth": 73,
+      "base_knockback": 22,
+      "hitbox_bird_width_B": "ellipse x=.55 y=.07 radii=.35/.20",
+      "landing_lag_frames": 12
+    },
+    {
+      "id": "back_air",
+      "name": "Back Air",
+      "startup_frames": 8,
+      "active_frames": 3,
+      "endlag_frames": 22,
+      "first_actionable_frame": 34,
+      "damage_percent": 6,
+      "launch_angle_degrees": 39,
+      "knockback_growth": 76,
+      "base_knockback": 25,
+      "hitbox_bird_width_B": "ellipse x=-.48 y=.10 radii=.34/.22",
+      "landing_lag_frames": 12
+    },
+    {
+      "id": "up_air",
+      "name": "Up Air",
+      "startup_frames": 7,
+      "active_frames": 4,
+      "endlag_frames": 18,
+      "first_actionable_frame": 30,
+      "damage_percent": 5,
+      "launch_angle_degrees": 82,
+      "knockback_growth": 62,
+      "base_knockback": 20,
+      "hitbox_bird_width_B": "ellipse x=.04 y=.64 radii=.37/.25",
+      "landing_lag_frames": 10
+    },
+    {
+      "id": "down_air",
+      "name": "Down Air",
+      "startup_frames": 13,
+      "active_frames": 3,
+      "endlag_frames": 26,
+      "first_actionable_frame": 43,
+      "damage_percent": 6,
+      "launch_angle_degrees": 270,
+      "knockback_growth": 72,
+      "base_knockback": 18,
+      "hitbox_bird_width_B": "ellipse x=.00 y=-.60 radii=.36/.29",
+      "landing_lag_frames": 15
+    },
+    {
+      "id": "grab",
+      "name": "Grab",
+      "startup_frames": 8,
+      "active_frames": 2,
+      "endlag_frames": 24,
+      "first_actionable_frame": 35,
+      "damage_percent": 0,
+      "launch_angle_degrees": 0,
+      "knockback_growth": 0,
+      "base_knockback": 0,
+      "hitbox_bird_width_B": "capsule x=.20.. .55 y=.05 r=.19"
+    },
+    {
+      "id": "pummel",
+      "name": "Pummel",
+      "startup_frames": 4,
+      "active_frames": 2,
+      "endlag_frames": 9,
+      "first_actionable_frame": 16,
+      "damage_percent": 1,
+      "launch_angle_degrees": 0,
+      "knockback_growth": 0,
+      "base_knockback": 0,
+      "hitbox_bird_width_B": "captured target"
+    },
+    {
+      "id": "forward_throw",
+      "name": "Forward Throw",
+      "startup_frames": 10,
+      "active_frames": 1,
+      "endlag_frames": 20,
+      "first_actionable_frame": 32,
+      "damage_percent": 5,
+      "launch_angle_degrees": 45,
+      "knockback_growth": 73,
+      "base_knockback": 28,
+      "hitbox_bird_width_B": "captured target"
+    },
+    {
+      "id": "back_throw",
+      "name": "Back Throw",
+      "startup_frames": 12,
+      "active_frames": 1,
+      "endlag_frames": 20,
+      "first_actionable_frame": 34,
+      "damage_percent": 6,
+      "launch_angle_degrees": 137,
+      "knockback_growth": 78,
+      "base_knockback": 33,
+      "hitbox_bird_width_B": "captured target"
+    },
+    {
+      "id": "up_throw",
+      "name": "Up Throw",
+      "startup_frames": 11,
+      "active_frames": 1,
+      "endlag_frames": 18,
+      "first_actionable_frame": 31,
+      "damage_percent": 5,
+      "launch_angle_degrees": 89,
+      "knockback_growth": 60,
+      "base_knockback": 29,
+      "hitbox_bird_width_B": "captured target"
+    },
+    {
+      "id": "down_throw",
+      "name": "Down Throw",
+      "startup_frames": 12,
+      "active_frames": 1,
+      "endlag_frames": 18,
+      "first_actionable_frame": 32,
+      "damage_percent": 4,
+      "launch_angle_degrees": 72,
+      "knockback_growth": 55,
+      "base_knockback": 25,
+      "hitbox_bird_width_B": "captured target"
+    }
+  ],
+  "forms": [
+    {
+      "bird": "Flint",
+      "role": "balanced",
+      "weight": 100,
+      "run_mult": 1.0,
+      "air_mult": 1.0,
+      "gravity_mult": 1.0,
+      "neutral_b": {
+        "name": "Straight Dummy",
+        "startup": 10,
+        "active": 1,
+        "endlag": 18,
+        "damage": 6,
+        "projectile": "blue wooden dummy",
+        "speed_W_per_tick": 0.38,
+        "lifetime": 65,
+        "angle": 40,
+        "knockback": "moderate; 90 kbg/25 bkb",
+        "restriction": "max 2 live normal dummies; additional fire replaces oldest"
+      },
+      "side_b": {
+        "name": "Redline Cannonball",
+        "startup": 12,
+        "aim_max": 20,
+        "damage": 13,
+        "launch_speed_W_per_tick": 0.55,
+        "flight_ticks": 32,
+        "activation": "B battle cry: 3% in .85W radius, impulse opposite facing; one activation per launch; 10 frame animation",
+        "solo_note": "headbutt-centric, reliable mobility"
+      },
+      "f_smash": {
+        "damage": 18,
+        "startup": 18,
+        "reach_W": 1.22,
+        "angle": 40
+      },
+      "nair": {
+        "damage": 9,
+        "note": "universal spinning attack"
+      },
+      "dash": {
+        "damage": 9,
+        "note": "standard tumbling entry"
+      }
+    },
+    {
+      "bird": "Bolt",
+      "role": "speed",
+      "weight": 88,
+      "run_mult": 1.15,
+      "air_mult": 1.11,
+      "gravity_mult": 1.04,
+      "neutral_b": {
+        "name": "Double Tap",
+        "startup": 8,
+        "active": 1,
+        "endlag": 20,
+        "damage": "3% x2",
+        "projectile": "two small wooden blue dummies",
+        "speed_W_per_tick": "0.42,0.48",
+        "lifetime": 52,
+        "angle": 62,
+        "knockback": "weak, total damage capped; second bullet spawned 6 ticks later",
+        "restriction": "max 4 active dummy pellets"
+      },
+      "side_b": {
+        "name": "Hypersonic Launch",
+        "startup": 10,
+        "aim_max": 16,
+        "damage": "9 normal / 14 boosted",
+        "launch_speed_W_per_tick": 0.72,
+        "flight_ticks": 28,
+        "activation": "B adds +0.38W/tick along existing velocity once, 3f later; allow ground skim without action cancel",
+        "solo_note": "sliding momentum but poor kill power"
+      },
+      "f_smash": {
+        "damage": 14,
+        "startup": 14,
+        "reach_W": 1.34,
+        "angle": 48
+      },
+      "nair": {
+        "damage": 8,
+        "note": "3 small hits totaling 8%, 1-frame gaps; clean release guaranteed"
+      },
+      "dash": {
+        "damage": 8,
+        "note": "longer slide, weaker knockback"
+      }
+    },
+    {
+      "bird": "Cinder",
+      "role": "power",
+      "weight": 115,
+      "run_mult": 0.86,
+      "air_mult": 0.88,
+      "gravity_mult": 1.08,
+      "neutral_b": {
+        "name": "Fuse Dummy",
+        "startup": 17,
+        "active": 1,
+        "endlag": 25,
+        "damage": 9,
+        "projectile": "arcing explosive wooden dummy",
+        "speed_W_per_tick": 0.3,
+        "lifetime": 50,
+        "angle": 50,
+        "knockback": "9% total incl burst; blast radius .64W",
+        "restriction": "only one live explosive dummy; cannot stack explosion and direct hit"
+      },
+      "side_b": {
+        "name": "Living Cannonball",
+        "startup": 17,
+        "aim_max": 22,
+        "damage": "18 max impact OR 16 explosive, not both",
+        "launch_speed_W_per_tick": 0.45,
+        "flight_ticks": 40,
+        "activation": "B detonates once; radial impulse including self .18W/tick, brief soot expression, never invuln",
+        "solo_note": "heavy roll and self-propelled blast hop"
+      },
+      "f_smash": {
+        "damage": 21,
+        "startup": 23,
+        "reach_W": 1.17,
+        "angle": 42
+      },
+      "nair": {
+        "damage": 11,
+        "note": "larger body hitbox, +15% radius"
+      },
+      "dash": {
+        "damage": 10,
+        "note": "slow heavy roll, projectile resistance only during 2 specific frames; no blanket armor"
+      }
+    },
+    {
+      "bird": "Pip",
+      "role": "trickery",
+      "weight": 87,
+      "run_mult": 1.06,
+      "air_mult": 1.12,
+      "gravity_mult": 0.97,
+      "neutral_b": {
+        "name": "Wooden Scatter",
+        "startup": 12,
+        "active": 1,
+        "endlag": 20,
+        "damage": "up to 8% total",
+        "projectile": "one dummy splits into three",
+        "speed_W_per_tick": 0.34,
+        "lifetime": 48,
+        "angle": 60,
+        "knockback": "shared per-target aggregate cap 8%, no triple same tick hit",
+        "restriction": "max 3 live shards; no chain splitting"
+      },
+      "side_b": {
+        "name": "Triple Trouble",
+        "startup": 12,
+        "aim_max": 18,
+        "damage": "5% lead, side clones up to 3% each with total 8% max per target",
+        "launch_speed_W_per_tick": 0.54,
+        "flight_ticks": 33,
+        "activation": "B creates two visual/attack clones from same mesh for 24 ticks; center is only player-controlled body; no extra damage stocks",
+        "solo_note": "tiny body with fakeouts"
+      },
+      "f_smash": {
+        "damage": 15,
+        "startup": 18,
+        "reach_W": 1.26,
+        "angle": 47
+      },
+      "nair": {
+        "damage": 8,
+        "note": "3 precise pulses, shared knockback cap"
+      },
+      "dash": {
+        "damage": 8,
+        "note": "3 quick microhits, not independent wall-of-hitboxes"
+      }
+    },
+    {
+      "bird": "Pearl",
+      "role": "aerial control",
+      "weight": 96,
+      "run_mult": 0.96,
+      "air_mult": 1.08,
+      "gravity_mult": 0.87,
+      "neutral_b": {
+        "name": "Egg Courier",
+        "startup": 15,
+        "active": 1,
+        "endlag": 24,
+        "damage": "5 direct + 7 egg; cap combined 10",
+        "projectile": "wooden blue dummy carrying one egg",
+        "speed_W_per_tick": 0.28,
+        "lifetime": 55,
+        "angle": 78,
+        "knockback": "blast has .55W radius and mild launch",
+        "restriction": "one active egg; existing egg detonates or expires on new input"
+      },
+      "side_b": {
+        "name": "Egg Drop Flight",
+        "startup": 13,
+        "aim_max": 20,
+        "damage": "8 bird impact + 9 egg; cap combined 13% per victim",
+        "launch_speed_W_per_tick": 0.47,
+        "flight_ticks": 37,
+        "activation": "B drops one egg below and adds +0.16W/tick vertical self impulse; no repeated air stall",
+        "solo_note": "float and ledge pressure"
+      },
+      "f_smash": {
+        "damage": 16,
+        "startup": 18,
+        "reach_W": 1.27,
+        "angle": 44
+      },
+      "nair": {
+        "damage": 8,
+        "note": "wide fan hitbox but low knockback"
+      },
+      "dash": {
+        "damage": 8,
+        "note": "floaty lunge with weak early anti-air"
+      }
+    }
+  ],
+  "solo_specials": {
+    "Flint": [
+      {
+        "name": "Neutral B: Mini Cry",
+        "startup": 9,
+        "active": 3,
+        "endlag": 19,
+        "damage": 3,
+        "notes": "push radius .65B; low knockback"
+      },
+      {
+        "name": "Side B: Angry Rush",
+        "startup": 11,
+        "active": 5,
+        "endlag": 21,
+        "damage": 6,
+        "notes": "speed .32B/tick"
+      },
+      {
+        "name": "Up B: Double Hop",
+        "startup": 6,
+        "active": 1,
+        "endlag": 26,
+        "damage": 2,
+        "notes": "one upward impulse .80B/tick, used once airtime"
+      }
+    ],
+    "Bolt": [
+      {
+        "name": "Neutral B: Beak Drill",
+        "startup": 7,
+        "active": 6,
+        "endlag": 16,
+        "damage": 5,
+        "notes": "3 ticks of damage totaling 5, once per enemy"
+      },
+      {
+        "name": "Side B: Sprint Burst",
+        "startup": 9,
+        "active": 7,
+        "endlag": 24,
+        "damage": 5,
+        "notes": "speed .48B/tick, slides on landing"
+      },
+      {
+        "name": "Up B: Diagonal Flash",
+        "startup": 8,
+        "active": 4,
+        "endlag": 28,
+        "damage": 3,
+        "notes": "single diagonal boost .70B/tick, used once airtime"
+      }
+    ],
+    "Cinder": [
+      {
+        "name": "Neutral B: Smoke Puff",
+        "startup": 15,
+        "active": 5,
+        "endlag": 25,
+        "damage": 6,
+        "notes": "near body .8B radius"
+      },
+      {
+        "name": "Side B: Heavy Roll",
+        "startup": 14,
+        "active": 10,
+        "endlag": 31,
+        "damage": 8,
+        "notes": "slow armored only frame 15-17 vs weak hits"
+      },
+      {
+        "name": "Up B: Blast Hop",
+        "startup": 15,
+        "active": 4,
+        "endlag": 32,
+        "damage": 6,
+        "notes": "short upward blast, recoil and landing lag"
+      }
+    ],
+    "Pip": [
+      {
+        "name": "Neutral B: Mini Split",
+        "startup": 12,
+        "active": 3,
+        "endlag": 19,
+        "damage": 5,
+        "notes": "two temporary clones, no independent hurtbox"
+      },
+      {
+        "name": "Side B: Trio Stampede",
+        "startup": 10,
+        "active": 7,
+        "endlag": 25,
+        "damage": 6,
+        "notes": "3 short pulses, aggregate 6"
+      },
+      {
+        "name": "Up B: Bird Ladder",
+        "startup": 8,
+        "active": 10,
+        "endlag": 29,
+        "damage": 3,
+        "notes": "3 staged upward impulses, once airtime"
+      }
+    ],
+    "Pearl": [
+      {
+        "name": "Neutral B: Weak Egg",
+        "startup": 15,
+        "active": 2,
+        "endlag": 27,
+        "damage": 6,
+        "notes": "one tiny egg active"
+      },
+      {
+        "name": "Side B: Flutter Check",
+        "startup": 10,
+        "active": 7,
+        "endlag": 23,
+        "damage": 5,
+        "notes": "gentle horizontal body-check"
+      },
+      {
+        "name": "Up B: Wing Float",
+        "startup": 7,
+        "active": 13,
+        "endlag": 31,
+        "damage": 2,
+        "notes": "slow upward impulse, air steering, once airtime"
+      }
+    ]
+  },
+  "shared_up_b": {
+    "name": "Catastrophic Launch",
+    "startup": 7,
+    "charge_max_frames": 45,
+    "manual_release_required": true,
+    "charge_damage_points": [
+      [
+        0,
+        8
+      ],
+      [
+        10,
+        8
+      ],
+      [
+        25,
+        13
+      ],
+      [
+        44,
+        18
+      ],
+      [
+        45,
+        24
+      ]
+    ],
+    "direction": "full 360 degrees, using main stick only after initiating Up+B",
+    "flight_ticks": "12-38 depending charge, tune by engine W",
+    "initial_velocity_W_per_tick": "0.34-0.80 scaled smoothly with charge",
+    "max_active_hitbox": "ellipsoid 0.65W x 0.57W around compound entity, one hit per opponent",
+    "landing_lag_frames": 28,
+    "ground_collision": "shallow hit -> deterministic skid; steep hit -> 1 reduced-energy bounce, no recursive energy gain",
+    "charge_physics": "gravity remains on (reduced 25%) and horizontal traction reduces; cannot suspend indefinitely",
+    "state": "unavailable once per airtime; reset on landing/ledge normal recovery; hold charge at cap without auto-launch, until button released or interrupted",
+    "kill_tier": "at max charge target around Flare Blitz-level feel, not guaranteed identical damage or KO percent",
+    "armor": "none"
+  },
+  "systems": {
+    "side_b": "launch bird, transfer control, abandoned sling persists as non-damageable collision-light prop; bird can fight and rejoin",
+    "switching": "instant bird selection when actionable, no artificial cooldown, no cancelling lag/hitstun",
+    "rejoin": "within .90W of pouch center, press Down+B once actionable; 6f reconnection, same position and percent",
+    "solo_up_b": "shared Up+B replaced by species solo recovery while separated",
+    "down_air_recoil": "one full-strength recoil per airtime; dummy spawn max 1 alive; stable fixed timestep",
+    "rollback": "all state snapshot/restore, seeded RNG, stable entity ids, deterministic animations VFX not part of state"
+  }
+}

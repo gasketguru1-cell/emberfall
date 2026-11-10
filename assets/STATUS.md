@@ -43,7 +43,7 @@ All Meshy calls go through `tools/meshy.js`. Limits are in `assets/meshy-budget.
 | 2026-11-10 | Sprocket, Brand, Tilt, Scuttle | Concept pictures (4 each) | 16 |
 | 2026-11-10 | Sprocket, Scuttle | 3D models from the concepts (30 each), after the owner said to carry on | 60 |
 
-Spent so far: 385 credits (Flint 135, companions 102, stage 38, Potato Sack 34, Sprocket 34, Scuttle 34, concept pictures for Brand and Tilt 8). The owner cleared up to 400 for the Potato Sack project on 2026-11-10; the 150-a-day limit is unchanged (148 used that day, so Brand's and Tilt's models wait for another day). The daily limit was raised to 240 for 2026-11-09 only, at the owner's request; it is 150 on other days. No credits were spent in the unattended session on the evening of 2026-11-09.
+Spent so far: 535 credits (Flint 135, companions 102, stage 38, Potato Sack 34, Sprocket 34, Scuttle 34, concept pictures for Brand and Tilt 8, five Furious Fowls birds 150). On 2026-11-10 the owner allowed 150 more that day (day limit 300; 298 used). The owner cleared up to 400 for the Potato Sack project on 2026-11-10; the 150-a-day limit is unchanged (148 used that day, so Brand's and Tilt's models wait for another day). The daily limit was raised to 240 for 2026-11-09 only, at the owner's request; it is 150 on other days. No credits were spent in the unattended session on the evening of 2026-11-09.
 
 ## Flint v3: what is and is not done
 
@@ -61,6 +61,19 @@ Spent so far: 385 credits (Flint 135, companions 102, stage 38, Potato Sack 34, 
 - Each companion has nine to eleven attack clips. A few moves still share a clip (see `assets/manifest.json`).
 - Each companion has its own ledge hang, spot dodge, grab hold and being-held clips. Roll and air dodge use the curled tumble with a spin, on purpose.
 - Follow-through: tails, ears and ribbons are simulated in `render3d.js` (`springs` in the manifest). It is stepped by the game clock, so freezing the game freezes it.
+
+## Furious Fowls (2026-11-10)
+
+Five birds and a living slingshot, from the owner's package (assets/fowls/source/spec.md and move_data.json) and the owner's own line-up art.
+
+- **One fighter, two shapes.** In the slingshot (forms 0 to 4): side special fires the bird itself and control goes with it. Alone (forms 5 to 9) the bird is a smaller, lighter fighter; the empty slingshot waits where it was, cannot be hit, falls to the floor, and comes back by the nearest ledge 45 frames after being lost. Down special beside it (within 0.9 W) puts the bird back; down special in the slingshot changes bird. One damage meter and stock count; losing a stock puts the bird back in the pouch.
+- **Numbers.** tools/fowls-gen.js copies every frame count, damage, angle and knockback from move_data.json into the FOWL table in sim.js, and reads the hitbox shapes from the document's text. W is 10 units, B 6.5. Speeds given in W a tick are scaled by 4.5 so a launch crosses about half the stage.
+- **Names.** The document's russet bird is called Flint; the game already has a Flint, so it is Rusty here.
+- **Simplified from the document:** the slingshot is one built shape that leans and squashes rather than a fully animated rig; multi-hit notes (Bolt's and Pip's three small hits) are single hits of the same total; the bird picker is next / previous rather than a five-way wheel; Pip's doubles are two extra hitboxes, not drawn birds; ammunition, eggs and blasts are plain shapes; landing-lag and auto-cancel tables are the engine's.
+- **Models:** five birds from the owner's art, 30 credits each (150). One shared 10-bone skeleton and 22 clips (tools/blender/fowls.js). The slingshot is built in render3d.js, not generated.
+- **Balance:** the owner asked for 55 to 65%. See the log line below for the measured figures.
+- **Checked:** 8 rule checks of its own (150 in all), 80 stress matches, recovery from all six spots for each bird, a CPU match in the game with no errors. **Not checked:** anything in a person's hands, the hitbox audit, animation in motion.
+- **Also fixed:** the 3D picture crashed when a shot made of several parts (Sprocket's tape roll) disappeared. That bug had been live since Sprocket was added.
 
 ## Combat audit (2026-11-10, branch combat-audit)
 

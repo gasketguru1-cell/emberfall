@@ -128,6 +128,8 @@ function build() {
       v.obj = obj; v.unit = M.cfg.height / M.height; v.flip = f.face;
       obj.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; o.frustumCulled = false; o.material = o.material.clone(); if (f.alt) o.material.color.setRGB(0.78, 0.9, 1.25); v.mats.push(o.material); } });
       v.pivot.add(obj); v.model = M; v.mixer = new THREE.AnimationMixer(obj); setupSprings(v, M);
+      if (M.cfg.lift) obj.position.y = M.cfg.lift;   /* a rider: the model sits this high above the fighter's feet */
+      if (M.cfg.prop && M.cfg.prop.type === 'sling') { v.prop = makeSling(); v.hand = null; scene.add(v.prop); }
       if (M.cfg.prop && M.cfg.prop.type === 'lantern') { v.hand = obj.getObjectByName(M.cfg.prop.bone) || null; if (v.hand) { v.prop = makeLantern(); scene.add(v.prop); } }
       return;
     }
@@ -140,12 +142,25 @@ function build() {
   }
 
   /* ---- projectiles ---- */
+  /* The living slingshot (Furious Fowls): a forked branch on two small feet, with two bands and a leather pouch. Built here, not generated. Faces +x. */
+  const emptySlings = [];
+  const makeSling = () => {
+    const grp = new THREE.Group(), wood = new THREE.MeshStandardMaterial({ color: 0xb8742f, roughness: 0.75 }), dark = new THREE.MeshStandardMaterial({ color: 0x7a3a26, roughness: 0.8 }), band = new THREE.MeshStandardMaterial({ color: 0xc8562c, roughness: 0.6 });
+    const stick = (x0, y0, z0, x1, y1, z1, r0, r1, mat) => { const a = new THREE.Vector3(x0, y0, z0), b = new THREE.Vector3(x1, y1, z1), m = new THREE.Mesh(new THREE.CylinderGeometry(r1, r0, a.distanceTo(b), 10), mat); m.position.copy(a).add(b).multiplyScalar(0.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize()); m.castShadow = true; grp.add(m); return m; };
+    stick(0, 0.9, 0, 0, 6.2, 0, 1.5, 1.25, wood); stick(0, 5.6, 0, 0, 14.2, 4.4, 1.2, 0.95, wood); stick(0, 5.6, 0, 0, 14.2, -4.4, 1.2, 0.95, wood);   /* trunk and the two arms of the fork, spread toward and away from the camera */
+    for (const z of [4.4, -4.4]) { const cap = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 1.1, 10), dark); cap.position.set(0, 13.4, z * 0.93); grp.add(cap); stick(0, 13.2, z * 0.9, 0.3, 9.6, z * 0.32, 0.28, 0.28, band); }
+    const pouch = new THREE.Mesh(new THREE.SphereGeometry(2.7, 14, 10, 0, Math.PI * 2, Math.PI * 0.5, Math.PI * 0.5), dark); pouch.position.set(0.2, 10.6, 0); pouch.scale.set(1, 0.8, 1.1); grp.add(pouch);
+    for (const z of [1.2, -1.2]) { const foot = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), wood); foot.scale.set(1.5, 0.6, 1); foot.position.set(0.5, 0.5, z); foot.castShadow = true; grp.add(foot); }
+    const eye = new THREE.MeshBasicMaterial({ color: 0x2a1a12 }); for (const z of [0.5, -0.5]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 6), eye); e.position.set(1.42, 3.6, z); grp.add(e); }
+    const out = new THREE.Group(); grp.rotation.y = 0.95; out.add(grp); out.visible = false; return out;   /* turned so the fork shows from the side */
+  };
   const shots = new Map();
   const shotMesh = kind => {
     const e = (hex, i) => new THREE.MeshStandardMaterial({ color: hex, emissive: hex, emissiveIntensity: i, roughness: 0.5 });
     if (kind === 'bolt') return new THREE.Mesh(new THREE.CapsuleGeometry(0.9, 4, 4, 10).rotateZ(Math.PI / 2), e(0xffe8a3, 2));
     if (kind === 'gust') return new THREE.Mesh(new THREE.TorusGeometry(4.5, 0.7, 8, 24), new THREE.MeshStandardMaterial({ color: 0xf0dcff, transparent: true, opacity: 0.55, depthWrite: false }));
     if (kind === 'boulder') { const m = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 0), new THREE.MeshStandardMaterial({ color: 0x8d8794, roughness: 0.95, flatShading: true })); m.castShadow = true; return m; }
+    if (kind === 'dummy' || kind === 'clone' || kind === 'egg') { const m = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 9), new THREE.MeshStandardMaterial({ color: kind === 'egg' ? 0xf4ead8 : kind === 'clone' ? 0x2bb8b0 : 0x8a623a, roughness: 0.7 })); if (kind === 'egg') m.scale.set(0.8, 1, 0.8); m.castShadow = true; return m; }   /* wooden ammunition, Pip's doubles, Pearl's egg */
     if (kind === 'tape') { const m = new THREE.Group(), rim = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.55, 18).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xd9c24a, roughness: 0.45, metalness: 0.5 })), hub = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.3, 0.62), new THREE.MeshStandardMaterial({ color: 0x4a4d57, roughness: 0.6 })); rim.castShadow = true; m.add(rim, hub); return m; }   /* Sprocket's tape roll: a steel reel with a dark bar across it, so its turning shows */
     return new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), e(0xffa040, 2.6));   /* ember and flame */
   };
@@ -377,19 +392,24 @@ function build() {
       if (v.shield.visible) { const [sx, sy, r] = shieldCircle(f); v.shield.scale.setScalar(r); v.shield.position.set(sx, sy, 0); }
       if (v.pad.visible) v.pad.position.set(f.x, f.y - 0.8, 0);
       if (v.springs.length) applySprings(v);
-      if (v.prop) {
+      if (v.prop && !v.hand) {   /* the living slingshot under its bird: it leans into its run and squashes a little in an attack */
+        v.prop.position.set(f.x, f.y, 0); v.prop.rotation.y = f.face > 0 ? 0 : Math.PI; v.prop.rotation.z = clamp(-f.vx * 0.06, -0.3, 0.3) * (f.face > 0 ? 1 : -1); const sq = f.state === 'attack' ? 1 - 0.12 * Math.sin(Math.min(1, f.mf / (f.move ? f.move.t : 1)) * Math.PI) : f.state === 'jsq' || f.state === 'land' ? 0.85 : 1; v.prop.scale.set(1, sq, 1); v.prop.visible = true;
+      } else if (v.prop) {
         v.root.updateWorldMatrix(true, true); v.hand.getWorldPosition(v.prop.position);
         v.prop.rotation.z = clamp(-f.vx * 0.12, -0.5, 0.5) + Math.sin(frame * 0.12 + idx) * 0.05;
         v.prop.userData.glow.material.opacity = 0.85 + Math.sin(frame * 0.37 + idx * 2) * 0.12; v.prop.visible = true;
       }
     });
+    F.forEach((f, idx) => { let e = emptySlings[idx]; if (f.sling && f.state !== 'dead') { if (!e) { e = emptySlings[idx] = makeSling(); scene.add(e); } e.position.set(f.sling.x, f.sling.y, 0); e.rotation.y = f.sling.face > 0 ? 0 : Math.PI; e.rotation.z = Math.sin(frame * 0.05 + idx) * 0.03; e.visible = true; } else if (e) e.visible = false; });   /* the empty slingshot, waiting for its bird */
+    for (let k = F.length; k < 2; k++) { if (emptySlings[k]) emptySlings[k].visible = false; }
     for (let k = F.length; k < 2; k++) { if (fighters[k].prop) fighters[k].prop.visible = false; fighters[k].root.visible = false; fighters[k].shield.visible = false; fighters[k].pad.visible = false; }
 
-    for (const [p, m] of shots) if (!PROJ.includes(p)) { scene.remove(m); m.geometry.dispose(); shots.delete(p); }
+    for (const [p, m] of shots) if (!PROJ.includes(p)) { scene.remove(m); m.traverse(o => { if (o.geometry) o.geometry.dispose(); }); shots.delete(p); }   /* a shot may be a group of parts (the tape roll) */
     for (const p of PROJ) {
       let m = shots.get(p); if (!m || m.userData.kind !== p.kind) { if (m) { scene.remove(m); } m = shotMesh(p.kind); m.userData.kind = p.kind; shots.set(p, m); scene.add(m); }
       m.position.set(p.x, p.y, 0);
       if (p.kind === 'boulder' || p.kind === 'tape') { m.scale.setScalar(p.r); m.rotation.z = -(p.rot || 0); }
+      else if (p.kind === 'dummy' || p.kind === 'clone' || p.kind === 'egg') { m.scale.setScalar(p.r); m.rotation.z = -frame * 0.3 * p.face; }
       else if (p.kind === 'gust') { m.rotation.y = Math.PI / 2; m.rotation.x = frame * 0.25; }
       else if (p.kind === 'flame') m.scale.set(p.r * 0.8, p.r * (1.1 + Math.sin(frame * 0.5) * 0.3), p.r * 0.8);
       else if (p.kind === 'ember') m.scale.setScalar(p.r * 0.75);

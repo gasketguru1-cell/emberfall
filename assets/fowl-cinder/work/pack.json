@@ -1,0 +1,5 @@
+{
+ "base": "work/cinder-rigged.glb",
+ "texture": 1024,
+ "out": "export/cinder-v1.glb"
+}

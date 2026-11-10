@@ -13,9 +13,10 @@ let seed = +process.argv[3] || 777; Math.random = () => { seed = (seed * 1664525
 for (const f of ['hitboxes.js', 'sim.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 vm.runInThisContext(`
 (function () {
-  const forms = [[0, 0, 'Flint'], [1, 0, 'Nib'], [1, 1, 'Loom'], [1, 2, 'Hod'], [2, 0, 'Potato Sack'], [3, 0, 'Sprocket'], [4, 0, 'Scuttle']], S = {}, M = {};
+  const forms = [[0, 0, 'Flint'], [1, 0, 'Nib'], [1, 1, 'Loom'], [1, 2, 'Hod'], [2, 0, 'Potato Sack'], [3, 0, 'Sprocket'], [4, 0, 'Scuttle'], [5, 0, 'Rusty'], [5, 1, 'Bolt'], [5, 2, 'Cinder'], [5, 3, 'Pip'], [5, 4, 'Pearl']], S = {}, M = {};
   for (const a of forms) { M[a[2]] = {}; for (const b of forms) M[a[2]][b[2]] = 0; }
   for (const f of forms) S[f[2]] = { wins: 0, games: 0, started: 0, hits: 0, dmg: 0, koAt: [], frames: 0, byMove: {} };
+  for (const k of ['Rusty', 'Bolt', 'Cinder', 'Pip', 'Pearl']) S[k + ' alone'] = S[k];   /* a bird out of its slingshot counts as the same fighter */
   const _apply = applyHit, _start = Fighter.prototype.startMove, _ko = Fighter.prototype.ko;
   applyHit = function (a, v, h, face, srcX, proj, poke) { const p0 = v.pct, st0 = v.state; _apply(a, v, h, face, srcX, proj, poke); if (v.pct > p0) { const s = S[a.form.name]; s.hits++; s.dmg += v.pct - p0; const k = h.id ? h.id.split(':')[1] : a.mname; s.byMove[k] = (s.byMove[k] || 0) + 1; v.lastHit = [a.form.name, k]; } };
   Fighter.prototype.startMove = function (n) { if (!this.form.moves[n].swap) { const s = S[this.form.name]; s.started++; s.tried = s.tried || {}; s.tried[n] = (s.tried[n] || 0) + 1; } return _start.call(this, n); };
@@ -23,7 +24,7 @@ vm.runInThisContext(`
   for (const A of forms) for (const B of forms) for (let m = 0; m < ${per}; m++) {
     slots[0] = { dev: 'kb', pick: A[0], ready: true }; slots[1] = { dev: 'kb', pick: B[0], ready: true };
     startMatch(); F[0].ctl = new Ctl('cpu'); F[1].ctl = new Ctl('cpu'); F[0].fi = A[1]; F[1].fi = B[1]; F[0].noSwap = F[1].noSwap = true;
-    let n = 0; while (mode !== 'over' && n < 8 * 3600 + 400) { step(); n++; if (F[0].fi !== A[1]) F[0].fi = A[1]; if (F[1].fi !== B[1]) F[1].fi = B[1]; }
+    let n = 0; while (mode !== 'over' && n < 8 * 3600 + 400) { step(); n++; if (!F[0].def.fowl && F[0].fi !== A[1]) F[0].fi = A[1]; if (!F[1].def.fowl && F[1].fi !== B[1]) F[1].fi = B[1]; }   /* a Furious Fowls bird leaves and returns to its slingshot, so its form is left alone */
     const w = F[0].stocks !== F[1].stocks ? (F[0].stocks > F[1].stocks ? 0 : 1) : F[0].pct < F[1].pct ? 0 : 1;
     S[A[2]].games++; S[B[2]].games++; S[[A, B][w][2]].wins++; M[[A, B][w][2]][[B, A][w][2]]++; S[A[2]].frames += n; S[B[2]].frames += n;
   }

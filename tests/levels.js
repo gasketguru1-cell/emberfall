@@ -11,7 +11,7 @@ let seed = +process.argv[3] || 31; Math.random = () => { seed = (seed * 1664525 
 for (const f of ['hitboxes.js', 'sim.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 vm.runInThisContext(`
 (function () {
-  const forms = [[0, 0, 'Flint'], [1, 0, 'Nib'], [1, 1, 'Loom'], [1, 2, 'Hod'], [2, 0, 'Potato Sack'], [3, 0, 'Sprocket'], [4, 0, 'Scuttle']], rows = {};
+  const forms = [[0, 0, 'Flint'], [1, 0, 'Nib'], [1, 1, 'Loom'], [1, 2, 'Hod'], [2, 0, 'Potato Sack'], [3, 0, 'Sprocket'], [4, 0, 'Scuttle'], [5, 0, 'Rusty'], [5, 1, 'Bolt'], [5, 2, 'Cinder'], [5, 3, 'Pip'], [5, 4, 'Pearl']], rows = {};
   for (let lv = 1; lv <= 9; lv++) {
     let wins = 0, games = 0, stocks = 0, dmg = 0, frames = 0;
     for (const A of forms) for (let m = 0; m < ${per}; m++) {
@@ -19,7 +19,7 @@ vm.runInThisContext(`
       slots[0] = { dev: 'kb', pick: A[0], ready: true }; slots[1] = { dev: 'kb', pick: A[0], ready: true };
       startMatch(); F[0].ctl = new Ctl('cpu'); F[1].ctl = new Ctl('cpu'); F[0].fi = F[1].fi = A[1]; F[0].noSwap = F[1].noSwap = true;
       F[side].ctl.ai.lv = lv; F[1 - side].ctl.ai.lv = 7;
-      let n = 0; while (mode !== 'over' && n < 8 * 3600 + 400) { step(); n++; if (F[0].fi !== A[1]) F[0].fi = A[1]; if (F[1].fi !== A[1]) F[1].fi = A[1]; }
+      let n = 0; while (mode !== 'over' && n < 8 * 3600 + 400) { step(); n++; if (!F[0].def.fowl && F[0].fi !== A[1]) F[0].fi = A[1]; if (!F[1].def.fowl && F[1].fi !== A[1]) F[1].fi = A[1]; }
       const w = F[0].stocks !== F[1].stocks ? (F[0].stocks > F[1].stocks ? 0 : 1) : F[0].pct < F[1].pct ? 0 : 1;
       games++; if (w === side) wins++; stocks += F[side].stocks - F[1 - side].stocks; frames += n;
     }

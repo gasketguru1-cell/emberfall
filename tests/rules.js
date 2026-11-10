@@ -9,7 +9,7 @@ let seed = 5; Math.random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; 
 for (const f of ['hitboxes.js', 'sim.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 vm.runInThisContext(`
 (function () {
-  const FL = [0, 0], NIB = [1, 0], LOOM = [1, 1], HOD = [1, 2], SACK = [2, 0], SPR = [3, 0], SCU = [4, 0];
+  const FL = [0, 0], NIB = [1, 0], LOOM = [1, 1], HOD = [1, 2], SACK = [2, 0], SPR = [3, 0], SCU = [4, 0], FOW = [5, 0];
   let SCRIPT = [null, null], t = 0; const results = [];
   cpuInput = function (f) { const i = blankIn(); if (SCRIPT[f.idx]) SCRIPT[f.idx](i, t, f); return i; };
   /* Two fighters standing on the main stage, facing each other, both driven by scripts. */
@@ -527,6 +527,32 @@ vm.runInThisContext(`
       check('Scuttle: Bucket Drop on the floor hits for 13%', ground > 14.5 && ground < 17, 'target at ' + ground.toFixed(1) + '%');
       check('Scuttle: the air dive falls at 1.4 times fast fall and thumps where it lands', near(d1.maxDown / st.ffall, 1.4, 0.03) && d1.pct > 11 && d1.pct < 13.5, 'fell at ' + (d1.maxDown / st.ffall).toFixed(2) + ' times fast fall; a target standing beside the landing took ' + d1.pct.toFixed(1) + '% (10% before the bonus)');
       check('Scuttle: the dive sends an airborne target straight down', d2.pct > 13 && d2.pct < 16.5 && d2.vyHit < -1, 'target in the air took ' + d2.pct.toFixed(1) + '%, sent ' + (d2.vyHit < 0 ? 'down' : 'up')); }
+  }
+
+  /* ---- Furious Fowls: five birds and a slingshot (the owner's document) ---- */
+  {
+    const FM = ROSTER[5].forms, by = (list, id) => list[id];   /* FOWL is the table tools/fowls-gen.js copies out of the owner's move data */
+    const same = (mv, q, tune) => mv.h[0].f0 === q.s + 1 && mv.h[0].f1 === q.s + q.a && mv.t === q.s + q.a + q.e && mv.h[0].d === q.d && mv.h[0].a === q.ang && mv.h[0].b === q.b && Math.abs(mv.h[0].k - q.k * tune) < 1;
+    const kb = n => (TUNE[n] && TUNE[n].kb) || 1, pairs = [['ftilt', 'forward_tilt'], ['utilt', 'up_tilt'], ['dtilt', 'down_tilt'], ['usmash', 'up_smash'], ['dsmash', 'down_smash'], ['fair', 'forward_air'], ['bair', 'back_air'], ['uair', 'up_air']];
+    let okC = 0, okS = 0; for (const [k, id] of pairs) { if (same(FM[1].moves[k], by(FOWL.combined, id), kb('Bolt'))) okC++; if (same(FM[6].moves[k], by(FOWL.solo, id), 1)) okS++; }
+    check('Furious Fowls: frames, damage, angle and knockback are the document\u2019s', okC === pairs.length && okS === pairs.length, okC + ' of ' + pairs.length + ' slingshot moves and ' + okS + ' of ' + pairs.length + ' lone-bird moves match the move data exactly');
+    const fsm = FOWL.forms.map((f, n) => FM[n].moves.fsmash.h[0].d === f.fs.damage && FM[n].moves.fsmash.h[0].f0 === f.fs.startup + 1 && FM[n].moves.nair.h[0].d === f.nair), th = FM[0].moves.throws, bt = FOWL.combined.back_throw;
+    check('Furious Fowls: each bird\u2019s own forward smash and neutral air, and the throws', fsm.every(Boolean) && th.b.d === bt.d && th.b.a === bt.ang, FOWL.forms.map((f, n) => FM[n].name + ' ' + FM[n].moves.fsmash.h[0].d + '% f' + FM[n].moves.fsmash.h[0].f0).join(', ') + '; back throw ' + th.b.d + '%');
+    /* firing the bird, fighting alone, going back */
+    { const [f, o2] = setup(FOW, FL, -20, 60); f.pct = 37; SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.lx = 1; i.spc = true; } }; let flew = 0, left = null; run(70, () => { if (f.fi >= 5 && f.state === 'attack' && f.mname === 'launch') flew++; if (f.sling && !left) left = { x: f.sling.x, fi: f.fi }; });
+      check('Furious Fowls: side special fires the bird and leaves the slingshot behind', left && Math.abs(left.x + 20) < 1 && left.fi === 5 && flew >= 28 && f.x > 20 && f.pct === 37, left ? 'slingshot stayed at ' + left.x.toFixed(0) + ', the bird flew ' + flew + ' frames to ' + f.x.toFixed(0) + ' as ' + f.form.name + ', damage still ' + f.pct + '%' : 'nothing was fired');
+      const far = f.fi; SCRIPT[0] = (i, tt) => { if (tap(72)(tt)) { i.ly = -1; i.spc = true; } }; run(20); const stayed = f.fi === far && !!f.sling;
+      f.x = f.sling.x + 4; f.y = 0; f.vx = f.vy = 0; f.grounded = true; f.plat = PLATS[0]; f.set('idle'); const t0 = t; SCRIPT[0] = (i, tt) => { if (tap(t0 + 1)(tt)) { i.ly = -1; i.spc = true; } }; run(14);
+      check('Furious Fowls: down special beside the slingshot puts the bird back, and only there', stayed && f.fi === 0 && !f.sling && Math.abs(f.x + 20) < 1 && f.pct === 37, 'far away: ' + (stayed ? 'nothing' : 'rejoined') + '; beside it: ' + (f.sling ? 'still apart' : 'back in the pouch at ' + f.x.toFixed(0)) + ', ' + f.pct + '%'); }
+    { const [f] = setup(FOW, FL, 0, 60); f.pct = 22; SCRIPT[0] = (i, tt) => { if (tap(2)(tt) || tap(20)(tt)) { i.ly = -1; i.spc = true; } }; const seen = [f.form.name]; run(40, () => { if (seen[seen.length - 1] !== f.form.name) seen.push(f.form.name); });
+      check('Furious Fowls: down special in the slingshot changes bird and keeps the damage', seen.join('>') === 'Rusty>Bolt>Cinder' && f.pct === 22, seen.join(' > ') + ', ' + f.pct + '%'); }
+    { const [f] = setup(FOW, FL, 0, 60); SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.lx = 1; i.spc = true; } }; run(30); f.x = 400; run(80, () => f.state !== 'respawn' && f.stocks === 3);
+      check('Furious Fowls: losing a stock alone puts the bird back in the pouch', f.stocks === 2 && f.fi < 5 && !f.sling, 'stocks ' + f.stocks + ', form ' + f.form.name + ', slingshot ' + (f.sling ? 'still out' : 'gone')); }
+    { const up = hold => { const [f, o2] = setup(FOW, FL, 0, 0.5); airborne(o2, 0.5, 30); let top = 0, y0 = o2.y; SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 2 + hold) { i.ly = 1; i.spc = true; } else if (tt >= 2 + hold) i.ly = 1; }; run(110, () => { o2.y = y0; o2.vy = 0; top = Math.max(top, f.y); return o2.pct === 0 || t < 100; }); return { top, pct: o2.pct }; };
+      const tapped = up(3), full = up(60), pts = FOWL.upb.charge_damage_points;
+      check('Furious Fowls: the charged launch goes further and hits harder the longer it is held', full.top > tapped.top * 2 && tapped.pct > pts[0][1] && tapped.pct < pts[0][1] * 1.4 && full.pct > pts[pts.length - 1][1] && full.pct < pts[pts.length - 1][1] * 1.4, 'tapped: rose ' + tapped.top.toFixed(0) + ', ' + tapped.pct.toFixed(1) + '% (' + pts[0][1] + '% before the bonus); held: rose ' + full.top.toFixed(0) + ', ' + full.pct.toFixed(1) + '% (' + pts[pts.length - 1][1] + '%)'); }
+    { const [f] = setup(FOW, FL, -40, 60); let most = 0; SCRIPT[0] = (i, tt) => { if (tt % 34 === 2 || tt % 34 === 3) i.spc = true; }; run(110, () => { most = Math.max(most, PROJ.filter(q => q.tag === 'fowl').length); });
+      check('Furious Fowls: at most two of Rusty\u2019s wooden shots at once', most === 2, most + ' at once after three shots'); }
   }
 
   /* ---- Combat audit (2026-11-10): strike shapes, sweeping, the ledge's open frames, the run turnaround ---- */

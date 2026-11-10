@@ -10,7 +10,7 @@ function drawHud() {
     g.fillStyle = 'rgba(10,10,20,.6)'; rr(x - 120, y, 240, 74, 12); g.fill(); g.fillStyle = pc; rr(x - 120, y, 8, 74, 4); g.fill();
     g.textAlign = 'left'; g.font = 'bold 16px system-ui, sans-serif'; g.fillStyle = pc; g.fillText((f.ctl.dev === 'cpu' ? 'CPU ' + (f.ctl.ai.lv || CPU_LEVEL) : 'P' + (f.idx + 1)) + '  ' + f.def.name, x - 102, y + 22);
     for (let k = 0; k < f.stocks; k++) { g.fillStyle = '#ffd98a'; g.beginPath(); g.arc(x - 96 + k * 18, y + 40, 6, 0, TAU); g.fill(); }
-    if (f.def.forms.length > 1) f.def.forms.forEach((fm, k) => { g.fillStyle = k === f.fi ? '#fff' : 'rgba(255,255,255,.35)'; g.font = (k === f.fi ? 'bold ' : '') + '12px system-ui, sans-serif'; g.fillText(fm.name, x - 102 + k * 42, y + 64); });
+    if (f.def.forms.length > 1) f.def.forms.slice(0, f.def.cycle || 99).forEach((fm, k) => { g.fillStyle = k === f.fi % (f.def.cycle || 99) ? '#fff' : 'rgba(255,255,255,.35)'; g.font = (k === f.fi % (f.def.cycle || 99) ? 'bold ' : '') + '12px system-ui, sans-serif'; g.fillText(fm.name, x - 102 + k * 42, y + 64); });
     g.textAlign = 'right'; g.font = 'bold 44px system-ui, sans-serif'; g.fillStyle = pctCol(f.pct); const jx = f.flash > 0 ? (Math.random() - 0.5) * 6 : 0; g.fillText(Math.round(f.pct) + '%', x + 106 + jx, y + 52);
   });
   /* the finishing hit: cinema bars while the game runs slow */
@@ -104,10 +104,10 @@ function drawSelect(three) {
     const nw = g.measureText(d.name).width; g.font = 'bold 30px system-ui, sans-serif'; g.fillStyle = sl.ready ? 'rgba(255,255,255,.18)' : '#ffd98a'; g.fillText('‹', x + 24, y + 81); g.fillText('›', x + 62 + nw, y + 81);
     g.font = 'italic 16px ' + serif; g.fillStyle = '#f3dfb6'; g.fillText(d.sub, x + 26, y + 110);
     if (d.forms.length > 1) {   /* the companions; in 3D the one standing on the island is lit */
-      const now = Math.floor(t / 170) % d.forms.length; let fx = x + 26;
-      d.forms.forEach((fm, n) => { g.font = (three && n === now ? 'bold ' : '') + '13px system-ui, sans-serif'; const w = g.measureText(fm.name).width + 18; g.fillStyle = three && n === now ? pc : 'rgba(255,255,255,.1)'; rr(fx, y + 120, w, 22, 11); g.fill(); g.fillStyle = three && n === now ? '#16121f' : '#d8d2ee'; g.textAlign = 'center'; g.fillText(fm.name, fx + w / 2, y + 135); g.textAlign = 'left'; fx += w + 6; });
+      const now = Math.floor(t / 170) % (d.cycle || d.forms.length); let fx = x + 26;
+      d.forms.slice(0, d.cycle || 99).forEach((fm, n) => { g.font = (three && n === now ? 'bold ' : '') + '13px system-ui, sans-serif'; const w = g.measureText(fm.name).width + 18; g.fillStyle = three && n === now ? pc : 'rgba(255,255,255,.1)'; rr(fx, y + 120, w, 22, 11); g.fill(); g.fillStyle = three && n === now ? '#16121f' : '#d8d2ee'; g.textAlign = 'center'; g.fillText(fm.name, fx + w / 2, y + 135); g.textAlign = 'left'; fx += w + 6; });
     }
-    if (!three) d.forms.forEach((fm, n) => { g.save(); g.translate(x + cw - 60 - (d.forms.length - 1 - n) * 62, y + 112); g.scale(3.4, -3.4); ART[fm.name](same ? fm.alt : fm.col, frame, null); g.restore(); });
+    if (!three) d.forms.slice(0, d.cycle || 99).forEach((fm, n) => { g.save(); g.translate(x + cw - 60 - (d.forms.length - 1 - n) * 62, y + 112); g.scale(3.4, -3.4); ART[fm.name](same ? fm.alt : fm.col, frame, null); g.restore(); });
     g.textAlign = 'right';
     if (sl.ready) { g.fillStyle = '#9be564'; rr(x + cw - 108, y + 118, 88, 26, 13); g.fill(); g.font = 'bold 14px system-ui, sans-serif'; spaced(2); g.fillStyle = '#12200c'; g.textAlign = 'center'; g.fillText('READY', x + cw - 63, y + 136); spaced(0); }
     else if (three || d.forms.length === 1) { g.font = '13px system-ui, sans-serif'; g.fillStyle = '#cfc8e8'; g.fillText('Left / Right  ·  Attack to confirm', x + cw - 20, y + 136); }

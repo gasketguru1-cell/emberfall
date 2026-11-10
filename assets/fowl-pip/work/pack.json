@@ -1,0 +1,5 @@
+{
+ "base": "work/pip-rigged.glb",
+ "texture": 1024,
+ "out": "export/pip-v1.glb"
+}

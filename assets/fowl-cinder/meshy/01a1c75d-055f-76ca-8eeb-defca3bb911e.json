@@ -1,0 +1,64 @@
+{
+  "character": "fowl-cinder",
+  "endpoint": "image-to-3d",
+  "params": {
+    "image_url": "file:assets/fowls/source/cinder.png",
+    "ai_model": "latest",
+    "model_type": "standard",
+    "should_texture": true,
+    "enable_pbr": true,
+    "texture_resolution": "2k",
+    "should_remesh": true,
+    "topology": "triangle",
+    "target_polycount": 20000,
+    "symmetry_mode": "off",
+    "target_formats": [
+      "glb"
+    ]
+  },
+  "estimate": 30,
+  "consumed": 30,
+  "files": [
+    "assets/fowl-cinder/raw/01a1c75d-055f-76ca-8eeb-defca3bb911e/model_url.glb",
+    "assets/fowl-cinder/raw/01a1c75d-055f-76ca-8eeb-defca3bb911e/model_urls.glb",
+    "assets/fowl-cinder/raw/01a1c75d-055f-76ca-8eeb-defca3bb911e/thumbnail_url.png",
+    "assets/fowl-cinder/raw/01a1c75d-055f-76ca-8eeb-defca3bb911e/texture_urls.0.base_color.png",
+    "assets/fowl-cinder/raw/01a1c75d-055f-76ca-8eeb-defca3bb911e/texture_urls.0.metallic.png",
+    "assets/fowl-cinder/raw/01a1c75d-055f-76ca-8eeb-defca3bb911e/texture_urls.0.roughness.png",
+    "assets/fowl-cinder/raw/01a1c75d-055f-76ca-8eeb-defca3bb911e/texture_urls.0.normal.png"
+  ],
+  "task": {
+    "id": "01a1c75d-055f-76ca-8eeb-defca3bb911e",
+    "type": "image-to-3d",
+    "name": "",
+    "art_style": "",
+    "object_prompt": "",
+    "style_prompt": "",
+    "negative_prompt": "",
+    "texture_prompt": "",
+    "texture_image_url": "",
+    "text_style_prompt": "",
+    "image_style_url": "",
+    "status": "SUCCEEDED",
+    "created_at": 1794346125486,
+    "progress": 100,
+    "started_at": 1794346125495,
+    "finished_at": 1794346210991,
+    "expires_at": 1794605410991,
+    "task_error": null,
+    "model_url": "https://assets.meshy.ai/9b63c3ed-0b38-42c8-922f-bcc56f30de31/tasks/01a1c75d-055f-76ca-8eeb-defca3bb911e/output/model.glb",
+    "model_urls": {
+      "glb": "https://assets.meshy.ai/9b63c3ed-0b38-42c8-922f-bcc56f30de31/tasks/01a1c75d-055f-76ca-8eeb-defca3bb911e/output/model.glb"
+    },
+    "thumbnail_url": "https://assets.meshy.ai/9b63c3ed-0b38-42c8-922f-bcc56f30de31/tasks/01a1c75d-055f-76ca-8eeb-defca3bb911e/output/preview.png",
+    "texture_urls": [
+      {
+        "base_color": "https://assets.meshy.ai/9b63c3ed-0b38-42c8-922f-bcc56f30de31/tasks/01a1c75d-055f-76ca-8eeb-defca3bb911e/output/texture_0.png",
+        "metallic": "https://assets.meshy.ai/9b63c3ed-0b38-42c8-922f-bcc56f30de31/tasks/01a1c75d-055f-76ca-8eeb-defca3bb911e/output/texture_0_metallic.png",
+        "roughness": "https://assets.meshy.ai/9b63c3ed-0b38-42c8-922f-bcc56f30de31/tasks/01a1c75d-055f-76ca-8eeb-defca3bb911e/output/texture_0_roughness.png",
+        "normal": "https://assets.meshy.ai/9b63c3ed-0b38-42c8-922f-bcc56f30de31/tasks/01a1c75d-055f-76ca-8eeb-defca3bb911e/output/texture_0_normal.png"
+      }
+    ],
+    "consumed_credits": 30
+  }
+}

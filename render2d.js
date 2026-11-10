@@ -194,6 +194,15 @@ const ART = {
     limb(4.2, 6.4 + bob, hx, hy, 1.3, c[0]); g.beginPath(); g.arc(hx, hy, 1.35, 0, TAU); ink(tint(c[0], 0.08), 0.3);   /* front fist, the one that swings */
   },
 };
+/* Furious Fowls in 2D: a round bird, in the slingshot's pouch or alone. */
+function fowlSling2d() { g.strokeStyle = '#a8672f'; g.lineWidth = 1.7; g.lineCap = 'round'; g.beginPath(); g.moveTo(0, 0.6); g.lineTo(0, 6); g.lineTo(-4.2, 13.6); g.moveTo(0, 6); g.lineTo(4.2, 13.6); g.stroke();
+  g.strokeStyle = '#c2562e'; g.lineWidth = 0.6; g.beginPath(); g.moveTo(-4.2, 13); g.lineTo(0, 9.2); g.lineTo(4.2, 13); g.stroke(); g.fillStyle = '#7a3a26'; g.beginPath(); g.ellipse(0, 9, 2.6, 1.3, 0, 0, TAU); g.fill();
+  g.fillStyle = '#a8672f'; for (const x of [-1.3, 1.3]) { g.beginPath(); g.ellipse(x, 0.4, 1.1, 0.5, 0, 0, TAU); g.fill(); } }
+function fowlBird(c, y, r, t) { const bob = Math.sin(t * 0.1) * 0.12; g.beginPath(); g.ellipse(0, y + bob, r, r * 0.95, 0, 0, TAU); ink(vgrad(c[0], y - r, y + r), 0.3); g.beginPath(); g.ellipse(r * 0.2, y - r * 0.35 + bob, r * 0.6, r * 0.5, 0, 0, TAU); ink(c[1], 0.2);
+  g.beginPath(); g.moveTo(-r * 0.3, y + r * 0.85 + bob); g.quadraticCurveTo(-r * 0.9, y + r * 1.7 + bob, r * 0.2, y + r * 0.95 + bob); g.closePath(); ink(c[2] === '#ffffff' ? c[1] : c[2], 0.2);
+  g.fillStyle = '#fff'; g.beginPath(); g.arc(r * 0.45, y + r * 0.25 + bob, r * 0.26, 0, TAU); g.fill(); g.fillStyle = OL; g.beginPath(); g.arc(r * 0.52, y + r * 0.22 + bob, r * 0.12, 0, TAU); g.fill();
+  g.beginPath(); g.moveTo(r * 0.8, y + r * 0.1 + bob); g.lineTo(r * 1.3, y - r * 0.05 + bob); g.lineTo(r * 0.8, y - r * 0.2 + bob); g.closePath(); ink('#4a3b36', 0.2); }
+for (const [n, r] of [['Rusty', 3.2], ['Bolt', 2.9], ['Cinder', 4], ['Pip', 2.3], ['Pearl', 3.3]]) { ART[n] = (c, t) => { fowlSling2d(); fowlBird(c, 9.8, r, t); }; ART[n + ' alone'] = (c, t) => fowlBird(c, r + 0.5, r * 1.05, t); }
 function drawFighter(f, three) {
   if (f.state === 'dead') return;
   const s = cam.s, st = f.st, fm = f.form, col = f.alt ? fm.alt : fm.col, x = SX(f.x), y = SY(f.y);
@@ -296,6 +305,7 @@ function draw() {
   SHK.x = shake > 0 ? (Math.random() - 0.5) * shake : 0; SHK.y = shake > 0 ? (Math.random() - 0.5) * shake : 0;
   g.save(); g.translate(SHK.x, SHK.y);
   if (!three) { drawBg(); drawStage(); drawProj(); }
+  if (!three) for (const f of F) if (f.sling) { g.save(); g.translate(SX(f.sling.x), SY(f.sling.y)); g.scale(cam.s * f.sling.face, -cam.s); fowlSling2d(); g.restore(); }   /* the empty slingshot, waiting */
   for (const f of F) drawFighter(f, three); drawFx(three); drawDebug(); g.restore(); drawHud(); drawDebugText();
   if (three) window.R3.render();
 }
