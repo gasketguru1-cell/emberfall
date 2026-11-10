@@ -825,7 +825,7 @@ function cpuInput(f, o, m) {
   }
   if (f.state === 'attack' && f.move && f.move.rapid) { i.atk = f.rapidN < 6 && ad < 16; return i; }
   if (f.state === 'attack' && f.move && f.move.next && f.mf >= f.move.chain && ad < 18) { i.atk = m.t % 2 === 0; return i; }
-  if (f.state === 'held') { i.atk = m.t % 2 === 0; i.jmp = m.t % 2 === 1; return i; }
+  if (f.state === 'held') { i.grb = m.t % 2 === 0; i.lx = m.t % 4 < 2 ? 1 : -1; return i; }   /* mash out with the stick and the grab button: a buffered attack or jump would come out the moment it breaks free */
   if (f.state === 'down') { if (f.sf > 24) { const r = m.t % 3; if (r === 0) i.ly = 1; else if (r === 1) i.lx = -dir; else i.atk = true; } return i; }
   if (f.state === 'ledge') { if (f.sf > 20) { if (m.t % 2) i.lx = -sgn(f.x); else i.jmp = true; } return i; }
   if (f.state === 'hold') { if (f.sf > 16) { const r = m.t % 4; if (r === 0) i.lx = f.face; else if (r === 1) i.lx = -f.face; else if (r === 2) i.ly = 1; else i.ly = -1; } return i; }
