@@ -45,6 +45,24 @@ function beep(freq, dur, type, vol, slide) {
     o.connect(a); a.connect(AC.destination); o.start(t); o.stop(t + dur);
   } catch (e) { /* no audio */ }
 }
+/* A hit: a short burst of filtered noise over a low thump, longer and deeper for harder hits. The noise is made with its
+   own generator, so playing a sound never disturbs the game's random numbers. */
+let NOISE = null;
+function thwack(kb) {
+  try {
+    if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+    if (AC.state === 'suspended') AC.resume();
+    if (!NOISE) { NOISE = AC.createBuffer(1, AC.sampleRate * 0.4 | 0, AC.sampleRate); const d = NOISE.getChannelData(0); let q = 12345; for (let k = 0; k < d.length; k++) { q = (q * 1664525 + 1013904223) >>> 0; d[k] = q / 2147483648 - 1; } }
+    const t = AC.currentTime, k = Math.min(1, kb / 160), dur = 0.07 + k * 0.16;
+    const n = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain(); n.buffer = NOISE;
+    f.type = 'bandpass'; f.Q.value = 0.9; f.frequency.setValueAtTime(2600 - k * 1200, t); f.frequency.exponentialRampToValueAtTime(380, t + dur);
+    g.gain.setValueAtTime(0.05 + k * 0.09, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    n.connect(f); f.connect(g); g.connect(AC.destination); n.start(t); n.stop(t + dur);
+    const o = AC.createOscillator(), a = AC.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(170 - k * 60, t); o.frequency.exponentialRampToValueAtTime(45, t + dur * 1.2);
+    a.gain.setValueAtTime(0.06 + k * 0.1, t); a.gain.exponentialRampToValueAtTime(0.0001, t + dur * 1.2);
+    o.connect(a); a.connect(AC.destination); o.start(t); o.stop(t + dur * 1.2);
+  } catch (e) { /* no audio */ }
+}
 
 /* ---------- Input ---------- */
 const keys = {};
@@ -568,7 +586,7 @@ class Fighter {
         if (this.sf === 10 && v) {
           const h = this.form.moves.throws[this.throwK], id = this.form.name + ':throw' + this.throwK, d = h.d * staleMul(this, id) * DMG_1V1; pushStale(this, id);
           this.victim = null; v.grounded = false; v.plat = null; v.pct = Math.min(999, v.pct + d); v.grabImm = 60;
-          v.launch(knock(v, d, h.b, h.k) * rage(this), h.a * Math.PI / 180, this.face); v.hitlag = 6; this.hitlag = 6; spark(v.x, v.y + 8, '#fff', 12, 1.6); beep(180, 0.1, 'square', 0.06, 0.6);
+          v.launch(knock(v, d, h.b, h.k) * rage(this), h.a * Math.PI / 180, this.face); v.hitlag = 6; this.hitlag = 6; spark(v.x, v.y + 8, '#fff', 12, 1.6); thwack(90);
         }
         if (this.sf >= 26) this.set('idle');
         break;
@@ -730,7 +748,7 @@ function applyHit(a, v, h, face, srcX, proj, poke) {
   }
   spark(hx, hy, kb > 110 ? '#ffd166' : '#fff', Math.min(40, 6 + kb / 6 | 0), 1 + kb / 80);
   if (kb > 110) shake = Math.max(shake, 8);
-  beep(kb > 110 ? 120 : 220, 0.1 + Math.min(0.2, kb / 800), 'square', 0.07, 0.5);
+  thwack(kb);
 }
 function resolveHits() {
   const ev = [];
