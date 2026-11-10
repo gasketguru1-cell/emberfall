@@ -1,7 +1,7 @@
 'use strict';
 /* Hitbox audit, run inside the real game: for every attack of every fighter it puts the fighter into that attack, has the
    3D renderer pose the model exactly as it does in play, and measures how far each hitbox is from the nearest striking
-   limb at the first, middle and last active frame. Follow-through (tails, ribbons) is switched off while measuring so the
+   limb at the first, middle and last active frame, facing right and then left. Follow-through (tails, ribbons) is switched off while measuring so the
    result is the animation's own pose.
 
    To run: open the game in 3D, then in the browser console:
@@ -29,6 +29,7 @@ async function auditHitboxes(limit) {
     const tips = () => { v.root.updateWorldMatrix(true, true); return strikers.map(s => {
       s.node.getWorldPosition(wp); s.node.parent.getWorldPosition(wq); const dx = wp.x - wq.x, dy = wp.y - wq.y, dz = wp.z - wq.z, len = Math.hypot(dx, dy, dz) || 1, e = s.ext || 0;
       return { bone: s.bone, x: wp.x + dx / len * e - f.x, y: wp.y + dy / len * e - (s.drop || 0) * 0.5 - f.y }; }); };
+    for (const face of [1, -1]) { f.face = face; for (let k = 0; k < 16; k++) { tick++; draw(); }   /* both facings: let the model finish turning first */
     for (const [name, mv] of Object.entries(f.form.moves)) {
       if (name === 'throws' || !mv || !Array.isArray(mv.h) || !mv.h.length || mv.swap) continue;
       const M = f.form.moves; if ((name === 'jab2' && M.jab.next !== 'jab2') || (name === 'jab3' && M.jab.next !== 'jab3' && !(M.jab.next === 'jab2' && M.jab2.next === 'jab3'))) continue;
@@ -37,15 +38,16 @@ async function auditHitboxes(limit) {
         const body = Math.abs(h.x) < f.st.w / 2 + 1 && h.y > 0 && h.y < f.st.h;
         let best = null;
         for (const fr of [h.f0, Math.round((h.f0 + h.f1) / 2), h.f1]) {
-          f.x = 0; f.vx = f.vy = 0; f.face = 1; f.hitlag = 0;
+          f.x = 0; f.vx = f.vy = 0; f.face = face; f.hitlag = 0;
           if (mv.air) { f.y = 40; f.grounded = false; f.plat = null; } else { f.y = 0; f.grounded = true; f.plat = MAIN; }
           f.state = 'attack'; f.mname = name; f.move = mv; f.mf = fr; f.sf = fr; f.charge = 0;
           draw(); tick += 6; draw();   /* second draw is past the cross-fade */
-          for (const t of tips()) { const off = Math.hypot(t.x - h.x, t.y - h.y); if (!best || off < best.off) best = { off, gap: Math.max(0, off - h.r), bone: t.bone, at: fr, x: t.x, y: t.y }; }
+          for (const t of tips()) { const off = Math.hypot(t.x - h.x * face, t.y - h.y); if (!best || off < best.off) best = { off, gap: Math.max(0, off - h.r), bone: t.bone, at: fr, x: t.x, y: t.y }; }
         }
-        rows.push({ fighter: f.form.name, move: name + (mv.h.length > 1 ? ' #' + (n + 1) : ''), hitbox: r1(h.x) + ',' + r1(h.y) + ' r' + r1(h.r), off: best ? r1(best.off) : null, gap: best ? r1(best.gap) : null,
+        rows.push({ fighter: f.form.name, facing: face > 0 ? 'right' : 'left', move: name + (mv.h.length > 1 ? ' #' + (n + 1) : ''), hitbox: r1(h.x * face) + ',' + r1(h.y) + ' r' + r1(h.r), off: best ? r1(best.off) : null, gap: best ? r1(best.gap) : null,
           nearest: best ? best.bone + ' at ' + r1(best.x) + ',' + r1(best.y) + ' (frame ' + best.at + ')' : 'no strikers listed', note: body ? 'body burst' : inner ? 'inner part' : h.grab ? 'grab' : '' });
       });
+    }
     }
   }
   const flagged = rows.filter(r => r.off !== null && r.off > limit && r.note !== 'body burst' && r.note !== 'inner part');

@@ -69,7 +69,7 @@ Spent so far: 237 credits (Flint 135, companions 102). The daily limit was raise
 | `tests/kotable.js` | KO percent of every hit | see Rules |
 | `tests/recovery.js` | CPU recovery from six spots off stage per form | 24 of 24 get back |
 | `tests/deaths.js` | traces of stocks lost without being in hitstun | Hod loses about a quarter of its stocks to short recoveries after long launches |
-| `tools/audit.js` (in the game) | distance from each hitbox to the nearest limb tip while the attack is active, measured through the real renderer | 89 hitboxes; only the two pivot grabs are over 3 units (3.2), by design |
+| `tools/audit.js` (in the game) | distance from each hitbox to the nearest limb tip while the attack is active, measured through the real renderer | 178 checks (89 hitboxes, facing right and left); only pivot grabs are over 3 units (3.2 to 3.5), by design |
 
 ## Not checked by anyone yet
 
