@@ -1,12 +1,14 @@
 // Balance numbers from seeded CPU-vs-CPU matches, one fixed form per side (the CPU does not swap in this test).
-// Usage: node tests/stats.js [matchesPerPairing]
+// Usage: node tests/stats.js [matchesPerPairing] [seed]
+// Small samples mislead: at 10 matches per pairing the win rates move by 5 points or more between runs, and results
+// shift with the seed. Use 60 or more, and more than one seed, before changing a fighter because of them.
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const root = path.join(__dirname, '..'), per = +process.argv[2] || 4;
 const ctx = new Proxy({}, { get: (t, k) => k in t ? t[k] : (k === 'createLinearGradient' || k === 'createRadialGradient') ? () => ({ addColorStop() {} }) : () => {}, set: (t, k, v) => { t[k] = v; return true; } });
 global.document = { getElementById: () => ({ getContext: () => ctx }) };
 global.window = global; global.addEventListener = () => {}; global.requestAnimationFrame = () => {};
 Object.defineProperty(global, 'navigator', { value: { getGamepads: () => [] }, configurable: true });
-let seed = 777; Math.random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+let seed = +process.argv[3] || 777; Math.random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
 for (const f of ['hitboxes.js', 'sim.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 vm.runInThisContext(`
 (function () {

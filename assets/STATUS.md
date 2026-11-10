@@ -56,15 +56,16 @@ Spent so far: 237 credits (Flint 135, companions 102). The daily limit was raise
 
 - **Archetypes** (`st` and the kit passed to `mk()` in `sim.js`): Flint all-rounder with a three-hit jab; Nib rushdown with fast dodges, a wall jump, a rapid jab, a quick short grab and weak set-up throws; Loom floaty zoner with three air jumps, slow fall, and a long slow ribbon grab; Hod heavy with armour on forward smash and dash attack and strong throws.
 - **Rules in the game:** jab chains (press or hold), Nib's held flurry, clanks between ground attacks, attacks putting out projectiles, footstool jumps, wall techs, wall jumps (Nib), dash and pivot grabs, turnaround specials, turnaround tilt or smash out of a run, angled forward tilts, hitlag nudges, shield tilt and shield poke, ledge protection by air time and damage, slower ledge options above 100%, tap jump as a per-controller option, brief intangibility on Flint's and Hod's up specials, smaller hurtbox when crouching or lying down, and a lethal-hit effect with slow motion on the last stock.
-- **Kill power** is set from `tests/kotable.js` (KO percent of every hit, centre and edge). Against a mid-weight with no DI: forward smash KOs at about 100% mid-stage for Flint and Loom, 121% Nib, 70% Hod (about 25 lower at the edge); Hod's back throw at about 150% mid-stage, 109% at the edge.
+- **Kill power** is set from `tests/kotable.js` (KO percent of every hit, centre and edge). Against a mid-weight with no DI: forward smash KOs at about 99% mid-stage for Flint and Loom, 112% Nib, 67% Hod (about 25 lower at the edge); Hod's back throw at about 147% mid-stage, 107% at the edge.
 
 ## How things are checked
 
 | Tool | What it does | Result on 2026-11-09 |
 |---|---|---|
-| `npm test` | six seeded CPU matches looking for broken states, then `tests/rules.js` | passes |
-| `tests/rules.js` | 28 scripted checks of single rules with exact inputs | all pass |
-| `tests/stats.js` | CPU-versus-CPU balance per form: wins, damage, KO percent, where stocks are lost, who beats whom | wins Nib 53%, Loom 51%, Flint 50%, Hod 46%; average KO percent Hod 163, Flint 161, Nib 159, Loom 146 |
+| `npm test` | six seeded CPU matches looking for broken states, then `tests/rules.js`, then a 20-match `tests/fuzz.js` | passes |
+| `tests/rules.js` | 41 scripted checks of single rules with exact inputs, including the movement rules from platforms.ini and the match clock | all pass |
+| `tests/fuzz.js` | both fighters driven by random sticks and buttons; looks for crashes, broken numbers, impossible or stuck states | about 880,000 frames over five seeds, clean |
+| `tests/stats.js` | CPU-versus-CPU balance per form: wins, damage, KO percent, where stocks are lost, who beats whom | over four seeds of 960 matches each: Flint 49 to 54%, Nib 51 to 56%, Hod 48 to 50%, Loom 44 to 47%; average KO percent Hod 166, Flint 165, Nib 156, Loom 148 |
 | `tests/kotable.js` | KO percent of every hit | see Rules |
 | `tests/recovery.js` | CPU recovery from six spots off stage per form | 24 of 24 get back |
 | `tests/deaths.js` | traces of stocks lost without being in hitstun | Hod loses about a quarter of its stocks to short recoveries after long launches |
@@ -74,7 +75,7 @@ Spent so far: 237 credits (Flint 135, companions 102). The daily limit was raise
 
 - Frame rate on the RTX 2060. The browser pane used for checks runs on the Intel chip.
 - Anything on a real controller: button layout, wavedash, platform and shield drops, tap jump, shield tilt, rumble.
-- How the game feels with a person playing. All balance numbers are CPU against CPU.
+- How the game feels with a person playing. All balance numbers are CPU against CPU, and that measure is touchy: 160-match samples moved by 5 points or more between runs, and a two-point change to one fighter's weight swung a single matchup by 25 points. Only large samples over several seeds were used for the final setting.
 - The new effects and clips in motion at full speed. They were inspected as still frames.
 - Wavedash distance against the reference build (needs ten wavedashes logged there).
 

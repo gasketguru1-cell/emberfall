@@ -202,9 +202,9 @@ const SWAP = { t: 34, swap: 1, h: [], on(f, n) { if (n === 1) f.invuln = Math.ma
 /* ---------- Fighters (all original) ---------- */
 const FLINT = {
   name: 'Flint', sub: 'the lamplighter', forms: [{
-    name: 'Flint', col: ['#1f6f78', '#f2c14e', '#f6e7c1'], alt: ['#7a3b69', '#9be564', '#f6e7c1'], reachMul: 1.04,
+    name: 'Flint', col: ['#1f6f78', '#f2c14e', '#f6e7c1'], alt: ['#7a3b69', '#9be564', '#f6e7c1'], reachMul: 1.0,
     /* All-rounder: middling everything, a three-hit jab, a projectile, a dependable recovery. */
-    st: { weight: 95, walk: 1.1, dash: 1.95, run: 1.75, airSpeed: 1.12, airAcc: 0.075, grav: 0.095, fall: 1.6, ffall: 2.55, jump: 3.05, shop: 1.85, djump: 2.95, jsq: 3, trac: 0.11, w: 8, h: 14,
+    st: { weight: 92, walk: 1.1, dash: 1.95, run: 1.75, airSpeed: 1.12, airAcc: 0.075, grav: 0.095, fall: 1.6, ffall: 2.55, jump: 3.05, shop: 1.85, djump: 2.95, jsq: 3, trac: 0.11, w: 8, h: 14,
       jumps: 1, dashF: 14, roll: [28, 1.35, 13], spot: [22, 15] },
     aiShot: 1,
     moves: mk(1, 1, 1, 1, {
@@ -227,7 +227,7 @@ const WREN = {
     st: { weight: 80, walk: 1.25, dash: 2.25, run: 2.1, airSpeed: 1.28, airAcc: 0.095, grav: 0.115, fall: 1.85, ffall: 2.95, jump: 3.2, shop: 2.0, djump: 3.1, jsq: 3, trac: 0.13, w: 8, h: 9,
       jumps: 1, wallJump: 1, dashF: 11, roll: [24, 1.6, 11], spot: [20, 14] },
     aiShot: 1,
-    moves: mk(0.85, 0.86, 0.85, 0.65, {
+    moves: mk(0.85, 0.9, 0.85, 0.65, {
       nspec: { t: 30, h: [], on(f, n) { if (n === 10) { shoot(f, { kind: 'bolt', oy: 5, vx: 3.2, r: 2.2, life: 40, h: { d: 4, a: 361, b: 12, k: 25 } }); beep(900, 0.06, 'square', 0.03, 1.5); } } },
       sspec: { t: 42, once: 1, nodrift: 1, ll: 12, h: [{ f0: 10, f1: 24, x: 5, y: 5, r: 5.5, d: 8, a: 60, b: 45, k: 75 }], on(f, n) { if (n === 10) { lift(f, 1.7); f.vx = f.face * 2.4; } } },
       uspec: { t: 34, helpless: 1, ledge: 1, h: [{ f0: 5, f1: 10, x: 0, y: 6, r: 5, d: 3, a: 90, b: 40, k: 30 }], on(f, n, i) { if (n === 5) { lift(f, 4.3); f.vx = i.lx; } } },
@@ -812,6 +812,12 @@ function cpuInput(f, o, m) {
   const i = blankIn(); m.t = (m.t || 0) + 1; if (m.cd > 0) m.cd--; else m.cd = 0;
   const dx = o.x - f.x, dy = o.y - f.y, ad = Math.abs(dx), dir = sgn(dx) || 1;
   if (f.state === 'respawn') { if (f.sf > 45) i.lx = dir; return i; }
+  if (f.state === 'hurt' && f.tumble && !f.grounded) {   /* decide once per launch whether to tech, then shield just above the floor */
+    if (f.sf <= 1) m.tech = Math.random() < 0.55;
+    /* only when it really is about to land, still in hitstun: a shield press that misses the floor would come out as an air dodge */
+    const nx = f.x + f.vx * 3;
+    if (m.tech && f.vy < 0 && f.techLock === 0 && f.hitstun - f.sf > 4 && PLATS.some(q => nx >= q.x0 + 2 && nx <= q.x1 - 2 && f.y - q.y > 0 && f.y - q.y < -f.vy * 3 + 0.5)) i.shd = true;
+  }
   if (f.state === 'attack' && f.move && f.move.rapid) { i.atk = f.rapidN < 6 && ad < 16; return i; }
   if (f.state === 'attack' && f.move && f.move.next && f.mf >= f.move.chain && ad < 18) { i.atk = m.t % 2 === 0; return i; }
   if (f.state === 'held') { i.atk = m.t % 2 === 0; i.jmp = m.t % 2 === 1; return i; }
@@ -822,8 +828,8 @@ function cpuInput(f, o, m) {
     /* Getting back. Never drift in under the stage: when below its top and inside its edge, steer back out first.
        Use the side special only while still high and far out, the air jumps on the way down, and the up special last,
        pressed with the stick only slightly toward the stage so it is not read as a side special. */
-    const side = sgn(f.x) || 1, edge = 80 + f.st.w / 2 + 2, under = f.y < -2 && Math.abs(f.x) < edge, far = Math.abs(f.x) - 80;
-    i.lx = under ? side : Math.abs(f.x) > edge + 1 ? -side : 0;
+    const side = sgn(f.x) || 1, edge = 80 + f.st.w / 2 + 2, under = f.y + f.st.h < -BODY_H + 4 && Math.abs(f.x) < edge, far = Math.abs(f.x) - 80;
+    i.lx = under ? side : (f.y > -3 || Math.abs(f.x) > edge + 1) ? -side : 0;   /* beside the wall and below the lip: stay off it and let the ledge or a jump do the work */
     if (f.state !== 'air' || m.t % 5 !== 0) return i;
     if (!f.sideUsed && f.form.moves.sspec.once && far > 36 && f.y > 14) { i.lx = -side; i.spc = true; return i; }
     if (f.vy < 0 && !under) {
@@ -846,6 +852,7 @@ function cpuInput(f, o, m) {
     if (f.def.forms.length > 1 && !f.noSwap && m.cd === 0 && ad > 45 && Math.random() < 0.012) { i.ly = -1; i.spc = true; m.cd = 70; return i; }   /* swap companion at a safe distance */
     if (ad > (f.form.aiRange || 14)) { i.lx = dir; return i; }
     if (f.face !== dir) { i.lx = dir * 0.5; return i; }
+    if (m.cd === 0 && (o.state === 'shield' || o.state === 'shieldstun') && f.form.moves.grab.h[0].f0 <= 9 && ad < f.form.moves.grab.h[0].x + 3 && Math.abs(dy) < 6 && Math.random() < 0.6) { i.grb = true; m.cd = 36; return i; }   /* a shield is there to be grabbed, by those whose grab is quick enough */
     if (m.cd === 0) {
       const r = Math.random(); m.cd = Math.round((22 + (Math.random() * 30 | 0)) * (f.form.aiTempo || 1));
       if (dy > 8) { if (r < 0.5) { i.ly = 1; i.atk = true; } else i.cy = 1; }
