@@ -64,5 +64,17 @@
  },
  "CoilJump": {
   "seconds": 0.933
+ },
+ "Ledge": {
+  "seconds": 1.433
+ },
+ "Dodge": {
+  "seconds": 0.433
+ },
+ "Hold": {
+  "seconds": 0.633
+ },
+ "Held": {
+  "seconds": 0.467
  }
 }

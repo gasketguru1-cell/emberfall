@@ -10,7 +10,7 @@ const flip = (deg, c) => { const a = deg * Math.PI / 180, cs = Math.cos(a), sn =
 const A = (clip, c0, c1, start, end) => ({ clip, start: start || 0, contact: [c0, c1], end: end || 0.9 });
 const baseClips = (hold, thrown) => ({ idle: { clip: 'Idle' }, walk: { clip: 'Walk' }, run: { clip: 'Run' }, crouch: { clip: 'Crouch', at: 0.2 }, brake: { clip: 'Land', from: 0.1, to: 0.35 }, jumpsquat: { clip: 'Crouch', from: 0, to: 0.2 }, rise: { clip: 'Rise', from: 0, to: 0.4 }, fall: { clip: 'Fall' }, land: { clip: 'Land', from: 0, to: 0.35 },
   shield: { clip: 'Shield', from: 0, to: 0.15 }, hit: { clip: 'Hit', from: 0, to: 0.6 }, tumble: { clip: 'Tumble', bounce: true }, down: { clip: 'Down', from: 0, to: 0.3 }, dizzy: { clip: 'Hit', from: 0, to: 0.6, bounce: true },
-  airdodge: { clip: 'Tumble', bounce: true }, dodge: { clip: 'Shield', from: 0, to: 0.15 }, roll: { clip: 'Tumble', bounce: true }, ledge: { clip: 'Rise', at: 0.0 }, hold: { clip: hold, at: 0.4 }, held: { clip: 'Tumble', bounce: true }, throw: { clip: thrown, from: 0.2, to: 0.9 }, swap: { clip: 'Tumble', bounce: true } });
+  airdodge: { clip: 'Tumble', bounce: true }, dodge: { clip: 'Dodge', from: 0, to: 0.4 }, roll: { clip: 'Tumble', bounce: true }, ledge: { clip: 'Ledge' }, hold: { clip: 'Hold' }, held: { clip: 'Held' }, throw: { clip: thrown, from: 0.2, to: 0.9 }, swap: { clip: 'Tumble', bounce: true } });
 const manifest = {};
 
 /* ---------------- Hod: plated pangolin-badger. Heavy, four legs, long tail. ---------------- */
@@ -120,8 +120,8 @@ Object.assign(hod.clips, {
   TailSlam: { fps: 30, keys: [
     { t: 0, use: 'stand' },
     { t: 0.28, pose: { all: R(0, -25), root: M(0, -0.05, 0), tail1: R(26), tail2: R(16) } },
-    { t: 0.36, pose: { all: R(0, 172), tail1: R(-18), tail2: R(-12), tail3: R(-8) } },
-    { t: 0.48, pose: { all: R(0, 178), tail1: R(-24) } },
+    { t: 0.36, pose: { all: R(0, 172), tail1: R(-9), tail2: R(-6), tail3: R(-4) } },
+    { t: 0.48, pose: { all: R(0, 178), tail1: R(-12) } },
     { t: 0.9, pose: { all: R(0, 0), root: M(0, 0, 0), tail1: R(0), tail2: R(0), tail3: R(0) } }] },
   Toss: { fps: 30, keys: [
     { t: 0, use: 'stand' },
@@ -141,6 +141,27 @@ Object.assign(hod.clips, {
     { t: 0.36, reset: true, pose: { all: flip(18, HOD_C), hips: R(-6), chest: R(-8), neck: R(-12), ik_fl: M(0.14, 0.16, 0.22), ik_fr: M(-0.14, 0.16, 0.22), ik_rl: M(0.14, 0.16, -0.2), ik_rr: M(-0.14, 0.16, -0.2), tail1: R(14) } },
     { t: 0.48, pose: { all: flip(24, HOD_C) } },
     { t: 0.9, reset: true, use: 'stand' }] },
+  /* Hanging from the ledge: body upright against the wall, front paws hooked over the top, hind legs and tail swaying. */
+  Ledge: { fps: 30, keys: [
+    { t: 0, use: 'stand', pose: { all: flip(-82, HOD_C), neck: R(26), head: R(14), ik_fl: M(0.02, 0.05, 0.2), ik_fr: M(-0.02, 0.05, 0.2), ik_rl: M(0, 0.1, 0.05), ik_rr: M(0, 0.05, 0.1), tail1: R(0, 6) } },
+    { t: 0.8, pose: { all: flip(-78, HOD_C), ik_rl: M(0, 0.05, 0.1), ik_rr: M(0, 0.1, 0.05), tail1: R(0, -6) } },
+    { t: 1.6, pose: { all: flip(-82, HOD_C), ik_rl: M(0, 0.1, 0.05), ik_rr: M(0, 0.05, 0.1), tail1: R(0, 6) } }] },
+  /* Spot dodge: ducks back and turns its plated side to the front. */
+  Dodge: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.12, pose: { all: R(0, 55), root: M(0, -0.12, -0.1), chest: R(10), neck: R(24), head: R(14), tail1: R(-16, 30) } },
+    { t: 0.28, pose: { all: R(0, 60), root: M(0, -0.13, -0.1) } },
+    { t: 0.4, reset: true, use: 'stand' }] },
+  /* Holding a grabbed opponent: front paws clamped out in front, squeezing. */
+  Hold: { fps: 30, keys: [
+    { t: 0, use: 'stand', pose: { root: M(0, -0.03, 0.12), hips: R(-10), chest: R(6), neck: R(10), ik_fl: M(-0.07, 0.3, 0.3), ik_fr: M(0.07, 0.3, 0.3), tail1: R(8) } },
+    { t: 0.3, pose: { root: M(0, -0.05, 0.14), ik_fl: M(-0.1, 0.27, 0.3), ik_fr: M(0.1, 0.27, 0.3), neck: R(16) } },
+    { t: 0.6, pose: { root: M(0, -0.03, 0.12), ik_fl: M(-0.07, 0.3, 0.3), ik_fr: M(0.07, 0.3, 0.3), neck: R(10) } }] },
+  /* Being held: hauled up off its front feet, paddling. */
+  Held: { fps: 30, keys: [
+    { t: 0, use: 'stand', pose: { all: flip(-38, HOD_C), root: M(0, 0.08, 0), neck: R(-14), head: R(-8), ik_fl: M(0, 0.12, 0.1), ik_fr: M(0, 0.04, 0.02), ik_rl: M(0, 0.04, 0.06), ik_rr: M(0, 0.1, 0), tail1: R(-20), tail2: R(-12) } },
+    { t: 0.25, pose: { ik_fl: M(0, 0.04, 0.02), ik_fr: M(0, 0.12, 0.1), ik_rl: M(0, 0.1, 0), ik_rr: M(0, 0.04, 0.06), head: R(-8, 8), tail1: R(-20, 10) } },
+    { t: 0.5, pose: { ik_fl: M(0, 0.12, 0.1), ik_fr: M(0, 0.04, 0.02), ik_rl: M(0, 0.04, 0.06), ik_rr: M(0, 0.1, 0), head: R(-8, 0), tail1: R(-20, 0) } }] },
 });
 out('hod', hod);
 manifest.Hod = { file: 'assets/hod/export/hod-v1.glb', height: 11.5, clips: baseClips('Swipe', 'Slam'),
@@ -270,6 +291,27 @@ Object.assign(loom.clips, {
     { t: 0.6, pose: Object.assign({ wingL: R(0, 0, 14), wingR: R(0, 0, -14), top: R(6) }, ribs(6, 8, 4, 0, 0), ribsR(-6, -8, -4, 0, 0)) },
     { t: 0.75, pose: Object.assign({ wingL: R(0, 0, -20), wingR: R(0, 0, 20), top: R(-6) }, ribs(-8, -4, 0, 0, 0), ribsR(8, 4, 0, 0, 0)) },
     { t: 0.9, reset: true, use: 'stand' }] },
+  /* Caught on the ledge by its forward wing, body against the wall, ribbons hanging. */
+  Ledge: { fps: 30, keys: [
+    { t: 0, use: 'stand', pose: Object.assign({ all: R(0, 0, -5), top: R(0, 0, -8), wingL: R(0, 0, 38), wingR: R(0, 0, -12) }, both(-6, -4, -2, 0, 0)) },
+    { t: 0.9, pose: Object.assign({ all: R(0, 0, -2), wingR: R(0, 0, -4) }, both(8, 5, 3, 2, 0)) },
+    { t: 1.8, pose: Object.assign({ all: R(0, 0, -5), wingR: R(0, 0, -12) }, both(-6, -4, -2, 0, 0)) }] },
+  /* Spot dodge: turns edge-on, so there is almost nothing to hit. */
+  Dodge: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.12, pose: Object.assign({ all: R(0, 82), root: M(0, 0.05, 0), wingL: R(0, 0, -30), wingR: R(0, 0, 30) }, both(0, 0, 0, 0, 0)) },
+    { t: 0.28, pose: { all: R(0, 86) } },
+    { t: 0.4, reset: true, use: 'stand' }] },
+  /* Holding with a ribbon: the forward ribbon stays out and tugs. */
+  Hold: { fps: 30, keys: [
+    { t: 0, use: 'stand', pose: Object.assign({ all: R(0, 0, -8), root: M(0.04, 0, 0) }, ribs(72, 18, 8, 0, 0)) },
+    { t: 0.3, pose: Object.assign({ all: R(0, 0, -3) }, ribs(64, 26, 10, -4, 0)) },
+    { t: 0.6, pose: Object.assign({ all: R(0, 0, -8) }, ribs(72, 18, 8, 0, 0)) }] },
+  /* Being held: pulled back off balance, wings and ribbons fluttering. */
+  Held: { fps: 30, keys: [
+    { t: 0, use: 'stand', pose: Object.assign({ all: R(0, 0, 14), top: R(0, 0, 10), wingL: R(0, 0, 18), wingR: R(0, 0, -18) }, both(22, 14, 8, 4, 2)) },
+    { t: 0.22, pose: Object.assign({ top: R(0, 0, 4), wingL: R(0, 0, -14), wingR: R(0, 0, 14) }, both(8, 18, 4, 8, 0)) },
+    { t: 0.44, pose: Object.assign({ top: R(0, 0, 10), wingL: R(0, 0, 18), wingR: R(0, 0, -18) }, both(22, 14, 8, 4, 2)) }] },
 });
 out('loom', loom);
 manifest.Loom = { file: 'assets/loom/export/loom-v1.glb', height: 15, faceCamera: true, clips: baseClips('Lash', 'Lash'),
@@ -328,6 +370,28 @@ Object.assign(nib.clips, {
     { t: 0.22, reset: true, use: 'stretch', pose: { all: flip(-68, NIB_C), key: R(0, 180, 0) } },
     { t: 0.5, pose: { all: flip(-74, NIB_C), key: R(0, 360, 0) } },
     { t: 0.9, reset: true, use: 'stand' }] },
+  /* Hanging from the ledge: upright against the wall, front paws over the top, hind legs kicking, key turning. */
+  Ledge: { fps: 30, keys: [
+    { t: 0, use: 'stand', pose: { all: flip(-80, NIB_C), neck: R(28), head: R(10), ik_fl: M(0.02, 0.04, 0.12), ik_fr: M(-0.02, 0.04, 0.12), ik_rl: M(0, 0.1, 0.06), ik_rr: M(0, 0.05, 0.1), tailL1: R(0, 10), tailR1: R(0, -4), earL1: R(0, 0, -10), earR1: R(10) } },
+    { t: 0.7, pose: { all: flip(-76, NIB_C), ik_rl: M(0, 0.05, 0.1), ik_rr: M(0, 0.1, 0.06), tailL1: R(0, -4), tailR1: R(0, 10), key: R(0, 180, 0) } },
+    { t: 1.4, pose: { all: flip(-80, NIB_C), ik_rl: M(0, 0.1, 0.06), ik_rr: M(0, 0.05, 0.1), tailL1: R(0, 10), tailR1: R(0, -4), key: R(0, 360, 0) } }] },
+  /* Spot dodge: a quick sidestep away from the camera, ears flat. */
+  Dodge: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.12, pose: { all: R(0, 60), root: M(0, -0.1, -0.14), neck: R(16), head: R(8), earL1: R(0, 0, -24), earR1: R(22), tailL1: R(-20, 20), tailR1: R(-20, 30) } },
+    { t: 0.28, pose: { all: R(0, 66), root: M(0, -0.11, -0.14) } },
+    { t: 0.4, reset: true, use: 'stand' }] },
+  /* Holding a grabbed opponent in its jaws, shaking its head. */
+  Hold: { fps: 30, keys: [
+    { t: 0, use: 'stand', pose: { root: M(0, -0.05, 0.16), hips: R(-6), neck: R(24), head: R(-14), ik_fl: M(0, 0, 0.1), ik_fr: M(0, 0, 0.08), tailL1: R(-18), tailR1: R(-18) } },
+    { t: 0.2, pose: { head: R(-14, 12), neck: R(24, 6), earL1: R(0, 0, -14), earR1: R(12) } },
+    { t: 0.4, pose: { head: R(-14, -12), neck: R(24, -6), earL1: R(0, 0, 10), earR1: R(-10) } },
+    { t: 0.6, pose: { head: R(-14, 0), neck: R(24, 0), earL1: R(0, 0, 0), earR1: R(0) } }] },
+  /* Being held: lifted by the scruff, legs paddling, tails drooping. */
+  Held: { fps: 30, keys: [
+    { t: 0, use: 'stand', pose: { all: flip(-40, NIB_C), root: M(0, 0.06, 0), neck: R(-16), head: R(-10), ik_fl: M(0, 0.14, 0.08), ik_fr: M(0, 0.04, 0), ik_rl: M(0, 0.04, 0.06), ik_rr: M(0, 0.12, 0), tailL1: R(-30), tailR1: R(-30), earL1: R(0, 0, 20), earR1: R(-18) } },
+    { t: 0.22, pose: { ik_fl: M(0, 0.04, 0), ik_fr: M(0, 0.14, 0.08), ik_rl: M(0, 0.12, 0), ik_rr: M(0, 0.04, 0.06), tailL1: R(-30, 12), tailR1: R(-30, -12) } },
+    { t: 0.44, pose: { ik_fl: M(0, 0.14, 0.08), ik_fr: M(0, 0.04, 0), ik_rl: M(0, 0.04, 0.06), ik_rr: M(0, 0.12, 0), tailL1: R(-30, 0), tailR1: R(-30, 0) } }] },
 });
 out('nib', nib);
 manifest.Nib = { file: 'assets/nib/export/nib-v1.glb', height: 10.5, clips: baseClips('Bite', 'Bite'),

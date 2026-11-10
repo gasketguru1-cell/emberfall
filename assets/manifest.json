@@ -400,25 +400,22 @@
     "bounce": true
    },
    "dodge": {
-    "clip": "Shield",
+    "clip": "Dodge",
     "from": 0,
-    "to": 0.15
+    "to": 0.4
    },
    "roll": {
     "clip": "Tumble",
     "bounce": true
    },
    "ledge": {
-    "clip": "Rise",
-    "at": 0
+    "clip": "Ledge"
    },
    "hold": {
-    "clip": "Bite",
-    "at": 0.4
+    "clip": "Hold"
    },
    "held": {
-    "clip": "Tumble",
-    "bounce": true
+    "clip": "Held"
    },
    "throw": {
     "clip": "Bite",
@@ -759,25 +756,22 @@
     "bounce": true
    },
    "dodge": {
-    "clip": "Shield",
+    "clip": "Dodge",
     "from": 0,
-    "to": 0.15
+    "to": 0.4
    },
    "roll": {
     "clip": "Tumble",
     "bounce": true
    },
    "ledge": {
-    "clip": "Rise",
-    "at": 0
+    "clip": "Ledge"
    },
    "hold": {
-    "clip": "Swipe",
-    "at": 0.4
+    "clip": "Hold"
    },
    "held": {
-    "clip": "Tumble",
-    "bounce": true
+    "clip": "Held"
    },
    "throw": {
     "clip": "Slam",
@@ -1083,25 +1077,22 @@
     "bounce": true
    },
    "dodge": {
-    "clip": "Shield",
+    "clip": "Dodge",
     "from": 0,
-    "to": 0.15
+    "to": 0.4
    },
    "roll": {
     "clip": "Tumble",
     "bounce": true
    },
    "ledge": {
-    "clip": "Rise",
-    "at": 0
+    "clip": "Ledge"
    },
    "hold": {
-    "clip": "Lash",
-    "at": 0.4
+    "clip": "Hold"
    },
    "held": {
-    "clip": "Tumble",
-    "bounce": true
+    "clip": "Held"
    },
    "throw": {
     "clip": "Lash",
