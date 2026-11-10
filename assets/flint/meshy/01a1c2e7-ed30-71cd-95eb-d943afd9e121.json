@@ -1,0 +1,45 @@
+{
+  "character": "flint",
+  "endpoint": "animations",
+  "params": {
+    "rig_task_id": "01a1c2da-7eb4-7579-9b80-0d1df56b4c8f",
+    "action_ids": [
+      216,
+      389,
+      421,
+      158,
+      156,
+      393,
+      240,
+      460,
+      127,
+      478
+    ]
+  },
+  "estimate": 30,
+  "consumed": 30,
+  "files": [
+    "assets/flint/raw/01a1c2e7-ed30-71cd-95eb-d943afd9e121/result.animation_glb_url.glb",
+    "assets/flint/raw/01a1c2e7-ed30-71cd-95eb-d943afd9e121/result.animation_fbx_url.fbx"
+  ],
+  "task": {
+    "id": "01a1c2e7-ed30-71cd-95eb-d943afd9e121",
+    "type": "animate",
+    "name": "",
+    "status": "SUCCEEDED",
+    "created_at": 1794271342097,
+    "progress": 100,
+    "started_at": 1794271342109,
+    "finished_at": 1794271550683,
+    "expires_at": 1794530750683,
+    "task_error": null,
+    "result": {
+      "animation_glb_url": "https://assets.meshy.ai/9b63c3ed-0b38-42c8-922f-bcc56f30de31/tasks/01a1c2e7-ed30-71cd-95eb-d943afd9e121/output/merged_animations.glb",
+      "animation_fbx_url": "https://assets.meshy.ai/9b63c3ed-0b38-42c8-922f-bcc56f30de31/tasks/01a1c2e7-ed30-71cd-95eb-d943afd9e121/output/merged_animations.fbx",
+      "processed_usdz_url": "",
+      "processed_armature_fbx_url": "",
+      "processed_animation_fps_fbx_url": ""
+    },
+    "consumed_credits": 30
+  }
+}

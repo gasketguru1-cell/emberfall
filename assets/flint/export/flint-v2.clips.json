@@ -1,0 +1,258 @@
+{
+ "Idle": {
+  "seconds": 4,
+  "rootY": "keep",
+  "highestAt": 2.5,
+  "lowestAt": 1.2,
+  "high": 88,
+  "low": 85.1
+ },
+ "Regular_Jump": {
+  "seconds": 1.867,
+  "rootY": "clamp",
+  "highestAt": 0.8,
+  "lowestAt": 1.3,
+  "high": 130.1,
+  "low": 64.7
+ },
+ "Fall1": {
+  "seconds": 4.5,
+  "rootY": "stand",
+  "highestAt": 1,
+  "lowestAt": 0.43,
+  "high": 56.8,
+  "low": 54.9
+ },
+ "Jumping_Down": {
+  "seconds": 3.267,
+  "rootY": "clamp",
+  "highestAt": 0.63,
+  "lowestAt": 1.7,
+  "high": 151.6,
+  "low": 67.9
+ },
+ "Block1": {
+  "seconds": 3.467,
+  "rootY": "keep",
+  "highestAt": 0.23,
+  "lowestAt": 1.37,
+  "high": 86,
+  "low": 77.9
+ },
+ "Hit_Reaction": {
+  "seconds": 1.633,
+  "rootY": "keep",
+  "highestAt": 0,
+  "lowestAt": 0.47,
+  "high": 88.3,
+  "low": 83.1
+ },
+ "BeHit_FlyUp": {
+  "seconds": 1.5,
+  "rootY": "stand",
+  "highestAt": 0.2,
+  "lowestAt": 1.5,
+  "high": 214.1,
+  "low": 19.5
+ },
+ "Knock_Down": {
+  "seconds": 2.5,
+  "rootY": "keep",
+  "highestAt": 0.5,
+  "lowestAt": 2.17,
+  "high": 148.2,
+  "low": 29.2
+ },
+ "Charged_Slash": {
+  "seconds": 2.2,
+  "rootY": "keep",
+  "highestAt": 1.23,
+  "lowestAt": 1.9,
+  "high": 86.5,
+  "low": 74.7
+ },
+ "Right_Jab_from_Guard": {
+  "seconds": 2,
+  "rootY": "keep",
+  "highestAt": 1.37,
+  "lowestAt": 1.07,
+  "high": 87.7,
+  "low": 82.5
+ },
+ "Walk": {
+  "seconds": 1.067,
+  "rootY": "keep",
+  "highestAt": 0.07,
+  "lowestAt": 0.87,
+  "high": 95.5,
+  "low": 89
+ },
+ "Run": {
+  "seconds": 0.667,
+  "rootY": "keep",
+  "highestAt": 0.47,
+  "lowestAt": 0.3,
+  "high": 93.5,
+  "low": 86.9
+ },
+ "Left_Hook_from_Guard": {
+  "seconds": 1,
+  "rootY": "keep",
+  "highestAt": 0,
+  "lowestAt": 0.5,
+  "high": 87,
+  "low": 83.1
+ },
+ "Right_Uppercut_from_Guard": {
+  "seconds": 1,
+  "rootY": "keep",
+  "highestAt": 0.7,
+  "lowestAt": 0.4,
+  "high": 85.8,
+  "low": 81
+ },
+ "Leg_Sweep": {
+  "seconds": 2.467,
+  "rootY": "keep",
+  "highestAt": 1.03,
+  "lowestAt": 1.4,
+  "high": 90.8,
+  "low": 81
+ },
+ "Lunge_Roundhouse_Kick": {
+  "seconds": 3,
+  "rootY": "clamp",
+  "highestAt": 2.23,
+  "lowestAt": 1.5,
+  "high": 91.4,
+  "low": 69.4
+ },
+ "Charged_Upward_Slash": {
+  "seconds": 3.167,
+  "rootY": "keep",
+  "highestAt": 1,
+  "lowestAt": 3.03,
+  "high": 87.8,
+  "low": 81
+ },
+ "Sweep_Kick": {
+  "seconds": 4.033,
+  "rootY": "clamp",
+  "highestAt": 3.87,
+  "lowestAt": 2,
+  "high": 86,
+  "low": 45
+ },
+ "360_Power_Spin_Jump": {
+  "seconds": 3.033,
+  "rootY": "stand",
+  "highestAt": 1.53,
+  "lowestAt": 1.9,
+  "high": 102.8,
+  "low": 77
+ },
+ "Jumping_Punch": {
+  "seconds": 2.667,
+  "rootY": "stand",
+  "highestAt": 1,
+  "lowestAt": 1.87,
+  "high": 166.6,
+  "low": 50.6
+ },
+ "Rising_Flying_Kick": {
+  "seconds": 1.5,
+  "rootY": "stand",
+  "highestAt": 0.37,
+  "lowestAt": 1,
+  "high": 125.7,
+  "low": 75.7
+ },
+ "Jump_and_Slam_Back_Down": {
+  "seconds": 2.733,
+  "rootY": "stand",
+  "highestAt": 0.73,
+  "lowestAt": 1.73,
+  "high": 104,
+  "low": 30
+ },
+ "Lunge_Spin_Kick": {
+  "seconds": 1.633,
+  "rootY": "keep",
+  "highestAt": 1.13,
+  "lowestAt": 0.53,
+  "high": 83,
+  "low": 71.7
+ },
+ "Grip_and_Throw_Down": {
+  "seconds": 4.667,
+  "rootY": "keep",
+  "highestAt": 2.37,
+  "lowestAt": 1.53,
+  "high": 90.6,
+  "low": 85.1
+ },
+ "Over_Shoulder_Throw": {
+  "seconds": 4.3,
+  "rootY": "keep",
+  "highestAt": 1.53,
+  "lowestAt": 3.57,
+  "high": 88.9,
+  "low": 56.7
+ },
+ "Roll_Dodge": {
+  "seconds": 1.833,
+  "rootY": "keep",
+  "highestAt": 0,
+  "lowestAt": 1.27,
+  "high": 90.4,
+  "low": 30.4
+ },
+ "Stand_Dodge": {
+  "seconds": 1.4,
+  "rootY": "keep",
+  "highestAt": 1.3,
+  "lowestAt": 0.57,
+  "high": 85.5,
+  "low": 75.5
+ },
+ "baseball_pitching": {
+  "seconds": 3.967,
+  "rootY": "keep",
+  "highestAt": 0.03,
+  "lowestAt": 1.33,
+  "high": 90.9,
+  "low": 78.8
+ },
+ "Thrust_Slash": {
+  "seconds": 3,
+  "rootY": "keep",
+  "highestAt": 0.6,
+  "lowestAt": 2.07,
+  "high": 85.1,
+  "low": 76.9
+ },
+ "Jump_with_Arms_Open": {
+  "seconds": 3.667,
+  "rootY": "stand",
+  "highestAt": 1.8,
+  "lowestAt": 2.4,
+  "high": 130.8,
+  "low": 59
+ },
+ "Charged_Ground_Slam": {
+  "seconds": 3,
+  "rootY": "keep",
+  "highestAt": 1.2,
+  "lowestAt": 1.83,
+  "high": 81.4,
+  "low": 49.4
+ },
+ "Bar_Hang_Idle": {
+  "seconds": 4.667,
+  "rootY": "stand",
+  "highestAt": 2.17,
+  "lowestAt": 1.27,
+  "high": 102.6,
+  "low": 102.2
+ }
+}

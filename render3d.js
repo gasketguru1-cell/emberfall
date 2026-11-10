@@ -91,19 +91,33 @@ function build() {
     const root = new THREE.Group(), pivot = new THREE.Group(); root.add(pivot); scene.add(root);
     const shield = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 18), new THREE.MeshStandardMaterial({ color: PCOL[idx], emissive: PCOL[idx], emissiveIntensity: 0.5, transparent: true, opacity: 0.42, roughness: 0.2, depthWrite: false })); shield.visible = false; scene.add(shield);
     const pad = new THREE.Mesh(new THREE.BoxGeometry(18, 1.4, 10), new THREE.MeshStandardMaterial({ color: 0xffe6a0, emissive: 0xffc860, emissiveIntensity: 1.2 })); pad.visible = false; scene.add(pad);
-    return { root, pivot, shield, pad, key: '', yaw: idx ? Math.PI : 0, mats: [], model: null, mixer: null, actions: {}, cur: null, prev: null };
+    return { root, pivot, shield, pad, key: '', yaw: idx ? Math.PI : 0, mats: [], model: null, mixer: null, actions: {}, cur: null, prev: null, prop: null, hand: null };
   });
+  /* Flint's lantern: hangs from his hand and stays upright, so swinging the arm swings the light. */
+  function makeLantern() {
+    const g = new THREE.Group(), brass = new THREE.MeshStandardMaterial({ color: 0xc9a24a, roughness: 0.35, metalness: 0.8 });
+    const add = (geo, mat, y) => { const m = new THREE.Mesh(geo, mat); m.position.y = y; m.castShadow = true; g.add(m); return m; };
+    add(new THREE.TorusGeometry(0.5, 0.07, 6, 16), brass, -0.45);
+    add(new THREE.CylinderGeometry(0.72, 0.5, 0.28, 6), brass, -1.0);
+    add(new THREE.CylinderGeometry(0.58, 0.66, 1.5, 6), new THREE.MeshStandardMaterial({ color: 0xffe2a0, emissive: 0xffa540, emissiveIntensity: 2.6, roughness: 0.3 }), -1.9).castShadow = false;
+    add(new THREE.CylinderGeometry(0.72, 0.72, 0.22, 6), brass, -2.75);
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, map: tex(128, 128, (c, w) => { const q = c.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2); q.addColorStop(0, 'rgba(255,200,110,.75)'); q.addColorStop(0.35, 'rgba(255,170,70,.22)'); q.addColorStop(1, 'rgba(255,170,70,0)'); c.fillStyle = q; c.fillRect(0, 0, w, w); }) }));
+    glow.scale.set(9, 9, 1); glow.position.y = -1.9; g.add(glow); g.userData.glow = glow;
+    return g;
+  }
   function dress(v, f) {
     const fm = f.form, col = f.alt ? fm.alt : fm.col, st = fm.st, M = MODELS[fm.name], useModel = !!(M && M.ready), k = fm.name + (f.alt ? '*' : '') + (useModel ? '#model' : '');
     if (v.key === k) return; v.key = k;
     while (v.pivot.children.length) { const c = v.pivot.children.pop(); if (c.geometry) c.geometry.dispose(); }
     if (v.mixer) v.mixer.stopAllAction();
-    v.mixer = null; v.model = null; v.actions = {}; v.cur = null; v.prev = null;
+    v.mixer = null; v.model = null; v.actions = {}; v.cur = null; v.prev = null; v.hand = null;
+    if (v.prop) { scene.remove(v.prop); v.prop = null; }
     if (useModel) {
       /* A copy of the loaded model with its own skeleton, scaled to the fighter's height and turned so its front is +x. */
       const obj = cloneSkinned(M.scene); obj.scale.setScalar(M.cfg.height / M.height); obj.rotation.y = Math.PI / 2; v.mats = [];
       obj.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; o.frustumCulled = false; o.material = o.material.clone(); if (f.alt) o.material.color.setRGB(0.78, 0.9, 1.25); v.mats.push(o.material); } });
       v.pivot.add(obj); v.model = M; v.mixer = new THREE.AnimationMixer(obj);
+      if (M.cfg.prop && M.cfg.prop.type === 'lantern') { v.hand = obj.getObjectByName(M.cfg.prop.bone) || null; if (v.hand) { v.prop = makeLantern(); scene.add(v.prop); } }
       return;
     }
     const r = st.w * 0.45, len = Math.max(0.1, st.h - 2 * r);
@@ -188,6 +202,7 @@ function build() {
 
     F.forEach((f, idx) => {
       const v = fighters[idx], st = f.st, alive = f.state !== 'dead';
+      if (v.prop && !alive) v.prop.visible = false;
       v.root.visible = alive; v.shield.visible = alive && (f.state === 'shield' || f.state === 'shieldstun'); v.pad.visible = f.state === 'respawn';
       if (!alive) return;
       dress(v, f);
@@ -201,8 +216,13 @@ function build() {
       for (const m of v.mats) { m.transparent = ghost; m.opacity = ghost ? 0.45 : 1; m.emissive.setHex(hot ? 0xffffff : 0x000000); m.emissiveIntensity = hot ? 0.8 : 0; }
       if (v.shield.visible) { const r = 4 + f.shieldHp / 50 * 6; v.shield.scale.setScalar(r); v.shield.position.set(f.x, f.y + st.h / 2, 0); }
       if (v.pad.visible) v.pad.position.set(f.x, f.y - 0.8, 0);
+      if (v.prop) {
+        v.root.updateWorldMatrix(true, true); v.hand.getWorldPosition(v.prop.position);
+        v.prop.rotation.z = clamp(-f.vx * 0.12, -0.5, 0.5) + Math.sin(frame * 0.12 + idx) * 0.05;
+        v.prop.userData.glow.material.opacity = 0.85 + Math.sin(frame * 0.37 + idx * 2) * 0.12; v.prop.visible = true;
+      }
     });
-    for (let k = F.length; k < 2; k++) { fighters[k].root.visible = false; fighters[k].shield.visible = false; fighters[k].pad.visible = false; }
+    for (let k = F.length; k < 2; k++) { if (fighters[k].prop) fighters[k].prop.visible = false; fighters[k].root.visible = false; fighters[k].shield.visible = false; fighters[k].pad.visible = false; }
 
     for (const [p, m] of shots) if (!PROJ.includes(p)) { scene.remove(m); m.geometry.dispose(); shots.delete(p); }
     for (const p of PROJ) {

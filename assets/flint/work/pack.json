@@ -2,7 +2,9 @@
   "base": "raw/01a1c2db-5e53-7203-8a9c-9c6f9f827eaf/result.animation_glb_url.glb",
   "extra": [
     { "file": "raw/01a1c2da-7eb4-7579-9b80-0d1df56b4c8f/result.basic_animations.walking_armature_glb_url.glb", "rename": { "Armature|walking_man|baselayer": "Walk" } },
-    { "file": "raw/01a1c2da-7eb4-7579-9b80-0d1df56b4c8f/result.basic_animations.running_armature_glb_url.glb", "rename": { "Armature|running|baselayer": "Run" } }
+    { "file": "raw/01a1c2da-7eb4-7579-9b80-0d1df56b4c8f/result.basic_animations.running_armature_glb_url.glb", "rename": { "Armature|running|baselayer": "Run" } },
+    { "file": "raw/01a1c2e7-e9e9-710a-8eb7-22de172a4e4c/result.animation_glb_url.glb" },
+    { "file": "raw/01a1c2e7-ed30-71cd-95eb-d943afd9e121/result.animation_glb_url.glb" }
   ],
   "root": "Hips",
   "stand": "Idle",
@@ -11,8 +13,16 @@
     "Regular_Jump": { "y": "clamp" },
     "Fall1": { "y": "stand" },
     "Jumping_Down": { "y": "clamp" },
-    "BeHit_FlyUp": { "y": "stand" }
+    "BeHit_FlyUp": { "y": "stand" },
+    "360_Power_Spin_Jump": { "y": "stand" },
+    "Jumping_Punch": { "y": "stand" },
+    "Rising_Flying_Kick": { "y": "stand" },
+    "Jump_and_Slam_Back_Down": { "y": "stand" },
+    "Jump_with_Arms_Open": { "y": "stand" },
+    "Bar_Hang_Idle": { "y": "stand" },
+    "Lunge_Roundhouse_Kick": { "y": "clamp" },
+    "Sweep_Kick": { "y": "clamp" }
   },
   "texture": 1024,
-  "out": "export/flint-v1.glb"
+  "out": "export/flint-v2.glb"
 }
