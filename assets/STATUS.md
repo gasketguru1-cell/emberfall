@@ -71,7 +71,7 @@ Five birds and a living slingshot, from the owner's package (assets/fowls/source
 - **Names.** The document's russet bird is called Flint; the game already has a Flint, so it is Rusty here.
 - **Simplified from the document:** the slingshot is one built shape that leans and squashes rather than a fully animated rig; multi-hit notes (Bolt's and Pip's three small hits) are single hits of the same total; the bird picker is next / previous rather than a five-way wheel; Pip's doubles are two extra hitboxes, not drawn birds; ammunition, eggs and blasts are plain shapes; landing-lag and auto-cancel tables are the engine's.
 - **Models:** five birds from the owner's art, 30 credits each (150). One shared 10-bone skeleton and 22 clips (tools/blender/fowls.js). The slingshot is built in render3d.js, not generated.
-- **Balance:** the owner asked for 55 to 65%. See the log line below for the measured figures.
+- **Balance:** the owner asked for 55 to 65%. Full run (8,640 matches, CPU level 7): Rusty 68%, Bolt 65%, Cinder 61%, Pip 63%, Pearl 63%; the other seven fighters 36 to 45% in that run, since each plays the five birds in 5 of its 11 pairings. Rusty's launch power was trimmed once more after that run (0.95 to 0.92) and not re-measured.
 - **Checked:** 8 rule checks of its own (150 in all), 80 stress matches, recovery from all six spots for each bird, a CPU match in the game with no errors. **Not checked:** anything in a person's hands, the hitbox audit, animation in motion.
 - **Also fixed:** the 3D picture crashed when a shot made of several parts (Sprocket's tape roll) disappeared. That bug had been live since Sprocket was added.
 
@@ -96,6 +96,7 @@ Measured with tests/combat-audit.js (movement timings, how near and far each att
 
 ## CPU levels and tap jump (2026-11-10)
 
+- CPU level 0 (2026-11-10, for testing): the CPU stands still and does nothing. Up / Down on the start screen goes down to it.
 - CPU level 1 to 9, set with Up / Down on the select screen while player 2 is empty, and remembered. Level 7 is the CPU as it always played; every test and balance figure uses it. The numbers for each level are in `CPU_LV` in `sim.js`.
 - Tap jump is removed (owner's request, 2026-11-10): only the jump buttons jump, never the stick. There is no switch for it.
 

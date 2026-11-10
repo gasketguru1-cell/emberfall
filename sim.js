@@ -290,7 +290,7 @@ function applyKit(fm) {
 const TUNE = {
   Flint: { kb: 0.84, lag: 1.2 }, Nib: { kb: 1.09 }, Loom: { kb: 1.11, lag: 0.95 }, Hod: { kb: 1.31, lag: 0.8 }, 'Potato Sack': { kb: 0.9 }, Sprocket: { kb: 0.8, lag: 1.3 }, Scuttle: { kb: 0.91, lag: 1.2 },
   /* Furious Fowls: the owner asked for 55 to 65% (2026-11-10) */
-  Rusty: { kb: 0.95 }, Cinder: { kb: 0.92 }, Pip: { kb: 1.04 }, Pearl: { kb: 0.95 },
+  Rusty: { kb: 0.92 }, Cinder: { kb: 0.92 }, Pip: { kb: 1.04 }, Pearl: { kb: 0.95 },
 };
 const NORMALS = ['jab', 'jab2', 'jab3', 'dash', 'ftilt', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash', 'nair', 'fair', 'bair', 'uair', 'dair'];
 function applyTune(fm) {
@@ -1305,10 +1305,11 @@ const CPU_LV = [null,
   { tempo: 0.8, guard: 0.62, tech: 0.76, punish: 0.78, air: 1, nap: 0, napLen: 0, mash: 7 },
   { tempo: 0.62, guard: 0.8, tech: 0.94, punish: 0.92, air: 1, nap: 0, napLen: 0, mash: 6 }];
 let CPU_LEVEL = 7;
-try { const v = +localStorage.getItem('emberfall.cpulevel'); if (v >= 1 && v <= 9) CPU_LEVEL = Math.round(v); } catch (e) { /* no storage */ }
-function setCpuLevel(v) { CPU_LEVEL = clamp(Math.round(v), 1, 9); try { localStorage.setItem('emberfall.cpulevel', String(CPU_LEVEL)); } catch (e) { /* no storage */ } }
+try { const raw = localStorage.getItem('emberfall.cpulevel'), v = +raw; if (raw !== null && raw !== '' && v >= 0 && v <= 9) CPU_LEVEL = Math.round(v); } catch (e) { /* no storage */ }   /* level 0 is for testing: the CPU stands still */
+function setCpuLevel(v) { CPU_LEVEL = clamp(Math.round(v), 0, 9); try { localStorage.setItem('emberfall.cpulevel', String(CPU_LEVEL)); } catch (e) { /* no storage */ } }
 const NAP_STATES = { idle: 1, dash: 1, run: 1, brake: 1, land: 1, wd: 1 };
 function cpuInput(f, o, m) {
+  if (!m.lv && CPU_LEVEL === 0) return blankIn();   /* level 0: a target that does nothing at all, for testing moves on */
   const L = CPU_LV[m.lv || CPU_LEVEL], before = m.cd > 0 ? m.cd - 1 : 0, i = cpuBrain(f, o, m, L);
   if (m.cd > before && L.tempo !== 1) m.cd = Math.max(1, Math.round(m.cd * L.tempo));   /* a wait it has just set itself */
   if (L.nap > 0) {

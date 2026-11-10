@@ -90,7 +90,7 @@ function drawSelect(three) {
       if (!k) { g.textAlign = 'center'; g.font = 'bold 26px system-ui, sans-serif'; g.fillStyle = 'rgba(255,255,255,' + pulse.toFixed(2) + ')'; g.fillText('Press Attack to join', x + cw / 2, y + 92); g.font = '14px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('A on a controller  ·  Z on the keyboard', x + cw / 2, y + 120); continue; }
       /* empty second slot: the CPU and its level */
       g.font = 'bold 34px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('CPU', x + 24, y + 78);
-      g.font = '15px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('picks a fighter at random', x + 24, y + 102);
+      g.font = '15px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(CPU_LEVEL === 0 ? 'level 0: stands still, for testing' : 'picks a fighter at random', x + 24, y + 102);
       g.textAlign = 'right'; g.font = 'bold 13px system-ui, sans-serif'; spaced(2); g.fillStyle = '#f3dfb6'; g.fillText('LEVEL', x + cw - 86, y + 62); spaced(0);
       g.font = '900 44px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(String(CPU_LEVEL), x + cw - 30, y + 74);
       for (let n = 1; n <= 9; n++) { g.fillStyle = n <= CPU_LEVEL ? pc : 'rgba(255,255,255,.16)'; rr(x + cw - 30 - (10 - n) * 21, y + 88, 17, 7, 3); g.fill(); }
