@@ -26,4 +26,13 @@ let UPDATE_READY = false;
     .then(v => { if (!v || v.length > 20) return; if (mine === null) mine = v; else if (v !== mine) UPDATE_READY = true; }).catch(() => {});
   ask(); timer = setInterval(ask, 5000);
 })();
+/* ---------- Mouse (or a finger) on the fighter select: drag the CPU's token ---------- */
+let MOUSE = null;
+(function () {
+  const at = e => { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height }; };
+  addEventListener('pointerdown', e => { const p = at(e); MOUSE = p; if (cpuGrab(p.x, p.y)) { e.preventDefault(); try { e.target.setPointerCapture && e.target.setPointerCapture(e.pointerId); } catch (_) { /* fine */ } } });
+  addEventListener('pointermove', e => { const p = at(e); MOUSE = p; cpuDrag(p.x, p.y); document.body.style.cursor = CPU_TOK.drag ? 'grabbing' : cpuTokOn(p.x, p.y) ? 'grab' : ''; });
+  addEventListener('pointerup', e => { const p = at(e); cpuDrop(p.x, p.y); document.body.style.cursor = cpuTokOn(p.x, p.y) ? 'grab' : ''; });
+  addEventListener('pointercancel', () => { if (CPU_TOK.drag) { CPU_TOK.drag = false; cpuTokHome(); } });
+})();
 window.__game = { get F() { return F; }, get mode() { return mode; }, slots, step, startMatch, keys, draw, perf, DBG, cam };

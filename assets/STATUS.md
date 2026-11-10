@@ -91,7 +91,7 @@ Measured with tests/combat-audit.js (movement timings, how near and far each att
 
 ## Fighter select (2026-11-10)
 
-- The start screen shows the roster as a row of portrait tiles (drawn with each fighter's 2D picture), with a P1 and P2 marker on the tile each player is on and a tick when they have confirmed. Each player has a cursor moved with the stick or the arrow keys: pointing at a tile shows that fighter, Attack there picks it, Special takes the pick back (and again to leave). With the cursor on the CPU card, Attack raises the level and Special lowers it (0 to 9, wrapping). Start begins once everyone has picked. The layout is Emberfall's own; it follows the usual portrait-grid idea, not another game's art.
+- The start screen shows the roster as a row of portrait tiles (drawn with each fighter's 2D picture), with a P1 and P2 marker on the tile each player is on and a tick when they have confirmed. Each player has a cursor moved with the stick or the arrow keys: pointing at a tile shows that fighter, Attack there picks it, Special takes the pick back (and again to leave). With the cursor on the CPU card, Attack raises the level and Special lowers it (0 to 9, wrapping). Start begins once everyone has picked. While the second slot is the CPU, its grey CPU token can be dragged with the mouse (or a finger) onto a fighter's tile to choose the CPU's fighter; dropped anywhere else it goes back to the CPU card and the CPU picks at random. The choice is not saved between visits. The layout is Emberfall's own; it follows the usual portrait-grid idea, not another game's art.
 
 ## Hit sparks switch (2026-11-10)
 

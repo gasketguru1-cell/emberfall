@@ -1428,7 +1428,7 @@ const cam = { x: 0, y: 30, s: 3.4 };
 function devCtl(dev) { return DEVS[dev] || (DEVS[dev] = new Ctl(dev)); }
 function allDevs() { const d = ['kb']; const gp = navigator.getGamepads ? navigator.getGamepads() : []; for (let n = 0; n < gp.length && n < 4; n++) if (gp[n]) d.push('pad' + n); return d; }
 function startMatch() {
-  const s0 = slots[0], s1 = slots[1] || { dev: 'cpu', pick: Math.random() * ROSTER.length | 0 };
+  const s0 = slots[0], s1 = slots[1] || { dev: 'cpu', pick: CPU_PICK >= 0 ? CPU_PICK : Math.random() * ROSTER.length | 0 };   /* the CPU's token, or random */
   const c0 = devCtl(s0.dev), c1 = s1.dev === 'cpu' ? new Ctl('cpu') : devCtl(s1.dev);
   F = [new Fighter(0, ROSTER[s0.pick], c0, false), new Fighter(1, ROSTER[s1.pick], c1, s1.pick === s0.pick)];
   PROJ = []; PART = []; POPS = []; timer = MATCH_FRAMES; sudden = false; slowT = 0; focus = null; countdown = 190; paused = false; mode = 'countdown'; cam.x = 0; cam.y = 30; cam.s = 3.4;
@@ -1438,10 +1438,11 @@ function startMatch() {
 let PREVIEW = null;
 function selectPreview() {
   tick++;
-  const key = slots.map(s => s ? s.pick : '-').join(',');
+  const shown = slots.slice(); if (!shown[1] && shown[0] && CPU_PICK >= 0) shown[1] = { pick: CPU_PICK };   /* the CPU's chosen fighter stands on the island too */
+  const key = shown.map(s => s ? s.pick : '-').join(',');
   if (key !== PREVIEW || !F.preview) {
     PREVIEW = key; const list = [];
-    slots.forEach((s, k) => { if (!s) return; const n = list.length, f = new Fighter(n, ROSTER[s.pick], new Ctl('cpu'), k === 1 && !!slots[0] && slots[0].pick === s.pick); f.x = n ? 16 : -16; f.face = n ? -1 : 1; list.push(f); });
+    shown.forEach((s, k) => { if (!s) return; const n = list.length, f = new Fighter(n, ROSTER[s.pick], new Ctl('cpu'), k === 1 && !!slots[0] && slots[0].pick === s.pick); f.x = n ? 16 : -16; f.face = n ? -1 : 1; list.push(f); });
     F = list; F.preview = true; PROJ = []; PART = []; POPS = [];
   }
   for (const f of F) if (f.def.forms.length > 1) f.fi = Math.floor(tick / 170) % (f.def.cycle || f.def.forms.length);
@@ -1453,6 +1454,15 @@ function rosterTile(k) { const n = ROSTER.length, tw = Math.min(168, (W - 120) /
 const CPU_CARD = [W - 44 - 460, 446, 460, 158];
 const inBox = (b, x, y) => x >= b[0] && x <= b[0] + b[2] && y >= b[1] && y <= b[1] + b[3];
 function tileUnder(x, y) { for (let k = 0; k < ROSTER.length; k++) if (inBox(rosterTile(k), x, y)) return k; return -1; }
+/* The CPU's token: dragged with the mouse (or a finger) onto a fighter's tile to choose the CPU's fighter. Dropped anywhere
+   else, the CPU picks at random again. CPU_PICK is -1 for random. Only while the second player slot is empty. */
+let CPU_PICK = -1; const CPU_TOK = { x: 0, y: 0, drag: false, dx: 0, dy: 0 };
+function cpuTokHome() { if (CPU_PICK >= 0) { const b = rosterTile(CPU_PICK); CPU_TOK.x = b[0] + b[2] - 44; CPU_TOK.y = b[1] + b[3] - 60; } else { CPU_TOK.x = CPU_CARD[0] + 236; CPU_TOK.y = CPU_CARD[1] + 40; } }
+cpuTokHome();
+function cpuTokOn(x, y) { return mode === 'select' && !slots[1] && Math.hypot(x - (CPU_TOK.x + 24), y - (CPU_TOK.y + 24)) < 24; }
+function cpuGrab(x, y) { if (!cpuTokOn(x, y)) return false; CPU_TOK.drag = true; CPU_TOK.dx = CPU_TOK.x - x; CPU_TOK.dy = CPU_TOK.y - y; beep(600, 0.04, 'triangle', 0.03); return true; }
+function cpuDrag(x, y) { if (!CPU_TOK.drag) return; CPU_TOK.x = clamp(x + CPU_TOK.dx, 0, W - 48); CPU_TOK.y = clamp(y + CPU_TOK.dy, 0, H - 48); const k = tileUnder(CPU_TOK.x, CPU_TOK.y); if (k >= 0 && k !== CPU_PICK) { CPU_PICK = k; beep(440, 0.03, 'square', 0.02); } }
+function cpuDrop(x, y) { if (!CPU_TOK.drag) return; cpuDrag(x, y); CPU_TOK.drag = false; CPU_PICK = tileUnder(CPU_TOK.x, CPU_TOK.y); cpuTokHome(); beep(CPU_PICK >= 0 ? 800 : 420, 0.06, 'triangle', 0.04); }
 function stepSelect() {
   selectPreview();
   for (const dev of allDevs()) {

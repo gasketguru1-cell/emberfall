@@ -103,7 +103,7 @@ function drawSelect(three) {
       if (!k) { g.textAlign = 'center'; g.font = 'bold 26px system-ui, sans-serif'; g.fillStyle = 'rgba(255,255,255,' + pulse.toFixed(2) + ')'; g.fillText('Press Attack to join', x + cw / 2, y + 92); g.font = '14px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('A on a controller  ·  Z on the keyboard', x + cw / 2, y + 120); continue; }
       /* empty second slot: the CPU and its level */
       g.font = 'bold 34px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('CPU', x + 24, y + 78);
-      g.font = '15px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(CPU_LEVEL === 0 ? 'level 0: stands still, for testing' : 'picks a fighter at random', x + 24, y + 102);
+      g.font = '15px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(CPU_LEVEL === 0 ? 'level 0: stands still, for testing' : CPU_PICK >= 0 ? 'plays ' + ROSTER[CPU_PICK].name : 'drag its token to a fighter, or it picks at random', x + 24, y + 102);
       g.textAlign = 'right'; g.font = 'bold 13px system-ui, sans-serif'; spaced(2); g.fillStyle = '#f3dfb6'; g.fillText('LEVEL', x + cw - 86, y + 62); spaced(0);
       g.font = '900 44px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(String(CPU_LEVEL), x + cw - 30, y + 74);
       for (let n = 1; n <= 9; n++) { g.fillStyle = n <= CPU_LEVEL ? pc : 'rgba(255,255,255,.16)'; rr(x + cw - 30 - (10 - n) * 21, y + 88, 17, 7, 3); g.fill(); }
@@ -167,6 +167,14 @@ function drawSelect(three) {
     g.beginPath(); g.arc(x + 24, y + 24, 16, 0, TAU); g.fill(); g.restore();
     g.strokeStyle = '#fff'; g.lineWidth = 2.5; g.beginPath(); g.arc(x + 24, y + 24, 16, 0, TAU); g.stroke();
     g.textAlign = 'center'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = '#16121f'; g.fillText('P' + (k + 1), x + 24, y + 29); }
+  /* ---- the CPU's token, while the second slot is the CPU: drag it with the mouse onto a fighter ---- */
+  if (!slots[1]) { const x = CPU_TOK.x, y = CPU_TOK.y, lift = CPU_TOK.drag ? 4 : 0, hov = CPU_TOK.drag || (MOUSE && cpuTokOn(MOUSE.x, MOUSE.y));
+    if (CPU_PICK >= 0 && !CPU_TOK.drag) { const b = rosterTile(CPU_PICK); g.strokeStyle = '#c9c3dc'; g.lineWidth = 3; g.setLineDash([6, 5]); rr(b[0] - 2, b[1] - 2, b[2] + 4, b[3] + 4, 12); g.stroke(); g.setLineDash([]); }
+    g.save(); g.shadowColor = 'rgba(0,0,0,.6)'; g.shadowBlur = 10 + lift * 2; g.shadowOffsetY = 2 + lift;
+    g.fillStyle = '#c9c3dc'; g.beginPath(); g.moveTo(x, y - lift); g.lineTo(x + 20, y + 7 - lift); g.lineTo(x + 7, y + 20 - lift); g.closePath(); g.fill();
+    g.beginPath(); g.arc(x + 24, y + 24 - lift, 18, 0, TAU); g.fill(); g.restore();
+    g.strokeStyle = hov ? '#ffd98a' : '#fff'; g.lineWidth = 2.5; g.beginPath(); g.arc(x + 24, y + 24 - lift, 18, 0, TAU); g.stroke();
+    g.textAlign = 'center'; g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#16121f'; g.fillText('CPU', x + 24, y + 28 - lift); }
   g.textAlign = 'center'; drawUpdateNote(14);
 }
 function drawDebugText() {
