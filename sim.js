@@ -528,7 +528,7 @@ const FOWL = {"combined":{"jab_1":{"s":3,"a":2,"e":7,"d":2,"ang":68,"k":40,"b":1
    combined changes bird. One damage meter and one set of stocks throughout.
    Every frame count, damage, angle and knockback number is the document's (FOWL, above). W is the slingshot's width and
    B a lone bird's; speeds the document gives in W a tick are scaled by FV so a launch crosses about half the stage. */
-const FW = 10, FB = 6.5, FV = 4.5;
+const FW = 10, FB = 6.5, FV = 4.5, FUP = 2.5;   /* FUP scales the charged launch: a full charge carries about 75, well short of the ceiling */
 function fowlHit(q, unit, cy, extra) {
   const g = q.g || { x: 0, y: 0, r: 0.25 }, h = Object.assign({ f0: q.s + 1, f1: q.s + q.a, x: +(g.x * unit).toFixed(1), y: +(cy + g.y * unit).toFixed(1), r: +Math.max(2.4, g.r * unit).toFixed(1), d: q.d, a: q.ang, b: q.b, k: q.k }, extra);
   if (g.in) h.in = [+(g.in[0] * unit).toFixed(1), +(cy + g.in[1] * unit).toFixed(1)]; return h;
@@ -590,16 +590,16 @@ const FOWLS = { name: 'Furious Fowls', sub: 'five birds and a slingshot', fowl: 
       /* side special: aim with the stick during the wind-up, then the bird itself is fired and takes the controls with it */
       sspec: { t: sb.s + 3, h: [], on(f, n, i) { if (n <= sb.s) f.fowlAim = clamp(i.ly, -1, 1) * sb.aim + 8; if (n === sb.s + 1) fowlLaunch(f, b); } },
       /* up special, the same for all five: hold to charge (up to 45 frames), let go to fly where the stick points */
-      uspec: { t: UP.startup + 1 + 38 + 3, helpless: 1, ledge: 1, ll: UP.landing_lag_frames, rise: 70, fowlUp: 1, blast: 1, h: [{ f0: UP.startup + 2, f1: UP.startup + 40, x: 0, y: 7.5, r: 0.61 * FW, d: 8, dd: a => a.upD || 8, a: 60, b: 42, k: 96 }],
+      uspec: { t: UP.startup + 1 + 38 + 3, helpless: 1, ledge: 1, ll: UP.landing_lag_frames, rise: 55, fowlUp: 1, blast: 1, h: [{ f0: UP.startup + 2, f1: UP.startup + 40, x: 0, y: 7.5, r: 0.61 * FW, d: 8, dd: a => a.upD || 8, a: 60, b: 42, k: 96 }],
         on(f, n, i) {
           if (n === 1) { f.upC = 0; f.upGo = 0; if (!f.grounded) f.blastUsed = true; }
           if (n > UP.startup && !f.upGo) {
             if (i.spc) { if (f.upC < UP.charge_max_frames) f.upC++; f.mf = UP.startup + 1; f.vx *= 0.9; if (!f.grounded && f.vy < -0.6) f.vy = -0.6; return; }   /* charging: it sinks slowly, it cannot hang for ever */
             const c = f.upC, t = c / UP.charge_max_frames, pts = UP.charge_damage_points; let dmg = pts[0][1]; for (let k = 1; k < pts.length; k++) if (c >= pts[k][0]) dmg = pts[k][1]; else { dmg += (pts[k][1] - dmg) * (c - pts[k - 1][0]) / Math.max(1, pts[k][0] - pts[k - 1][0]); break; }
-            const mag = Math.hypot(i.lx, i.ly), dx = mag > 0.3 ? i.lx / mag : 0, dy = mag > 0.3 ? i.ly / mag : 1, sp = (0.34 + 0.46 * t) * FV;
+            const mag = Math.hypot(i.lx, i.ly), dx = mag > 0.3 ? i.lx / mag : 0, dy = mag > 0.3 ? i.ly / mag : 1, sp = (0.34 + 0.46 * t) * FUP;
             f.upD = Math.round(dmg * 10) / 10; f.upV = [dx * sp, dy * sp]; f.upGo = 12 + Math.round(26 * t); f.upEnd = f.mf + f.upGo; if (dx) f.face = sgn(dx); f.grounded = false; f.plat = null; spark(f.x, f.y + 6, '#fff', 16, 2); beep(220, 0.2, 'sawtooth', 0.07, 2);
           }
-          if (f.upGo) { if (f.mf <= f.upEnd) { f.vx = f.upV[0]; f.vy = f.upV[1]; } else if (f.mf === f.upEnd + 1) { f.vx *= 0.4; f.vy *= 0.4; f.mf = f.move.t - 2; } }
+          if (f.upGo) { if (f.mf <= f.upEnd) { f.vx = f.upV[0]; f.vy = f.y > BLAST.t - 30 && f.upV[1] > 0 ? 0 : f.upV[1]; }   /* it never flies itself out through the top */ else if (f.upEnd > 0) { f.vx *= 0.4; f.vy *= 0.4; f.upEnd = -99; f.mf = Math.max(f.mf, f.move.t - 1); }   /* the flight is over, once: straight into the fall */ }
         } },
       /* down special: the next bird (or the one before it, holding back) steps into the pouch; damage and stocks stay as they are */
       dspec: { t: 6, h: [], on(f, n, i) { if (n === 2) { f.fi = (f.fi + (i.lx * f.face < -0.5 ? 4 : 1)) % 5; spark(f.x, f.y + 10, '#fff', 10, 1.2); beep(660, 0.05, 'triangle', 0.04); } } },
