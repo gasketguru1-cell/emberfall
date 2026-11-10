@@ -53,6 +53,11 @@ Spent so far: 237 credits (Flint 135, companions 102). The daily limit was raise
 - Each companion has its own ledge hang, spot dodge, grab hold and being-held clips. Roll and air dodge use the curled tumble with a spin, on purpose.
 - Follow-through: tails, ears and ribbons are simulated in `render3d.js` (`springs` in the manifest). It is stepped by the game clock, so freezing the game freezes it.
 
+## CPU levels and tap jump (2026-11-10)
+
+- CPU level 1 to 9, set with Up / Down on the select screen while player 2 is empty, and remembered. Level 7 is the CPU as it always played; every test and balance figure uses it. The numbers for each level are in `CPU_LV` in `sim.js`.
+- Tap jump is off unless switched on with the grab button on the select screen (it used to be the jump button).
+
 ## Stage (2026-11-10)
 
 One stage: a flat main platform 160 wide with two soft platforms side by side (x 18 to 52 on each side, height 26) and no top platform. The sizes are in `PLATS` in `sim.js`; both renderers build the platforms from that list. The look is Emberfall's own (dusk sky, plank deck, lamps, far islands).
@@ -84,7 +89,7 @@ The movement rules now work the way the reference build's do, with Emberfall's o
 | fall / fast fall | 1.55 / 2.48 | 1.82 / 2.91 | 1.12 / 1.79 | 1.78 / 2.85 | 1.6 / 2.53 |
 
 - Flint sits at the middle of the roster (all-rounder). Nib is near the fast end on the ground and falls fast (rushdown). Loom is slow on the ground, light on gravity, with three smaller air jumps and good drift (floaty). Hod is slow with poor air control and falls hard (heavy).
-- **Kept the same for balance:** Nib's up special was raised (4.3 to 4.55) to give back the recovery the lower jumps took away; Nib's weight 80 -> 84 and Loom's 80 -> 77.
+- **Changed for balance:** Nib's up special was raised (4.3 to 4.55) to give back the recovery the lower jumps took away; Nib's weight 80 -> 84 and damage 0.9 -> 0.93 of the template; Loom's weight 80 -> 77.
 - **Not known, so guessed:** the file with the build's shared constants (`common.prc`) is not on disk in readable form. Three things come from it: how many frames a dash waits before its burst (set to 1 here), the extra grip while skidding out of a run (set to none), and the turn-around rules. Landing lag (2 frames, 4 after a fast fall) was left as it was.
 
 ## Rules (2026-11-09)
@@ -101,7 +106,8 @@ The movement rules now work the way the reference build's do, with Emberfall's o
 | `tests/rules.js` | 58 scripted checks of single rules with exact inputs, including the movement rules from platforms.ini, the match clock and (2026-11-10) each fighter's jump heights, full-hop pop, fast fall and ground speeds | all pass |
 | `tests/movement.js` | measures every fighter's speeds, stopping distance, jump heights and air times in the running rules; `EMBERFALL_SIM=<file>` measures another copy of the rules | see Movement |
 | `tests/fuzz.js` | both fighters driven by random sticks and buttons; looks for crashes, broken numbers, impossible or stuck states | about 880,000 frames of random against random and 730,000 with the CPU on one side in a quarter of the matches, clean |
-| `tests/stats.js` | CPU-versus-CPU balance per form: wins, damage, KO percent, where stocks are lost, who beats whom | after the movement change (2026-11-10), over three seeds of 960 matches each: Flint 49 to 53%, Nib 45 to 48%, Loom 51 to 53%, Hod 48 to 53%; average KO percent Hod 163, Flint 159, Loom 149, Nib 148 |
+| `tests/stats.js` | CPU-versus-CPU balance per form: wins, damage, KO percent, where stocks are lost, who beats whom | on the two-platform stage with the new movement (2026-11-10), over three seeds of 960 matches each: Flint 49 to 51%, Nib 48 to 52%, Loom 48 to 50%, Hod 49 to 52%; average KO percent Hod 163, Flint 159, Loom 150, Nib 147 |
+| `tests/levels.js` | each CPU level against level 7, same fighter on both sides | wins for levels 1 to 9: 0, 0, 0, 2, 7, 35, 47, 67, 75% |
 | `tests/kotable.js` | KO percent of every hit | see Rules |
 | `tests/recovery.js` | CPU recovery from six spots off stage per form | 24 of 24 get back (also after the movement change) |
 | `tests/deaths.js` | traces of stocks lost without being in hitstun | found three CPU mistakes on 2026-11-09 (a ledge regrab loop, a tech press that became an air dodge, recovering out through the top), all fixed; what remains is long launches at high percent |

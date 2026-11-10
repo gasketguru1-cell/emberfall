@@ -8,7 +8,7 @@ function drawHud() {
   F.forEach(f => {
     const x = W * (f.idx ? 0.68 : 0.32), y = H - 86, pc = f.idx ? '#6cb4ff' : '#ff7b6c';
     g.fillStyle = 'rgba(10,10,20,.6)'; rr(x - 120, y, 240, 74, 12); g.fill(); g.fillStyle = pc; rr(x - 120, y, 8, 74, 4); g.fill();
-    g.textAlign = 'left'; g.font = 'bold 16px system-ui, sans-serif'; g.fillStyle = pc; g.fillText((f.ctl.dev === 'cpu' ? 'CPU' : 'P' + (f.idx + 1)) + '  ' + f.def.name, x - 102, y + 22);
+    g.textAlign = 'left'; g.font = 'bold 16px system-ui, sans-serif'; g.fillStyle = pc; g.fillText((f.ctl.dev === 'cpu' ? 'CPU ' + (f.ctl.ai.lv || CPU_LEVEL) : 'P' + (f.idx + 1)) + '  ' + f.def.name, x - 102, y + 22);
     for (let k = 0; k < f.stocks; k++) { g.fillStyle = '#ffd98a'; g.beginPath(); g.arc(x - 96 + k * 18, y + 40, 6, 0, TAU); g.fill(); }
     if (f.def.forms.length > 1) f.def.forms.forEach((fm, k) => { g.fillStyle = k === f.fi ? '#fff' : 'rgba(255,255,255,.35)'; g.font = (k === f.fi ? 'bold ' : '') + '12px system-ui, sans-serif'; g.fillText(fm.name, x - 102 + k * 42, y + 64); });
     g.textAlign = 'right'; g.font = 'bold 44px system-ui, sans-serif'; g.fillStyle = pctCol(f.pct); const jx = f.flash > 0 ? (Math.random() - 0.5) * 6 : 0; g.fillText(Math.round(f.pct) + '%', x + 106 + jx, y + 52);
@@ -30,7 +30,11 @@ function drawSelect() {
     g.fillStyle = 'rgba(15,15,30,.75)'; rr(x, y, 440, 330, 16); g.fill(); g.strokeStyle = pc; g.lineWidth = 3; g.stroke();
     g.textAlign = 'left'; g.font = 'bold 24px system-ui, sans-serif'; g.fillStyle = pc; g.fillText('PLAYER ' + (k + 1), x + 24, y + 40);
     g.textAlign = 'center';
-    if (!sl) { g.font = '20px system-ui, sans-serif'; g.fillStyle = '#ddd'; g.fillText(k && slots[0] ? 'Press Attack to join' : 'Press Attack to join', x + 220, y + 160); if (k) { g.fillStyle = '#999'; g.fillText('(empty = CPU opponent)', x + 220, y + 192); } continue; }
+    if (!sl) { g.font = '20px system-ui, sans-serif'; g.fillStyle = '#ddd'; g.fillText(k && slots[0] ? 'Press Attack to join' : 'Press Attack to join', x + 220, y + 160); if (k) { g.fillStyle = '#999'; g.fillText('(empty = CPU opponent)', x + 220, y + 192);
+      g.font = 'bold 30px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('CPU level  ' + CPU_LEVEL, x + 220, y + 248);
+      for (let n = 1; n <= 9; n++) { g.fillStyle = n <= CPU_LEVEL ? pc : 'rgba(255,255,255,.18)'; rr(x + 220 - 108 + (n - 1) * 24, y + 262, 20, 8, 3); g.fill(); }
+      g.font = '16px system-ui, sans-serif'; g.fillStyle = '#bbb'; g.fillText('Up / Down to change  ·  1 easiest, 9 hardest', x + 220, y + 298); }
+      continue; }
     g.textAlign = 'right'; g.font = '18px system-ui, sans-serif'; g.fillStyle = '#ccc'; g.fillText(devName(sl.dev) + (sl.dev !== 'kb' ? (LAYOUT[sl.dev] === 'labels' ? '  ·  A/B swapped' : '  ·  A/B normal') : '') + '  ·  tap jump ' + (TAPJUMP[sl.dev] ? 'on' : 'off'), x + 416, y + 40);
     if (sl.dev !== 'kb') { g.font = '12px system-ui, sans-serif'; g.fillStyle = '#888'; g.fillText(padInfo(+sl.dev.slice(3)).slice(0, 46), x + 416, y + 58); }
     g.textAlign = 'center';
@@ -48,7 +52,7 @@ function drawSelect() {
   g.fillText("Jump + attack together for a short-hop aerial · hold attack to chain jabs (Nib keeps a flurry going) · tilt the stick slightly up or down to angle a forward tilt", W / 2, 639);
   g.fillText("Grab out of a dash reaches further, out of a turn further still · jump on a head to spring off it · Nib can kick off the stage wall · shield just before a wall or the floor to tech", W / 2, 658);
   g.fillText("A worn shield leaves the head or feet open: tilt the stick gently to move it · back + attack out of a run turns and strikes · above 100% getting up from the ledge is slower", W / 2, 677);
-  g.fillText("Jump button on this screen: tap jump on or off (flick up to jump) · the ledge protects longer after a long fall and less when damaged", W / 2, 696);
+  g.fillText("On this screen: Up / Down sets the CPU level · the grab button turns tap jump on or off (flick up to jump) · the ledge protects longer after a long fall", W / 2, 696);
   g.fillStyle = '#8f88aa'; g.fillText('Tools: B shows hitboxes · P freezes · O steps one frame · M switches 2D / 3D', W / 2, 715);
 }
 function drawDebugText() {

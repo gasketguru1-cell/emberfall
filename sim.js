@@ -100,8 +100,9 @@ try { Object.assign(LAYOUT, JSON.parse(localStorage.getItem('emberfall.layout') 
 function toggleLayout(dev) { LAYOUT[dev] = LAYOUT[dev] === 'labels' ? 'positional' : 'labels'; try { localStorage.setItem('emberfall.layout', JSON.stringify(LAYOUT)); } catch (e) { /* no storage */ } }
 /* Per device: flicking the stick up also jumps ("tap jump"). Off until switched on with the jump button on the select screen. Kept between visits. */
 const TAPJUMP = {};
-try { Object.assign(TAPJUMP, JSON.parse(localStorage.getItem('emberfall.tapjump') || '{}')); } catch (e) { /* no storage */ }
-function toggleTapJump(dev) { TAPJUMP[dev] = !TAPJUMP[dev]; try { localStorage.setItem('emberfall.tapjump', JSON.stringify(TAPJUMP)); } catch (e) { /* no storage */ } }
+/* Off unless switched on with the grab button on the select screen. (It used to be on the jump button, where it was switched on by accident; the storage key was renamed on 2026-11-10 so everyone starts with it off again.) */
+try { Object.assign(TAPJUMP, JSON.parse(localStorage.getItem('emberfall.tapjump2') || '{}')); } catch (e) { /* no storage */ }
+function toggleTapJump(dev) { TAPJUMP[dev] = !TAPJUMP[dev]; try { localStorage.setItem('emberfall.tapjump2', JSON.stringify(TAPJUMP)); } catch (e) { /* no storage */ } }
 const TAP_STATES = { idle: 1, dash: 1, run: 1, brake: 1, land: 1, air: 1, wd: 1, shield: 1, shieldstun: 1, shieldoff: 1, attack: 1 };   /* where an upward flick may mean "jump" */
 function stick(x, y) { const m = Math.hypot(x, y); if (m === 0 || m <= PAD.deadzone) return [0, 0]; const k = Math.min(1, (m - PAD.deadzone) / (PAD.outer - PAD.deadzone)) / m; return [x * k, y * k]; }
 /* Keyboard: the same keys as the reference build. Arrows are the left stick, I J K L the right stick, Shift walks. */
@@ -247,7 +248,7 @@ const WREN = {
       airMul: 0.085, airAdd: 0.015, airSpeed: 1.2, airBrake: 0.012, grav: 0.125, fall: 1.82, ffall: 2.91, jsq: 3, w: 8, h: 9,
       jumps: 1, wallJump: 1, dashF: 10, roll: [24, 1.6, 11], spot: [20, 14] },
     aiShot: 1,
-    moves: mk(0.85, 0.9, 0.85, 0.65, {
+    moves: mk(0.85, 0.93, 0.85, 0.65, {
       nspec: { t: 30, h: [], on(f, n) { if (n === 10) { shoot(f, { kind: 'bolt', oy: 5, vx: 3.2, r: 2.2, life: 40, h: { d: 4, a: 361, b: 12, k: 25 } }); beep(900, 0.06, 'square', 0.03, 1.5); } } },
       sspec: { t: 42, once: 1, nodrift: 1, ll: 12, h: [{ f0: 10, f1: 24, x: 5, y: 5, r: 5.5, d: 8, a: 60, b: 45, k: 75 }], on(f, n) { if (n === 10) { lift(f, 1.7); f.vx = f.face * 2.4; } } },
       uspec: { t: 34, helpless: 1, ledge: 1, h: [{ f0: 5, f1: 10, x: 0, y: 6, r: 5, d: 3, a: 90, b: 40, k: 30 }], on(f, n, i) { if (n === 5) { lift(f, 4.55); f.vx = i.lx; } } },
@@ -854,12 +855,40 @@ function updateProj() {
 }
 
 /* ---------- CPU opponent ---------- */
+/* CPU level, 1 (easiest) to 9. Level 7 is the CPU exactly as it played before levels existed, and the one every test uses.
+   tempo: how long it waits between attacks (x its usual wait)   guard: chance it shields an attack it sees coming
+   tech: chance it techs a hard landing   punish: chance it grabs a shield   air: chance it takes an opening in the air
+   nap: chance each second that it stops attacking for napLen frames and only walks */
+const CPU_LV = [null,
+  { tempo: 2.6, guard: 0.03, tech: 0, punish: 0, air: 0.15, nap: 0.7, napLen: 110 },
+  { tempo: 2.2, guard: 0.08, tech: 0.05, punish: 0.05, air: 0.25, nap: 0.55, napLen: 95 },
+  { tempo: 1.85, guard: 0.14, tech: 0.1, punish: 0.12, air: 0.4, nap: 0.42, napLen: 80 },
+  { tempo: 1.55, guard: 0.22, tech: 0.2, punish: 0.22, air: 0.55, nap: 0.3, napLen: 65 },
+  { tempo: 1.32, guard: 0.3, tech: 0.32, punish: 0.35, air: 0.7, nap: 0.18, napLen: 50 },
+  { tempo: 1.15, guard: 0.38, tech: 0.44, punish: 0.48, air: 0.85, nap: 0.08, napLen: 40 },
+  { tempo: 1, guard: 0.45, tech: 0.55, punish: 0.6, air: 1, nap: 0, napLen: 0 },
+  { tempo: 0.8, guard: 0.62, tech: 0.76, punish: 0.78, air: 1, nap: 0, napLen: 0 },
+  { tempo: 0.62, guard: 0.8, tech: 0.94, punish: 0.92, air: 1, nap: 0, napLen: 0 }];
+let CPU_LEVEL = 7;
+try { const v = +localStorage.getItem('emberfall.cpulevel'); if (v >= 1 && v <= 9) CPU_LEVEL = Math.round(v); } catch (e) { /* no storage */ }
+function setCpuLevel(v) { CPU_LEVEL = clamp(Math.round(v), 1, 9); try { localStorage.setItem('emberfall.cpulevel', String(CPU_LEVEL)); } catch (e) { /* no storage */ } }
+const NAP_STATES = { idle: 1, dash: 1, run: 1, brake: 1, land: 1, wd: 1 };
 function cpuInput(f, o, m) {
+  const L = CPU_LV[m.lv || CPU_LEVEL], before = m.cd > 0 ? m.cd - 1 : 0, i = cpuBrain(f, o, m, L);
+  if (m.cd > before && L.tempo !== 1) m.cd = Math.max(1, Math.round(m.cd * L.tempo));   /* a wait it has just set itself */
+  if (L.nap > 0) {
+    if (m.nap > 0) m.nap--; else if (m.t % 60 === 0 && Math.random() < L.nap) m.nap = L.napLen;
+    /* napping: standing safely on the stage it throws nothing out, and only ambles */
+    if (m.nap > 0 && f.grounded && NAP_STATES[f.state] && Math.abs(f.x) < 72) { i.atk = i.spc = i.grb = i.jmp = false; i.cx = i.cy = 0; i.lx *= 0.45; if (i.ly > 0) i.ly = 0; }
+  }
+  return i;
+}
+function cpuBrain(f, o, m, L) {
   const i = blankIn(); m.t = (m.t || 0) + 1; if (m.cd > 0) m.cd--; else m.cd = 0;
   const dx = o.x - f.x, dy = o.y - f.y, ad = Math.abs(dx), dir = sgn(dx) || 1;
   if (f.state === 'respawn') { if (f.sf > 45) i.lx = dir; return i; }
   if (f.state === 'hurt' && f.tumble && !f.grounded) {   /* decide once per launch whether to tech, then shield just above the floor */
-    if (f.sf <= 1) m.tech = Math.random() < 0.55;
+    if (f.sf <= 1) m.tech = Math.random() < L.tech;
     /* only when it really is about to land, still in hitstun: a shield press that misses the floor would come out as an air dodge */
     const nx = f.x + f.vx * 3;
     if (m.tech && f.vy < 0 && f.techLock === 0 && f.hitstun - f.sf > 4 && PLATS.some(q => nx >= q.x0 + 2 && nx <= q.x1 - 2 && f.y - q.y > 0 && f.y - q.y < -f.vy * 3 + 0.5)) i.shd = true;
@@ -886,7 +915,7 @@ function cpuInput(f, o, m) {
     return i;
   }
   if (o.state === 'dead' || o.state === 'respawn') { if (Math.abs(f.x) > 20) i.lx = -sgn(f.x) * 0.5; return i; }
-  if (f.grounded && o.state === 'attack' && ad < 24 && Math.abs(dy) < 20) { if (m.def == null) m.def = Math.random() < 0.45; if (m.def) { i.shd = true; return i; } } else m.def = null;
+  if (f.grounded && o.state === 'attack' && ad < 24 && Math.abs(dy) < 20) { if (m.def == null) m.def = Math.random() < L.guard; if (m.def) { i.shd = true; return i; } } else m.def = null;
   if (f.grounded) {
     /* The opponent is off stage: hold the ledge instead of following them out, and swing as they come back. */
     if ((Math.abs(o.x) > 84 || o.y < -5) && Math.abs(f.x) > 58 && sgn(f.x) === sgn(o.x)) {
@@ -899,7 +928,7 @@ function cpuInput(f, o, m) {
     if (f.def.forms.length > 1 && !f.noSwap && m.cd === 0 && ad > 45 && Math.random() < 0.012) { i.ly = -1; i.spc = true; m.cd = 70; return i; }   /* swap companion at a safe distance */
     if (ad > (f.form.aiRange || 14)) { i.lx = dir; return i; }
     if (f.face !== dir) { i.lx = dir * 0.5; return i; }
-    if (m.cd === 0 && (o.state === 'shield' || o.state === 'shieldstun') && f.form.moves.grab.h[0].f0 <= 9 && ad < f.form.moves.grab.h[0].x + 3 && Math.abs(dy) < 6 && Math.random() < 0.6) { i.grb = true; m.cd = 36; return i; }   /* a shield is there to be grabbed, by those whose grab is quick enough */
+    if (m.cd === 0 && (o.state === 'shield' || o.state === 'shieldstun') && f.form.moves.grab.h[0].f0 <= 9 && ad < f.form.moves.grab.h[0].x + 3 && Math.abs(dy) < 6 && Math.random() < L.punish) { i.grb = true; m.cd = 36; return i; }   /* a shield is there to be grabbed, by those whose grab is quick enough */
     if (m.cd === 0) {
       const r = Math.random(); m.cd = Math.round((22 + (Math.random() * 30 | 0)) * (f.form.aiTempo || 1));
       if (dy > 8) { if (r < 0.5) { i.ly = 1; i.atk = true; } else i.cy = 1; }
@@ -910,7 +939,7 @@ function cpuInput(f, o, m) {
   }
   i.lx = ad > 6 ? dir : 0;
   if (Math.abs(f.x) > 66) { i.lx = -sgn(f.x); return i; }   /* airborne near the edge: drift back over the stage, no attacks */
-  if (m.cd === 0 && f.state === 'air') {
+  if (m.cd === 0 && f.state === 'air' && (L.air >= 1 || Math.random() < L.air)) {
     const mv = f.form.moves, lead = n => mv[n].h[0].f0 + 1, at = n => { const t = lead(n); return [dx + (o.vx - f.vx) * t, dy + (o.vy - f.vy) * t + (o.grounded ? 0.5 * f.st.grav * t * t : 0)]; };
     const up = at('uair'), dn = at('dair'), fw = at('fair'), room = f.y + f.vy * mv.fair.h[0].f1 > 3 || o.y > 6;
     if (Math.abs(up[0]) < 8 && up[1] > 5 && up[1] < 22) { m.cd = 30; i.cy = 1; }
@@ -939,9 +968,10 @@ function stepSelect() {
   for (const dev of allDevs()) {
     const c = devCtl(dev); c.poll(readDev(dev));
     if (c.pressed('sel') && dev !== 'kb') { toggleLayout(dev); beep(520, 0.05, 'square', 0.03); }
-    if (c.pressed('jmp')) { toggleTapJump(dev); beep(TAPJUMP[dev] ? 620 : 380, 0.05, 'square', 0.03); }
+    if (c.pressed('grb')) { toggleTapJump(dev); beep(TAPJUMP[dev] ? 620 : 380, 0.05, 'square', 0.03); }
     let sl = slots.find(s => s && s.dev === dev);
     if (!sl) { if (c.pressed('atk') || c.pressed('start')) { const k = slots[0] ? (slots[1] ? -1 : 1) : 0; if (k >= 0) { slots[k] = { dev, pick: k, ready: false }; beep(600, 0.06, 'triangle', 0.05); } } continue; }
+    if (!slots[1] && (c.upNow || c.downNow)) { setCpuLevel(CPU_LEVEL + (c.upNow ? 1 : -1)); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
     if (!sl.ready) {
       if (c.dashDir) { sl.pick = (sl.pick + c.dashDir + ROSTER.length) % ROSTER.length; beep(440, 0.04, 'square', 0.03); }
       if (c.pressed('atk')) { sl.ready = true; beep(800, 0.08, 'triangle', 0.05); }
