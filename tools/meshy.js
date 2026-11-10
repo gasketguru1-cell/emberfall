@@ -134,6 +134,12 @@ async function wait(id, once) {
   const [cmd, a, b, c, d] = process.argv.slice(2);
   if (cmd === 'balance') { const r = await call('GET', '/openapi/v1/balance'); console.log(JSON.stringify({ balance: r.balance, monthly_credits: r.monthly_credits, permanent_credits: r.permanent_credits, monthly_resets: r.monthly_resets_at ? new Date(r.monthly_resets_at).toISOString().slice(0, 10) : null })); }
   else if (cmd === 'budget') { const s = summary(); console.log(JSON.stringify({ phase: s.budget.phase, spentPhase: s.spentPhase, ceiling: s.budget.ceiling, spentToday: s.spentToday, perDayMax: s.budget.perDayMax, perTaskMax: s.budget.perTaskMax, spentAllTime: s.spentAll, tasks: s.tasks.length })); }
+  else if (cmd === 'animations') {   /* free: Meshy's preset animation list, saved for picking action ids */
+    const r = await call('GET', '/openapi/v1/animations/library'), list = Array.isArray(r) ? r : (r.result || r.data || r.animations || r.items || []);
+    fs.writeFileSync(path.join(ASSETS, 'animation-library.json'), JSON.stringify(r, null, 1));
+    const cats = {}; for (const x of list) { const k = x.category || x.category_name || '?'; cats[k] = (cats[k] || 0) + 1; }
+    console.log(list.length + ' actions saved to assets/animation-library.json'); console.log(JSON.stringify(cats)); if (list[0]) console.log('fields: ' + Object.keys(list[0]).join(', '));
+  }
   else if (cmd === 'create' && a && b && c) await create(a, b, c, d === '--dry');
   else if (cmd === 'wait' && a) await wait(a, false);
   else if (cmd === 'get' && a) await wait(a, true);

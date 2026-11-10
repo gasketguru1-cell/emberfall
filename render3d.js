@@ -1,10 +1,15 @@
 /* Emberfall 3D renderer (Three.js). It only reads the simulation: fighters, projectiles, camera. It never writes to it.
-   Fighters are grey-box capsules until real models are imported; the stage, lights and shadows are in place. */
-/* global W, H, TAU, clamp, MAIN, PLATS, BODY_H, F, PROJ, cam, SHK, frame, cv */
+   A fighter with an entry in assets/manifest.json is drawn as its rigged model, posed every frame from the simulation's
+   own frame counters (see anim.js). Fighters without a model yet are grey-box capsules. */
+/* global W, H, TAU, clamp, MAIN, PLATS, BODY_H, F, PROJ, cam, SHK, frame, mode, cv, animState */
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 const glc = document.getElementById('gl');
-const R3 = window.R3 = { ready: false, gpu: '', three: THREE.REVISION, show() {}, render() {}, info: null };
+const R3 = window.R3 = { ready: false, gpu: '', three: THREE.REVISION, show() {}, render() {}, info: null, models: {} };
+const MODELS = R3.models;
 let renderer = null;
 try { renderer = new THREE.WebGLRenderer({ canvas: glc, antialias: true, powerPreference: 'high-performance' }); }
 catch (e) { console.warn('3D renderer unavailable; staying in 2D.', e); }
@@ -19,6 +24,8 @@ function build() {
   const FOV = 28, LIFT = 0.13;   /* camera sits above the action and looks straight ahead through a shifted lens, so the play plane stays undistorted */
   const scene = new THREE.Scene(); scene.fog = new THREE.Fog(0x7a4a72, 650, 2900);
   const camera = new THREE.PerspectiveCamera(FOV, 16 / 9, 5, 6000);
+  /* Soft all-round reflections, so the models' metal and cloth materials have something to reflect (without it they render near-black). */
+  const pmrem = new THREE.PMREMGenerator(renderer); scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.55; pmrem.dispose();
 
   /* ---- sky, moon, stars, hills ---- */
   const tex = (w, h, paint) => { const c = document.createElement('canvas'); c.width = w; c.height = h; paint(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; };
@@ -65,19 +72,40 @@ function build() {
   key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004; key.shadow.normalBias = 0.6;
   Object.assign(key.shadow.camera, { left: -150, right: 150, top: 150, bottom: -70, near: 10, far: 520 }); key.shadow.camera.updateProjectionMatrix();
   const rim = new THREE.DirectionalLight(0x8fa8ff, 1.7); rim.position.set(90, 70, -140); scene.add(rim);
+  const fill = new THREE.DirectionalLight(0xffd9b0, 0.9); fill.position.set(30, 40, 200); scene.add(fill);   /* from the camera side, no shadow: keeps faces readable */
 
-  /* ---- fighters (grey-box) ---- */
+  /* ---- models ---- */
+  fetch('assets/manifest.json').then(r => r.ok ? r.json() : {}).then(man => {
+    for (const [name, cfg] of Object.entries(man)) {
+      const M = MODELS[name] = { cfg, ready: false, error: null };
+      new GLTFLoader().load(cfg.file, g => {
+        M.scene = g.scene; M.clips = Object.fromEntries(g.animations.map(c => [c.name, c]));
+        const box = new THREE.Box3().setFromObject(g.scene); M.height = box.max.y - box.min.y; M.ready = true;
+      }, undefined, e => { M.error = String((e && e.message) || e); console.warn('model failed to load: ' + name, e); });
+    }
+  }).catch(e => console.warn('no model manifest', e));
+
+  /* ---- fighters ---- */
   const PCOL = [0xff7b6c, 0x6cb4ff];
   const fighters = [0, 1].map(idx => {
     const root = new THREE.Group(), pivot = new THREE.Group(); root.add(pivot); scene.add(root);
     const shield = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 18), new THREE.MeshStandardMaterial({ color: PCOL[idx], emissive: PCOL[idx], emissiveIntensity: 0.5, transparent: true, opacity: 0.42, roughness: 0.2, depthWrite: false })); shield.visible = false; scene.add(shield);
     const pad = new THREE.Mesh(new THREE.BoxGeometry(18, 1.4, 10), new THREE.MeshStandardMaterial({ color: 0xffe6a0, emissive: 0xffc860, emissiveIntensity: 1.2 })); pad.visible = false; scene.add(pad);
-    return { root, pivot, shield, pad, key: '', yaw: idx ? Math.PI : 0, mats: [] };
+    return { root, pivot, shield, pad, key: '', yaw: idx ? Math.PI : 0, mats: [], model: null, mixer: null, actions: {}, cur: null, prev: null };
   });
   function dress(v, f) {
-    const fm = f.form, col = f.alt ? fm.alt : fm.col, st = fm.st, k = fm.name + (f.alt ? '*' : '');
+    const fm = f.form, col = f.alt ? fm.alt : fm.col, st = fm.st, M = MODELS[fm.name], useModel = !!(M && M.ready), k = fm.name + (f.alt ? '*' : '') + (useModel ? '#model' : '');
     if (v.key === k) return; v.key = k;
-    while (v.pivot.children.length) { const c = v.pivot.children.pop(); c.geometry.dispose(); }
+    while (v.pivot.children.length) { const c = v.pivot.children.pop(); if (c.geometry) c.geometry.dispose(); }
+    if (v.mixer) v.mixer.stopAllAction();
+    v.mixer = null; v.model = null; v.actions = {}; v.cur = null; v.prev = null;
+    if (useModel) {
+      /* A copy of the loaded model with its own skeleton, scaled to the fighter's height and turned so its front is +x. */
+      const obj = cloneSkinned(M.scene); obj.scale.setScalar(M.cfg.height / M.height); obj.rotation.y = Math.PI / 2; v.mats = [];
+      obj.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; o.frustumCulled = false; o.material = o.material.clone(); if (f.alt) o.material.color.setRGB(0.78, 0.9, 1.25); v.mats.push(o.material); } });
+      v.pivot.add(obj); v.model = M; v.mixer = new THREE.AnimationMixer(obj);
+      return;
+    }
     const r = st.w * 0.45, len = Math.max(0.1, st.h - 2 * r);
     const mk = (geo, hex, x, y, z) => { const mat = new THREE.MeshStandardMaterial({ color: new THREE.Color(hex), roughness: 0.55 }); const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; v.pivot.add(m); v.mats.push(mat); return m; };
     v.mats = [];
@@ -96,8 +124,42 @@ function build() {
     return new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), e(0xffa040, 2.6));   /* ember and flame */
   };
 
-  function poseOf(f) {
+  /* ---- animation: the simulation says which action and which frame; this only poses the model to match ---- */
+  const lerp = (a, b, t) => a + (b - a) * t, frac = x => x - Math.floor(x);
+  function clipTime(M, a) {
+    if (a.key === 'attack') {
+      const at = M.cfg.attacks[a.move] || M.cfg.attacks['*'];
+      return [at.clip, a.whole ? lerp(at.start, at.end, a.v) : a.seg === 0 ? lerp(at.start, at.contact[0], a.v) : a.seg === 1 ? lerp(at.contact[0], at.contact[1], a.v) : lerp(at.contact[1], at.end, a.v)];
+    }
+    const sp = M.cfg.clips[a.key] || M.cfg.clips.idle, clip = M.clips[sp.clip], from = sp.from || 0, to = sp.to !== undefined ? sp.to : clip.duration, span = Math.max(1e-3, to - from);
+    if (sp.at !== undefined) return [sp.clip, sp.at];
+    if (a.mode === 'loop') { const t = a.v * (sp.rate || 1); if (sp.bounce) { const u = t % (2 * span); return [sp.clip, from + (u < span ? u : 2 * span - u)]; } return [sp.clip, from + t % span]; }
+    if (a.mode === 'cycle') return [sp.clip, from + frac(a.v) * span];
+    return [sp.clip, from + clamp(a.v, 0, 1) * span];
+  }
+  function applyAnim(v, f) {
+    const M = v.model, [name, time] = clipTime(M, animState(f));
+    if (!v.cur || v.cur.name !== name) { v.prev = v.cur; v.cur = { name, time, since: frame }; }
+    v.cur.time = time;
+    /* A change of action is instant in the game; only the picture eases across, over four game frames. */
+    const b = v.prev && mode === 'play' ? clamp((frame - v.cur.since + 1) / 4, 0, 1) : 1;
+    const act = n => v.actions[n] || (v.actions[n] = v.mixer.clipAction(M.clips[n]).play());
+    for (const n in v.actions) v.actions[n].setEffectiveWeight(0);
+    const set = (c, w) => { const a = act(c.name); a.setEffectiveWeight(w); a.time = clamp(c.time, 0, a.getClip().duration - 1e-4); };
+    if (v.prev && b < 1) set(v.prev, 1 - b);
+    set(v.cur, v.prev && b < 1 ? b : 1);
+    v.mixer.update(0);
+    R3.anim = R3.anim || []; R3.anim[f.idx] = name + ' @ ' + time.toFixed(2) + 's';
+  }
+
+  function poseOf(f, hasModel) {
     const h = f.st.h; let sx = 1, sy = 1, rot = 0, oy = 0;
+    if (hasModel) {   /* a model animates itself; only whole-body spins and the swap shrink stay procedural */
+      if (f.state === 'roll') return { sx, sy, rot: f.sf * 0.45 * f.rollDir * f.face, oy: h / 2 };
+      if (f.state === 'hurt' && !f.grounded && f.tumble) return { sx, sy, rot: f.sf * 0.2, oy: h / 2 };
+      if (f.state === 'attack' && f.move && f.move.swap) { const k = 1 - Math.sin(Math.min(1, f.mf / 34) * Math.PI) * 0.7; return { sx: k, sy: k, rot, oy }; }
+      return { sx, sy, rot, oy };
+    }
     if (f.state === 'jsq' || f.state === 'land') { sy = 0.8; sx = 1.12; } else if (f.state === 'dash' || f.state === 'run') rot = 0.18;
     else if (f.state === 'wd') { sy = 0.85; rot = -0.12 * Math.sign(f.vx * f.face); }
     else if (f.state === 'hurt' && !f.grounded) { rot = f.sf * 0.3; oy = h / 2; }
@@ -129,10 +191,11 @@ function build() {
       v.root.visible = alive; v.shield.visible = alive && (f.state === 'shield' || f.state === 'shieldstun'); v.pad.visible = f.state === 'respawn';
       if (!alive) return;
       dress(v, f);
-      const p = poseOf(f), want = f.face > 0 ? -0.35 : Math.PI + 0.35;
+      if (v.model) applyAnim(v, f);
+      const p = poseOf(f, !!v.model), want = f.face > 0 ? -0.35 : Math.PI + 0.35;
       v.yaw += (want - v.yaw) * 0.4;
       v.root.position.set(f.x, f.y, 0); v.root.rotation.y = v.yaw;
-      v.pivot.position.set(0, p.oy, 0); v.pivot.rotation.z = -p.rot; v.pivot.scale.set(p.sx, p.sy, p.sx);
+      v.pivot.position.set(f.hitlag > 0 && f.state === 'hurt' ? ((frame & 1) ? 0.35 : -0.35) : 0, p.oy, 0); v.pivot.rotation.z = -p.rot; v.pivot.scale.set(p.sx, p.sy, p.sx);
       v.pivot.children.forEach(c => { if (c.userData.y0 === undefined) c.userData.y0 = c.position.y; c.position.y = c.userData.y0 - p.oy; });
       const ghost = (f.invuln > 0 && (frame >> 1) % 2) || f.state === 'spot' || f.state === 'airdodge', hot = f.flash > 0 || (f.hitlag > 0 && f.state === 'hurt');
       for (const m of v.mats) { m.transparent = ghost; m.opacity = ghost ? 0.45 : 1; m.emissive.setHex(hot ? 0xffffff : 0x000000); m.emissiveIntensity = hot ? 0.8 : 0; }

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Emberfall model viewer</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1b1f2e; color: #dfe; font: 13px Consolas, monospace; overflow: hidden; }
+  #info { position: absolute; left: 10px; top: 8px; white-space: pre; background: rgba(0,0,0,.5); padding: 6px 10px; border-radius: 6px; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "../node_modules/three/build/three.module.js", "three/addons/": "../node_modules/three/examples/jsm/" } }
+</script>
+</head>
+<body>
+<div id="info">loading…</div>
+<canvas id="v"></canvas>
+<script type="module">
+/* Inspection page for a generated model: four views side by side (front, right, back, left), plus counts.
+   ?file=assets/flint/raw/<task>/model.glb   &clip=<n> plays animation clip n   &t=<0..1> holds the clip at that point   &wire=1 shows the mesh lines */
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+const q = new URLSearchParams(location.search), file = q.get('file'), info = document.getElementById('info');
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('v'), antialias: true, preserveDrawingBuffer: true });
+renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping;
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x2a3042);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x404050, 1.6));
+const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(2, 4, 5); scene.add(key);
+const cam = new THREE.PerspectiveCamera(30, 1, 0.01, 1000);
+let root = null, mixer = null, action = null, size = new THREE.Vector3(1, 1, 1), centre = new THREE.Vector3();
+window.VIEW = { ready: false, error: null };
+new GLTFLoader().load('../' + file, gltf => {
+  root = gltf.scene; scene.add(root);
+  let tris = 0, verts = 0, meshes = 0, skinned = 0, bones = 0; const mats = new Set(), tex = new Set();
+  root.traverse(o => {
+    if (o.isBone) bones++;
+    if (o.isMesh) {
+      meshes++; if (o.isSkinnedMesh) skinned++;
+      const g = o.geometry; verts += g.attributes.position.count; tris += (g.index ? g.index.count : g.attributes.position.count) / 3;
+      for (const m of [].concat(o.material)) { mats.add(m.uuid); for (const k of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'emissiveMap']) if (m[k] && m[k].image) tex.add(k + ' ' + m[k].image.width + 'x' + m[k].image.height); if (q.get('wire')) m.wireframe = true; }
+    }
+  });
+  const box = new THREE.Box3().setFromObject(root); box.getSize(size); box.getCenter(centre);
+  const clips = gltf.animations.map((c, i) => i + ':' + c.name + ' ' + c.duration.toFixed(2) + 's');
+  if (q.has('clip') && gltf.animations[+q.get('clip')]) { mixer = new THREE.AnimationMixer(root); action = mixer.clipAction(gltf.animations[+q.get('clip')]); action.play(); }
+  /* Measure a clip: where the hands and feet are relative to the hips over time, and how fast they move.
+     Used to find a clip's key moments (wind-up, contact, landing) before tying it to game frames. */
+  window.analyze = (name, step = 1 / 30) => {
+    const clip = gltf.animations.find(c => c.name === name); if (!clip) return null;
+    const mx = new THREE.AnimationMixer(root), act = mx.clipAction(clip); act.play();
+    const bone = n => root.getObjectByName(n), parts = ['RightHand', 'LeftHand', 'RightFoot', 'LeftFoot', 'Head'].filter(bone), hips = bone('Hips');
+    const rows = [], prev = {}, v = new THREE.Vector3(), hp = new THREE.Vector3();
+    for (let t = 0; t <= clip.duration + 1e-6; t += step) {
+      act.time = Math.min(t, clip.duration - 1e-4); mx.update(0); root.updateMatrixWorld(true); hips.getWorldPosition(hp);
+      const row = { t: +t.toFixed(3), hipsY: +hp.y.toFixed(3) };
+      for (const p of parts) { bone(p).getWorldPosition(v); row[p] = [+(v.x - hp.x).toFixed(3), +v.y.toFixed(3), +(v.z - hp.z).toFixed(3)]; row[p + 'Speed'] = prev[p] ? +(v.distanceTo(prev[p]) / step).toFixed(2) : 0; prev[p] = v.clone(); }
+      rows.push(row);
+    }
+    mx.stopAllAction(); mx.uncacheRoot(root);
+    const peak = (k, f) => rows.reduce((a, r) => f(r) > f(a) ? r : a, rows[0]).t, out = { clip: name, seconds: +clip.duration.toFixed(3) };
+    for (const p of parts) out[p] = { fastestAt: peak(p, r => r[p + 'Speed']), topSpeed: Math.max(...rows.map(r => r[p + 'Speed'])), farthestForwardAt: peak(p, r => r[p][2]), forward: Math.max(...rows.map(r => r[p][2])), highestAt: peak(p, r => r[p][1]), lowestAt: peak(p, r => -r[p][1]) };
+    out.hipsLowestAt = peak('h', r => -r.hipsY); out.hipsY = rows.filter((r, i) => i % 3 === 0).map(r => r.hipsY);
+    out.rightHandForward = rows.filter((r, i) => i % 3 === 0).map(r => r.RightHand ? r.RightHand[2] : 0);
+    return out;
+  };
+  window.VIEW = { ready: true, file, triangles: Math.round(tris), vertices: verts, meshes, skinned, bones, materials: mats.size, textures: [...tex], size: size.toArray().map(v => +v.toFixed(3)), min: box.min.toArray().map(v => +v.toFixed(3)), clips };
+  info.textContent = file + '\n' + Math.round(tris) + ' triangles, ' + verts + ' vertices, ' + meshes + ' mesh(es), ' + bones + ' bones\nsize ' + window.VIEW.size.join(' x ') + '\n' + [...tex].join(', ') + (clips.length ? '\nclips: ' + clips.join(', ') : '');
+}, undefined, e => { window.VIEW = { ready: false, error: String(e && e.message || e) }; info.textContent = 'failed: ' + window.VIEW.error; });
+const clock = new THREE.Clock();
+function frame() {
+  const w = innerWidth, h = innerHeight; if (renderer.domElement.width !== w || renderer.domElement.height !== h) renderer.setSize(w, h, false);
+  if (mixer && action) { if (q.has('t')) { action.time = +q.get('t') * action.getClip().duration; mixer.update(0); } else mixer.update(clock.getDelta()); }
+  renderer.setScissorTest(true);
+  const d = Math.max(size.y, size.x, size.z) / (2 * Math.tan(Math.PI / 12)) * 1.15;
+  /* ?times=0.2,0.5,1.1,1.3 : a strip of the chosen clip at those seconds, seen from the side the game camera uses (fighter facing right). */
+  const times = q.has('times') ? q.get('times').split(',').map(Number) : null;
+  if (times && mixer && action) {
+    const n = times.length, cols = Math.min(n, 4), rows = Math.ceil(n / cols), vw = w / cols, vh = h / rows, tan = Math.tan(Math.PI / 12);
+    const dist = Math.max(2.3 / (2 * tan), 2.6 / (2 * tan * (vw / vh)));   /* room for a 2.3 m tall, 2.6 m wide pose */
+    for (let k = 0; k < n; k++) {
+      action.time = Math.min(times[k], action.getClip().duration - 1e-4); mixer.update(0);
+      const x = (k % cols) * vw, y = h - (Math.floor(k / cols) + 1) * vh;
+      renderer.setViewport(x, y, vw, vh); renderer.setScissor(x, y, vw, vh);
+      cam.aspect = vw / vh; cam.position.set(-dist * 0.96, 0.95, dist * 0.28); cam.lookAt(0, 0.9, 0); cam.updateProjectionMatrix();
+      key.position.set(-dist, dist, dist); renderer.render(scene, cam);
+    }
+    requestAnimationFrame(frame); return;
+  }
+  for (let k = 0; k < 4; k++) {
+    const a = k * Math.PI / 2, vw = w / 4;
+    renderer.setViewport(k * vw, 0, vw, h); renderer.setScissor(k * vw, 0, vw, h);
+    cam.aspect = vw / h; cam.position.set(centre.x + Math.sin(a) * d, centre.y + size.y * 0.08, centre.z + Math.cos(a) * d); cam.lookAt(centre); cam.updateProjectionMatrix();
+    key.position.copy(cam.position).add(new THREE.Vector3(0, d * 0.5, 0));
+    renderer.render(scene, cam);
+  }
+  requestAnimationFrame(frame);
+}
+frame();
+</script>
+</body>
+</html>

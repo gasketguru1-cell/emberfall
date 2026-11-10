@@ -16,4 +16,4 @@ function loop(now) {
   draw(); requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
-window.__game = { get F() { return F; }, get mode() { return mode; }, slots, step, startMatch, keys, draw, perf, DBG };
+window.__game = { get F() { return F; }, get mode() { return mode; }, slots, step, startMatch, keys, draw, perf, DBG, cam };

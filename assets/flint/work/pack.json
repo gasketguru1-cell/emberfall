@@ -1,0 +1,18 @@
+{
+  "base": "raw/01a1c2db-5e53-7203-8a9c-9c6f9f827eaf/result.animation_glb_url.glb",
+  "extra": [
+    { "file": "raw/01a1c2da-7eb4-7579-9b80-0d1df56b4c8f/result.basic_animations.walking_armature_glb_url.glb", "rename": { "Armature|walking_man|baselayer": "Walk" } },
+    { "file": "raw/01a1c2da-7eb4-7579-9b80-0d1df56b4c8f/result.basic_animations.running_armature_glb_url.glb", "rename": { "Armature|running|baselayer": "Run" } }
+  ],
+  "root": "Hips",
+  "stand": "Idle",
+  "ref": [0, null, 9],
+  "clips": {
+    "Regular_Jump": { "y": "clamp" },
+    "Fall1": { "y": "stand" },
+    "Jumping_Down": { "y": "clamp" },
+    "BeHit_FlyUp": { "y": "stand" }
+  },
+  "texture": 1024,
+  "out": "export/flint-v1.glb"
+}
