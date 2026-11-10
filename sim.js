@@ -1447,6 +1447,12 @@ function selectPreview() {
   for (const f of F) if (f.def.forms.length > 1) f.fi = Math.floor(tick / 170) % (f.def.cycle || f.def.forms.length);
   cam.x = Math.sin(tick * 0.004) * 3; cam.y = 5; cam.s = 9;
 }
+/* The fighter select screen: where each roster tile and the CPU card are (the HUD draws them from the same numbers), and
+   which one a player's cursor is over. */
+function rosterTile(k) { const n = ROSTER.length, tw = Math.min(168, (W - 120) / n - 12), gap = 12, x0 = (W - (n * tw + (n - 1) * gap)) / 2; return [x0 + k * (tw + gap), 158, tw, 124]; }
+const CPU_CARD = [W - 44 - 460, 446, 460, 158];
+const inBox = (b, x, y) => x >= b[0] && x <= b[0] + b[2] && y >= b[1] && y <= b[1] + b[3];
+function tileUnder(x, y) { for (let k = 0; k < ROSTER.length; k++) if (inBox(rosterTile(k), x, y)) return k; return -1; }
 function stepSelect() {
   selectPreview();
   for (const dev of allDevs()) {
@@ -1455,14 +1461,23 @@ function stepSelect() {
     if (c.pressed('jmp')) { setBoxes(!DBG.boxes); beep(DBG.boxes ? 700 : 420, 0.05, 'square', 0.03); }   /* jump button: show or hide hitboxes */
     if (c.pressed('shd')) { setHitFx(!DBG.fx); beep(DBG.fx ? 700 : 420, 0.05, 'square', 0.03); }   /* shield button: hit sparks and flash on or off */
     let sl = slots.find(s => s && s.dev === dev);
-    if (!sl) { if (c.pressed('atk') || c.pressed('start')) { const k = slots[0] ? (slots[1] ? -1 : 1) : 0; if (k >= 0) { slots[k] = { dev, pick: k, ready: false }; beep(600, 0.06, 'triangle', 0.05); } } continue; }
-    if (!slots[1] && (c.upNow || c.downNow)) { setCpuLevel(CPU_LEVEL + (c.upNow ? 1 : -1)); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
-    if (!sl.ready) {
-      if (c.dashDir) { sl.pick = (sl.pick + c.dashDir + ROSTER.length) % ROSTER.length; beep(440, 0.04, 'square', 0.03); }
-      if (c.pressed('atk')) { sl.ready = true; beep(800, 0.08, 'triangle', 0.05); }
-      else if (c.pressed('spc')) { slots[slots.indexOf(sl)] = null; if (!slots[0] && slots[1]) { slots[0] = slots[1]; slots[1] = null; } }
-    } else if (c.pressed('spc')) sl.ready = false;
-    else if (c.pressed('start') || c.pressed('atk')) { if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; } }
+    if (!sl) { if (c.pressed('atk') || c.pressed('start')) { const k = slots[0] ? (slots[1] ? -1 : 1) : 0; if (k >= 0) { const tb = rosterTile(k); slots[k] = { dev, pick: k, ready: false, cx: tb[0] + tb[2] / 2, cy: tb[1] + tb[3] + 46 }; beep(600, 0.06, 'triangle', 0.05); } } continue; }
+    /* Each player has a cursor moved with the stick (or the arrow keys). Pointing at a fighter shows it; Attack there picks it.
+       On the CPU card, Attack raises the level and Special lowers it. Special anywhere else takes back a pick, then leaves. */
+    if (sl.cx === undefined) { const tb = rosterTile(sl.pick); sl.cx = tb[0] + tb[2] / 2; sl.cy = tb[1] + tb[3] + 46; }
+    const mag = Math.hypot(c.c.lx, c.c.ly); if (mag > 0.15) { const sp = 4 + 9 * Math.min(1, mag); sl.cx = clamp(sl.cx + c.c.lx / mag * sp, 8, W - 8); sl.cy = clamp(sl.cy - c.c.ly / mag * sp, 8, H - 8); }
+    const over = tileUnder(sl.cx, sl.cy), onCpu = !slots[1] && inBox(CPU_CARD, sl.cx, sl.cy);
+    if (over >= 0 && !sl.ready && sl.pick !== over) { sl.pick = over; beep(440, 0.03, 'square', 0.02); }
+    if (c.pressed('start')) { if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; } }
+    else if (c.pressed('atk')) {
+      if (onCpu) { setCpuLevel(CPU_LEVEL + 1 > 9 ? 0 : CPU_LEVEL + 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
+      else if (over >= 0) { sl.pick = over; sl.ready = true; beep(800, 0.08, 'triangle', 0.05); }
+      else if (sl.ready && slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; }
+    } else if (c.pressed('spc')) {
+      if (onCpu) { setCpuLevel(CPU_LEVEL - 1 < 0 ? 9 : CPU_LEVEL - 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
+      else if (sl.ready) sl.ready = false;
+      else { slots[slots.indexOf(sl)] = null; if (!slots[0] && slots[1]) { slots[0] = slots[1]; slots[1] = null; } }
+    }
   }
 }
 function pollMatch() {

@@ -80,8 +80,8 @@ function drawSelect(three) {
   for (const dir of [-1, 1]) { q = g.createLinearGradient(W / 2 + dir * 250, 0, W / 2 + dir * 430, 0); q.addColorStop(0, 'rgba(255,170,90,.85)'); q.addColorStop(1, 'rgba(255,170,90,0)'); g.fillStyle = q; g.fillRect(dir > 0 ? W / 2 + 250 : W / 2 - 430, 132, 180, 2); }
 
   /* ---- the roster: one portrait tile for each fighter, with each player's marker on the one they are on ---- */
-  { const n = ROSTER.length, tw = Math.min(168, (W - 120) / n - 12), th = 124, gap = 12, x0 = (W - (n * tw + (n - 1) * gap)) / 2, y0 = 158;
-    ROSTER.forEach((d, k) => { const x = x0 + k * (tw + gap), fm = d.forms[d.forms.length > 1 ? Math.floor(t / 170) % (d.cycle || d.forms.length) : 0], on = [0, 1].filter(q => slots[q] && slots[q].pick === k);
+  { const th = 124, y0 = 158, tw = rosterTile(0)[2];
+    ROSTER.forEach((d, k) => { const x = rosterTile(k)[0], fm = d.forms[d.forms.length > 1 ? Math.floor(t / 170) % (d.cycle || d.forms.length) : 0], on = [0, 1].filter(q => slots[q] && slots[q].pick === k);
       q = g.createLinearGradient(0, y0, 0, y0 + th); q.addColorStop(0, 'rgba(46,38,72,.92)'); q.addColorStop(1, 'rgba(18,15,32,.94)'); g.fillStyle = q; rr(x, y0, tw, th, 10); g.fill();
       g.save(); rr(x, y0, tw, th, 10); g.clip(); g.fillStyle = fm.col[0]; g.globalAlpha = 0.16; g.beginPath(); g.arc(x + tw / 2, y0 + th * 0.62, tw * 0.46, 0, TAU); g.fill(); g.globalAlpha = 1;
       const k2 = Math.min(5.2, 74 / (fm.st.h + 3)); g.translate(x + tw / 2, y0 + th - 30); g.scale(k2, -k2); ART[fm.name](fm.col, frame + k * 30, null); g.restore();
@@ -107,7 +107,7 @@ function drawSelect(three) {
       g.textAlign = 'right'; g.font = 'bold 13px system-ui, sans-serif'; spaced(2); g.fillStyle = '#f3dfb6'; g.fillText('LEVEL', x + cw - 86, y + 62); spaced(0);
       g.font = '900 44px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(String(CPU_LEVEL), x + cw - 30, y + 74);
       for (let n = 1; n <= 9; n++) { g.fillStyle = n <= CPU_LEVEL ? pc : 'rgba(255,255,255,.16)'; rr(x + cw - 30 - (10 - n) * 21, y + 88, 17, 7, 3); g.fill(); }
-      g.font = '13px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('Up / Down to change', x + cw - 30, y + 116);
+      g.font = '13px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point here: Attack raises, Special lowers', x + cw - 30, y + 116);
       g.textAlign = 'left'; g.fillStyle = 'rgba(255,255,255,' + (0.45 + 0.3 * pulse).toFixed(2) + ')'; g.fillText('or press Attack on another controller to join', x + 24, y + 140);
       continue;
     }
@@ -123,7 +123,7 @@ function drawSelect(three) {
     if (!three) d.forms.slice(0, d.cycle || 99).forEach((fm, n) => { g.save(); g.translate(x + cw - 60 - (d.forms.length - 1 - n) * 62, y + 112); g.scale(3.4, -3.4); ART[fm.name](same ? fm.alt : fm.col, frame, null); g.restore(); });
     g.textAlign = 'right';
     if (sl.ready) { g.fillStyle = '#9be564'; rr(x + cw - 108, y + 118, 88, 26, 13); g.fill(); g.font = 'bold 14px system-ui, sans-serif'; spaced(2); g.fillStyle = '#12200c'; g.textAlign = 'center'; g.fillText('READY', x + cw - 63, y + 136); spaced(0); }
-    else if ((three || d.forms.length === 1) && (d.cycle || d.forms.length) < 4) { g.font = '13px system-ui, sans-serif'; g.fillStyle = '#cfc8e8'; g.fillText('Left / Right  ·  Attack to confirm', x + cw - 20, y + 136); }
+    else if ((three || d.forms.length === 1) && (d.cycle || d.forms.length) < 4) { g.font = '13px system-ui, sans-serif'; g.fillStyle = '#cfc8e8'; g.fillText('Point at a fighter  ·  Attack to pick', x + cw - 20, y + 136); }
   }
 
   /* ---- start prompt, between the cards ---- */
@@ -134,7 +134,7 @@ function drawSelect(three) {
     g.save(); g.shadowColor = 'rgba(255,140,50,' + (0.5 + 0.4 * p).toFixed(2) + ')'; g.shadowBlur = 26; q = g.createLinearGradient(0, by, 0, by + 56); q.addColorStop(0, '#ffc867'); q.addColorStop(1, '#ef6d2a'); g.fillStyle = q; rr(bx, by, bw, 56, 28); g.fill(); g.restore();
     g.font = '900 26px system-ui, sans-serif'; spaced(4); g.fillStyle = '#2a1208'; g.fillText('FIGHT', W / 2 + 2, by + 36); spaced(0);
     g.font = '13px system-ui, sans-serif'; g.fillStyle = '#f3dfb6'; g.fillText('Start on a controller  ·  Enter on the keyboard', W / 2, by + 80);
-  } else if (slots[0]) { g.fillStyle = 'rgba(20,17,36,.72)'; rr(W / 2 - 108, 492, 216, 54, 14); g.fill(); g.font = '14px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Choose a fighter,', W / 2, 515); g.fillText('then Attack to confirm', W / 2, 535); }
+  } else if (slots[0]) { g.fillStyle = 'rgba(20,17,36,.72)'; rr(W / 2 - 108, 492, 216, 54, 14); g.fill(); g.font = '14px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Point at a fighter,', W / 2, 515); g.fillText('then Attack to pick', W / 2, 535); }
 
   /* ---- controls and a tip ---- */
   const px = 44, py = 620, pw = W - 88;
@@ -160,6 +160,13 @@ function drawSelect(three) {
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Hit sparks', x + 12, y + 22);
     g.fillStyle = on ? '#ffd166' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
     g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('Shield  or  H key', x + 128, y + 22); }
+  /* ---- each player's cursor: a round token with a pointer at its top left, where it points ---- */
+  for (let k = 0; k < 2; k++) { const sl = slots[k]; if (!sl || sl.cx === undefined) continue; const x = sl.cx, y = sl.cy, pc = PC[k];
+    g.save(); g.shadowColor = 'rgba(0,0,0,.55)'; g.shadowBlur = 8; g.shadowOffsetY = 2;
+    g.fillStyle = pc; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 20, y + 7); g.lineTo(x + 7, y + 20); g.closePath(); g.fill();
+    g.beginPath(); g.arc(x + 24, y + 24, 16, 0, TAU); g.fill(); g.restore();
+    g.strokeStyle = '#fff'; g.lineWidth = 2.5; g.beginPath(); g.arc(x + 24, y + 24, 16, 0, TAU); g.stroke();
+    g.textAlign = 'center'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = '#16121f'; g.fillText('P' + (k + 1), x + 24, y + 29); }
   g.textAlign = 'center'; drawUpdateNote(14);
 }
 function drawDebugText() {
