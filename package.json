@@ -1,0 +1,16 @@
+{
+  "name": "emberfall",
+  "version": "1.0.0",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "node tests/headless.js",
+    "start": "node serve.js"
+  },
+  "type": "commonjs",
+  "private": "true",
+  "dependencies": {
+    "three": "^0.187.0"
+  }
+}
