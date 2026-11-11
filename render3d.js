@@ -93,7 +93,7 @@ function build() {
         M.scene = g.scene; M.clips = Object.fromEntries(g.animations.map(c => [c.name, c]));
         const box = new THREE.Box3().setFromObject(g.scene); M.height = box.max.y - box.min.y; M.ready = true;
       }, undefined, e => { M.error = String((e && e.message) || e); console.warn('model failed to load: ' + name, e); });
-      if (cfg.axe) new GLTFLoader().load(cfg.axe.file, g => { M.axe = g.scene; }, undefined, e => console.warn('axe failed to load: ' + name, e));   /* Vargan's axe on its own, drawn while it is thrown */
+      if (cfg.axe) new GLTFLoader().load(cfg.axe.file, g => { M.axe = g.scene; }, undefined, e => console.warn('axe failed to load: ' + name, e));   /* Fyrdsman's axe on its own, drawn while it is thrown */
     }
   }).catch(e => console.warn('no model manifest', e));
 
@@ -305,8 +305,8 @@ function build() {
     if (kind === 'boulder') { const m = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 0), new THREE.MeshStandardMaterial({ color: 0x8d8794, roughness: 0.95, flatShading: true })); m.castShadow = true; return m; }
     if (kind === 'dummy' || kind === 'clone' || kind === 'egg') { const m = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 9), new THREE.MeshStandardMaterial({ color: kind === 'egg' ? 0xf4ead8 : kind === 'clone' ? 0x2bb8b0 : 0x8a623a, roughness: 0.7 })); if (kind === 'egg') m.scale.set(0.8, 1, 0.8); m.castShadow = true; return m; }   /* wooden ammunition, Pip's doubles, Pearl's egg */
     if (kind === 'tape') { const m = new THREE.Group(), rim = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.55, 18).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xd9c24a, roughness: 0.45, metalness: 0.5 })), hub = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.3, 0.62), new THREE.MeshStandardMaterial({ color: 0x4a4d57, roughness: 0.6 })); rim.castShadow = true; m.add(rim, hub); return m; }   /* Sprocket's tape roll: a steel reel with a dark bar across it, so its turning shows */
-    if (kind === 'vaxe') {   /* Vargan's thrown axe: his own axe model, turned about its balance point 0.85 m up the haft; mirrored by the pivot so the blade leads */
-      const M = MODELS.Vargan, g2 = new THREE.Group(), pivot = new THREE.Group(); g2.add(pivot); g2.userData.pivot = pivot;
+    if (kind === 'vaxe') {   /* Fyrdsman's thrown axe: his own axe model, turned about its balance point 0.85 m up the haft; mirrored by the pivot so the blade leads */
+      const M = MODELS.Fyrdsman, g2 = new THREE.Group(), pivot = new THREE.Group(); g2.add(pivot); g2.userData.pivot = pivot;
       if (M && M.axe && M.ready) { const s = M.cfg.height / M.height, o = M.axe.clone(true); o.scale.setScalar(s); o.rotation.y = Math.PI / 2; o.position.y = -(M.cfg.axe.bal || 0.85) * s; o.traverse(q => { if (q.isMesh) { q.castShadow = true; q.frustumCulled = false; } }); pivot.add(o); g2.userData.s = s; }
       else { const b = new THREE.Mesh(new THREE.BoxGeometry(0.8, 13, 0.8), new THREE.MeshStandardMaterial({ color: 0x5a3a24 })), hd = new THREE.Mesh(new THREE.BoxGeometry(3, 3.4, 0.5), new THREE.MeshStandardMaterial({ color: 0x9aa4ae, metalness: 0.6 })); hd.position.set(1.5, 4.5, 0); pivot.add(b, hd); g2.userData.s = 8.4; }
       return g2;
@@ -352,7 +352,7 @@ function build() {
     R3.anim = R3.anim || []; R3.anim[f.idx] = name + ' @ ' + time.toFixed(2) + 's';
   }
 
-  /* Vargan's axe has three places, and is drawn in exactly one of them (or none):
+  /* Fyrdsman's axe has three places, and is drawn in exactly one of them (or none):
      - in his hand: the axe part of his own mesh (skinned to the "axe" bone), only inside an axe move between the clip times
        the manifest gives it (axe.armed: { clip: [draw, stow] }), where the clip has his hand at his back to take it or put it back;
      - on his back: a copy of the axe model hung from his chest bone (axe.back: pommel, haft direction d and edge e in the
@@ -531,7 +531,7 @@ function build() {
     if (k <= 0 || !A.s.length) { A.mesh.visible = A.tip.visible = A.halo.visible = false; if (!live) { A.s = []; if (!span) A.key = ''; } return; }
     /* the red point: on the sword while it is out, left where it ended while the arc fades */
     const tp = out ? point : A.s[A.s.length - 1].t, r = (B.dot || 0.6) * (out ? 1 : 0.6 + 0.4 * k);
-    A.tip.visible = A.halo.visible = B.dot !== 0;   /* dot 0: an arc with no red point (Vargan's axe) */ A.tip.position.copy(tp); A.tip.scale.setScalar(r); A.tip.material.opacity = k; A.halo.position.copy(tp); A.halo.scale.set(r * 6, r * 6, 1); A.halo.material.opacity = 0.9 * k;
+    A.tip.visible = A.halo.visible = B.dot !== 0;   /* dot 0: an arc with no red point (Fyrdsman's axe) */ A.tip.position.copy(tp); A.tip.scale.setScalar(r); A.tip.material.opacity = k; A.halo.position.copy(tp); A.halo.scale.set(r * 6, r * 6, 1); A.halo.material.opacity = 0.9 * k;
     /* the ribbon: each recorded step, with the blade turned smoothly round its base between steps */
     const pts = [], S = out ? A.s.concat([{ b: base, t: point }]) : A.s;
     for (let i = 0; i < S.length; i++) {
@@ -570,7 +570,7 @@ function build() {
     const lampGlow = new THREE.Sprite(new THREE.SpriteMaterial(glowMat({ map: dot, color: 0xffb866 }))); lampGlow.scale.set(r * 0.9, r * 0.9, 1); lampGlow.position.set(r * 0.3, r * 0.68, 0); g.add(lampGlow);
     g.position.set(x, y, z); g.rotation.y = k * 1.3; g.userData = { y, ph: k * 2.1 }; g.visible = false; scene.add(g); return g;   /* hidden: the painted backdrop has its own scenery now */
   });
-  /* Vargan's fire (his atlas, II / RENDERING): embers that start on his bones and his axe and drift up in the world. In
+  /* Fyrdsman's fire (his atlas, II / RENDERING): embers that start on his bones and his axe and drift up in the world. In
      Berserker, wisps round his chest, shoulders, head and greaves, and fire on whatever strikes (the axe's blade, a fist or a
      boot) through each hit's frames; the meteor charge burns at the shoulder always, hotter in Berserker; the flying axe
      always trails embers, most when it homes. Picture only, from bones and the axe's place: nothing here touches a hitbox.

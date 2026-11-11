@@ -1554,7 +1554,7 @@ const JOEY = (() => {
   return { name: 'Joey', sub: 'just a regular guy', transform: 1, forms: [human, big] };
 })();
 
-/* ---------- Vargan the Ashbound (original; the owner's "Nordic Berserker" atlas v1.0, 2026-11-11) ----------
+/* ---------- Fyrdsman the Ashbound (original; the owner's "Nordic Berserker" atlas v1.0, 2026-11-11) ----------
    A superheavyweight Nordic warrior in worn bronze and iron, a fur mantle and a braided beard, with Runebreaker: a split-head
    greataxe that is a real object in the world. Thrown, it lands and stays stuck in the stage (or falls slowly past the
    ledge) until he calls it back by holding special; it hurts whatever it passes through on the way home, harder the further
@@ -1572,10 +1572,10 @@ const vHand = f => [f.x + f.face * 4.6, f.y + f.st.h * 0.55];
 /* Distance power (atlas II / SCALING FORMULA): t = clamp(D / 0.55 W, 0, 1), D from the fighter to the axe, frozen when the
    recall is asked for or the counter succeeds. 12% + 9% x t, knockback x (1 + 0.8 t). */
 const vTier = (f, p) => clamp(Math.hypot(p.x - f.x, p.y - (f.y + f.st.h * 0.5)) / (0.55 * vW()), 0, 1);
-const vAxeHit = (t, o) => Object.assign({ d: Math.round((12 + 9 * t) * 100) / 100, a: 45, b: 40, k: 70, kbMul: 1 + 0.8 * t, id: 'Vargan:recall' }, o);
+const vAxeHit = (t, o) => Object.assign({ d: Math.round((12 + 9 * t) * 100) / 100, a: 45, b: 40, k: 70, kbMul: 1 + 0.8 * t, id: 'Fyrdsman:recall' }, o);
 function vThrow(f) {
   const p = { x: f.x + f.face * 5.8, y: f.y + f.st.h * 0.78, vx: VAXE.vx * f.face, vy: VAXE.vy, grav: 0, life: 1e9, hits: 1e9, rehit: 1e9, owner: f.idx, face: f.face, r: VAXE.r, ground: 'pass', plat: null,
-    kind: 'vaxe', tag: 'vaxe', st: 'fly', rot: f.face > 0 ? 0.7 : Math.PI - 0.7, noClash: 1, h: { d: 15, a: 50, b: 40, k: 70, id: 'Vargan:nspec' }, step: vAxeStep, onHit: vAxeOnHit, onGone: vAxeGone };
+    kind: 'vaxe', tag: 'vaxe', st: 'fly', rot: f.face > 0 ? 0.7 : Math.PI - 0.7, noClash: 1, h: { d: 15, a: 50, b: 40, k: 70, id: 'Fyrdsman:nspec' }, step: vAxeStep, onHit: vAxeOnHit, onGone: vAxeGone };
   PROJ.push(p); f.axe = p; f.axeAway = true; f.recallArm = false; f.recallN = 0; beep(240, 0.08, 'sawtooth', 0.05, 0.7);
 }
 /* the axe hits a victim once per trip (out, home, or the counter's homing strike), then passes through them */
@@ -1614,7 +1614,7 @@ function vAxeStep(p) {
 function vCounter(v, a, hx, hy) {
   a.hitlag = 14; v.hitlag = 6; v.face = sgn(a.x - v.x) || v.face; const p = v.axe;
   v.startMove('dspecHit');   /* dspecHitE when the axe is away (startMove) */
-  if (p && p.st === 'stuck') { p.st = 'home'; p.target = a.idx; p.t = vTier(v, p); p.h = vAxeHit(p.t, { a: 75, id: 'Vargan:home' }); p.ghost = false; p.plat = null; p.sp = VAXE.sp0; p.n = 0; p.vx = 0; p.vy = 2; spark(p.x, p.y, '#ff5a1e', 22, 2); }
+  if (p && p.st === 'stuck') { p.st = 'home'; p.target = a.idx; p.t = vTier(v, p); p.h = vAxeHit(p.t, { a: 75, id: 'Fyrdsman:home' }); p.ghost = false; p.plat = null; p.sp = VAXE.sp0; p.n = 0; p.vx = 0; p.vy = 2; spark(p.x, p.y, '#ff5a1e', 22, 2); }
   spark(hx, hy, '#ffcf6a', 18, 1.8); pop(hx, hy + 12, 'COUNTER', '#ff9a4a'); beep(880, 0.08, 'triangle', 0.05, 0.6);
 }
 const VARGAN = (() => {
@@ -1667,8 +1667,8 @@ const VARGAN = (() => {
     else { f.vx = f.grounded ? 0 : appr(f.vx, 0, 0.04); if (!f.grounded) f.vy = Math.max(f.vy - f.st.grav, -f.st.fall); }   /* on the ground the travel is exactly 0.30 W: the skid after it is only drawn */
   };
   return {
-    name: 'Vargan', sub: 'the Ashbound', forms: [{
-      name: 'Vargan', col: ['#5a3a24', '#b07a3a', '#ff5a1e'], alt: ['#3a4a5a', '#9aa4ae', '#ff8a3c'], varg: 1,
+    name: 'Fyrdsman', sub: 'the Ashbound', forms: [{
+      name: 'Fyrdsman', col: ['#5a3a24', '#b07a3a', '#ff5a1e'], alt: ['#3a4a5a', '#9aa4ae', '#ff8a3c'], varg: 1,
       /* Atlas I / LOCOMOTION: weight 118, walk 0.767, run 1.34, initial dash 1.87, air speed 0.83 and acceleration 0.04,
          gravity 0.108, fall 1.65 / 2.64, a 3-frame squat (the reference fighter's own numbers, which are this game's units).
          Jump heights are the reference's (30 / 14.5 / 30.5); traction and the rest are mine. Standing 0.5 x 1 H. */
@@ -1784,7 +1784,7 @@ for (const def of ROSTER) for (const fm of def.forms) {
   st.vRise = jumpV(st.jumpH - st.jumpInit, st.grav); st.boost = MOVE.boost.map(k => k * st.jumpInit); st.vBurst = jumpV(30, st.grav);
   if (u.rise) top = u.rise;   /* a move that launches its user says how high it carries, since it cannot be tried on a stand-in */
   fm.aiRise = top; fm.aiHop = st.airJumpH;
-  /* Vargan's Berserker (atlas II / MODE TOGGLE): walk, run, initial dash, ground and air acceleration and air speed x 1.5;
+  /* Fyrdsman's Berserker (atlas II / MODE TOGGLE): walk, run, initial dash, ground and air acceleration and air speed x 1.5;
      gravity, jumps, fast fall and every frame count stay as they are */
   if (fm.varg) { const B = 1.5; fm.stB = Object.assign({}, st, { walk: st.walk * B, walkMul: st.walkMul * B, walkAdd: st.walkAdd * B, run: st.run * B, runMul: st.runMul * B, runAdd: st.runAdd * B, dash: st.dash * B, airSpeed: st.airSpeed * B, airMul: st.airMul * B, airAdd: st.airAdd * B }); }
 }
@@ -1797,7 +1797,7 @@ class Fighter {
     this.pct = 0; this.kos = 0; this.tfLatch = false; this.tfPend = false; this.tfStart = -1; this.noSwap = !!def.transform; this.spawn(true);
   }
   get form() { return this.def.forms[this.fi]; }
-  get st() { return this.berserk && this.form.stB ? this.form.stB : this.form.st; }   /* Vargan's Berserker: his movement x 1.5 (stB) */
+  get st() { return this.berserk && this.form.stB ? this.form.stB : this.form.st; }   /* Fyrdsman's Berserker: his movement x 1.5 (stB) */
   spawn(first) {
     this.x = first ? (this.idx ? 28 : -28) : 0; this.y = first ? 0 : 82; this.vx = this.vy = 0;
     if (first) this.face = this.idx ? -1 : 1;
@@ -1811,9 +1811,9 @@ class Fighter {
     this.chargeT = 0; this.stalled = false; this.stallOk = false; this.cAir = null; this.hopT = 0; this.airUse = {}; this.flying = false; this.selOpen = false; this.sling = null; this.dairUsed = false; this.upC = 0; this.upGo = 0; this.flyV = null; this.flyB = false; this.dove = false; this.burstKind = ''; this.burstX = 0; this.burstDown = false; this.burstUsed = false; this.blastUsed = false; this.swapLock = 0; this.slingUsed = false; this.thermal = false; this.recoil = false; this.bigStone = false; this.armorLeft = 99; this.castHit = false; this.linkT = 0; this.helpLag = 0; this.guarded = false;
     this.fat = 0; this.fatGain = false; this.restT = 0; this.exPend = false; this.exStart = -1; this.paceX = null; this.paceDir = 1;   /* INTENSITY: per stock */
     this.punchC = 0; this.punchUse = 0; this.buryT = 0; this.slapMore = false; this.tether = null; this.adFaf = 0; this.spinVx = 0;   /* per stock: a stored punch charge goes with the stock */
-    this.berserk = false; this.bzAcc = 0; this.axe = null; this.axeAway = false; this.recallArm = true; this.recallN = 0; this.metX = 0;   /* Vargan: per stock (a KO puts the axe back in his hand and ends Berserker) */
+    this.berserk = false; this.bzAcc = 0; this.axe = null; this.axeAway = false; this.recallArm = true; this.recallN = 0; this.metX = 0;   /* Fyrdsman: per stock (a KO puts the axe back in his hand and ends Berserker) */
   }
-  /* Vargan, every tick (hitlag included, never while paused): Berserker's cost, 1% every 12 ticks (5% a second, counted in
+  /* Fyrdsman, every tick (hitlag included, never while paused): Berserker's cost, 1% every 12 ticks (5% a second, counted in
      whole ticks so it never rounds away); and the recall, special held 8 ticks in a row while the axe is away and lying or
      flying, after letting go of the press that threw it. It changes only the axe: whatever he is doing carries on. */
   varganTick() {
@@ -1847,7 +1847,7 @@ class Fighter {
   dodge() { this.ds = this.dodgeStale; this.dodgeStale = Math.min(5, this.dodgeStale + 1); this.dodgeT = 0; }
   set(s) { this.state = s; this.sf = 0; }
   startMove(n) {
-    if (this.axeAway && n[n.length - 1] !== 'E' && this.form.moves[n + 'E']) n += 'E';   /* Vargan with his axe away: the unarmed version, chosen once as the move starts */
+    if (this.axeAway && n[n.length - 1] !== 'E' && this.form.moves[n + 'E']) n += 'E';   /* Fyrdsman with his axe away: the unarmed version, chosen once as the move starts */
     const m = this.form.moves[n]; if (this.def.transform) this.effort(FAT.move[n]); this.move = m; this.mname = n; this.mf = 0; this.charge = 0; this.chargeT = 0; this.aim = 0;
     this.stallOk = !!m.stall && !this.grounded && !this.stalled; if (this.stallOk) this.stalled = true;
     this.armorLeft = m.armorHits || 99; this.castHit = false; this.bRev = 0;   /* a move that hangs in the air does so once per time off the ground */
@@ -1897,7 +1897,7 @@ class Fighter {
     if (n === 'ftilt') this.aim = i.ly > 0.25 ? 1 : i.ly < -0.25 ? -1 : 0;   /* a forward tilt can be angled up or down */
     if (n === 'dash') this.vx = this.face * this.st.run; else if (n === 'fsmash') this.vx *= 0.3;
   }
-  /* Vargan: attack and special pressed on the same frame toggle Berserker instead of anything either would do alone */
+  /* Fyrdsman: attack and special pressed on the same frame toggle Berserker instead of anything either would do alone */
   bzToggle() { const c = this.ctl; if (!this.form.varg || !(c.buf.atk > 0 && c.buf.atk === c.buf.spc)) return false; c.buf.atk = c.buf.spc = 0; this.startMove('berserk'); return true; }
   groundActs(moving) {
     const c = this.ctl, i = c.c;
@@ -2431,8 +2431,8 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   const onShield = (v.state === 'shield' || v.state === 'shieldstun') && !poke;
   if (proj) { d *= staleMul(a, id); pushStale(a, id, onShield); }
   else { if (!a.staled) { a.staleM = staleMul(a, id); pushStale(a, id, onShield); a.staled = true; } d *= a.staleM * (1 + a.charge / 60 * CHG_K(a)) * (a.moveSH ? SHORT_HOP_MUL : 1); }
-  const bz = a && a.berserk ? 1.5 : 1; d *= bz;   /* Vargan's Berserker: +50% damage on everything he hits with, the axe included (knockback below) */
-  if (!proj && !h.grab && v.state === 'attack' && v.move && v.move.vCounter && v.mf >= v.move.vCounter[0] && v.mf <= v.move.vCounter[1]) { vCounter(v, a, hx, hy); return; }   /* Vargan's counter takes any strike, from either side */
+  const bz = a && a.berserk ? 1.5 : 1; d *= bz;   /* Fyrdsman's Berserker: +50% damage on everything he hits with, the axe included (knockback below) */
+  if (!proj && !h.grab && v.state === 'attack' && v.move && v.move.vCounter && v.mf >= v.move.vCounter[0] && v.mf <= v.move.vCounter[1]) { vCounter(v, a, hx, hy); return; }   /* Fyrdsman's counter takes any strike, from either side */
   if (v.state === 'shieldoff' && v.sf <= SHIELD.parry) {
     v.set('idle'); v.invuln = 4; if (!proj) { a.hitlag = 16; a.parriedBy = v; }
     spark(hx, hy, '#fff', 20, 2); pop(hx, hy + 12, 'PARRY', '#fff'); beep(1200, 0.12, 'triangle', 0.07, 1.3); return;
@@ -2521,7 +2521,7 @@ function resolveHits() {
     }
   }
   for (const p of PROJ) {
-    const a = F[1 - p.owner]; if (p.life <= 0 || !a || p.ghost || p.noClash || (p.gndBreak && !a.grounded)) continue;   /* noClash: Vargan's axe is never put out */
+    const a = F[1 - p.owner]; if (p.life <= 0 || !a || p.ghost || p.noClash || (p.gndBreak && !a.grounded)) continue;   /* noClash: Fyrdsman's axe is never put out */
     for (const h of live(a)) { const dx = a.x + h.x * a.face - p.x, dy = hitY(a, h) - p.y; if (dx * dx + dy * dy <= (h.r + p.r) * (h.r + p.r) && h.d + 9 > p.h.d) { p.life = 0;   /* an attack puts out a projectile less than 9% stronger than itself */ spark(p.x, p.y, '#fff', 8, 1.2); beep(700, 0.04, 'triangle', 0.04); break; } }
   }
   for (const a of F) {
@@ -2601,7 +2601,7 @@ function cpuInput(f, o, m) {
   }
   return i;
 }
-/* Vargan as the CPU: calls his axe home a little while after it lands (holding special 12 frames), turns Berserker on now
+/* Fyrdsman as the CPU: calls his axe home a little while after it lands (holding special 12 frames), turns Berserker on now
    and then while his damage is low (under 60%) and off once it passes 90%, and counters a swing that has just started in front of him. */
 function vargBrain(f, o, m, L, i, ad) {
   const off = !f.grounded && (Math.abs(f.x) > EDGE + 4 || f.y < -3), p = f.axe, free = f.state === 'idle' || f.state === 'run' || f.state === 'dash' || f.state === 'air';
@@ -2650,7 +2650,7 @@ function cpuBrain(f, o, m, L) {
     const side = sgn(f.x) || 1, edge = EDGE + f.st.w / 2 + 2, under = false, far = Math.abs(f.x) - EDGE;   /* the island's underside slopes, so rising from beneath it just slides out to the ledge */
     i.lx = under ? side : (f.y > -3 || Math.abs(f.x) > edge + 1) ? -side : 0;   /* beside the wall and below the lip: stay off it and let the ledge or a jump do the work */
     if (f.state !== 'air' || m.t % 5 !== 0) return i;
-    if (!f.sideUsed && f.form.moves.sspec.once && (f.form.st.airSpeed < 0.9 ?   /* the form's own drift: Vargan's Berserker speed does not make him a fast drifter */ far > 30 && f.y > 32 - f.form.aiRise - (f.jumps > 0 ? f.form.aiHop : 0) : far > 36 && f.y > 14)) { i.lx = -side; i.spc = true; return i; }   /* a slow drifter needs its side special for distance, but only while the jump and up special it has left can pay back the drop */
+    if (!f.sideUsed && f.form.moves.sspec.once && (f.form.st.airSpeed < 0.9 ?   /* the form's own drift: Fyrdsman's Berserker speed does not make him a fast drifter */ far > 30 && f.y > 32 - f.form.aiRise - (f.jumps > 0 ? f.form.aiHop : 0) : far > 36 && f.y > 14)) { i.lx = -side; i.spc = true; return i; }   /* a slow drifter needs its side special for distance, but only while the jump and up special it has left can pay back the drop */
     if (f.st.noLedge && !f.burstUsed && f.vy < 0 && (f.y < 4 || far > 45) && f.y + 30 < BLAST.t - 28) { i.lx = 0; i.ly = -1; i.spc = true; return i; }   /* no ledge to hold: the tumble's free lift comes before the jump and the blast */
     if (f.vy < 0 && !under) {
       const roof = BLAST.t - 28;   /* when launched high, fall first: rising from up there would go out through the top */

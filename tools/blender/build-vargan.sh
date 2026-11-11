@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Rebuilds Vargan the Ashbound's animated model and his thrown axe from tools/blender/vargan.js. No Meshy calls.
+# Rebuilds Fyrdsman the Ashbound's animated model and his thrown axe from tools/blender/vargan.js. No Meshy calls.
 #   bash tools/blender/build-vargan.sh [shots.json outdir]
 # The owner's sculpts (Google Drive, Ironhide) are prepared once into assets/vargan/work/{body-a,axe}.glb:
 #   SCULPTS=<folder holding the two .blend files> bash tools/blender/build-vargan.sh prep

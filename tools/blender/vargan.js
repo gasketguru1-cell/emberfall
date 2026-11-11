@@ -1,4 +1,4 @@
-// Writes the skeleton and animation spec for Vargan the Ashbound (assets/vargan/work/rig.json), which tools/blender/rig.py
+// Writes the skeleton and animation spec for Fyrdsman the Ashbound (assets/vargan/work/rig.json), which tools/blender/rig.py
 // turns into a rigged, animated model, and adds his entry to the game's manifest.
 //   node tools/blender/vargan.js
 //   bash tools/blender/build-vargan.sh [shots.json outdir]
@@ -14,13 +14,13 @@
 // the hit is.
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const ROOT = path.join(__dirname, '..', '..'), OUT = path.join(ROOT, 'assets', 'vargan', 'work');
-/* ---- the game's own numbers: load sim.js as the tests do and take Vargan's moves ---- */
+/* ---- the game's own numbers: load sim.js as the tests do and take Fyrdsman's moves ---- */
 const MV = (() => {
   const ctx = new Proxy({}, { get: (t, k) => k in t ? t[k] : () => ({ addColorStop() {} }), set: (t, k, v) => { t[k] = v; return true; } });
   const g = { document: { getElementById: () => ({ getContext: () => ctx }) }, addEventListener() {}, requestAnimationFrame() {}, navigator: { getGamepads: () => [] }, localStorage: { getItem: () => null, setItem() {} }, console, Math, performance: { now: () => 0 } };
   g.window = g; vm.createContext(g);
   for (const f of ['hitboxes.js', 'sim.js']) vm.runInContext(fs.readFileSync(path.join(ROOT, f), 'utf8'), g, { filename: f });
-  return vm.runInContext('ROSTER.find(d => d.name === "Vargan").forms[0].moves', g);
+  return vm.runInContext('ROSTER.find(d => d.name === "Fyrdsman").forms[0].moves', g);
 })();
 const R = (p, y, r) => ({ rot: [p, y || 0, r || 0] }), M = (x, y, z) => ({ move: [x, y, z] });
 const add = (a, b, k) => a.map((v, i) => v + b[i] * (k === undefined ? 1 : k)), sub = (a, b) => a.map((v, i) => v - b[i]), dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
@@ -52,7 +52,7 @@ const side = (s, k) => { const P = p => k ? mir(p) : p; return [
   { name: 'foot' + s, head: P(J.ankle), tail: P(J.toe), parent: 'shin' + s },
   { name: 'c_foot' + s, head: P(J.ankle), tail: add(P(J.ankle), unit(sub(P(J.toe), P(J.ankle))).map(v => v * 0.12)), parent: 'all', deform: false }]; };   /* along the foot, so the foot can copy its turn (heel and toe) */
 const spec = {
-  note: 'Vargan the Ashbound: metres, feet on y = 0, facing +Z, his right is -X. Joint positions measured from the owner\'s A-pose sculpt.',
+  note: 'Fyrdsman the Ashbound: metres, feet on y = 0, facing +Z, his right is -X. Joint positions measured from the owner\'s A-pose sculpt.',
   prep: { yaw: 0, translate: [0, 0, 0] },
   parts: [{ object: 'Axe', bone: 'axe' }],
   bones: [
@@ -564,4 +564,4 @@ const entry = { file: 'assets/vargan/export/vargan-v1.glb', height: 18.5,   /* 7
     nspec: AF('Throw', 30, 30, 66), nspecE: AF('Beckon', 8, 8, 24), sspec: AF('Meteor', 15, 40, 57), uspec: AF('UpB', 10, 60, 60), uspecE: AF('UpBE', 10, 60, 60), uspecL: AF('UpLand', 1, 4, 36), uspecLE: AF('UpLandE', 1, 4, 36),
     dspec: AF('Counter', 8, 29, 67), dspecHit: AF('CounterHit', 4, 5, 34), dspecHitE: AF('CounterHitE', 4, 5, 34), berserk: AF('Berserk', 4, 4, 8), '*': AF('Jab', 7, 8, 26) } };
 const mf = path.join(ROOT, 'assets', 'manifest.json'), cur = JSON.parse(fs.readFileSync(mf, 'utf8'));
-cur.Vargan = entry; fs.writeFileSync(mf, JSON.stringify(cur, null, 1) + '\n'); console.log('manifest: ' + Object.keys(cur).join(', '));
+cur.Fyrdsman = entry; fs.writeFileSync(mf, JSON.stringify(cur, null, 1) + '\n'); console.log('manifest: ' + Object.keys(cur).join(', '));

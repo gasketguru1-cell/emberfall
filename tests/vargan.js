@@ -1,4 +1,4 @@
-// Vargan the Ashbound: scripted checks against the owner's "Nordic Berserker" atlas v1.0 (its frame tables, movement and
+// Fyrdsman the Ashbound: scripted checks against the owner's "Nordic Berserker" atlas v1.0 (its frame tables, movement and
 // its own acceptance tests: the axe as one persistent object, slow fall past the ledge, the 8-frame recall, no swap mid-move,
 // the counter's homing and its distance power, no false homing, the 0.30 W meteor, Berserker's x1.5 and its 5% a second).
 // Usage: node tests/vargan.js        (exit code 1 if any check fails)
@@ -11,7 +11,7 @@ let seed = 5; Math.random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; 
 for (const f of ['hitboxes.js', 'sim.js', 'anim.js', 'movelist.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 vm.runInThisContext(`
 (function () {
-  const VI = ROSTER.findIndex(d => d.name === 'Vargan'), VF = ROSTER[VI].forms[0], mv = VF.moves, st = VF.st, W = vW(), B = DMG_1V1 * FRESH;
+  const VI = ROSTER.findIndex(d => d.name === 'Fyrdsman'), VF = ROSTER[VI].forms[0], mv = VF.moves, st = VF.st, W = vW(), B = DMG_1V1 * FRESH;
   let SCRIPT = [null, null], t = 0; const results = [], CPU0 = cpuInput;
   cpuInput = function (f) { const i = blankIn(); if (SCRIPT[f.idx]) SCRIPT[f.idx](i, t, f); return i; };
   function setup(xa, xb, other) {
@@ -24,7 +24,7 @@ vm.runInThisContext(`
   function check(name, ok, detail) { results.push([ok, name, detail || '']); }
   const near = (a, b, tol) => Math.abs(a - b) <= (tol === undefined ? 0.012 : tol);
   const axes = () => PROJ.filter(p => p.kind === 'vaxe');
-  /* Vargan starts a move directly against a Flint standing gap away; returns the first hit's frame and the damage */
+  /* Fyrdsman starts a move directly against a Flint standing gap away; returns the first hit's frame and the damage */
   function swing(name, gap, o) { o = o || {}; const [v, f] = setup(0, gap); if (o.away) { v.axeAway = true; } if (o.bz) v.berserk = true; v.startMove(name); const out = { first: 0, hits: 0, pct: 0, name: v.mname }; let p = 0;
     run(mv[v.mname].t + 20, () => { if (f.pct > p + 0.01) { out.hits++; if (!out.first) out.first = v.mf; p = f.pct; } }); out.pct = f.pct; return out; }
 

@@ -213,10 +213,10 @@ const ART = {
     g.fillStyle = c[1]; g.fillRect(sx - sr * 0.6, sy - 0.25, sr * 0.55, 0.5);   /* brass hinge strap */
     g.fillStyle = c[2]; g.beginPath(); g.ellipse(sx + 0.25, sy, 0.32, 0.6, 0, 0, TAU); g.fill();   /* the glowing grille */
   },
-  /* Vargan the Ashbound: heavy boots, dark trousers, a studded leather tunic, a fur mantle on one shoulder, a braided red
+  /* Fyrdsman the Ashbound: heavy boots, dark trousers, a studded leather tunic, a fur mantle on one shoulder, a braided red
      beard, and Runebreaker. The axe is drawn where an axe hit's shape is (as Brand's blade); while it is thrown his hand is
      empty. In Berserker an orange glow rings him. Faces +x. */
-  Vargan(c, t, f) {
+  Fyrdsman(c, t, f) {
     const sw = gait(f) * 1.2, bob = Math.sin(t * 0.06) * 0.16, skin = '#d29a76', leather = '#4a2e1c', beard = '#9a4e22';
     if (f && f.berserk) { g.beginPath(); g.ellipse(0, 8, 6.4, 9.6, 0, 0, TAU); g.fillStyle = 'rgba(255,90,30,.18)'; g.fill(); }
     limb(-1.5, 5, -1.6 - sw, 1, 1.9, '#3c3a30'); limb(1.5, 5, 1.6 + sw, 1, 1.9, '#3c3a30');
