@@ -73,5 +73,86 @@
  },
  "Drop": {
   "seconds": 1.433
+ },
+ "Jab3": {
+  "seconds": 0.633
+ },
+ "FTilt": {
+  "seconds": 0.667
+ },
+ "Dash": {
+  "seconds": 0.767
+ },
+ "Heave": {
+  "seconds": 1.033
+ },
+ "Clamp": {
+  "seconds": 0.9
+ },
+ "Chop": {
+  "seconds": 0.633
+ },
+ "Swat": {
+  "seconds": 0.633
+ },
+ "Grab": {
+  "seconds": 0.567
+ },
+ "GetupSweep": {
+  "seconds": 0.833
+ },
+ "Hang": {
+  "seconds": 1.233
+ },
+ "IdleClack": {
+  "seconds": 2.633
+ },
+ "Respawn": {
+  "seconds": 1.233
+ },
+ "AirJump": {
+  "seconds": 0.533
+ },
+ "FastFall": {
+  "seconds": 0.433
+ },
+ "Helpless": {
+  "seconds": 0.433
+ },
+ "LandHard": {
+  "seconds": 0.5
+ },
+ "ShieldHit": {
+  "seconds": 0.333
+ },
+ "HitHeavy": {
+  "seconds": 0.833
+ },
+ "LaunchUp": {
+  "seconds": 0.633
+ },
+ "Spike": {
+  "seconds": 0.633
+ },
+ "Launch": {
+  "seconds": 0.533
+ },
+ "AirDodge": {
+  "seconds": 0.533
+ },
+ "Pummel": {
+  "seconds": 0.267
+ },
+ "ThrowF": {
+  "seconds": 0.767
+ },
+ "ThrowB": {
+  "seconds": 0.833
+ },
+ "ThrowU": {
+  "seconds": 0.833
+ },
+ "ThrowD": {
+  "seconds": 0.767
  }
 }

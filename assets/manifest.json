@@ -1863,6 +1863,7 @@
  "Sprocket": {
   "file": "assets/sprocket/export/sprocket-v1.glb",
   "height": 14,
+  "feel": 1,
   "clips": {
    "idle": {
     "clip": "Idle"
@@ -1926,8 +1927,7 @@
     "bounce": true
    },
    "airdodge": {
-    "clip": "Tumble",
-    "bounce": true
+    "clip": "AirDodge"
    },
    "dodge": {
     "clip": "Dodge",
@@ -1935,7 +1935,7 @@
     "to": 0.4
    },
    "roll": {
-    "clip": "Tumble",
+    "clip": "Roll",
     "bounce": true
    },
    "ledge": {
@@ -1955,6 +1955,54 @@
    "swap": {
     "clip": "Tumble",
     "bounce": true
+   },
+   "idle2": {
+    "clip": "IdleFiddle"
+   },
+   "respawn": {
+    "clip": "Respawn"
+   },
+   "airjump": {
+    "clip": "AirJump"
+   },
+   "fastfall": {
+    "clip": "FastFall"
+   },
+   "helpless": {
+    "clip": "Helpless"
+   },
+   "landHard": {
+    "clip": "LandHard"
+   },
+   "shieldHit": {
+    "clip": "ShieldHit"
+   },
+   "hitHeavy": {
+    "clip": "HitHeavy"
+   },
+   "launchUp": {
+    "clip": "LaunchUp"
+   },
+   "spike": {
+    "clip": "Spike"
+   },
+   "launch": {
+    "clip": "Launch"
+   },
+   "pummel": {
+    "clip": "Pummel"
+   },
+   "throw_f": {
+    "clip": "ThrowF"
+   },
+   "throw_b": {
+    "clip": "ThrowB"
+   },
+   "throw_u": {
+    "clip": "ThrowU"
+   },
+   "throw_d": {
+    "clip": "ThrowD"
    }
   },
   "strikers": [
@@ -1964,6 +2012,10 @@
    },
    {
     "bone": "handL",
+    "ext": 1.2
+   },
+   {
+    "bone": "handR",
     "ext": 1.2
    },
    {
@@ -1991,7 +2043,7 @@
     "end": 0.5
    },
    "jab2": {
-    "clip": "Jab",
+    "clip": "Jab2",
     "start": 0,
     "contact": [
      0.17,
@@ -2126,13 +2178,13 @@
     "end": 0.8
    },
    "getup": {
-    "clip": "BenchSweep",
-    "start": 0,
+    "clip": "GetupSwing",
+    "start": 0.22,
     "contact": [
      0.38,
      0.74
     ],
-    "end": 1.2
+    "end": 1
    },
    "nspec": {
     "clip": "Flick",
@@ -2184,6 +2236,7 @@
  "Scuttle": {
   "file": "assets/scuttle/export/scuttle-v1.glb",
   "height": 11.4,
+  "feel": 1,
   "clips": {
    "idle": {
     "clip": "Idle"
@@ -2247,8 +2300,7 @@
     "bounce": true
    },
    "airdodge": {
-    "clip": "Tumble",
-    "bounce": true
+    "clip": "AirDodge"
    },
    "dodge": {
     "clip": "Dodge",
@@ -2260,8 +2312,7 @@
     "bounce": true
    },
    "ledge": {
-    "clip": "Rise",
-    "at": 0.4
+    "clip": "Hang"
    },
    "hold": {
     "clip": "Hold"
@@ -2277,6 +2328,54 @@
    "swap": {
     "clip": "Tumble",
     "bounce": true
+   },
+   "idle2": {
+    "clip": "IdleClack"
+   },
+   "respawn": {
+    "clip": "Respawn"
+   },
+   "airjump": {
+    "clip": "AirJump"
+   },
+   "fastfall": {
+    "clip": "FastFall"
+   },
+   "helpless": {
+    "clip": "Helpless"
+   },
+   "landHard": {
+    "clip": "LandHard"
+   },
+   "shieldHit": {
+    "clip": "ShieldHit"
+   },
+   "hitHeavy": {
+    "clip": "HitHeavy"
+   },
+   "launchUp": {
+    "clip": "LaunchUp"
+   },
+   "spike": {
+    "clip": "Spike"
+   },
+   "launch": {
+    "clip": "Launch"
+   },
+   "pummel": {
+    "clip": "Pummel"
+   },
+   "throw_f": {
+    "clip": "ThrowF"
+   },
+   "throw_b": {
+    "clip": "ThrowB"
+   },
+   "throw_u": {
+    "clip": "ThrowU"
+   },
+   "throw_d": {
+    "clip": "ThrowD"
    }
   },
   "strikers": [
@@ -2322,22 +2421,22 @@
     "end": 0.5
    },
    "jab3": {
-    "clip": "Snip",
+    "clip": "Jab3",
     "start": 0,
     "contact": [
      0.2,
      0.3
     ],
-    "end": 0.55
+    "end": 0.6
    },
    "ftilt": {
-    "clip": "Snip",
+    "clip": "FTilt",
     "start": 0,
     "contact": [
-     0.2,
-     0.3
+     0.22,
+     0.32
     ],
-    "end": 0.55
+    "end": 0.62
    },
    "utilt": {
     "clip": "Lift",
@@ -2358,13 +2457,13 @@
     "end": 0.85
    },
    "dash": {
-    "clip": "Spin",
+    "clip": "Dash",
     "start": 0,
     "contact": [
      0.2,
-     0.45
+     0.48
     ],
-    "end": 0.7
+    "end": 0.75
    },
    "fsmash": {
     "clip": "Lunge",
@@ -2376,19 +2475,19 @@
     "end": 0.95
    },
    "usmash": {
-    "clip": "Lift",
+    "clip": "Heave",
     "start": 0,
     "contact": [
-     0.3,
-     0.44
+     0.34,
+     0.5
     ],
-    "end": 0.9
+    "end": 1
    },
    "dsmash": {
-    "clip": "Sweep",
+    "clip": "Clamp",
     "start": 0,
     "contact": [
-     0.3,
+     0.32,
      0.46
     ],
     "end": 0.85
@@ -2403,13 +2502,13 @@
     "end": 0.7
    },
    "fair": {
-    "clip": "Snip",
+    "clip": "Chop",
     "start": 0,
     "contact": [
-     0.2,
-     0.3
+     0.22,
+     0.32
     ],
-    "end": 0.55
+    "end": 0.6
    },
    "bair": {
     "clip": "BackKick",
@@ -2421,13 +2520,13 @@
     "end": 0.9
    },
    "uair": {
-    "clip": "Lift",
+    "clip": "Swat",
     "start": 0,
     "contact": [
-     0.3,
-     0.44
+     0.22,
+     0.32
     ],
-    "end": 0.9
+    "end": 0.6
    },
    "dair": {
     "clip": "Stamp",
@@ -2439,7 +2538,7 @@
     "end": 0.95
    },
    "grab": {
-    "clip": "Snip",
+    "clip": "Grab",
     "start": 0,
     "contact": [
      0.2,
@@ -2448,13 +2547,13 @@
     "end": 0.55
    },
    "getup": {
-    "clip": "Sweep",
-    "start": 0,
+    "clip": "GetupSweep",
+    "start": 0.16,
     "contact": [
-     0.3,
-     0.46
+     0.36,
+     0.48
     ],
-    "end": 0.85
+    "end": 0.8
    },
    "nspec": {
     "clip": "Reach",
