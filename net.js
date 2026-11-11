@@ -162,7 +162,8 @@ const NET = (function () {
   const readDev0 = readDev;
   readDev = dev => (dev.startsWith('net') && N._in) ? N._in[+dev.slice(3)] : readDev0(dev);
   /* no sounds or popups while replaying frames that were already heard and seen */
-  const beep0 = beep, thwack0 = thwack, pop0 = pop;
+  const beep0 = beep, thwack0 = thwack, pop0 = pop, sfx0 = sfx;
+  sfx = function () { if (!N.resim) return sfx0.apply(this, arguments); };
   beep = function () { if (!N.resim) return beep0.apply(this, arguments); };
   thwack = function () { if (!N.resim) return thwack0.apply(this, arguments); };
   pop = function () { if (!N.resim) return pop0.apply(this, arguments); };

@@ -14,6 +14,7 @@ function loop(now) {
     else if (!DBG.step || mode === 'select') step(); else if (DBG.advance > 0) { DBG.advance--; step(); }
     acc -= 1000 / 60;
   }
+  SND.frame(mode, paused, F.preview ? null : F);   /* music follows the game; footsteps for anyone running */
   draw(); requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);

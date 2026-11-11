@@ -94,7 +94,7 @@ const TIPS = [
   'Push the right stick forward while dashing or running for a dash attack.',
   'B-reverse: just after pressing special, pull the stick the other way to turn round; in the air your drift turns round too.',
   'Flick down while falling to fast-fall. Flick the right stick down instead and the left stick stays free to steer.',
-  'Change your buttons or keys on the controls screen: − on a controller, Backspace on the keyboard.',
+  'Change your buttons, keys and the volume on the controls screen: − on a controller, Backspace on the keyboard.',
   'Hold attack to chain jabs. Nib keeps a flurry going for as long as it is held.',
   'Tilt the stick slightly up or down to angle a forward tilt.',
   'You cannot run through an opponent: roll, jump, or hit your way past.',
@@ -128,16 +128,32 @@ function legendRows() {
 /* The controls screen (sim.js: CMENU), over the fighter select or the pause screen. */
 const ACT_COL = { '': '#6d6885', atk: '#ff7b6c', spc: '#6cb4ff', jmp: '#9be564', shd: '#7fe3e0', grb: '#d59bff' };
 function drawCMenu() {
-  if (!CMENU) return; const m = CMENU, su = setupOf(m.dev), kb = su.type === 'kb', items = cmenuItems(), list = setupsFor(m.dev), ui = 'system-ui, sans-serif';
+  if (!CMENU) return; const m = CMENU, su = setupOf(m.dev), kb = su.type === 'kb', snd = m.page === 'sound', items = cmenuItems(), list = setupsFor(m.dev), ui = 'system-ui, sans-serif';
   g.save(); spaced(0); g.fillStyle = 'rgba(8,6,16,.8)'; g.fillRect(0, 0, W, H);
   g.fillStyle = 'rgba(26,22,46,.98)'; rr(CM.x, CM.y, CM.w, CM.h, 18); g.fill(); g.strokeStyle = 'rgba(255,184,107,.55)'; g.lineWidth = 1.5; g.stroke();
-  g.textAlign = 'left'; g.font = '900 26px ' + ui; g.fillStyle = '#ffd98a'; g.fillText('CONTROLS', CM.x + 30, CM.y + 44);
-  const tw = g.measureText('CONTROLS').width; g.font = '16px ' + ui; g.fillStyle = '#cfc8e8'; g.fillText(devName(m.dev), CM.x + 44 + tw, CM.y + 43);
+  g.textAlign = 'left'; g.font = '900 26px ' + ui; g.fillStyle = '#ffd98a'; g.fillText(snd ? 'SOUND' : 'CONTROLS', CM.x + 30, CM.y + 44);
+  const tw = g.measureText(snd ? 'SOUND' : 'CONTROLS').width; g.font = '16px ' + ui; g.fillStyle = '#cfc8e8'; g.fillText(devName(m.dev), CM.x + 44 + tw, CM.y + 43);
   g.fillStyle = 'rgba(255,255,255,.1)'; rr(CM.done[0], CM.done[1], CM.done[2], CM.done[3], 17); g.fill(); g.textAlign = 'center'; g.font = 'bold 14px ' + ui; g.fillStyle = '#fff'; g.fillText('Done', CM.done[0] + CM.done[2] / 2, CM.done[1] + 22);
   items.forEach((it, n) => {
     const [x, y, w, h] = it.box, on = n === m.row, my = y + h / 2 + 5;
     g.fillStyle = on ? 'rgba(255,217,138,.14)' : 'rgba(255,255,255,.05)'; rr(x, y, w, h, 8); g.fill(); if (on) { g.strokeStyle = '#ffd98a'; g.lineWidth = 2; g.stroke(); }
-    if (it.kind === 'setup') {
+    if (it.kind === 'page') { g.textAlign = 'center'; g.font = 'bold 14px ' + ui; g.fillStyle = on ? '#fff' : '#ffd98a'; g.fillText(it.to === 'sound' ? '♪  Sound' : '‹  Controls', x + w / 2, my); }
+    else if (it.kind === 'vol') {
+      const S = SND.settings, off = S.mute[it.key], v = S[it.key], b = volBar(it.box);
+      g.textAlign = 'left'; g.font = 'bold 17px ' + ui; g.fillStyle = on ? '#fff' : '#d8d2ee'; g.fillText(it.label, x + 18, my + 1);
+      g.fillStyle = 'rgba(255,255,255,.12)'; rr(b[0], b[1], b[2], b[3], 8); g.fill();
+      if (v > 0) { g.fillStyle = off ? '#6d6885' : '#ffb86b'; rr(b[0], b[1], Math.max(16, b[2] * v), b[3], 8); g.fill(); }
+      g.fillStyle = off ? '#8f88ad' : '#fff'; g.beginPath(); g.arc(b[0] + b[2] * v, b[1] + b[3] / 2, 11, 0, TAU); g.fill();
+      g.textAlign = 'right'; g.font = 'bold 15px ' + ui; g.fillStyle = off ? '#8f88ad' : '#fff'; g.fillText(Math.round(v * 100) + '%', b[0] - 16, my + 1);
+      const px = x + w - 128; g.fillStyle = off ? '#ff7b6c' : 'rgba(255,255,255,.1)'; rr(px, y + 10, 112, h - 20, (h - 20) / 2); g.fill();
+      g.textAlign = 'center'; g.font = 'bold 13px ' + ui; g.fillStyle = off ? '#1a1230' : '#d8d2ee'; g.fillText(off ? 'MUTED' : 'Mute', px + 56, my);
+    } else if (it.kind === 'track') {
+      const name = SND.trackName();
+      g.textAlign = 'left'; g.font = 'bold 17px ' + ui; g.fillStyle = on ? '#fff' : '#d8d2ee'; g.fillText('Battle music', x + 18, my + 1);
+      g.textAlign = 'center'; g.font = 'bold 18px ' + ui; g.fillStyle = '#fff'; g.fillText(name, x + w / 2 + 60, my + 2);
+      const nw = g.measureText(name).width; g.fillStyle = '#ffd98a'; g.fillText('‹', x + w / 2 + 60 - nw / 2 - 24, my + 1); g.fillText('›', x + w / 2 + 60 + nw / 2 + 24, my + 1);
+    }
+    else if (it.kind === 'setup') {
       const name = su.name.replace(/\s+/g, ' ');
       g.textAlign = 'left'; g.font = 'bold 12px ' + ui; spaced(2); g.fillStyle = '#ffb86b'; g.fillText('SETUP', x + 16, my); spaced(0);
       g.textAlign = 'center'; g.font = 'bold 22px ' + ui; g.fillStyle = '#fff'; g.fillText(name, x + w / 2, my + 3);
@@ -158,9 +174,9 @@ function drawCMenu() {
     }
   });
   if (m.noteT > 0) { g.globalAlpha = Math.min(1, m.noteT / 30); g.textAlign = 'center'; g.font = '14px ' + ui; g.fillStyle = '#ffd98a'; g.fillText(m.note, CM.x + CM.w / 2, CM.y + 542); g.globalAlpha = 1; }
-  g.textAlign = 'center'; g.font = '13px ' + ui; g.fillStyle = '#8f88ad'; g.fillText('Two jump buttons together: short hop   ·   Right stick down while falling: fast fall', CM.x + CM.w / 2, CM.y + 568);
-  let hx = CM.x + (kb ? 96 : 250); const hy = CM.y + CM.h - 24;
-  for (const [cap, act] of kb ? [['↑ ↓ ← →', 'choose'], ['Enter', 'change a key'], ['Delete', 'clear it'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'change'], ['Y', 'set to nothing'], ['B', 'done']]) hx = keyHint(hx, hy, cap, act) + 8;
+  g.textAlign = 'center'; g.font = '13px ' + ui; g.fillStyle = '#8f88ad'; g.fillText(snd ? 'The music steps back by itself for heavy hits and KOs, and while the game is paused.' : 'Two jump buttons together: short hop   ·   Right stick down while falling: fast fall', CM.x + CM.w / 2, CM.y + 568);
+  let hx = CM.x + (snd ? 190 : kb ? 96 : 250); const hy = CM.y + CM.h - 24;
+  for (const [cap, act] of snd ? (kb ? [['↑ ↓', 'choose'], ['← →', 'quieter / louder'], ['Enter', 'mute'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'quieter / louder'], ['A', 'mute'], ['B', 'done']]) : kb ? [['↑ ↓ ← →', 'choose'], ['Enter', 'change a key'], ['Delete', 'clear it'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'change'], ['Y', 'set to nothing'], ['B', 'done']]) hx = keyHint(hx, hy, cap, act) + 8;
   g.restore();
 }
 /* the forms the fighter select shows: Wren's companions, the first five Fowls; Joey only as himself (his other form is a surprise) */

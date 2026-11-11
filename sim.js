@@ -82,37 +82,12 @@ function staleMul(a, id) { let r = 0, seen = false; a.stale.forEach((m, k) => { 
 function pushStale(a, id, shield) { a.stale.unshift(shield ? id + '|s' : id); if (a.stale.length > 9) a.stale.pop(); }
 function rage(a) { return a.pct <= 35 ? 1 : a.pct >= 150 ? 1.1 : 1 + (a.pct - 35) / 115 * 0.1; }
 
-/* ---------- Sound ---------- */
-let AC = null;
-function beep(freq, dur, type, vol, slide) {
-  try {
-    if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
-    if (AC.state === 'suspended') AC.resume();
-    const o = AC.createOscillator(), a = AC.createGain(), t = AC.currentTime;
-    o.type = type || 'square'; o.frequency.setValueAtTime(freq, t);
-    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, freq * slide), t + dur);
-    a.gain.setValueAtTime(vol || 0.05, t); a.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(a); a.connect(AC.destination); o.start(t); o.stop(t + dur);
-  } catch (e) { /* no audio */ }
-}
-/* A hit: a short burst of filtered noise over a low thump, longer and deeper for harder hits. The noise is made with its
-   own generator, so playing a sound never disturbs the game's random numbers. */
-let NOISE = null;
-function thwack(kb) {
-  try {
-    if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
-    if (AC.state === 'suspended') AC.resume();
-    if (!NOISE) { NOISE = AC.createBuffer(1, AC.sampleRate * 0.4 | 0, AC.sampleRate); const d = NOISE.getChannelData(0); let q = 12345; for (let k = 0; k < d.length; k++) { q = (q * 1664525 + 1013904223) >>> 0; d[k] = q / 2147483648 - 1; } }
-    const t = AC.currentTime, k = Math.min(1, kb / 160), dur = 0.07 + k * 0.16;
-    const n = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain(); n.buffer = NOISE;
-    f.type = 'bandpass'; f.Q.value = 0.9; f.frequency.setValueAtTime(2600 - k * 1200, t); f.frequency.exponentialRampToValueAtTime(380, t + dur);
-    g.gain.setValueAtTime(0.05 + k * 0.09, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    n.connect(f); f.connect(g); g.connect(AC.destination); n.start(t); n.stop(t + dur);
-    const o = AC.createOscillator(), a = AC.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(170 - k * 60, t); o.frequency.exponentialRampToValueAtTime(45, t + dur * 1.2);
-    a.gain.setValueAtTime(0.06 + k * 0.1, t); a.gain.exponentialRampToValueAtTime(0.0001, t + dur * 1.2);
-    o.connect(a); a.connect(AC.destination); o.start(t); o.stop(t + dur * 1.2);
-  } catch (e) { /* no audio */ }
-}
+/* ---------- Sound ----------
+   The game only names what happened (sfx('parry', x)); audio.js decides what that sounds like. x is where on the stage it
+   happened, for left and right. With no audio.js loaded (the tests, the search tools) every one of these does nothing. */
+function sfx(id, x, o) { if (typeof SND !== 'undefined') SND.play(id, x, o); }
+function thwack(kb, x) { if (typeof SND !== 'undefined') SND.hit(kb, x); }
+function beep(freq, dur, type, vol, slide) { if (typeof SND !== 'undefined') SND.tone(freq, dur, type, vol, slide); }   /* a plain tone: the stand-in for moves with no recording yet */
 
 /* ---------- Input ---------- */
 const keys = {};
@@ -228,43 +203,59 @@ function menuRaw(dev) {
   const b = k => !!(p.buttons[k] && p.buttons[k].pressed), ax = k => p.axes[k] || 0;
   return { x: b(15) || ax(0) > 0.55 ? 1 : b(14) || ax(0) < -0.55 ? -1 : 0, y: b(13) || ax(1) > 0.55 ? 1 : b(12) || ax(1) < -0.55 ? -1 : 0, ok: b(0), back: b(1) || b(8) || b(9), clear: b(3) };
 }
-function openCMenu(dev) { CMENU = { dev, row: 0, capture: false, wait: false, closing: false, note: '', noteT: 0, prev: menuRaw(dev), rep: 0 }; beep(660, 0.06, 'triangle', 0.04); }
+function openCMenu(dev) { CMENU = { dev, page: 'controls', row: 0, capture: false, wait: false, closing: false, note: '', noteT: 0, prev: menuRaw(dev), rep: 0 }; sfx('confirm'); }
 function cmenuNote(t) { CMENU.note = t; CMENU.noteT = 260; }
+/* The Sound page of the same screen: a slider and a mute for music, sound effects and menu sounds, and which battle music plays. */
+const SOUND_ROWS = [['music', 'Music'], ['sfx', 'Sound effects'], ['ui', 'Menu sounds']];
+const CM_TAB = [CM.done[0] - 132, CM.done[1], 120, 34];
+function volBar(box) { return [box[0] + 220, box[1] + 18, box[2] - 220 - 150, 16]; }   /* where a row's slider is drawn (and clicked) */
 function cmenuItems() {   /* the rows, each with the box it is drawn in (the mouse uses the same boxes) */
+  if (CMENU.page === 'sound') {
+    const rows = SOUND_ROWS.map(([key, label], n) => ({ kind: 'vol', key, label, box: [CM.x + 30, CM.y + 96 + n * 66, CM.w - 60, 52] }));
+    rows.push({ kind: 'track', box: [CM.x + 30, CM.y + 96 + 3 * 66, CM.w - 60, 52] }, { kind: 'page', to: 'controls', box: CM_TAB });
+    return rows;
+  }
   const su = setupOf(CMENU.dev), items = [{ kind: 'setup', box: [CM.x + 30, CM.y + 68, CM.w - 60, 46] }];
   if (su.type === 'kb') { const cw = (CM.w - 80) / 2; KB_ROWS.forEach(([key, label], n) => items.push({ kind: 'bind', key, label, box: [CM.x + 30 + (n >= 9 ? cw + 20 : 0), CM.y + 134 + (n % 9) * 36, cw, 32] })); }
   else PAD_ROWS.forEach(([key, label], n) => items.push({ kind: 'bind', key, label, box: [CM.x + 170, CM.y + 130 + n * 33, CM.w - 340, 29] }));
   if (!su.fixed) items.push({ kind: 'reset', box: [CM.x + CM.w / 2 - 160, CM.y + 476, 320, 34] });
+  if (typeof SND !== 'undefined') items.push({ kind: 'page', to: 'sound', box: CM_TAB });   /* last, so the rows above keep their numbers */
   return items;
 }
 /* The setup about to be changed. Changing a built-in one copies it into a Custom setup nobody has touched yet and switches to that. */
 function cmenuEditable() {
   const m = CMENU, su = setupOf(m.dev); if (!su.fixed) return su;
   const free = setupsFor(m.dev).find(s => !s.fixed && !s.touched);
-  if (!free) { cmenuNote('Built-in setups cannot be changed. Switch to a Custom setup and change that one.'); beep(200, 0.08, 'square', 0.03); return null; }
+  if (!free) { cmenuNote('Built-in setups cannot be changed. Switch to a Custom setup and change that one.'); sfx('error'); return null; }
   free.map = Object.assign({}, su.map); free.touched = true; USE[m.dev] = free.id; cmenuNote('Copied "' + su.name.replace(/\s+/g, ' ') + '" into ' + free.name + ', which is yours to change.'); return free;
 }
-function cmenuCycle(d) { const m = CMENU, list = setupsFor(m.dev), n = list.indexOf(setupOf(m.dev)); USE[m.dev] = list[(n + d + list.length) % list.length].id; saveControls(); beep(520, 0.04, 'square', 0.03); }
+function cmenuCycle(d) { const m = CMENU, list = setupsFor(m.dev), n = list.indexOf(setupOf(m.dev)); USE[m.dev] = list[(n + d + list.length) % list.length].id; saveControls(); sfx('toggle'); }
 function cmenuOk(it, d) {
   const m = CMENU;
+  if (it.kind === 'page') { m.page = it.to; m.row = 0; m.wait = true; sfx('confirm'); return; }
+  if (it.kind === 'vol') { SND.mute(it.key); sfx(it.key === 'ui' ? 'toggle' : 'jab_hit_light'); return; }   /* Enter on a slider: mute or unmute */
+  if (it.kind === 'track') { SND.cycleTrack(d); sfx('toggle'); return; }
   if (it.kind === 'setup') cmenuCycle(d);
-  else if (it.kind === 'reset') { const su = setupOf(m.dev); su.map = Object.assign({}, su.base); su.touched = false; saveControls(); cmenuNote(su.name + ' is back to the standard layout.'); beep(380, 0.08, 'triangle', 0.04); }
-  else if (m.dev === 'kb') { if (cmenuEditable()) { m.capture = true; beep(700, 0.04, 'square', 0.03); } }
-  else { const su = cmenuEditable(); if (!su) return; const n = PAD_ACTS.indexOf(su.map[it.key] || ''); su.map[it.key] = PAD_ACTS[(n + d + PAD_ACTS.length) % PAD_ACTS.length]; su.touched = true; saveControls(); beep(520, 0.04, 'square', 0.03); }
+  else if (it.kind === 'reset') { const su = setupOf(m.dev); su.map = Object.assign({}, su.base); su.touched = false; saveControls(); cmenuNote(su.name + ' is back to the standard layout.'); sfx('confirm'); }
+  else if (m.dev === 'kb') { if (cmenuEditable()) { m.capture = true; sfx('confirm'); } }
+  else { const su = cmenuEditable(); if (!su) return; const n = PAD_ACTS.indexOf(su.map[it.key] || ''); su.map[it.key] = PAD_ACTS[(n + d + PAD_ACTS.length) % PAD_ACTS.length]; su.touched = true; saveControls(); sfx('toggle'); }
 }
 function cmenuKey(code) {   /* a key pressed while a row is waiting for one */
   const m = CMENU, it = cmenuItems()[m.row];
   if (code === 'Escape' || !it || it.kind !== 'bind') { m.capture = false; m.wait = true; return; }
-  if (KEY_NO.test(code)) { cmenuNote(keyName(code) + ' is kept for the menus, the move list and debug tools. Press a different key, or Escape to cancel.'); beep(200, 0.08, 'square', 0.03); return; }
+  if (KEY_NO.test(code)) { cmenuNote(keyName(code) + ' is kept for the menus, the move list and debug tools. Press a different key, or Escape to cancel.'); sfx('error'); return; }
   const su = setupOf(m.dev), old = su.map[it.key]; for (const k in su.map) if (k !== it.key && su.map[k] === code) { su.map[k] = old; cmenuNote(keyName(code) + ' was already in use, so the two have swapped.'); }
-  su.map[it.key] = code; su.touched = true; m.capture = false; m.wait = true; saveControls(); beep(800, 0.06, 'triangle', 0.04);
+  su.map[it.key] = code; su.touched = true; m.capture = false; m.wait = true; saveControls(); sfx('ready');
 }
+function cmenuVol(it, v) { SND.set(it.key, v); if (SND.settings.mute[it.key]) SND.mute(it.key, false); sfx(it.key === 'ui' ? 'menu_move' : it.key === 'sfx' ? 'tilt_hit_mid' : 'menu_move'); }
 function cmenuClick(x, y) {
   const m = CMENU; if (!m || m.closing) return;
   if (m.capture) { m.capture = false; return; }
-  if (inBox(CM.done, x, y)) { m.closing = true; saveControls(); beep(420, 0.06, 'triangle', 0.04); return; }
+  if (inBox(CM.done, x, y)) { m.closing = true; saveControls(); sfx('cancel'); return; }
   const items = cmenuItems(), n = items.findIndex(it => inBox(it.box, x, y)); if (n < 0) return;
-  m.row = n; const it = items[n]; cmenuOk(it, x < it.box[0] + it.box[2] / 2 ? -1 : 1);
+  m.row = n; const it = items[n];
+  if (it.kind === 'vol') { const b = volBar(it.box); if (x >= b[0] - 12 && x <= b[0] + b[2] + 12) { cmenuVol(it, clamp((x - b[0]) / b[2], 0, 1)); return; } if (x < b[0]) return; }   /* on the slider: set it there; on the pill to its right: mute */
+  cmenuOk(it, x < it.box[0] + it.box[2] / 2 ? -1 : 1);
 }
 function stepCMenu() {
   const m = CMENU, r = menuRaw(m.dev), p = m.prev; m.prev = r; if (m.noteT > 0) m.noteT--;
@@ -273,18 +264,20 @@ function stepCMenu() {
   if (m.capture) return;
   if (m.wait) { if (idle) m.wait = false; return; }
   const items = cmenuItems(); m.row = Math.min(m.row, items.length - 1); const it = items[m.row];
-  if (r.back && !p.back) { m.closing = true; saveControls(); beep(420, 0.06, 'triangle', 0.04); return; }
+  if (r.back && !p.back) { m.closing = true; saveControls(); sfx('cancel'); return; }
   let dy = 0; if (r.y && r.y !== p.y) { dy = r.y; m.rep = 0; } else if (r.y && ++m.rep > 18 && m.rep % 5 === 0) dy = r.y;
-  if (dy) { m.row = (m.row + dy + items.length) % items.length; beep(440, 0.03, 'square', 0.02); return; }
+  if (dy) { m.row = (m.row + dy + items.length) % items.length; sfx('menu_move'); return; }
   const dx = r.x && r.x !== p.x ? r.x : 0;
-  if (dx) {
-    if (it.kind === 'setup') cmenuCycle(dx);
+  if (dx || (it.kind === 'vol' && r.x && ++m.rep > 18 && m.rep % 4 === 0)) {
+    if (it.kind === 'vol') { if (dx) m.rep = 0; cmenuVol(it, SND.settings[it.key] + (dx || r.x) * 0.05); }
+    else if (it.kind === 'track') cmenuOk(it, dx);
+    else if (it.kind === 'setup') cmenuCycle(dx);
     else if (it.kind === 'bind' && m.dev !== 'kb') cmenuOk(it, dx);
-    else if (it.kind === 'bind') { const n = m.row - 1, t = n >= 9 ? n - 9 : n + 9; if (t < KB_ROWS.length) { m.row = t + 1; beep(440, 0.03, 'square', 0.02); } }   /* keyboard rows sit in two columns */
+    else if (it.kind === 'bind') { const n = m.row - 1, t = n >= 9 ? n - 9 : n + 9; if (t < KB_ROWS.length) { m.row = t + 1; sfx('menu_move'); } }   /* keyboard rows sit in two columns */
     return;
   }
   if (r.ok && !p.ok) cmenuOk(it, 1);
-  else if (r.clear && !p.clear && it.kind === 'bind') { const su = cmenuEditable(); if (su) { su.map[it.key] = ''; su.touched = true; saveControls(); beep(300, 0.05, 'square', 0.03); } }
+  else if (r.clear && !p.clear && it.kind === 'bind') { const su = cmenuEditable(); if (su) { su.map[it.key] = ''; su.touched = true; saveControls(); sfx('cancel'); } }
 }
 function rumble(ctl, ms, strength) {
   if (!ctl || ctl.dev === 'kb' || ctl.dev === 'cpu') return;
@@ -337,7 +330,7 @@ function spark(x, y, col, n, sp) {
 /* The glint of a fast fall starting: a small four-point star. No random numbers, so it never changes how a match plays out. */
 function ffSpark(x, y) {
   for (let k = 0; k < 4; k++) { const a = k * TAU / 4; PART.push({ x, y, vx: Math.cos(a) * 1.5, vy: Math.sin(a) * 1.5, life: 12, col: '#fff3b0', r: 0.55 }); }
-  PART.push({ x, y, vx: 0, vy: 0, life: 10, col: '#ffffff', r: 1.3 }); beep(1700, 0.035, 'sine', 0.012, 1.4);
+  PART.push({ x, y, vx: 0, vy: 0, life: 10, col: '#ffffff', r: 1.3 }); sfx('fastfall', x);
 }
 /* B-reverse: how many frames after a special starts the stick can still turn it round, and the little swirl when it does. */
 const B_REV = 5;
@@ -399,7 +392,7 @@ const lift = (f, vy) => { f.grounded = false; f.plat = null; f.vy = vy; };
 /* Wren's Call: the cue starts on frame 1, the new companion takes over on frame 16 and can act on frame 33. It can be hit
    throughout: a hit before frame 16 leaves the old companion in. 60 frames must pass before the next swap. It hangs in the
    air while it plays (the owner's rule). */
-const SWAP = { t: 32, swap: 1, stall: 1, h: [], on(f, n) { if (n === 1) f.swapLock = 60; if (n === 16) { f.fi = (f.fi + 1) % f.def.forms.length; f.jumps = f.grounded ? (f.st.jumps ?? 1) : Math.min(f.jumps, f.st.jumps ?? 1); spark(f.x, f.y + 7, '#fff', 14, 1.4); beep(660, 0.12, 'triangle', 0.05, 1.6); } } };
+const SWAP = { t: 32, swap: 1, stall: 1, h: [], on(f, n) { if (n === 1) f.swapLock = 60; if (n === 16) { f.fi = (f.fi + 1) % f.def.forms.length; f.jumps = f.grounded ? (f.st.jumps ?? 1) : Math.min(f.jumps, f.st.jumps ?? 1); spark(f.x, f.y + 7, '#fff', 14, 1.4); sfx('form_swap', f.x); } } };
 
 /* ---------- The owner's moveset document (2026-11-10) ----------
    KIT holds, per fighter, each attack's first active frame and damage as the document lists them, with:
@@ -494,7 +487,7 @@ const FLINT = {
     moves: mk(1, 1, 1, 1, {
       /* Banked Coal: released on frame 14. 5% on contact; if it reaches the floor first it leaves one small ember for 45 frames
          (4%). The next coal clears the old ember. */
-      nspec: { t: 40, h: [], on(f, n) { if (n === 14) { shoot(f, { kind: 'ember', solo: 1, vx: 1.4, vy: 1.7, grav: 0.09, r: 3, life: 120, ground: 'stick', h: { d: 5, a: 70, b: 30, k: 40 } }); beep(520, 0.08, 'sawtooth', 0.04, 0.6); } } },
+      nspec: { t: 40, h: [], on(f, n) { if (n === 14) { shoot(f, { kind: 'ember', solo: 1, vx: 1.4, vy: 1.7, grav: 0.09, r: 3, life: 120, ground: 'stick', h: { d: 5, a: 70, b: 30, k: 40 } }); sfx('fire_shot', f.x); } } },
       /* Lamp Rush: a short lantern lunge of about 1.1 H. Active 14 to 18: 10% clean, 7% late. About 21 frames after the swing. */
       sspec: { t: 39, once: 1, nodrift: 1, h: [{ f0: 14, f1: 15, x: 8, y: 8, r: 6, d: 10, a: 50, b: 50, k: 72 }, { f0: 16, f1: 18, x: 8, y: 8, r: 6, d: 7, a: 50, b: 40, k: 55, part: 'late' }],
         on(f, n) { if (n >= 10 && n <= 18) { f.vx = f.face * 1.7; if (!f.grounded) f.vy = 0; } if (n === 19) f.vx *= 0.3; } },
@@ -502,7 +495,7 @@ const FLINT = {
       uspec: { t: 40, helpless: 1, ledge: 1, h: [{ f0: 8, f1: 16, x: 0, y: 10, r: 7, d: 6, a: 85, b: 55, k: 50 }], on(f, n, i) { if (n < 8) hang(f); if (n === 8) { lift(f, f.st.vUp); f.vx = i.lx * 0.7; } } },
       /* Bellows Burst: plants, then blasts a short cone on frames 24 to 26 for 15%. If the cone reaches Flint's ember it uses
          the patch up and sends a low 8% flame a short way further. About 23 frames after the blast. Hangs in the air (owner's rule). */
-      dspec: { t: 49, stall: 1, cast: 1, h: [{ f0: 24, f1: 26, x: 10, y: 7, r: 8.5, d: 15, a: 45, b: 40, k: 95 }], on(f, n) { if (n === 24) { spark(f.x + f.face * 9, f.y + 7, '#f2c14e', 24, 2.2); beep(140, 0.25, 'sawtooth', 0.07, 0.4); bellowsWave(f); } } },
+      dspec: { t: 49, stall: 1, cast: 1, h: [{ f0: 24, f1: 26, x: 10, y: 7, r: 8.5, d: 15, a: 45, b: 40, k: 95 }], on(f, n) { if (n === 24) { spark(f.x + f.face * 9, f.y + 7, '#f2c14e', 24, 2.2); sfx('fire_burst', f.x); bellowsWave(f); } } },
     }, { jabs: 3 }),
   }],
 };
@@ -516,7 +509,7 @@ const WREN = {
       jumps: 1, wallJump: 1, dashF: 10, roll: [24, 1.6, 11], spot: [20, 14] },
     moves: mk(0.85, 1, 0.85, 0.65, {
       /* Quick Bolt: the key ticks and fires a fast 4% bolt on frame 9. Range about 1.8 H. Little flinch, little launch. */
-      nspec: { t: 28, h: [], on(f, n) { if (n === 9) { shoot(f, { kind: 'bolt', solo: 1, oy: 5, vx: 3.2, r: 2.2, life: 5, h: { d: 4, a: 361, b: 8, k: 12 } }); beep(900, 0.06, 'square', 0.03, 1.5); } } },
+      nspec: { t: 28, h: [], on(f, n) { if (n === 9) { shoot(f, { kind: 'bolt', solo: 1, oy: 5, vx: 3.2, r: 2.2, life: 5, h: { d: 4, a: 361, b: 8, k: 12 } }); sfx('bolt_shot', f.x); } } },
       /* False Start: the first nine frames are shared. Let go before frame 10 for a low pounce of about 1.3 H, active 14 to 16
          for 9%, 20 frames after. Hold through frame 10 to stop short at about 0.55 H: no damage, free to act on frame 23.
          In the air only the pounce, once per time off the ground. */
@@ -542,7 +535,7 @@ const WREN = {
     moves: mk(1.3, 1.0, 1.1, 1.05, {
       /* Crossbreeze: a brief forward gust from frame 12 for four frames. The inner pulse deals 3%. The outer pulse pushes
          once, with no damage and no hitstun, less on a grounded target; a shield blocks it. */
-      nspec: { t: 40, h: [{ f0: 12, f1: 15, x: 9, y: 9, r: 6, d: 3, a: 20, b: 30, k: 20 }, { f0: 12, f1: 15, x: 23, y: 9, r: 9, d: 0, wind: 1.9, g: 1 }], on(f, n) { if (n === 12) beep(300, 0.2, 'sine', 0.05, 2); } },
+      nspec: { t: 40, h: [{ f0: 12, f1: 15, x: 9, y: 9, r: 6, d: 3, a: 20, b: 30, k: 20 }, { f0: 12, f1: 15, x: 23, y: 9, r: 9, d: 0, wind: 1.9, g: 1 }], on(f, n) { if (n === 12) sfx('wind_gust', f.x); } },
       /* Ribbon Sling: one ribbon snapped straight out, then a recoil of about 0.3 H. From frame 16: 11% at the weight, 6% on
          the inner ribbon, nothing at point-blank. One recoil per time off the ground. */
       sspec: { t: 46, h: [{ f0: 16, f1: 19, x: 24, y: 9, r: 5, d: 11, a: 361, b: 30, k: 95 }, { f0: 16, f1: 19, x: 14, y: 9, r: 5, d: 6, a: 361, b: 30, k: 60, part: 'near' }],
@@ -567,8 +560,8 @@ const WREN = {
          slower 11% stone on frame 35. Either rolls about 3 H, falls away at a ledge, or breaks on contact. One at a time. */
       nspec: { t: 54, h: [], on(f, n, i) {
         if (n === 1) f.bigStone = true; if (n <= 16 && !i.spc) f.bigStone = false;
-        if (!f.bigStone && n === 21) { shoot(f, { kind: 'boulder', solo: 1, oy: 5, vx: 2.1, vy: 0.5, grav: 0.09, r: 3.2, life: 90, reach: 42, ground: 'roll', h: { d: 7, a: 50, b: 35, k: 55 } }); beep(140, 0.12, 'square', 0.05, 0.7); f.mf = f.move.t - 16; }
-        if (f.bigStone && n === 35) { shoot(f, { kind: 'boulder', solo: 1, oy: 6, vx: 1.35, vy: 0.6, grav: 0.09, r: 4.8, life: 120, reach: 42, ground: 'roll', h: { d: 11, a: 50, b: 40, k: 72 } }); beep(110, 0.15, 'square', 0.06, 0.7); } } },
+        if (!f.bigStone && n === 21) { shoot(f, { kind: 'boulder', solo: 1, oy: 5, vx: 2.1, vy: 0.5, grav: 0.09, r: 3.2, life: 90, reach: 42, ground: 'roll', h: { d: 7, a: 50, b: 35, k: 55 } }); sfx('rock_throw', f.x); f.mf = f.move.t - 16; }
+        if (f.bigStone && n === 35) { shoot(f, { kind: 'boulder', solo: 1, oy: 6, vx: 1.35, vy: 0.6, grav: 0.09, r: 4.8, life: 120, reach: 42, ground: 'roll', h: { d: 11, a: 50, b: 40, k: 72 } }); sfx('rock_throw', f.x, { pitch: 0.8, vol: 1.2 }); } } },
       /* Ram Plate: a low committed charge. On the ground, frames 13 to 19 shrug off one strike of 8% base damage or less (Hod
          still takes the damage; throws and stronger hits stop it). Hits 15 to 21 for 13%; about 25 frames after. In the air
          it carries a short way with no armour. */
@@ -599,7 +592,7 @@ const WREN = {
 const SACK_BLAST = { sweet: { r: 6, d: 15, a: 75, b: 50, k: 112 }, sour: { r: 12, d: 10, a: 70, b: 35, k: 100 } };   /* measured with no DI at centre stage: sweet KOs at 55-90% (most near 70), sour at 105-130% (heavies later) */
 function sackBlast(f, i, at) {   /* at: where the burst is centred (the hot potato's spot when it goes off early), else his middle; no burst hit on someone his body already caught this move */
   const bx = at ? at[0] : f.x, by = at ? at[1] : f.y + 4;
-  spark(bx, by, '#ffb347', 30, 2.6); spark(bx, by, '#ff5a1a', 18, 1.8); beep(120, 0.3, 'sawtooth', 0.08, 0.4); shake = Math.max(shake, 6);
+  spark(bx, by, '#ffb347', 30, 2.6); spark(bx, by, '#ff5a1a', 18, 1.8); sfx('blast', f.x); shake = Math.max(shake, 6);
   if (!(f.hitG && f.hitG.has(1))) for (const part of ['sweet', 'sour']) { const q = SACK_BLAST[part]; shoot(f, { kind: 'blast', grp: 'hotpotato', vx: 0, r: q.r, life: 4, h: { d: q.d, a: q.a, b: q.b, k: q.k, norage: 1 } }); const b = PROJ[PROJ.length - 1]; b.x = bx; b.y = by; }   /* norage: the sack's own damage does not add to it */
   const d = 12; f.pct = Math.min(999, f.pct + d); f.flash = 6; f.blastUsed = !f.grounded || true;
   f.launch(knock(f, d, 100, 70), (90 - clamp(i.lx, -1, 1) * 28) * Math.PI / 180, 1); f.hitlag = 4;
@@ -634,7 +627,7 @@ const SACK = {
         if (!f.scRel) { if (i.spc) { f.scC++; f.mf = 2; if (glow) glow.r = 4 + f.scC * 0.12; return; } f.scRel = f.mf; }
         if (f.mf === f.scRel + 4) { if (glow) glow.life = 0; const c = f.scC;
           PROJ.push({ x: f.x, y: f.y + 5, vx: 0, vy: 0, grav: 0, life: 4, owner: f.idx, face: f.face, r: 7 + c * 0.12, ground: 'pass', plat: null, kind: 'blast', h: { d: +(8 + c * 0.15).toFixed(1), a: 50, b: 50, k: 96, id: 'Potato Sack:spudbomb' } });
-          spark(f.x, f.y + 5, '#ffb347', Math.min(80, 20 + c / 4 | 0), 2 + Math.min(6, c / 60)); beep(90, 0.35, 'sawtooth', 0.09, 0.4); shake = Math.max(shake, Math.min(20, 6 + c / 30)); }
+          spark(f.x, f.y + 5, '#ffb347', Math.min(80, 20 + c / 4 | 0), 2 + Math.min(6, c / 60)); sfx('blast', f.x, { pitch: 0.85, vol: 1.2 }); shake = Math.max(shake, Math.min(20, 6 + c / 30)); }
         if (f.mf >= f.scRel + 24) { if (glow) glow.life = 0; f.mf = f.move.t; } } },
       sspec: { t: 50, once: 1, nodrift: 1, ll: 14, h: [{ f0: 10, f1: 22, x: 7, y: 6, r: 6, grab: 1, cmd: 's', d: 0 }], on(f, n) { if (n === 8) { lift(f, 1.6); f.vx = f.face * 2.3; } } },
       /* Hot Potato (owner's request, 2026-11-11): on frame 4 he tosses a flaming potato straight up over his head; it drops back
@@ -684,7 +677,7 @@ const SPROCKET = {
       /* Tape Roll: flicked low on frame 16. On flat ground it runs outward for about 22 frames, then curls back toward where
          it was let go. From the air it drops to the floor first. 6%; breaks on a fighter or a shield, or falls away at the
          ledge. One roll at a time. */
-      nspec: { t: 42, h: [], on(f, n) { if (n === 16) { shoot(f, { kind: 'tape', solo: 1, oy: 3, vx: 1.3, vy: 0.2, grav: 0.09, r: 2.4, life: 130, ground: 'roll', back: 22, h: { d: 6, a: 60, b: 30, k: 40 } }); beep(420, 0.07, 'triangle', 0.04, 0.8); } } },
+      nspec: { t: 42, h: [], on(f, n) { if (n === 16) { shoot(f, { kind: 'tape', solo: 1, oy: 3, vx: 1.3, vy: 0.2, grav: 0.09, r: 2.4, life: 130, ground: 'roll', back: 22, h: { d: 6, a: 60, b: 30, k: 40 } }); sfx('tape_roll', f.x); } } },
       /* Hook Wrench: plants the lead foot and reaches up and forward with the open wrench, frames 16 to 19. The head deals 9%
          and tugs the target a little inward; the handle deals 7% and pushes outward. About 22 frames after the swing. */
       sspec: { t: 41, h: [{ f0: 16, f1: 19, x: 12, y: 15, r: 5, d: 9, a: 115, b: 38, k: 22 }, { f0: 16, f1: 19, x: 6.5, y: 11, r: 4.5, d: 7, a: 40, b: 40, k: 60, part: 'near' }] },
@@ -702,7 +695,7 @@ const SPROCKET = {
 /* Scuttle: a soot crab living in a coal scuttle, with one claw grown into a pair of fire tongs. A low, quick skirmisher
    (frames, damage and movement from the owner's document for fighter 01; the names, look and moves are Emberfall's own).
    Gets under a swing, makes two quick hits count, and calls the landing with its up smash. Short reach and light. */
-function scuttleImpact(f) { shoot(f, { kind: 'blast', ox: 0.01, oy: 2, vx: 0, r: 8, life: 3, h: { d: 10, a: 63, b: 39, k: 74 } }); spark(f.x, f.y + 1, '#c9c2b8', 18, 2); beep(110, 0.18, 'square', 0.06, 0.5); shake = Math.max(shake, 4); }
+function scuttleImpact(f) { shoot(f, { kind: 'blast', ox: 0.01, oy: 2, vx: 0, r: 8, life: 3, h: { d: 10, a: 63, b: 39, k: 74 } }); spark(f.x, f.y + 1, '#c9c2b8', 18, 2); sfx('blast', f.x, { vol: 0.8 }); shake = Math.max(shake, 4); }
 const SCUTTLE = {
   name: 'Scuttle', sub: 'the coal crab', forms: [{
     name: 'Scuttle', col: ['#b5692f', '#2b2a2e', '#ff9a3c'], alt: ['#6f7f86', '#2b2a2e', '#7fe0ff'], reachMul: 1.0,
@@ -765,8 +758,8 @@ function fowlNormals(m, src, unit, cy, jabs) {
   return m;
 }
 function fowlLate(mv, d) { const h = mv.h[0], cut = h.f0 + Math.max(1, Math.round((h.f1 - h.f0) * 0.35)); mv.h.push(Object.assign({}, h, { f0: cut + 1, d, k: Math.round(h.k * 0.8), part: 'late' })); h.f1 = cut; }
-function fowlBoom(p) { const b = p.boom; PROJ.push({ x: p.x, y: p.y, vx: 0, vy: 0, grav: 0, life: 4, owner: p.owner, face: p.face, r: b.r, ground: 'pass', plat: null, kind: 'blast', h: { d: b.d, a: 70, b: 40, k: b.k || 70, id: p.h.id + ':boom' } }); spark(p.x, p.y, '#ffb347', 18, 2); beep(120, 0.2, 'sawtooth', 0.06, 0.5); }
-function fowlRejoin(f) { const s = f.sling; f.x = s.x; f.y = s.y; f.fi -= 5; f.sling = null; f.move = null; f.vx = f.vy = 0; f.jumps = Math.min(f.jumps, f.st.jumps); f.grounded = !!s.plat; f.plat = s.plat; f.set(f.grounded ? 'idle' : 'air'); spark(f.x, f.y + 8, '#fff', 12, 1.4); beep(520, 0.08, 'triangle', 0.05, 1.2); }
+function fowlBoom(p) { const b = p.boom; PROJ.push({ x: p.x, y: p.y, vx: 0, vy: 0, grav: 0, life: 4, owner: p.owner, face: p.face, r: b.r, ground: 'pass', plat: null, kind: 'blast', h: { d: b.d, a: 70, b: 40, k: b.k || 70, id: p.h.id + ':boom' } }); spark(p.x, p.y, '#ffb347', 18, 2); sfx('blast', p.x, { vol: 0.8, pitch: 1.15 }); }
+function fowlRejoin(f) { const s = f.sling; f.x = s.x; f.y = s.y; f.fi -= 5; f.sling = null; f.move = null; f.vx = f.vy = 0; f.jumps = Math.min(f.jumps, f.st.jumps); f.grounded = !!s.plat; f.plat = s.plat; f.set(f.grounded ? 'idle' : 'air'); spark(f.x, f.y + 8, '#fff', 12, 1.4); sfx('bird_reload', f.x); }
 function fowlSlings() {   /* the empty slingshot: it falls to the floor, and comes back by the nearest ledge if it is lost */
   for (const f of F) { const s = f.sling; if (!s) continue;
     if (!s.plat) { const y0 = s.y; s.vy = Math.max(s.vy - 0.1, -2.4); s.y += s.vy; for (const q of PLATS) if (y0 >= q.y && s.y <= q.y && s.x >= q.x0 && s.x <= q.x1) { s.plat = q; s.y = q.y; s.vy = 0; } }
@@ -886,7 +879,7 @@ function fowlLaunch(f, name) {
   if (L.mates) for (const side of [1, -1]) pipMate(f, (o, p) => { const sp = Math.hypot(o.vx, o.vy) || 1, ux = o.vx / sp, uy = o.vy / sp;
       if (p.age > 20 || !o.flying) { p.ghost = true; const th = p.age * 0.3 + (side > 0 ? 0 : Math.PI); return [o.x + 6 * Math.cos(th), o.y + 3.5 + 6 * Math.sin(th)]; }   /* the formation breaks into a close orbit */
       return [o.x - ux * 6 - uy * 5 * side, o.y + 3.5 - uy * 6 + ux * 5 * side]; }, 50, { d: 2, a: 50, b: 25, k: 40 });
-  spark(f.x, f.y, '#fff', 14, 2); beep(300, 0.12, 'square', 0.06, 1.6);
+  spark(f.x, f.y, '#fff', 14, 2); sfx('bird_launch', f.x);
 }
 function fowlFlyEnd(f, name, how) {   /* how: 'hit', 'shield' or 'free' */
   f.flying = false; const c = f.ctl.c;
@@ -1645,7 +1638,7 @@ function vCounter(v, a, hx, hy) {
   a.hitlag = 14; v.hitlag = 6; v.face = sgn(a.x - v.x) || v.face; const p = v.axe;
   v.startMove('dspecHit');   /* dspecHitE when the axe is away (startMove) */
   if (p && p.st === 'stuck') { p.st = 'home'; p.target = a.idx; p.t = vTier(v, p); p.h = vAxeHit(p.t, { a: 75, id: 'Fyrdsman:home' }); p.ghost = false; p.plat = null; p.sp = VAXE.sp0; p.n = 0; p.vx = 0; p.vy = 2; spark(p.x, p.y, '#ff5a1e', 22, 2); }
-  spark(hx, hy, '#ffcf6a', 18, 1.8); pop(hx, hy + 12, 'COUNTER', '#ff9a4a'); beep(880, 0.08, 'triangle', 0.05, 0.6);
+  spark(hx, hy, '#ffcf6a', 18, 1.8); pop(hx, hy + 12, 'COUNTER', '#ff9a4a'); sfx('brace', hx);
 }
 const VARGAN = (() => {
   const U = 18.5, q = v => Math.round(v * U * 100) / 100;   /* his height H: 7.2 ft (2.19 m) against the roster's 16 for six feet and a bit */
@@ -1885,11 +1878,11 @@ class Fighter {
     const c = this.ctl; if (c.tfReq) { c.tfReq = false; if (!this.tfLatch && this.exStart < 0) this.tfPend = true; }   /* a request during TAKE FIVE is dropped, not saved for later */
     if (this.tfPend && !this.tfLatch && this.hitlag === 0 && TF_READY[this.state]) {
       this.tfLatch = true; this.tfPend = false; this.tfStart = frame; this.fat = 0; this.exPend = false; this.exStart = -1; this.restT = 0; this.freeVictim(); this.move = null; this.charge = 0; PROJ = PROJ.filter(p => p.owner !== this.idx);
-      if (this.grounded) this.vx = 0; this.set('grow'); beep(330, 0.12, 'triangle', 0.05, 1.3);
+      if (this.grounded) this.vx = 0; this.set('grow'); sfx('transformation_start', this.x); sfx('joey_transform_voice');   /* the voice note: loud on purpose, through a terrible microphone (audio.js) */
     }
     if (!this.tfLatch) return; const e = frame - this.tfStart;
     if (e >= 180 && this.fi === 0) { this.fi = 1; this.punchC = 0;
-      if (this.state === 'grow') { this.jumps = this.st.jumps ?? 1; this.set(this.grounded ? 'idle' : 'air'); spark(this.x, this.y + 2, '#d8c49a', 22, 1.8); beep(120, 0.25, 'sawtooth', 0.07, 0.6); shake = Math.max(shake, 6); } }
+      if (this.state === 'grow') { this.jumps = this.st.jumps ?? 1; this.set(this.grounded ? 'idle' : 'air'); spark(this.x, this.y + 2, '#d8c49a', 22, 1.8); sfx('transformation_complete', this.x); shake = Math.max(shake, 6); } }
     else if (e < 180 && this.state !== 'grow' && this.state !== 'dead' && this.state !== 'respawn') { this.move = null; this.set('grow'); this.sf = e; }
     if (e === 180 + 1 || e === 300) beep(e === 300 ? 520 : 990, 0.08, 'sine', 0.04, e === 300 ? 0.8 : 1.2);   /* the protected moment starts, and ends */
   }
@@ -1900,7 +1893,7 @@ class Fighter {
   exhausted() { return this.exStart >= 0; }
   /* Dodges used back to back protect for less time and leave more lag. */
   dodge() { this.ds = this.dodgeStale; this.dodgeStale = Math.min(5, this.dodgeStale + 1); this.dodgeT = 0; }
-  set(s) { this.state = s; this.sf = 0; }
+  set(s) { this.state = s; this.sf = 0; if (s === 'roll' || s === 'spot') sfx('roll', this.x); }
   startMove(n) {
     if (this.axeAway && n[n.length - 1] !== 'E' && this.form.moves[n + 'E']) n += 'E';   /* Fyrdsman with his axe away: the unarmed version, chosen once as the move starts */
     const m = this.form.moves[n]; if (this.def.transform) this.effort(FAT.move[n]); this.move = m; this.mname = n; this.mf = 0; this.charge = 0; this.chargeT = 0; this.aim = 0;
@@ -1978,7 +1971,7 @@ class Fighter {
     if (c.take('jmp')) { this.set('jsq'); return true; }
     if (i.shd && !this.wdHold) { c.buf.shd = 0; this.set('shield'); return true; }
     if (this.plat.soft && c.downBuf > 0) { c.downBuf = 0; this.drop(); return true; }
-    if (c.dashDir) { this.face = c.dashDir; this.set('dash'); return true; }
+    if (c.dashDir) { this.face = c.dashDir; this.set('dash'); sfx('dash_start', this.x); return true; }
     return false;
   }
   airActs() {
@@ -1993,15 +1986,15 @@ class Fighter {
       const o = F[1 - this.idx];
       if (o && canBeHit(o) && o.state !== 'ledge' && this.vy <= 0.6 && Math.abs(this.x - o.x) < o.st.w / 2 + 2.5 && this.y >= o.y + o.st.h - 3 && this.y <= o.y + o.st.h + 4.5) {
         c.buf.jmp = 0; this.vy = s.vJump * 0.92; this.ff = false; this.shortHop = false; this.y = Math.max(this.y, o.y + o.st.h);
-        o.footstooled(); spark(this.x, this.y, '#fff', 12, 1.4); pop(this.x, this.y + 8, 'STOMP', '#fff'); beep(640, 0.07, 'triangle', 0.05, 1.5); return false;
+        o.footstooled(); spark(this.x, this.y, '#fff', 12, 1.4); pop(this.x, this.y + 8, 'STOMP', '#fff'); sfx('footstool', this.x); return false;
       }
     }
     /* wall jump (only some fighters): flick away from a wall just touched */
     if (s.wallJump && this.wallT > 0 && c.dashDir === this.wall && this.wallJumps < 2) {
       this.wallJumps++; this.wallT = 0; this.vy = s.vJump * 0.92; this.vx = this.wall * 1.5; this.face = this.wall; this.ff = false;
-      spark(this.x - this.wall * 3, this.y + 4, '#fff', 10, 1.2); beep(560, 0.05, 'sine', 0.04, 1.4); return false;
+      spark(this.x - this.wall * 3, this.y + 4, '#fff', 10, 1.2); sfx('wall_bonk', this.x); return false;
     }
-    if (c.buf.jmp > 0 && this.jumps > 0) { c.buf.jmp = 0; this.jumps--; this.shortHop = false; this.vy = s.vAir * (1 - 0.1 * Math.max(0, (s.jumps ?? 1) - 1 - this.jumps)); if (Math.abs(i.lx) > 0.2) this.vx = i.lx * s.airSpeed * s.airJumpX; this.ff = false; spark(this.x, this.y, '#fff', 6, 0.8); beep(500, 0.05, 'sine', 0.03, 1.4); }
+    if (c.buf.jmp > 0 && this.jumps > 0) { c.buf.jmp = 0; this.jumps--; this.shortHop = false; this.vy = s.vAir * (1 - 0.1 * Math.max(0, (s.jumps ?? 1) - 1 - this.jumps)); if (Math.abs(i.lx) > 0.2) this.vx = i.lx * s.airSpeed * s.airJumpX; this.ff = false; spark(this.x, this.y, '#fff', 6, 0.8); sfx('double_jump', this.x); }
     this.fastFall();
     return false;
   }
@@ -2017,14 +2010,14 @@ class Fighter {
       this.touchDown(best);
     }
     const sp = ang <= T.wd_long_angle ? T.wd_long_speed : ang <= T.wd_down_angle ? T.wd_short_speed : 0;
-    this.ctl.buf.shd = 0; this.wdHold = true; this.vx = sgn(i.lx) * sp; this.vy = 0; this.move = null; this.set('wd'); spark(this.x, this.y, '#cfd8ff', 8, 0.9);
+    this.ctl.buf.shd = 0; this.wdHold = true; this.vx = sgn(i.lx) * sp; this.vy = 0; this.move = null; this.set('wd'); spark(this.x, this.y, '#cfd8ff', 8, 0.9); sfx('wavedash', this.x);
     return true;
   }
   airdodge() {
     const i = this.ctl.c, mag = Math.hypot(i.lx, i.ly); this.effort(FAT.airdodge); this.airdodged = true; this.ff = false; this.dodge();
     this.adDir = mag > 0.3; if (this.adDir) { this.vx = i.lx / mag * 2.7; this.vy = i.ly / mag * 2.7; }
     const dd = this.st.ad && this.st.ad.dir; if (this.adDir && dd) { const a = Math.atan2(i.ly, Math.abs(i.lx)) * 180 / Math.PI; this.adFaf = dd[a < -67.5 ? 0 : a < -22.5 ? 1 : a < 22.5 ? 2 : a < 67.5 ? 3 : 4]; }   /* down, down-sideways, sideways, up-sideways, up */
-    this.set('airdodge');
+    this.set('airdodge'); sfx('air_dodge', this.x);
   }
   /* Hoppers: which part of the hop this frame is. Returns the speed multiplier while moving, 0 while planted. */
   hopGate(c) { const ph = this.hopT++ % (c[0] + c[1]); return ph < c[0] ? c[2] : 0; }
@@ -2046,7 +2039,7 @@ class Fighter {
   }
   touchDown(p, fromLedge) { if (!fromLedge) this.ledgeGrabs = 0; this.airUse = {}; this.flying = false; this.grounded = true; this.plat = p; this.y = p.y; this.vy = 0; this.jr = 0; this.stalled = false; this.burstUsed = false; this.blastUsed = false; this.slingUsed = false; this.dairUsed = false; this.wallJumps = 0; this.jumps = this.st.jumps ?? 1; this.airdodged = false; this.sideUsed = false; this.ff = false; this.shortHop = false; }
   land(p) {
-    const st = this.state, hard = this.ff; this.touchDown(p);
+    const st = this.state, hard = this.ff; this.touchDown(p); if (st !== 'hurt') sfx(hard ? 'land_hard' : 'land_soft', this.x);
     if (st === 'attack' && this.move.burst) {   /* a tumble never falls over: a dive that reaches the floor carries on as a slide, anything else lands ready to act */
       if (this.burstKind === 'dive') { this.burstKind = 'slide'; spark(this.x, this.y, '#ddd', 8, 1.2); } else { this.move = null; this.set('idle'); }
     }
@@ -2058,9 +2051,9 @@ class Fighter {
       if (this.tumble && this.sf < this.hitstun) {
         const lx = this.ctl.c.lx;
         if (this.techT > 0) {
-          this.techT = 0; this.invuln = 20; spark(this.x, this.y, '#9ff', 10, 1.2); beep(900, 0.05, 'triangle', 0.04);
+          this.techT = 0; this.invuln = 20; spark(this.x, this.y, '#9ff', 10, 1.2); sfx('tech', this.x);
           if (Math.abs(lx) > 0.5) { this.rollDir = sgn(lx); this.ds = 0; this.set('roll'); } else { this.vx = 0; this.lag = 26; this.set('land'); }
-        } else { this.downBack = this.vx * this.face < 0; this.vx *= 0.5; spark(this.x, this.y, '#ddd', 8, 1.2); beep(130, 0.08, 'square', 0.05); this.set('down'); }   /* downBack: carried backward, so lying on the back */
+        } else { this.downBack = this.vx * this.face < 0; this.vx *= 0.5; spark(this.x, this.y, '#ddd', 8, 1.2); sfx('tech_miss', this.x); this.set('down'); }   /* downBack: carried backward, so lying on the back */
       } else { this.lag = 4; this.set('land'); }
     }
     else if (st === 'helpless') { this.lag = this.helpLag || 12; this.helpLag = 0; this.set('land'); }
@@ -2077,7 +2070,7 @@ class Fighter {
   /* Being hit always gives the up special back: the once-per-trip ones (Potato Sack's blast, the Fowls' cyclone, Joey's Spot Me!)
      are ready again, and a launch out of helpless is an ordinary tumble. The other once-per-trip specials are left as they are. */
   upBack() { const u = this.form.moves.uspec; if (u && u.blast) this.blastUsed = false; if (u && u.burst) this.burstUsed = false; if (this.airUse) delete this.airUse.spot; this.helpLag = 0; }
-  breakShield() { this.shieldHp = SHIELD.hp * 0.75;   /* Ultimate: a broken shield comes back at 75% */ this.grounded = false; this.plat = null; this.vy = 3.2; this.vx = 0; this.set('broken'); spark(this.x, this.y + 8, '#9cf', 30, 2.4); beep(200, 0.4, 'sawtooth', 0.08, 0.3); shake = 10; }
+  breakShield() { this.shieldHp = SHIELD.hp * 0.75;   /* Ultimate: a broken shield comes back at 75% */ this.grounded = false; this.plat = null; this.vy = 3.2; this.vx = 0; this.set('broken'); spark(this.x, this.y + 8, '#9cf', 30, 2.4); sfx('shield_break', this.x); shake = 10; }
   launch(kb, ang, dir, lsi) {
     this.freeVictim(); this.selOpen = false; const sp = kb * 0.03 * (lsi || 1); this.sdi = 0; this.tumble = kb >= TUMBLE_KB; this.ledgeGrabs = 0; this.shortHop = false; this.vx = Math.cos(ang) * sp * dir; this.vy = Math.sin(ang) * sp;
     this.hitstun = Math.max(4, Math.floor(kb * HITSTUN * COMBO_EASE) - 1); this.move = null; this.ff = false; this.linkT = 0;
@@ -2088,7 +2081,7 @@ class Fighter {
   ko() {
     const top = this.y > BLAST.t - 5;
     spark(clamp(this.x, BLAST.l + 20, BLAST.r - 20), clamp(this.y, BLAST.b + 20, BLAST.t - 20), this.idx ? '#6cb4ff' : '#ff7b6c', 60, top ? 4 : 5);
-    beep(90, 0.6, 'sawtooth', 0.1, 0.3); shake = 16; rumble(this.ctl, 400, 1); this.stale = [];
+    sfx('blastzone_ko', clamp(this.x, -160, 160)); sfx('stock_lost'); shake = 16; rumble(this.ctl, 400, 1); this.stale = [];
     const o = F[1 - this.idx]; if (o.victim === this) o.victim = null; this.freeVictim();
     if (this.def.fowl) { this.sling = null; if (this.fi >= 5) this.fi -= 5; }   /* a lost stock puts the bird back in the pouch */
     this.stocks--; if (TRAINING) this.stocks = STOCKS; F[1 - this.idx].kos++;   /* training: stocks never run out */ this.move = null; this.vx = this.vy = 0; this.grounded = false; this.plat = null; this.set('dead'); PROJ = PROJ.filter(p => p.owner !== this.idx);
@@ -2159,7 +2152,7 @@ class Fighter {
         if (c.cFall && Math.abs(this.vx) > s.run * 0.35 && sgn(this.vx) === this.face && Math.abs(i.lx) > 0.5 && sgn(i.lx) === -this.face && Math.abs(i.lx) >= Math.abs(i.ly)) this.face = -this.face;
         if (c.buf.atk > 0) { if (i.ly > 0.5 && c.ySmash) { c.buf.atk = 0; this.startMove('usmash'); break; } this.shMacro = true; }
         if (this.sf >= s.jsq) { this.grounded = false; this.plat = null; this.jumps = s.jumps ?? 1; this.shortHop = !i.jmp || this.shMacro || c.jmp2Age <= this.sf + T.buffer; this.effort(FAT.jump);   /* let go early, attack with the jump, or two jump buttons together */ if (this.shortHop) this.vy = s.vHop; else { this.vy = this.jrV = s.boost[0]; this.jr = 1; } const rar = c.cFall && Math.abs(this.vx) > s.run * 0.35 && sgn(this.vx) === -this.face;   /* facing against the slide: a reverse aerial rush keeps the run's speed (the stick is not taken off it), ready for a back air */
-          this.vx = clamp(this.vx * s.jumpXMul + (Math.abs(i.lx) > 0.2 && !rar ? i.lx * s.jumpX : 0), -s.jumpXMax, s.jumpXMax); this.set('air'); beep(420, 0.05, 'sine', 0.03, 1.5); if (this.shMacro) { this.shMacro = false; if (c.take('atk')) this.startMove(this.aerial(i.lx, i.ly)); } else if (this.cAir) this.startMove(this.aerial(this.cAir[0], this.cAir[1])); this.cAir = null; }
+          this.vx = clamp(this.vx * s.jumpXMul + (Math.abs(i.lx) > 0.2 && !rar ? i.lx * s.jumpX : 0), -s.jumpXMax, s.jumpXMax); this.set('air'); sfx(this.shortHop ? 'jump_short' : 'jump_full', this.x); if (this.shMacro) { this.shMacro = false; if (c.take('atk')) this.startMove(this.aerial(i.lx, i.ly)); } else if (this.cAir) this.startMove(this.aerial(this.cAir[0], this.cAir[1])); this.cAir = null; }
         break;
       case 'wd':
         this.vx = appr(this.vx, 0, T.wd_friction);
@@ -2184,6 +2177,7 @@ class Fighter {
         else if (!m.ownPhys) { this.airPhys(!m.nodrift); if (m.air) this.fastFall(); }   /* ownPhys: the move moves the fighter itself */
         /* A smash is charged by keeping attack held: its power grows for a second, and it can be held back for two more. */
         if (m.chg && this.mf === m.chg && this.chargeT < (m.chgHold || SMASH_HOLD) && i.atk) { this.chargeT++; if (this.charge < 60) this.charge++; } else this.mf++;
+        if (m.h.length && this.mf === m.h[0].f0 && !m.h[0].grab && this.hitlag <= 0) { const wd = m.h[0].d || 5; sfx('whiff_whoosh', this.x, { pitch: clamp(1.5 - wd / 14, 0.6, 1.5), vol: 0.7 + Math.min(0.9, wd / 14) }); }   /* the swing itself, deeper and louder for a heavier move */
         if (m.inv && this.mf === m.inv[0]) this.invuln = Math.max(this.invuln, m.inv[1] - m.inv[0]);   /* some moves cannot be hit for a few frames */
         /* B-reverse: in a special's first few frames, pull the stick the other way to turn round; in the air the drift turns round too.
            With a turnaround special first (back held as special is pressed) it becomes a wavebounce. Once per special; not for up specials. */
@@ -2267,7 +2261,7 @@ class Fighter {
         v.x = this.x + this.face * 8; v.y = this.y; v.vx = v.vy = 0; v.face = -this.face;
         if (this.sf > 6) {
           if (this.pumT > 0) this.pumT--;
-          const pumHit = () => { v.pct += (this.st.pummel || 1.3) * DMG_1V1; v.flash = 5; spark(v.x, v.y + 8, '#fff', 4, 0.8); beep(260, 0.04, 'square', 0.04); };
+          const pumHit = () => { v.pct += (this.st.pummel || 1.3) * DMG_1V1; v.flash = 5; spark(v.x, v.y + 8, '#fff', 4, 0.8); sfx('pummel', v.x); };
           if (this.pumHit > 0 && --this.pumHit === 0) pumHit();   /* pumAt: a pummel whose hit lands a few frames after the press */
           if (this.pumT === 0 && c.take('atk')) { this.effort(FAT.pummel); this.pumT = this.st.pumT || 14; if (this.st.pumAt > 1) this.pumHit = this.st.pumAt - 1; else pumHit(); }
           if (this.st.pumLock && this.pumT > 0) break;   /* pumLock: the pummel runs on its own clock; nothing else until its free frame */
@@ -2288,7 +2282,7 @@ class Fighter {
         if (this.sf === (tw.f || 10) && v) {
           const h = tw, id = this.form.name + ':throw' + this.throwK, d = h.d * staleMul(this, id) * DMG_1V1; pushStale(this, id);
           this.victim = null; v.grounded = false; v.plat = null; v.pct = Math.min(999, v.pct + d); v.grabImm = 60;
-          comboHit(this, v, d, true); v.launch(knock(v, d, h.b, h.k) * rage(this), h.a * Math.PI / 180, this.face); v.hitlag = 6; this.hitlag = 6; spark(v.x, v.y + 8, '#fff', 12, 1.6); thwack(90);
+          comboHit(this, v, d, true); v.launch(knock(v, d, h.b, h.k) * rage(this), h.a * Math.PI / 180, this.face); v.hitlag = 6; this.hitlag = 6; spark(v.x, v.y + 8, '#fff', 12, 1.6); thwack(90, v.x); sfx('throw', v.x);
         }
         if (!this.grounded) this.vy = 0;   /* a catch in the air hangs there for the fling */
         if (this.sf >= (tw.t || 26)) this.set(this.grounded ? 'idle' : 'air');
@@ -2360,7 +2354,7 @@ class Fighter {
     this.ledgeGrabs++; this.shortHop = false;
     this.x = side * (EDGE + hw + 0.5); this.y = -s.h + 1; this.vx = this.vy = 0; this.face = -side; this.move = null; this.ff = false;
     this.jumps = s.jumps ?? 1; this.wallJumps = 0; this.airdodged = false; this.sideUsed = false; this.stalled = false; this.airUse = {}; this.ledgeInv = Math.round(LEDGE_INV(this.airT, this.pct) * (LEDGE_REGRAB[this.ledgeGrabs - 1] || 0));   /* Ultimate's rule: longer in the air earns more, damage takes it away, and regrabs before landing or being hit earn less, then none */
-    this.set('ledge'); beep(700, 0.04, 'triangle', 0.03);
+    this.set('ledge'); sfx('ledge_grab', this.x);
   }
   integrate() {
     const st = this.state, s = this.st, i = this.ctl.c;
@@ -2394,7 +2388,7 @@ class Fighter {
           if (this.techT > 0 && Math.abs(this.vx) > 0.8) {
             this.techT = 0; this.vx = 0; this.vy = Math.max(this.vy, 0); this.invuln = 14; this.set('air');
             if (i.jmp || i.ly > 0.5) { this.vy = s.vJump * 0.9; this.vx = side * 1.1; }
-            spark(this.x, this.y + s.h / 2, '#9ff', 12, 1.4); pop(this.x, this.y + s.h + 4, 'TECH', '#9ff'); beep(900, 0.05, 'triangle', 0.04);
+            spark(this.x, this.y + s.h / 2, '#9ff', 12, 1.4); pop(this.x, this.y + s.h + 4, 'TECH', '#9ff'); sfx('tech', this.x);
           } else {
             if (Math.abs(this.vx) > 1.5) spark(this.x, this.y + s.h / 2, '#ddd', 8, 1.2);
             if (this.vx * side < 0) this.vx = -this.vx * 0.7;   /* thrown against the island, rim or rock: back out the way they came, never down under it */
@@ -2486,9 +2480,9 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   if (h.grab) {
     if (v.state === 'held' || v.state === 'hold' || a.state !== 'attack' || (!a.grounded && !h.cmd)) return;   /* a grab that traded with a hit loses */
     if (h.cmd) {   /* a grab that is its own throw: caught and flung in one motion, on the ground or in the air */
-      v.freeVictim(); a.move = null; a.victim = v; a.throwK = h.cmd; a.vx = a.vy = 0; a.set('throw'); v.move = null; v.grounded = false; v.plat = null; v.set('held'); beep(330, 0.06, 'triangle', 0.05); return;
+      v.freeVictim(); a.move = null; a.victim = v; a.throwK = h.cmd; a.vx = a.vy = 0; a.set('throw'); v.move = null; v.grounded = false; v.plat = null; v.set('held'); sfx('grab', hx); sfx('throw', hx, { delay: 0.08 }); return;
     }
-    v.freeVictim(); a.move = null; a.set('hold'); a.victim = v; a.holdT = Math.min(300, 90 + v.pct * 1.7); a.pumT = 0; a.pumHit = 0; v.move = null; v.grounded = false; v.plat = null; v.set('held'); beep(330, 0.06, 'triangle', 0.05); return;
+    v.freeVictim(); a.move = null; a.set('hold'); a.victim = v; a.holdT = Math.min(300, 90 + v.pct * 1.7); a.pumT = 0; a.pumHit = 0; v.move = null; v.grounded = false; v.plat = null; v.set('held'); sfx('grab', hx); return;
   }
   if (!proj && a.parriedBy === v) return;
   if (h.wind) {   /* a gust: no damage and no hitstun, just a shove, weaker on someone standing; a shield stops it */
@@ -2504,10 +2498,10 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   if (!proj && !h.grab && v.state === 'attack' && v.move && v.move.vCounter && v.mf >= v.move.vCounter[0] && v.mf <= v.move.vCounter[1]) { vCounter(v, a, hx, hy); return; }   /* Fyrdsman's counter takes any strike, from either side */
   if (v.state === 'shieldoff' && v.sf <= SHIELD.parry) {
     v.set('idle'); v.invuln = 4; if (!proj) { a.hitlag = 16; a.parriedBy = v; }
-    spark(hx, hy, '#fff', 20, 2); pop(hx, hy + 12, 'PARRY', '#fff'); beep(1200, 0.12, 'triangle', 0.07, 1.3); return;
+    spark(hx, hy, '#fff', 20, 2); pop(hx, hy + 12, 'PARRY', '#fff'); sfx('parry', hx); return;
   }
   if (!proj && !h.grab && v.state === 'attack' && v.move && v.move.counter && v.mf >= v.move.counter[0] && v.mf <= v.move.counter[1] && sgn(a.x - v.x) === v.face) {
-    if (h.d <= v.move.counterMax) { a.hitlag = 12; v.hitlag = 6; v.startMove('dcounter'); spark(hx, hy, '#ffd98a', 16, 1.8); pop(hx, hy + 12, 'BRACE', '#ffd98a'); beep(880, 0.08, 'triangle', 0.05, 0.6); return; }
+    if (h.d <= v.move.counterMax) { a.hitlag = 12; v.hitlag = 6; v.startMove('dcounter'); spark(hx, hy, '#ffd98a', 16, 1.8); pop(hx, hy + 12, 'BRACE', '#ffd98a'); sfx('brace', hx); return; }
     d *= 0.5;   /* a strong hit overpowers the brace, for half its damage */
   }
   /* A guard window (Brand's Shield Bash): on the ground it stops one light strike that comes in from the front, for the
@@ -2528,7 +2522,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
     const sm = proj ? SHIELD.stun.proj : a.move && a.move.air ? SHIELD.stun.air : a.move && a.move.chg ? SHIELD.stun.smash : SHIELD.stun.ground;
     if (v.shieldHp <= 0) v.breakShield(); else { v.stunT = Math.floor(d * sm) + 2; v.set('shieldstun'); v.vx = (sgn(v.x - srcX) || face) * Math.min(1.3, (v.stunT + 1) * 0.09); }   /* pushback as in Ultimate: (shieldstun + 1) x 0.09, at most 1.3 */
     const hl = Math.min(20, Math.floor((d * 0.65 + 6) * 0.67)); v.hitlag = hl; if (!proj) a.hitlag = hl;
-    spark(hx, hy, '#9cf', 6, 1); beep(400, 0.05, 'triangle', 0.04); return;
+    spark(hx, hy, '#9cf', 6, 1); sfx('shield_hit', hx); return;
   }
   const chained = v.state === 'hurt' || v.state === 'held' || v.hitlag > 0;
   v.pct = Math.min(999, v.pct + d); v.flash = 6; v.upBack(); if (!proj && a.move && a.move.cast) a.castHit = true; comboHit(a, v, d, chained);
@@ -2538,15 +2532,15 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   /* Armour: a move either shrugs off anything short of a hard launch, or (armorMax) takes one strike of that base damage or less, on the ground only. */
   const am = v.state === 'attack' && v.move && v.move.armor && v.mf >= v.move.armor[0] && v.mf <= v.move.armor[1] ? v.move : null;
   const sa = v.state === 'attack' && v.move && (v.grounded ? v.move.sarm : (v.move.sarmAir || v.move.sarm));   /* super armour: no flinch at all for those frames (the damage is still taken) */
-  if (sa && v.mf >= sa[0] && v.mf <= sa[1]) { v.hitlag = hl; if (!proj) a.hitlag = hl; spark(hx, hy, '#ffcf8a', 10, 1.2); beep(150, 0.06, 'square', 0.05); return; }
+  if (sa && v.mf >= sa[0] && v.mf <= sa[1]) { v.hitlag = hl; if (!proj) a.hitlag = hl; spark(hx, hy, '#ffcf8a', 10, 1.2); sfx('armor_clang', hx); return; }
   if (h.bury && v.grounded) {   /* buried: stuck in the floor for a time that grows with the launch it would have had */
     v.freeVictim(); v.move = null; v.vx = v.vy = 0; v.buryT = Math.min(180, Math.round(kb * 0.6) + 12); v.set('buried'); v.hitlag = hl; if (!proj) a.hitlag = hl;
-    spark(hx, v.y, '#c9a27a', 18, 1.6); pop(hx, hy + 10, 'BURIED', '#e0b98a'); thwack(kb); shake = Math.max(shake, 6); return; }
-  if (am && (am.armorMax ? v.grounded && h.d <= am.armorMax && v.armorLeft > 0 : kb < 95)) { if (am.armorMax) v.armorLeft--; v.hitlag = hl; if (!proj) a.hitlag = hl; spark(hx, hy, '#ccc', 8, 1); beep(150, 0.06, 'square', 0.05); return; }
+    spark(hx, v.y, '#c9a27a', 18, 1.6); pop(hx, hy + 10, 'BURIED', '#e0b98a'); thwack(kb, hx); shake = Math.max(shake, 6); return; }
+  if (am && (am.armorMax ? v.grounded && h.d <= am.armorMax && v.armorLeft > 0 : kb < 95)) { if (am.armorMax) v.armorLeft--; v.hitlag = hl; if (!proj) a.hitlag = hl; spark(hx, hy, '#ccc', 8, 1); sfx('armor_clang', hx); return; }
   /* 361 is the "natural" angle: flat along the ground for weak hits, steeper as the hit gets stronger, 45 in the air. */
   let deg = h.a !== 361 ? h.a : !v.grounded ? 38 : kb < 60 ? 0 : kb >= 88 ? 38 : (kb - 60) / 28 * 38;   /* Ultimate's values (SmashWiki "Sakurai angle") */
   if (!proj && a.aim) deg = Math.max(0, deg + a.aim * 8);   /* an angled tilt sends a little higher or lower */
-  let ang = deg * Math.PI / 180;
+  let ang = deg * Math.PI / 180; if (deg > 240 && deg < 300 && !v.grounded && kb > 70) sfx('spike', hx);
   let dir = h.away ? (sgn(v.x - srcX) || face) : face;
   if (h.drag) { const tx = a.face * (v.y + v.st.h / 2 - (a.y + FP)), ty = -a.face * (v.x - a.x); ang = Math.atan2(ty, tx); dir = 1; }   /* along the spin: forward over the top, back along the bottom */
   /* Directional influence: the stick bends the launch up to about 10 degrees. */
@@ -2559,7 +2553,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   if (h.link) { v.tumble = false; v.grounded = false; v.plat = null; v.hitstun = v.linkT = h.link[2]; v.vx = face * h.link[0] / h.link[2]; v.vy = h.link[1] / h.link[2]; }   /* a linking hit: the target is moved a set distance over a set time, whatever its damage, so the next hit of the move connects */   /* carry: caught and taken along (sackCarry) */   /* carried along with a travelling rig (see fowlCarry) */ v.hitlag = hl; if (!proj) a.hitlag = hl; rumble(v.ctl, 60 + kb, Math.min(1, 0.25 + kb / 150)); rumble(a.ctl, 50, 0.25);
   if (wouldKO(v)) {   /* a hit that will KO lands harder: longer freeze, a bigger burst, and slow motion if it takes the last stock */
     v.hitlag += 8; if (!proj) a.hitlag += 8; shake = Math.max(shake, 14); rumble(v.ctl, 300, 1);
-    spark(hx, hy, '#ff5a4d', 40, 4.2); spark(hx, hy, '#ffe9a8', 24, 2.6); beep(70, 0.5, 'sawtooth', 0.11, 0.5);
+    spark(hx, hy, '#ff5a4d', 40, 4.2); spark(hx, hy, '#ffe9a8', 24, 2.6); sfx('ko_hit', hx);
     if (v.stocks === 1) { slowT = 54; focus = { x: hx, y: hy };
       if (!TRAINING && !finalT) {   /* the match-ending hit: the red final-hit screen */
         finalT = FINAL_FREEZE; FINAL = { v: v.idx, a: a && a.idx !== undefined ? a.idx : 1 - v.idx, x: hx, y: hy, ang: Math.atan2(v.vy, v.vx), t0: frame };
@@ -2567,11 +2561,11 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
         shake = 0; rumble(v.ctl, 600, 1); if (a && a.ctl) rumble(a.ctl, 400, 0.8);
         beep(55, 0.9, 'sawtooth', 0.13, 0.4); beep(1400, 0.35, 'triangle', 0.06, 2.2); } }
   }
-  if (h.haft) { spark(hx, hy, '#c8b49a', Math.min(14, 4 + kb / 12 | 0), 0.8); thwack(kb * 0.6); beep(120, 0.07, 'triangle', 0.06, 0.7); }   /* Fyrdsman's axe handle: a dull wooden knock, no flare */
+  if (h.haft) { spark(hx, hy, '#c8b49a', Math.min(14, 4 + kb / 12 | 0), 0.8); thwack(kb * 0.6, hx); beep(120, 0.07, 'triangle', 0.06, 0.7); }   /* Fyrdsman's axe handle: a dull wooden knock, no flare */
   else {
   spark(hx, hy, kb > 110 ? '#ffd166' : '#fff', Math.min(40, 6 + kb / 6 | 0), 1 + kb / 80);
   if (kb > 110) shake = Math.max(shake, 8);
-  thwack(kb); }
+  thwack(kb, hx); }
 }
 function resolveHits() {
   for (const f of F) { if (f.px === undefined) { f.px = f.x; f.py = f.y; } }
@@ -2587,13 +2581,13 @@ function resolveHits() {
       if (dx * dx + dy * dy > (h0.r + h1.r) * (h0.r + h1.r)) continue;
       const mx = (a.x + h0.x * a.face + b.x + h1.x * b.face) / 2, my = (hitY(a, h0) + hitY(b, h1)) / 2, diff = h0.d - h1.d;
       if (diff < 9) a.rebound(h1.d); if (diff > -9) b.rebound(h0.d);
-      spark(mx, my, '#fff', 16, 1.8); pop(mx, my + 8, 'CLANK', '#fff'); beep(1000, 0.06, 'square', 0.05, 0.7); shake = Math.max(shake, 5);
+      spark(mx, my, '#fff', 16, 1.8); pop(mx, my + 8, 'CLANK', '#fff'); sfx('clank', mx); shake = Math.max(shake, 5);
       break clank;
     }
   }
   for (const p of PROJ) {
     const a = F[1 - p.owner]; if (p.life <= 0 || !a || p.ghost || p.noClash || (p.gndBreak && !a.grounded)) continue;   /* noClash: Fyrdsman's axe is never put out */
-    for (const h of live(a)) { const dx = a.x + h.x * a.face - p.x, dy = hitY(a, h) - p.y; if (dx * dx + dy * dy <= (h.r + p.r) * (h.r + p.r) && h.d + 9 > p.h.d) { p.life = 0;   /* an attack puts out a projectile less than 9% stronger than itself */ spark(p.x, p.y, '#fff', 8, 1.2); beep(700, 0.04, 'triangle', 0.04); break; } }
+    for (const h of live(a)) { const dx = a.x + h.x * a.face - p.x, dy = hitY(a, h) - p.y; if (dx * dx + dy * dy <= (h.r + p.r) * (h.r + p.r) && h.d + 9 > p.h.d) { p.life = 0;   /* an attack puts out a projectile less than 9% stronger than itself */ spark(p.x, p.y, '#fff', 8, 1.2); sfx('projectile_cancel', p.x); break; } }
   }
   for (const a of F) {
     const v = F[1 - a.idx];
@@ -2808,7 +2802,7 @@ function startMatch(stocks) {   /* stocks: an online match plays with the host's
   for (const c of [c0, c1]) { c.tfAge = 99; c.tfReq = false; }
   F = [new Fighter(0, ROSTER[s0.pick], c0, false), new Fighter(1, ROSTER[s1.pick], c1, s1.pick === s0.pick)];
   for (const c of COMBO) Object.assign(c, { hits: 0, dmg: 0, last: null, best: null, t: 0 });
-  PROJ = []; PART = []; POPS = []; timer = MATCH_FRAMES; sudden = false; slowT = 0; focus = null; finalT = 0; FINAL = null; countdown = 190; paused = false; mode = 'countdown'; cam.x = 0; cam.y = 30; cam.s = 3.4;
+  PROJ = []; PART = []; POPS = []; timer = MATCH_FRAMES; sudden = false; slowT = 0; focus = null; finalT = 0; FINAL = null; countdown = 190; paused = false; mode = 'countdown'; sfx('confirm'); cam.x = 0; cam.y = 30; cam.s = 3.4;
 }
 /* Start screen: the fighters chosen so far stand on the island, for show only (nothing here is played). They are
    rebuilt whenever a choice changes; Wren's three companions take turns. The camera sits close on the island. */
@@ -2849,7 +2843,7 @@ function optInput(c) {
   if (c.pressed('spc') || c.pressed('start') || c.pressed('sel') || (esc && !OPT_UI.esc)) { OPT_UI.esc = esc; optClose(); return; }
   if (c.dev === 'kb') OPT_UI.esc = esc;
   const lx = c.c.lx, ly = c.c.ly, hx = lx > 0.6 ? 1 : lx < -0.6 ? -1 : 0, vy = Math.abs(ly) > 0.6 && Math.abs(ly) > Math.abs(lx) ? sgn(ly) : 0;
-  if (vy && vy !== c.ov) { OPT_UI.row = (OPT_UI.row - vy + 3) % 3; beep(440, 0.03, 'square', 0.02); } c.ov = vy;
+  if (vy && vy !== c.ov) { OPT_UI.row = (OPT_UI.row - vy + 3) % 3; sfx('menu_move'); } c.ov = vy;
   if (OPT_UI.row < 2) { if (hx && hx === c.oh) { if (++c.orep > 20 && c.orep % 4 === 0) optChange(OPT_UI.row, hx); } else if (hx) { c.orep = 0; optChange(OPT_UI.row, hx); } } c.oh = hx;
   if (c.pressed('atk')) { if (OPT_UI.row === 2) optClose(); else if (OPT_UI.row === 0 && OPT.stocks >= 99) { OPT.stocks = 1; saveOpt(); beep(450, 0.04, 'square', 0.03); }   /* A past 99 goes round to 1 */ else optChange(OPT_UI.row, 1); }
 }
@@ -2872,9 +2866,9 @@ let CPU_PICK = -1; const CPU_TOK = { x: 0, y: 0, drag: false, dx: 0, dy: 0 };
 function cpuTokHome() { if (CPU_PICK >= 0) { const b = rosterTile(CPU_PICK); CPU_TOK.x = b[0] + b[2] - 44; CPU_TOK.y = b[1] + b[3] - 60; } else { CPU_TOK.x = CPU_CARD[0] + 236; CPU_TOK.y = CPU_CARD[1] + 40; } }
 cpuTokHome();
 function cpuTokOn(x, y) { return mode === 'select' && !slots[1] && Math.hypot(x - (CPU_TOK.x + 24), y - (CPU_TOK.y + 24)) < 24; }
-function cpuGrab(x, y) { if (!cpuTokOn(x, y)) return false; CPU_TOK.drag = true; CPU_TOK.dx = CPU_TOK.x - x; CPU_TOK.dy = CPU_TOK.y - y; beep(600, 0.04, 'triangle', 0.03); return true; }
-function cpuDrag(x, y) { if (!CPU_TOK.drag) return; CPU_TOK.x = clamp(x + CPU_TOK.dx, 0, W - 48); CPU_TOK.y = clamp(y + CPU_TOK.dy, 0, H - 48); const k = tileUnder(CPU_TOK.x, CPU_TOK.y); if (k >= 0 && k !== CPU_PICK) { CPU_PICK = k; beep(440, 0.03, 'square', 0.02); } }
-function cpuDrop(x, y) { if (!CPU_TOK.drag) return; cpuDrag(x, y); CPU_TOK.drag = false; CPU_PICK = tileUnder(CPU_TOK.x, CPU_TOK.y); cpuTokHome(); beep(CPU_PICK >= 0 ? 800 : 420, 0.06, 'triangle', 0.04); }
+function cpuGrab(x, y) { if (!cpuTokOn(x, y)) return false; CPU_TOK.drag = true; CPU_TOK.dx = CPU_TOK.x - x; CPU_TOK.dy = CPU_TOK.y - y; sfx('fighter_select'); return true; }
+function cpuDrag(x, y) { if (!CPU_TOK.drag) return; CPU_TOK.x = clamp(x + CPU_TOK.dx, 0, W - 48); CPU_TOK.y = clamp(y + CPU_TOK.dy, 0, H - 48); const k = tileUnder(CPU_TOK.x, CPU_TOK.y); if (k >= 0 && k !== CPU_PICK) { CPU_PICK = k; sfx('menu_move'); } }
+function cpuDrop(x, y) { if (!CPU_TOK.drag) return; cpuDrag(x, y); CPU_TOK.drag = false; CPU_PICK = tileUnder(CPU_TOK.x, CPU_TOK.y); cpuTokHome(); sfx(CPU_PICK >= 0 ? 'ready' : 'cancel'); }
 function stepSelect() {
   selectPreview(); if (QUIT_ASK > 0) QUIT_ASK--;
   for (const dev of allDevs()) {
@@ -2883,22 +2877,22 @@ function stepSelect() {
     if (typeof ML !== 'undefined' && ML.open) { if (dev === ML.dev) mlInput(c); continue; }
     if (OPT_UI.open) { optInput(c); continue; }   /* the Options panel: any controller or the keyboard works it */   /* a move list is open (movelist.js): only its player turns the pages */
     if (c.pressed('sel')) { openCMenu(dev); return; }   /* Backspace, or - on a controller: the controls screen for that device */
-    if (c.pressed('jmp')) { setBoxes(!DBG.boxes); beep(DBG.boxes ? 700 : 420, 0.05, 'square', 0.03); }   /* jump button: show or hide hitboxes */
-    if (c.pressed('shd')) { setHitFx(!DBG.fx); beep(DBG.fx ? 700 : 420, 0.05, 'square', 0.03); }   /* shield button: hit sparks and flash on or off */
+    if (c.pressed('jmp')) { setBoxes(!DBG.boxes); sfx('toggle'); }   /* jump button: show or hide hitboxes */
+    if (c.pressed('shd')) { setHitFx(!DBG.fx); sfx('toggle'); }   /* shield button: hit sparks and flash on or off */
     let sl = slots.find(s => s && s.dev === dev);
-    if (!sl) { if (c.pressed('atk') || c.pressed('start')) { const k = slots[0] ? (slots[1] ? -1 : 1) : 0; if (k >= 0) { const tb = rosterTile(k); slots[k] = { dev, pick: k, ready: false, cx: tb[0] + tb[2] / 2, cy: tb[1] + tb[3] + 46 }; beep(600, 0.06, 'triangle', 0.05); } } continue; }
+    if (!sl) { if (c.pressed('atk') || c.pressed('start')) { const k = slots[0] ? (slots[1] ? -1 : 1) : 0; if (k >= 0) { const tb = rosterTile(k); slots[k] = { dev, pick: k, ready: false, cx: tb[0] + tb[2] / 2, cy: tb[1] + tb[3] + 46 }; sfx('fighter_select'); } } continue; }
     /* Each player has a cursor moved with the stick (or the arrow keys). Pointing at a fighter shows it; Attack there picks it.
        On the CPU card, Attack raises the level and Special lowers it. Special anywhere else takes back a pick, then leaves. */
     if (sl.cx === undefined) { const tb = rosterTile(sl.pick); sl.cx = tb[0] + tb[2] / 2; sl.cy = tb[1] + tb[3] + 46; }
     const mag = Math.hypot(c.c.lx, c.c.ly); if (mag > 0.15) { const sp = 4 + 9 * Math.min(1, mag); sl.cx = clamp(sl.cx + c.c.lx / mag * sp, 8, W - 8); sl.cy = clamp(sl.cy - c.c.ly / mag * sp, 8, H - 8); }
     const over = tileUnder(sl.cx, sl.cy), onCpu = !slots[1] && inBox(CPU_CARD, sl.cx, sl.cy);
-    if (over >= 0 && !sl.ready && sl.pick !== over) { sl.pick = over; beep(440, 0.03, 'square', 0.02); }
+    if (over >= 0 && !sl.ready && sl.pick !== over) { sl.pick = over; sfx('menu_move'); }
     /* The CPU's fighter: point at its token and press Attack to pick it up, move it onto a fighter, Attack again to put it down
        (the mouse can still drag it). Off any fighter, it goes back to random. */
     if (sl.tok) { CPU_TOK.x = clamp(sl.cx - 24, 0, W - 48); CPU_TOK.y = clamp(sl.cy - 24, 0, H - 48); CPU_TOK.drag = true;
-      if (c.pressed('atk') || c.pressed('spc') || slots[1]) { sl.tok = false; CPU_TOK.drag = false; if (!slots[1] && c.pressed('atk')) CPU_PICK = tileUnder(sl.cx, sl.cy); cpuTokHome(); beep(CPU_PICK >= 0 ? 800 : 420, 0.06, 'triangle', 0.04); }
+      if (c.pressed('atk') || c.pressed('spc') || slots[1]) { sl.tok = false; CPU_TOK.drag = false; if (!slots[1] && c.pressed('atk')) CPU_PICK = tileUnder(sl.cx, sl.cy); cpuTokHome(); sfx(CPU_PICK >= 0 ? 'ready' : 'cancel'); }
       continue; }
-    if (c.pressed('atk') && !CPU_TOK.drag && cpuTokOn(sl.cx, sl.cy)) { sl.tok = true; beep(600, 0.04, 'triangle', 0.03); continue; }
+    if (c.pressed('atk') && !CPU_TOK.drag && cpuTokOn(sl.cx, sl.cy)) { sl.tok = true; sfx('fighter_select'); continue; }
     /* + (Start, or the + key) while pointing at a fighter opens its move list; once everyone is ready, Start fights instead */
     if (typeof mlOpen === 'function' && dev === 'kb' && mlPlusKey()) { if (over >= 0) mlOpen(ROSTER[over], 0, c, 0, true); else setSwitches(!SWITCHES); continue; }
     if (c.pressed('start')) { if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; } if (typeof mlOpen === 'function' && over >= 0) { mlOpen(ROSTER[over], 0, c, 0, true); continue; } setSwitches(!SWITCHES); continue; }   /* anywhere else: hide or show the switches */
@@ -2906,22 +2900,22 @@ function stepSelect() {
       if (inBox(OPT_PILL, sl.cx, sl.cy)) { optOpen(); continue; }
       if (SWITCHES && DESKTOP() && inBox(ONLINE_PILL, sl.cx, sl.cy)) { if (window.openOnline) window.openOnline(); beep(600, 0.05, 'square', 0.03); continue; }
       if (SWITCHES && DESKTOP() && inBox(QUIT_PILL, sl.cx, sl.cy)) { if (QUIT_ASK > 0) window.close(); else { QUIT_ASK = 150; beep(300, 0.08, 'square', 0.04); } continue; }   /* press twice to quit */
-      if (SWITCHES && inBox(TRAIN_PILL, sl.cx, sl.cy)) { setTraining(!TRAINING); beep(TRAINING ? 700 : 420, 0.05, 'square', 0.03); }
+      if (SWITCHES && inBox(TRAIN_PILL, sl.cx, sl.cy)) { setTraining(!TRAINING); sfx('toggle'); }
       if (SWITCHES && inBox(ARC_PILL, sl.cx, sl.cy)) { setArcs(!DBG.arcs); beep(DBG.arcs ? 700 : 420, 0.05, 'square', 0.03); }
       else if (onCpu) { setCpuLevel(CPU_LEVEL + 1 > 9 ? 0 : CPU_LEVEL + 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
-      else if (over >= 0) { sl.pick = over; sl.ready = true; beep(800, 0.08, 'triangle', 0.05); }
+      else if (over >= 0) { sl.pick = over; sl.ready = true; sfx('ready'); }
       else if (sl.ready && slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; }
     } else if (c.pressed('spc')) {
       if (onCpu) { setCpuLevel(CPU_LEVEL - 1 < 0 ? 9 : CPU_LEVEL - 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
-      else if (sl.ready) sl.ready = false;
-      else { slots[slots.indexOf(sl)] = null; if (!slots[0] && slots[1]) { slots[0] = slots[1]; slots[1] = null; } }
+      else if (sl.ready) { sl.ready = false; sfx('cancel'); }
+      else { sfx('cancel'); slots[slots.indexOf(sl)] = null; if (!slots[0] && slots[1]) { slots[0] = slots[1]; slots[1] = null; } }
     }
   }
 }
 function pollMatch() {
   for (const f of F) f.ctl.poll(f.ctl.dev === 'cpu' ? (mode === 'play' ? cpuInput(f, F[1 - f.idx], f.ctl.ai) : blankIn()) : readDev(f.ctl.dev));
 }
-function finish(text) { result = text; mode = 'over'; overT = 0; beep(300, 0.5, 'triangle', 0.08, 2); }
+function finish(text) { result = text; mode = 'over'; overT = 0; }   /* the victory sound plays as the mode changes (audio.js) */
 function resetFighters() {
   PROJ = []; slowT = 0; focus = null; finalT = 0; FINAL = null; shake = 0;
   for (const f of F) { if (f.def.fowl) { f.sling = null; f.fi %= 5; } if (f.def.transform) { f.fi = 0; f.tfLatch = f.tfPend = false; f.tfStart = -1; f.ctl.tfReq = false; } f.freeVictim(); f.victim = null; f.stocks = STOCKS; f.spawn(true); for (const k in f.ctl.buf) f.ctl.buf[k] = 0; }
@@ -2929,10 +2923,10 @@ function resetFighters() {
 }
 function stepPlay() {
   const starter = F.find(f => f.ctl.dev !== 'cpu' && f.ctl.pressed('start'));
-  const quit = () => { paused = false; mode = 'select'; for (const s of slots) if (s) s.ready = false; F = []; PROJ = []; PART = []; POPS = []; beep(300, 0.1, 'triangle', 0.05); };
+  const quit = () => { paused = false; mode = 'select'; for (const s of slots) if (s) s.ready = false; F = []; PROJ = []; PART = []; POPS = []; sfx('cancel'); };
   if (paused && typeof pauseMenuStep === 'function') {   /* the pause menu and the move list (movelist.js) */
     const r = pauseMenuStep(starter); if (r === 'held') return; if (r === 'resume') { paused = false; return; } if (r === 'exit') { quit(); return; } }
-  if (starter) { paused = !paused; if (paused) { PAUSED_BY = starter.idx; PAUSE_SEL = 0; } return; }
+  if (starter) { paused = !paused; sfx(paused ? 'pause' : 'resume'); if (paused) { PAUSED_BY = starter.idx; PAUSE_SEL = 0; } return; }
   if (paused) {   /* paused: Special leaves the match and goes back to the fighter select */
     const cm = F.find(f => f.ctl.dev !== 'cpu' && f.ctl.pressed('sel')); if (cm) { openCMenu(cm.ctl.dev); return; }
     if (F.some(f => f.ctl.dev !== 'cpu' && f.ctl.pressed('spc'))) quit();
@@ -2957,7 +2951,7 @@ function stepPlay() {
   else if (timer <= 0) {
     const [a, b] = F; let w = a.stocks !== b.stocks ? (a.stocks > b.stocks ? a : b) : Math.round(a.pct) !== Math.round(b.pct) ? (a.pct < b.pct ? a : b) : null;
     if (w) finish((w.def.name + ' WINS').toUpperCase());
-    else { sudden = true; timer = 1e9; for (const f of F) { f.pct = 300; f.stocks = 1; } pop(0, 60, 'SUDDEN DEATH', '#ff8a7a'); beep(200, 0.6, 'sawtooth', 0.08, 2); }
+    else { sudden = true; timer = 1e9; for (const f of F) { f.pct = 300; f.stocks = 1; } pop(0, 60, 'SUDDEN DEATH', '#ff8a7a'); sfx('sudden_death'); }
   }
 }
 /* Camera numbers, in stage units. padX/padUp/padDown: room kept round each fighter. min/max: how far out and in it may zoom
@@ -2997,7 +2991,7 @@ function step() {
   if (CMENU) { stepCMenu(); if (mode === 'select') selectPreview(); return; }   /* the controls screen holds everything else still */
   if (mode === 'select') { stepSelect(); return; }
   pollMatch(); if (!paused) tick++;
-  if (mode === 'countdown') { countdown--; if (countdown === 130 || countdown === 90 || countdown === 50) beep(440, 0.1, 'square', 0.05); if (countdown === 10) beep(880, 0.3, 'square', 0.06); if (countdown <= 10) mode = 'play'; }
+  if (mode === 'countdown') { countdown--; if (countdown === 130 || countdown === 90 || countdown === 50) sfx('count_3_2_1'); if (countdown === 10) sfx('go'); if (countdown <= 10) mode = 'play'; }
   else if (mode === 'play') stepPlay();
   else if (mode === 'over') { overT++; if (overT < 90) { for (const f of F) { if (overT % 3 === 0) f.update(); } } if (overT > 100 && F.some(f => f.ctl.dev !== 'cpu' && (f.ctl.pressed('start') || f.ctl.pressed('atk')))) { mode = 'select'; for (const s of slots) if (s) s.ready = false; F = []; } }
   stepFx();
