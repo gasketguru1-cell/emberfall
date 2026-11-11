@@ -1010,8 +1010,11 @@ const FOWLS = { name: 'Furious Fowls', sub: 'five birds and a slingshot', fowl: 
 (function () {
   const base = FLINT.forms[0].st, COL = { Rusty: ['#b5533a', '#f1d7a8', '#f6a623'], Bolt: ['#f2b91e', '#2f6f78', '#fff3c4'], Cinder: ['#3a3134', '#a8623a', '#f26b1d'], Pip: ['#2bb8b0', '#bfeccd', '#ffffff'], Pearl: ['#f3e2cf', '#c9736b', '#ffffff'] };
   const UPH = { Rusty: 26, Bolt: 26, Cinder: 30, Pip: 20, Pearl: 34 };
+  /* The body box in the slingshot covers the whole slingshot with the bird in its pouch (the owner, 2026-11-11), so it is as tall as
+     each bird sits: measured from the drawn models with auditHurtboxes() in tools/audit.js. The width (FW) already spans the slingshot. */
+  const SLH = { Rusty: 16.5, Bolt: 16.5, Cinder: 18.5, Pip: 15.5, Pearl: 17 };   /* the tallest each reaches through its idle bob */
   const stat = (b, solo) => Object.assign({}, base, { weight: Math.round(base.weight * b.weight / 100 * (solo ? 0.8 : 1)), walk: +(base.walk * b.run).toFixed(2), dash: +(base.dash * b.run * (solo ? 1.05 : 1)).toFixed(2), run: +(base.run * b.run * (solo ? 1.05 : 1)).toFixed(2),
-    airSpeed: +(base.airSpeed * b.air).toFixed(2), grav: +(base.grav * b.grav).toFixed(3), fall: +(base.fall * b.grav).toFixed(2), ffall: +(base.ffall * b.grav).toFixed(2), w: solo ? FB : FW, h: solo ? 7 : 15, jf: solo ? 2.6 : 3.4, jb: solo ? 1.4 : 2,
+    airSpeed: +(base.airSpeed * b.air).toFixed(2), grav: +(base.grav * b.grav).toFixed(3), fall: +(base.fall * b.grav).toFixed(2), ffall: +(base.ffall * b.grav).toFixed(2), w: solo ? FB : FW, h: solo ? 7 : SLH[b.name], jf: solo ? 2.6 : 3.4, jb: solo ? 1.4 : 2,
     upH: solo ? UPH[b.name] : undefined, pummel: solo ? 1 : FN[b.name].pum });
   const combined = FOWL.forms.map(b => { const C = FOWL.combined, nm = b.name, L = LAUNCH[nm];
     const m = fowlNormals(mk(1, 1, 1, 1, {
