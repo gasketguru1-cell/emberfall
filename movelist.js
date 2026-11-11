@@ -201,29 +201,30 @@ const MOVE_TEXT = {
     d: ['Into the Ash', 'Pins the opponent down and pops them up in front.'],
   },
   Brand: {
-    nspec: ['Hot Iron Thrust', 'Tap for a quick thrust on frames 14 to 16. Keep special held through frame 9 and she draws the arm back for a slower thrust on frames 24 to 26 that hits harder and reaches about a third further. Hold it to catch someone who dodged early. In the air it lands for 16 frames (20 for the held one).', 'Tap f14 · 11%  ·  held f24 · 15%'],
-    sspec: ['Stove Door Bash', 'Raises the stove door on frames 5 to 8, then steps in and bashes on frames 12 to 14. On the ground the raised door stops one strike of 8% or less that comes in from the front: it costs shield like a block and the bash still comes out. Stronger hits, hits from behind or above, grabs and projectiles get through. 24 frames to recover, hit or miss. In the air there is no guard, the bash does 8% and landing takes 17 frames.', 'Guard f5-8 (one hit, 8% or less)  ·  bash f12 · 10%  ·  air 8%'],
-    uspec: ['Watchfire Rise', 'A rising cut on frames 7 to 9, then straight up about two body lengths by frame 25 with very little steering. She can take the ledge from frame 11. Brand falls helpless after and takes 20 frames to land. The cut contests someone low; from above she is open.'],
-    dspec: ['Night Step', 'On the ground, steps back out of a swing on frames 4 to 8 (never off an edge), steps in again and cuts low on frames 15 to 17. Her body can still be hit during the step. In the air there is no step, only the cut. A miss leaves her open until frame 40.'],
-    jab: ['Hilt Rap, Quick Cut, Watch Cut', 'A rap with the hilt, a short cut and a cross cut that pushes the opponent back out to the range of the blade. Press again on frames 7 to 13, then 8 to 15, for the next one.'],
-    dash: ['Door Drive', 'Drives in shoulder-first behind the stove door, a short step with one solid hit. Covers someone crossing over her.'],
+    nspec: ['Vorpal Thrust', 'Tap for a quick thrust on frames 14 to 16. Keep special held through frame 9 and she draws the arm back for a slower thrust on frames 24 to 26 that hits harder and reaches about a third further. Hold it to catch someone who dodged early. In the air it lands for 16 frames (20 for the held one).', 'Tap f14 · 11%  ·  held f24 · 15%'],
+    sspec: ['Shield Bash', 'Raises the stove door on frames 5 to 8, then steps in and bashes on frames 12 to 14. On the ground the raised door stops one strike of 8% or less that comes in from the front: it costs shield like a block and the bash still comes out. Stronger hits, hits from behind or above, grabs and projectiles get through. 24 frames to recover, hit or miss. In the air there is no guard, the bash does 8% and landing takes 17 frames.', 'Guard f5-8 (one hit, 8% or less)  ·  bash f12 · 10%  ·  air 8%'],
+    uspec: ['Ember Rise', 'A rising cut on frames 7 to 9, then straight up about two body lengths by frame 25 with very little steering. She can take the ledge from frame 11. Brand falls helpless after and takes 20 frames to land. The cut contests someone low; from above she is open.'],
+    dspec: ['Grave Step', 'On the ground, steps back out of a swing on frames 4 to 8 (never off an edge), steps in again and cuts low on frames 15 to 17. Her body can still be hit during the step. In the air there is no step, only the cut, with ordinary drift and 16 frames of landing. A miss leaves her open until frame 40.'],
+    jab: ['Hilt Tap, Short Cut, Cross Cut', 'A tap with the hilt, a short cut and a cross cut that pushes the opponent back out to the range of the blade. Press again on frames 7 to 13, then 8 to 15, for the next one.'],
+    dash: ['Shield Drive', 'Drives in shoulder-first behind the stove door, 0.39 of a body length by frame 10, with one solid hit. Covers someone crossing over her.'],
     ftilt: ['Ember Cut', 'A level cut with the full length of the blade. The same damage from the guard to the tip. Her main poke.'],
-    utilt: ['Brim Sweep', 'The blade rises in front, then sweeps over her hat and down behind. Either part hits, once. Stops a jump-in and sets up an aerial at low damage.'],
-    dtilt: ['Boot-Line Cut', 'A fast low cut that scoops the opponent up in front of her, into Brim Arc or High Ward.'],
-    fsmash: ['Forge Cleave', 'A big two-handed cleave, strong along the whole blade. Slow to start and slow to recover: for a punish or a called landing.'],
-    usmash: ['Hinge Lift', 'The rim of the stove door scoops the opponent up a set distance, then the blade cleaves straight up through them. Both hits connect at any damage.'],
-    dsmash: ['Curfew Sweep', 'A low sweep in front on frame 12, then behind on frame 17. One launch a target. Catches a roll past her.'],
-    nair: ['Watch Wheel', 'A close hit with the hilt that holds the opponent in place, then a full turn of the blade on frames 13 to 15 that covers both sides. Landing before the turn skips it.'],
-    fair: ['High Ward', 'A forward cut held out for four frames, with only 9 frames of landing lag. Space the end of the blade while drifting back.'],
-    bair: ['About-Face Cut', 'A hard cut behind her. Her strongest aerial: run off the stage, or turn round, to take a stock with it.'],
-    uair: ['Brim Arc', 'An arc over her head from front to back. Covers the platform above.'],
-    dair: ['Poker Drop', 'Drives the blade straight down. The point sends an opponent who is in the air straight down; anyone standing, or caught by the blade above the point, is popped up instead.', 'f13 · point 13% (spike) / blade 9% / late 7%'],
-    grab: ['Gauntlet Grab', 'The door swings aside and her shield hand reaches past it: a short reach. It threatens an opponent who waits in shield, but only close. Further out of a dash; the turnaround grab reaches furthest.'],
-    f: ['Door Shove', 'Shoves the opponent away with the stove door, out toward the ledge.'],
-    b: ['Turn Out', 'Swings the opponent round and sends them out behind her.'],
-    u: ['Hoist', 'Lifts the opponent straight up, under a platform.'],
-    d: ['Kneel Down', 'Forces the opponent down and pops them up in front, into a rising Brim Arc or High Ward at low damage.'],
-    getup: ['Low Sweep / Lip Cut', 'From the floor, sweeps low in front on frame 19 and behind on frame 24. From the ledge, a rising cut onto the stage on frames 20 to 22 for 8%. Briefly intangible as she rises (less above 100%).'],
+    utilt: ['Crown Guard', 'The blade rises in front, then sweeps over her hat and down behind. Either part hits, once. Stops a jump-in and sets up an aerial at low damage.'],
+    dtilt: ['Greave Cut', 'A fast low cut that scoops the opponent up in front of her, into Crown Arc or High Guard.'],
+    fsmash: ['Vorpal Cleave', 'A big two-handed cleave, strong along the whole blade. Slow to start and slow to recover: for a punish or a called landing.'],
+    usmash: ['Gate Raise', 'The rim of the stove door scoops the opponent up a set distance, then the blade cleaves straight up through them. Both hits connect at any damage.'],
+    dsmash: ['Rampart Sweep', 'A low sweep in front on frame 12, then behind on frame 17. One launch a target. Catches a roll past her.'],
+    nair: ['Guard Wheel', 'A close hit with the hilt that holds the opponent in place, then a full turn of the blade on frames 13 to 15 that covers both sides. Landing after the first hit skips the turn.'],
+    fair: ['High Guard', 'A forward cut held out for four frames, with only 9 frames of landing lag. Space the end of the blade while drifting back.'],
+    bair: ['Reverse Cut', 'A hard cut behind her. Her strongest aerial: run off the stage, or turn round, to take a stock with it.'],
+    uair: ['Crown Arc', 'An arc over her head from front to back. Covers the platform above.'],
+    dair: ['Blade Drop', 'Drives the blade straight down. The point (the red tip) sends an opponent who is in the air straight down; anyone standing, or caught by the blade above the point, is popped up instead.', 'f13 · point 13% (spike) / blade 9% / late 7%'],
+    grab: ['Gauntlet Grab', 'The door swings aside and her shield hand reaches past it: a short reach. It threatens an opponent who waits in shield, but only close. Lunge Grab out of a dash carries her 0.33 of a body length; Turn Grab out of a run turnaround reaches furthest.'],
+    pummel: ['Pommel Tap', 'Taps the held opponent with the pommel on frame 4 for 1.3%. The next pummel or a throw is ready on frame 13.'],
+    f: ['Shield Shove', 'Shoves the opponent away with the stove door, out toward the ledge.'],
+    b: ['Gauntlet Turn', 'Swings the opponent round and lets go behind her on frame 13.'],
+    u: ['Crown Lift', 'Lifts the opponent straight up, under a platform.'],
+    d: ['Kneel Break', 'Forces the opponent down and pops them up in front, into a rising Crown Arc or High Guard at low damage.'],
+    getup: ['Guard Sweep / Rising Cut', 'From the floor, sweeps low in front on frame 19 and behind on frame 24 (lying on her back: behind first, then in front). From the ledge, a rising cut onto the stage on frames 20 to 22 for 8%. Briefly intangible as she rises (less above 100%).'],
   },
   /* Joey: the owner's guide, v1.0 (2026-11-10). Weak on purpose. */
   Joey: {
@@ -424,10 +425,10 @@ const MOVE_RULES = {
     ['Air ↓ B', 'Spike and Thump', 'Bucket Drop in the air sends anyone it hits straight down, and thumps the ground where it lands for anyone it missed.'],
   ],
   Brand: [
-    ['★', 'The Whole Blade', 'Her sword hits the same from the guard to the tip, and it is longer than most swings. Stand where it reaches and the other fighter falls short.'],
-    ['→ B', 'The Door Guards Once', 'Stove Door Bash stops one light strike (8% or less) from the front on frames 5 to 8, on the ground only. It is a read: thrown out with nothing to stop, it leaves 24 frames to punish.'],
-    ['B', 'Tap or Hold', 'Hot Iron Thrust is chosen by frame 9: let go for the quick thrust, keep holding for the long, late one.'],
-    ['↑ B', 'A Narrow Way Home', 'Watchfire Rise goes almost straight up and she is helpless after it. Get under the ledge before using it.'],
+    ['★', 'The Whole Blade', 'Her sword hits the same from the guard to the tip, and it is longer than most swings. Stand where it reaches and the other fighter falls short. While a cut is out its arc stays on screen, with a red spot at the tip: the end of her reach.'],
+    ['→ B', 'The Door Guards Once', 'Shield Bash stops one light strike (8% or less) from the front on frames 5 to 8, on the ground only. It is a read: thrown out with nothing to stop, it leaves 24 frames to punish.'],
+    ['B', 'Tap or Hold', 'Vorpal Thrust is chosen by frame 9: let go for the quick thrust, keep holding for the long, late one.'],
+    ['↑ B', 'A Narrow Way Home', 'Ember Rise goes almost straight up and she is helpless after it. Get under the ledge before using it.'],
   ],
   'Furious Fowls': [
     ['B', 'Choosing a Bird', 'In the slingshot, tap special for the next bird. Hold it 8 frames to open the wheel, point with the stick and let go: clockwise from the top, Flint, Bolt, Cinder, Pip, Pearl. Each bird changes the slingshot\'s weight, speed and every attack.'],
@@ -445,7 +446,7 @@ const ML_INPUT = { nspec: 'B', sspec: '→ B', uspec: '↑ B', dspec: '↓ B', j
   nair: 'Air A', fair: 'Air → A', bair: 'Air ← A', uair: 'Air ↑ A', dair: 'Air ↓ A', grab: 'Grab', pummel: 'Grab A', f: 'Grab →', b: 'Grab ←', u: 'Grab ↑', d: 'Grab ↓', getup: 'Get-up A', launch: 'In flight' };
 const ML_GROUND = ['jab', 'dash', 'ftilt', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash'], ML_AIR = ['nair', 'fair', 'bair', 'uair', 'dair'], ML_SPEC = ['nspec', 'sspec', 'uspec', 'dspec'];
 /* every move a form has, and the entry that documents it (the move keys that are part of another move) */
-const ML_PART_OF = { nspecR: 'nspec', nspecF: 'nspec', uspecA: 'uspec', dspecA: 'dspec', jab2: 'jab', jab3: 'jab', jabr: 'jab', dgrab: 'grab', pgrab: 'grab', sbrake: 'sspec', dsnap: 'dspec', dcounter: 'dspec', flyStop: 'launch', swingBite: 'sspec', throws: 'grab', nspecH: 'nspec', ledgeatk: 'getup' };
+const ML_PART_OF = { nspecR: 'nspec', nspecF: 'nspec', uspecA: 'uspec', dspecA: 'dspec', jab2: 'jab', jab3: 'jab', jabr: 'jab', dgrab: 'grab', pgrab: 'grab', sbrake: 'sspec', dsnap: 'dspec', dcounter: 'dspec', flyStop: 'launch', swingBite: 'sspec', throws: 'grab', nspecH: 'nspec', ledgeatk: 'getup', getupB: 'getup' };
 const pc = v => +(+v).toFixed(1) + '%';
 function mlFd(fm, key) {
   const mv = fm.moves;
@@ -468,7 +469,7 @@ function mlFd(fm, key) {
 function mlEntry(fm, key, txt, fdx) { if (!txt) return null; return { key, inp: ML_INPUT[key] || '★', name: txt[0], desc: txt[1], fd: txt[2] || ((fm ? mlFd(fm, key) : '') + (fdx ? ' ' + fdx : '')) }; }
 function mlStdPages(fm, T, title) {
   const E = k => mlEntry(fm, k, T[k]);
-  const grab = [E('grab'), mlEntry(fm, 'pummel', PUMMEL_TEXT), E('f'), E('b'), E('u'), E('d'), mlEntry(fm, 'getup', T.getup || GETUP_TEXT)];
+  const grab = [E('grab'), mlEntry(fm, 'pummel', T.pummel || PUMMEL_TEXT), E('f'), E('b'), E('u'), E('d'), mlEntry(fm, 'getup', T.getup || GETUP_TEXT)];
   return [
     { title: 'Special Moves', fm, entries: ML_SPEC.map(E) },
     { title: 'Ground Attacks', fm, entries: ML_GROUND.map(E) },

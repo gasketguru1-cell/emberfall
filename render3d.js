@@ -451,6 +451,57 @@ function build() {
     const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial(glowMat({ vertexColors: true, side: THREE.DoubleSide }))); mesh.frustumCulled = false; mesh.visible = false; scene.add(mesh);
     return { mesh, pts: [], col: new THREE.Color(PCOL[idx]), last: -1 };
   });
+  /* A blade's arc (a model with cfg.blade: Brand). While any of a move's sword hits is out (from the first active frame of
+     its blade hits to the last, gaps included), the path the blade has swept since just before that first frame stays on
+     screen as a glowing ribbon, with a red spot on the point; after the last active frame it fades over a few steps. Read
+     from the model's own sword bones, so it follows the sword as drawn. Hits marked nb (the hilt, the door) draw none. */
+  const ARC = 120, ARC_SUB = 5, ARC_LEAD = 3, ARC_FADE = 7, bladeSpans = new WeakMap();
+  const spanOf = m => { if (!bladeSpans.has(m)) { const hs = (m.h || []).filter(h => !h.grab && !h.nb && h.d > 0); bladeSpans.set(m, hs.length ? [Math.min(...hs.map(h => h.f0)), Math.max(...hs.map(h => h.f1))] : null); } return bladeSpans.get(m); };
+  const arcs = [0, 1].map(() => {
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(ARC * 6), 3)); geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(ARC * 8), 4));   /* with alpha: the swing fades toward its start */
+    const ix = []; for (let k = 0; k < ARC - 1; k++) ix.push(k * 2, k * 2 + 1, k * 2 + 2, k * 2 + 1, k * 2 + 3, k * 2 + 2); geo.setIndex(ix);
+    const mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, side: THREE.DoubleSide, depthTest: false, depthWrite: false, fog: false }));   /* not additive: it stays forge-coloured against a bright sky */ mesh.frustumCulled = false; mesh.visible = false; mesh.renderOrder = 5; scene.add(mesh);
+    const tip = new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), new THREE.MeshBasicMaterial({ color: 0xff1414, transparent: true, depthTest: false, fog: false })); tip.renderOrder = 7; tip.visible = false; scene.add(tip);
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial(glowMat({ map: dot, color: 0xff2020, depthTest: false }))); halo.renderOrder = 6; halo.visible = false; scene.add(halo);
+    return { mesh, tip, halo, s: [], key: '', mf: -1, fade: 0, last: -1, bones: null, boneKey: '' };
+  });
+  const hideArc = idx => { const A = arcs[idx]; A.mesh.visible = A.tip.visible = A.halo.visible = false; A.s = []; A.fade = 0; A.key = ''; };
+  const _aq = new THREE.Quaternion(), _aq0 = new THREE.Quaternion(), _d0 = new THREE.Vector3(), _d1 = new THREE.Vector3();
+  function bladeArc(v, f, idx) {
+    const A = arcs[idx], B = v.model && v.model.cfg.blade;
+    if (!B || !v.obj) { if (A.key || A.mesh.visible || A.tip.visible) hideArc(idx); return; }
+    if (A.boneKey !== v.key) { A.boneKey = v.key; A.bones = [v.obj.getObjectByName(B.base), v.obj.getObjectByName(B.tip)]; }
+    if (!A.bones[0] || !A.bones[1]) return;
+    const m = f.state === 'attack' ? f.move : null, span = m ? spanOf(m) : null;
+    if (span && (A.key !== f.mname || f.mf < A.mf)) { A.s = []; A.key = f.mname; A.fade = 0; }   /* a new swing */
+    A.mf = span ? f.mf : -1;
+    const live = !!span && f.mf >= span[0] - ARC_LEAD && f.mf <= span[1], out = live && f.mf >= span[0];
+    v.root.updateMatrixWorld(true);
+    const grip = new THREE.Vector3().setFromMatrixPosition(A.bones[0].matrixWorld), point = new THREE.Vector3().setFromMatrixPosition(A.bones[1].matrixWorld), base = grip.clone().lerp(point, B.at || 0.2);
+    if (live && tick !== A.last) { A.last = tick; const s0 = A.s[A.s.length - 1]; if (!s0 || s0.mf !== f.mf) A.s.push({ mf: f.mf, b: base.clone(), t: point.clone() }); }
+    if (out) A.fade = ARC_FADE; else if (A.fade > 0 && tick !== A.last) { A.last = tick; A.fade--; }
+    const k = out ? 1 : A.fade / ARC_FADE;
+    if (k <= 0 || !A.s.length) { A.mesh.visible = A.tip.visible = A.halo.visible = false; if (!live) { A.s = []; if (!span) A.key = ''; } return; }
+    /* the red point: on the sword while it is out, left where it ended while the arc fades */
+    const tp = out ? point : A.s[A.s.length - 1].t, r = (B.dot || 0.6) * (out ? 1 : 0.6 + 0.4 * k);
+    A.tip.visible = A.halo.visible = true; A.tip.position.copy(tp); A.tip.scale.setScalar(r); A.tip.material.opacity = k; A.halo.position.copy(tp); A.halo.scale.set(r * 6, r * 6, 1); A.halo.material.opacity = 0.9 * k;
+    /* the ribbon: each recorded step, with the blade turned smoothly round its base between steps */
+    const pts = [], S = out ? A.s.concat([{ b: base, t: point }]) : A.s;
+    for (let i = 0; i < S.length; i++) {
+      const a = S[i], b = S[i + 1]; pts.push([a.b, a.t]); if (!b) break;
+      _d0.subVectors(a.t, a.b); _d1.subVectors(b.t, b.b); const l0 = _d0.length(), l1 = _d1.length(); _d0.normalize(); _d1.normalize(); _aq.setFromUnitVectors(_d0, _d1);
+      for (let j = 1; j < ARC_SUB; j++) { const u = j / ARC_SUB, bb = a.b.clone().lerp(b.b, u); _aq0.identity().slerp(_aq, u); pts.push([bb, bb.clone().add(_d0.clone().applyQuaternion(_aq0).multiplyScalar(l0 + (l1 - l0) * u))]); }
+    }
+    while (pts.length > ARC) pts.shift();
+    const n = pts.length; A.mesh.visible = n > 1; if (n < 2) return;
+    const pos = A.mesh.geometry.attributes.position, col = A.mesh.geometry.attributes.color, hot = new THREE.Color(B.col || 0xffb45a), cool = new THREE.Color(B.col2 || 0xff5a1e);
+    for (let i = 0; i < ARC; i++) {
+      const q = Math.min(i, n - 1), pb = pts[q][0], pt = pts[q][1], age = 1 - q / (n - 1), al = k * (0.92 - 0.35 * age);   /* the newest part strongest; the start of the swing stays visible */
+      pos.setXYZ(i * 2, pb.x, pb.y, pb.z); pos.setXYZ(i * 2 + 1, pt.x, pt.y, pt.z);
+      col.setXYZW(i * 2, cool.r, cool.g, cool.b, al * 0.5); col.setXYZW(i * 2 + 1, hot.r, hot.g, hot.b, al);
+    }
+    pos.needsUpdate = true; col.needsUpdate = true;
+  }
   /* the KO burst: a ring that swells from where the fighter left, and a flare pointing back at the stage */
   const beamTex = tex(64, 256, (c, w, h) => { const q = c.createLinearGradient(0, 0, w, 0); q.addColorStop(0, 'rgba(255,255,255,0)'); q.addColorStop(0.5, 'rgba(255,255,255,1)'); q.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = q; c.fillRect(0, 0, w, h); const f = c.createLinearGradient(0, 0, 0, h); f.addColorStop(0, 'rgba(0,0,0,1)'); f.addColorStop(0.14, 'rgba(0,0,0,0)'); f.addColorStop(1, 'rgba(0,0,0,1)');   /* soft at both ends */ c.globalCompositeOperation = 'destination-out'; c.fillStyle = f; c.fillRect(0, 0, w, h); });
   const bursts = [0, 1].map(idx => {
@@ -564,7 +615,7 @@ function build() {
       fxFighter(f, idx, st, alive, v);
       if (v.prop && !alive) v.prop.visible = false;
       v.root.visible = alive; v.shield.visible = alive && (f.state === 'shield' || f.state === 'shieldstun'); v.pad.visible = f.state === 'respawn';
-      if (!alive) return;
+      if (!alive) { hideArc(idx); return; }
       dress(v, f);
       if (v.model) applyAnim(v, f);
       const p = poseOf(f, !!v.model), want = f.face > 0 ? -0.35 : Math.PI + 0.35;
@@ -586,6 +637,7 @@ function build() {
       if (v.bubble) { const on = !!f.bubble, grow = f.state === 'attack' && f.mname === 'uspec' && !on ? clamp((f.mf - 3) / 5, 0, 1) : 0;   /* it swells from his mouth as he blows, then wobbles round him; it sits round his middle whatever the pivot is doing */
         v.bubble.visible = on || grow > 0; v.bubble.scale.setScalar(on ? 1 + Math.sin(tick * 0.3) * 0.03 : 0.15 + 0.85 * grow); v.bubble.position.x = on ? 0 : 5 * (1 - grow); }
       if (v.springs.length) applySprings(v);
+      bladeArc(v, f, idx);
       if (v.prop && !v.hand) {   /* the living slingshot under its bird: posed by slingWant, the bird riding in its pouch */
         const spinning = f.state === 'attack' && f.move && f.move.spin && f.move.spinAt, rot = spinning ? f.move.spinAt(f, f.mf) : 0, rig = v.prop.userData.rig, step = rig.tick !== tick; rig.tick = tick;
         v.prop.rotation.y = f.face > 0 ? 0 : Math.PI;
@@ -642,6 +694,6 @@ function build() {
     R3.info = { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles };
   };
   R3.fighters = fighters;   /* for inspection from the console and tests; nothing in the game reads it */
-  R3.fx = { bursts, trails, flashes, sparks, embers, islands };
+  R3.fx = { bursts, trails, arcs, flashes, sparks, embers, islands };
   R3.ready = true;
 }
