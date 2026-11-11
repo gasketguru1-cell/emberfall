@@ -128,6 +128,14 @@ vm.runInThisContext(`
     const a = early('atk'), j = early('jmp');
     check('Side B: attack lets go into the bite early in the swing', a.leftAt !== null && a.leftAt - a.onRope <= 4 && a.bit, 'on the rope on frame ' + a.onRope + ', bite on frame ' + a.leftAt);
     check('Side B: jump hops off the rope early, with no bite and his air jump kept', j.leftAt !== null && j.leftAt - j.onRope <= 4 && !j.bit && j.st === 'air' && j.top > 6 && j.jumps >= 1, 'on the rope on frame ' + j.onRope + ', off on frame ' + j.leftAt + ' (' + j.st + '), rose to ' + j.top.toFixed(0) + ', air jumps left ' + j.jumps); }
+  { /* out of a move that hit: side B cuts it short and the rope hooks on frame 3; a whiffed or shielded move gets no such thing */
+    const tryIt = (ox, shield) => { const [c, o] = setup(-10, ox, 30); if (shield) SCRIPT[1] = i => { i.shd = true; }; else o.ctl = new Ctl('none'); let hitAt = null, sAt = null, hookAt = null, quick = null;
+      SCRIPT[0] = (i, tt) => { if (tt === 20) i.cy = 1; if (tt >= 20 && (hitAt !== null || tt > 40) && sAt === null) { i.spc = tt % 2 === 0; i.lx = 1; } };
+      run(90, () => { if (hitAt === null && c.hitG.size) hitAt = t; if (sAt === null && c.mname === 'sspec' && c.state === 'attack') sAt = t; if (sAt !== null && hookAt === null && c.rsGo) { hookAt = t; quick = c.rsHook; return false; } });
+      return { hitAt, sAt, hookAt, quick, lag: hookAt - sAt }; };
+    const hit = tryIt(-2, false), whiff = tryIt(60, false), shd = tryIt(-2, true);
+    check('Side B out of a move that hit: the rope hooks on frame 3', hit.hitAt !== null && hit.quick === 3 && hit.lag <= 4 && hit.sAt - hit.hitAt < 14, 'up tilt hit on frame ' + hit.hitAt + ', side B began on ' + hit.sAt + ', on the rope on ' + hit.hookAt);
+    check('Side B otherwise: the rope hooks on frame 11 (after a miss, or a shielded hit)', whiff.quick === 11 && shd.quick === 11, 'after a miss: frame ' + whiff.quick + '; after a shielded hit: frame ' + shd.quick); }
   { /* a launched opponent is stopped by the rope too */
     const tryIt = rope => { const [c, o] = setup(-20, 56); c.face = 1; coalAt(EDGE + 30, 44, 'fly', { vx: 0, vy: 0 }); if (rope) SCRIPT[0] = (i, tt) => { if (tt === 2) i.spc = true; };
       o.y = 46; o.grounded = false; o.plat = null; o.set('air'); let low = 99, st = 0, launched = 0;

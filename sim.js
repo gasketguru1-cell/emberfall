@@ -1215,7 +1215,9 @@ function chompNspec(f, n, i) {
   }
 }
 function coalGone(p) { if (!p.picked) { const ow = F[p.owner]; if (ow) ow.coalReady = frame + COAL.cd; } }
-/* Side B, Rope Swing: a rope to a hook above and ahead on frame 11 (once per time in the air), then a pendulum swing. Push
+/* Side B, Rope Swing: a rope to a hook above and ahead on frame 11 (once per time in the air), then a pendulum swing.
+   Out of a move of his that has just hit (not one that was shielded), side special cuts that move short and the rope hooks
+   on frame 3 instead: the swing as a combo extension (ropeOut on the form; see the attack state). Push
    the stick to pump it. From the ground the rope pulls in a little as it takes his weight, so the swing clears the floor.
    While swinging: special again throws a new rope to a hook further on and he swings on from that one, keeping his speed
    (up to ROPE.max ropes in one go); attack lets go along the swing with the mouth open: 9% clean, 6% after; jump hops off
@@ -1225,9 +1227,10 @@ function coalGone(p) { if (!p.picked) { const ow = F[p.owner]; if (ow) ow.coalRe
 const ROPE = { max: 4, gap: 8, off: 1 };   /* ropes in one go; frames on a rope before the next rope; frames on a rope before attack or jump can leave it */
 function chompSwing(f, n, i) {
   const s = f.st, by = () => f.y + s.h / 2;
-  if (n === 1) { f.rsGo = false; f.rsN = 0; if (!f.grounded) { if (f.airUse.rope) { f.mf = f.move.t; return; } f.airUse.rope = 1; } }
-  if (!f.rsGo && n < 11) { hang(f); return; }
-  if (n === 11 && !f.rsGo) {
+  if (n === 1) { f.rsGo = false; f.rsN = 0; f.rsHook = f.rsQuick !== undefined && frame - f.rsQuick <= 3 ? 3 : 11; f.rsQuick = undefined; if (!f.grounded) { if (f.airUse.rope) { f.mf = f.move.t; return; } f.airUse.rope = 1; } }
+  const hook = f.rsHook || 11;
+  if (!f.rsGo && n < hook) { hang(f); return; }
+  if (n === hook && !f.rsGo) {
     f.rsAx = f.x + f.face * 12; f.rsAy = by() + 22; const dx = f.x - f.rsAx, dy = by() - f.rsAy;
     f.rsL = Math.hypot(dx, dy); f.rsTh = Math.atan2(dx, -dy); f.rsW = f.face * 0.05 + (f.vx * Math.cos(f.rsTh)) / f.rsL; f.rsGo = true; f.rsN = 1; f.rsT = 0;
     f.rsReel = f.grounded ? f.rsL - 19 : 0; f.airUse.rope = 1; f.grounded = false; f.plat = null;
@@ -1271,7 +1274,7 @@ function chompCushion(f, n) {
 }
 const CHOMP = {
   name: 'Chomp Chomp', sub: 'the hungry critter', forms: [{
-    name: 'Chomp Chomp', col: ['#2a5fd6', '#5fc23a', '#ffb13b'], alt: ['#8a3fd0', '#ffcf3a', '#ff6a3c'], reachMul: 1.0,
+    name: 'Chomp Chomp', ropeOut: 1, col: ['#2a5fd6', '#5fc23a', '#ffb13b'], alt: ['#8a3fd0', '#ffcf3a', '#ff6a3c'], reachMul: 1.0,
     /* the design's targets against an average fighter (Flint): weight 94, walk 108, dash 115, run 110, air speed average,
        gravity and fall a little low, jump squat 4, a high full hop. Squat and round. */
     st: { weight: 94, walk: 1.21, walkMul: 0.15, walkAdd: 0.1, trac: 0.11, dash: 2.2, runMul: 0.12, runAdd: 0.045, run: 1.91,
@@ -1918,6 +1921,11 @@ class Fighter {
            With a turnaround special first (back held as special is pressed) it becomes a wavebounce. Once per special; not for up specials. */
         if (this.bRev > 0) { this.bRev--; if (Math.abs(i.lx) > 0.5 && Math.abs(i.lx) >= Math.abs(i.ly) && sgn(i.lx) === -this.face) { this.bRev = 0; this.face = -this.face; if (!this.grounded && this.bRevV) this.vx = -this.vx; brevPuff(this.x, this.y + this.st.h * 0.45); } }
         if (m.on) m.on(this, this.mf, i);
+        /* Chomp Chomp: out of a move that has hit (and was not shielded), side special cuts it short into a Rope Swing that hooks on frame 3 */
+        if (this.form.ropeOut && this.state === 'attack' && this.move === m && this.hitG.size && !blocked(this) && this.mname !== 'sspec' && this.mname !== 'swingBite' && !(m.h[0] && m.h[0].grab)
+          && c.buf.spc > 0 && Math.abs(i.lx) > 0.5 && Math.abs(i.lx) >= Math.abs(i.ly) && (this.grounded || !this.airUse.rope)) {
+          c.buf.spc = 0; this.face = sgn(i.lx); this.startMove('sspec'); this.rsQuick = frame; break;
+        }
         if (this.state === 'attack' && this.move === m && m.cancel && this.mf >= m.cancel) {   /* cut short into any action, keeping the speed */
           if (this.grounded) { if (this.groundActs(false)) break; }
           else { const j = this.jumps; if (this.airActs()) break; if (this.jumps < j) { this.endMove(); break; } }
