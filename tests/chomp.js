@@ -43,7 +43,7 @@ vm.runInThisContext(`
     check('Relays: a press 5 or more frames late is a miss: it lets go', missOk, missOk ? 'no relay' : 'a late press still relayed'); }
   { const [c] = setup(-60, 120); SCRIPT[0] = (i, tt) => { if (tt === 1) i.spc = true; }; let rel = null;
     run(200, () => { const p = coal(); if (p && p.st === 'swing' && p.age === 8 && !rel) { SCRIPT[0] = (i, tt) => { if (tt === t) i.spc = true; }; rel = true; } if (p && p.st === 'ground') return false; });
-    const p = coal(); check('A mistimed press lets go: the coal flies on and lands as a placed coal', p && p.st === 'ground' && p.relay === 0 && p.life > 300, p ? 'state ' + p.st + ', ' + p.relay + ' relays, ' + p.life + ' frames left' : 'no coal'); }
+    const p = coal(); check('A mistimed press lets go: the coal flies on and lands as a placed coal that stays 8 seconds', p && p.st === 'ground' && p.relay === 0 && p.life > 440 && p.life <= 480, p ? 'state ' + p.st + ', ' + p.relay + ' relays, ' + p.life + ' frames left' : 'no coal'); }
   /* 3. the ant: a rope from the coal to Chomp, the ant walking from the coal to him while he walks away; only the ant hurts */
   { const [c, o] = setup(-10, 90, 0); o.ctl = new Ctl('none');
     PROJ.push({ x: -50, y: 2.4, vx: 0, vy: 0, grav: 0, life: 360, owner: 0, face: 1, dir: 1, r: 2.4, ground: 'pass', plat: null, kind: 'coal', tag: 'coal', st: 'ground', landAge: 0, age: 30, relay: 0, hits: 99, rehit: 45, cool: 9999, h: { d: 3, a: 75, b: 30, k: 20, id: 'Chomp Chomp:nspec' }, step: coalStep, onGone: coalGone });
@@ -68,9 +68,9 @@ vm.runInThisContext(`
     c.x = 30; c.face = -1; SCRIPT[0] = B(1);
     /* the opponent walks back and forth across the rope while the ant is still near the coal: rope contact only */
     SCRIPT[1] = (i, tt, f) => { i.lx = Math.sin(tt / 8) > 0 ? 1 : -1; i.jmp = tt % 40 === 5; };
-    let pct0 = o.pct, hurt = 0, lag = 0, snags = 0;
-    run(30, () => { const a = ant(); if (a) snags = a.snags || 0; if (o.state === 'hurt') hurt++; if (o.hitlag > 0) lag++; });
-    check('Rope: crossing it never hurts (no damage, hitstun, freeze or launch)', o.pct === pct0 && hurt === 0 && lag === 0, 'damage ' + (o.pct - pct0).toFixed(1) + ', hitstun frames ' + hurt + ', freeze frames ' + lag + ', snags ' + snags); }
+    let pct0 = o.pct, hurt = 0, lag = 0, snags = 0;   /* snags: times the rope stopped a crossing */
+    run(30, () => { const a = ant(); if (a) snags = a.blocks || 0; if (o.state === 'hurt') hurt++; if (o.hitlag > 0) lag++; });
+    check('Rope: crossing it never hurts (no damage, hitstun, freeze or launch)', o.pct === pct0 && hurt === 0 && lag === 0, 'damage ' + (o.pct - pct0).toFixed(1) + ', hitstun frames ' + hurt + ', freeze frames ' + lag + ', frames held back ' + snags); }
   { const [c, o] = setup(-30, 0, 0);
     PROJ.push({ x: -30, y: 2.4, vx: 0, vy: 0, grav: 0, life: 360, owner: 0, face: 1, dir: 1, r: 2.4, ground: 'pass', plat: null, kind: 'coal', tag: 'coal', st: 'ground', landAge: 0, age: 30, relay: 0, hits: 99, rehit: 45, cool: 9999, h: { d: 3, a: 75, b: 30, k: 20, id: 'Chomp Chomp:nspec' }, step: coalStep, onGone: coalGone });
     c.x = 30; c.face = -1; o.x = 10; o.face = 1; SCRIPT[0] = B(1); let cut = false;
@@ -86,6 +86,43 @@ vm.runInThisContext(`
     check('Up B: a bubble carries him up', bub && top - 20 > 45, 'rose ' + (top - 20).toFixed(0)); }
   { const [c, o] = setup(0, 9); o.ctl = new Ctl('none'); SCRIPT[0] = (i, tt) => { if (tt === 1) { i.spc = true; i.ly = -1; } }; const x0 = o.x; run(40);
     check('Down B: the gust pushes the opponent away for 3%', o.x - x0 > 3 && o.pct > 2.5 && o.pct < 4.5, 'pushed ' + (o.x - x0).toFixed(1) + ', ' + o.pct.toFixed(1) + '%'); }
+  /* 5. the 2026-11-11 changes: side B from the ground and in a chain, the coal stopped off the stage, the rope in the way */
+  const coalAt = (x, y, st, extra) => { const p = Object.assign({ x, y, vx: 0, vy: 0, grav: 0, life: st === 'ground' ? COAL.ground : 9999, owner: 0, face: 1, dir: 1, r: 2.4, ground: 'pass', plat: null, kind: 'coal', tag: 'coal', st, landAge: 0, age: 30, relay: 0, hits: 99, rehit: 45, cool: 9999, h: { d: 3, a: 75, b: 30, k: 20, id: 'Chomp Chomp:nspec' }, step: coalStep, onGone: coalGone }, extra || {}); PROJ.push(p); return p; };
+  { const [c, o] = setup(-40, 60); SCRIPT[0] = (i, tt) => { if (tt === 1) { i.spc = true; i.lx = 1; } }; let swung = 0, low = 99, maxX = -99, bit = false;
+    run(140, () => { if (c.rsGo) { swung++; low = Math.min(low, c.y); } if (c.mname === 'swingBite' && c.state === 'attack') bit = true; maxX = Math.max(maxX, c.x); });
+    check('Side B from the ground: he swings clear of the floor, and a rope left alone ends in the bite', swung > 60 && low > 0.3 && bit && maxX > -20, 'swung ' + swung + ' frames, lowest ' + low.toFixed(1) + ' above the floor, carried from x -40 to ' + maxX.toFixed(0) + ', bite: ' + bit); }
+  { const chain = presses => { const [c, o] = setup(-60, 66); SCRIPT[0] = (i, tt) => { if (tt === 1) { i.spc = true; i.lx = 1; } else if (presses.includes(tt)) i.spc = true; }; let n = 0, maxX = -99, bitAt = null;
+      run(400, () => { n = Math.max(n, c.rsN || 0); if (c.state === 'attack' && (c.mname === 'sspec' || c.mname === 'swingBite')) maxX = Math.max(maxX, c.x); if (bitAt === null && c.mname === 'swingBite' && c.state === 'attack') bitAt = t; if (bitAt !== null && c.state !== 'attack') return false; });
+      return { n, maxX, bitAt }; };
+    const one = chain([]), three = chain([40, 70]), many = chain([40, 70, 100, 130, 160, 190]);
+    check('Side B: special again strings ropes together, each carrying him further', one.n === 1 && three.n === 3 && three.maxX - one.maxX > 25, 'one rope: to x ' + one.maxX.toFixed(0) + '; three ropes: to x ' + three.maxX.toFixed(0));
+    check('Side B: no more than ' + ROPE.max + ' ropes in one go', many.n === ROPE.max, 'six more presses gave ' + many.n + ' ropes'); }
+  { const [c, o] = setup(-40, -8); o.ctl = new Ctl('none'); SCRIPT[0] = (i, tt) => { if (tt === 1) { i.spc = true; i.lx = 1; } if (tt === 36) i.atk = true; }; let bitAt = null;
+    run(80, () => { if (bitAt === null && c.mname === 'swingBite' && c.state === 'attack') bitAt = t; });
+    check('Side B: attack lets go into the bite', bitAt !== null && bitAt <= 38 && o.pct > 5, 'bite on frame ' + bitAt + ', opponent at ' + o.pct.toFixed(1) + '%'); }
+  { const [c, o] = setup(40, -60); o.ctl = new Ctl('none'); c.face = 1; const p = coalAt(EDGE + 14, 20, 'fly', { vx: 0.6, vy: 0 });
+    let y0 = null, moved = 0, hung = 0, home = false; SCRIPT[0] = (i, tt) => { if (tt === 12) i.spc = true; };
+    run(300, () => { if (p.st === 'hang') { hung++; if (y0 === null) y0 = [p.x, p.y]; moved = Math.max(moved, Math.hypot(p.x - y0[0], p.y - y0[1])); } if (hung && !coal()) { home = !!p.picked; return false; } });
+    check('Coal off the stage: B stops it where it is while the ant brings it home', hung > 20 && moved < 0.01 && home, 'stopped ' + hung + ' frames, drifted ' + moved.toFixed(2) + ', back with Chomp: ' + home); }
+  { const [c, o] = setup(40, 52); c.face = 1; const p = coalAt(EDGE + 14, 20, 'fly', { vx: 0.2, vy: 0 }); o.face = 1;
+    let hung = 0, fell = false; SCRIPT[0] = (i, tt) => { if (tt === 12) i.spc = true; }; SCRIPT[1] = (i, tt) => { if (tt === 40) i.atk = true; };
+    run(200, () => { if (p.st === 'hang') hung++; else if (hung && p.st === 'fly') fell = true; if (hung && !coal()) return false; });
+    check('Coal off the stage: cut the rope and it falls again', hung > 5 && fell && !p.picked, 'stopped ' + hung + ' frames, fell again: ' + fell + ', rope cuts: ' + (c.ropeCuts || 0)); }
+  { const [c, o] = setup(0, 30); const p = coalAt(-20, 30, 'fly', { vx: 0, vy: 0 }); SCRIPT[0] = (i, tt) => { if (tt === 3) i.spc = true; }; let hung = false; run(30, () => { if (p.st === 'hang') hung = true; });
+    check('Coal over the stage: B does not stop it', !hung, 'stopped: ' + hung); }
+  { /* a coal stopped high off the right edge, Chomp far along the stage: the rope slants up across the stage, and the opponent falls onto it and then pushes into it */
+    const tryIt = rope => { const [c, o] = setup(-20, 56); c.face = 1; coalAt(EDGE + 30, 44, 'fly', { vx: 0, vy: 0 }); if (rope) SCRIPT[0] = (i, tt) => { if (tt === 2) i.spc = true; };
+      o.y = 40; o.grounded = false; o.plat = null; o.set('air'); o.vx = 0; o.vy = 0; let pct0 = o.pct, hurt = 0, st = 0, y = 0, x = 0;
+      run(32, () => { if (o.state === 'hurt') hurt++; if (ant()) st = ant().blocks || 0; }); return { y: o.y, x: o.x, hurt, dmg: o.pct - pct0, st }; };
+    const free = tryIt(false), wall = tryIt(true);
+    check('Rope: it is in the way of an opponent moving through it, and never hurts', wall.st > 0 && wall.y - free.y > 6 && wall.hurt === 0 && wall.dmg === 0, 'no rope: fell to height ' + free.y.toFixed(0) + ' at x ' + free.x.toFixed(0) + '; with the rope: held at height ' + wall.y.toFixed(0) + ', x ' + wall.x.toFixed(0) + ' (frames held back ' + wall.st + ', damage ' + wall.dmg.toFixed(1) + ', hitstun frames ' + wall.hurt + ')'); }
+  { /* on the floor: the rope slants down to a coal on the floor from Chomp on a platform; the opponent runs at it */
+    const tryIt = rope => { const [c, o] = setup(0, -60); o.face = 1; const q = PLATS.filter(q => q !== MAIN).sort((a, b) => b.y - a.y)[0]; c.x = (q.x0 + q.x1) / 2; c.y = q.y; c.plat = q; c.face = -1;
+      const p = coalAt(c.x - 34, 2.4, 'ground'); if (rope) SCRIPT[0] = (i, tt) => { if (tt === 2) i.spc = true; };
+      o.x = p.x + 20; o.face = -1; SCRIPT[1] = (i, tt) => { if (tt > 30) i.lx = -1; }; let maxX = 999, hurt = 0, st = 0; const pct0 = o.pct;
+      run(49, () => { maxX = Math.min(maxX, o.x); if (o.state === 'hurt') hurt++; if (ant()) st = ant().blocks || 0; }); return { maxX, hurt, st, dmg: o.pct - pct0, cx: p.x, top: q.y }; };
+    const free = tryIt(false), wall = tryIt(true);
+    check('Rope: a walking opponent is stopped by a rope slanting up from the floor', wall.st > 0 && wall.maxX - free.maxX > 5 && wall.dmg === 0, 'coal at x ' + wall.cx.toFixed(0) + ', Chomp on the platform at height ' + wall.top + '; no rope: walked to x ' + free.maxX.toFixed(0) + '; with the rope: stopped at x ' + wall.maxX.toFixed(0) + ' (damage ' + wall.dmg.toFixed(1) + ')'); }
   const bad = results.filter(r => !r[0]);
   for (const r of results) console.log((r[0] ? 'pass  ' : 'FAIL  ') + r[1] + '   ' + r[2]);
   console.log(bad.length ? bad.length + ' of ' + results.length + ' Chomp Chomp checks FAILED' : 'all ' + results.length + ' Chomp Chomp checks pass');
