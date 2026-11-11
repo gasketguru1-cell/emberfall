@@ -290,6 +290,11 @@ const KIT = {
     fsmash: [21, 20, { sour: 15 }], usmash: [15, 17], dsmash: [16, 15, { rear: [24, 13] }],
     nair: [7, 9, { late: 6 }], fair: [11, 13, { sour: 8 }], bair: [10, 14, { late: 8 }], uair: [10, 10], dair: [16, 15, { sour: 8 }],
     grab: 7, pummel: 1.5, throws: { f: 9, b: 11, u: 8, d: 7 } },
+  /* Chomp Chomp: the owner's design v2 (2026-11-10) */
+  'Chomp Chomp': { jab: [3, 2], jab2: [5, 2], jab3: [8, 4], dash: [9, 9, { late: 6 }], ftilt: [7, 7], utilt: [6, 7], dtilt: [5, 6],
+    fsmash: [17, 16], usmash: [14, 14], dsmash: [15, 13, { rear: [17, 13] }],
+    nair: [7, 8, { late: 5 }], fair: [9, 10], bair: [8, 9], uair: [7, 8], dair: [12, 12, { late: 7 }],
+    grab: 9, pummel: 1.3, throws: { f: 8, b: 9, u: 8, d: 7 } },
   Scuttle: { jab: [3, 2], jab2: [4, 2], jab3: [6, 4], dash: [7, 9, { late: 5 }], ftilt: [6, 7], utilt: [5, 6], dtilt: [5, 6],
     fsmash: [16, 17, { late: 11 }], usmash: [11, 13], dsmash: [13, 13, { rear: [18, 11] }],
     nair: [4, 8, { late: 4 }], fair: [6, 8], bair: [8, 12, { sour: 8 }], uair: [5, 7], dair: [13, 11, { sour: 8 }],
@@ -929,7 +934,182 @@ const FOWLS = { name: 'Furious Fowls', sub: 'five birds and a slingshot', fowl: 
   FOWLS.forms = combined.concat(solo);
 })();
 
-const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE, FOWLS];
+/* ---------- Chomp Chomp (original; the owner's design v2, 2026-11-10) ----------
+   A squat blue critter with a leaf sprout, small beady eyes and a huge toothy mouth. He bites, swings on a rope, rides a
+   bubble, puffs an air cushion, and plays a hot coal round the stage that his ant can carry back to him.
+   Neutral B, the hot coal (one per Chomp at any time; all of it lives in PROJ, so it is part of every snapshot):
+     - no coal: tosses it out on a rope from a little hook above and ahead (out on frame 13, can hit from frame 18). It swings
+       as a pendulum.
+     - swinging: B again is a relay. Pressed within 3 frames of the moment the coal swings out past its mark, it hops to a new
+       rope further on, keeping its speed (a little faster within 1 frame). Up to 3 relays. Pressed at any other moment it
+       lets go, and the coal flies on with the speed it had. Left alone it lets go at the far end of its swing.
+     - landed: stays 6 seconds. Chomp picks it up by walking over it. B while it lies there: a rope runs from the coal to
+       Chomp, wherever he is, every frame, and an ant crawls from the coal along it toward him (from frame 10). The rope
+       snags an opponent who crosses it but never hurts; only the ant hits (7%, once a trip). An attack on the rope cuts it,
+       and on the ant destroys it; the coal stays where it lies. The ant arriving hands Chomp the coal back.
+   Its damage grows with its speed: 5% slow, up to 12% at full tilt after relays. */
+const COAL = { g: 0.11, mark: 0.55, win: 3, relays: 3, boost: 1.1, keep: 0.97, vmax: 3.4, arc: 70, ground: 360, cd: 50, antV: 1.15, antD: 7, burn: 3 };
+const chompCoal = f => PROJ.find(p => p.owner === f.idx && p.tag === 'coal' && p.life > 0);
+const chompAnt = f => PROJ.find(p => p.owner === f.idx && p.tag === 'ant' && p.life > 0);
+const chompMouth = f => [f.x + f.face * 3, f.y + 5];
+function segDist(px, py, x0, y0, x1, y1) { const dx = x1 - x0, dy = y1 - y0, l2 = dx * dx + dy * dy || 1e-6, t = clamp(((px - x0) * dx + (py - y0) * dy) / l2, 0, 1); return [Math.hypot(px - x0 - dx * t, py - y0 - dy * t), t]; }
+/* a pendulum step: angle from straight down, positive toward +x */
+function coalSwing(p) { p.w += -(COAL.g / p.L) * Math.sin(p.th); const x = p.ax + p.L * Math.sin(p.th + p.w), y = p.ay - p.L * Math.cos(p.th + p.w); p.th += p.w; p.vx = x - p.x; p.vy = y - p.y; p.x = x; p.y = y; }
+function coalSpeedHit(p) { const sp = Math.hypot(p.vx, p.vy); p.h.d = Math.round(clamp(4 + sp * 2.3, 5, 12) * 10) / 10; p.face = sgn(p.vx) || p.face; }
+function coalStep(p) {
+  const ow = F[p.owner]; if (!ow || ow.state === 'dead') { p.life = 0; return; }
+  if (p.st === 'swing') {
+    coalSwing(p); p.arcT++;
+    /* the relay mark: the frame it swings out past COAL.mark (forward of its hook) */
+    if (p.markAge === undefined && sgn(p.w) === p.dir && p.th * p.dir >= COAL.mark) p.markAge = p.age;
+    coalSpeedHit(p);
+    if (p.y - p.r < 0 && Math.abs(p.x) < EDGE) { p.y = p.r; coalLand(p, MAIN); return; }   /* swung into the floor */
+    if (p.markAge !== undefined && sgn(p.w) !== p.dir) { coalLetGo(p); return; }   /* left alone it lets go at the far end of the swing and drops there */
+    if (p.arcT > COAL.arc) coalLetGo(p);
+    return;
+  }
+  if (p.st === 'fly') {
+    p.vy -= 0.1; const py = p.y - p.r; p.x += p.vx; p.y += p.vy; coalSpeedHit(p);
+    if (p.vy <= 0) for (const q of PLATS) if (py >= q.y && p.y - p.r <= q.y && p.x >= q.x0 && p.x <= q.x1) { p.y = q.y + p.r; coalLand(p, q); return; }
+    if (p.y < -1 && Math.abs(p.x) - p.r < stageHalf(p.y)) { p.life = 0; return; }   /* into the side of the island */
+    if (p.y < BLAST.b || Math.abs(p.x) > BLAST.r) p.life = 0;
+    return;
+  }
+  /* on the ground: Chomp picks it up by walking over it, unless his ant is carrying it */
+  p.vx = p.vy = 0;
+  if (!chompAnt(ow) && p.age - p.landAge > 20 && Math.abs(ow.x - p.x) < 5 && Math.abs(ow.y - (p.y - p.r)) < 3) { p.picked = true; p.life = 0; spark(p.x, p.y, '#ffb13b', 6, 0.8); beep(700, 0.05, 'triangle', 0.04); }
+}
+function coalLetGo(p) { p.st = 'fly'; p.ax = p.ay = undefined; beep(300, 0.05, 'triangle', 0.03, 0.7); }
+function coalLand(p, q) { p.st = 'ground'; p.plat = null; p.onPlat = q; p.vx = p.vy = 0; p.landAge = p.age; p.life = COAL.ground; p.h = { d: COAL.burn, a: 75, b: 30, k: 20, id: p.h.id }; p.cool = 0; p.rehit = 45; spark(p.x, p.y, '#ffb13b', 8, 0.9); beep(180, 0.06, 'triangle', 0.04, 0.8); }
+/* a relay press: in the window it moves the coal onto a new rope further on; anywhere else it lets go */
+function coalRelay(f, p) {
+  if (p.relay >= COAL.relays) { coalLetGo(p); return 'release'; }
+  let off = null;
+  if (p.markAge !== undefined && p.age - p.markAge <= COAL.win) off = p.age - p.markAge;   /* late side */
+  else if (p.markAge === undefined) {   /* early side: would it pass the mark within the window? */
+    let th = p.th, w = p.w; for (let k = 1; k <= COAL.win; k++) { w += -(COAL.g / p.L) * Math.sin(th); th += w; if (sgn(w) === p.dir && th * p.dir >= COAL.mark) { off = k; break; } }
+  }
+  if (off === null) { coalLetGo(p); return 'release'; }
+  const sp = Math.hypot(p.vx, p.vy) * (off <= 1 ? COAL.boost : COAL.keep), v = Math.min(COAL.vmax, sp);
+  /* the new rope: hooked ahead at the same height as the last, so the coal starts behind it and swings on through the same
+     low point and out again: each relay carries it about one rope width further */
+  const th = -p.dir * Math.acos(clamp((p.ay - p.y) / p.L, -1, 1)); p.ax = p.x - p.L * Math.sin(th); p.th = th; p.w = p.dir * v / p.L;
+  p.relay++; p.arcT = 0; p.markAge = undefined; p.perfect = off <= 1; p.offs = (p.offs || []).concat(off);
+  spark(p.x, p.y, off <= 1 ? '#fff6c8' : '#ffd27a', off <= 1 ? 12 : 7, 1.1); beep(off <= 1 ? 880 : 660, 0.06, 'square', 0.04, 1.3);
+  return off <= 1 ? 'perfect' : 'relay';
+}
+/* The ant: it starts at the coal and walks along the rope toward Chomp's mouth, wherever he is now. Its progress is the
+   distance it has walked from the coal; when Chomp moves, the rope swings round the coal and the ant stays that far along. */
+function antStep(p) {
+  const ow = F[p.owner], c = p.coal, v = F[1 - p.owner];
+  if (!ow || ow.state === 'dead' || !c || c.life <= 0 || !PROJ.includes(c)) { p.life = 0; return; }
+  const [mx, my] = chompMouth(ow), x0 = c.x, y0 = c.y, L = Math.hypot(mx - x0, my - y0) || 1e-6;
+  p.rope = [x0, y0, mx, my];
+  /* a rope through solid stage is cut */
+  for (const t of [0.25, 0.5, 0.75]) { const x = x0 + (mx - x0) * t, y = y0 + (my - y0) * t; if (y < -1 && Math.abs(x) < stageHalf(y)) { antCut(p, x, y); return; } }
+  p.s = Math.min(p.s + COAL.antV, L); const x = x0 + (mx - x0) * p.s / L, y = y0 + (my - y0) * p.s / L;
+  p.vx = x - p.x; p.vy = y - p.y; p.x = x; p.y = y; p.face = sgn(mx - x0) || 1;
+  if (L - p.s < 2.5) {   /* home: the coal comes back to Chomp */
+    p.life = 0; c.life = 0; c.picked = true; p.home = true; spark(mx, my, '#ffb13b', 10, 1); beep(520, 0.05, 'triangle', 0.04); beep(780, 0.05, 'triangle', 0.04);
+    return;
+  }
+  if (!v || v.state === 'dead') return;
+  /* the opponent's attacks cut the rope */
+  if (v.state === 'attack' && v.move) for (const h of v.move.h) {
+    if (h.grab || v.mf < h.f0 || v.mf > h.f1 || (h.when && !h.when(v))) continue;
+    const [d, t] = segDist(v.x + h.x * v.face, hitY(v, h), x0, y0, mx, my); if (d < h.r && t > 0.02 && t < 0.98) { antCut(p, x0 + (mx - x0) * t, y0 + (my - y0) * t); return; }
+  }
+  /* crossing the rope: a gentle snag that slows the crosser, never a hit (no damage, no hitstun, no freeze, no launch) */
+  const bx = v.x, by = v.y + v.st.h / 2, side = sgn((mx - x0) * (by - y0) - (my - y0) * (bx - x0)), [d, t] = segDist(bx, by, x0, y0, mx, my);
+  if (p.side && side && side !== p.side && d < v.st.h / 2 + 1 && t > 0.03 && t < 0.97 && !(p.snagT > 0)) { v.vx *= 0.5; if (!v.grounded) v.vy *= 0.6; p.snagT = 15; p.snags = (p.snags || 0) + 1; }
+  if (p.snagT > 0) p.snagT--; if (side) p.side = side;
+}
+function antCut(p, x, y) { p.life = 0; p.cut = true; const ow = F[p.owner]; if (ow) ow.ropeCuts = (ow.ropeCuts || 0) + 1; spark(x, y, '#d8c49a', 10, 1); beep(240, 0.06, 'square', 0.04, 0.6); }
+/* the ant's rope and the coal's swing rope, for the renderers and the hitbox view: picture only */
+function chompRopes() { const out = []; for (const p of PROJ) { if (p.tag === 'coal' && p.st === 'swing' && p.ax !== undefined) out.push([p.ax, p.ay, p.x, p.y, 'swing']); if (p.tag === 'ant' && p.rope) out.push([...p.rope, 'ant']); } return out; }
+function chompNspec(f, n, i) {
+  if (n === 1) {
+    const c = chompCoal(f), a = chompAnt(f);
+    f.ccAct = !c ? (frame < (f.coalReady || 0) ? 'none' : 'throw') : c.st === 'swing' ? 'relay' : c.st === 'ground' && !a ? 'ant' : 'none';
+    if (f.ccAct === 'relay') { f.ccRelay = coalRelay(f, c); f.mf = f.move.t - 8; }   /* a quick flick of the head */
+    else if (f.ccAct === 'none') f.mf = f.move.t - 6;
+    if (!f.grounded) hang(f);
+    return;
+  }
+  if (f.ccAct === 'throw' && n === 13) {   /* out of his mouth, onto a rope from a little hook above and ahead */
+    const dir = f.face, up = clamp(i.ly, -1, 1), ax = f.x + dir * 14, ay = f.y + 26 + up * 5, x = f.x + dir * 4, y = f.y + 6, L = Math.hypot(x - ax, y - ay), th = Math.atan2(x - ax, ay - y);
+    PROJ.push({ x, y, vx: 0, vy: 0, grav: 0, life: 9999, owner: f.idx, face: dir, dir, r: 2.4, ground: 'pass', plat: null, kind: 'coal', tag: 'coal', st: 'swing',
+      ax, ay, L, th, w: dir * (0.06 + 0.012 * up), arcT: 0, relay: 0, hits: 99, rehit: 9999, cool: 5, h: { d: 5, a: 50, b: 30, k: 55, id: 'Chomp Chomp:nspec' }, step: coalStep, onGone: coalGone });
+    beep(420, 0.07, 'triangle', 0.04, 1.2);
+  }
+  if (f.ccAct === 'ant' && n === 10) {
+    const c = chompCoal(f);
+    if (c && c.st === 'ground' && !chompAnt(f)) PROJ.push({ x: c.x, y: c.y, vx: 0, vy: 0, grav: 0, life: 9999, owner: f.idx, face: f.face, r: 2.2, ground: 'pass', plat: null, kind: 'ant', tag: 'ant',
+      coal: c, s: 0, hits: 99, rehit: 9999, h: { d: COAL.antD, a: 55, b: 40, k: 50, id: 'Chomp Chomp:ant' }, step: antStep });
+    f.mf = Math.max(f.mf, f.move.t - 8);
+  }
+}
+function coalGone(p) { if (!p.picked) { const ow = F[p.owner]; if (ow) ow.coalReady = frame + COAL.cd; } }
+/* Side B, Rope Swing: a rope to a hook above and ahead on frame 11 (once per time in the air), then a pendulum swing. Push
+   the stick to pump it. Let go of special to release along the swing with the mouth open: 9% clean, 6% after. A swing ends
+   by itself after 80 frames, or on landing. The rope never hits. */
+function chompSwing(f, n, i) {
+  const s = f.st, by = () => f.y + s.h / 2;
+  if (n === 1) { f.rsGo = false; if (!f.grounded) { if (f.airUse.rope) { f.mf = f.move.t; return; } f.airUse.rope = 1; } }
+  if (n < 11) { hang(f); return; }
+  if (n === 11) {
+    f.rsAx = f.x + f.face * 12; f.rsAy = by() + 22; const dx = f.x - f.rsAx, dy = by() - f.rsAy;
+    f.rsL = Math.hypot(dx, dy); f.rsTh = Math.atan2(dx, -dy); f.rsW = f.face * 0.05 + (f.vx * Math.cos(f.rsTh)) / f.rsL; f.rsGo = true; f.grounded = false; f.plat = null;
+    beep(500, 0.05, 'triangle', 0.04, 1.4);
+  }
+  if (!f.rsGo) return;
+  f.rsW += -(0.11 / f.rsL) * Math.sin(f.rsTh) + clamp(i.lx * f.face, -1, 1) * 0.0012 * f.face; f.rsW = clamp(f.rsW, -0.14, 0.14); f.rsTh += f.rsW;
+  const x = f.rsAx + f.rsL * Math.sin(f.rsTh), y = f.rsAy - f.rsL * Math.cos(f.rsTh) - s.h / 2;
+  f.vx = x - f.x; f.vy = y - f.y;
+  if ((n > 16 && !i.spc) || n >= 91) { f.rsGo = false; f.startMove('swingBite'); f.vx = clamp(f.vx, -3, 3); f.vy = clamp(f.vy, -2.5, 3); }   /* let go: fly on along the swing, mouth first */
+}
+/* Up B, Bubble Ride: a bubble forms on frame 8 and carries him up for up to 55 frames, steering gently. Up B again pops it
+   (4% round him) with a small push the way the stick points; it pops by itself at the end. Falls helpless after. */
+function chompBubble(f, n, i) {
+  if (n < 8) { hang(f); return; }
+  if (n === 8) f.bubble = true;
+  if (!f.bubble) return;
+  f.vy = 0.95; f.vx = appr(f.vx, clamp(i.lx, -1, 1) * 0.75, 0.06);
+  if ((n > 14 && f.ctl && f.ctl.pressed('spc')) || n >= 63) {
+    f.bubble = false; const m = Math.hypot(i.lx, i.ly), dx = m > 0.3 ? i.lx / m : 0, dy = m > 0.3 ? i.ly / m : 1;
+    f.vx = dx * 1.8; f.vy = dy * 1.8 + 0.4;
+    PROJ.push({ x: f.x, y: f.y + f.st.h / 2, vx: 0, vy: 0, grav: 0, life: 3, owner: f.idx, face: f.face, r: 8, ground: 'pass', plat: null, kind: 'blast', h: { d: 4, a: 70, b: 40, k: 40, id: 'Chomp Chomp:uspec' } });
+    spark(f.x, f.y + f.st.h / 2, '#cfe8ff', 14, 1.4); beep(900, 0.05, 'sine', 0.04, 0.6); f.mf = f.move.t;
+  }
+}
+/* Down B, Air Cushion: squeezes a little cushion. A gust on frames 9 to 13 pushes the opponent away (3%) and nudges a
+   swinging or flying coal along; it leaves the ant alone. In the air the first one each jump pushes Chomp back. 18 after. */
+function chompCushion(f, n) {
+  if (n === 9) { if (!f.grounded && !f.airUse.cush) { f.airUse.cush = 1; f.vx = -f.face * 1.6; f.vy = Math.max(f.vy, 0.7); } else if (f.grounded) f.vx = -f.face * 0.5; beep(260, 0.08, 'sine', 0.04, 0.5); }
+  if (n >= 9 && n <= 13) { const c = chompCoal(f); if (c && (c.st === 'swing' || c.st === 'fly')) { const dx = c.x - f.x, dy = c.y - (f.y + 5), d = Math.hypot(dx, dy);
+    if (d < 22 && dx * f.face > 0 && Math.abs(dy) < d * 0.7) { if (c.st === 'swing') c.w += f.face * 0.006; else { c.vx += f.face * 0.4; c.vy += 0.12; } c.gusted = (c.gusted || 0) + 1; } } }
+}
+const CHOMP = {
+  name: 'Chomp Chomp', sub: 'the hungry critter', forms: [{
+    name: 'Chomp Chomp', col: ['#2a5fd6', '#5fc23a', '#ffb13b'], alt: ['#8a3fd0', '#ffcf3a', '#ff6a3c'], reachMul: 1.0,
+    /* the design's targets against an average fighter (Flint): weight 94, walk 108, dash 115, run 110, air speed average,
+       gravity and fall a little low, jump squat 4, a high full hop. Squat and round. */
+    st: { weight: 94, walk: 1.21, walkMul: 0.15, walkAdd: 0.1, trac: 0.11, dash: 2.2, runMul: 0.12, runAdd: 0.045, run: 1.91,
+      jumpX: 0.95, jumpXMul: 0.85, jumpXMax: 1.35, airJumpX: 0.9, jumpH: 37, jumpInit: 19.6, hopH: 17, airJumpH: 35, upH: 28,
+      airMul: 0.07, airAdd: 0.012, airSpeed: 1.1, airBrake: 0.01, grav: 0.084, fall: 1.47, ffall: 2.4, jsq: 4, w: 9, h: 11, jf: 3, jb: 1.6,
+      jumps: 1, dashF: 12, roll: [28, 1.35, 13], spot: [22, 15] },
+    aiShot: [30, 90],
+    moves: mk(0.95, 1, 1, 0.8, {
+      nspec: { t: 22, h: [], on: chompNspec },   /* the toss: out on frame 13, free again on 22, before the coal reaches its first relay mark */
+      sspec: { t: 92, nodrift: 1, h: [], on: chompSwing },
+      swingBite: { t: 26, air: 1, ll: 10, h: [{ f0: 1, f1: 4, x: 5, y: 6, r: 5.5, d: 9, a: 40, b: 40, k: 75 }, { f0: 5, f1: 9, x: 4.5, y: 6, r: 5, d: 6, a: 45, b: 30, k: 60, part: 'late' }] },
+      uspec: { t: 70, helpless: 1, ledge: 1, nodrift: 1, rise: 78, h: [], on: chompBubble },   /* rise: about 52 in the bubble and 26 from the pop */
+      dspec: { t: 32, h: [{ f0: 9, f1: 13, x: 10, y: 5, r: 7.5, d: 3, a: 20, b: 48, k: 12, away: 1 }], on: chompCushion },
+    }, { jabs: 3, grab: { t: 32, h: { f0: 9, f1: 10, x: 10.5, r: 4.4 } } }),
+  }],
+};
+
+const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE, FOWLS, CHOMP];
 /* Hitbox positions measured from the animations (hitboxes.js, written with tools/measure.html). Timing, damage and launch stay as defined above. */
 if (typeof HITBOXES !== 'undefined') for (const def of ROSTER) for (const fm of def.forms) {
   const set = HITBOXES[fm.name]; if (!set) continue;
@@ -1594,6 +1774,7 @@ function updateProj() {
   for (const p of PROJ.slice()) {
     p.life--; p.age = (p.age || 0) + 1; const py = p.y - p.r;
     if (p.cool > 0) p.cool--;
+    if (p.step) { p.step(p); continue; }   /* moves itself (Chomp Chomp's coal and ant) */
     if (p.track) { const ow = F[p.owner]; if (!ow || ow.state === 'dead') { p.life = 0; continue; } const q = p.track(ow, p); p.vx = q[0] - p.x; p.vy = q[1] - p.y; p.x = q[0]; p.y = q[1]; continue; }   /* placed by a rule from its owner (Pip's doubles) */
     if (p.lateAt && p.age === p.lateAt) p.h = Object.assign({ id: p.h.id }, p.lateH);
     if (p.split && p.age === p.split) { p.split = 0; for (const vy of [0.55, -0.55]) PROJ.push(Object.assign({}, p, { vy, age: p.age, h: Object.assign({}, p.h, { d: vy > 0 ? 3 : 2 }) })); }
@@ -1614,6 +1795,7 @@ function updateProj() {
     }
     if (p.y < -1 && Math.abs(p.x) - p.r < stageHalf(p.y)) p.life = 0;   /* into the side or underside of the island */
   }
+  for (const p of PROJ) if (p.onGone && !p.gone && (p.life <= 0 || p.y <= BLAST.b || Math.abs(p.x) >= BLAST.r)) { p.gone = true; p.onGone(p); }
   PROJ = PROJ.filter(p => p.life > 0 && p.y > BLAST.b && Math.abs(p.x) < BLAST.r);
 }
 

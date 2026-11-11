@@ -120,7 +120,7 @@ function build() {
     if (v.key === k) return; const prevKey = v.key; v.key = k;
     while (v.pivot.children.length) { const c = v.pivot.children.pop(); if (c.geometry) c.geometry.dispose(); }
     if (v.mixer) v.mixer.stopAllAction();
-    v.mixer = null; v.model = null; v.actions = {}; v.cur = null; v.prev = null; v.hand = null; v.springs = []; v.springTick = -1;
+    v.mixer = null; v.model = null; v.chomp = null; v.actions = {}; v.cur = null; v.prev = null; v.hand = null; v.springs = []; v.springTick = -1;
     if (v.prop) { scene.remove(v.prop); v.prop = null; }
     if (useModel) {
       /* A copy of the loaded model with its own skeleton, scaled to the fighter's height and turned so its front is +x. */
@@ -133,6 +133,7 @@ function build() {
       if (M.cfg.prop && M.cfg.prop.type === 'lantern') { v.hand = obj.getObjectByName(M.cfg.prop.bone) || null; if (v.hand) { v.prop = makeLantern(); scene.add(v.prop); } }
       return;
     }
+    if (fm.name === 'Chomp Chomp') { buildChomp(v, col); return; }   /* built from simple shapes here until a generated model is made */
     const r = st.w * 0.45, len = Math.max(0.1, st.h - 2 * r);
     const mk = (geo, hex, x, y, z) => { const mat = new THREE.MeshStandardMaterial({ color: new THREE.Color(hex), roughness: 0.55 }); const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; v.pivot.add(m); v.mats.push(mat); return m; };
     v.mats = [];
@@ -231,10 +232,64 @@ function build() {
     rig.lastVy = f.vy;
     return w;
   }
+  /* Chomp Chomp, built from simple shapes: a round blue body with a dark outline, a big mouth of triangular teeth on the
+     front that opens when he bites, small beady eyes, stubby feet, little fins and a leaf sprout. Faces +x. */
+  function buildChomp(v, col) {
+    const M2 = (c, o) => { const m = new THREE.MeshStandardMaterial(Object.assign({ color: new THREE.Color(c), roughness: 0.55 }, o || {})); v.mats.push(m); return m; };
+    const add = (geo, mat, x, y, z, sx, sy, sz) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); if (sx) m.scale.set(sx, sy, sz); m.castShadow = true; v.pivot.add(m); return m; };
+    v.mats = []; const blue = M2(col[0]), dark = M2(new THREE.Color(col[0]).multiplyScalar(0.7).getHex()), ink = new THREE.MeshBasicMaterial({ color: 0x111111, side: THREE.BackSide });
+    add(new THREE.SphereGeometry(5.2, 28, 20), blue, 0, 5.7, 0, 1, 0.98, 0.95);
+    add(new THREE.SphereGeometry(5.2, 24, 16), ink, 0, 5.7, 0, 1.05, 1.03, 1.0).castShadow = false;   /* the outline */
+    for (const z of [2, -2]) add(new THREE.SphereGeometry(1.8, 14, 10), dark, 0.5, 0.7, z, 1.15, 0.55, 0.8);   /* feet */
+    for (const z of [5, -5]) add(new THREE.SphereGeometry(1.6, 12, 8), dark, -0.2, 4.6, z, 0.7, 0.45, 0.9).rotation.x = z > 0 ? -0.5 : 0.5;   /* fins */
+    const mouth = new THREE.Group(); mouth.position.set(3.3, 4.8, 0); v.pivot.add(mouth);
+    const red = M2(0x5a0f1c), tooth = M2(0xffffff, { roughness: 0.35 });
+    const gap = new THREE.Mesh(new THREE.SphereGeometry(2.6, 18, 12), red); gap.scale.set(0.75, 0.55, 1.35); gap.position.set(0.6, 0, 0); mouth.add(gap);
+    const upper = new THREE.Group(), lower = new THREE.Group(); mouth.add(upper, lower);
+    for (let k = 0; k < 7; k++) { const z = -3 + k, t2 = new THREE.Mesh(new THREE.ConeGeometry(0.42, 1.1, 6), tooth); t2.position.set(1.9 - Math.abs(z) * 0.18, 0.75, z * 0.9); t2.rotation.z = Math.PI; upper.add(t2); }
+    for (let k = 0; k < 4; k++) { const z = -1.5 + k, t2 = new THREE.Mesh(new THREE.ConeGeometry(0.38, 0.9, 6), tooth); t2.position.set(1.8 - Math.abs(z) * 0.2, -0.75, z * 0.95); lower.add(t2); }
+    const eyeM = M2(0x0d0d0d, { roughness: 0.2 }), glint = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    for (const z of [1.1, -1.1]) { add(new THREE.SphereGeometry(0.5, 12, 8), eyeM, 4.45, 8.2, z); add(new THREE.SphereGeometry(0.16, 6, 4), glint, 4.85, 8.4, z + 0.12).castShadow = false; }
+    const leaf = new THREE.Group(); leaf.position.set(0, 10.6, 0); v.pivot.add(leaf);
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.24, 1.6, 6), M2(0x2f6b1e)); stem.position.y = 0.8; leaf.add(stem);
+    for (const [x, rz, c2] of [[1.1, -0.5, col[1]], [-0.9, 0.6, new THREE.Color(col[1]).multiplyScalar(0.8).getHex()]]) { const l = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 8), M2(c2)); l.scale.set(1.3, 0.35, 0.7); l.position.set(x, 1.8, 0); l.rotation.z = rz; l.castShadow = true; leaf.add(l); }
+    const bubble = new THREE.Mesh(new THREE.SphereGeometry(7.8, 24, 16), new THREE.MeshStandardMaterial({ color: 0xcfe8ff, transparent: true, opacity: 0.22, roughness: 0.05, metalness: 0.1, depthWrite: false }));
+    bubble.position.y = 5.7; bubble.visible = false; v.pivot.add(bubble);
+    v.chomp = { mouth, upper, lower, gap, leaf, bubble, open: 0.2 };
+  }
+  /* per frame: the mouth opens to bite, the leaf bobs and lags, the bubble shows. Picture only. */
+  function poseChomp(v, f) {
+    const c = v.chomp, a = f.state === 'attack' ? animState(f) : null;
+    let want = 0.2 + Math.max(0, Math.sin(tick * 0.05)) * 0.08;
+    if (a && a.mode === 'marks') want = a.seg === 0 ? 0.3 + 0.7 * a.v : a.seg === 1 ? 0.15 : 0.2 + 0.4 * (1 - a.v);   /* opens wide in the wind-up, snaps shut on the hit */
+    if (f.state === 'attack' && f.mname === 'nspec') want = 0.9;
+    if (f.state === 'hold' || f.state === 'throw') want = 0.1;
+    if (f.state === 'hurt') want = 0.6;
+    c.open += (want - c.open) * 0.45;
+    c.lower.position.y = -c.open * 1.6; c.upper.position.y = c.open * 0.5; c.gap.scale.y = 0.35 + c.open * 0.6;
+    c.leaf.rotation.z = Math.sin(tick * 0.15) * 0.12 - clamp(f.vx * f.face * 0.08, -0.35, 0.35) + (f.vy > 0.5 ? -0.15 : f.vy < -0.5 ? 0.2 : 0);
+    c.bubble.visible = !!f.bubble; if (f.bubble) c.bubble.scale.setScalar(1 + Math.sin(tick * 0.3) * 0.03);
+  }
+  /* Chomp Chomp's ropes (from the simulation: chompRopes) drawn as thin cords; they never hit, so they never glow */
+  const ropePool = [], ropeMat = new THREE.MeshStandardMaterial({ color: 0xb08a55, roughness: 0.9 }), hookMat = new THREE.MeshStandardMaterial({ color: 0x6b5a4a, roughness: 0.8 });
+  function drawRopes() {
+    const list = typeof chompRopes === 'function' ? chompRopes() : [];
+    while (ropePool.length < list.length) { const cord = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 1, 6), ropeMat), hook = new THREE.Mesh(new THREE.SphereGeometry(0.8, 8, 6), hookMat); scene.add(cord, hook); ropePool.push({ cord, hook }); }
+    ropePool.forEach((q, k) => { const r = list[k]; q.cord.visible = !!r; q.hook.visible = !!r && r[4] === 'swing'; if (!r) return;
+      const a = new THREE.Vector3(r[0], r[1], 0), b = new THREE.Vector3(r[2], r[3], 0), len = Math.max(0.01, a.distanceTo(b));
+      q.cord.position.copy(a).add(b).multiplyScalar(0.5); q.cord.scale.set(1, len, 1); q.cord.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize()); q.hook.position.copy(a); });
+  }
   const shots = new Map();
   const shotMesh = kind => {
     if (kind === 'pipmate') { const M = MODELS['Pip alone']; if (M && M.ready) { const o = cloneSkinned(M.scene), g2 = new THREE.Group(); o.scale.setScalar(M.cfg.height * 0.8 / M.height); o.rotation.y = Math.PI / 2; o.traverse(q => { if (q.isMesh) { q.castShadow = true; q.frustumCulled = false; } }); g2.add(o); g2.userData.mixer = new THREE.AnimationMixer(o); g2.userData.acts = {}; g2.userData.ph = (shots.size % 3) * 0.37; return g2; }   /* Pip's companions animate too, each a little out of step */
       return new THREE.Mesh(new THREE.SphereGeometry(2.2, 12, 9), new THREE.MeshStandardMaterial({ color: 0x2bb8b0, roughness: 0.6 })); }
+    if (kind === 'coal') { const g2 = new THREE.Group(), m = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 0), new THREE.MeshStandardMaterial({ color: 0xff8a2a, emissive: 0xff5a10, emissiveIntensity: 1.6, roughness: 0.7, flatShading: true }));
+      const glow2 = new THREE.Sprite(new THREE.SpriteMaterial({ map: dot, color: 0xffa040, transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending })); glow2.scale.setScalar(5); m.castShadow = true; g2.add(m, glow2); g2.userData.core = m; return g2; }   /* Chomp Chomp's hot coal */
+    if (kind === 'ant') { const g2 = new THREE.Group(), red = new THREE.MeshStandardMaterial({ color: 0xc2402a, roughness: 0.5 }), legM = new THREE.MeshStandardMaterial({ color: 0x2a1a14 });
+      for (const [x, r] of [[-1.1, 0.8], [0, 0.6], [1.1, 0.75]]) { const b = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 8), red); b.position.x = x; b.castShadow = true; g2.add(b); }
+      g2.userData.legs = []; for (const x of [-0.5, 0, 0.5]) for (const z of [0.6, -0.6]) { const l = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1.1, 4), legM); l.position.set(x, -0.5, z); l.rotation.x = z > 0 ? 0.6 : -0.6; g2.add(l); g2.userData.legs.push(l); }
+      for (const z of [0.25, -0.25]) { const an = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1, 4), legM); an.position.set(1.6, 0.6, z); an.rotation.z = -0.7; g2.add(an); }
+      return g2; }   /* Chomp Chomp's ant */
     if (kind === 'sackglow') { const m = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 14), new THREE.MeshBasicMaterial({ color: 0xffa040, transparent: true, opacity: 0.28, depthWrite: false })); return m; }   /* Potato Sack's swelling Spud Bomb */
     if (kind === 'nest') { const g2 = new THREE.Group(), twig = new THREE.MeshStandardMaterial({ color: 0x8a6a3e, roughness: 0.9 }); const ring = new THREE.Mesh(new THREE.TorusGeometry(2.6, 0.9, 6, 14), twig); ring.rotation.x = Math.PI / 2; g2.add(ring);
       const egg = new THREE.Mesh(new THREE.SphereGeometry(1.2, 12, 9), new THREE.MeshStandardMaterial({ color: 0xf4ead8, roughness: 0.5 })); egg.scale.set(0.8, 1, 0.8); egg.position.y = 0.6; g2.add(egg); return g2; }
@@ -502,6 +557,7 @@ function build() {
       for (const m of v.mats) { m.transparent = ghost; m.opacity = ghost ? 0.45 : 1; m.emissive.setHex(hot ? 0xffffff : 0x000000); m.emissiveIntensity = hot ? 0.8 : 0; }
       if (v.shield.visible) { const [sx, sy, r] = shieldCircle(f); v.shield.scale.setScalar(r); v.shield.position.set(sx, sy, 0); }
       if (v.pad.visible) v.pad.position.set(f.x, f.y - 0.8, 0);
+      if (v.chomp) poseChomp(v, f);
       if (v.springs.length) applySprings(v);
       if (v.prop && !v.hand) {   /* the living slingshot under its bird: posed by slingWant, the bird riding in its pouch */
         const spinning = f.state === 'attack' && f.move && f.move.spin && f.move.spinAt, rot = spinning ? f.move.spinAt(f, f.mf) : 0, rig = v.prop.userData.rig, step = rig.tick !== tick; rig.tick = tick;
@@ -550,7 +606,10 @@ function build() {
       else if (p.kind === 'flame') m.scale.set(p.r * 0.8, p.r * (1.1 + Math.sin(frame * 0.5) * 0.3), p.r * 0.8);
       else if (p.kind === 'ember') m.scale.setScalar(p.r * 0.75);
       else if (p.kind === 'bolt') m.scale.x = p.face;
+      else if (p.kind === 'coal') { m.userData.core.scale.setScalar(p.r); m.userData.core.rotation.set(frame * 0.05, frame * 0.07, 0); }
+      else if (p.kind === 'ant') { m.rotation.y = p.face < 0 ? Math.PI : 0; m.rotation.z = Math.atan2(p.vy, Math.abs(p.vx) + 1e-6); m.userData.legs.forEach((l, k) => { l.rotation.z = Math.sin(frame * 0.8 + k * 1.7) * 0.5; }); }
     }
+    drawRopes();
     fxFrame();
     renderer.render(scene, camera);
     R3.info = { calls: renderer.info.render.calls, triangles: renderer.info.render.triangles };

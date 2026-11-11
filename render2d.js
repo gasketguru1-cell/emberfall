@@ -157,6 +157,25 @@ const ART = {
     g.fillStyle = c[2]; for (const x of [1.6, 3]) { g.beginPath(); g.arc(x, 4.1 + bob, 0.38, 0, TAU); g.fill(); }   /* eyes under the lip */
     g.save(); g.translate(4.2, 3.4 + bob); g.rotate(-1.2 * a + 0.5); g.strokeStyle = '#4a4d57'; g.lineWidth = 0.55; g.beginPath(); g.moveTo(0, 0); g.lineTo(0, 5.2); g.moveTo(0, 3.4); g.lineTo(-0.7, 6); g.moveTo(0, 3.4); g.lineTo(0.7, 6); g.stroke(); g.restore();   /* fire tongs */
   },
+  /* Chomp Chomp: a squat round blue critter with a leaf sprout, small beady eyes and a huge mouth of triangular teeth. The
+     mouth opens wide in an attack; the leaf bobs. Faces +x. */
+  'Chomp Chomp'(c, t, f) {
+    const sw = gait(f) * 0.8, a = swing(f), bob = Math.sin(t * 0.12) * 0.18, open = f && f.state === 'attack' ? 0.55 + 0.45 * Math.abs(Math.sin(a * 2.2)) : 0.25 + Math.max(0, Math.sin(t * 0.05)) * 0.1;
+    for (const s2 of [-1, 1]) { g.beginPath(); g.ellipse(s2 * 2 + s2 * sw * 0.6 + 0.4, 0.7, 2, 1, 0, 0, TAU); ink(tint(c[0], -0.1), 0.35); }   /* stubby feet */
+    for (const s2 of [-1, 1]) { g.beginPath(); g.moveTo(s2 * 4.6, 5.6 + bob); g.quadraticCurveTo(s2 * 6.6, 5.2 + bob, s2 * 6.7, 3.2 + bob); g.quadraticCurveTo(s2 * 5.4, 3.6 + bob, s2 * 4.4, 4.4 + bob); g.closePath(); ink(tint(c[0], -0.2), 0.32); }   /* fins */
+    g.beginPath(); g.ellipse(0, 5.7 + bob, 5.2, 5.2, 0, 0, TAU); ink(vgrad(c[0], 0.5, 11), 0.5);   /* body */
+    const my = 5 + bob, mh = 2.2 + open * 2.4;   /* the mouth, on the front of the body */
+    g.beginPath(); g.moveTo(-1.6, my + 0.6); g.quadraticCurveTo(2, my + 1, 5.1, my + 0.6); g.quadraticCurveTo(4.6, my - mh, 1.6, my - mh * 0.9); g.quadraticCurveTo(-1.2, my - mh * 0.6, -1.6, my + 0.6); g.closePath(); ink('#5a0f1c', 0.35);
+    g.fillStyle = '#fff'; g.strokeStyle = OL; g.lineWidth = 0.18;
+    for (let k = 0; k < 5; k++) { const x0 = -1 + k * 1.2; g.beginPath(); g.moveTo(x0, my + 0.6); g.lineTo(x0 + 0.6, my - 0.5); g.lineTo(x0 + 1.2, my + 0.65); g.closePath(); g.fill(); g.stroke(); }   /* top teeth */
+    for (let k = 0; k < 3; k++) { const x0 = 0 + k * 1.4, yb = my - mh * 0.8; g.beginPath(); g.moveTo(x0, yb); g.lineTo(x0 + 0.7, yb + 0.9); g.lineTo(x0 + 1.4, yb + 0.1); g.closePath(); g.fill(); g.stroke(); }   /* bottom teeth */
+    g.fillStyle = OL; for (const x of [1.2, 3]) { g.beginPath(); g.arc(x, 8.4 + bob, 0.45, 0, TAU); g.fill(); }   /* small beady eyes */
+    g.fillStyle = '#fff'; for (const x of [1.35, 3.15]) { g.beginPath(); g.arc(x, 8.6 + bob, 0.14, 0, TAU); g.fill(); }
+    const lb = Math.sin(t * 0.15) * 0.3;   /* the leaf sprout, bobbing */
+    g.strokeStyle = '#2f6b1e'; g.lineWidth = 0.4; g.beginPath(); g.moveTo(0, 10.8 + bob); g.quadraticCurveTo(0.1, 11.8 + bob, 0.2 + lb * 0.3, 12.4 + bob); g.stroke();
+    g.beginPath(); g.ellipse(1.3 + lb, 12.9 + bob, 1.3, 0.55, 0.35, 0, TAU); ink(c[1], 0.25); g.beginPath(); g.ellipse(-0.8 + lb * 0.6, 12.6 + bob, 1, 0.45, -0.4, 0, TAU); ink(tint(c[1], -0.15), 0.25);
+    if (f && f.bubble) { g.beginPath(); g.arc(0, 5.5, 7.5, 0, TAU); g.fillStyle = 'rgba(190,225,255,.22)'; g.fill(); g.strokeStyle = 'rgba(220,240,255,.85)'; g.lineWidth = 0.35; g.stroke(); }
+  },
   Sprocket(c, t, f) {
     const sw = gait(f) * 1.4, a = swing(f), bob = Math.sin(t * 0.08) * 0.15, skin = '#e0a98a', iron = '#5b5f6b', copper = '#b87333';
     for (const s of [-1, 1]) { g.beginPath(); g.rect(s * 1.9 - 1.1 + s * sw * 0.5, 1.2, 2.2, 3.6); ink('#3a3a40', 0.3); g.beginPath(); g.ellipse(s * 1.9 + s * sw + 0.5, 0.8, 1.9, 0.9, 0, 0, TAU); ink(iron, 0.3); }   /* legs and steel-capped boots */
@@ -250,8 +269,11 @@ function drawFighter(f, three) {
 }
 function drawProj() {
   const s = cam.s;
+  if (typeof chompRopes === 'function') for (const r of chompRopes()) { g.strokeStyle = r[4] === 'ant' ? '#c9a46a' : '#a88552'; g.lineWidth = Math.max(1, 0.5 * s); g.beginPath(); g.moveTo(SX(r[0]), SY(r[1])); g.lineTo(SX(r[2]), SY(r[3])); g.stroke(); if (r[4] === 'swing') { g.fillStyle = '#6b5a4a'; g.beginPath(); g.arc(SX(r[0]), SY(r[1]), 0.8 * s, 0, TAU); g.fill(); } }   /* Chomp Chomp's ropes: never hit, drawn plainly */
   for (const p of PROJ) {
     const x = SX(p.x), y = SY(p.y);
+    if (p.kind === 'coal') { g.fillStyle = 'rgba(255,150,50,.3)'; g.beginPath(); g.arc(x, y, p.r * 2 * s, 0, TAU); g.fill(); g.beginPath(); for (let k = 0; k < 7; k++) { const a2 = k / 7 * TAU, r = p.r * s * (k % 2 ? 0.85 : 1); g.lineTo(x + Math.cos(a2) * r, y + Math.sin(a2) * r); } g.closePath(); g.fillStyle = '#ff8a2a'; g.fill(); g.strokeStyle = OL; g.lineWidth = 1.2; g.stroke(); g.fillStyle = '#ffe6a0'; g.beginPath(); g.arc(x - p.r * 0.2 * s, y - p.r * 0.2 * s, p.r * 0.35 * s, 0, TAU); g.fill(); continue; }
+    if (p.kind === 'ant') { g.save(); g.translate(x, y); g.scale(p.face * s / 3, s / 3); g.fillStyle = '#c2402a'; g.strokeStyle = OL; g.lineWidth = 0.9; for (const [ex, er] of [[-4, 3], [0, 2.2], [4, 2.8]]) { g.beginPath(); g.arc(ex, 0, er, 0, TAU); g.fill(); g.stroke(); } g.beginPath(); for (const lx of [-2, 0, 2]) { g.moveTo(lx, 1); g.lineTo(lx - 1.5 + Math.sin(frame * 0.6 + lx) * 1.2, 4); } g.stroke(); g.restore(); continue; }
     if (p.kind === 'ember' || p.kind === 'flame') {
       const fl = p.kind === 'flame' ? 1 + Math.sin(frame * 0.5) * 0.25 : 1; g.fillStyle = 'rgba(255,170,60,.35)'; g.beginPath(); g.arc(x, y, p.r * 1.8 * s, 0, TAU); g.fill();
       g.fillStyle = '#ffb347'; g.beginPath(); g.ellipse(x, y - (fl - 1) * 2 * s, p.r * 0.7 * s, p.r * 0.9 * s * fl, 0, 0, TAU); g.fill(); g.fillStyle = '#fff3c4'; g.beginPath(); g.arc(x, y, p.r * 0.35 * s, 0, TAU); g.fill();

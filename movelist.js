@@ -152,6 +152,30 @@ const MOVE_TEXT = {
     u: ['Jack It Up', 'Lifts straight up to set up an up air chase.'],
     d: ['Bench Drop', 'A short bounce up in front. Down tilt on a low-damage drift, or chase the tech.'],
   },
+  'Chomp Chomp': {
+    nspec: ['Hot Coal Relay', 'Tosses a glowing hot coal out on a rope (frame 13). Press B again just as it swings out past its mark (within 3 frames; within 1 for a little extra speed) to hop it onto a new rope further on: up to three relays. Press at any other moment and it lets go and flies on. It hits harder the faster it goes, 5% up to 12%. Where it lands it stays for 6 seconds. With the coal on the floor, B runs a rope from it to Chomp and sends his ant along it (see the rules page).'],
+    sspec: ['Rope Swing', 'Hooks a rope above and ahead on frame 11 and swings on it. Push the stick to pump the swing; let go of B to release and fly on with his mouth open, biting for 9% (6% late). Once each time in the air.'],
+    uspec: ['Bubble Ride', 'Blows a bubble round himself on frame 8 and floats up for up to 55 frames, steering gently. Up B again pops it early, for 4% round him and a small push the way the stick points. Falls helpless after.'],
+    dspec: ['Air Cushion', 'Squeezes a little cushion: a gust on frames 9 to 13 pushes the opponent away (3%) and nudges a swinging or flying coal along. In the air the first one each jump pushes Chomp back.'],
+    jab: ['Nibble, Nibble, Chomp', 'Two quick nibbles and a bigger chomp that knocks away.'],
+    dash: ['Rolling Hunger', 'Tumbles forward into a bite. The late hit is weaker.'],
+    ftilt: ['Tongue Flick', 'Flicks his tongue out for a mid-range poke.'],
+    utilt: ['Snap Up', 'Snaps straight up. A good anti-air.'],
+    dtilt: ['Toe Nibble', 'A low nibble at the feet. Starts combos.'],
+    fsmash: ['Mega Chomp', 'His mouth opens absurdly wide, then slams shut. His main ground finisher.'],
+    usmash: ['Sugar Snap', 'An upward bite that lifts with his head.'],
+    dsmash: ['Floor Feast', 'Spins low, biting in front and behind.'],
+    nair: ['Hungry Spin', 'Spins with his mouth open, hitting all round. The late hit is weaker.'],
+    fair: ['Flying Chomp', 'A big forward bite in the air.'],
+    bair: ['Heel Flick', 'A quick kick behind with his stubby feet.'],
+    uair: ['Sky Bite', 'An upward snap of the jaws, for juggles.'],
+    dair: ['Jaw Drop', 'A giant downward bite. Early it sends straight down; later it is weaker.'],
+    grab: ['Tongue Snatch', 'Catches with his tongue. Short-medium reach.'],
+    f: ['Spit Launch', 'Spits the opponent forward.'],
+    b: ['Over-Shoulder Spit', 'Turns and spits them behind. His strongest throw.'],
+    u: ['Pop Up', 'Pops them straight up.'],
+    d: ['Floor Bounce', 'Bounces them off the floor in front. Starts combos.'],
+  },
   Scuttle: {
     nspec: ['Tongs Snatch', 'A slow reach with the tongs on frames 16 to 18. On the ground it catches a standing opponent, shield or not, and flings them up and away. In the air it is a swipe instead. Use it on someone who keeps shielding.', 'Grab f16 · fling 8%  ·  in the air 5%'],
     sspec: ['Scuttle Roll', 'Pulls into the scuttle and rolls on frames 9 to 23: about 1.65 body lengths along the floor, less in the air. Stronger early (frames 11 to 15), weaker after. Once per jump in the air.'],
@@ -303,6 +327,11 @@ const MOVE_RULES = {
     ['↓ B', 'Through the Shield', 'Bench Vise catches a standing opponent even if they are shielding. Make a shield-happy opponent pay; a jump or a dodge beats it.'],
     ['B', 'The Returning Tape', 'Tape Roll curls back toward where it was let go after about 22 frames, so it covers the space in front of Sprocket twice.'],
   ],
+  'Chomp Chomp': [
+    ['B', 'The Ant and the Rope', 'With the coal on the floor, B runs a rope from the coal to Chomp, wherever he is, and his ant crawls from the coal along it toward him (from frame 10), following him as he moves. Only the ant hits: 7%, once a trip. The rope never hurts; it just snags an opponent who crosses it. Any attack on the rope cuts it, and any attack on the ant beats it; the coal stays. The ant arriving hands Chomp his coal back.'],
+    ['B', 'One Coal', 'Chomp has one hot coal at a time. Walk over it to pick it up. If it is destroyed or runs out, a new one is ready after a moment.'],
+    ['↓ B', 'Gust the Coal', 'Air Cushion pushes a swinging or flying coal further along, to change where it lands. It never pushes the ant.'],
+  ],
   Scuttle: [
     ['★', 'Low and Quick', 'Scuttle is small and light (three quarters of Flint\'s height), fast on the ground and in the air. It gets under swings but is launched early.'],
     ['B', 'Through the Shield', 'Tongs Snatch on the ground catches a standing opponent even if they are shielding.'],
@@ -324,7 +353,7 @@ const ML_INPUT = { nspec: 'B', sspec: '→ B', uspec: '↑ B', dspec: '↓ B', j
   nair: 'Air A', fair: 'Air → A', bair: 'Air ← A', uair: 'Air ↑ A', dair: 'Air ↓ A', grab: 'Grab', pummel: 'Grab A', f: 'Grab →', b: 'Grab ←', u: 'Grab ↑', d: 'Grab ↓', getup: 'Get-up A', launch: 'In flight' };
 const ML_GROUND = ['jab', 'dash', 'ftilt', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash'], ML_AIR = ['nair', 'fair', 'bair', 'uair', 'dair'], ML_SPEC = ['nspec', 'sspec', 'uspec', 'dspec'];
 /* every move a form has, and the entry that documents it (the move keys that are part of another move) */
-const ML_PART_OF = { jab2: 'jab', jab3: 'jab', jabr: 'jab', dgrab: 'grab', pgrab: 'grab', sbrake: 'sspec', dsnap: 'dspec', dcounter: 'dspec', flyStop: 'launch', throws: 'grab' };
+const ML_PART_OF = { jab2: 'jab', jab3: 'jab', jabr: 'jab', dgrab: 'grab', pgrab: 'grab', sbrake: 'sspec', dsnap: 'dspec', dcounter: 'dspec', flyStop: 'launch', swingBite: 'sspec', throws: 'grab' };
 const pc = v => +(+v).toFixed(1) + '%';
 function mlFd(fm, key) {
   const mv = fm.moves;
