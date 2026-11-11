@@ -7001,6 +7001,7 @@
  "Joey": {
   "file": "assets/joey/export/joey-v1.glb",
   "height": 13.5,
+  "feel": 1,
   "clips": {
    "idle": {
     "clip": "Idle"
@@ -7024,7 +7025,7 @@
     "to": 0.4
    },
    "jumpsquat": {
-    "clip": "Crouch",
+    "clip": "Squat",
     "from": 0,
     "to": 0.2
    },
@@ -7067,8 +7068,9 @@
     "bounce": true
    },
    "airdodge": {
-    "clip": "Tumble",
-    "bounce": true
+    "clip": "AirDodge",
+    "from": 0,
+    "to": 0.66
    },
    "dodge": {
     "clip": "Dodge",
@@ -7076,7 +7078,7 @@
     "to": 0.45
    },
    "roll": {
-    "clip": "Tumble",
+    "clip": "Ball",
     "bounce": true
    },
    "ledge": {
@@ -7107,6 +7109,65 @@
     "clip": "Exhaust",
     "from": 0,
     "to": 15
+   },
+   "fastfall": {
+    "clip": "FastFall"
+   },
+   "helpless": {
+    "clip": "Helpless"
+   },
+   "landHard": {
+    "clip": "LandHard",
+    "from": 0,
+    "to": 0.6
+   },
+   "shieldHit": {
+    "clip": "ShieldHit",
+    "from": 0,
+    "to": 0.3
+   },
+   "hitHeavy": {
+    "clip": "HitHeavy",
+    "from": 0,
+    "to": 0.8
+   },
+   "launch": {
+    "clip": "Launch",
+    "from": 0,
+    "to": 0.5
+   },
+   "launchUp": {
+    "clip": "LaunchUp",
+    "from": 0,
+    "to": 0.6
+   },
+   "spike": {
+    "clip": "Spike",
+    "from": 0,
+    "to": 0.6
+   },
+   "respawn": {
+    "clip": "Respawn"
+   },
+   "pummel": {
+    "clip": "Pummel",
+    "from": 0,
+    "to": 0.3
+   },
+   "throw_f": {
+    "clip": "ThrowF",
+    "from": 0,
+    "to": 1
+   },
+   "throw_b": {
+    "clip": "ThrowB",
+    "from": 0,
+    "to": 1.05
+   },
+   "throw_d": {
+    "clip": "ThrowD",
+    "from": 0,
+    "to": 1.1
    }
   },
   "strikers": [
@@ -7359,6 +7420,7 @@
  "Cronky Dong": {
   "file": "assets/joey/export/cronky-v1.glb",
   "height": 27,
+  "feel": 1,
   "clips": {
    "idle": {
     "clip": "Idle"
@@ -7374,22 +7436,22 @@
    },
    "crouch": {
     "clip": "Crouch",
-    "at": 0.2
+    "at": 0.15
    },
    "brake": {
-    "clip": "Land",
-    "from": 0.05,
+    "clip": "Skid",
+    "from": 0,
     "to": 0.4
    },
    "jumpsquat": {
-    "clip": "Crouch",
+    "clip": "Squat",
     "from": 0,
-    "to": 0.2
+    "to": 0.1
    },
    "rise": {
     "clip": "Rise",
     "from": 0,
-    "to": 0.4
+    "to": 0.45
    },
    "fall": {
     "clip": "Fall"
@@ -7425,8 +7487,9 @@
     "bounce": true
    },
    "airdodge": {
-    "clip": "Tumble",
-    "bounce": true
+    "clip": "AirDodge",
+    "from": 0,
+    "to": 0.66
    },
    "dodge": {
     "clip": "Dodge",
@@ -7434,7 +7497,7 @@
     "to": 0.45
    },
    "roll": {
-    "clip": "Tumble",
+    "clip": "Ball",
     "bounce": true
    },
    "ledge": {
@@ -7462,6 +7525,90 @@
    },
    "buried": {
     "clip": "Buried"
+   },
+   "airjump": {
+    "clip": "AirJump",
+    "from": 0,
+    "to": 0.48
+   },
+   "fastfall": {
+    "clip": "FastFall"
+   },
+   "helpless": {
+    "clip": "Helpless"
+   },
+   "landHard": {
+    "clip": "LandHard",
+    "from": 0,
+    "to": 0.65
+   },
+   "shieldHit": {
+    "clip": "ShieldHit",
+    "from": 0,
+    "to": 0.3
+   },
+   "hitHeavy": {
+    "clip": "HitHeavy",
+    "from": 0,
+    "to": 0.8
+   },
+   "launch": {
+    "clip": "Launch",
+    "from": 0,
+    "to": 0.5
+   },
+   "launchUp": {
+    "clip": "LaunchUp",
+    "from": 0,
+    "to": 0.6
+   },
+   "spike": {
+    "clip": "Spike",
+    "from": 0,
+    "to": 0.6
+   },
+   "respawn": {
+    "clip": "Respawn"
+   },
+   "pummel": {
+    "clip": "Pummel",
+    "from": 0,
+    "to": 0.23
+   },
+   "throw_b": {
+    "clip": "ThrowB",
+    "from": 0,
+    "to": 0.9
+   },
+   "throw_u": {
+    "clip": "ThrowU",
+    "from": 0,
+    "to": 0.95
+   },
+   "throw_d": {
+    "clip": "ThrowD",
+    "from": 0,
+    "to": 0.95
+   },
+   "throw_cf": {
+    "clip": "Toss",
+    "from": 0,
+    "to": 1.4
+   },
+   "throw_cb": {
+    "clip": "ThrowCB",
+    "from": 0,
+    "to": 0.95
+   },
+   "throw_cu": {
+    "clip": "ThrowCU",
+    "from": 0,
+    "to": 0.95
+   },
+   "throw_cd": {
+    "clip": "ThrowCD",
+    "from": 0,
+    "to": 0.95
    }
   },
   "strikers": [

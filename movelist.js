@@ -387,8 +387,8 @@ const FOWL_ALONE = {
 /* Unique mechanics, stances and forms */
 const MOVE_RULES = {
   Joey: [
-    ['tap tap', 'The Injection', 'Tap the transform action twice (the D-pad’s down button, or E on the keyboard), the second tap within a third of a second. Joey looks round, injects, and grows for three seconds: he cannot act, and nothing can hit or grab him. Two seconds more of the same protection once he can move, attacking or not. Then he is Cronky Dong for the rest of the match, through every stock.'],
-    ['', 'Any time', 'Taps in the countdown start it on the first moment of play. Taps while he is hit, held, dodging or in an attack wait for the first moment he can act. Later taps do nothing.'],
+    ['tap tap', 'The Injection', 'Tap the transform action twice (the D-pad’s down button, or E on the keyboard), the second tap within a third of a second. Joey looks round, injects, and grows for three seconds: he cannot act, and nothing can hit or grab him. Two seconds more of the same protection once he can move, attacking or not. Then he is Cronky Dong for the rest of the match, through every stock.', 1],
+    ['', 'Any time', 'Taps in the countdown start it on the first moment of play. Taps while he is hit, held, dodging or in an attack wait for the first moment he can act. Later taps do nothing.', 1],
     ['', 'Human', 'A normal man: very little damage, short reach, slow in the air and no second jump. Spot Me! only reaches a ledge just above him.'],
   ],
   Flint: [
@@ -477,7 +477,8 @@ function mlStdPages(fm, T, title) {
     { title: 'Grabs & Throws', fm, entries: grab },
   ].concat(T._extra ? [{ title: T._extra.title, fm, entries: T._extra.keys.map(E) }] : []).map(p => Object.assign(p, { entries: p.entries.filter(Boolean), sub: title }));   /* _extra: a page of a form's own (Cronky Dong's carry throws) */
 }
-function mlRulesPage(name, fm) { const R = MOVE_RULES[name]; return R ? { title: 'Unique Mechanics', fm, entries: R.map(([inp, n, d]) => ({ key: '', inp, name: n, desc: d, fd: '' })) } : null; }
+/* a rule with a fourth field of 1 tells of Joey's other form, kept off the fighter select's move list */
+function mlRulesPage(name, fm, sel) { const R = MOVE_RULES[name] && MOVE_RULES[name].filter(r => !(sel && r[3])); return R && R.length ? { title: 'Unique Mechanics', fm, entries: R.map(([inp, n, d]) => ({ key: '', inp, name: n, desc: d, fd: '' })) } : null; }
 function mlFowlSections(def) {
   const sl = def.forms.filter(fm => fm.sling), alone = def.forms.filter(fm => !fm.sling), secs = [];
   for (const fm of sl) {
@@ -500,6 +501,13 @@ function mlFowlSections(def) {
   return secs;
 }
 const ML_CACHE = new Map();
+/* on the fighter select Joey shows only himself: no Cronky Dong pages, no word of the injection */
+const ML_SEL_CACHE = new Map();
+function mlSelSections(def) {
+  if (!def.transform) return mlSections(def);
+  if (!ML_SEL_CACHE.has(def)) { const fm = def.forms[0], pages = mlStdPages(fm, MOVE_TEXT[fm.name] || {}, ''), rp = mlRulesPage(def.name, fm, true); if (rp) pages.push(rp); ML_SEL_CACHE.set(def, [{ label: fm.label || fm.name, role: '', fm, pages }]); }
+  return ML_SEL_CACHE.get(def);
+}
 function mlSections(def) {
   if (ML_CACHE.has(def)) return ML_CACHE.get(def);
   let secs;
@@ -530,8 +538,8 @@ const ML = { open: false, def: null, secs: [], flat: [], at: 0, ctl: null, dev: 
 let ML_PLUS = 0;   /* when the + key was last pressed (keyboard) */
 if (typeof addEventListener === 'function') addEventListener('keydown', e => { if ((e.code === 'Equal' || e.code === 'NumpadAdd') && !e.repeat) ML_PLUS = performance.now(); if (ML.open && (e.code === 'Escape' || e.code === 'Tab')) e.preventDefault(); });
 function mlPlusKey() { if (!ML_PLUS || performance.now() - ML_PLUS > 250) return false; ML_PLUS = 0; return true; }
-function mlOpen(def, sec, ctl, page) {
-  ML.def = def; ML.secs = mlSections(def); ML.flat = []; ML.secs.forEach((s, si) => s.pages.forEach((p, pi) => ML.flat.push({ si, pi })));
+function mlOpen(def, sec, ctl, page, sel) {
+  ML.def = def; ML.secs = sel ? mlSelSections(def) : mlSections(def); ML.flat = []; ML.secs.forEach((s, si) => s.pages.forEach((p, pi) => ML.flat.push({ si, pi })));
   const at = ML.flat.findIndex(q => q.si === (sec || 0) && q.pi === (page || 0)); ML.at = Math.max(0, at);
   ML.ctl = ctl; ML.dev = ctl.dev; ML.open = true; ML.hx = 0; ML.vy = 0; ML.rep = 0; ML.t = 0; ML.esc = true; ML.sh = [true, true]; ML.kq = [true, true];
   beep(660, 0.06, 'triangle', 0.05, 1.3);

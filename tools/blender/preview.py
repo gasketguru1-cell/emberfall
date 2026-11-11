@@ -11,7 +11,8 @@ opt = {args[i].lstrip('-'): args[i + 1] for i in range(0, len(args), 2)}
 size = int(opt.get('size', 320)); az = math.radians(float(opt.get('az', 60))); out = opt['out']; os.makedirs(out, exist_ok=True)
 scene = bpy.context.scene
 if 'glb' in opt:
-    bpy.ops.wm.read_factory_settings(use_empty=True); bpy.ops.import_scene.gltf(filepath=opt['glb']); scene = bpy.context.scene
+    bpy.ops.wm.read_factory_settings(use_empty=True); bpy.context.scene.render.fps = 30   # the importer turns seconds into frames at the scene's rate
+    bpy.ops.import_scene.gltf(filepath=opt['glb']); scene = bpy.context.scene
 rig = next(o for o in scene.objects if o.type == 'ARMATURE'); mesh = max((o for o in scene.objects if o.type == 'MESH'), key=lambda o: len(o.data.vertices))
 pts = [mesh.matrix_world @ v.co for v in mesh.data.vertices]; lo = [min(p[i] for p in pts) for i in range(3)]; hi = [max(p[i] for p in pts) for i in range(3)]
 h = hi[2] - lo[2]; mid = Vector((0, 0, lo[2] + h * 0.5))
@@ -41,5 +42,10 @@ for n, (clip, t) in enumerate(shots):
         try: ad.action_slot = act.slots[0]
         except Exception: pass
     f = t * 30 + 1; scene.frame_set(int(f), subframe=f - int(f))
+    if 'focus' in opt:   # --focus head [--span 0.5]: a close-up that follows that bone, e.g. to check a face stays itself
+        b = rig.pose.bones[opt['focus']]; c = rig.matrix_world @ ((b.head + b.tail) * 0.5)
+        cam.data.ortho_scale = float(opt.get('span', 0.5))
+        cam.location = c + Vector((-math.sin(az) * math.cos(el) * d, -math.cos(az) * math.cos(el) * d, math.sin(el) * d))
+        cam.rotation_euler = (c - cam.location).to_track_quat('-Z', 'Y').to_euler()
     scene.render.filepath = os.path.join(out, '%03d_%s_%.2f.png' % (n, clip or 'rest', t)); bpy.ops.render.render(write_still=True)
 print('preview: wrote %d stills to %s' % (len(shots), out))

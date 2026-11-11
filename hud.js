@@ -123,6 +123,8 @@ function drawCMenu() {
   for (const [cap, act] of kb ? [['↑ ↓ ← →', 'choose'], ['Enter', 'change a key'], ['Delete', 'clear it'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'change'], ['Y', 'set to nothing'], ['B', 'done']]) hx = keyHint(hx, hy, cap, act) + 8;
   g.restore();
 }
+/* the forms the fighter select shows: Wren's companions, the first five Fowls; Joey only as himself (his other form is a surprise) */
+function selForms(d) { return d.transform ? d.forms.slice(0, 1) : d.forms.slice(0, d.cycle || 99); }
 function drawSelect(three) {
   const t = tick, PC = ['#ff7b6c', '#6cb4ff'], serif = '"Palatino Linotype", "Book Antiqua", Georgia, serif';
   /* ---- background (2D only; in 3D the live island shows through) ---- */
@@ -144,7 +146,7 @@ function drawSelect(three) {
 
   /* ---- the roster: one portrait tile for each fighter, with each player's marker on the one they are on ---- */
   { const th = 124, y0 = 158, tw = rosterTile(0)[2];
-    ROSTER.forEach((d, k) => { const x = rosterTile(k)[0], fm = d.forms[d.forms.length > 1 ? Math.floor(t / 170) % (d.cycle || d.forms.length) : 0], on = [0, 1].filter(q => slots[q] && slots[q].pick === k);
+    ROSTER.forEach((d, k) => { const x = rosterTile(k)[0], fm = selForms(d)[Math.floor(t / 170) % selForms(d).length], on = [0, 1].filter(q => slots[q] && slots[q].pick === k);
       q = g.createLinearGradient(0, y0, 0, y0 + th); q.addColorStop(0, 'rgba(46,38,72,.92)'); q.addColorStop(1, 'rgba(18,15,32,.94)'); g.fillStyle = q; rr(x, y0, tw, th, 10); g.fill();
       g.save(); rr(x, y0, tw, th, 10); g.clip(); g.fillStyle = fm.col[0]; g.globalAlpha = 0.16; g.beginPath(); g.arc(x + tw / 2, y0 + th * 0.62, tw * 0.46, 0, TAU); g.fill(); g.globalAlpha = 1;
       const k2 = Math.min(5.2, 74 / (fm.st.h + 3)); g.translate(x + tw / 2, y0 + th - 30); g.scale(k2, -k2); ART[fm.name](fm.col, frame + k * 30, null); g.restore();
@@ -179,14 +181,14 @@ function drawSelect(three) {
     g.textAlign = 'left'; g.font = 'bold 44px ' + serif; g.fillStyle = '#fff'; g.fillText(d.name, x + 52, y + 84);
     const nw = g.measureText(d.name).width; g.font = 'bold 30px system-ui, sans-serif'; g.fillStyle = sl.ready ? 'rgba(255,255,255,.18)' : '#ffd98a'; g.fillText('‹', x + 24, y + 81); g.fillText('›', x + 62 + nw, y + 81);
     g.font = 'italic 16px ' + serif; g.fillStyle = '#f3dfb6'; g.fillText(d.sub, x + 26, y + 110);
-    if (d.forms.length > 1) {   /* the companions; in 3D the one standing on the island is lit */
-      const now = Math.floor(t / 170) % (d.cycle || d.forms.length); let fx = x + 26;
-      d.forms.slice(0, d.cycle || 99).forEach((fm, n) => { g.font = (three && n === now ? 'bold ' : '') + '13px system-ui, sans-serif'; const w = g.measureText(fm.label || fm.name).width + 18; g.fillStyle = three && n === now ? pc : 'rgba(255,255,255,.1)'; rr(fx, y + 120, w, 22, 11); g.fill(); g.fillStyle = three && n === now ? '#16121f' : '#d8d2ee'; g.textAlign = 'center'; g.fillText(fm.label || fm.name, fx + w / 2, y + 135); g.textAlign = 'left'; fx += w + 6; });
+    if (selForms(d).length > 1) {   /* the companions; in 3D the one standing on the island is lit */
+      const now = Math.floor(t / 170) % selForms(d).length; let fx = x + 26;
+      selForms(d).forEach((fm, n) => { g.font = (three && n === now ? 'bold ' : '') + '13px system-ui, sans-serif'; const w = g.measureText(fm.label || fm.name).width + 18; g.fillStyle = three && n === now ? pc : 'rgba(255,255,255,.1)'; rr(fx, y + 120, w, 22, 11); g.fill(); g.fillStyle = three && n === now ? '#16121f' : '#d8d2ee'; g.textAlign = 'center'; g.fillText(fm.label || fm.name, fx + w / 2, y + 135); g.textAlign = 'left'; fx += w + 6; });
     }
-    if (!three) d.forms.slice(0, d.cycle || 99).forEach((fm, n) => { g.save(); g.translate(x + cw - 60 - (d.forms.length - 1 - n) * 62, y + 112); g.scale(3.4, -3.4); ART[fm.name](same ? fm.alt : fm.col, frame, null); g.restore(); });
+    if (!three) selForms(d).forEach((fm, n, a) => { g.save(); g.translate(x + cw - 60 - (a.length - 1 - n) * 62, y + 112); g.scale(3.4, -3.4); ART[fm.name](same ? fm.alt : fm.col, frame, null); g.restore(); });
     g.textAlign = 'right';
     if (sl.ready) { g.fillStyle = '#9be564'; rr(x + cw - 108, y + 118, 88, 26, 13); g.fill(); g.font = 'bold 14px system-ui, sans-serif'; spaced(2); g.fillStyle = '#12200c'; g.textAlign = 'center'; g.fillText('READY', x + cw - 63, y + 136); spaced(0); }
-    else if ((three || d.forms.length === 1) && (d.cycle || d.forms.length) < 4) { g.font = '13px system-ui, sans-serif'; g.fillStyle = '#cfc8e8'; g.fillText('Point at a fighter  ·  Attack to pick', x + cw - 20, y + 136); }
+    else if ((three || selForms(d).length === 1) && selForms(d).length < 4) { g.font = '13px system-ui, sans-serif'; g.fillStyle = '#cfc8e8'; g.fillText('Point at a fighter  ·  Attack to pick', x + cw - 20, y + 136); }
   }
 
   /* ---- start prompt, between the cards ---- */
