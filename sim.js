@@ -1577,9 +1577,21 @@ for (const def of ROSTER) for (const fm of def.forms) {
   /* Toned down (owner's request, 2026-11-10): only the first neutral air of each trip into the air drags. Later ones in the
      same airtime still hit four times but let go, so the move can no longer carry someone through a chain of itself. */
   nair.on = (f, n) => { if (n === 1) { f.nairDrag = !f.airUse.nairDrag; f.airUse.nairDrag = 1; } if (n >= 3 && n <= 9 && f.nairDrag) sackCarry(f); }; }
+/* Potato Sack's back air, the Spud Drill (owner's request, 2026-11-11): he turns into a drill pointing backward and bores
+   through the air behind him for 0.45 s (frames 6 to 32, 27 frames). Six light hits drag whoever they catch along with him
+   (sackCarry, held behind his back), then a seventh sends them off up and behind, close enough to drill them again: three
+   in a row from 0%. 0.9% x 6 + 2.6% = 8%. While it bores he pushes backward and his fall slows, once per trip into the air. */
+const OVD = typeof OVDRILL !== "undefined" ? OVDRILL : {};
+{ const bair = SACK.forms[0].moves.bair, body = { x: -7, y: 6, r: 6.5 };
+  bair.t = 42; bair.ll = 9; bair.ac = 38; bair.drill = 1;
+  bair.h = [6, 10, 14, 18, 22, 26].map((f0, k) => Object.assign({ f0, f1: f0 + 1, g: k + 1, d: 0.9, a: 80, b: 16, k: 0, carry: 1, carryX: -9 }, body))
+    .concat([Object.assign({ f0: 30, f1: 32, g: 50, d: 2.6, a: 135, b: 30, k: 60 }, body)]);
+  bair.on = (f, n) => { if (n === 1) { f.drillPush = (f.airUse.drill || 0) < (OVD.push || 1); f.airUse.drill = (f.airUse.drill || 0) + 1; }
+    if (n >= 6 && n <= 32) { if (f.drillPush && !f.grounded) { f.vx = appr(f.vx, -f.face * 1.1, 0.12); f.vy = Math.max(f.vy, -0.6); } sackCarry(f, -9); }
+    if (n >= 6 && n <= 32 && n % 4 === 2) spark(f.x - f.face * 9, f.y + 6, '#e6d3a6', 3, 0.8); }; }
 /* Keeps an opponent caught by Potato Sack's neutral air moving with him: their speed eases toward his and they are pulled
    toward the middle of his body, so the hits that follow connect wherever he is drifting or falling. */
-function sackCarry(f) { const o = opp(f); if (!o || o.dragBy !== f.idx || o.state !== 'hurt' || o.hitlag > 0) return; const cx = f.x + f.face * 2 - o.x, cy = f.y + f.st.h / 2 - (o.y + o.st.h / 2), dd = Math.hypot(cx, cy);
+function sackCarry(f, off) { const o = opp(f); if (!o || o.dragBy !== f.idx || o.state !== 'hurt' || o.hitlag > 0) return; const cx = f.x + f.face * (off === undefined ? 2 : off) - o.x, cy = f.y + f.st.h / 2 - (o.y + o.st.h / 2), dd = Math.hypot(cx, cy);
   o.vx = appr(o.vx, f.vx + clamp(cx * 0.25, -1.5, 1.5), 0.6); o.vy = appr(o.vy, f.vy + clamp(cy * 0.25, -1.5, 1.5), 0.6); }
 /* Strike shapes (combat audit, 2026-11-10).
    - A strike whose tip is clear of the body also covers the 45% of the way back toward the body's middle (h.in): the
@@ -2285,7 +2297,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   /* Holding up or down stretches or shortens the launch, except for near-vertical ones. */
   const nd = ((ang * 180 / Math.PI) % 360 + 360) % 360, vertical = (nd > 65 && nd < 115) || (nd > 245 && nd < 295);
   const lsi = vertical ? 1 : i.ly > 0.5 ? 1.095 : i.ly < -0.5 ? 0.92 : 1;
-  v.launch(kb, ang, dir, lsi); if (h.hs) v.hitstun += h.hs; if (h.drag) { v.vx += a.vx; v.vy += a.vy; v.dragBy = a.idx; } else if (h.carry && !proj) { const cx = a.x + a.face * 2 - v.x, cy = a.y + a.st.h / 2 - (v.y + v.st.h / 2); v.grounded = false; v.plat = null; v.vx = a.vx + clamp(cx * 0.3, -2, 2); v.vy = a.vy + clamp(cy * 0.3, -2, 2) + 0.2; v.dragBy = a.idx; } else v.dragBy = -1;
+  v.launch(kb, ang, dir, lsi); if (h.hs) v.hitstun += h.hs; if (h.drag) { v.vx += a.vx; v.vy += a.vy; v.dragBy = a.idx; } else if (h.carry && !proj) { const cx = a.x + a.face * (h.carryX !== undefined ? h.carryX : 2) - v.x, cy = a.y + a.st.h / 2 - (v.y + v.st.h / 2); v.grounded = false; v.plat = null; v.vx = a.vx + clamp(cx * 0.3, -2, 2); v.vy = a.vy + clamp(cy * 0.3, -2, 2) + 0.2; v.dragBy = a.idx; } else v.dragBy = -1;
   if (h.link) { v.tumble = false; v.grounded = false; v.plat = null; v.hitstun = v.linkT = h.link[2]; v.vx = face * h.link[0] / h.link[2]; v.vy = h.link[1] / h.link[2]; }   /* a linking hit: the target is moved a set distance over a set time, whatever its damage, so the next hit of the move connects */   /* carry: caught and taken along (sackCarry) */   /* carried along with a travelling rig (see fowlCarry) */ v.hitlag = hl; if (!proj) a.hitlag = hl; rumble(v.ctl, 60 + kb, Math.min(1, 0.25 + kb / 150)); rumble(a.ctl, 50, 0.25);
   if (wouldKO(v)) {   /* a hit that will KO lands harder: longer freeze, a bigger burst, and slow motion if it takes the last stock */
     v.hitlag += 8; if (!proj) a.hitlag += 8; shake = Math.max(shake, 14); rumble(v.ctl, 300, 1);
