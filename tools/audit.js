@@ -68,10 +68,10 @@ async function auditHurtboxes() {
     const f = F[0]; f.fi = A[1]; F[1].x = 60; f.x = 0; f.y = 0; f.face = 1; f.grounded = true; f.plat = MAIN; f.state = 'idle'; f.vx = f.vy = 0;
     const v = R.fighters[0]; for (let k = 0; k < 40; k++) { tick++; draw(); }
     if (!v.model) { rows.push({ fighter: f.form.name, box: '(no model)' }); continue; }
-    v.springs = []; draw(); v.root.updateWorldMatrix(true, true);
+    v.springs = []; draw(); v.root.updateWorldMatrix(true, true); if (v.prop) v.prop.updateWorldMatrix(true, true);
     let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; const p = new (v.root.position.constructor)();
-    v.obj.traverse(m => { if (!m.isSkinnedMesh) return; const pos = m.geometry.attributes.position, stepN = Math.max(1, Math.floor(pos.count / 4000));
-      for (let i = 0; i < pos.count; i += stepN) { p.fromBufferAttribute(pos, i); m.applyBoneTransform(i, p); p.applyMatrix4(m.matrixWorld); x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); } });
+    [v.root, v.prop].filter(o => o && o.parent).forEach(top => top.traverse(m => { if (!m.isMesh || !m.visible || !m.geometry || !m.geometry.attributes.position) return; let o = m; while (o) { if (!o.visible) return; o = o.parent; } const pos = m.geometry.attributes.position, stepN = Math.max(1, Math.floor(pos.count / 4000));   /* props too (the Fowls' slingshot), not only the skinned model */
+      for (let i = 0; i < pos.count; i += stepN) { p.fromBufferAttribute(pos, i); if (m.isSkinnedMesh) m.applyBoneTransform(i, p); p.applyMatrix4(m.matrixWorld); x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); } }));
     const hr = hurtRect(f), bw = hr[2] - hr[0], bh = hr[3] - hr[1];
     rows.push({ fighter: f.form.name, box: r1(bw) + ' x ' + r1(bh), model: r1(x1 - x0) + ' x ' + r1(y1 - y0), feet: r1(y0 - f.y), dw: r1(bw - (x1 - x0)), dh: r1(bh - (y1 - y0)) });
   }
