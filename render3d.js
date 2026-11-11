@@ -422,6 +422,9 @@ function build() {
       if (f.state === 'attack' && f.mname === 'sspec' && f.rsGo && f.rsTh !== undefined) return { sx, sy, rot: -f.rsTh * f.face, oy: h / 2 };   /* Chomp Chomp hanging from his rope: turned to lie along it */
       if (f.state === 'hurt' && !f.grounded && f.tumble) return { sx, sy, rot: f.sf * 0.2, oy: h / 2 };
       if (f.state === 'attack' && f.move && f.move.spin && f.move.spinAt) return { sx, sy, rot: f.move.spinAt(f, f.mf), oy: FP };   /* Sling Spin and Catapult Cyclone: end over end round the rig's middle */
+      if (f.state === 'attack' && f.move && f.move.drill) {   /* Potato Sack's Spud Drill: tips flat with his top pointing backward, then spins along his length */
+        const n = f.mf, k = n < 6 ? n / 6 : n <= 32 ? 1 : Math.max(0, 1 - (n - 32) / 6), sp = n < 6 ? n * n * 0.05 : n <= 32 ? 1.8 + (n - 6) * 0.95 + (f.hitlag > 0 ? tick * 0.6 : 0) : 26.5 + (n - 32) * 0.4;
+        return { sx: 1 - 0.12 * k, sy: 1 + 0.18 * k, rot: -Math.PI / 2 * k, oy: h / 2, drill: sp * k }; }
       if (f.state === 'attack' && f.move && f.move.swap) { const k = 1 - Math.sin(Math.min(1, f.mf / 34) * Math.PI) * 0.7; return { sx: k, sy: k, rot, oy }; }
       return { sx, sy, rot, oy };
     }
@@ -679,7 +682,7 @@ function build() {
       if (v.model && f.state === 'attack' && f.aim) { p.rot -= f.aim * 0.3 * (flat ? f.face : 1); p.oy = st.h * 0.55; }   /* an angled tilt leans the body up or down about the chest */
       if (flat) { v.flip += (f.face - v.flip) * 0.3; v.obj.scale.x = v.unit * (Math.abs(v.flip) < 0.08 ? 0.08 * (v.flip < 0 ? -1 : 1) : v.flip); }
       v.root.position.set(f.x, f.y, 0); v.root.rotation.y = (flat ? 0.55 * v.flip : v.yaw) + (v.model && v.turned ? Math.PI : 0) - (v.model ? (v.spin || 0) * f.face : 0);
-      v.pivot.position.set(p.shx !== undefined ? p.shx : f.hitlag > 0 && f.state === 'hurt' ? ((tick & 1) ? 0.35 : -0.35) : 0, p.oy + (p.shy || 0), 0); v.pivot.rotation.z = -p.rot; v.pivot.scale.set(p.sx, p.sy, p.sx);
+      v.pivot.position.set(p.shx !== undefined ? p.shx : f.hitlag > 0 && f.state === 'hurt' ? ((tick & 1) ? 0.35 : -0.35) : 0, p.oy + (p.shy || 0), 0); v.pivot.rotation.order = 'ZYX'; v.pivot.rotation.z = -p.rot; v.pivot.rotation.y = p.drill || 0; v.pivot.scale.set(p.sx, p.sy, p.sx);   /* ZYX: a drill spins about the body's own length, then the body is tipped */
       v.pivot.children.forEach(c => { if (c.userData.y0 === undefined) c.userData.y0 = c.position.y; c.position.y = c.userData.y0 - p.oy; });
       const ghost = (f.invuln > 0 && (tick >> 1) % 2) || f.state === 'spot' || f.state === 'airdodge', hot = (f.flash > 0 || (f.hitlag > 0 && f.state === 'hurt')) && !(typeof finalT !== 'undefined' && finalT > 0 && finalT < FINAL_FREEZE - 3);   /* the final-hit freeze shows the fighter, not a white flash */
       for (const m of v.mats) { m.transparent = ghost; m.opacity = ghost ? 0.45 : 1; m.emissive.setHex(hot ? 0xffffff : 0x000000); m.emissiveIntensity = hot ? 0.8 : 0; }

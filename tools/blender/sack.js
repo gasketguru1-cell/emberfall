@@ -205,7 +205,7 @@ const entry = { file: 'assets/potato-sack/export/potato-sack-v1.glb', height: 13
   springs: [{ bones: ['tuft1', 'tuft2'], k: 0.3, d: 0.66, max: 0.7, drag: 0.14 }],
   attacks: { jab: L3('Jab1'), jab2: L3('Jab2'), jab3: L3('Jab3'), ftilt: L3('Ftilt'), utilt: L3('Utilt'), dtilt: L3('Dtilt'), dash: L3('Belly'),
     fsmash: L3('Fsmash'), usmash: L3('Usmash'), dsmash: L3('Dsmash'),
-    nair: A('SpinDrag', 0.15, 0.48, 0, 0.85),   /* active frames 3 to 10: three carrying thumps, then the finisher fling */ fair: L3('Axe'), bair: A('BackKick', 0.39, 0.52), uair: L3('Juggle'), dair: A('Stomp', 0.39, 0.52),
+    nair: A('SpinDrag', 0.15, 0.48, 0, 0.85),   /* active frames 3 to 10: three carrying thumps, then the finisher fling */ fair: L3('Axe'), bair: A('Fall', 0.17, 0.89, 0, 1),   /* the Spud Drill: the tucked fall pose, tipped flat and spun by the renderer (render3d poseOf) */ uair: L3('Juggle'), dair: A('Stomp', 0.39, 0.52),
     grab: L3('Grab'), getup: A('Sweep', 0.34, 0.52), nspec: A('SpudBurst', 0.17, 0.3, 0, 1), sspec: A('BagIt', 0.3, 0.6, 0.12, 0.9), uspec: A('HotPotato', 0.17, 0.2, 0, 1), dspec: A('TumbleSlide', 0.1, 0.5, 0, 1), '*': L3('Jab1') } };
 const mf = path.join(__dirname, '..', '..', 'assets', 'manifest.json'), current = JSON.parse(fs.readFileSync(mf, 'utf8'));
 current['Potato Sack'] = entry; fs.writeFileSync(mf, JSON.stringify(current, null, 1) + '\n'); console.log('manifest: ' + Object.keys(current).join(', '));
