@@ -10,7 +10,7 @@ One folder per character. Inside each:
 
 ## Status
 
-The roster: Flint, Wren's three companions Nib, Loom and Hod, and (added 2026-11-10 at the owner's request) Potato Sack, Sprocket and Scuttle. Brand was added on 2026-11-10 (model 30 credits, 26-bone rig, 35 clips; details in WORKQUEUE.md). Tilt is still a concept picture only.
+The roster: Flint, Wren's three companions Nib, Loom and Hod, and (added 2026-11-10 at the owner's request) Potato Sack, Sprocket and Scuttle. Brand was added on 2026-11-10 (model 30 credits, 26-bone rig, 35 clips; details in WORKQUEUE.md). Joey (the owner, with a transformation into Cronky Dong) was added on 2026-11-11 (68 credits; details in WORKQUEUE.md). Tilt is still a concept picture only.
 
 | Character | Brief | Concept image | 3D model | Rig | Animations | In game |
 |---|---|---|---|---|---|---|

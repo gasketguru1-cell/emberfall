@@ -65,7 +65,18 @@ const LEDGE_INV = (air, pct) => clamp(Math.round(60 * Math.min(air, 300) / 300 +
 const LEDGE_REGRAB = [1, 0.8, 0.5], LEDGE_HANG = 390, TECH_WINDOW = 11;
 const SMASH_HOLD = 180, GRAB_MIN = 30;   /* frames a smash can be held; frames a grab holds at the very least, however hard the victim mashes */
 const FRESH = 1.05, SHORT_HOP_MUL = 0.85, TUMBLE_KB = 80, CROUCH_MUL = 0.85, CHARGING_MUL = 1.2;
-const CROUCH_Y = -0.4;   /* how far down the stick must be held to crouch */
+const CROUCH_Y = -0.4;
+const LANDL = f => f.st.land || [2, 4];   /* a form's ordinary landing: [soft, hard] frames */
+const CHG_K = a => a.move && a.move.chgK !== undefined ? a.move.chgK : 0.4;   /* how much a full smash charge adds (Joey the human: a fifth) */
+/* the states from which Joey can start his transformation; a request made at any other time waits for one */
+const TF_READY = { idle: 1, dash: 1, run: 1, brake: 1, air: 1, shield: 1, wd: 1, shieldoff: 1, exhaust: 1 };
+/* INTENSITY (Joey's addendum, v1.0): human Joey's fatigue, in integer units, 10000 = full. What each committed action costs
+   (one displayed point = 100 units). Running costs 8 a tick; resting drains 8 a tick standing, 3 walking, after 60 ticks of rest.
+   Full: once he is next free on the ground, 900 ticks (15 seconds) of catching his breath, only shuffling or transforming. */
+const FAT = { max: 10000, run: 8, restDelay: 60, drainIdle: 8, drainWalk: 3, jump: 1000, roll: 500, spot: 400, airdodge: 600, pummel: 200, throwPick: 800, rep: 400, exhaust: 900,
+  move: { jab: 300, jab2: 400, jab3: 500, ftilt: 600, utilt: 600, dtilt: 600, dash: 1000, fsmash: 1500, usmash: 1500, dsmash: 1500, nair: 700, fair: 700, bair: 700, uair: 700, dair: 700,
+    grab: 500, dgrab: 700, pgrab: 600, nspec: 800, sspec: 1000, uspec: 800, dspec: 1200 } };
+const EX_READY = { idle: 1, dash: 1, run: 1, brake: 1, wd: 1, shieldoff: 1 };   /* the moments exhaustion can take over (it never cuts a move short) */   /* how far down the stick must be held to crouch */
 const SHIELD = { hp: 50, drain: 0.15, regen: 0.08, dmg: 1.19, release: 11, parry: 5, stun: { ground: 0.8, smash: 0.725, air: 0.33, proj: 0.29 } };
 function staleMul(a, id) { let r = 0, seen = false; a.stale.forEach((m, k) => { if (m === id) { r += STALE[k]; seen = true; } else if (m === id + '|s') { r += STALE[k] * STALE_SHIELD; seen = true; } }); return seen ? 1 - r : FRESH; }
 function pushStale(a, id, shield) { a.stale.unshift(shield ? id + '|s' : id); if (a.stale.length > 9) a.stale.pop(); }
@@ -139,7 +150,7 @@ function debugKey(code) {
 }
 addEventListener('keyup', e => { keys[e.code] = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
-function blankIn() { return { lx: 0, ly: 0, cx: 0, cy: 0, atk: false, spc: false, jmp: false, shd: false, grb: false, start: false, sel: false, sm: false, jmp2: false }; }   /* jmp2: two jump buttons held at once. sm: the CPU's way of saying "this attack is a smash" (a person flicks the stick) */
+function blankIn() { return { lx: 0, ly: 0, cx: 0, cy: 0, atk: false, spc: false, jmp: false, shd: false, grb: false, start: false, sel: false, sm: false, jmp2: false, tf: false }; }   /* tf: the transform action (Joey: two taps) */   /* jmp2: two jump buttons held at once. sm: the CPU's way of saying "this attack is a smash" (a person flicks the stick) */
 /* Controller settings follow the reference build's controllers.ini: no stick deadzone, full outer zone, triggers at 25%. */
 const PAD = { deadzone: 0, outer: 1, trigger: 0.25 };
 function stick(x, y) { const m = Math.hypot(x, y); if (m === 0 || m <= PAD.deadzone) return [0, 0]; const k = Math.min(1, (m - PAD.deadzone) / (PAD.outer - PAD.deadzone)) / m; return [x * k, y * k]; }
@@ -148,11 +159,11 @@ function stick(x, y) { const m = Math.hypot(x, y); if (m === 0 || m <= PAD.deadz
    cannot be changed; the three Custom ones of each kind can. Which setup each device uses, and the Custom ones, are kept
    between visits. Start, the controls screen (Backspace, or - on a controller) and the debug keys are never remapped. */
 const KB_ROWS = [['left', 'Move left'], ['right', 'Move right'], ['up', 'Move up'], ['down', 'Move down'], ['walk', 'Walk (hold)'], ['atk', 'Attack'], ['spc', 'Special'], ['jmp', 'Jump'], ['jmp2', 'Jump (second key)'],
-  ['shd', 'Shield'], ['shd2', 'Shield (second key)'], ['grb', 'Grab'], ['grb2', 'Grab (second key)'], ['cu', 'Tilt stick up'], ['cd', 'Tilt stick down'], ['cl', 'Tilt stick left'], ['cr', 'Tilt stick right']];
+  ['shd', 'Shield'], ['shd2', 'Shield (second key)'], ['grb', 'Grab'], ['grb2', 'Grab (second key)'], ['cu', 'Tilt stick up'], ['cd', 'Tilt stick down'], ['cl', 'Tilt stick left'], ['cr', 'Tilt stick right'], ['tf', 'Transform (tap twice)']];
 const PAD_ROWS = [[0, 'A  (bottom button)', 'A'], [1, 'B  (right button)', 'B'], [2, 'X  (left button)', 'X'], [3, 'Y  (top button)', 'Y'], [4, 'L  (left bumper)', 'L'], [5, 'R  (right bumper)', 'R'], [6, 'ZL  (left trigger)', 'ZL'], [7, 'ZR  (right trigger)', 'ZR'], [10, 'Left stick click', 'L click'], [11, 'Right stick click', 'R click']];
 const PAD_ACTS = ['', 'atk', 'spc', 'jmp', 'shd', 'grb'], ACT_NAME = { '': 'Nothing', atk: 'Attack', spc: 'Special', jmp: 'Jump', shd: 'Shield', grb: 'Grab' };
-const KB_STD = { left: 'ArrowLeft', right: 'ArrowRight', up: 'ArrowUp', down: 'ArrowDown', walk: 'ShiftLeft', atk: 'KeyZ', spc: 'KeyX', jmp: 'KeyC', jmp2: 'KeyV', shd: 'KeyQ', shd2: 'KeyW', grb: 'KeyA', grb2: 'KeyS', cu: 'KeyI', cd: 'KeyK', cl: 'KeyJ', cr: 'KeyL' };
-const KB_WASD = { left: 'KeyA', right: 'KeyD', up: 'KeyW', down: 'KeyS', walk: 'ShiftLeft', atk: 'KeyJ', spc: 'KeyK', jmp: 'Space', jmp2: 'KeyL', shd: 'KeyU', shd2: '', grb: 'KeyI', grb2: '', cu: 'ArrowUp', cd: 'ArrowDown', cl: 'ArrowLeft', cr: 'ArrowRight' };
+const KB_STD = { left: 'ArrowLeft', right: 'ArrowRight', up: 'ArrowUp', down: 'ArrowDown', walk: 'ShiftLeft', atk: 'KeyZ', spc: 'KeyX', jmp: 'KeyC', jmp2: 'KeyV', shd: 'KeyQ', shd2: 'KeyW', grb: 'KeyA', grb2: 'KeyS', cu: 'KeyI', cd: 'KeyK', cl: 'KeyJ', cr: 'KeyL', tf: 'KeyE' };
+const KB_WASD = { left: 'KeyA', right: 'KeyD', up: 'KeyW', down: 'KeyS', walk: 'ShiftLeft', atk: 'KeyJ', spc: 'KeyK', jmp: 'Space', jmp2: 'KeyL', shd: 'KeyU', shd2: '', grb: 'KeyI', grb2: '', cu: 'ArrowUp', cd: 'ArrowDown', cl: 'ArrowLeft', cr: 'ArrowRight', tf: 'KeyE' };
 const PAD_STD = { 0: 'atk', 1: 'spc', 2: 'jmp', 3: 'jmp', 4: 'grb', 5: 'grb', 6: 'shd', 7: 'shd', 10: '', 11: '' };   /* the bottom button attacks (owner's choice, 2026-11-10) */
 const SETUPS = [], USE = {};   /* USE: device -> the id of the setup it uses */
 (function () {
@@ -180,7 +191,7 @@ function readKb() {
   const i = blankIn(), k = setupOf('kb').map, h = n => keyHeld(k[n]), m = h('walk') ? 0.5 : 1, j = h('jmp'), j2 = h('jmp2');
   i.lx = ((h('right') ? 1 : 0) - (h('left') ? 1 : 0)) * m; i.ly = ((h('up') ? 1 : 0) - (h('down') ? 1 : 0)) * m;
   i.cx = (h('cr') ? 1 : 0) - (h('cl') ? 1 : 0); i.cy = (h('cu') ? 1 : 0) - (h('cd') ? 1 : 0);
-  i.atk = h('atk'); i.spc = h('spc'); i.jmp = j || j2; i.jmp2 = j && j2; i.grb = h('grb') || h('grb2'); i.shd = h('shd') || h('shd2');
+  i.tf = h('tf'); i.atk = h('atk'); i.spc = h('spc'); i.jmp = j || j2; i.jmp2 = j && j2; i.grb = h('grb') || h('grb2'); i.shd = h('shd') || h('shd2');
   i.start = !!keys.Enter; i.sel = !!keys.Backspace;
   return i;
 }
@@ -190,7 +201,7 @@ function readPad(n) {
   if (!p) return i;
   const b = k => !!(p.buttons[k] && (p.buttons[k].pressed || p.buttons[k].value > PAD.trigger)), ax = k => p.axes[k] || 0;
   [i.lx, i.ly] = stick(ax(0), -ax(1)); [i.cx, i.cy] = stick(ax(2), -ax(3));
-  if (b(14)) i.lx = -1; if (b(15)) i.lx = 1; if (b(12)) i.ly = 1; if (b(13)) i.ly = -1;
+  if (b(14)) i.lx = -1; if (b(15)) i.lx = 1; if (b(12)) i.ly = 1; if (b(13)) i.ly = -1; i.tf = b(13);   /* the D-pad's down button is also the transform action */
   const m = Math.hypot(i.lx, i.ly); if (m > 1) { i.lx /= m; i.ly /= m; }
   const map = setupOf('pad' + n).map; let jumps = 0;
   for (const k in map) { const a = map[k]; if (a && b(+k)) { i[a] = true; if (a === 'jmp') jumps++; } }
@@ -280,6 +291,7 @@ class Ctl {
     this.buf = { atk: 0, spc: 0, jmp: 0, shd: 0, grb: 0 };
     this.xT = 99; this.yT = 99; this.xFired = true; this.yFired = true;
     this.dashDir = 0; this.downBuf = 0; this.downNow = false; this.upNow = false; this.cPress = false; this.cDown = false; this.cFall = dev !== 'cpu'; this.shdAge = 99; this.jmp2Age = 99;
+    this.tfAge = 99; this.tfReq = false;
   }
   poll(raw) {
     this.p = this.c; this.c = raw; const c = raw, p = this.p;
@@ -299,6 +311,9 @@ class Ctl {
     this.cPress = Math.hypot(c.cx, c.cy) >= 0.5 && Math.hypot(p.cx, p.cy) < 0.5;
     this.cDown = this.cFall && c.cy <= -0.55 && !(p.cy <= -0.55) && -c.cy >= Math.abs(c.cx);   /* the right stick flicked down: fast-falls, as a flick of the left stick does (people only: the CPU plays as it did) */
     this.jmp2Age = c.jmp2 ? 0 : Math.min(99, this.jmp2Age + 1);   /* frames since two jump buttons were last held together */
+    /* The transform double tap (Joey's guide): two presses of the transform action, released in between, the second no more
+       than 20 ticks after the first, make one request. Counted on every poll of a match (countdown included), not while paused. */
+    if (!(typeof paused !== 'undefined' && paused)) { if (c.tf && !p.tf) { if (this.tfAge < 20) { this.tfReq = true; this.tfAge = 99; } else this.tfAge = 0; } else if (this.tfAge < 99) this.tfAge++; }
   }
   pressed(k) { return this.c[k] && !this.p[k]; }
   take(k) { if (this.buf[k] > 0) { this.buf[k] = 0; return true; } return false; }
@@ -370,7 +385,7 @@ const lift = (f, vy) => { f.grounded = false; f.plat = null; f.vy = vy; };
 /* Wren's Call: the cue starts on frame 1, the new companion takes over on frame 16 and can act on frame 33. It can be hit
    throughout: a hit before frame 16 leaves the old companion in. 60 frames must pass before the next swap. It hangs in the
    air while it plays (the owner's rule). */
-const SWAP = { t: 32, swap: 1, stall: 1, h: [], on(f, n) { if (n === 1) f.swapLock = 60; if (n === 16) { f.fi = (f.fi + 1) % f.def.forms.length; f.jumps = f.grounded ? (f.st.jumps || 1) : Math.min(f.jumps, f.st.jumps || 1); spark(f.x, f.y + 7, '#fff', 14, 1.4); beep(660, 0.12, 'triangle', 0.05, 1.6); } } };
+const SWAP = { t: 32, swap: 1, stall: 1, h: [], on(f, n) { if (n === 1) f.swapLock = 60; if (n === 16) { f.fi = (f.fi + 1) % f.def.forms.length; f.jumps = f.grounded ? (f.st.jumps ?? 1) : Math.min(f.jumps, f.st.jumps ?? 1); spark(f.x, f.y + 7, '#fff', 14, 1.4); beep(660, 0.12, 'triangle', 0.05, 1.6); } } };
 
 /* ---------- The owner's moveset document (2026-11-10) ----------
    KIT holds, per fighter, each attack's first active frame and damage as the document lists them, with:
@@ -1294,7 +1309,187 @@ const BRAND = (() => {
   };
 })();
 
-const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE, FOWLS, CHOMP, BRAND];
+/* Joey (the owner's guide "Joey: from warm-up to Cronky Dong", v1.0, 2026-11-10). Two forms of one fighter:
+   - Joey, an ordinary man with a gym bag's worth of moves, deliberately weak: no air jump, short reach, 0.5 to 5% hits.
+     Every number here is the guide's (frames are its frames; FAF - 1 is a move's length t; H is his height, 13.5).
+   - Cronky Dong, the same face on an absurd body, after two taps of the transform action. His numbers are the guide's
+     reference fighter (Ultimate 13.0.1, from the public frame and hitbox tables the guide cites), in the game's own units,
+     which match the reference's. Hitboxes the tables give on a bone are placed where that bone is at the active frame,
+     by estimate: positions are approximate, timing, damage and launch are the tables'. No balance change is applied.
+   The transformation itself (two taps, 180 ticks of growth, protection to tick 300, kept through KOs) is Fighter.tfStep. */
+const JOEY = (() => {
+  const U = 13.5, q = v => Math.round(v * U * 1000) / 1000;
+  const cap = (f0, f1, x1, y1, x2, y2, r, d, a, b, k, o) => Object.assign({ f0, f1, x: x2, y: y2, r, in: [x1, y1], n: Math.max(3, Math.ceil(Math.hypot(x2 - x1, y2 - y1) / r) + 1), d, a, b, k }, o);
+  const circ = (f0, f1, x, y, r, d, a, b, k, o) => Object.assign({ f0, f1, x, y, r, in: [x, y], n: 1, d, a, b, k }, o);
+  const grab = (f0, f1, x1, y1, x2, y2, r) => ({ f0, f1, x: x2, y: y2, r, in: [x1, y1], n: 4, grab: 1, d: 0 });
+  /* the same in units of Joey's height */
+  const hc = (f0, f1, x1, y1, x2, y2, r, d, a, b, k, o) => cap(f0, f1, q(x1), q(y1), q(x2), q(y2), q(r), d, a, b, k, o);
+  const hg = (f0, f1, x1, y1, x2, y2, r) => grab(f0, f1, q(x1), q(y1), q(x2), q(y2), q(r));
+  const rise = inv => (f, n) => { if (n === 1) f.invuln = Math.max(f.invuln, inv || (f.pct >= 100 ? 12 : 18)); };
+  /* a ground move that carries him forward stops at the end of what he stands on */
+  const walkOn = (f, v) => { const p = f.plat; if (p && (f.x + v < p.x0 + 0.5 || f.x + v > p.x1 - 0.5)) v = 0; f.vx = v; };
+  const over = (f, v) => { v.x = f.x; v.y = f.y + f.st.h + 0.5; };   /* overhead, for the carry throws */
+
+  const human = {
+    name: 'Joey', col: ['#c8102e', '#3b3b3b', '#f1c7a6'], alt: ['#1f4fa8', '#6b6b6b', '#f1c7a6'],
+    /* Guide section 06. Weight 72, walk 0.70, dash 1.15, run 1.05, air 0.50, gravity 0.10, fall 1.35, fast fall 2.16, a
+       6-tick squat, jumps of 8.45 and 4.05, no air jump; landing 3 / 7; standing 0.40 H wide (torso and arms), crouch 0.60 H. */
+    st: { weight: 72, walk: 0.70, walkMul: 0.04, walkAdd: 0.04, trac: 0.08, dash: 1.15, runMul: 0.04, runAdd: 0.04, run: 1.05,
+      jumpX: 0.6, jumpXMul: 0.8, jumpXMax: 0.8, airJumpX: 0.9, jumpH: 8.45, jumpInit: 2, hopH: 4.05, airJumpH: 1,
+      airMul: 0.025, airAdd: 0.01, airSpeed: 0.50, airBrake: 0.01, grav: 0.10, fall: 1.35, ffall: 2.16, jsq: 6, w: q(0.40), h: U, jf: 2.5, jb: 1,
+      crouch: [0.60, 1], jumps: 0, dashF: 12, land: [3, 7], pummel: 0.5, pumT: 29,
+      roll: [38, 0.30, 10, 5], spot: [31, 9, 4], ad: { s: 5, n: [15, 52, 18], d: [13, 65, 22] } },
+    aiShot: [18, 60],
+    moves: mk(1, 1, 1, 1, {
+      /* ---- 07: the warm-up set ---- */
+      jab: { t: 24, next: 'jab2', chain: 12, chainEnd: 18, press: 1, h: [hc(7, 8, 0.16, 0.62, 0.30, 0.62, 0.045, 0.8, 65, 12, 15)] },
+      jab2: { t: 29, next: 'jab3', chain: 15, chainEnd: 22, press: 1, h: [hc(9, 10, 0.16, 0.58, 0.30, 0.60, 0.045, 1.2, 70, 15, 20)] },
+      jab3: { t: 43, h: [hc(15, 17, 0.14, 0.66, 0.30, 0.66, 0.045, 2, 55, 18, 35, { g: 1 }), hc(15, 17, 0.14, 0.55, 0.30, 0.55, 0.045, 2, 55, 18, 35, { g: 1 })] },
+      ftilt: { t: 36, tilt: 1, h: [hc(12, 15, 0.18, 0.62, 0.365, 0.62, 0.055, 2, 40, 15, 30)] },
+      utilt: { t: 38, tilt: 1, h: [hc(13, 16, 0.05, 0.80, 0.03, 1.00, 0.06, 2, 90, 18, 25)] },
+      dtilt: { t: 31, tilt: 1, h: [hc(10, 12, 0.12, 0.12, 0.315, 0.05, 0.035, 1, 25, 12, 25)] },
+      dash: { t: 53, h: [hc(17, 20, 0.05, 0.70, 0.16, 0.62, 0.08, 3, 40, 20, 35)], on(f, n) { if (n >= 8 && n <= 16 && f.grounded) walkOn(f, f.face * 1.4); } },
+      fsmash: { t: 73, chg: 10, chgHold: 60, chgK: 0.2, h: [hc(30, 32, 0.20, 0.62, 0.445, 0.62, 0.055, 5, 40, 20, 45)] },
+      usmash: { t: 71, chg: 10, chgHold: 60, chgK: 0.2, h: [hc(28, 30, 0.05, 0.85, 0.02, 1.0, 0.06, 4, 85, 22, 40)] },
+      dsmash: { t: 73, chg: 10, chgHold: 60, chgK: 0.2, h: [hc(23, 25, 0.10, 0.10, 0.30, 0.05, 0.05, 3, 30, 18, 35, { g: 1 }), hc(36, 38, -0.10, 0.12, -0.30, 0.08, 0.05, 3, 150, 18, 35, { g: 1 })] },
+      /* ---- 08: aerials (landing lag; landing free up to ac0 and after ac) ---- */
+      nair: { t: 39, air: 1, ll: 15, ac0: 3, ac: 33, h: [hc(11, 15, 0.10, 0.72, 0.30, 0.82, 0.045, 1.5, 60, 15, 25, { g: 1, away: 1 }), hc(11, 15, -0.10, 0.72, -0.30, 0.82, 0.045, 1.5, 60, 15, 25, { g: 1, away: 1 }),
+        hc(11, 15, 0.06, 0.15, 0.24, 0.0, 0.05, 1.5, 60, 15, 25, { g: 1, away: 1 }), hc(11, 15, -0.06, 0.15, -0.24, 0.0, 0.05, 1.5, 60, 15, 25, { g: 1, away: 1 })] },
+      fair: { t: 47, air: 1, ll: 20, ac0: 3, ac: 41, h: [hc(16, 18, 0.12, 0.66, 0.405, 0.66, 0.045, 2.5, 45, 18, 30)] },
+      bair: { t: 42, air: 1, ll: 17, ac0: 3, ac: 36, h: [hc(13, 16, -0.10, 0.35, -0.33, 0.30, 0.05, 2, 140, 15, 30)] },
+      uair: { t: 37, air: 1, ll: 15, ac0: 3, ac: 31, h: [hc(12, 14, 0.04, 0.95, 0.06, 1.16, 0.045, 1.5, 90, 16, 25)] },
+      dair: { t: 54, air: 1, ll: 24, ac0: 4, ac: 48, h: [hc(20, 23, -0.07, 0.05, -0.07, -0.15, 0.05, 3, 70, 20, 30, { g: 1 }), hc(20, 23, 0.07, 0.05, 0.07, -0.15, 0.05, 3, 70, 20, 30, { g: 1 })] },
+      /* ---- 09: grabs ---- */
+      grab: { t: 39, h: [hg(11, 13, 0.12, 0.55, 0.235, 0.55, 0.045)] },
+      dgrab: { t: 47, h: [hg(15, 17, 0.12, 0.55, 0.295, 0.55, 0.045)] },
+      pgrab: { t: 45, h: [hg(16, 18, 0.12, 0.55, 0.275, 0.55, 0.045)] },
+      /* ---- 11: get-ups ---- */
+      getup: { t: 48, h: [hc(22, 24, 0.08, 0.15, 0.30, 0.12, 0.05, 1.5, 45, 20, 25, { g: 1 }), hc(22, 24, -0.08, 0.15, -0.30, 0.12, 0.05, 1.5, 135, 20, 25, { g: 1 })], on: rise() },
+      ledgeatk: { t: 51, h: [hc(24, 26, 0.10, 0.40, 0.32, 0.40, 0.045, 2, 45, 20, 25)], on: rise() },
+      /* ---- 10: specials ---- */
+      /* Shaker Disaster: the bottle leaves 0.25 H ahead at chest height on frame 22, (1.0, 0.4) a tick, gravity 0.08, 40 ticks. */
+      nspec: { t: 52, h: [], on(f, n) { if (n === 22) { shoot(f, { kind: 'shaker', solo: 1, ox: q(0.25), oy: q(0.6), vx: 1.0, vy: 0.4, grav: 0.08, r: q(0.05), life: 40, h: { d: 1.5, a: 45, b: 12, k: 20 } }); beep(700, 0.05, 'triangle', 0.03, 0.7); } } },
+      /* Resistance Band Betrayal: the kick on 24 to 27; on the ground 1.2 a tick forward on 20 to 29, stopping at an edge. */
+      sspec: { t: 58, h: [hc(24, 27, 0.05, 0.30, 0.30, 0.15, 0.05, 2.5, 40, 20, 30)], on(f, n) { if (f.grounded && n >= 20 && n <= 29) walkOn(f, f.face * 1.2); } },
+      /* Spot Me!: a strap reaches for a ledge 0.65 H above and 0.35 H out from his hand on frames 10 to 16 (once in the air
+         until he lands or holds a ledge); a catch pulls him to the ledge over 18 ticks. Missed: an ordinary fall on 43. */
+      uspec: { t: 42, rise: 0.1, h: [], on(f, n) {
+        if (n === 1) { f.tether = null; f.spotDud = !f.grounded && !!f.airUse.spot; if (!f.grounded) f.airUse.spot = 1; }
+        if (n >= 10 && n <= 16 && !f.tether && !f.spotDud && !f.grounded) {
+          const side = sgn(f.x) || 1, hx = f.x + f.face * q(0.15), hy = f.y + q(0.75), dx = Math.abs(side * EDGE - hx), dy = 0 - hy, o = F[1 - f.idx];
+          if (f.face === -side && dx <= q(0.35) && dy >= 0 && dy <= q(0.65) && f.ledgeGrabs < 6 && f.ledgeCd === 0) f.tether = { n: 0, x0: f.x, y0: f.y, side };
+        }
+        if (f.tether) { const T = f.tether, k = ++T.n / 18, tx = T.side * (EDGE + f.st.w / 2 + 0.5), ty = -f.st.h + 1;
+          f.x = T.x0 + (tx - T.x0) * k; f.y = T.y0 + (ty - T.y0) * k; f.vx = f.vy = 0; if (T.n >= 18) { f.tether = null; f.grabLedge(T.side); } } } },
+      /* Ab Wheel Regret: the wheel hits on 18 to 32; on the ground he rolls 0.9 a tick on 12 to 32. 25 frames on landing. */
+      dspec: { t: 66, ll: 25, h: [hc(18, 32, 0.22, 0.06, 0.40, 0.06, 0.06, 2, 35, 15, 25)], on(f, n) { if (f.grounded && n >= 12 && n <= 32) walkOn(f, f.face * 0.9); } },
+    }, { jabs: 3, throws: {
+      f: { d: 3, a: 40, b: 24, k: 30, f: 27, t: 51 },
+      b: { d: 3, a: 140, b: 24, k: 30, f: 31, t: 55 },
+      /* the Three-Rep Bench PR: reps of 0.5 on 20, 38 and 56, released on 65 for 1.5 */
+      u: { d: 1.5, a: 85, b: 28, k: 25, f: 65, t: 87, hits: [[20, 0.5], [38, 0.5], [56, 0.5]], at(f, v, n) { const rep = [20, 38, 56].some(r => Math.abs(n - r) < 5); v.x = f.x + f.face * 0.5; v.y = f.y + q(0.30) + (rep ? q(0.12) : 0); } },
+      d: { d: 2, a: 65, b: 22, k: 25, f: 39, t: 61, hits: [[30, 1]], at(f, v) { v.x = f.x + f.face * q(0.35); v.y = f.y; } } } }),
+  };
+
+  const big = {
+    name: 'Cronky Dong', col: ['#c8102e', '#3b3b3b', '#e9b58f'], alt: ['#1f4fa8', '#6b6b6b', '#e9b58f'], cargo: 1,
+    /* Guide section 13: weight 127, walk 1.365, dash 2.09, run 1.873, air 1.208 (0.01 + 0.05), gravity 0.085, fall 1.63,
+       fast fall 2.608, a 3-tick squat, jumps 34 / 17.3 / 35.5, one air jump, dash 15, landing 2 / 5. Traction is not in the
+       guide (0.08 here). Dodges: spot 3-17 / 27, roll 4-15 / 31, air dodge 4-32 / 49 (landing 10), directional 4-22 with
+       67 to 110 by direction. */
+    st: { weight: 127, walk: 1.365, walkMul: 0.14, walkAdd: 0.1, trac: 0.08, dash: 2.09, runMul: 0.11, runAdd: 0.044, run: 1.873,
+      jumpX: 1.0, jumpXMul: 0.8, jumpXMax: 1.4, airJumpX: 0.9, jumpH: 34, jumpInit: 19, hopH: 17.3, airJumpH: 35.5,
+      airMul: 0.05, airAdd: 0.01, airSpeed: 1.208, airBrake: 0.01, grav: 0.085, fall: 1.63, ffall: 2.608, jsq: 3, w: 12, h: 18, jf: 4, jb: 2,
+      crouch: [0.62, 1.1], jumps: 1, dashF: 15, land: [2, 5], pummel: 1.6, pumT: 8,
+      roll: [30, 1.3, 12, 4], spot: [26, 15, 3], ad: { s: 4, n: [29, 49, 10], d: [19, 83, 14], dir: [67, 74, 83, 89, 110] } },
+    moves: mk(1, 1, 1, 1, {
+      /* ---- 14: ground ---- */
+      jab: { t: 24, next: 'jab2', chain: 8, chainEnd: 28, h: [cap(5, 6, 3, 11.5, 11, 10.5, 5, 4, 361, 25, 35)] },
+      jab2: { t: 31, h: [cap(4, 6, 4, 9.5, 9, 13.5, 6, 6, 70, 40, 100)] },
+      ftilt: { t: 34, tilt: 1, h: [cap(7, 9, 2, 10, 16, 9, 5.5, 8, 361, 50, 78, { dd: a => a.aim ? 9 : 8 })] },   /* 9% angled, 8% straight */
+      utilt: { t: 38, tilt: 1, h: [circ(5, 11, 2, 15, 4.8, 8, 100, 40, 105, { g: 1 }), circ(5, 11, 6, 23, 4.0, 9, 100, 40, 110, { g: 1 }), circ(5, 11, 4, 19, 5.3, 10, 100, 40, 115, { g: 1 })] },
+      dtilt: { t: 24, tilt: 1, h: [cap(6, 7, 5, 4, 15, 2.5, 5, 6, 361, 10, 80, { hs: 5 })] },   /* +5 hitstun (13.0.1); the trip chance is not modelled */
+      dash: { t: 34, h: [circ(9, 12, 8, 8, 7, 12, 53, 85, 46), circ(13, 24, 5.2, 8, 5.5, 9, 45, 60, 60)] },
+      fsmash: { t: 54, chg: 14, h: [circ(22, 23, 24, 6.4, 5.7, 22, 46, 21, 88, { g: 1 }), cap(22, 23, 10, 6.4, 18, 6.4, 3.7, 21, 361, 18, 86, { g: 1 })] },
+      usmash: { t: 49, chg: 6, h: [circ(14, 15, 0, 28, 8.8, 19, 90, 40, 84, { g: 1 }), cap(14, 15, -5, 18, 5, 18, 7, 19, 90, 40, 84, { g: 1 })] },
+      dsmash: { t: 55, chg: 2, h: [
+        circ(11, 12, 12, 3, 4, 17, 70, 35, 88, { g: 1, away: 1 }), circ(11, 12, -12, 3, 4, 17, 70, 35, 88, { g: 1, away: 1 }), circ(11, 12, 6, 8, 4, 14, 82, 35, 88, { g: 1, away: 1 }), circ(11, 12, -6, 8, 4, 14, 82, 35, 88, { g: 1, away: 1 }),
+        circ(13, 14, 19, 4.5, 6, 18, 55, 30, 88, { g: 1, away: 1 }), circ(13, 14, -12, 4.5, 6, 18, 55, 30, 88, { g: 1, away: 1 }), circ(13, 14, 6, 8, 4.5, 14, 98, 35, 88, { g: 1, away: 1 }), circ(13, 14, -6, 8, 4.5, 14, 98, 35, 88, { g: 1, away: 1 })] },
+      /* ---- 15: aerials ---- */
+      nair: { t: 38, air: 1, ll: 10, ac0: 9, ac: 26, h: [cap(10, 10, -12, 9, 15, 8, 5, 12, 361, 20, 100, { g: 1 }), cap(11, 13, -11, 9, 11, 9, 5, 12, 361, 20, 100, { g: 1 }), cap(14, 26, -11, 9, 11, 9, 5, 9, 361, 10, 100, { g: 1 })] },
+      fair: { t: 55, air: 1, ll: 17, ac0: 0, ac: 55, h: [cap(18, 20, 5, 15, 12, 12, 5.5, 16, 361, 20, 85, { g: 1 }), circ(21, 23, 13, 4, 5.5, 15, 270, 30, 100, { g: 1 }), circ(21, 23, 6, 9, 5, 13, 361, 30, 100, { g: 1 })] },
+      bair: { t: 31, air: 1, ll: 11, ac0: 6, ac: 30, h: [cap(7, 8, -4, 8, -14, 6, 6, 13, 361, 20, 97, { g: 1, away: 1 }), cap(9, 16, -4, 8, -14, 6, 5, 8, 361, 10, 100, { g: 1, away: 1 })] },
+      uair: { t: 37, air: 1, ll: 15, ac0: 5, ac: 25, h: [circ(6, 10, 1, 21, 7.5, 13, 90, 32, 90)] },
+      dair: { t: 54, air: 1, ll: 14, ac0: 2, ac: 49, h: [circ(14, 16, 0, -5, 7, 16, 270, 30, 90, { g: 1 }), circ(14, 16, 0, 6, 5.8, 13, 361, 20, 90, { g: 1 })] },
+      /* ---- 18: grabs ---- */
+      grab: { t: 38, h: [grab(8, 10, 4, 7, 13.7, 7, 5.8)] },
+      dgrab: { t: 46, h: [grab(11, 13, 4, 7, 15.9, 7, 4.6)] },
+      pgrab: { t: 41, h: [grab(12, 14, 4, 7, 21.5, 7, 5.8)] },
+      ledgeatk: { t: 55, h: [cap(23, 25, -5.5, 5.5, 12, 5.5, 5.5, 10, 45, 90, 20)], on: rise(25) },
+      /* ---- 16 and 17: specials ---- */
+      /* The Entire Gym (Giant Punch): 7 ticks in, then it charges for up to 110 while he swings his arm; special lets it go,
+         shield (or an air dodge) stops and keeps the charge for this stock. A full charge is kept, and the next press
+         punches at once with super armour. Partial: hit 19-20 after the release, 63 to act; 10 to 27% on the ground (6 to
+         24% in the air: the guide gives 6, the rest by the same slope). Full: 28% (18% near the body), 25% in the air. */
+      nspec: { t: 400, ll: 4, h: [], pick: f => f.punchC >= 110 ? 'nspecF' : null, on(f, n) {
+        const c = f.ctl; if (!c) return;
+        if (n === 1) f.punchGo = false;
+        if (n <= 7) { if (c.take('spc')) f.punchGo = true; if (n === 7 && f.punchGo) f.startMove('nspecR'); return; }
+        f.punchC = Math.min(110, f.punchC + 1);
+        if (c.take('spc')) { f.startMove(f.punchC >= 110 ? 'nspecF' : 'nspecR'); return; }
+        if (f.punchC >= 110) { spark(f.x, f.y + 12, '#ffb15c', 16, 1.6); beep(880, 0.12, 'triangle', 0.05, 1.5); f.endMove(); return; }
+        if (c.buf.shd > 0) { c.buf.shd = 0; f.move = null; if (f.grounded) f.set('shield'); else if (!f.airdodged) f.airdodge(); else f.set('air'); } } },
+      nspecR: { t: 62, h: [cap(19, 20, 3, 9, 15, 9, 5.5, 10, 361, 45, 70, { dyn: a => a.grounded ? { d: Math.round((10 + 17 * a.punchUse / 110) * 10) / 10, b: 45, k: 70 } : { d: Math.round((6 + 18 * a.punchUse / 110) * 10) / 10, b: 60, k: 65 } })],
+        on(f, n) { if (n === 1) { f.punchUse = f.punchC; f.punchC = 0; } } },
+      nspecF: { t: 47, sarm: [9, 20], sarmAir: [15, 20], h: [cap(19, 20, 3, 9, 15, 9, 5.5, 28, 361, 35, 73, { g: 1, dyn: a => a.grounded ? {} : { d: 25, b: 40, k: 72 } }), circ(19, 20, 1, 8, 3, 18, 361, 35, 73, { g: 1, dyn: a => a.grounded ? {} : { d: 25, b: 40, k: 72 } })],
+        on(f, n) { if (n === 1) { f.punchC = 0; spark(f.x, f.y + 10, '#ffb15c', 10, 1.2); } } },
+      /* Cap Check (Headbutt): super armour 5-14, the hit on 20-21. A standing target is buried; one in the air takes the 70°
+         part. 25 extra shield damage. He slows at the start: half speed on the ground, two-thirds across and half up in the air,
+         with half gravity. */
+      sspec: { t: 62, sarm: [5, 14], h: [
+        cap(20, 21, 7, 5, 19, 5, 5, 10, 270, 40, 40, { bury: 1, vGnd: 1, gndOnly: 1, sd: 25, g: 1 }), cap(20, 21, 9, 13, 18, 13, 3, 10, 270, 40, 40, { bury: 1, vGnd: 1, gndOnly: 1, sd: 25, g: 1 }), circ(20, 21, 14, 11, 10, 8, 70, 15, 40, { vAir: 1, gndOnly: 1, sd: 25, g: 1 }),
+        cap(20, 21, 1.4, 5, 8.8, 5, 6.5, 10, 270, 30, 40, { bury: 1, vGnd: 1, airOnly: 1, sd: 25, g: 1 }), circ(20, 21, 14, 11, 10, 8, 70, 15, 40, { vAir: 1, airOnly: 1, sd: 25, g: 1 })],
+        on(f, n) { if (n === 1) { f.vx *= f.grounded ? 0.5 : 0.67; if (!f.grounded) f.vy *= 0.5; } if (!f.grounded) f.vy += f.st.grav * 0.5; } },
+      /* Lat Spread Catastrophe (Spinning Kong), on the ground: super armour 5-17; hits on 19, 25-27, 32-33, 40-42, 49-50,
+         55-58 and a finisher on 62; 105 to act. Steers at up to 1.1 (0.034 a tick). The light hits pull the target in. */
+      uspec: { t: 104, rise: 12, sarm: [5, 17], pick: f => f.grounded ? null : 'uspecA', h: [
+        cap(19, 19, -12, 10, 12, 10, 6, 5, 88, 0, 30, { fkv: 90, g: 1 }),
+        ...[[25, 27], [32, 33], [40, 42], [49, 50], [55, 58]].flatMap(([a0, a1], k) => [cap(a0, a1, -2.5, 12, 25, 9.5, 4.5, 1.4, 80, 0, 55, { fkv: 90, carry: 1, g: 2 + k }), circ(a0, a1, -2.5, 13.5, 5.7, 3.5, 60, 35, 100, { g: 2 + k })]),
+        cap(62, 62, -4, 11, 20, 11, 8, 4, 361, 60, 157, { g: 9 })],
+        on(f, n, i) { if (n === 1) f.spinVx = f.vx; f.spinVx = appr(f.spinVx, clamp(i.lx, -1, 1) * 1.1, Math.abs(i.lx) > 0.2 ? 0.034 : n > 62 ? 0.04 : 0.015); f.vx = f.spinVx; } },
+      /* in the air: a first hit on 4-6, twelve light pulling hits from 10 to 38, a finisher on 39-43; then helpless, 38 frames
+         on landing; the ledge can be taken from frame 14. Rises from 0.9 a tick and drifts up to 1.7 sideways. Landing
+         before the end goes to frame 63 of the ground version. (How fast the rise dies away is my estimate: 0.03 a tick.) */
+      uspecA: { t: 69, helpless: 1, ledge: 1, snap: 14, hll: 38, ownPhys: 1, h: [
+        cap(4, 6, -7, 12, 4, 12, 7.7, 5, 85, 50, 10, { g: 1 }),
+        ...[[10, 12], [13, 14], [15, 17], [18, 19], [20, 21], [22, 24], [25, 26], [27, 29], [30, 31], [32, 33], [34, 36], [37, 38]].map(([a0, a1], k) => cap(a0, a1, -10, 10, 10, 10, 5, 1, 80, 55, 20, { carry: 1, g: 2 + k })),
+        cap(39, 43, -10, 10, 10, 10, 5, 2, 361, 72, 80, { g: 20 })],
+        on(f, n, i) { if (n === 1) { f.vy = 0.9; f.grounded = false; f.plat = null; } f.vx = appr(f.vx, clamp(i.lx, -1, 1) * 1.7, 0.05); f.vy -= f.st.grav * 0.07; if (f.vy > 0) f.vy = Math.max(0, f.vy - 0.03); f.vy = Math.max(f.vy, -f.st.fall); },
+        onLand(f, n) { if (n < 69) { f.startMove('uspec'); f.mf = 63; return true; } } },
+      /* Floor Is Leg Day (Hand Slap), on the ground: slaps on 12-13 and 23-24 that reach only standing opponents, in front
+         and behind; special again before the second slap ends repeats the pair (26 ticks a loop). 47 to act. */
+      dspec: { t: 46, pick: f => f.grounded ? null : 'dspecA', h: [
+        circ(12, 13, 13.6, 5, 10.3, 14, 78, 85, 30, { vGnd: 1, away: 1, g: 1 }), circ(12, 13, -1.4, 5, 10.3, 14, 84, 85, 30, { vGnd: 1, away: 1, g: 1 }),
+        circ(23, 24, 13.6, 5, 10.3, 14, 84, 85, 30, { vGnd: 1, away: 1, g: 2 }), circ(23, 24, -1.4, 5, 10.3, 14, 78, 85, 30, { vGnd: 1, away: 1, g: 2 })],
+        on(f, n) { if (n === 1) f.slapMore = false; if (n <= 34 && f.ctl && f.ctl.take('spc')) f.slapMore = true; if (n === 35 && f.slapMore) { f.slapMore = false; f.mf = 9; f.hitG = new Set(); } } },
+      /* in the air: 5% on 19-21 (a set pop), then 6% straight down on 28-30; 10 frames on landing. */
+      dspecA: { t: 49, ll: 10, h: [circ(19, 21, 9, 4, 7, 5, 90, 0, 100, { fkv: 36, g: 1 }), circ(28, 30, 9, 1, 8, 6, 270, 30, 100, { g: 2 })] },
+    }, { jabs: 2, throws: {
+      /* forward throw starts the carry (Fighter: 'carry'); the four carry throws are cf, cb, cu and cd */
+      f: { d: 12, a: 60, b: 90, k: 46, f: 15, t: 45 },
+      b: { d: 11, a: 140, b: 60, k: 65, f: 15, t: 39 },
+      u: { d: 9, a: 90, b: 70, k: 50, f: 14, t: 43 },
+      d: { d: 7, a: 38, b: 60, k: 50, f: 19, t: 54 },
+      cf: { d: 12, a: 60, b: 90, k: 46, f: 15, t: 45, at: over },
+      cb: { d: 13, a: 108, b: 85, k: 52, f: 16, t: 42, at: over },
+      cu: { d: 12, a: 92, b: 65, k: 53, f: 15, t: 29, at: over },
+      cd: { d: 11, a: 46, b: 70, k: 45, f: 17, t: 44, at: over } } }),
+  };
+  delete big.moves.jab3;   /* two jabs only */
+  return { name: 'Joey', sub: 'a regular guy (for now)', transform: 1, forms: [human, big] };
+})();
+
+const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE, FOWLS, CHOMP, BRAND, JOEY];
 /* Hitbox positions measured from the animations (hitboxes.js, written with tools/measure.html). Timing, damage and launch stay as defined above. */
 if (typeof HITBOXES !== 'undefined') for (const def of ROSTER) for (const fm of def.forms) {
   const set = HITBOXES[fm.name]; if (!set) continue;
@@ -1352,7 +1547,7 @@ let F = [];
 class Fighter {
   constructor(idx, def, ctl, alt) {
     this.idx = idx; this.def = def; this.ctl = ctl; this.alt = alt; this.fi = 0; this.stocks = STOCKS;
-    this.pct = 0; this.kos = 0; this.spawn(true);
+    this.pct = 0; this.kos = 0; this.tfLatch = false; this.tfPend = false; this.tfStart = -1; this.noSwap = !!def.transform; this.spawn(true);
   }
   get form() { return this.def.forms[this.fi]; }
   get st() { return this.form.st; }
@@ -1360,19 +1555,41 @@ class Fighter {
     this.x = first ? (this.idx ? 28 : -28) : 0; this.y = first ? 0 : 82; this.vx = this.vy = 0;
     if (first) this.face = this.idx ? -1 : 1;
     this.grounded = !!first; this.plat = first ? MAIN : null; this.state = first ? 'idle' : 'respawn'; this.sf = 0;
-    this.jumps = this.st.jumps || 1; this.airdodged = false; this.sideUsed = false; this.ff = false;
+    this.jumps = this.st.jumps ?? 1; this.airdodged = false; this.sideUsed = false; this.ff = false;
     this.wall = 0; this.wallT = 0; this.wallJumps = 0; this.sdi = 0; this.airT = 0; this.jr = 0; this.jrV = 0; this.rapidN = 0; this.aim = 0;
     this.pct = 0; this.shieldHp = 50; this.invuln = 0; this.hitlag = 0; this.hitstun = 0; this.ledgeCd = 0; this.dropT = 0; this.dropPlat = null;
     this.move = null; this.mf = 0; this.charge = 0; this.hitG = new Set(); this.parriedBy = null; this.victim = null; this.lag = 0; this.flash = 0;
     this.stale = []; this.staled = false; this.staleM = 1; this.shortHop = false; this.moveSH = false; this.shMacro = false; this.grabImm = 0; this.ledgeGrabs = 0;
     this.dodgeStale = 0; this.dodgeT = 0; this.ds = 0; this.tumble = false; this.techT = 0; this.techLock = 0; this.pumT = 0; this.wdHold = false;
     this.chargeT = 0; this.stalled = false; this.stallOk = false; this.cAir = null; this.hopT = 0; this.airUse = {}; this.flying = false; this.selOpen = false; this.sling = null; this.dairUsed = false; this.upC = 0; this.upGo = 0; this.flyV = null; this.flyB = false; this.dove = false; this.burstKind = ''; this.burstX = 0; this.burstDown = false; this.burstUsed = false; this.blastUsed = false; this.swapLock = 0; this.slingUsed = false; this.thermal = false; this.recoil = false; this.bigStone = false; this.armorLeft = 99; this.castHit = false; this.linkT = 0; this.helpLag = 0; this.guarded = false;
+    this.fat = 0; this.fatGain = false; this.restT = 0; this.exPend = false; this.exStart = -1; this.paceX = null; this.paceDir = 1;   /* INTENSITY: per stock */
+    this.punchC = 0; this.punchUse = 0; this.buryT = 0; this.slapMore = false; this.tether = null; this.adFaf = 0; this.spinVx = 0;   /* per stock: a stored punch charge goes with the stock */
   }
+  /* Joey's transformation (his guide, sections 04 and 05). The latch and the start tick belong to the fighter for the whole
+     match, never to a stock: a KO does not undo it, and a respawn before it finishes picks the growth up where it is. e is
+     gameplay ticks since it began: no control while e < 180, the big form from e = 180, protection while e < 300. */
+  tfStep() {
+    const c = this.ctl; if (c.tfReq) { c.tfReq = false; if (!this.tfLatch) this.tfPend = true; }
+    if (this.tfPend && !this.tfLatch && this.hitlag === 0 && TF_READY[this.state]) {
+      this.tfLatch = true; this.tfPend = false; this.tfStart = frame; this.fat = 0; this.exPend = false; this.exStart = -1; this.restT = 0; this.freeVictim(); this.move = null; this.charge = 0; PROJ = PROJ.filter(p => p.owner !== this.idx);
+      if (this.grounded) this.vx = 0; this.set('grow'); beep(330, 0.12, 'triangle', 0.05, 1.3);
+    }
+    if (!this.tfLatch) return; const e = frame - this.tfStart;
+    if (e >= 180 && this.fi === 0) { this.fi = 1; this.punchC = 0;
+      if (this.state === 'grow') { this.jumps = this.st.jumps ?? 1; this.set(this.grounded ? 'idle' : 'air'); spark(this.x, this.y + 2, '#d8c49a', 22, 1.8); beep(120, 0.25, 'sawtooth', 0.07, 0.6); shake = Math.max(shake, 6); } }
+    else if (e < 180 && this.state !== 'grow' && this.state !== 'dead' && this.state !== 'respawn') { this.move = null; this.set('grow'); this.sf = e; }
+    if (e === 180 + 1 || e === 300) beep(e === 300 ? 520 : 990, 0.08, 'sine', 0.04, e === 300 ? 0.8 : 1.2);   /* the protected moment starts, and ends */
+  }
+  tfProtected() { return this.tfLatch && frame - this.tfStart < 300; }
+  /* INTENSITY: only human Joey, only until the transformation latch is set */
+  fatOn() { return !!this.def.transform && this.fi === 0 && !this.tfLatch; }
+  effort(u) { if (!u || !this.fatOn() || this.exStart >= 0) return; this.fat = Math.min(FAT.max, this.fat + u); this.fatGain = true; }
+  exhausted() { return this.exStart >= 0; }
   /* Dodges used back to back protect for less time and leave more lag. */
   dodge() { this.ds = this.dodgeStale; this.dodgeStale = Math.min(5, this.dodgeStale + 1); this.dodgeT = 0; }
   set(s) { this.state = s; this.sf = 0; }
   startMove(n) {
-    const m = this.form.moves[n]; this.move = m; this.mname = n; this.mf = 0; this.charge = 0; this.chargeT = 0; this.aim = 0;
+    const m = this.form.moves[n]; if (this.def.transform) this.effort(FAT.move[n]); this.move = m; this.mname = n; this.mf = 0; this.charge = 0; this.chargeT = 0; this.aim = 0;
     this.stallOk = !!m.stall && !this.grounded && !this.stalled; if (this.stallOk) this.stalled = true;
     this.armorLeft = m.armorHits || 99; this.castHit = false;   /* a move that hangs in the air does so once per time off the ground */
     this.selOpen = false;   /* a bird wheel left open by an interrupted Neutral B never outlives it */
@@ -1399,7 +1616,8 @@ class Fighter {
     if (Math.abs(i.lx) > 0.5 && Math.abs(i.lx) >= Math.abs(i.ly)) { this.face = sgn(i.lx); n = (!this.grounded && this.sideUsed) ? 'nspec' : 'sspec'; }
     else if (i.ly > 0.5) n = 'uspec'; else if (i.ly < -0.5) n = 'dspec';
     /* Turnaround special: holding back turns the fighter round first; in the air a neutral special also reverses its drift. */
-    const mv = this.form.moves[n]; if (!this.grounded && ((mv.burst && this.burstUsed) || (mv.blast && this.blastUsed))) return;
+    let mv = this.form.moves[n]; if (mv.pick) { n = mv.pick(this) || n; mv = this.form.moves[n]; }   /* a special with a ground and an air form, or a stored charge */
+    if (!this.grounded && ((mv.burst && this.burstUsed) || (mv.blast && this.blastUsed))) return;
     if (mv.swap && this.swapLock > 0) return;   /* too soon after the last swap */   /* spent until it lands */
     if (n !== 'sspec' && Math.abs(i.lx) > 0.35 && sgn(i.lx) !== this.face) { this.face = sgn(i.lx); if (n === 'nspec' && !this.grounded) this.vx = -this.vx * 0.9; }
     this.startMove(n);
@@ -1445,6 +1663,7 @@ class Fighter {
   }
   airActs() {
     const c = this.ctl, i = c.c, s = this.st;
+    if (this.exStart >= 0) { for (const k in c.buf) c.buf[k] = 0; this.fastFall(); return false; }   /* exhausted in the air: drift only */
     if (c.buf.shd > 0 && !this.airdodged) { c.buf.shd = 0; if (!this.tryWavedash(false)) this.airdodge(); return true; }
     if (c.take('spc')) { this.doSpecial(); return true; }
     if (c.take('atk')) { this.startMove(this.aerial(i.lx, i.ly)); return true; }
@@ -1461,7 +1680,7 @@ class Fighter {
       this.wallJumps++; this.wallT = 0; this.vy = s.vJump * 0.92; this.vx = this.wall * 1.5; this.face = this.wall; this.ff = false;
       spark(this.x - this.wall * 3, this.y + 4, '#fff', 10, 1.2); beep(560, 0.05, 'sine', 0.04, 1.4); return false;
     }
-    if (c.buf.jmp > 0 && this.jumps > 0) { c.buf.jmp = 0; this.jumps--; this.shortHop = false; this.vy = s.vAir * (1 - 0.1 * Math.max(0, (s.jumps || 1) - 1 - this.jumps)); if (Math.abs(i.lx) > 0.2) this.vx = i.lx * s.airSpeed * s.airJumpX; this.ff = false; spark(this.x, this.y, '#fff', 6, 0.8); beep(500, 0.05, 'sine', 0.03, 1.4); }
+    if (c.buf.jmp > 0 && this.jumps > 0) { c.buf.jmp = 0; this.jumps--; this.shortHop = false; this.vy = s.vAir * (1 - 0.1 * Math.max(0, (s.jumps ?? 1) - 1 - this.jumps)); if (Math.abs(i.lx) > 0.2) this.vx = i.lx * s.airSpeed * s.airJumpX; this.ff = false; spark(this.x, this.y, '#fff', 6, 0.8); beep(500, 0.05, 'sine', 0.03, 1.4); }
     this.fastFall();
     return false;
   }
@@ -1481,8 +1700,9 @@ class Fighter {
     return true;
   }
   airdodge() {
-    const i = this.ctl.c, mag = Math.hypot(i.lx, i.ly); this.airdodged = true; this.ff = false; this.dodge();
+    const i = this.ctl.c, mag = Math.hypot(i.lx, i.ly); this.effort(FAT.airdodge); this.airdodged = true; this.ff = false; this.dodge();
     this.adDir = mag > 0.3; if (this.adDir) { this.vx = i.lx / mag * 2.7; this.vy = i.ly / mag * 2.7; }
+    const dd = this.st.ad && this.st.ad.dir; if (this.adDir && dd) { const a = Math.atan2(i.ly, Math.abs(i.lx)) * 180 / Math.PI; this.adFaf = dd[a < -67.5 ? 0 : a < -22.5 ? 1 : a < 22.5 ? 2 : a < 67.5 ? 3 : 4]; }   /* down, down-sideways, sideways, up-sideways, up */
     this.set('airdodge');
   }
   /* Hoppers: which part of the hop this frame is. Returns the speed multiplier while moving, 0 while planted. */
@@ -1503,14 +1723,15 @@ class Fighter {
     }
     this.vy -= s.grav; const mf = this.ff ? s.ffall : s.fall; if (this.vy < -mf) this.vy = -mf;
   }
-  touchDown(p, fromLedge) { if (!fromLedge) this.ledgeGrabs = 0; this.airUse = {}; this.flying = false; this.grounded = true; this.plat = p; this.y = p.y; this.vy = 0; this.jr = 0; this.stalled = false; this.burstUsed = false; this.blastUsed = false; this.slingUsed = false; this.dairUsed = false; this.wallJumps = 0; this.jumps = this.st.jumps || 1; this.airdodged = false; this.sideUsed = false; this.ff = false; this.shortHop = false; }
+  touchDown(p, fromLedge) { if (!fromLedge) this.ledgeGrabs = 0; this.airUse = {}; this.flying = false; this.grounded = true; this.plat = p; this.y = p.y; this.vy = 0; this.jr = 0; this.stalled = false; this.burstUsed = false; this.blastUsed = false; this.slingUsed = false; this.dairUsed = false; this.wallJumps = 0; this.jumps = this.st.jumps ?? 1; this.airdodged = false; this.sideUsed = false; this.ff = false; this.shortHop = false; }
   land(p) {
     const st = this.state, hard = this.ff; this.touchDown(p);
     if (st === 'attack' && this.move.burst) {   /* a tumble never falls over: a dive that reaches the floor carries on as a slide, anything else lands ready to act */
       if (this.burstKind === 'dive') { this.burstKind = 'slide'; spark(this.x, this.y, '#ddd', 8, 1.2); } else { this.move = null; this.set('idle'); }
     }
-    else if (st === 'attack') { const m = this.move; if (m.onLand) m.onLand(this, this.mf); this.lag = m.air ? ((m.ac0 !== undefined ? this.mf <= m.ac0 : this.mf < (m.h[0] ? m.h[0].f0 : 99) - 1) || this.mf > m.ac ? (hard ? 4 : 2) : m.ll) : (m.ll || 8); if (m.llf) this.lag = m.llf(this); this.move = null; this.set('land'); }
-    else if (st === 'airdodge') { if (Math.abs(this.vx) > 0.5) { this.vx = clamp(this.vx, -T.wd_max_speed, T.wd_max_speed); this.set('wd'); } else { this.lag = 10; this.set('land'); } }
+    else if (st === 'attack') { const m = this.move; if (m.onLand && m.onLand(this, this.mf) === true) return;   /* the move carries on in a landing form of its own */ this.lag = m.air ? ((m.ac0 !== undefined ? this.mf <= m.ac0 : this.mf < (m.h[0] ? m.h[0].f0 : 99) - 1) || this.mf > m.ac ? (hard ? LANDL(this)[1] : LANDL(this)[0]) : m.ll) : (m.ll || 8); if (m.llf) this.lag = m.llf(this); this.move = null; this.set('land'); }
+    else if (st === 'airdodge') { if (Math.abs(this.vx) > 0.5) { this.vx = clamp(this.vx, -T.wd_max_speed, T.wd_max_speed); this.set('wd'); } else { this.lag = this.st.ad ? this.st.ad[this.adDir ? 'd' : 'n'][2] : 10; this.set('land'); } }
+    else if (st === 'grow' || st === 'carry' || st === 'buried') { /* growing, carrying or buried: carries on where it lands */ }
     else if (st === 'hurt') {
       /* Launched hard enough to tumble: shield just before touching down to tech (in place or rolling), else lie there. */
       if (this.tumble && this.sf < this.hitstun) {
@@ -1523,7 +1744,7 @@ class Fighter {
     }
     else if (st === 'helpless') { this.lag = this.helpLag || 12; this.helpLag = 0; this.set('land'); }
     else if (st === 'broken') { /* stays dizzy */ }
-    else { this.lag = hard ? 4 : 2; this.set('land'); }
+    else { this.lag = hard ? LANDL(this)[1] : LANDL(this)[0]; this.set('land'); }
   }
   canFall() {
     const s = this.state;
@@ -1549,6 +1770,8 @@ class Fighter {
   }
   update() {
     const c = this.ctl, i = c.c;
+    if (this.def.transform) this.tfStep();
+    if (this.exStart >= 0 && frame - this.exStart >= FAT.exhaust) { this.exStart = -1; this.fat = 0; this.exPend = false; this.restT = 0; if (this.state === 'exhaust') this.set('idle'); }   /* e = 900: free, with no extra lag */
     if (this.invuln > 0) this.invuln--; if (this.swapLock > 0) this.swapLock--; if (this.ledgeCd > 0) this.ledgeCd--; if (this.dropT > 0) this.dropT--; if (this.flash > 0) this.flash--;
     if (!i.shd) this.wdHold = false;   /* the shield press that made a wavedash does not turn into a shield while still held */
     if (this.grabImm > 0) this.grabImm--; if (this.wallT > 0) this.wallT--; if (this.techT > 0) this.techT--; if (this.techLock > 0) this.techLock--;
@@ -1560,6 +1783,10 @@ class Fighter {
       /* While frozen by a hit, up to three stick flicks nudge the victim a little: a way to shift out of multi-hits and change where a launch starts. */
       if (this.state === 'hurt' && this.sdi < 3) { const dx = c.dashDir, dy = c.upNow ? 1 : c.downNow ? -1 : 0; if (dx || dy) { this.sdi++; this.x += dx * 1.1; if (!this.grounded) this.y += dy * 1.1; } }
       this.hitlag--; return;
+    }
+    if (this.def.transform && this.grounded && EX_READY[this.state]) {
+      if (this.exStart >= 0) { this.paceX = null; this.set('exhaust'); this.sf = frame - this.exStart; }   /* back on his feet before the 15 seconds are up: the same moment of the performance */
+      else if (this.exPend && this.fatOn()) { this.exPend = false; this.exStart = frame; this.paceX = null; this.paceDir = this.face; this.vx *= 0.3; this.set('exhaust'); pop(this.x, this.y + this.st.h + 6, 'TAKE FIVE', '#ffb26b'); beep(220, 0.35, 'triangle', 0.05, 0.5); }
     }
     this.sf++; const s = this.st;
     switch (this.state) {
@@ -1598,7 +1825,7 @@ class Fighter {
         /* Out of a jump's start-up: an up smash (flick up with attack), attack with the jump for a short-hop aerial, or the right stick for an aerial the moment the fighter leaves the ground. */
         if (c.cPress) this.cAir = [i.cx, i.cy];
         if (c.buf.atk > 0) { if (i.ly > 0.5 && c.ySmash) { c.buf.atk = 0; this.startMove('usmash'); break; } this.shMacro = true; }
-        if (this.sf >= s.jsq) { this.grounded = false; this.plat = null; this.jumps = s.jumps || 1; this.shortHop = !i.jmp || this.shMacro || c.jmp2Age <= this.sf + T.buffer;   /* let go early, attack with the jump, or two jump buttons together */ if (this.shortHop) this.vy = s.vHop; else { this.vy = this.jrV = s.boost[0]; this.jr = 1; } this.vx = clamp(this.vx * s.jumpXMul + (Math.abs(i.lx) > 0.2 ? i.lx * s.jumpX : 0), -s.jumpXMax, s.jumpXMax); this.set('air'); beep(420, 0.05, 'sine', 0.03, 1.5); if (this.shMacro) { this.shMacro = false; if (c.take('atk')) this.startMove(this.aerial(i.lx, i.ly)); } else if (this.cAir) this.startMove(this.aerial(this.cAir[0], this.cAir[1])); this.cAir = null; }
+        if (this.sf >= s.jsq) { this.grounded = false; this.plat = null; this.jumps = s.jumps ?? 1; this.shortHop = !i.jmp || this.shMacro || c.jmp2Age <= this.sf + T.buffer; this.effort(FAT.jump);   /* let go early, attack with the jump, or two jump buttons together */ if (this.shortHop) this.vy = s.vHop; else { this.vy = this.jrV = s.boost[0]; this.jr = 1; } this.vx = clamp(this.vx * s.jumpXMul + (Math.abs(i.lx) > 0.2 ? i.lx * s.jumpX : 0), -s.jumpXMax, s.jumpXMax); this.set('air'); beep(420, 0.05, 'sine', 0.03, 1.5); if (this.shMacro) { this.shMacro = false; if (c.take('atk')) this.startMove(this.aerial(i.lx, i.ly)); } else if (this.cAir) this.startMove(this.aerial(this.cAir[0], this.cAir[1])); this.cAir = null; }
         break;
       case 'wd':
         this.vx = appr(this.vx, 0, T.wd_friction);
@@ -1609,8 +1836,9 @@ class Fighter {
       case 'helpless': this.airPhys(true); break;
       case 'airdodge':
         if (this.adDir && this.sf < 18) { this.vx *= 0.9; this.vy *= 0.9; } else this.airPhys(!this.adDir);
-        if (this.sf === 3) this.invuln = Math.max(this.invuln, 24 - this.ds * 2 - (this.adDir ? 6 : 0));
-        if (this.sf >= (this.adDir ? 54 : 40) + this.ds * 3) this.set('air');
+        { const ad = s.ad, k = this.adDir ? 'd' : 'n';   /* ad: a form's own air dodge (first protected frame; per kind: frames protected, first free frame, landing) */
+          if (this.sf === (ad ? ad.s : 3)) this.invuln = Math.max(this.invuln, (ad ? ad[k][0] : 24 - (this.adDir ? 6 : 0)) - this.ds * 2);
+          if (this.sf >= (ad ? (this.adDir && ad.dir ? this.adFaf : ad[k][1]) - 1 : this.adDir ? 54 : 40) + this.ds * 3) this.set('air'); }
         break;
       case 'land':
         this.vx = appr(this.vx, 0, s.trac);
@@ -1619,9 +1847,9 @@ class Fighter {
       case 'attack': {
         const m = this.move;
         if (this.grounded) this.vx = appr(this.vx, 0, s.trac); else if (this.stallOk) { this.vy = 0; this.vx = appr(this.vx, 0, 0.08); }   /* hangs in the air until the move is over */
-        else { this.airPhys(!m.nodrift); if (m.air) this.fastFall(); }
+        else if (!m.ownPhys) { this.airPhys(!m.nodrift); if (m.air) this.fastFall(); }   /* ownPhys: the move moves the fighter itself */
         /* A smash is charged by keeping attack held: its power grows for a second, and it can be held back for two more. */
-        if (m.chg && this.mf === m.chg && this.chargeT < SMASH_HOLD && i.atk) { this.chargeT++; if (this.charge < 60) this.charge++; } else this.mf++;
+        if (m.chg && this.mf === m.chg && this.chargeT < (m.chgHold || SMASH_HOLD) && i.atk) { this.chargeT++; if (this.charge < 60) this.charge++; } else this.mf++;
         if (m.inv && this.mf === m.inv[0]) this.invuln = Math.max(this.invuln, m.inv[1] - m.inv[0]);   /* some moves cannot be hit for a few frames */
         if (m.on) m.on(this, this.mf, i);
         if (this.state === 'attack' && this.move === m && m.cancel && this.mf >= m.cancel) {   /* cut short into any action, keeping the speed */
@@ -1635,7 +1863,7 @@ class Fighter {
         /* jab chain: attack again once the jab allows it and the next hit comes out */
         /* rapid jab: loops while attack is held (three at least, fourteen at most), then the finisher */
         if (this.state === 'attack' && m.rapid && this.mf >= m.t) { const n = this.rapidN + 1; if ((i.atk || n < 3) && n < 14 && this.grounded) { this.startMove(this.mname); this.rapidN = n; } else if (this.grounded) this.startMove(m.next); else this.endMove(); break; }
-        if (this.state === 'attack' && m.next && this.grounded && this.mf >= m.chain && (!m.chainEnd || this.mf <= m.chainEnd) && (c.take('atk') || (i.atk && this.mf >= m.chain + 2))) { this.startMove(m.next); break; }
+        if (this.state === 'attack' && m.next && this.grounded && this.mf >= m.chain && (!m.chainEnd || this.mf <= m.chainEnd) && (c.take('atk') || (!m.press && i.atk && this.mf >= m.chain + 2))) { this.startMove(m.next); break; }   /* press: only a new press chains */
         if (this.state === 'attack' && this.mf >= m.t) this.endMove();
         break;
       }
@@ -1644,8 +1872,8 @@ class Fighter {
         if (c.buf.spc > 0 && i.ly > 0.5) { c.buf.spc = 0; this.startMove('uspec'); break; }   /* up special straight out of shield */
         if (c.take('jmp')) { this.set('jsq'); break; }
         if (c.take('atk') || c.take('grb')) { this.startMove('grab'); break; }
-        if (c.downBuf > 0) { c.downBuf = 0; if (this.plat.soft) this.drop(); else { this.dodge(); this.set('spot'); } break; }
-        if (c.dashDir && this.sf > 1) { this.rollDir = c.dashDir; this.dodge(); this.set('roll'); break; }
+        if (c.downBuf > 0) { c.downBuf = 0; if (this.plat.soft) this.drop(); else { this.effort(FAT.spot); this.dodge(); this.set('spot'); } break; }
+        if (c.dashDir && this.sf > 1) { this.rollDir = c.dashDir; this.effort(FAT.roll); this.dodge(); this.set('roll'); break; }
         if (!i.shd && this.sf >= 3) this.set('shieldoff');
         break;
       case 'shieldstun':
@@ -1653,11 +1881,11 @@ class Fighter {
         if (this.sf >= this.stunT) { if (this.plat.soft && i.ly < T.shield_drop_stick_y) this.drop(); else this.set(i.shd ? 'shield' : 'shieldoff'); }
         break;
       case 'shieldoff': this.vx = appr(this.vx, 0, s.trac); if (this.sf >= SHIELD.release) this.set('idle'); break;
-      case 'spot': { const sp = s.spot || [22, 15]; this.vx = 0; if (this.sf === 3) this.invuln = Math.max(this.invuln, sp[1] - this.ds * 2); if (this.sf >= sp[0] + this.ds * 3) this.set('idle'); break; }
+      case 'spot': { const sp = s.spot || [22, 15]; this.vx = 0; if (this.sf === (sp[2] || 3)) this.invuln = Math.max(this.invuln, sp[1] - this.ds * 2); if (this.sf >= sp[0] + this.ds * 3) this.set('idle'); break; }
       case 'rebound': this.vx = appr(this.vx, 0, s.trac); if (this.sf >= this.lag) this.set('idle'); break;
       case 'roll': {
         const r = s.roll || [28, 1.35, 13];   /* total frames, speed, frames it cannot be hit */
-        this.vx = this.sf >= 3 && this.sf <= r[0] - 6 ? this.rollDir * r[1] : 0; if (this.sf === 4) this.invuln = Math.max(this.invuln, r[2] - this.ds * 2);
+        this.vx = this.sf >= 3 && this.sf <= r[0] - 6 ? this.rollDir * r[1] : 0; if (this.sf === (r[3] || 4)) this.invuln = Math.max(this.invuln, r[2] - this.ds * 2);
         if (this.sf >= r[0] + this.ds * 3) { this.face = -this.rollDir; this.vx = 0; this.set('idle'); }
         break;
       }
@@ -1666,7 +1894,7 @@ class Fighter {
         else {
           /* Long hitstun can be cut short: an air dodge from frame 40, an attack or jump from frame 45. */
           if (this.sf >= 45 && (c.buf.atk > 0 || c.cPress || c.buf.spc > 0 || (c.buf.jmp > 0 && this.jumps > 0))) { this.set('air'); this.airActs(); break; }
-          if (this.sf >= 40 && c.buf.shd > 0 && !this.airdodged) { c.buf.shd = 0; this.airdodge(); break; }
+          if (this.sf >= 40 && c.buf.shd > 0 && !this.airdodged && this.exStart < 0) { c.buf.shd = 0; this.airdodge(); break; }
           if (this.linkT > 0) { this.linkT--; if (this.sf >= this.hitstun) this.set('air'); break; }   /* held by a linking hit: carried at a fixed speed, no gravity, until it lets go */
           const sp = Math.hypot(this.vx, this.vy); if (sp > 0.051) { const k = (sp - 0.051) / sp; this.vx *= k; this.vy *= k; }
           this.vy -= s.grav; if (this.sf % 3 === 0 && sp > 2) PART.push({ x: this.x, y: this.y + s.h / 2, vx: 0, vy: 0, life: 16, col: 'rgba(255,255,255,.7)', r: 1.6 });
@@ -1676,6 +1904,7 @@ class Fighter {
       case 'down':   /* missed tech: lying on the floor */
         this.vx = appr(this.vx, 0, 0.1);
         if (this.sf >= 20) {
+          if (this.exStart >= 0) { c.buf.atk = 0; if (i.ly > 0.5 || Math.abs(i.lx) > 0.5 || this.sf >= 100) { this.lag = 22; this.invuln = 16; this.set('land'); } break; }   /* exhausted: only gets up */
           if (c.take('atk')) { this.startMove('getup'); break; }
           if (Math.abs(i.lx) > 0.5) { this.rollDir = sgn(i.lx); this.ds = 0; this.invuln = 14; this.set('roll'); break; }
           if (i.ly > 0.5 || c.take('jmp') || i.shd || this.sf >= 100) { this.lag = 22; this.invuln = 16; this.set('land'); }
@@ -1696,19 +1925,21 @@ class Fighter {
         v.x = this.x + this.face * 8; v.y = this.y; v.vx = v.vy = 0; v.face = -this.face;
         if (this.sf > 6) {
           if (this.pumT > 0) this.pumT--;
-          if (this.pumT === 0 && c.take('atk')) { this.pumT = 14; v.pct += (this.st.pummel || 1.3) * DMG_1V1; v.flash = 5; spark(v.x, v.y + 8, '#fff', 4, 0.8); beep(260, 0.04, 'square', 0.04); }
+          if (this.pumT === 0 && c.take('atk')) { this.effort(FAT.pummel); this.pumT = this.st.pumT || 14; v.pct += (this.st.pummel || 1.3) * DMG_1V1; v.flash = 5; spark(v.x, v.y + 8, '#fff', 4, 0.8); beep(260, 0.04, 'square', 0.04); }
           /* Throw with either stick, held or flicked: the right stick wins if both are pushed. */
           const cs = Math.hypot(i.cx, i.cy) >= 0.5, tx = cs ? i.cx : i.lx, ty = cs ? i.cy : i.ly; let k = null;
           if (cs || Math.hypot(i.lx, i.ly) >= 0.6) k = Math.abs(ty) > Math.abs(tx) ? (ty > 0 ? 'u' : 'd') : (sgn(tx) === this.face ? 'f' : 'b');
-          if (k) { this.throwK = k; this.set('throw'); }
+          if (k === 'f' && this.form.cargo) { this.holdT = Math.round((90 + 1.7 * v.pct) * 11 / 6) - this.sf; this.set('carry'); }   /* the carry lasts what the grab had left, x 11/6 */
+          else if (k) { this.effort(FAT.throwPick); this.throwK = k; this.set('throw'); }
           else if (this.sf > this.holdT && this.sf > GRAB_MIN) { this.freeVictim(); this.lag = 30; this.set('land'); }
         }
         break;
       }
       case 'throw': {
         const v = this.victim;
-        if (v && v.state === 'held') { v.x = this.x + this.face * (this.throwK === 'b' ? -6 : 8) * Math.min(1, this.sf / 8); v.y = this.y + (this.throwK === 'u' ? this.sf : 0); }
         const tw = this.form.moves.throws[this.throwK] || {};
+        if (v && v.state === 'held') { if (tw.at) tw.at(this, v, this.sf); else { v.x = this.x + this.face * (this.throwK === 'b' ? -6 : 8) * Math.min(1, this.sf / 8); v.y = this.y + (this.throwK === 'u' ? this.sf : 0); } }   /* at: where a throw holds its victim */
+        if (v && v.state === 'held' && tw.hits) for (const q of tw.hits) if (this.sf === q[0]) { this.effort(FAT.rep); const d = q[1] * DMG_1V1; v.pct = Math.min(999, v.pct + d); v.flash = 4; comboHit(this, v, d, true); spark(v.x, v.y + 6, '#fff', 4, 0.7); beep(300, 0.04, 'square', 0.03); }   /* damage before the release (a throw of several reps) */
         if (this.sf === (tw.f || 10) && v) {
           const h = tw, id = this.form.name + ':throw' + this.throwK, d = h.d * staleMul(this, id) * DMG_1V1; pushStale(this, id);
           this.victim = null; v.grounded = false; v.plat = null; v.pct = Math.min(999, v.pct + d); v.grabImm = 60;
@@ -1718,13 +1949,45 @@ class Fighter {
         if (this.sf >= (tw.t || 26)) this.set(this.grounded ? 'idle' : 'air');
         break;
       }
+      case 'exhaust': {   /* TAKE FIVE: 900 ticks. Nothing but a slow shuffle (and the transformation, in tfStep); between 3 and 9 s he paces on his own */
+        for (const k in c.buf) c.buf[k] = 0; c.downBuf = 0;
+        const e = frame - this.exStart; let tv = 0;
+        if (Math.abs(i.lx) > 0.2) { tv = clamp(i.lx, -1, 1) * 0.22; this.paceX = null; }
+        else if (e >= 180 && e < 540) { if (this.paceX === null) this.paceX = this.x; if (Math.abs(this.x - this.paceX) >= 0.25 * s.h) this.paceDir = -sgn(this.x - this.paceX); tv = this.paceDir * 0.16; }
+        this.vx = appr(this.vx, tv, 0.04);
+        const p = this.plat; if (p && (this.x + this.vx < p.x0 + 1 || this.x + this.vx > p.x1 - 1)) { this.vx = 0; this.paceDir = -this.paceDir; }   /* never walks himself off anything */
+        if (Math.abs(this.vx) > 0.02) this.face = sgn(this.vx);
+        break;
+      }
+      case 'grow':   /* Joey's injection and growth: no control; on the ground he stays put, in the air he falls as the human form does */
+        if (this.grounded) this.vx = 0; else this.airPhys(false);
+        break;
+      case 'carry': {   /* Cronky Dong's cargo carry: walk and jump with the opponent overhead, throw with attack or grab (or the right stick) */
+        const v = this.victim; if (!v || v.state !== 'held') { this.victim = null; this.set(this.grounded ? 'idle' : 'air'); break; }
+        if (this.grounded) { if (Math.abs(i.lx) > 0.2) { this.face = sgn(i.lx); this.vx = this.groundMove(i.lx * s.walk * 1.1, (s.walkAdd + s.walkMul * Math.abs(i.lx)) * 1.1); } else this.vx = appr(this.vx, 0, s.trac);
+          if (c.take('jmp')) { this.grounded = false; this.plat = null; this.vy = i.jmp ? s.vJump : s.vHop; } }
+        else { this.airPhys(true); if (c.take('jmp') && this.jumps > 0) { this.jumps--; this.vy = s.vAir; } this.fastFall(); }
+        v.x = this.x; v.y = this.y + s.h + 0.5; v.vx = v.vy = 0; v.face = this.face;
+        const cs = Math.hypot(i.cx, i.cy) >= 0.5;
+        if (this.sf > 3 && (cs || c.take('atk') || c.take('grb'))) { const tx = cs ? i.cx : i.lx, ty = cs ? i.cy : i.ly; let k = 'cf';
+          if (Math.abs(ty) > 0.5 && Math.abs(ty) >= Math.abs(tx)) k = ty > 0 ? 'cu' : 'cd'; else if (Math.abs(tx) > 0.3 && sgn(tx) !== this.face) k = 'cb';
+          this.throwK = k; this.set('throw'); break; }
+        if (this.sf > this.holdT) { this.freeVictim(); this.set(this.grounded ? 'idle' : 'air'); }
+        break;
+      }
+      case 'buried': {   /* stuck in the floor: mashing frees sooner; a hit knocks them out */
+        this.vx = 0; let n = c.dashDir || c.upNow || c.downNow ? 1 : 0; for (const k of ['atk', 'spc', 'jmp', 'shd', 'grb']) if (c.pressed(k)) n++; this.buryT -= n * 8;
+        if (this.sf >= this.buryT) { this.grounded = false; this.plat = null; this.vy = 1.6; this.set('air'); spark(this.x, this.y, '#c9a27a', 10, 1.2); }
+        break;
+      }
       case 'ledge': {
         const side = sgn(this.x); this.vx = this.vy = 0;
         if (this.sf === 2 && this.ledgeInv) { this.invuln = Math.max(this.invuln, this.ledgeInv - 2); this.ledgeInv = 0; }   /* the protection starts on the third frame: the grab itself can be hit */
         if (this.sf > 8) {
-          const toward = -side * i.lx, slow = this.pct >= 100;   /* worn down: every way up is slower and less protected */
+          const toward = -side * i.lx, slow = this.pct >= 100;
+          if (this.exStart >= 0) { c.buf.jmp = c.buf.atk = 0; }   /* exhausted: only the plain climb up, or letting go */   /* worn down: every way up is slower and less protected */
           if (c.take('jmp')) { this.vy = s.vJump * 1.05; this.vx = -side * 0.7; this.ledgeCd = 30; this.set('air'); }
-          else if (i.shd) { this.x = side * (EDGE - 22); this.touchDown(MAIN, true); this.lag = slow ? 26 : 18; this.invuln = slow ? 20 : 18; this.set('land'); }
+          else if (i.shd && this.exStart < 0) { this.x = side * (EDGE - 22); this.touchDown(MAIN, true); this.lag = slow ? 26 : 18; this.invuln = slow ? 20 : 18; this.set('land'); }
           else if (c.take('atk')) { this.x = side * (EDGE - 6); this.touchDown(MAIN, true); this.startMove(this.form.moves.ledgeatk ? 'ledgeatk' : 'getup'); if (slow) this.mf = -8; }
           else if (toward > 0.5 || i.ly > 0.5) { this.x = side * (EDGE - 5); this.touchDown(MAIN, true); this.lag = slow ? 22 : 14; this.invuln = slow ? 16 : 14; this.set('land'); }
           else if (toward < -0.5 || i.ly < -0.5 || this.sf > LEDGE_HANG) { this.ledgeCd = 30; this.vy = -0.5; this.x += side * 2; this.set('air'); }
@@ -1739,7 +2002,21 @@ class Fighter {
         if (this.stocks > 0 && this.sf >= 50) { const fi = this.fi; this.spawn(false); this.fi = fi; }
         break;
     }
+    if (this.fatOn()) {   /* INTENSITY: costs already charged this tick come first; running; then rest, only if nothing was gained */
+      if (this.exStart < 0 && this.grounded && (this.state === 'dash' || this.state === 'run') && Math.abs(i.lx) > 0.2 && Math.abs(this.vx) > s.walk) this.effort(FAT.run);
+      if (this.grounded && this.state === 'idle' && !this.exPend && this.exStart < 0 && !i.shd) { this.restT++; if (!this.fatGain && this.restT > FAT.restDelay) this.fat = Math.max(0, this.fat - (Math.abs(this.vx) > 0.25 ? FAT.drainWalk : FAT.drainIdle)); } else this.restT = 0;
+      if (this.fat >= FAT.max && this.exStart < 0) { this.fat = FAT.max; this.exPend = true; }
+      this.fatGain = false;
+    }
     this.integrate();
+  }
+  grabLedge(side) {
+    const s = this.st, hw = s.w / 2, o = F[1 - this.idx];
+    if (o && o.state === 'ledge' && sgn(o.x) === side) { o.set('air'); o.vy = 1.3; o.vx = side * 0.9; o.ledgeCd = 45; o.invuln = 0; pop(o.x, o.y + 20, 'TRUMP', '#fff'); }
+    this.ledgeGrabs++; this.shortHop = false;
+    this.x = side * (EDGE + hw + 0.5); this.y = -s.h + 1; this.vx = this.vy = 0; this.face = -side; this.move = null; this.ff = false;
+    this.jumps = s.jumps ?? 1; this.wallJumps = 0; this.airdodged = false; this.sideUsed = false; this.stalled = false; this.airUse = {}; this.ledgeInv = Math.round(LEDGE_INV(this.airT, this.pct) * (LEDGE_REGRAB[this.ledgeGrabs - 1] || 0));   /* Ultimate's rule: longer in the air earns more, damage takes it away, and regrabs before landing or being hit earn less, then none */
+    this.set('ledge'); beep(700, 0.04, 'triangle', 0.03);
   }
   integrate() {
     const st = this.state, s = this.st, i = this.ctl.c;
@@ -1786,11 +2063,7 @@ class Fighter {
     if (!s.noLedge && (this.vy < 0 || snap) && this.ledgeCd === 0 && i.ly > -0.5 && (st === 'air' || st === 'helpless' || (st === 'attack' && this.move && this.move.ledge))) {
       const side = sgn(this.x), out = Math.abs(this.x) - EDGE, hand = this.y + s.h, o = F[1 - this.idx];
       if (side && out > -1 && out < 13 && hand > -9 && hand < 9 && this.ledgeGrabs < 6) {
-        if (o && o.state === 'ledge' && sgn(o.x) === side) { o.set('air'); o.vy = 1.3; o.vx = side * 0.9; o.ledgeCd = 45; o.invuln = 0; pop(o.x, o.y + 20, 'TRUMP', '#fff'); }
-        this.ledgeGrabs++; this.shortHop = false;
-        this.x = side * (EDGE + hw + 0.5); this.y = -s.h + 1; this.vx = this.vy = 0; this.face = -side; this.move = null; this.ff = false;
-        this.jumps = s.jumps || 1; this.wallJumps = 0; this.airdodged = false; this.sideUsed = false; this.stalled = false; this.airUse = {}; this.ledgeInv = Math.round(LEDGE_INV(this.airT, this.pct) * (LEDGE_REGRAB[this.ledgeGrabs - 1] || 0));   /* Ultimate's rule: longer in the air earns more, damage takes it away, and regrabs before landing or being hit earn less, then none */
-        this.set('ledge'); beep(700, 0.04, 'triangle', 0.03);
+        this.grabLedge(side);
       }
     }
   }
@@ -1817,11 +2090,14 @@ function hitTouches(a, h, v) {
   for (const b of steps) { const r = hurtRect(v), sx = (v.x - v.px) * b, sy = (v.y - v.py) * b; for (const c of hitCircles(a, h, b).reverse()) if (circRect(c[0], c[1], c[2], r[0] - sx, r[1] - sy, r[2] - sx, r[3] - sy)) return c; }
   return null;
 }
+/* Set knockback (Ultimate): the launch is worked out as if from a fixed amount, whatever the damage. */
+function knockSet(v, s, b, k) { return (((1 + s * 10 / 20) * 200 / (v.st.weight + 100) * 1.4) + 18) * k / 100 + b; }
 function knock(v, d, b, k) { const p = v.pct; return ((((p / 10 + p * d / 20) * 200 / (v.st.weight + 100) * 1.4) + 18) * k / 100) + b; }
 function circRect(cx, cy, r, x0, y0, x1, y1) { const dx = cx - clamp(cx, x0, x1), dy = cy - clamp(cy, y0, y1); return dx * dx + dy * dy <= r * r; }
 /* The body's hittable box. It shrinks when crouching or lying down, which is how a crouch slips under high attacks. */
 function hurtRect(v) {
   const st = v.st; let w = st.w, h = st.h;
+  if (v.state === 'buried') return [v.x - w / 2, v.y, v.x + w / 2, v.y + h * 0.45];   /* only the top half shows above the floor */
   if (v.grounded && v.state === 'idle' && v.ctl.c.ly < CROUCH_Y) { h *= st.crouch ? st.crouch[0] : 0.62; if (st.crouch) w *= st.crouch[1]; }
   else if (v.state === 'down') { h *= 0.42; w *= 1.4; }
   else if (v.state === 'ledge') return [v.x - w / 2, v.y, v.x + w / 2, v.y + h + 3];   /* head and hands show above the lip */
@@ -1858,7 +2134,7 @@ let slowT = 0, focus = null;   /* slow motion and camera focus after a hit that 
    the slow motion above. FINAL holds what the picture needs: victim, attacker, where the hit landed and the launch angle. */
 const FINAL_FREEZE = 48;
 let finalT = 0, FINAL = null;
-function canBeHit(v) { return v.invuln === 0 && v.state !== 'dead' && v.state !== 'respawn' && v.state !== 'held'; }
+function canBeHit(v) { return v.invuln === 0 && v.state !== 'dead' && v.state !== 'respawn' && v.state !== 'held' && !(v.tfLatch && v.tfProtected()); }   /* Joey's five protected seconds: nothing can hit or grab him */
 function applyHit(a, v, h, face, srcX, proj, poke, at) { sparkOff = !DBG.fx; try { applyHitRaw(a, v, h, face, srcX, proj, poke, at); } finally { sparkOff = false; } }
 function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   if (h.dyn) h = Object.assign({}, h, h.dyn(a));   /* a hit whose numbers depend on the moment (the Cyclone's light hits, then its finisher) */
@@ -1879,7 +2155,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   const id = h.id || (a.form.name + ':' + a.mname); let d = (h.dd ? h.dd(a) : h.d) * DMG_1V1;   /* dd: damage worked out when it lands (a charged launch) */
   const onShield = (v.state === 'shield' || v.state === 'shieldstun') && !poke;
   if (proj) { d *= staleMul(a, id); pushStale(a, id, onShield); }
-  else { if (!a.staled) { a.staleM = staleMul(a, id); pushStale(a, id, onShield); a.staled = true; } d *= a.staleM * (1 + a.charge / 60 * 0.4) * (a.moveSH ? SHORT_HOP_MUL : 1); }
+  else { if (!a.staled) { a.staleM = staleMul(a, id); pushStale(a, id, onShield); a.staled = true; } d *= a.staleM * (1 + a.charge / 60 * CHG_K(a)) * (a.moveSH ? SHORT_HOP_MUL : 1); }
   if (v.state === 'shieldoff' && v.sf <= SHIELD.parry) {
     v.set('idle'); v.invuln = 4; if (!proj) { a.hitlag = 16; a.parriedBy = v; }
     spark(hx, hy, '#fff', 20, 2); pop(hx, hy + 12, 'PARRY', '#fff'); beep(1200, 0.12, 'triangle', 0.07, 1.3); return;
@@ -1890,7 +2166,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   }
   /* A guard window (Brand's Stove Door Bash): on the ground it stops one light strike that comes in from the front, for the
      usual shield cost and freeze, and the move carries on. Too strong, from behind or above, a grab or a projectile: no guard. */
-  if (!proj && v.state === 'attack' && v.move && v.move.guard && v.grounded && !v.guarded && v.mf >= v.move.guard[0] && v.mf <= v.move.guard[1] && h.d * (1 + a.charge / 60 * 0.4) <= v.move.guardMax) {
+  if (!proj && v.state === 'attack' && v.move && v.move.guard && v.grounded && !v.guarded && v.mf >= v.move.guard[0] && v.mf <= v.move.guard[1] && h.d * (1 + a.charge / 60 * CHG_K(a)) <= v.move.guardMax) {
     const gc = v.move.guardC, gx = v.x + gc[0] * v.face, gy = v.y + gc[1], c = at || [a.x + h.x * a.face, hitY(a, h), h.r];
     let fx = (c[0] - v.x) * v.face; const fy = c[1] - gy; if (Math.abs(fx) < 1) fx = (a.x - v.x) * v.face;
     if (fx > 0 && Math.abs(Math.atan2(fy, fx)) <= 55 * Math.PI / 180 && Math.hypot(c[0] - gx, c[1] - gy) <= c[2] + gc[2]) {
@@ -1902,7 +2178,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   }
   if (poke) pop(hx, hy + 12, 'POKE', '#9cf');   /* the hit found a part of the body the shield no longer covers */
   if ((v.state === 'shield' || v.state === 'shieldstun') && !poke) {
-    v.shieldHp -= d * SHIELD.dmg;
+    v.shieldHp -= (d + (h.sd || 0)) * SHIELD.dmg;   /* sd: extra shield damage */
     const sm = proj ? SHIELD.stun.proj : a.move && a.move.air ? SHIELD.stun.air : a.move && a.move.chg ? SHIELD.stun.smash : SHIELD.stun.ground;
     if (v.shieldHp <= 0) v.breakShield(); else { v.stunT = Math.floor(d * sm) + 2; v.set('shieldstun'); v.vx = (sgn(v.x - srcX) || face) * Math.min(1.3, (v.stunT + 1) * 0.09); }   /* pushback as in Ultimate: (shieldstun + 1) x 0.09, at most 1.3 */
     const hl = Math.min(20, Math.floor((d * 0.65 + 6) * 0.67)); v.hitlag = hl; if (!proj) a.hitlag = hl;
@@ -1911,10 +2187,15 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   const chained = v.state === 'hurt' || v.state === 'held' || v.hitlag > 0;
   v.pct = Math.min(999, v.pct + d); v.flash = 6; if (!proj && a.move && a.move.cast) a.castHit = true; comboHit(a, v, d, chained);
   const crouch = v.grounded && v.state === 'idle' && v.ctl.c.ly < CROUCH_Y, charging = v.state === 'attack' && v.charge > 0;
-  const kb = knock(v, d, h.b, h.k) * (h.norage ? 1 : rage(a)) * (crouch ? CROUCH_MUL : 1) * (charging ? CHARGING_MUL : 1);
+  const kb = (h.fkv ? knockSet(v, h.fkv, h.b, h.k) : knock(v, d, h.b, h.k) * (h.norage ? 1 : rage(a))) * (crouch ? CROUCH_MUL : 1) * (charging ? CHARGING_MUL : 1);   /* fkv: set knockback, the same at any damage */
   const hl = h.hl !== undefined ? h.hl : Math.min(30, Math.floor((d * 0.65 + 6) * (crouch ? 0.67 : 1)));
   /* Armour: a move either shrugs off anything short of a hard launch, or (armorMax) takes one strike of that base damage or less, on the ground only. */
   const am = v.state === 'attack' && v.move && v.move.armor && v.mf >= v.move.armor[0] && v.mf <= v.move.armor[1] ? v.move : null;
+  const sa = v.state === 'attack' && v.move && (v.grounded ? v.move.sarm : (v.move.sarmAir || v.move.sarm));   /* super armour: no flinch at all for those frames (the damage is still taken) */
+  if (sa && v.mf >= sa[0] && v.mf <= sa[1]) { v.hitlag = hl; if (!proj) a.hitlag = hl; spark(hx, hy, '#ffcf8a', 10, 1.2); beep(150, 0.06, 'square', 0.05); return; }
+  if (h.bury && v.grounded) {   /* buried: stuck in the floor for a time that grows with the launch it would have had */
+    v.freeVictim(); v.move = null; v.vx = v.vy = 0; v.buryT = Math.min(180, Math.round(kb * 0.6) + 12); v.set('buried'); v.hitlag = hl; if (!proj) a.hitlag = hl;
+    spark(hx, v.y, '#c9a27a', 18, 1.6); pop(hx, hy + 10, 'BURIED', '#e0b98a'); thwack(kb); shake = Math.max(shake, 6); return; }
   if (am && (am.armorMax ? v.grounded && h.d <= am.armorMax && v.armorLeft > 0 : kb < 95)) { if (am.armorMax) v.armorLeft--; v.hitlag = hl; if (!proj) a.hitlag = hl; spark(hx, hy, '#ccc', 8, 1); beep(150, 0.06, 'square', 0.05); return; }
   /* 361 is the "natural" angle: flat along the ground for weak hits, steeper as the hit gets stronger, 45 in the air. */
   let deg = h.a !== 361 ? h.a : !v.grounded ? 38 : kb < 60 ? 0 : kb >= 88 ? 38 : (kb - 60) / 28 * 38;   /* Ultimate's values (SmashWiki "Sakurai angle") */
@@ -1928,7 +2209,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   /* Holding up or down stretches or shortens the launch, except for near-vertical ones. */
   const nd = ((ang * 180 / Math.PI) % 360 + 360) % 360, vertical = (nd > 65 && nd < 115) || (nd > 245 && nd < 295);
   const lsi = vertical ? 1 : i.ly > 0.5 ? 1.095 : i.ly < -0.5 ? 0.92 : 1;
-  v.launch(kb, ang, dir, lsi); if (h.drag) { v.vx += a.vx; v.vy += a.vy; v.dragBy = a.idx; } else if (h.carry && !proj) { const cx = a.x + a.face * 2 - v.x, cy = a.y + a.st.h / 2 - (v.y + v.st.h / 2); v.grounded = false; v.plat = null; v.vx = a.vx + clamp(cx * 0.3, -2, 2); v.vy = a.vy + clamp(cy * 0.3, -2, 2) + 0.2; v.dragBy = a.idx; } else v.dragBy = -1;
+  v.launch(kb, ang, dir, lsi); if (h.hs) v.hitstun += h.hs; if (h.drag) { v.vx += a.vx; v.vy += a.vy; v.dragBy = a.idx; } else if (h.carry && !proj) { const cx = a.x + a.face * 2 - v.x, cy = a.y + a.st.h / 2 - (v.y + v.st.h / 2); v.grounded = false; v.plat = null; v.vx = a.vx + clamp(cx * 0.3, -2, 2); v.vy = a.vy + clamp(cy * 0.3, -2, 2) + 0.2; v.dragBy = a.idx; } else v.dragBy = -1;
   if (h.link) { v.tumble = false; v.grounded = false; v.plat = null; v.hitstun = v.linkT = h.link[2]; v.vx = face * h.link[0] / h.link[2]; v.vy = h.link[1] / h.link[2]; }   /* a linking hit: the target is moved a set distance over a set time, whatever its damage, so the next hit of the move connects */   /* carry: caught and taken along (sackCarry) */   /* carried along with a travelling rig (see fowlCarry) */ v.hitlag = hl; if (!proj) a.hitlag = hl; rumble(v.ctl, 60 + kb, Math.min(1, 0.25 + kb / 150)); rumble(a.ctl, 50, 0.25);
   if (wouldKO(v)) {   /* a hit that will KO lands harder: longer freeze, a bigger burst, and slow motion if it takes the last stock */
     v.hitlag += 8; if (!proj) a.hitlag += 8; shake = Math.max(shake, 14); rumble(v.ctl, 300, 1);
@@ -2064,6 +2345,11 @@ function cpuBrain(f, o, m, L) {
   if (f.state === 'attack' && f.mname === 'nspec' && m.big && f.mf <= 17) { i.spc = true; return i; }   /* holding for the bigger stone */
   if (f.state === 'attack' && f.move && f.move.rapid) { i.atk = f.rapidN < 6 && ad < 16; return i; }
   if (f.state === 'attack' && f.move && f.move.next && f.mf >= f.move.chain && ad < 18) { i.atk = m.t % 2 === 0; return i; }
+  if (f.def.transform && !f.tfLatch) { if (m.tfAt === undefined) m.tfAt = 30 + (Math.random() * 240 | 0); if (m.t >= m.tfAt) i.tf = m.t % 6 < 2; }   /* two taps of the transform action, a moment into the match */
+  if (f.state === 'grow') return i;
+  if (f.state === 'buried') { const q = L.mash || 12; i.grb = m.t % q === 0; i.lx = m.t % (q * 2) < q ? 1 : -1; return i; }
+  if (f.state === 'carry') { if (f.sf > 8 + (m.t % 20)) { i.atk = m.t % 2 === 0; const r = (m.t >> 3) % 4; if (r === 1) i.ly = 1; else if (r === 2) i.lx = -f.face; else if (r === 3 && Math.abs(f.x) > EDGE - 30) i.lx = f.face; } else if (Math.abs(f.x) < EDGE - 20) i.lx = f.face * 0.8; return i; }
+  if (f.state === 'attack' && f.mname === 'nspec' && f.form.cargo && f.mf > 8) { i.spc = (ad < 26 && Math.abs(dy) < 12 && f.face === dir && m.t % 2 === 0) || (o.state === 'attack' && ad < 30 && m.t % 2 === 0) ? true : false; if (!i.spc && ad < 16 && Math.random() < 0.02) i.shd = true; return i; }   /* a Giant Punch on charge: let it go when they are in reach */
   if (f.state === 'held') { const q = L.mash; if (q) { i.grb = m.t % q === 0; i.lx = m.t % (q * 2) < q ? 1 : -1; } return i; }   /* mash out with the stick and the grab button: a buffered attack or jump would come out the moment it breaks free */
   if (f.state === 'down') { if (f.sf > 24) { const r = m.t % 3; if (r === 0) i.ly = 1; else if (r === 1) i.lx = -dir; else i.atk = true; } return i; }
   if (f.state === 'ledge') { if (f.sf > 20) { if (m.t % 2) i.lx = -sgn(f.x); else i.jmp = true; } return i; }
@@ -2158,6 +2444,7 @@ function allDevs() { const d = ['kb']; const gp = navigator.getGamepads ? naviga
 function startMatch() {
   const s0 = slots[0], s1 = slots[1] || { dev: 'cpu', pick: CPU_PICK >= 0 ? CPU_PICK : Math.random() * ROSTER.length | 0 };   /* the CPU's token, or random */
   const c0 = devCtl(s0.dev), c1 = s1.dev === 'cpu' ? new Ctl('cpu') : devCtl(s1.dev);
+  for (const c of [c0, c1]) { c.tfAge = 99; c.tfReq = false; }
   F = [new Fighter(0, ROSTER[s0.pick], c0, false), new Fighter(1, ROSTER[s1.pick], c1, s1.pick === s0.pick)];
   for (const c of COMBO) Object.assign(c, { hits: 0, dmg: 0, last: null, best: null, t: 0 });
   PROJ = []; PART = []; POPS = []; timer = MATCH_FRAMES; sudden = false; slowT = 0; focus = null; finalT = 0; FINAL = null; countdown = 190; paused = false; mode = 'countdown'; cam.x = 0; cam.y = 30; cam.s = 3.4;
@@ -2243,7 +2530,7 @@ function pollMatch() {
 function finish(text) { result = text; mode = 'over'; overT = 0; beep(300, 0.5, 'triangle', 0.08, 2); }
 function resetFighters() {
   PROJ = []; slowT = 0; focus = null; finalT = 0; FINAL = null; shake = 0;
-  for (const f of F) { if (f.def.fowl) { f.sling = null; f.fi %= 5; } f.freeVictim(); f.victim = null; f.stocks = STOCKS; f.spawn(true); for (const k in f.ctl.buf) f.ctl.buf[k] = 0; }
+  for (const f of F) { if (f.def.fowl) { f.sling = null; f.fi %= 5; } if (f.def.transform) { f.fi = 0; f.tfLatch = f.tfPend = false; f.tfStart = -1; f.ctl.tfReq = false; } f.freeVictim(); f.victim = null; f.stocks = STOCKS; f.spawn(true); for (const k in f.ctl.buf) f.ctl.buf[k] = 0; }
   beep(520, 0.08, 'triangle', 0.05, 1.4);
 }
 function stepPlay() {

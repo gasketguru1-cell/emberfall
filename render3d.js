@@ -298,6 +298,7 @@ function build() {
     if (kind === 'nest') { const g2 = new THREE.Group(), twig = new THREE.MeshStandardMaterial({ color: 0x8a6a3e, roughness: 0.9 }); const ring = new THREE.Mesh(new THREE.TorusGeometry(2.6, 0.9, 6, 14), twig); ring.rotation.x = Math.PI / 2; g2.add(ring);
       const egg = new THREE.Mesh(new THREE.SphereGeometry(1.2, 12, 9), new THREE.MeshStandardMaterial({ color: 0xf4ead8, roughness: 0.5 })); egg.scale.set(0.8, 1, 0.8); egg.position.y = 0.6; g2.add(egg); return g2; }
     const e = (hex, i) => new THREE.MeshStandardMaterial({ color: hex, emissive: hex, emissiveIntensity: i, roughness: 0.5 });
+    if (kind === 'shaker') { const m = new THREE.Group(), body = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.4, 1.5, 12), new THREE.MeshStandardMaterial({ color: 0xe9eef3, roughness: 0.4 })), lid = new THREE.Mesh(new THREE.CylinderGeometry(0.47, 0.47, 0.35, 12), new THREE.MeshStandardMaterial({ color: 0x5a8fd8, roughness: 0.5 })); lid.position.y = 0.85; m.add(body, lid); return m; }
     if (kind === 'bolt') return new THREE.Mesh(new THREE.CapsuleGeometry(0.9, 4, 4, 10).rotateZ(Math.PI / 2), e(0xffe8a3, 2));
     if (kind === 'gust') return new THREE.Mesh(new THREE.TorusGeometry(4.5, 0.7, 8, 24), new THREE.MeshStandardMaterial({ color: 0xf0dcff, transparent: true, opacity: 0.55, depthWrite: false }));
     if (kind === 'boulder') { const m = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 0), new THREE.MeshStandardMaterial({ color: 0x8d8794, roughness: 0.95, flatShading: true })); m.castShadow = true; return m; }

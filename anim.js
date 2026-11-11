@@ -40,6 +40,10 @@ function animBase(f) {
     case 'held': return { key: 'held', mode: 'loop', v: t };
     case 'throw': return { key: 'throw', mode: 'phase', v: phase(f.sf, 26) };
     case 'respawn': return { key: 'idle', mode: 'loop', v: t };
+    case 'exhaust': return { key: 'exhaust', mode: 'phase', v: phase(frame - f.exStart, 900) };   /* Joey's 15 seconds: the clip is the whole performance, sampled at the elapsed tick */
+    case 'grow': return { key: 'grow', mode: 'phase', v: phase(f.sf, 180) };
+    case 'carry': return f.grounded && Math.abs(f.vx) > 0.25 ? { key: 'carryWalk', mode: 'cycle', v: f.x * f.face / 30 } : { key: 'carry', mode: 'loop', v: t };
+    case 'buried': return { key: 'buried', mode: 'loop', v: t };
     case 'rebound': return { key: 'hit', mode: 'phase', v: phase(f.sf, Math.max(8, f.lag)) };
     case 'attack': {
       const m = f.move; if (!m) break;
@@ -103,6 +107,7 @@ function animAlt(f, a) {
         if (f.mname === 'sspec') return f.rsGo ? { key: 'ropeSwing', mode: 'loop', v: t } : { key: 'ropeToss', mode: 'phase', v: phase(f.mf, 11) };   /* hooks the rope on frame 11, then hangs from it */
         if (f.mname === 'uspec') return f.bubble ? { key: 'bubbleRide', mode: 'loop', v: t } : { key: 'bubbleBlow', mode: 'phase', v: phase(f.mf, 8) };   /* the bubble forms on frame 8 */
       }
+      if (f.form && f.form.cargo && f.mname === 'nspec') return { key: 'punchWind', mode: 'loop', v: t };   /* Cronky Dong winding up The Entire Gym */
       if (f.def && f.def.fowl && f.mname === 'nspec' && f.selOpen) return { key: 'selecting', mode: 'loop', v: t };
       return null;
     }

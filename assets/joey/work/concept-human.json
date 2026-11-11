@@ -1,0 +1,8 @@
+{
+ "ai_model": "nano-banana-2-1",
+ "reference_image_urls": [
+  "file:assets/joey/source/photo-normal.png"
+ ],
+ "aspect_ratio": "2:3",
+ "prompt": "Full-body character reference photo of exactly this man, for building a 3D game model. Keep his face completely unchanged: the same eyes and eye spacing, the same brows, nose, lips and jaw, the same thin dark mustache, the same light skin tone and the same dark curly hair showing under a plain red baseball cap worn straight forward. Keep his ordinary lean build exactly as in the photo. Shirtless, black and grey camouflage athletic shorts with a white drawstring, barefoot. He stands straight facing the camera in a relaxed A-pose: arms straight down and held about 30 degrees out from his sides, hands open with fingers together, feet a little apart, neutral calm expression, looking straight at the camera. Nothing in his hands, no phone, no jewellery. The whole body from the top of the cap to the soles of the feet in frame, centred. Plain light grey background, soft even studio lighting from the front, no shadows on the floor, no text, no logo."
+}

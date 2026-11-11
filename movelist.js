@@ -225,6 +225,62 @@ const MOVE_TEXT = {
     d: ['Kneel Down', 'Forces the opponent down and pops them up in front, into a rising Brim Arc or High Ward at low damage.'],
     getup: ['Low Sweep / Lip Cut', 'From the floor, sweeps low in front on frame 19 and behind on frame 24. From the ledge, a rising cut onto the stage on frames 20 to 22 for 8%. Briefly intangible as she rises (less above 100%).'],
   },
+  /* Joey: the owner's guide, v1.0 (2026-11-10). Weak on purpose. */
+  Joey: {
+    nspec: ['Shaker Disaster', 'Shakes a protein shaker, forgets the lid and throws the whole bottle. It leaves on frame 22 in a short arc and breaks on the first thing it touches. One bottle at a time. The powder on his face is only for show.'],
+    sspec: ['Resistance Band Betrayal', 'Plants a foot in an exercise band; it slips and his leg kicks out on frames 24 to 27. On the ground he stumbles forward with it (never off an edge). No boost in the air.'],
+    uspec: ['Spot Me!', 'Throws a lifting strap at a ledge just above and beside his hand on frames 10 to 16. If it catches, he is pulled up to the ledge. If not, it falls limp and he simply keeps falling: no lift at all. Once until he lands or holds a ledge.'],
+    dspec: ['Ab Wheel Regret', 'Rolls out on an ab wheel much further than intended. The wheel hits on frames 18 to 32; on the ground he rolls forward with it (stopping before an edge). 25 frames of landing in the air.'],
+    jab: ['Form Check, Tiny Curl, Personal Best', 'A timid checking palm, a tiny dumbbell curl, then a hugely overprepared two-hand shove. Each needs a new press: frames 12 to 18, then 15 to 22. No rapid jab.'],
+    dash: ['Cardio Was a Mistake', 'Three keen jogging steps and a breathless shoulder bump on frames 17 to 20. Then he checks a fitness watch he is not wearing.'],
+    ftilt: ['Lateral Raise', 'A light dumbbell held out to the side, elbow carefully bent. Reaches 0.42 of his height.'],
+    utilt: ['Shoulder Press', 'Both hands tremble overhead. The press reaches just above his head.'],
+    dtilt: ['Hamstring Check', 'Reaches for his toes and nudges a shin with his fingertips. It does not trip anyone.'],
+    fsmash: ['Five-Pound PR', 'Braces as if moving a mountain, then presses a tiny dumbbell forward. Holding it charges for up to a second, for at most a fifth more damage.'],
+    usmash: ['Clean and Mostly Jerk', 'Heaves a light plate overhead and nearly falls over. Chargeable like the others.'],
+    dsmash: ['Leg Day Withdrawal', 'A lunge forward on frame 23, then a wobbly kick back on frame 36. One hit a target between them.'],
+    nair: ['Jumping Jack Panic', 'One disciplined jumping jack, in mid-air. Hands and feet share one hit.'],
+    fair: ['Front Raise Fail', 'Raises a tiny dumbbell ahead of him, straining. It never leaves his hand.'],
+    bair: ['Glute Kickback', 'An awkward heel kick behind him, with a serious squeeze at contact.'],
+    uair: ['Ceiling High-Five', 'Reaches for a pull-up bar that is not there. No lift.'],
+    dair: ['Imaginary Box Jump', 'Tucks his knees and stamps down at a gym box that never appears. Pops the opponent up and out; never a spike.'],
+    grab: ['Polite Grab', 'An ordinary grab with very little reach. Out of a dash and turning round it reaches a little further.'],
+    f: ['Medicine Ball Pass', 'An embarrassingly short chest pass.'],
+    b: ['Partner Row', 'Rows the opponent past himself and nearly falls over before letting go.'],
+    u: ['Three-Rep Bench PR', 'Lies back on a folding bench and presses the opponent like a barbell: three ever shakier reps (0.5% each on frames 20, 38 and 56), then pops them a little way up on frame 65 and quietly celebrates.'],
+    d: ['Assisted Sit-Up', 'Asks the opponent to do a sit-up, then flops onto their knees.'],
+    getup: ['Sit-Up Kick / Elbow Nudge', 'From the floor, a sit-up kick both ways on frames 22 to 24. From the ledge, pulls himself up and nudges with an elbow on frames 24 to 26.'],
+  },
+  /* Cronky Dong: the same man after the injection. The reference fighter's numbers, Joey's own names. */
+  'Cronky Dong': {
+    nspec: ['The Entire Gym', 'Winds up an enormous arm. It charges for up to 110 frames; special lets it go (19 frames later), shield or an air dodge stops and keeps the charge for this stock. Fully charged, the arm stays wound and the next press punches at once with super armour: 28% on the ground, 25% in the air.'],
+    sspec: ['Cap Check', 'Drives his red-capped head forward on frames 20 and 21. A standing opponent is buried in the floor; one in the air is knocked up and away. Super armour on frames 5 to 14 and heavy shield damage. Slow to recover.'],
+    uspec: ['Lat Spread Catastrophe', 'Spins with both arms out. On the ground: super armour on frames 5 to 17, seven hits that drag the opponent along, and you steer it left and right. In the air: more hits, a little rise and good sideways travel; helpless after, 38 frames to land.'],
+    dspec: ['Floor Is Leg Day', 'Slaps the floor in front and behind on frames 12 and 23. Only standing opponents are hit. Press special again before the second slap ends for another pair. In the air: a two-hit downward swat, the second one sends straight down.'],
+    jab: ['Check, Hook', 'A shoving check, then a heavy hook that launches.'],
+    dash: ['Full-Body Roll', 'Rolls forward with his whole body. Strongest at the start.'],
+    ftilt: ['Long Backhand', 'A long backhand, angled up or down with the stick. 9% angled, 8% straight.'],
+    utilt: ['Overhead Arm Sweep', 'Sweeps an arm over his head, front to back. The forearm is the strong part.'],
+    dtilt: ['Low Hand Slap', 'A quick low slap that holds the opponent a few frames longer than usual.'],
+    fsmash: ['Two-Handed Clap', 'A huge forward clap at full reach. Weaker close in.'],
+    usmash: ['Overhead Clap', 'Claps both hands together over his head.'],
+    dsmash: ['Two-Fist Floor Strike', 'Hammers both fists into the floor either side of him. The late part on frames 13 and 14 hits hardest.'],
+    nair: ['Spin Out', 'Spins with arms out, both sides at once. Lands without lag before frame 10 or after 26.'],
+    fair: ['Double-Fist Drop', 'Brings both fists down in front. Late in the swing (frames 21 to 23) the fists spike.'],
+    bair: ['Back Kick', 'A fast kick behind him, strongest on frames 7 and 8.'],
+    uair: ['Cap Bump', 'Bumps straight up with his head (cap and all).'],
+    dair: ['Stomp', 'Stamps straight down. The feet spike; the body above them sends outward.'],
+    grab: ['Big Grab', 'A wide two-handed grab with good reach.'],
+    f: ['Cargo Lift', 'Hoists the opponent overhead and carries them: walk, jump and pick a carry throw (attack or grab with a direction, or the right stick). The carry lasts about as long as the grab would have; mashing gets them free sooner.'],
+    b: ['Toss Back', 'Throws the opponent behind him.'],
+    u: ['Overhead Toss', 'Throws the opponent straight up.'],
+    d: ['Floor Slam', 'Slams the opponent down in front of him.'],
+    cf: ['Cargo Forward', 'From the carry: throws them forward.', '12% · released f15'],
+    cb: ['Cargo Back', 'From the carry: turns and throws them behind.', '13% · released f16'],
+    cu: ['Cargo Up', 'From the carry: throws them straight up. Quick to recover.', '12% · released f15'],
+    cd: ['Cargo Down', 'From the carry: slams them into the floor and up.', '11% · released f17'],
+    _extra: { title: 'Carry Throws', keys: ['cf', 'cb', 'cu', 'cd'] },
+  },
 };
 /* The Furious Fowls in the slingshot: each bird's own names. Descriptions come from FOWL_SLING below. */
 const FOWL_NAMES = {
@@ -329,6 +385,11 @@ const FOWL_ALONE = {
 };
 /* Unique mechanics, stances and forms */
 const MOVE_RULES = {
+  Joey: [
+    ['tap tap', 'The Injection', 'Tap the transform action twice (the D-pad’s down button, or E on the keyboard), the second tap within a third of a second. Joey looks round, injects, and grows for three seconds: he cannot act, and nothing can hit or grab him. Two seconds more of the same protection once he can move, attacking or not. Then he is Cronky Dong for the rest of the match, through every stock.'],
+    ['', 'Any time', 'Taps in the countdown start it on the first moment of play. Taps while he is hit, held, dodging or in an attack wait for the first moment he can act. Later taps do nothing.'],
+    ['', 'Human', 'A normal man: very little damage, short reach, slow in the air and no second jump. Spot Me! only reaches a ledge just above him.'],
+  ],
   Flint: [
     ['★', 'The Ember Patch', 'A Banked Coal that reaches the floor leaves one ember for 45 frames. It burns whoever steps on it, and goes out on contact or on a shield. Only one: the next coal clears it.'],
     ['↓ B', 'Ember into Flame', 'Bellows Burst reaching Flint\'s own ember uses it up and sends a low flame wave on a little further for another hit.'],
@@ -384,7 +445,7 @@ const ML_INPUT = { nspec: 'B', sspec: '→ B', uspec: '↑ B', dspec: '↓ B', j
   nair: 'Air A', fair: 'Air → A', bair: 'Air ← A', uair: 'Air ↑ A', dair: 'Air ↓ A', grab: 'Grab', pummel: 'Grab A', f: 'Grab →', b: 'Grab ←', u: 'Grab ↑', d: 'Grab ↓', getup: 'Get-up A', launch: 'In flight' };
 const ML_GROUND = ['jab', 'dash', 'ftilt', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash'], ML_AIR = ['nair', 'fair', 'bair', 'uair', 'dair'], ML_SPEC = ['nspec', 'sspec', 'uspec', 'dspec'];
 /* every move a form has, and the entry that documents it (the move keys that are part of another move) */
-const ML_PART_OF = { jab2: 'jab', jab3: 'jab', jabr: 'jab', dgrab: 'grab', pgrab: 'grab', sbrake: 'sspec', dsnap: 'dspec', dcounter: 'dspec', flyStop: 'launch', swingBite: 'sspec', throws: 'grab', nspecH: 'nspec', ledgeatk: 'getup' };
+const ML_PART_OF = { nspecR: 'nspec', nspecF: 'nspec', uspecA: 'uspec', dspecA: 'dspec', jab2: 'jab', jab3: 'jab', jabr: 'jab', dgrab: 'grab', pgrab: 'grab', sbrake: 'sspec', dsnap: 'dspec', dcounter: 'dspec', flyStop: 'launch', swingBite: 'sspec', throws: 'grab', nspecH: 'nspec', ledgeatk: 'getup' };
 const pc = v => +(+v).toFixed(1) + '%';
 function mlFd(fm, key) {
   const mv = fm.moves;
@@ -413,7 +474,7 @@ function mlStdPages(fm, T, title) {
     { title: 'Ground Attacks', fm, entries: ML_GROUND.map(E) },
     { title: 'Aerial Attacks', fm, entries: ML_AIR.map(E) },
     { title: 'Grabs & Throws', fm, entries: grab },
-  ].map(p => Object.assign(p, { entries: p.entries.filter(Boolean), sub: title }));
+  ].concat(T._extra ? [{ title: T._extra.title, fm, entries: T._extra.keys.map(E) }] : []).map(p => Object.assign(p, { entries: p.entries.filter(Boolean), sub: title }));   /* _extra: a page of a form's own (Cronky Dong's carry throws) */
 }
 function mlRulesPage(name, fm) { const R = MOVE_RULES[name]; return R ? { title: 'Unique Mechanics', fm, entries: R.map(([inp, n, d]) => ({ key: '', inp, name: n, desc: d, fd: '' })) } : null; }
 function mlFowlSections(def) {

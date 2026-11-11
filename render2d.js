@@ -211,6 +211,49 @@ const ART = {
     g.fillStyle = c[1]; g.fillRect(sx - sr * 0.6, sy - 0.25, sr * 0.55, 0.5);   /* brass hinge strap */
     g.fillStyle = c[2]; g.beginPath(); g.ellipse(sx + 0.25, sy, 0.32, 0.6, 0, 0, TAU); g.fill();   /* the glowing grille */
   },
+  /* Joey: an ordinary lean man, red cap, a dark mustache, grey camouflage shorts, bare feet. The reaching hand is drawn to
+     where the attack's own shape is, as Brand's blade is. Faces +x. */
+  Joey(c, t, f) {
+    const sw = gait(f) * 1.2, bob = Math.sin(t * 0.07) * 0.12, skin = c[2], hair = '#2a1d18', sk = tint(skin, -0.12);
+    if (f && f.state === 'grow') return growArt(c, t, f);
+    limb(-0.8, 5.6, -0.8 - sw, 0.5, 1.1, sk); limb(0.8, 5.6, 0.8 + sw, 0.5, 1.1, skin);
+    for (const s of [-1, 1]) { g.beginPath(); g.ellipse(s * 0.8 + s * sw + 0.45, 0.35, 0.95, 0.38, 0, 0, TAU); ink(skin, 0.22); }   /* bare feet */
+    g.beginPath(); g.moveTo(-1.6, 5.2); g.lineTo(-1.7, 7.6); g.lineTo(1.7, 7.6); g.lineTo(1.6, 5.2); g.lineTo(0.15, 5.4); g.lineTo(0, 6.4); g.lineTo(-0.15, 5.4); g.closePath(); ink(c[1], 0.26);   /* shorts */
+    g.fillStyle = tint(c[1], 0.35); for (const q of [[-1, 6.7], [0.6, 6.1], [1.1, 7.1], [-0.4, 5.8]]) { g.beginPath(); g.ellipse(q[0], q[1], 0.45, 0.16, 0.4, 0, TAU); g.fill(); }   /* camouflage */
+    g.strokeStyle = '#f2f2f2'; g.lineWidth = 0.12; g.beginPath(); g.moveTo(0.1, 7.5); g.lineTo(0.05, 6.8); g.stroke();   /* drawstring */
+    g.beginPath(); g.moveTo(-1.5, 7.6); g.quadraticCurveTo(-1.9, 10.5, -1.8, 11.3 + bob); g.lineTo(1.8, 11.3 + bob); g.quadraticCurveTo(1.9, 10.5, 1.5, 7.6); g.closePath(); ink(vgrad(skin, 7.6, 11.4), 0.3);   /* bare torso */
+    limb(-1.4, 11 + bob, -2.1, 7.4, 0.85, sk);   /* back arm */
+    let tx = 2.1, ty = 7.6;
+    if (f && f.state === 'attack' && f.move && f.move.h) { const m = f.move, h = m.h.find(q => !q.grab && f.mf >= q.f0 && f.mf <= q.f1) || m.h.find(q => !q.grab && f.mf < q.f0) || m.h.filter(q => !q.grab).pop();
+      if (h && h.in && h.y > 3) { const p = f.mf < h.f0 ? f.mf / h.f0 : f.mf <= h.f1 ? 1 : Math.max(0, 1 - (f.mf - h.f1) / Math.max(1, m.t - h.f1)), e = p * p * (3 - 2 * p); tx += (h.x - tx) * e; ty += (h.y - ty) * e; } }
+    limb(1.3, 11 + bob, tx, ty, 0.85, skin); g.beginPath(); g.arc(tx, ty, 0.5, 0, TAU); ink(skin, 0.2);
+    g.beginPath(); g.rect(-0.45, 11.2 + bob, 0.9, 0.7); ink(skin, 0.2);   /* neck */
+    g.beginPath(); g.ellipse(0.2, 12.7 + bob, 1.25, 1.45, 0, 0, TAU); ink(skin, 0.28);   /* head */
+    g.fillStyle = hair; g.beginPath(); g.arc(-0.8, 13.3 + bob, 0.55, 0, TAU); g.arc(-0.3, 13.75 + bob, 0.5, 0, TAU); g.fill();   /* curls under the cap */
+    g.fillStyle = OL; g.beginPath(); g.arc(0.95, 12.95 + bob, 0.14, 0, TAU); g.fill();
+    g.strokeStyle = hair; g.lineWidth = 0.28; g.beginPath(); g.moveTo(0.6, 12.15 + bob); g.quadraticCurveTo(1.05, 12.35 + bob, 1.45, 12.05 + bob); g.stroke();   /* mustache */
+    g.beginPath(); g.moveTo(-1.15, 13.4 + bob); g.quadraticCurveTo(0.1, 14.9 + bob, 1.25, 13.6 + bob); g.lineTo(2.6, 13.35 + bob); g.lineTo(1.3, 13.25 + bob); g.closePath(); ink(c[0], 0.26);   /* red cap and its peak */
+  },
+  /* Cronky Dong: the same head, cap and shorts on an absurd body, low on its knuckles. Faces +x. */
+  'Cronky Dong'(c, t, f) {
+    const sw = gait(f) * 1.6, bob = Math.sin(t * 0.06) * 0.18, skin = c[2], sk = tint(skin, -0.14), hair = '#2a1d18', a = swing(f);
+    limb(-2.6, 6, -3.4 - sw, 0.6, 3, sk); limb(2.4, 6, 3.2 + sw, 0.6, 3, skin);   /* thick legs */
+    for (const s of [-1, 1]) { g.beginPath(); g.ellipse(s * 3.2 + s * sw + 0.6, 0.4, 1.5, 0.5, 0, 0, TAU); ink(skin, 0.24); }
+    g.beginPath(); g.moveTo(-4, 5); g.lineTo(-4.3, 8.2); g.lineTo(4.3, 8.2); g.lineTo(4, 5); g.lineTo(0, 5.6); g.closePath(); ink(c[1], 0.3);
+    g.fillStyle = tint(c[1], 0.35); for (const q of [[-2.4, 7.2], [1.5, 6.5], [2.8, 7.6], [-0.6, 6.2]]) { g.beginPath(); g.ellipse(q[0], q[1], 0.9, 0.3, 0.4, 0, TAU); g.fill(); }
+    g.beginPath(); g.moveTo(-4, 8.2); g.quadraticCurveTo(-7.4, 12.5 + bob, -5.6, 15.4 + bob); g.quadraticCurveTo(0, 17.4 + bob, 5.6, 15.4 + bob); g.quadraticCurveTo(7.4, 12.5 + bob, 4, 8.2); g.closePath(); ink(vgrad(skin, 8, 17), 0.34);   /* the torso */
+    g.strokeStyle = sk; g.lineWidth = 0.18; g.beginPath(); g.moveTo(0, 15.6 + bob); g.lineTo(0, 9.2); for (const y of [10, 11.2, 12.4]) { g.moveTo(-1.3, y); g.lineTo(1.3, y); } g.moveTo(-3.6, 13.6 + bob); g.quadraticCurveTo(0, 12.4 + bob, 3.6, 13.6 + bob); g.stroke();
+    const reach = a * 6;
+    limb(-5.2, 14.8 + bob, -6.6, 6, 3.4, sk); g.beginPath(); g.arc(-6.4, 1.6, 1.7, 0, TAU); ink(sk, 0.3); limb(-6.6, 6, -6.4, 2.2, 3.6, sk);   /* back arm: the forearm down to the knuckles */
+    limb(5.2, 14.8 + bob, 6.8 + reach * 0.5, 6 + reach * 0.3, 3.4, skin); limb(6.8 + reach * 0.5, 6 + reach * 0.3, 6.6 + reach, 2.2 + reach * 0.6, 3.8, skin); g.beginPath(); g.arc(6.6 + reach, 1.6 + reach * 0.6, 1.8, 0, TAU); ink(skin, 0.3);
+    g.beginPath(); g.ellipse(-3.4, 15.4 + bob, 2.4, 1.5, -0.3, 0, TAU); ink(skin, 0.28); g.beginPath(); g.ellipse(3.4, 15.4 + bob, 2.4, 1.5, 0.3, 0, TAU); ink(skin, 0.28);   /* traps */
+    const hy = 16.2 + bob;   /* the ordinary head, set low between the traps */
+    g.beginPath(); g.ellipse(0.4, hy, 1.25, 1.45, 0, 0, TAU); ink(skin, 0.28);
+    g.fillStyle = hair; g.beginPath(); g.arc(-0.6, hy + 0.6, 0.55, 0, TAU); g.arc(-0.1, hy + 1.05, 0.5, 0, TAU); g.fill();
+    g.fillStyle = OL; g.beginPath(); g.arc(1.15, hy + 0.25, 0.14, 0, TAU); g.fill();
+    g.strokeStyle = hair; g.lineWidth = 0.28; g.beginPath(); g.moveTo(0.8, hy - 0.55); g.quadraticCurveTo(1.25, hy - 0.35, 1.65, hy - 0.65); g.stroke();
+    g.beginPath(); g.moveTo(-0.95, hy + 0.7); g.quadraticCurveTo(0.3, hy + 2.2, 1.45, hy + 0.9); g.lineTo(2.8, hy + 0.65); g.lineTo(1.5, hy + 0.55); g.closePath(); ink(c[0], 0.26);
+  },
   Sprocket(c, t, f) {
     const sw = gait(f) * 1.4, a = swing(f), bob = Math.sin(t * 0.08) * 0.15, skin = '#e0a98a', iron = '#5b5f6b', copper = '#b87333';
     for (const s of [-1, 1]) { g.beginPath(); g.rect(s * 1.9 - 1.1 + s * sw * 0.5, 1.2, 2.2, 3.6); ink('#3a3a40', 0.3); g.beginPath(); g.ellipse(s * 1.9 + s * sw + 0.5, 0.8, 1.9, 0.9, 0, 0, TAU); ink(iron, 0.3); }   /* legs and steel-capped boots */
@@ -249,6 +292,14 @@ const ART = {
   },
 };
 /* Furious Fowls in 2D: a round bird, in the slingshot's pouch or alone. */
+/* Joey's growth, drawn over three seconds: he looks round, the injector, then three swells, and down onto his knuckles. */
+function growArt(c, t, f) {
+  const e = f.sf, k = e < 55 ? 0 : e < 115 ? (e - 55) / 60 * 0.6 : e < 157 ? 0.6 + (e - 115) / 42 * 0.4 : 1, pulse = e >= 55 && e < 115 ? Math.max(0, Math.sin((e - 55) / 20 * Math.PI)) * 0.08 : 0, s = k + pulse;
+  g.save(); if (e < 24) g.scale(e % 24 < 12 ? 1 : -1, 1);
+  if (s <= 0.02) { ART.Joey(c, t, Object.assign({}, f, { state: 'idle' })); if (e >= 25 && e < 55) { g.strokeStyle = '#9fd6ff'; g.lineWidth = 0.35; g.beginPath(); g.moveTo(1.6, 8.6); g.lineTo(2.6, 9.6); g.stroke(); } g.restore(); return; }
+  g.globalAlpha = 1 - Math.min(1, s); ART.Joey(c, t, Object.assign({}, f, { state: 'idle' })); g.globalAlpha = Math.min(1, s * 1.4);
+  g.translate(0, 0); g.scale(0.6 + 0.4 * s, 0.75 + 0.25 * s); ART['Cronky Dong'](c, t, Object.assign({}, f, { state: 'idle' })); g.restore();
+}
 function fowlSling2d() { g.strokeStyle = '#a8672f'; g.lineWidth = 1.7; g.lineCap = 'round'; g.beginPath(); g.moveTo(0, 0.6); g.lineTo(0, 6); g.lineTo(-4.2, 13.6); g.moveTo(0, 6); g.lineTo(4.2, 13.6); g.stroke();
   g.strokeStyle = '#c2562e'; g.lineWidth = 0.6; g.beginPath(); g.moveTo(-4.2, 13); g.lineTo(0, 9.2); g.lineTo(4.2, 13); g.stroke(); g.fillStyle = '#7a3a26'; g.beginPath(); g.ellipse(0, 9, 2.6, 1.3, 0, 0, TAU); g.fill();
   g.fillStyle = '#a8672f'; for (const x of [-1.3, 1.3]) { g.beginPath(); g.ellipse(x, 0.4, 1.1, 0.5, 0, 0, TAU); g.fill(); } }
@@ -312,6 +363,7 @@ function drawProj() {
     if (p.kind === 'ember' || p.kind === 'flame') {
       const fl = p.kind === 'flame' ? 1 + Math.sin(frame * 0.5) * 0.25 : 1; g.fillStyle = 'rgba(255,170,60,.35)'; g.beginPath(); g.arc(x, y, p.r * 1.8 * s, 0, TAU); g.fill();
       g.fillStyle = '#ffb347'; g.beginPath(); g.ellipse(x, y - (fl - 1) * 2 * s, p.r * 0.7 * s, p.r * 0.9 * s * fl, 0, 0, TAU); g.fill(); g.fillStyle = '#fff3c4'; g.beginPath(); g.arc(x, y, p.r * 0.35 * s, 0, TAU); g.fill();
+    } else if (p.kind === 'shaker') { g.save(); g.translate(x, y); g.rotate(frame * 0.4 * p.face); g.fillStyle = '#e9eef3'; g.strokeStyle = OL; g.lineWidth = 0.25 * s; g.fillRect(-0.45 * s, -0.8 * s, 0.9 * s, 1.6 * s); g.strokeRect(-0.45 * s, -0.8 * s, 0.9 * s, 1.6 * s); g.fillStyle = '#5a8fd8'; g.fillRect(-0.45 * s, -0.2 * s, 0.9 * s, 0.5 * s); g.restore();
     } else if (p.kind === 'bolt') { g.strokeStyle = '#ffe8a3'; g.lineWidth = 1.4 * s; g.lineCap = 'round'; g.beginPath(); g.moveTo(x - 3 * s * p.face, y); g.lineTo(x + 2 * s * p.face, y); g.stroke(); g.lineCap = 'butt'; }
     else if (p.kind === 'tape') { g.beginPath(); g.arc(x, y, p.r * s, 0, TAU); g.fillStyle = '#d9c24a'; g.fill(); g.strokeStyle = '#4a4d57'; g.lineWidth = 0.5 * s; g.stroke(); g.beginPath(); g.moveTo(x - Math.cos(p.rot || 0) * p.r * s, y + Math.sin(p.rot || 0) * p.r * s); g.lineTo(x + Math.cos(p.rot || 0) * p.r * s, y - Math.sin(p.rot || 0) * p.r * s); g.stroke(); }
     else if (p.kind === 'gust') { g.strokeStyle = 'rgba(240,220,255,.7)'; g.lineWidth = 0.7 * s; for (let k = -1; k <= 1; k++) { g.beginPath(); g.arc(x - k * 2 * s, y + k * 3 * s, 3 * s, -1 + frame * 0.2, 1.4 + frame * 0.2); g.stroke(); } }

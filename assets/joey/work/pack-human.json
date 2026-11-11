@@ -1,0 +1,5 @@
+{
+ "base": "work/joey-human-rigged.glb",
+ "texture": 1024,
+ "out": "export/joey-v1.glb"
+}

@@ -10,7 +10,8 @@ function drawHud() {
     g.fillStyle = 'rgba(10,10,20,.6)'; rr(x - 120, y, 240, 74, 12); g.fill(); g.fillStyle = pc; rr(x - 120, y, 8, 74, 4); g.fill();
     g.textAlign = 'left'; g.font = 'bold 16px system-ui, sans-serif'; g.fillStyle = pc; g.fillText((f.ctl.dev === 'cpu' ? 'CPU ' + (f.ctl.ai.lv || CPU_LEVEL) : 'P' + (f.idx + 1)) + '  ' + f.def.name, x - 102, y + 22);
     for (let k = 0; k < f.stocks; k++) { g.fillStyle = '#ffd98a'; g.beginPath(); g.arc(x - 96 + k * 18, y + 40, 6, 0, TAU); g.fill(); }
-    if (f.def.forms.length > 1) f.def.forms.slice(0, f.def.cycle || 99).forEach((fm, k) => { g.fillStyle = k === f.fi % (f.def.cycle || 99) ? '#fff' : 'rgba(255,255,255,.35)'; g.font = (k === f.fi % (f.def.cycle || 99) ? 'bold ' : '') + '12px system-ui, sans-serif'; g.fillText(fm.label || fm.name, x - 102 + k * 42, y + 64); });
+    if (f.def.transform) drawIntensity(f, x, y);
+    else if (f.def.forms.length > 1) f.def.forms.slice(0, f.def.cycle || 99).forEach((fm, k) => { g.fillStyle = k === f.fi % (f.def.cycle || 99) ? '#fff' : 'rgba(255,255,255,.35)'; g.font = (k === f.fi % (f.def.cycle || 99) ? 'bold ' : '') + '12px system-ui, sans-serif'; g.fillText(fm.label || fm.name, x - 102 + k * 42, y + 64); });
     g.textAlign = 'right'; g.font = 'bold 44px system-ui, sans-serif'; g.fillStyle = pctCol(f.pct); const jx = f.flash > 0 ? (Math.random() - 0.5) * 6 : 0; g.fillText(Math.round(f.pct) + '%', x + 106 + jx, y + 52);
   });
   /* the finishing hit: cinema bars while the game runs slow */
@@ -21,6 +22,16 @@ function drawHud() {
   else if (paused) { g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(0, 0, W, H); big('PAUSED', H * 0.42, 80); g.font = 'bold 20px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Start: resume          Special: exit to fighter select          − or Backspace: controls', W / 2, H * 0.42 + 54); }
   drawCMenu();
   if (mode === 'over') { big(overT < 90 ? 'GAME!' : result, H * 0.42, 100); if (overT > 100) { g.font = '22px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Press Start or Attack', W / 2, H * 0.42 + 56); drawUpdateNote(H * 0.42 + 80); } }
+}
+/* Joey's INTENSITY: looks like a power gauge, is really how tired he is. Red, then orange, then hot and pulsing near the
+   top. Full, it becomes TAKE FIVE and then CATCHING BREATH, the bar emptying with the 15 seconds. Gone once he transforms. */
+function drawIntensity(f, x, y) {
+  if (f.tfLatch) { g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#ffd98a'; g.textAlign = 'left'; g.fillText('CRONKY DONG', x - 102, y + 64); return; }
+  const ex = f.exStart >= 0, e = ex ? frame - f.exStart : 0, k = ex ? Math.max(0, 900 - e) / 900 : f.fat / FAT.max, bx = x - 102, by = y + 54, bw = 120, bh = 9;
+  const col = ex ? '#8fb7d6' : k < 0.5 ? '#b5473f' : k < 0.8 ? '#e8892f' : (Math.sin(tick * 0.3) > 0 ? '#ffcf5a' : '#ff9a3a');
+  g.fillStyle = 'rgba(255,255,255,.12)'; rr(bx, by, bw, bh, 4); g.fill(); g.fillStyle = col; if (k > 0) { rr(bx, by, Math.max(bh, bw * k), bh, 4); g.fill(); }
+  g.textAlign = 'left'; g.font = 'bold 10px system-ui, sans-serif'; g.fillStyle = ex ? '#cfe4f5' : '#ffd0a0';
+  g.fillText(ex ? (e < 60 ? 'TAKE FIVE' : 'CATCHING BREATH  ' + ((900 - e) / 60).toFixed(1)) : 'INTENSITY', bx + bw + 6, by + 8);
 }
 function big(t, y, sz) { g.font = `900 ${sz}px system-ui, sans-serif`; g.textAlign = 'center'; g.lineWidth = 10; g.strokeStyle = '#1a1230'; g.strokeText(t, W / 2, y); g.fillStyle = '#ffd98a'; g.fillText(t, W / 2, y); }
 /* Between matches only: a newer finished version of the game is waiting on the server. */

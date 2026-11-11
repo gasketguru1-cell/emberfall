@@ -20,7 +20,7 @@ const NET = (function () {
   N.resim = false;      /* true while frames are being replayed */
 
   /* ---- inputs: packed into one small integer array, the same on both machines (sticks to 1/127 steps) ---- */
-  const BTN = ['atk', 'spc', 'jmp', 'shd', 'grb', 'sel', 'jmp2'];   /* jmp2: two jump buttons at once (a short hop) */
+  const BTN = ['atk', 'spc', 'jmp', 'shd', 'grb', 'sel', 'jmp2', 'tf'];   /* tf: the transform action */   /* jmp2: two jump buttons at once (a short hop) */
   const q = v => Math.max(-127, Math.min(127, Math.round(v * 127)));
   N.pack = i => { let b = 0; BTN.forEach((k, n) => { if (i[k]) b |= 1 << n; }); return [q(i.lx), q(i.ly), q(i.cx), q(i.cy), b]; };
   N.unpack = a => { const i = blankIn(); i.lx = a[0] / 127; i.ly = a[1] / 127; i.cx = a[2] / 127; i.cy = a[3] / 127; BTN.forEach((k, n) => { i[k] = !!(a[4] & (1 << n)); }); return i; };   /* no Start online: pausing would stop both games */
