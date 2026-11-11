@@ -356,7 +356,15 @@ K.Held = keys([{ t: 0, use: AB, pose: { head: R(-10), c_handL: b.HL(0.15, 1.4, 0
 K.Buried = keys([{ t: 0, use: 'stand', pose: { c_handR: b.HR(0.2, 1.3, -0.6), c_handL: b.HL(0.2, 1.3, 0.6) } }, { t: 0.2, pose: { c_handR: b.HR(0.2, 1.4, -0.66), c_handL: b.HL(0.2, 1.2, 0.6) } }, { t: 0.4, pose: { c_handR: b.HR(0.2, 1.3, -0.6), c_handL: b.HL(0.2, 1.3, 0.6) } }]);
 /* ---- attacks: the reference fighter's motions with this body (keys at 30 fps; contact = the hit's first frame) ---- */
 const SW = (dz, drop) => ({ hips: M(0, HY + 0.12 - (drop || 0), -0.1 + dz) });   /* attacks rise a little out of the squat */
-K.Check = keys([{ t: 0, use: GB }, { t: 0.1, pose: { chest: R(10, 12), c_handR: b.HR(0.3, 0.9, -0.3) } }, { t: 0.17, in: 'snap', pose: Object.assign(SW(0.08), { chest: R(10, -14), c_handR: b.HR(0.9, 1.0, -0.2) }) }, { t: 0.24, pose: {} }, { t: 0.8, ...backB }]);
+/* Jab 1, keyed against the reference (hitbox frames 5-6 of 24): shoulder turns back with the fist cocked at the chest and the
+   other fist up by his face, a straight punch at chest height, then the fist snaps back into a guard (no lingering arm). */
+K.Check = keys([{ t: 0, use: GB },
+  { t: 3 / 30, pose: { hips: HP(0, 0.1, -0.06), spine: R(18), chest: R(8, 24), head: R(-36, -12), c_handR: b.HR(-0.05, 1.12, -0.42), c_handL: b.HL(0.05, 1.2, 0.36), c_footL: b.FL(-0.1, 0, 0.26) } },
+  { t: 0.17, in: 'snap', pose: Object.assign(SW(0.14), { spine: R(26), chest: R(10, -24), head: R(-46, 12), c_handR: b.HR(1.1, 1.18, -0.1), c_handL: b.HL(-0.25, 1.2, 0.38), c_footR: b.FR(0.14, 0, -0.26), c_footL: b.FL(-0.1, 0, 0.26) }) },
+  { t: 0.2, pose: { c_handR: b.HR(1.13, 1.16, -0.1) } },
+  { t: 9 / 30, in: 'out', pose: { hips: HP(0, 0.1, 0.02), chest: R(10, -6), head: R(-40, 4), c_handR: b.HR(0.36, 1.0, -0.32), c_handL: b.HL(0.12, 1.05, 0.36) } },
+  { t: 16 / 30, pose: { hips: HP(0, 0.08, 0), chest: R(12, 0), head: R(-42), c_handR: b.HR(0.36, 0.95, -0.34), c_handL: b.HL(0.18, 0.98, 0.38) } },
+  { t: 0.8, in: 'quad', ...backB }]);
 K.Hook = keys([{ t: 0, use: GB, pose: { chest: R(10, -14), c_handR: b.HR(0.9, 1.0, -0.2) } }, { t: 0.08, pose: { chest: R(8, 16), c_handL: b.HL(0.3, 1.0, 0.6) } }, { t: 0.13, in: 'snap', pose: Object.assign(SW(0.1), { chest: R(4, -24), head: R(-28), c_handL: b.HL(0.85, 1.3, 0.1) }) }, { t: 0.2, pose: {} }, { t: 1.05, ...backB }]);
 K.Backhand = keys([{ t: 0, use: GB }, { t: 0.17, pose: { chest: R(12, 30), c_handR: b.HR(0.0, 0.9, -0.7) } }, { t: 0.23, in: 'snap', pose: Object.assign(SW(0.12), { chest: R(12, -26), c_handR: b.HR(1.15, 0.8, -0.1) }) }, { t: 0.3, pose: {} }, { t: 1.15, ...backB }]);
 K.ArmSweep = keys([{ t: 0, use: GB }, { t: 0.13, in: 'snap', pose: { hips: M(0, -0.06, -0.05), spine: R(6), chest: R(-6), head: R(-14), c_handR: b.HR(0.55, 1.5, -0.3) } }, { t: 0.25, pose: { c_handR: b.HR(0.0, 2.15, -0.25) } }, { t: 0.37, pose: { c_handR: b.HR(-0.5, 1.55, -0.3) } }, { t: 1.3, ...backB }]);
@@ -542,18 +550,50 @@ K.Backhand = keys([{ t: 0, use: GB }, { t: 0.15, pose: { hips: HP(0, 0.04, -0.08
 K.LowSlap = keys([{ t: 0, use: GB }, { t: 0.1, pose: { hips: HP(0, -0.04, -0.04), spine: R(36), c_handR: b.HR(0.2, 0.5, -0.45) } },
   { t: 0.17, in: 'snap', pose: Object.assign(SW(0.06, 0.16), { spine: R(44), chest: R(26, -10), head: R(-64), c_handR: b.HR(1.15, 0.12, -0.2), c_handL: b.HL(-0.15, 0.45, 0.55) }) }, { t: 0.23, pose: { c_handR: b.HR(1.1, 0.12, -0.15) } },
   { t: 0.55, in: 'quad', pose: { hips: HP(0, -0.02, 0), c_handR: b.HR(0.6, 0.13, -0.38), c_handL: b.HL(0.36, 0.13, 0.38) } }, { t: 0.83, ...backB }]);
-K.Clap = keys([{ t: 0, use: GB }, { t: 0.2, pose: { hips: HP(0, 0.08, -0.1), spine: R(14), chest: R(4, 12), head: R(-30), c_handR: b.HR(0.5, 1.0, -0.6), c_handL: b.HL(0.5, 1.0, 0.6) } },
-  { t: 0.45, pose: { hips: HP(0, 0.16, -0.2), spine: R(2), chest: R(-12, 18), head: R(-14, -10), c_handR: b.HR(-0.45, 1.3, -0.9), c_handL: b.HL(-0.4, 1.32, 0.9) } },
-  { t: 0.73, in: 'snap', pose: Object.assign(SW(0.3, 0.06), { spine: R(40), chest: R(18, 0), head: R(-56), c_handR: b.HR(1.4, 0.6, -0.05), c_handL: b.HL(1.4, 0.6, 0.05), c_footR: b.FR(0.25, 0, -0.26) }) },
-  { t: 0.85, pose: { c_handR: b.HR(1.38, 0.58, -0.05), c_handL: b.HL(1.38, 0.58, 0.05) } },
-  { t: 1.4, in: 'quad', pose: { hips: HP(0, 0.04, 0.1), spine: R(30), chest: R(20), head: R(-48), c_handR: b.HR(0.8, 0.5, -0.5), c_handL: b.HL(0.8, 0.5, 0.5), c_footR: b.FR(0.05, 0, -0.24) } }, { t: 1.85, ...backB }]);
+/* Forward smash and down smash below are keyed frame by frame against the reference (one game frame = 1/30 s of clip
+   time here, so key times are frame / 30). Forward smash: hitbox 22-23, charge holds frame 14. Down smash: 11-14. */
+const FP = { c_footL: b.FL(-0.1, 0, 0.26) };   /* the back foot stays planted where the stance put it */
+K.Clap = keys([{ t: 0, use: GB },
+  /* 1-3: rises out of the knuckles, the arms opening wide to the sides */
+  { t: 3 / 30, pose: Object.assign({ hips: HP(0, 0.06, -0.08), spine: R(18), chest: R(4, 10), head: R(-32, -6), c_handR: b.HR(-0.05, 1.3, -0.6), c_handL: b.HL(0.35, 0.95, 0.7) }, FP) },
+  /* 14: the charge pose, held while the button is held: crouched, leaning back, one hand high and behind, the other wide */
+  { t: 14 / 30, pose: Object.assign({ hips: HP(0, 0.06, -0.14), spine: R(14), chest: R(-2, 16), head: R(-28, -8), c_handR: b.HR(-0.35, 1.45, -0.5), c_handL: b.HL(0.4, 0.95, 0.7) }, FP) },
+  /* 16-19: both arms flung straight back at shoulder height, chest open, weight back */
+  { t: 17 / 30, in: 'out', pose: Object.assign({ hips: HP(0, 0.1, -0.2), spine: R(4), chest: R(-14, 6), head: R(-20), c_handR: b.HR(-0.8, 1.45, -0.4), c_handL: b.HL(-0.75, 1.5, 0.4) }, FP) },
+  { t: 19 / 30, pose: { hips: HP(0, 0.1, -0.18), chest: R(-16, 4), c_handR: b.HR(-0.85, 1.42, -0.36), c_handL: b.HL(-0.8, 1.47, 0.36) } },
+  /* 20-21: pitches forward, the arms sweeping round the sides at shoulder height */
+  { t: 21 / 30, in: 'snap', pose: Object.assign({ hips: HP(0, 0.1, 0.08), spine: R(24), chest: R(10), head: R(-40), c_handR: b.HR(0.55, 1.0, -0.75), c_handL: b.HL(0.55, 1.0, 0.75), c_footR: b.FR(0.12, 0, -0.26) }, FP) },
+  /* 22: the clap, a long low lunge, the back leg stretched out behind */
+  { t: 0.73, pose: Object.assign(SW(0.34, 0.12), { spine: R(46), chest: R(20, 0), head: R(-60), c_handR: b.HR(1.45, 0.72, -0.05), c_handL: b.HL(1.45, 0.72, 0.05), c_footR: b.FR(0.32, 0, -0.26) }, FP) },
+  { t: 0.8, pose: { c_handR: b.HR(1.47, 0.7, -0.05), c_handL: b.HL(1.47, 0.7, 0.05) } },
+  /* 27-40: the hands sag, still pressed together, the body stays down in the lunge */
+  { t: 0.95, in: 'out', pose: { spine: R(44), c_handR: b.HR(1.3, 0.42, -0.08), c_handL: b.HL(1.3, 0.42, 0.08) } },
+  { t: 1.35, in: 'quad', pose: Object.assign({ hips: HP(0, 0.02, 0.18), spine: R(36), chest: R(22), head: R(-52), c_handR: b.HR(0.9, 0.2, -0.25), c_handL: b.HL(0.9, 0.2, 0.25), c_footR: b.FR(0.2, 0, -0.25) }, FP) },
+  /* 41-54: gathers back into the knuckles */
+  { t: 1.85, ...backB }]);
 K.OverClap = keys([{ t: 0, use: GB }, { t: 0.25, pose: { hips: HP(0, -0.1, -0.02), spine: R(34), chest: R(20), head: R(-50), c_handR: b.HR(0.3, 0.15, -0.85), c_handL: b.HL(0.3, 0.15, 0.85), c_footR: b.FR(-0.06, 0, -0.3), c_footL: b.FL(-0.1, 0, 0.3) } },
   { t: 0.47, in: 'snap', pose: { hips: HP(0, 0.24, 0), spine: R(4), chest: R(-10), head: R(-14), c_handR: b.HR(0.12, 1.95, -0.05), c_handL: b.HL(0.12, 1.95, 0.05), c_footR: b.FR(-0.06, 0, -0.26), c_footL: b.FL(-0.1, 0, 0.26) } },
   { t: 0.56, pose: { c_handR: b.HR(0.12, 1.93, -0.05), c_handL: b.HL(0.12, 1.93, 0.05) } },
   { t: 0.85, in: 'out', pose: { hips: HP(0, 0.18, 0), chest: R(-4), c_handR: b.HR(0.15, 1.75, -0.6), c_handL: b.HL(0.15, 1.75, 0.6) } }, { t: 1.65, ...backB }]);
-K.Hammer = keys([{ t: 0, use: GB }, { t: 0.2, pose: { hips: HP(0, 0.24, 0), spine: R(6), chest: R(-8), head: R(-16), c_handR: b.HR(0.15, 1.95, -0.08), c_handL: b.HL(0.15, 1.95, 0.08), c_footR: b.FR(-0.06, 0, -0.3), c_footL: b.FL(-0.1, 0, 0.3) } },
-  { t: 0.37, in: 'snap', pose: Object.assign(SW(0, 0.16), { spine: R(38), chest: R(20), head: R(-56), c_handR: b.HR(0.95, 0.12, -0.3), c_handL: b.HL(-0.75, 0.12, 0.3) }) }, { t: 0.47, pose: {} },
-  { t: 0.95, in: 'quad', pose: { hips: HP(0, 0.06, 0), spine: R(26), chest: R(14), head: R(-42), c_handR: b.HR(0.6, 0.15, -0.4), c_handL: b.HL(-0.2, 0.15, 0.4) } }, { t: 1.85, ...backB }]);
+const DF = { c_footR: b.FR(-0.06, 0, -0.32), c_footL: b.FL(-0.1, 0, 0.32) };   /* feet set wide and kept there */
+K.Hammer = keys([{ t: 0, use: GB },
+  /* 1-3: straightens up fast, the fists coming up past the chest */
+  { t: 2 / 30, pose: Object.assign({ hips: M(0, -0.22, -0.04), spine: R(10), chest: R(2), head: R(-20), c_handR: b.HR(0.35, 1.45, -0.35), c_handL: b.HL(0.35, 1.45, 0.35) }, DF) },
+  /* 4-9: standing tall, both fists on top of his head, elbows out wide; a small lift as it holds */
+  { t: 4 / 30, in: 'out', pose: Object.assign({ hips: M(0, -0.1, 0), spine: R(-2), chest: R(-6), head: R(-6), c_handR: b.HR(0.02, 1.6, -0.4), c_handL: b.HL(0.02, 1.6, 0.4) }, DF) },
+  { t: 9 / 30, pose: { hips: M(0, -0.07, 0), chest: R(-8), c_handR: b.HR(0.0, 1.64, -0.4), c_handL: b.HL(0.0, 1.64, 0.4) } },
+  /* 10: the fists swing out to either side, front and back, at shoulder height, as the body drops */
+  { t: 10.3 / 30, in: 'snap', pose: Object.assign({ hips: HP(0, 0.14, 0), spine: R(16), chest: R(6), head: R(-30), c_handR: b.HR(0.85, 1.3, -0.4), c_handL: b.HL(-0.85, 1.3, 0.4) }, DF) },
+  /* 11-14: fists slam the floor wide, the body squashed flat and low */
+  { t: 0.37, pose: Object.assign(SW(0, 0.24), { spine: R(50), chest: R(26), head: R(-66), c_handR: b.HR(1.1, 0.12, -0.38), c_handL: b.HL(-1.1, 0.12, 0.38) }, DF) },
+  { t: 0.47, pose: Object.assign(SW(0, 0.28), { c_handR: b.HR(1.12, 0.12, -0.38), c_handL: b.HL(-1.12, 0.12, 0.38) }) },
+  /* 15-32: holds down there, settling */
+  { t: 1.07, pose: Object.assign(SW(0, 0.26), { spine: R(48), c_handR: b.HR(1.1, 0.12, -0.38), c_handL: b.HL(-1.1, 0.12, 0.38) }) },
+  /* 33-40: the back fist lifts first, the body turning toward the front hand */
+  { t: 1.3, in: 'quad', pose: Object.assign({ hips: HP(0, 0.02, 0.06), spine: R(34), chest: R(20, -10), head: R(-52, 6), c_handL: b.HL(-0.45, 0.75, 0.38), c_handR: b.HR(0.95, 0.13, -0.36) }, DF) },
+  /* 41-55: brings the back fist round to the front and gathers into the knuckles */
+  { t: 1.55, pose: { hips: HP(0, 0.02, 0.02), chest: R(22, -4), c_handL: b.HL(0.25, 0.4, 0.38), c_handR: b.HR(0.6, 0.13, -0.38) } },
+  { t: 1.85, ...backB }]);
 K.Punch = keys([{ t: 0, use: GB, pose: { chest: R(10, 34), c_handR: b.HR(-0.45, 1.4, -0.65) } }, { t: 0.5, pose: { hips: HP(0, 0.06, -0.12), chest: R(6, 46), head: R(-40, -16), c_handR: b.HR(-0.65, 1.25, -0.55), c_handL: b.HL(0.45, 0.7, 0.45) } },
   { t: 0.63, in: 'snap', pose: Object.assign(SW(0.3), { spine: R(32), chest: R(14, -34), head: R(-46, 14), c_handR: b.HR(1.45, 0.95, -0.02), c_handL: b.HL(-0.45, 0.95, 0.5), c_footR: b.FR(0.28, 0, -0.26) }) },
   { t: 0.8, pose: { c_handR: b.HR(1.42, 0.93, -0.02) } }, { t: 1.5, in: 'quad', pose: { hips: HP(0, 0.02, 0.1), chest: R(20, -10), c_handR: b.HR(0.7, 0.4, -0.35), c_handL: b.HL(0.3, 0.13, 0.38), c_footR: b.FR(0.05, 0, -0.24) } }, { t: 2.05, ...backB }]);
