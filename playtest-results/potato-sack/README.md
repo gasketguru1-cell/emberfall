@@ -6,6 +6,26 @@ Recorded 2026-11-10 from the real game: the Training Room (training mode: no clo
 
 **What changed in the game before testing** (your request in the same message): Hot Potato (up B) bursts on frame 5; neutral B is the new Spud Bomb (charge with no cap); neutral air is short enough for two in one short hop; Tumble (down B) with down held passes through platforms. Nothing was changed after testing began.
 
+## Correction (added later on 2026-11-10): some clips show different moves from their labels
+
+After the clips were recorded I found two faults in my combo lab, which pressed the buttons:
+- It drifted toward the opponent while pressing neutral air, so the game read it as **forward air**.
+- Where an aerial step began once Potato Sack was already on the ground, the press came out as a **ground move**.
+
+The videos are genuine footage of the game at the time; they just show different moves from their names. I replayed every route with the game and lab exactly as they were at recording and logged what each step really did:
+
+| Clip | Labelled | What the video actually shows |
+|---|---|---|
+| 03, 22 | Spud Bomb → Tumble → **up air** | Spud Bomb → Tumble → **up smash** (he slid to the ground first) |
+| 15, 21 | down throw → fast fall → **up air** | down throw → fast fall to the floor → **up smash** |
+| 04 | … Tumble → **short-hop neutral air** → Tumble → up B | … Tumble → **forward air** → Tumble → up B |
+| 05 | **short-hop nair** → up throw → up air → full-hop nair → **forward smash** | **forward air** → up throw → up air → neutral air (the old single hit) → **Bag It** (side B: he was still airborne) |
+| 06 | **double neutral air** → up throw → up air → up air | **forward air** → up throw → up air → up air |
+| 08 | ledge: down air → up tilt → full-hop nair → **forward smash** | ledge: down air → up tilt → neutral air (old) → **Bag It** |
+| 19 | Tumble drop-through → **fast-fall neutral air** | Tumble drop-through → **forward air** |
+
+All other clips do what their labels say. Hit counts, damage, DI and weight results in the master table are true for the moves that really happened. Since then, neutral air has changed (three carrying hits and a finisher), so routes 05, 06, 08 and 10 behave differently in the current game: see **Neutral air (new)** below. The lab is fixed: neutral air is now pressed with the stick centred.
+
 **Terms in your brief that Potato Sack does not have.** He is an original fighter, so: "Sanddash" is his **Tumble** (down B, cancellable into anything from frame 7); "Sanddrop" is **Tumble drop-through** (down B holding down on a platform); "bomb" is **Spud Bomb** (neutral B) and **Hot Potato** (up B). He has no crouch cancel of his own beyond the engine's (crouching takes 15% less knockback); I did not find a route that used it.
 
 ## Reading the input notation
@@ -61,25 +81,53 @@ Starting positions: Potato Sack at x -20 with the opponent 8 to 14 units in fron
 
 ## Best ten for a competitive Potato Sack
 
-1. **15 Down throw → fast-fall up air** (100%+). Two inputs, holds against every DI and against the level 8 CPU; the cleanest kill confirm he has. Heavies need about 20% more.
+1. **15 Down throw → fast fall → up smash** (100%+). Labelled "up air" when recorded; it is an up smash once he lands. Holds against every DI and against the level 8 CPU; the cleanest kill confirm he has. Heavies need about 20% more.
 2. **14 Down air → Tumble up → Hot Potato** (70 to 120%). The frame-5 up B turns a landing down air into a kill from the middle of the stage against every DI.
 3. **16 Down air → Tumble stall → down throw → back air → Tumble → angled up B** (70 to 80%). Three hits, kills against every DI and every weight tested.
 4. **07 Down air → up throw → up air → up air** (around 60%). Four hits, every DI.
-5. **06 Short-hop double neutral air → up throw → up air → up air** (40 to 50%). Uses the new two-nair short hop; every DI.
+5. **06 Short-hop forward air → up throw → up air → up air** (40 to 50%). Labelled "double neutral air" when recorded; it was a forward air. Every DI. (With the new neutral air the double-nair version no longer reaches the grab.)
 6. **13 Ledge down throw → Tumble → up B → Bag It → up B** (80 to 90% at the ledge). Kills every weight including Hod.
 7. **11 Down air → Tumble stall grab → ... → up B** (around 70%). Four hits into a kill; DI out and down still die.
 8. **01 Spud Bomb → Tumble grab → Spud Bomb → Tumble up air** (0%). Four hits from nothing, every DI and weight.
-9. **03 Spud Bomb → Tumble up air** (0 to 30%). The simplest low-percent starter; works on everyone.
-10. **05 Short-hop nair → up throw → up air → nair → forward smash** (40 to 50%). The highest hit count found (5) and over 50%; DI out or up cut it to 3.
+9. **03 Spud Bomb → Tumble → up smash** (0 to 30%). Labelled "up air" when recorded. The simplest low-percent starter; works on everyone.
+10. **05 Short-hop forward air → up throw → up air → neutral air → Bag It** (40 to 50%, as recorded with the old neutral air). Five hits and over 50%; DI out or up cut it to 3. With the new neutral air it breaks after the first hit, so see **Neutral air (new)** for its replacements.
 
 ## New tech found
 
 - **Tumble cancel grab (`tum_stall+grab_d`, `tum_fwd+grab_d`)**: Tumble's frame-7 cancel lets him grab out of a stalled or forward Tumble while the target is still in hitstun from a down air or Spud Bomb. It is the glue in routes 01, 04, 11 and 16.
 - **Tumble → up B**: Tumble up or forward, cancelled into Hot Potato, which now bursts on frame 5, reaches launched opponents the up B alone could not.
 - **Spud Bomb as a combo starter**: the tapped bomb (8%, a 7-unit ring round his body) pops the opponent just enough for a forward Tumble to carry him to them.
-- **Two neutral airs per short hop** (route 06): the second one connects and leads into the up-throw chain.
-- **Tumble drop-through** (clip 19): down held on a platform keeps all of the Tumble's speed and drops him through; a fast-fall neutral air catches someone 30 units away below. As a combo extension it found nothing (the search tried it from 20, 50 and 80% at seven distances), so it is a movement and approach tool.
+- **Two neutral airs per short hop**: the rule tests confirm two fit in one short hop. Route 06 as recorded was a forward air, not this.
+- **Tumble drop-through** (clip 19): down held on a platform keeps all of the Tumble's speed and drops him through; a fast-fall aerial (a forward air in the clip) catches someone 30 units away below. As a combo extension it found nothing (the search tried it from 20, 50 and 80% at seven distances), so it is a movement and approach tool.
 - **Charged Spud Bomb** (clip 18): with no cap it eventually covers a third of the stage; at 2 seconds it KOs from 60% and 14 units away. It is slow and obvious, so it is a read or a punish on a ledge recovery, not a combo ender.
+
+## Neutral air (new): three carrying hits and a finisher
+
+Added on 2026-11-10 at your request.
+- **The move:** hits on frames 3, 5 and 7 carry the opponent along with Potato Sack, and a finisher on frame 9 launches them.
+- **Search:** `tools/combo-search-nair.js` tried routes that start with or pass through it, from 9 situations, and kept 54 (`search-nair.json`).
+- **Notation:** `nair` means neutral air in the air, with the stick centred. `dj_nair` means double jump, then neutral air.
+- **Hit counts are high** because every neutral air puts 4 hits on the counter.
+
+| # | Video (nair-drag/) | Route | Start | Result | DI in/out/up/down/CPU 8 | Weights Nib / Hod / Sprocket |
+|---|---|---|---|---|---|---|
+| 23 | 23_NairLoop_x4_16hits_at_0 | sh_nair > nair > dj_nair > nair | 0% | 16 hits, 29.5% | 16/16/16/16/0 | 16/16/16 |
+| 24 | 24_NairLoop_x8_32hits_at_0 | the same, then two more short hops of two neutral airs each | 0% | 32 hits, 49.6% | held against no DI and DI out at 0%; DI out at 30% stops it at 17 hits | — |
+| 25 | 25_Nair_Nair_DJNair_UpB_KO_at_30 | sh_nair > nair > dj_nair > upb | 30% | 13 hits, KO | 13K/13/13K/13/0 | 13K/13/13 |
+| 26 | 26_Ledge_Nair_DJNair_Nair_FFNair_KO_at_60 | at the ledge: sh_nair > dj_nair > nair > ff+nair | 60% | 12 hits, KO | 12K/8K/12K/12K/0 | 12K/12K/12K |
+| 27 | 27_Nair_TumbleNair_Nair_FFNair_KO_at_120 | sh_nair > tum_fwd+sh_nair > nair > ff+nair | 120% | 12 hits, KO | 8K/4K/8K/12K/4 | 7K/12K/12K |
+| 28 | 28_Platform_FHNair_Nair_DJNair_UpB_KO_at_30 | opponent on a platform: fh_nair > nair > dj_nair > upb | 30% | 13 hits, KO | 13K/13K/13K/13K/1 | 13K/13/13K |
+| 29 | 29_SpudBomb_TumbleGrab_Nair_TumbleUpB_KO_at_0 | route 04 with the real neutral air | 0% | 6 hits, KO | — | — |
+
+**What this means for balance. This is for you to decide; I have not changed it.**
+- **Neutral air now combos into itself.** Short hop with two neutral airs, then double jump with two more, is a true combo from 0 to 60% against every DI and every weight tested.
+- **Short hops after landing extend it to 8 neutral airs:** 32 hits and about 50% from one touch at 0%.
+- **It isn't infinite:** by 30%, DI out ends it at 17 hits, and by 90% it is 4 to 8 hits.
+- **The level 8 CPU usually escapes,** because it acts during the gaps and doesn't hold still.
+- **If it's too strong, any one of these would stop the loop:**
+  - a bigger base knockback on the finisher, so they fly out of reach;
+  - the carrying hits only on the first neutral air of each jump;
+  - a little more landing lag.
 
 ## Weaknesses: where combos break and opponents escape
 
@@ -94,7 +142,8 @@ Starting positions: Potato Sack at x -20 with the opponent 8 to 14 units in fron
 
 - `low-percent/`, `mid-percent/`, `kill-confirms/`, `advanced-tech/`: the clips (WebM, VP8, 1280x720; they play in Chrome, Edge, Firefox and VLC).
 - `frame-data.md`: Potato Sack's frame data, damage, angles, knockback and hitboxes, read from the game.
-- `robustness.json`: DI, weight and percent-window results for every clip's route. `search.json`, `search2.json`: every route the searches kept.
+- `robustness.json`: DI, weight and percent-window results for every clip's route, as recorded with the old neutral air. `search.json`, `search2.json`: every route the searches kept.
+- `nair-drag/`: clips 23 to 29 of the new neutral air. `search-nair.json`: the 54 routes the neutral-air search kept, with DI and weight results.
 
 ## Limits
 
