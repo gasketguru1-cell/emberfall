@@ -19,3 +19,4 @@ assets/_backup-anim-v1/
 # local logs
 dist-release.log
 tools/daily-snapshot.log
+playtest-results/glb-preview/

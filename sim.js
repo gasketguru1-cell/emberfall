@@ -128,6 +128,9 @@ try { DBG.boxes = localStorage.getItem('emberfall.boxes') === '1'; } catch (e) {
 try { DBG.fx = localStorage.getItem('emberfall.hitfx') !== '0'; } catch (e) { /* no storage */ }
 try { DBG.arcs = localStorage.getItem('emberfall.arcs') === '1'; } catch (e) { /* no storage */ }
 function setArcs(on) { DBG.arcs = !!on; try { localStorage.setItem('emberfall.arcs', on ? '1' : '0'); } catch (e) { /* no storage */ } }
+/* The switches at the top right of the fighter select: + (Start) away from a fighter hides or shows them. Remembered. */
+let SWITCHES = true; try { SWITCHES = localStorage.getItem('emberfall.switches') !== '0'; } catch (e) { /* no storage */ }
+function setSwitches(on) { SWITCHES = !!on; try { localStorage.setItem('emberfall.switches', on ? '1' : '0'); } catch (e) { /* no storage */ } beep(on ? 700 : 420, 0.05, 'square', 0.03); }
 function setHitFx(on) { DBG.fx = !!on; try { localStorage.setItem('emberfall.hitfx', on ? '1' : '0'); } catch (e) { /* no storage */ } }
 /* Training mode: no clock, stocks never run out, and a true-combo counter. A combo is every hit landed while the target is
    still in hitstun (or held) from the one before; it ends the moment the target can act again. */
@@ -1022,8 +1025,11 @@ const FOWLS = { name: 'Furious Fowls', sub: 'five birds and a slingshot', fowl: 
 (function () {
   const base = FLINT.forms[0].st, COL = { Rusty: ['#b5533a', '#f1d7a8', '#f6a623'], Bolt: ['#f2b91e', '#2f6f78', '#fff3c4'], Cinder: ['#3a3134', '#a8623a', '#f26b1d'], Pip: ['#2bb8b0', '#bfeccd', '#ffffff'], Pearl: ['#f3e2cf', '#c9736b', '#ffffff'] };
   const UPH = { Rusty: 26, Bolt: 26, Cinder: 30, Pip: 20, Pearl: 34 };
+  /* The body box in the slingshot covers the whole slingshot with the bird in its pouch (the owner, 2026-11-11), so it is as tall as
+     each bird sits: measured from the drawn models with auditHurtboxes() in tools/audit.js. The width (FW) already spans the slingshot. */
+  const SLH = { Rusty: 16.5, Bolt: 16.5, Cinder: 18.5, Pip: 15.5, Pearl: 17 };   /* the tallest each reaches through its idle bob */
   const stat = (b, solo) => Object.assign({}, base, { weight: Math.round(base.weight * b.weight / 100 * (solo ? 0.8 : 1)), walk: +(base.walk * b.run).toFixed(2), dash: +(base.dash * b.run * (solo ? 1.05 : 1)).toFixed(2), run: +(base.run * b.run * (solo ? 1.05 : 1)).toFixed(2),
-    airSpeed: +(base.airSpeed * b.air).toFixed(2), grav: +(base.grav * b.grav).toFixed(3), fall: +(base.fall * b.grav).toFixed(2), ffall: +(base.ffall * b.grav).toFixed(2), w: solo ? FB : FW, h: solo ? 7 : 15, jf: solo ? 2.6 : 3.4, jb: solo ? 1.4 : 2,
+    airSpeed: +(base.airSpeed * b.air).toFixed(2), grav: +(base.grav * b.grav).toFixed(3), fall: +(base.fall * b.grav).toFixed(2), ffall: +(base.ffall * b.grav).toFixed(2), w: solo ? FB : FW, h: solo ? 7 : SLH[b.name], jf: solo ? 2.6 : 3.4, jb: solo ? 1.4 : 2,
     upH: solo ? UPH[b.name] : undefined, pummel: solo ? 1 : FN[b.name].pum });
   const combined = FOWL.forms.map(b => { const C = FOWL.combined, nm = b.name, L = LAUNCH[nm];
     const m = fowlNormals(mk(1, 1, 1, 1, {
@@ -2507,13 +2513,13 @@ function stepSelect() {
       continue; }
     if (c.pressed('atk') && !CPU_TOK.drag && cpuTokOn(sl.cx, sl.cy)) { sl.tok = true; beep(600, 0.04, 'triangle', 0.03); continue; }
     /* + (Start, or the + key) while pointing at a fighter opens its move list; once everyone is ready, Start fights instead */
-    if (typeof mlOpen === 'function' && over >= 0 && dev === 'kb' && mlPlusKey()) { mlOpen(ROSTER[over], 0, c); continue; }
-    if (c.pressed('start')) { if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; } if (typeof mlOpen === 'function' && over >= 0) { mlOpen(ROSTER[over], 0, c); continue; } }
+    if (typeof mlOpen === 'function' && dev === 'kb' && mlPlusKey()) { if (over >= 0) mlOpen(ROSTER[over], 0, c); else setSwitches(!SWITCHES); continue; }
+    if (c.pressed('start')) { if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; } if (typeof mlOpen === 'function' && over >= 0) { mlOpen(ROSTER[over], 0, c); continue; } setSwitches(!SWITCHES); continue; }   /* anywhere else: hide or show the switches */
     else if (c.pressed('atk')) {
-      if (DESKTOP() && inBox(ONLINE_PILL, sl.cx, sl.cy)) { if (window.openOnline) window.openOnline(); beep(600, 0.05, 'square', 0.03); continue; }
-      if (DESKTOP() && inBox(QUIT_PILL, sl.cx, sl.cy)) { if (QUIT_ASK > 0) window.close(); else { QUIT_ASK = 150; beep(300, 0.08, 'square', 0.04); } continue; }   /* press twice to quit */
-      if (inBox(TRAIN_PILL, sl.cx, sl.cy)) { setTraining(!TRAINING); beep(TRAINING ? 700 : 420, 0.05, 'square', 0.03); }
-      if (inBox(ARC_PILL, sl.cx, sl.cy)) { setArcs(!DBG.arcs); beep(DBG.arcs ? 700 : 420, 0.05, 'square', 0.03); }
+      if (SWITCHES && DESKTOP() && inBox(ONLINE_PILL, sl.cx, sl.cy)) { if (window.openOnline) window.openOnline(); beep(600, 0.05, 'square', 0.03); continue; }
+      if (SWITCHES && DESKTOP() && inBox(QUIT_PILL, sl.cx, sl.cy)) { if (QUIT_ASK > 0) window.close(); else { QUIT_ASK = 150; beep(300, 0.08, 'square', 0.04); } continue; }   /* press twice to quit */
+      if (SWITCHES && inBox(TRAIN_PILL, sl.cx, sl.cy)) { setTraining(!TRAINING); beep(TRAINING ? 700 : 420, 0.05, 'square', 0.03); }
+      if (SWITCHES && inBox(ARC_PILL, sl.cx, sl.cy)) { setArcs(!DBG.arcs); beep(DBG.arcs ? 700 : 420, 0.05, 'square', 0.03); }
       else if (onCpu) { setCpuLevel(CPU_LEVEL + 1 > 9 ? 0 : CPU_LEVEL + 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
       else if (over >= 0) { sl.pick = over; sl.ready = true; beep(800, 0.08, 'triangle', 0.05); }
       else if (sl.ready && slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; }
