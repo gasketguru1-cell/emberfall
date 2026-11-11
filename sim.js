@@ -1218,9 +1218,11 @@ function coalGone(p) { if (!p.picked) { const ow = F[p.owner]; if (ow) ow.coalRe
 /* Side B, Rope Swing: a rope to a hook above and ahead on frame 11 (once per time in the air), then a pendulum swing. Push
    the stick to pump it. From the ground the rope pulls in a little as it takes his weight, so the swing clears the floor.
    While swinging: special again throws a new rope to a hook further on and he swings on from that one, keeping his speed
-   (up to ROPE.max ropes in one go); attack lets go along the swing with the mouth open: 9% clean, 6% after. A rope left
-   alone for 80 frames ends in the bite too. Landing ends the swing. The rope never hits. */
-const ROPE = { max: 4, gap: 8 };   /* ropes in one go; frames on a rope before the next rope or the bite */
+   (up to ROPE.max ropes in one go); attack lets go along the swing with the mouth open: 9% clean, 6% after; jump hops off
+   the rope with no bite, keeping the swing's speed (a short hop's lift; his air jump is kept). Attack and jump work from the
+   second frame on the rope, so he can leave early. A rope left alone for 80 frames ends in the bite too. Landing ends the
+   swing. The rope never hits. */
+const ROPE = { max: 4, gap: 8, off: 1 };   /* ropes in one go; frames on a rope before the next rope; frames on a rope before attack or jump can leave it */
 function chompSwing(f, n, i) {
   const s = f.st, by = () => f.y + s.h / 2;
   if (n === 1) { f.rsGo = false; f.rsN = 0; if (!f.grounded) { if (f.airUse.rope) { f.mf = f.move.t; return; } f.airUse.rope = 1; } }
@@ -1234,8 +1236,8 @@ function chompSwing(f, n, i) {
   if (!f.rsGo) return;
   f.rsT++;
   if (f.rsReel > 0) { const k = Math.min(1.5, f.rsReel); f.rsL -= k; f.rsReel -= k; }
-  const c = f.ctl, again = c && c.pressed('spc') && f.rsT > ROPE.gap, bite = c && c.pressed('atk') && f.rsT > ROPE.gap;
-  if (again && !bite && f.rsN < ROPE.max) {   /* the next rope: hooked ahead at the same height as the last, so he starts behind it and swings on through */
+  const c = f.ctl, again = c && c.pressed('spc') && f.rsT > ROPE.gap, bite = c && c.pressed('atk') && f.rsT > ROPE.off, hop = c && !bite && c.pressed('jmp') && f.rsT > ROPE.off;
+  if (again && !bite && !hop && f.rsN < ROPE.max) {   /* the next rope: hooked ahead at the same height as the last, so he starts behind it and swings on through */
     const sp = Math.max(Math.abs(f.rsW) * f.rsL, 1.3), th = -f.face * Math.acos(clamp((f.rsAy - by()) / f.rsL, -1, 1));
     f.rsAx = f.x - f.rsL * Math.sin(th); f.rsTh = th; f.rsW = f.face * sp / f.rsL; f.rsN++; f.rsT = 0; f.mf = 12;
     spark(f.rsAx, f.rsAy, '#ffd27a', 6, 0.9); beep(500 + f.rsN * 60, 0.05, 'triangle', 0.04, 1.4);
@@ -1243,6 +1245,7 @@ function chompSwing(f, n, i) {
   f.rsW += -(0.11 / f.rsL) * Math.sin(f.rsTh) + clamp(i.lx * f.face, -1, 1) * 0.0012 * f.face; f.rsW = clamp(f.rsW, -0.14, 0.14); f.rsTh += f.rsW;
   const x = f.rsAx + f.rsL * Math.sin(f.rsTh), y = f.rsAy - f.rsL * Math.cos(f.rsTh) - s.h / 2;
   f.vx = x - f.x; f.vy = y - f.y;
+  if (hop) { c.take('jmp'); f.rsGo = false; f.vx = clamp(f.vx, -3, 3); f.vy = Math.max(clamp(f.vy, -2.5, 3), s.vHop); f.move = null; f.set('air'); spark(f.x, by(), '#ffd27a', 6, 0.8); beep(560, 0.05, 'triangle', 0.04, 1.3); return; }   /* jumps off the rope: no bite */
   if (bite || f.mf >= 91) { f.rsGo = false; f.startMove('swingBite'); f.vx = clamp(f.vx, -3, 3); f.vy = clamp(f.vy, -2.5, 3); }   /* let go: fly on along the swing, mouth first */
 }
 /* Up B, Bubble Ride: a bubble forms on frame 8 and carries him up for up to 55 frames, steering gently. Up B again pops it

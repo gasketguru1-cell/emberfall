@@ -123,6 +123,11 @@ vm.runInThisContext(`
       run(49, () => { maxX = Math.min(maxX, o.x); if (o.state === 'hurt') hurt++; if (ant()) st = ant().blocks || 0; }); return { maxX, hurt, st, dmg: o.pct - pct0, cx: p.x, top: q.y }; };
     const free = tryIt(false), wall = tryIt(true);
     check('Rope: a walking opponent is stopped by a rope slanting up from the floor', wall.st > 0 && wall.maxX - free.maxX > 5 && wall.dmg === 0, 'coal at x ' + wall.cx.toFixed(0) + ', Chomp on the platform at height ' + wall.top + '; no rope: walked to x ' + free.maxX.toFixed(0) + '; with the rope: stopped at x ' + wall.maxX.toFixed(0) + ' (damage ' + wall.dmg.toFixed(1) + ')'); }
+  { const early = key => { const [c, o] = setup(-40, 60); SCRIPT[0] = (i, tt) => { if (tt === 1) { i.spc = true; i.lx = 1; } if (tt === 15) i[key] = true; }; let onRope = null, leftAt = null, bit = false, top = 0, st = null;
+      run(60, () => { if (c.rsGo && onRope === null) onRope = t; if (onRope !== null && !c.rsGo && leftAt === null) { leftAt = t; st = c.state; } if (c.mname === 'swingBite' && c.state === 'attack') bit = true; top = Math.max(top, c.y); }); return { onRope, leftAt, bit, top, st, jumps: c.jumps }; };
+    const a = early('atk'), j = early('jmp');
+    check('Side B: attack lets go into the bite early in the swing', a.leftAt !== null && a.leftAt - a.onRope <= 4 && a.bit, 'on the rope on frame ' + a.onRope + ', bite on frame ' + a.leftAt);
+    check('Side B: jump hops off the rope early, with no bite and his air jump kept', j.leftAt !== null && j.leftAt - j.onRope <= 4 && !j.bit && j.st === 'air' && j.top > 6 && j.jumps >= 1, 'on the rope on frame ' + j.onRope + ', off on frame ' + j.leftAt + ' (' + j.st + '), rose to ' + j.top.toFixed(0) + ', air jumps left ' + j.jumps); }
   { /* a launched opponent is stopped by the rope too */
     const tryIt = rope => { const [c, o] = setup(-20, 56); c.face = 1; coalAt(EDGE + 30, 44, 'fly', { vx: 0, vy: 0 }); if (rope) SCRIPT[0] = (i, tt) => { if (tt === 2) i.spc = true; };
       o.y = 46; o.grounded = false; o.plat = null; o.set('air'); let low = 99, st = 0, launched = 0;
