@@ -7,3 +7,6 @@ assets/*/raw/
 .env*
 assets/_pipeline-test/
 assets/*/work/*.glb
+
+# recorded playtest clips stay on disk, out of git (about 120 MB)
+playtest-results/**/*.webm

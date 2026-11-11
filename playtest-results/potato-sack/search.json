@@ -1,0 +1,6342 @@
+[
+ {
+  "situation": {
+   "pct": 0,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "bomb_tap",
+   "bag_it"
+  ],
+  "hits": 2,
+  "dmg": 22.7,
+  "ko": false,
+  "startPct": 0,
+  "endPct": 22.7,
+  "endX": 42,
+  "sackX": -7,
+  "frames": 123,
+  "last": 55,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 0,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "bomb_tap",
+   "sh_nair"
+  ],
+  "hits": 2,
+  "dmg": 20.1,
+  "ko": false,
+  "startPct": 0,
+  "endPct": 20.1,
+  "endX": 32,
+  "sackX": 19,
+  "frames": 128,
+  "last": 49,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 1,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 0,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "grab_u",
+   "sh_uair"
+  ],
+  "hits": 2,
+  "dmg": 18.1,
+  "ko": false,
+  "startPct": 0,
+  "endPct": 18.1,
+  "endX": -9,
+  "sackX": -2,
+  "frames": 148,
+  "last": 63,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 0,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "grab_u",
+   "sh_uair"
+  ],
+  "hits": 2,
+  "dmg": 18.1,
+  "ko": false,
+  "startPct": 0,
+  "endPct": 18.1,
+  "endX": -9,
+  "sackX": -2,
+  "frames": 148,
+  "last": 63,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 20,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "upb",
+   "bag_it"
+  ],
+  "hits": 2,
+  "dmg": 31.5,
+  "ko": false,
+  "startPct": 20,
+  "endPct": 51.5,
+  "endX": 66,
+  "sackX": -2,
+  "frames": 159,
+  "last": 91,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 2,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 20,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "bomb_tap",
+   "bag_it"
+  ],
+  "hits": 2,
+  "dmg": 22.7,
+  "ko": false,
+  "startPct": 20,
+  "endPct": 42.7,
+  "endX": 65,
+  "sackX": 6,
+  "frames": 129,
+  "last": 61,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 1,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 20,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "grab_u",
+   "sh_uair"
+  ],
+  "hits": 2,
+  "dmg": 18.1,
+  "ko": false,
+  "startPct": 20,
+  "endPct": 38.1,
+  "endX": -7,
+  "sackX": -2,
+  "frames": 148,
+  "last": 63,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 2,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 20,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "grab_u",
+   "sh_uair"
+  ],
+  "hits": 2,
+  "dmg": 18.1,
+  "ko": false,
+  "startPct": 20,
+  "endPct": 38.1,
+  "endX": -7,
+  "sackX": -2,
+  "frames": 148,
+  "last": 63,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 40,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_nair",
+   "grab_u",
+   "fh_uair",
+   "fh_nair",
+   "fsmash"
+  ],
+  "hits": 5,
+  "dmg": 51.6,
+  "ko": false,
+  "startPct": 40,
+  "endPct": 91.6,
+  "endX": -73,
+  "sackX": 19,
+  "frames": 277,
+  "last": 209,
+  "di": {
+   "in": {
+    "hits": 5,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 5,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 40,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_double_nair",
+   "grab_u",
+   "fh_uair",
+   "fh_nair",
+   "fsmash"
+  ],
+  "hits": 5,
+  "dmg": 51.6,
+  "ko": false,
+  "startPct": 40,
+  "endPct": 91.6,
+  "endX": -73,
+  "sackX": 19,
+  "frames": 277,
+  "last": 209,
+  "di": {
+   "in": {
+    "hits": 5,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 5,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 40,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_fair",
+   "grab_u",
+   "fh_uair",
+   "fh_nair",
+   "fsmash"
+  ],
+  "hits": 5,
+  "dmg": 51.6,
+  "ko": false,
+  "startPct": 40,
+  "endPct": 91.6,
+  "endX": -73,
+  "sackX": 19,
+  "frames": 277,
+  "last": 209,
+  "di": {
+   "in": {
+    "hits": 5,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 5,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 40,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_nair",
+   "grab_u",
+   "fh_uair",
+   "fh_nair"
+  ],
+  "hits": 4,
+  "dmg": 39,
+  "ko": false,
+  "startPct": 40,
+  "endPct": 79,
+  "endX": -8,
+  "sackX": 16,
+  "frames": 234,
+  "last": 164,
+  "di": {
+   "in": {
+    "hits": 4,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 4,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 40,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_double_nair",
+   "grab_u",
+   "fh_uair",
+   "fh_nair"
+  ],
+  "hits": 4,
+  "dmg": 39,
+  "ko": false,
+  "startPct": 40,
+  "endPct": 79,
+  "endX": -8,
+  "sackX": 16,
+  "frames": 234,
+  "last": 164,
+  "di": {
+   "in": {
+    "hits": 4,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 4,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 40,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_fair",
+   "grab_u",
+   "fh_uair",
+   "fh_nair"
+  ],
+  "hits": 4,
+  "dmg": 39,
+  "ko": false,
+  "startPct": 40,
+  "endPct": 79,
+  "endX": -8,
+  "sackX": 16,
+  "frames": 234,
+  "last": 164,
+  "di": {
+   "in": {
+    "hits": 4,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 4,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 2,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 40,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_nair",
+   "grab_u",
+   "fh_uair",
+   "sh_uair"
+  ],
+  "hits": 4,
+  "dmg": 36.6,
+  "ko": false,
+  "startPct": 40,
+  "endPct": 76.6,
+  "endX": 29,
+  "sackX": 23,
+  "frames": 246,
+  "last": 162,
+  "di": {
+   "in": {
+    "hits": 4,
+    "ko": false
+   },
+   "out": {
+    "hits": 4,
+    "ko": false
+   },
+   "up": {
+    "hits": 4,
+    "ko": false
+   },
+   "down": {
+    "hits": 4,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 3,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 3,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 40,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_double_nair",
+   "grab_u",
+   "fh_uair",
+   "sh_uair"
+  ],
+  "hits": 4,
+  "dmg": 36.6,
+  "ko": false,
+  "startPct": 40,
+  "endPct": 76.6,
+  "endX": 29,
+  "sackX": 23,
+  "frames": 246,
+  "last": 162,
+  "di": {
+   "in": {
+    "hits": 4,
+    "ko": false
+   },
+   "out": {
+    "hits": 4,
+    "ko": false
+   },
+   "up": {
+    "hits": 4,
+    "ko": false
+   },
+   "down": {
+    "hits": 4,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 3,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 3,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 3,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 40,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_nair",
+   "grab_u",
+   "fh_uair",
+   "fh_nair",
+   "fsmash"
+  ],
+  "hits": 5,
+  "dmg": 51.6,
+  "ko": false,
+  "startPct": 40,
+  "endPct": 91.6,
+  "endX": -71,
+  "sackX": 20,
+  "frames": 277,
+  "last": 209,
+  "di": {
+   "in": {
+    "hits": 5,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 5,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 1,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 40,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_double_nair",
+   "grab_u",
+   "fh_uair",
+   "fh_nair",
+   "fsmash"
+  ],
+  "hits": 5,
+  "dmg": 51.6,
+  "ko": false,
+  "startPct": 40,
+  "endPct": 91.6,
+  "endX": -71,
+  "sackX": 20,
+  "frames": 277,
+  "last": 209,
+  "di": {
+   "in": {
+    "hits": 5,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 5,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 2,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 40,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_fair",
+   "grab_u",
+   "fh_uair",
+   "fh_nair",
+   "fsmash"
+  ],
+  "hits": 5,
+  "dmg": 51.6,
+  "ko": false,
+  "startPct": 40,
+  "endPct": 91.6,
+  "endX": -71,
+  "sackX": 20,
+  "frames": 277,
+  "last": 209,
+  "di": {
+   "in": {
+    "hits": 5,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 5,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 1,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 40,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_nair",
+   "grab_u",
+   "fh_uair",
+   "fh_nair"
+  ],
+  "hits": 4,
+  "dmg": 39,
+  "ko": false,
+  "startPct": 40,
+  "endPct": 79,
+  "endX": -6,
+  "sackX": 17,
+  "frames": 234,
+  "last": 164,
+  "di": {
+   "in": {
+    "hits": 4,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 4,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 40,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_double_nair",
+   "grab_u",
+   "fh_uair",
+   "fh_nair"
+  ],
+  "hits": 4,
+  "dmg": 39,
+  "ko": false,
+  "startPct": 40,
+  "endPct": 79,
+  "endX": -6,
+  "sackX": 17,
+  "frames": 234,
+  "last": 164,
+  "di": {
+   "in": {
+    "hits": 4,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 4,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 2,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 40,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_fair",
+   "grab_u",
+   "fh_uair",
+   "fh_nair"
+  ],
+  "hits": 4,
+  "dmg": 39,
+  "ko": false,
+  "startPct": 40,
+  "endPct": 79,
+  "endX": -6,
+  "sackX": 17,
+  "frames": 234,
+  "last": 164,
+  "di": {
+   "in": {
+    "hits": 4,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 4,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 40,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_nair",
+   "grab_u",
+   "fh_uair",
+   "sh_uair"
+  ],
+  "hits": 4,
+  "dmg": 36.6,
+  "ko": false,
+  "startPct": 40,
+  "endPct": 76.6,
+  "endX": 30,
+  "sackX": 25,
+  "frames": 246,
+  "last": 162,
+  "di": {
+   "in": {
+    "hits": 4,
+    "ko": false
+   },
+   "out": {
+    "hits": 4,
+    "ko": false
+   },
+   "up": {
+    "hits": 4,
+    "ko": false
+   },
+   "down": {
+    "hits": 4,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 2,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 3,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 40,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_double_nair",
+   "grab_u",
+   "fh_uair",
+   "sh_uair"
+  ],
+  "hits": 4,
+  "dmg": 36.6,
+  "ko": false,
+  "startPct": 40,
+  "endPct": 76.6,
+  "endX": 30,
+  "sackX": 25,
+  "frames": 246,
+  "last": 162,
+  "di": {
+   "in": {
+    "hits": 4,
+    "ko": false
+   },
+   "out": {
+    "hits": 4,
+    "ko": false
+   },
+   "up": {
+    "hits": 4,
+    "ko": false
+   },
+   "down": {
+    "hits": 4,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 3,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "grab_u",
+   "fh_uair",
+   "fh_uair"
+  ],
+  "hits": 4,
+  "dmg": 39.8,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 99.8,
+  "endX": -16,
+  "sackX": -3,
+  "frames": 254,
+  "last": 168,
+  "di": {
+   "in": {
+    "hits": 4,
+    "ko": false
+   },
+   "out": {
+    "hits": 4,
+    "ko": false
+   },
+   "up": {
+    "hits": 4,
+    "ko": false
+   },
+   "down": {
+    "hits": 4,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 3,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 3,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 4,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "grab_u",
+   "fh_uair"
+  ],
+  "hits": 3,
+  "dmg": 31.6,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 91.6,
+  "endX": -26,
+  "sackX": -24,
+  "frames": 198,
+  "last": 120,
+  "di": {
+   "in": {
+    "hits": 3,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 3,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 3,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 3,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "usmash"
+  ],
+  "hits": 2,
+  "dmg": 28.7,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 88.7,
+  "endX": -16,
+  "sackX": -5,
+  "frames": 166,
+  "last": 69,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "dsmash"
+  ],
+  "hits": 2,
+  "dmg": 26.3,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 86.3,
+  "endX": -128,
+  "sackX": -5,
+  "frames": 167,
+  "last": 67,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "usmash",
+   "fh_uair"
+  ],
+  "hits": 2,
+  "dmg": 26.1,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 86.1,
+  "endX": 0,
+  "sackX": -2,
+  "frames": 171,
+  "last": 88,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "grab_b"
+  ],
+  "hits": 2,
+  "dmg": 24.7,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 84.7,
+  "endX": 73,
+  "sackX": -6,
+  "frames": 150,
+  "last": 82,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_nair",
+   "dair"
+  ],
+  "hits": 2,
+  "dmg": 24.3,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 84.3,
+  "endX": 145,
+  "sackX": 19,
+  "frames": 162,
+  "last": 67,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 1,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 1,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_double_nair",
+   "dair"
+  ],
+  "hits": 2,
+  "dmg": 24.3,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 84.3,
+  "endX": 145,
+  "sackX": 19,
+  "frames": 162,
+  "last": 67,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 1,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "grab_u",
+   "fh_uair",
+   "fh_uair"
+  ],
+  "hits": 4,
+  "dmg": 39.8,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 99.8,
+  "endX": -7,
+  "sackX": 6,
+  "frames": 254,
+  "last": 168,
+  "di": {
+   "in": {
+    "hits": 4,
+    "ko": false
+   },
+   "out": {
+    "hits": 4,
+    "ko": false
+   },
+   "up": {
+    "hits": 4,
+    "ko": false
+   },
+   "down": {
+    "hits": 4,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 4,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 3,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 3,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "dj_nair",
+   "bag_it"
+  ],
+  "hits": 3,
+  "dmg": 35.7,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 95.7,
+  "endX": -145,
+  "sackX": -51,
+  "frames": 202,
+  "last": 134,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "grab_u",
+   "fh_uair"
+  ],
+  "hits": 3,
+  "dmg": 31.6,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 91.6,
+  "endX": -17,
+  "sackX": -15,
+  "frames": 198,
+  "last": 120,
+  "di": {
+   "in": {
+    "hits": 3,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 3,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 3,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 3,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 3,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "usmash"
+  ],
+  "hits": 2,
+  "dmg": 28.7,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 88.7,
+  "endX": -10,
+  "sackX": 4,
+  "frames": 166,
+  "last": 69,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 2,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "dsmash"
+  ],
+  "hits": 2,
+  "dmg": 26.3,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 86.3,
+  "endX": -122,
+  "sackX": 4,
+  "frames": 167,
+  "last": 67,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "grab_b"
+  ],
+  "hits": 2,
+  "dmg": 24.7,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 84.7,
+  "endX": 92,
+  "sackX": 4,
+  "frames": 150,
+  "last": 82,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 1,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "grab_f"
+  ],
+  "hits": 2,
+  "dmg": 23.4,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 83.4,
+  "endX": -68,
+  "sackX": 4,
+  "frames": 150,
+  "last": 82,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "dj_nair"
+  ],
+  "hits": 2,
+  "dmg": 23.1,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 83.1,
+  "endX": -73,
+  "sackX": -35,
+  "frames": 155,
+  "last": 69,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 80,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "upb"
+  ],
+  "hits": 1,
+  "dmg": 18.9,
+  "ko": true,
+  "startPct": 80,
+  "endPct": 0,
+  "endX": 0,
+  "sackX": -20,
+  "frames": 111,
+  "last": 11,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": true
+   },
+   "out": {
+    "hits": 1,
+    "ko": true
+   },
+   "up": {
+    "hits": 1,
+    "ko": true
+   },
+   "down": {
+    "hits": 1,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": true
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 80,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "sh_nair",
+   "bag_it"
+  ],
+  "hits": 3,
+  "dmg": 34.8,
+  "ko": false,
+  "startPct": 80,
+  "endPct": 114.8,
+  "endX": -175,
+  "sackX": -73,
+  "frames": 206,
+  "last": 138,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 3,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 1,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 3,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 80,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "utilt",
+   "fh_uair"
+  ],
+  "hits": 3,
+  "dmg": 29.2,
+  "ko": false,
+  "startPct": 80,
+  "endPct": 109.2,
+  "endX": -20,
+  "sackX": -24,
+  "frames": 200,
+  "last": 113,
+  "di": {
+   "in": {
+    "hits": 3,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 3,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 3,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 80,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "fsmash"
+  ],
+  "hits": 2,
+  "dmg": 31,
+  "ko": false,
+  "startPct": 80,
+  "endPct": 111,
+  "endX": -167,
+  "sackX": -5,
+  "frames": 173,
+  "last": 75,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 1,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 80,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "usmash"
+  ],
+  "hits": 2,
+  "dmg": 28.7,
+  "ko": false,
+  "startPct": 80,
+  "endPct": 108.7,
+  "endX": -18,
+  "sackX": -5,
+  "frames": 166,
+  "last": 69,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 1,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 80,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "bag_it"
+  ],
+  "hits": 2,
+  "dmg": 24.7,
+  "ko": false,
+  "startPct": 80,
+  "endPct": 104.7,
+  "endX": -112,
+  "sackX": -13,
+  "frames": 146,
+  "last": 78,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 1,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 80,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_nair",
+   "bag_it"
+  ],
+  "hits": 2,
+  "dmg": 22.7,
+  "ko": false,
+  "startPct": 80,
+  "endPct": 102.7,
+  "endX": 131,
+  "sackX": 32,
+  "frames": 148,
+  "last": 80,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 80,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_double_nair",
+   "bag_it"
+  ],
+  "hits": 2,
+  "dmg": 22.7,
+  "ko": false,
+  "startPct": 80,
+  "endPct": 102.7,
+  "endX": 131,
+  "sackX": 32,
+  "frames": 148,
+  "last": 80,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 80,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "sh_nair",
+   "bag_it"
+  ],
+  "hits": 3,
+  "dmg": 34.8,
+  "ko": false,
+  "startPct": 80,
+  "endPct": 114.8,
+  "endX": -169,
+  "sackX": -63,
+  "frames": 207,
+  "last": 139,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 3,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 3,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 80,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "fsmash"
+  ],
+  "hits": 2,
+  "dmg": 31,
+  "ko": false,
+  "startPct": 80,
+  "endPct": 111,
+  "endX": -161,
+  "sackX": 4,
+  "frames": 173,
+  "last": 75,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 1,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 80,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "usmash"
+  ],
+  "hits": 2,
+  "dmg": 28.7,
+  "ko": false,
+  "startPct": 80,
+  "endPct": 108.7,
+  "endX": -12,
+  "sackX": 4,
+  "frames": 166,
+  "last": 69,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 80,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "bag_it"
+  ],
+  "hits": 2,
+  "dmg": 24.7,
+  "ko": false,
+  "startPct": 80,
+  "endPct": 104.7,
+  "endX": -103,
+  "sackX": -3,
+  "frames": 146,
+  "last": 78,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 80,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "dj_nair"
+  ],
+  "hits": 2,
+  "dmg": 23.1,
+  "ko": false,
+  "startPct": 80,
+  "endPct": 103.1,
+  "endX": -106,
+  "sackX": -35,
+  "frames": 155,
+  "last": 69,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 80,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_nair",
+   "bag_it"
+  ],
+  "hits": 2,
+  "dmg": 22.7,
+  "ko": false,
+  "startPct": 80,
+  "endPct": 102.7,
+  "endX": 140,
+  "sackX": 41,
+  "frames": 152,
+  "last": 84,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 80,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_double_nair",
+   "bag_it"
+  ],
+  "hits": 2,
+  "dmg": 22.7,
+  "ko": false,
+  "startPct": 80,
+  "endPct": 102.7,
+  "endX": 140,
+  "sackX": 41,
+  "frames": 152,
+  "last": 84,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 1,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 80,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_fair",
+   "bag_it"
+  ],
+  "hits": 2,
+  "dmg": 22.7,
+  "ko": false,
+  "startPct": 80,
+  "endPct": 102.7,
+  "endX": 140,
+  "sackX": 41,
+  "frames": 152,
+  "last": 84,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 1,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 100,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "usmash"
+  ],
+  "hits": 2,
+  "dmg": 28.7,
+  "ko": true,
+  "startPct": 100,
+  "endPct": 0,
+  "endX": 0,
+  "sackX": -5,
+  "frames": 173,
+  "last": 69,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": true
+   },
+   "out": {
+    "hits": 2,
+    "ko": true
+   },
+   "up": {
+    "hits": 2,
+    "ko": true
+   },
+   "down": {
+    "hits": 2,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 100,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "upb"
+  ],
+  "hits": 1,
+  "dmg": 18.9,
+  "ko": true,
+  "startPct": 100,
+  "endPct": 0,
+  "endX": 0,
+  "sackX": -20,
+  "frames": 111,
+  "last": 11,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": true
+   },
+   "out": {
+    "hits": 1,
+    "ko": true
+   },
+   "up": {
+    "hits": 1,
+    "ko": true
+   },
+   "down": {
+    "hits": 1,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 1,
+    "ko": true
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": true
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 100,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "grab_d",
+   "sh_uair",
+   "fh_uair"
+  ],
+  "hits": 3,
+  "dmg": 23.8,
+  "ko": false,
+  "startPct": 100,
+  "endPct": 123.8,
+  "endX": 0,
+  "sackX": -1,
+  "frames": 204,
+  "last": 118,
+  "di": {
+   "in": {
+    "hits": 3,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 3,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 3,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 100,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "sh_dair"
+  ],
+  "hits": 2,
+  "dmg": 22.6,
+  "ko": false,
+  "startPct": 100,
+  "endPct": 122.6,
+  "endX": -12,
+  "sackX": -17,
+  "frames": 154,
+  "last": 75,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 100,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "fh_nair"
+  ],
+  "hits": 2,
+  "dmg": 21.6,
+  "ko": false,
+  "startPct": 100,
+  "endPct": 121.6,
+  "endX": 54,
+  "sackX": -23,
+  "frames": 140,
+  "last": 70,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 100,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "utilt",
+   "fh_nair"
+  ],
+  "hits": 2,
+  "dmg": 20.7,
+  "ko": false,
+  "startPct": 100,
+  "endPct": 120.7,
+  "endX": -162,
+  "sackX": -34,
+  "frames": 157,
+  "last": 63,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 100,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "sh_uair"
+  ],
+  "hits": 2,
+  "dmg": 20.1,
+  "ko": false,
+  "startPct": 100,
+  "endPct": 120.1,
+  "endX": -24,
+  "sackX": -22,
+  "frames": 153,
+  "last": 68,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 100,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "dtilt",
+   "bag_it"
+  ],
+  "hits": 2,
+  "dmg": 19.7,
+  "ko": false,
+  "startPct": 100,
+  "endPct": 119.7,
+  "endX": 96,
+  "sackX": -13,
+  "frames": 129,
+  "last": 61,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 1,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 100,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "usmash"
+  ],
+  "hits": 2,
+  "dmg": 28.7,
+  "ko": true,
+  "startPct": 100,
+  "endPct": 0,
+  "endX": 0,
+  "sackX": 4,
+  "frames": 173,
+  "last": 73,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": true
+   },
+   "out": {
+    "hits": 2,
+    "ko": true
+   },
+   "up": {
+    "hits": 2,
+    "ko": true
+   },
+   "down": {
+    "hits": 2,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 100,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "grab_d",
+   "sh_uair",
+   "fh_uair"
+  ],
+  "hits": 3,
+  "dmg": 23.8,
+  "ko": false,
+  "startPct": 100,
+  "endPct": 123.8,
+  "endX": 0,
+  "sackX": -1,
+  "frames": 204,
+  "last": 118,
+  "di": {
+   "in": {
+    "hits": 3,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 3,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 3,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 100,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "dj_nair"
+  ],
+  "hits": 2,
+  "dmg": 23.1,
+  "ko": false,
+  "startPct": 100,
+  "endPct": 123.1,
+  "endX": -128,
+  "sackX": -35,
+  "frames": 155,
+  "last": 69,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 1,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 100,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "sh_dair"
+  ],
+  "hits": 2,
+  "dmg": 22.6,
+  "ko": false,
+  "startPct": 100,
+  "endPct": 122.6,
+  "endX": -6,
+  "sackX": -13,
+  "frames": 154,
+  "last": 75,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 100,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "sh_nair"
+  ],
+  "hits": 2,
+  "dmg": 22.2,
+  "ko": false,
+  "startPct": 100,
+  "endPct": 122.2,
+  "endX": -113,
+  "sackX": -35,
+  "frames": 154,
+  "last": 71,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 100,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "sh_uair"
+  ],
+  "hits": 2,
+  "dmg": 20.1,
+  "ko": false,
+  "startPct": 100,
+  "endPct": 120.1,
+  "endX": -18,
+  "sackX": -20,
+  "frames": 153,
+  "last": 68,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 100,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "dtilt",
+   "bag_it"
+  ],
+  "hits": 2,
+  "dmg": 19.7,
+  "ko": false,
+  "startPct": 100,
+  "endPct": 119.7,
+  "endX": 98,
+  "sackX": -11,
+  "frames": 130,
+  "last": 62,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 2,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 100,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "grab_u",
+   "fh_uair"
+  ],
+  "hits": 2,
+  "dmg": 19.5,
+  "ko": false,
+  "startPct": 100,
+  "endPct": 119.5,
+  "endX": 4,
+  "sackX": 1,
+  "frames": 155,
+  "last": 72,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 2,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 130,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "dash_attack"
+  ],
+  "hits": 1,
+  "dmg": 18.9,
+  "ko": true,
+  "startPct": 130,
+  "endPct": 148.9,
+  "endX": 223,
+  "sackX": -18,
+  "frames": 121,
+  "last": 27,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": true
+   },
+   "out": {
+    "hits": 1,
+    "ko": true
+   },
+   "up": {
+    "hits": 1,
+    "ko": true
+   },
+   "down": {
+    "hits": 1,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 130,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "upb"
+  ],
+  "hits": 1,
+  "dmg": 18.9,
+  "ko": true,
+  "startPct": 130,
+  "endPct": 0,
+  "endX": 0,
+  "sackX": -20,
+  "frames": 111,
+  "last": 11,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": true
+   },
+   "out": {
+    "hits": 1,
+    "ko": true
+   },
+   "up": {
+    "hits": 1,
+    "ko": true
+   },
+   "down": {
+    "hits": 1,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 1,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": true
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 130,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "fsmash"
+  ],
+  "hits": 1,
+  "dmg": 18.9,
+  "ko": true,
+  "startPct": 130,
+  "endPct": 148.9,
+  "endX": 224,
+  "sackX": -20,
+  "frames": 121,
+  "last": 23,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": true
+   },
+   "out": {
+    "hits": 1,
+    "ko": true
+   },
+   "up": {
+    "hits": 1,
+    "ko": true
+   },
+   "down": {
+    "hits": 1,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 130,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "usmash"
+  ],
+  "hits": 1,
+  "dmg": 16.6,
+  "ko": true,
+  "startPct": 130,
+  "endPct": 0,
+  "endX": 0,
+  "sackX": -20,
+  "frames": 121,
+  "last": 17,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": true
+   },
+   "out": {
+    "hits": 1,
+    "ko": true
+   },
+   "up": {
+    "hits": 1,
+    "ko": true
+   },
+   "down": {
+    "hits": 1,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": true
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 130,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "fh_nair"
+  ],
+  "hits": 2,
+  "dmg": 21.6,
+  "ko": false,
+  "startPct": 130,
+  "endPct": 151.6,
+  "endX": 74,
+  "sackX": -23,
+  "frames": 140,
+  "last": 70,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 130,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "grab_d",
+   "fh_bair"
+  ],
+  "hits": 2,
+  "dmg": 20.5,
+  "ko": false,
+  "startPct": 130,
+  "endPct": 150.5,
+  "endX": 192,
+  "sackX": 32,
+  "frames": 164,
+  "last": 70,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 1,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 130,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "sh_uair"
+  ],
+  "hits": 2,
+  "dmg": 20.1,
+  "ko": false,
+  "startPct": 130,
+  "endPct": 150.1,
+  "endX": -28,
+  "sackX": -22,
+  "frames": 153,
+  "last": 71,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 130,
+   "dist": 8,
+   "x0": -20
+  },
+  "route": [
+   "dtilt",
+   "fh_bair"
+  ],
+  "hits": 2,
+  "dmg": 20,
+  "ko": false,
+  "startPct": 130,
+  "endPct": 150,
+  "endX": 187,
+  "sackX": 32,
+  "frames": 152,
+  "last": 58,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 130,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "dash_attack"
+  ],
+  "hits": 1,
+  "dmg": 18.9,
+  "ko": true,
+  "startPct": 130,
+  "endPct": 148.9,
+  "endX": 224,
+  "sackX": -13,
+  "frames": 121,
+  "last": 27,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": true
+   },
+   "out": {
+    "hits": 1,
+    "ko": true
+   },
+   "up": {
+    "hits": 1,
+    "ko": true
+   },
+   "down": {
+    "hits": 1,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 130,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "fsmash"
+  ],
+  "hits": 1,
+  "dmg": 18.9,
+  "ko": true,
+  "startPct": 130,
+  "endPct": 148.9,
+  "endX": 224,
+  "sackX": -20,
+  "frames": 121,
+  "last": 23,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": true
+   },
+   "out": {
+    "hits": 1,
+    "ko": true
+   },
+   "up": {
+    "hits": 1,
+    "ko": true
+   },
+   "down": {
+    "hits": 1,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": true
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 130,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "fh_dair"
+  ],
+  "hits": 2,
+  "dmg": 24.4,
+  "ko": false,
+  "startPct": 130,
+  "endPct": 154.4,
+  "endX": -6,
+  "sackX": 0,
+  "frames": 169,
+  "last": 80,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 130,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "fh_uair"
+  ],
+  "hits": 2,
+  "dmg": 21.6,
+  "ko": false,
+  "startPct": 130,
+  "endPct": 151.6,
+  "endX": -25,
+  "sackX": -17,
+  "frames": 151,
+  "last": 73,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 2,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 130,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "grab_d",
+   "fh_bair"
+  ],
+  "hits": 2,
+  "dmg": 20.5,
+  "ko": false,
+  "startPct": 130,
+  "endPct": 150.5,
+  "endX": 192,
+  "sackX": 32,
+  "frames": 164,
+  "last": 70,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 1,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 2,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 130,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "sh_dair",
+   "sh_uair"
+  ],
+  "hits": 2,
+  "dmg": 20.1,
+  "ko": false,
+  "startPct": 130,
+  "endPct": 150.1,
+  "endX": -22,
+  "sackX": -19,
+  "frames": 153,
+  "last": 71,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 130,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "dtilt",
+   "fh_bair"
+  ],
+  "hits": 2,
+  "dmg": 20,
+  "ko": false,
+  "startPct": 130,
+  "endPct": 150,
+  "endX": 193,
+  "sackX": 32,
+  "frames": 152,
+  "last": 58,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 130,
+   "dist": 14,
+   "x0": -20
+  },
+  "route": [
+   "dtilt",
+   "bag_it"
+  ],
+  "hits": 2,
+  "dmg": 19.7,
+  "ko": false,
+  "startPct": 130,
+  "endPct": 149.7,
+  "endX": 125,
+  "sackX": -5,
+  "frames": 133,
+  "last": 65,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 1,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "sh_dair",
+   "utilt",
+   "fh_nair",
+   "fsmash"
+  ],
+  "hits": 4,
+  "dmg": 41.8,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 101.8,
+  "endX": 181,
+  "sackX": 83,
+  "frames": 235,
+  "last": 167,
+  "di": {
+   "in": {
+    "hits": 4,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 4,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 2,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "sh_dair",
+   "dj_nair",
+   "bag_it"
+  ],
+  "hits": 3,
+  "dmg": 35.7,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 95.7,
+  "endX": -73,
+  "sackX": 13,
+  "frames": 200,
+  "last": 132,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 1,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "sh_dair",
+   "dj_nair",
+   "sh_nair"
+  ],
+  "hits": 3,
+  "dmg": 33.2,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 93.2,
+  "endX": -73,
+  "sackX": -21,
+  "frames": 206,
+  "last": 123,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "sh_dair",
+   "dj_nair",
+   "dj_nair"
+  ],
+  "hits": 3,
+  "dmg": 32.7,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 92.7,
+  "endX": -66,
+  "sackX": -21,
+  "frames": 206,
+  "last": 121,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 1,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "sh_dair",
+   "grab_u",
+   "fh_uair"
+  ],
+  "hits": 3,
+  "dmg": 31.6,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 91.6,
+  "endX": 45,
+  "sackX": 45,
+  "frames": 207,
+  "last": 120,
+  "di": {
+   "in": {
+    "hits": 3,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 3,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 3,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 3,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "sh_dair",
+   "grab_d",
+   "sh_bair"
+  ],
+  "hits": 3,
+  "dmg": 30.7,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 90.7,
+  "endX": -31,
+  "sackX": 26,
+  "frames": 202,
+  "last": 117,
+  "di": {
+   "in": {
+    "hits": 3,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 3,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 3,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 3,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "sh_dair",
+   "grab_d",
+   "dj_nair"
+  ],
+  "hits": 3,
+  "dmg": 29.7,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 89.7,
+  "endX": -26,
+  "sackX": 26,
+  "frames": 201,
+  "last": 117,
+  "di": {
+   "in": {
+    "hits": 3,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 3,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 3,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 3,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 60,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "sh_dair",
+   "utilt",
+   "fh_nair"
+  ],
+  "hits": 3,
+  "dmg": 29.2,
+  "ko": false,
+  "startPct": 60,
+  "endPct": 89.2,
+  "endX": 108,
+  "sackX": 52,
+  "frames": 180,
+  "last": 110,
+  "di": {
+   "in": {
+    "hits": 3,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 3,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 90,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "sh_dair",
+   "usmash"
+  ],
+  "hits": 2,
+  "dmg": 28.7,
+  "ko": true,
+  "startPct": 90,
+  "endPct": 118.7,
+  "endX": 51,
+  "sackX": 64,
+  "frames": 173,
+  "last": 69,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": true
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 90,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "dash_attack"
+  ],
+  "hits": 1,
+  "dmg": 18.9,
+  "ko": true,
+  "startPct": 90,
+  "endPct": 108.9,
+  "endX": 223,
+  "sackX": 51,
+  "frames": 121,
+  "last": 27,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": true
+   },
+   "out": {
+    "hits": 1,
+    "ko": true
+   },
+   "up": {
+    "hits": 1,
+    "ko": true
+   },
+   "down": {
+    "hits": 1,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 90,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "upb"
+  ],
+  "hits": 1,
+  "dmg": 18.9,
+  "ko": true,
+  "startPct": 90,
+  "endPct": 0,
+  "endX": 0,
+  "sackX": 48,
+  "frames": 109,
+  "last": 11,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": true
+   },
+   "out": {
+    "hits": 1,
+    "ko": true
+   },
+   "up": {
+    "hits": 1,
+    "ko": true
+   },
+   "down": {
+    "hits": 1,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 1,
+    "ko": true
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": true
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 90,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "fsmash"
+  ],
+  "hits": 1,
+  "dmg": 18.9,
+  "ko": true,
+  "startPct": 90,
+  "endPct": 108.9,
+  "endX": 224,
+  "sackX": 48,
+  "frames": 121,
+  "last": 23,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": true
+   },
+   "out": {
+    "hits": 1,
+    "ko": true
+   },
+   "up": {
+    "hits": 1,
+    "ko": true
+   },
+   "down": {
+    "hits": 1,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 90,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "sh_dair",
+   "utilt",
+   "fh_uair"
+  ],
+  "hits": 3,
+  "dmg": 29.2,
+  "ko": false,
+  "startPct": 90,
+  "endPct": 119.2,
+  "endX": 48,
+  "sackX": 53,
+  "frames": 200,
+  "last": 117,
+  "di": {
+   "in": {
+    "hits": 3,
+    "ko": false
+   },
+   "out": {
+    "hits": 3,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 3,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 3,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 3,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 90,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "sh_dair",
+   "dj_uair"
+  ],
+  "hits": 2,
+  "dmg": 28.7,
+  "ko": false,
+  "startPct": 90,
+  "endPct": 118.7,
+  "endX": 63,
+  "sackX": 64,
+  "frames": 163,
+  "last": 72,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 90,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "sh_dair",
+   "dj_nair"
+  ],
+  "hits": 2,
+  "dmg": 23.1,
+  "ko": false,
+  "startPct": 90,
+  "endPct": 113.1,
+  "endX": -30,
+  "sackX": 25,
+  "frames": 155,
+  "last": 69,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 90,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "sh_dair",
+   "sh_dair"
+  ],
+  "hits": 2,
+  "dmg": 22.6,
+  "ko": false,
+  "startPct": 90,
+  "endPct": 112.6,
+  "endX": 57,
+  "sackX": 51,
+  "frames": 154,
+  "last": 75,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 2,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 120,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "grab_d",
+   "dj_dair"
+  ],
+  "hits": 2,
+  "dmg": 19.7,
+  "ko": true,
+  "startPct": 120,
+  "endPct": 139.7,
+  "endX": 72,
+  "sackX": 86,
+  "frames": 158,
+  "last": 69,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 1,
+    "ko": true
+   },
+   "up": {
+    "hits": 2,
+    "ko": true
+   },
+   "down": {
+    "hits": 2,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 2,
+    "ko": true
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": true
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 120,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "dash_attack"
+  ],
+  "hits": 1,
+  "dmg": 18.9,
+  "ko": true,
+  "startPct": 120,
+  "endPct": 138.9,
+  "endX": 224,
+  "sackX": 51,
+  "frames": 121,
+  "last": 27,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": true
+   },
+   "out": {
+    "hits": 1,
+    "ko": true
+   },
+   "up": {
+    "hits": 1,
+    "ko": true
+   },
+   "down": {
+    "hits": 1,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": true
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 120,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "upb"
+  ],
+  "hits": 1,
+  "dmg": 18.9,
+  "ko": true,
+  "startPct": 120,
+  "endPct": 0,
+  "endX": 0,
+  "sackX": 48,
+  "frames": 109,
+  "last": 11,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": true
+   },
+   "out": {
+    "hits": 1,
+    "ko": true
+   },
+   "up": {
+    "hits": 1,
+    "ko": true
+   },
+   "down": {
+    "hits": 1,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 1,
+    "ko": true
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": true
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 120,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "fsmash"
+  ],
+  "hits": 1,
+  "dmg": 18.9,
+  "ko": true,
+  "startPct": 120,
+  "endPct": 138.9,
+  "endX": 226,
+  "sackX": 48,
+  "frames": 121,
+  "last": 23,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": true
+   },
+   "out": {
+    "hits": 1,
+    "ko": true
+   },
+   "up": {
+    "hits": 1,
+    "ko": true
+   },
+   "down": {
+    "hits": 1,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": true
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 120,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "usmash"
+  ],
+  "hits": 1,
+  "dmg": 16.6,
+  "ko": true,
+  "startPct": 120,
+  "endPct": 0,
+  "endX": 0,
+  "sackX": 48,
+  "frames": 121,
+  "last": 17,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": true
+   },
+   "out": {
+    "hits": 1,
+    "ko": true
+   },
+   "up": {
+    "hits": 1,
+    "ko": true
+   },
+   "down": {
+    "hits": 1,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 120,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "dsmash"
+  ],
+  "hits": 1,
+  "dmg": 14.2,
+  "ko": true,
+  "startPct": 120,
+  "endPct": 134.2,
+  "endX": 223,
+  "sackX": 48,
+  "frames": 121,
+  "last": 15,
+  "di": {
+   "in": {
+    "hits": 1,
+    "ko": true
+   },
+   "out": {
+    "hits": 1,
+    "ko": true
+   },
+   "up": {
+    "hits": 1,
+    "ko": true
+   },
+   "down": {
+    "hits": 1,
+    "ko": true
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 1,
+    "ko": true
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 1,
+    "ko": true
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 120,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "utilt",
+   "fh_dair"
+  ],
+  "hits": 2,
+  "dmg": 21.9,
+  "ko": false,
+  "startPct": 120,
+  "endPct": 141.9,
+  "endX": 51,
+  "sackX": 44,
+  "frames": 158,
+  "last": 69,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 1,
+    "ko": false
+   },
+   "up": {
+    "hits": 1,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 2,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 1,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ },
+ {
+  "situation": {
+   "pct": 120,
+   "dist": 9,
+   "x0": 48,
+   "edge": 1
+  },
+  "route": [
+   "sh_dair",
+   "fh_nair"
+  ],
+  "hits": 2,
+  "dmg": 21.6,
+  "ko": false,
+  "startPct": 120,
+  "endPct": 141.6,
+  "endX": 137,
+  "sackX": 45,
+  "frames": 140,
+  "last": 70,
+  "di": {
+   "in": {
+    "hits": 2,
+    "ko": false
+   },
+   "out": {
+    "hits": 1,
+    "ko": false
+   },
+   "up": {
+    "hits": 2,
+    "ko": false
+   },
+   "down": {
+    "hits": 2,
+    "ko": false
+   },
+   "cpu8": {
+    "hits": 0,
+    "ko": false
+   }
+  },
+  "weights": {
+   "Nib (72)": {
+    "hits": 0,
+    "ko": false
+   },
+   "Hod (121)": {
+    "hits": 2,
+    "ko": false
+   },
+   "Sprocket (103)": {
+    "hits": 2,
+    "ko": false
+   }
+  }
+ }
+]

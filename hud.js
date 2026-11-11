@@ -186,7 +186,7 @@ function drawSelect(three) {
 function drawCombo() {
   if (!TRAINING || !F.length || F.preview) return; let y = 16;
   g.save(); g.textAlign = 'right'; g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#9be564'; g.fillText('TRAINING  ·  no clock, endless stocks  ·  A + B + L resets', W - 18, y + 4); y += 12;
-  for (const f of F) { const c = COMBO[f.idx]; if (!c || (!c.hits && !c.last)) continue; const pc = f.idx ? '#6cb4ff' : '#ff7b6c', live = c.hits > 0, n = live ? c.hits : c.last.hits, dm = live ? c.dmg : c.last.dmg, w = 230, x = W - 18 - w, fade = live ? 1 : Math.max(0.55, 1 - c.t / 240);
+  for (const f of F) { const c = COMBO[f.idx]; if (!c || (!c.hits && !c.last && f.idx !== 0)) continue; const last = c.last || { hits: 0, dmg: 0 };   /* player 1's panel is always shown in training, from zero */ const pc = f.idx ? '#6cb4ff' : '#ff7b6c', live = c.hits > 0, n = live ? c.hits : last.hits, dm = live ? c.dmg : last.dmg, w = 230, x = W - 18 - w, fade = live ? 1 : Math.max(0.55, 1 - c.t / 240);
     g.globalAlpha = fade; g.fillStyle = 'rgba(14,10,26,.78)'; rr(x, y, w, 86, 12); g.fill(); g.fillStyle = pc; rr(x, y + 10, 4, 66, 2); g.fill();
     g.textAlign = 'left'; g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = pc; g.fillText((f.ctl.dev === 'cpu' ? 'CPU' : 'P' + (f.idx + 1)) + (live ? '  COMBO' : '  LAST COMBO'), x + 16, y + 20);
     g.font = '900 40px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(String(n), x + 16, y + 62); const nw = g.measureText(String(n)).width;

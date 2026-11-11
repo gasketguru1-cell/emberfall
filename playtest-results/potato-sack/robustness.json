@@ -1,0 +1,569 @@
+{
+ "10": {
+  "base": {
+   "hits": 3,
+   "dmg": 29.7,
+   "ko": false,
+   "koHits": 0,
+   "end": 99.7,
+   "endX": -142,
+   "sackX": -45
+  },
+  "di": {
+   "in": "3",
+   "out": "2",
+   "up": "2",
+   "down": "3",
+   "cpu8": "3"
+  },
+  "weights": {
+   "Nib 72": "0",
+   "Flint 92": "3",
+   "Sprocket 103": "2",
+   "Hod 121": "1"
+  },
+  "window": [
+   70,
+   80,
+   90,
+   100
+  ]
+ },
+ "11": {
+  "base": {
+   "hits": 4,
+   "dmg": 41.7,
+   "ko": true,
+   "koHits": 4,
+   "end": 0,
+   "endX": 0,
+   "sackX": -25
+  },
+  "di": {
+   "in": "3",
+   "out": "3 KO",
+   "up": "3",
+   "down": "3 KO",
+   "cpu8": "1"
+  },
+  "weights": {
+   "Nib 72": "3 KO",
+   "Flint 92": "4 KO",
+   "Sprocket 103": "4 KO",
+   "Hod 121": "2 KO"
+  },
+  "window": [
+   70
+  ]
+ },
+ "12": {
+  "base": {
+   "hits": 4,
+   "dmg": 45,
+   "ko": true,
+   "koHits": 4,
+   "end": 0,
+   "endX": 0,
+   "sackX": -24
+  },
+  "di": {
+   "in": "3",
+   "out": "3",
+   "up": "4 KO",
+   "down": "3",
+   "cpu8": "0"
+  },
+  "weights": {
+   "Nib 72": "2 KO",
+   "Flint 92": "4 KO",
+   "Sprocket 103": "3 KO",
+   "Hod 121": "1"
+  },
+  "window": []
+ },
+ "13": {
+  "base": {
+   "hits": 3,
+   "dmg": 32.8,
+   "ko": true,
+   "koHits": 3,
+   "end": 0,
+   "endX": 0,
+   "sackX": 25
+  },
+  "di": {
+   "in": "2 KO",
+   "out": "2 KO",
+   "up": "3 KO",
+   "down": "2 KO",
+   "cpu8": "0"
+  },
+  "weights": {
+   "Nib 72": "3 KO",
+   "Flint 92": "3 KO",
+   "Sprocket 103": "2 KO",
+   "Hod 121": "1 KO"
+  },
+  "window": [
+   80,
+   90
+  ]
+ },
+ "14": {
+  "base": {
+   "hits": 2,
+   "dmg": 31,
+   "ko": true,
+   "koHits": 2,
+   "end": 0,
+   "endX": 0,
+   "sackX": -4
+  },
+  "di": {
+   "in": "2 KO",
+   "out": "2 KO",
+   "up": "2 KO",
+   "down": "2 KO",
+   "cpu8": "0"
+  },
+  "weights": {
+   "Nib 72": "1",
+   "Flint 92": "2 KO",
+   "Sprocket 103": "2 KO",
+   "Hod 121": "1"
+  },
+  "window": [
+   70,
+   80,
+   90,
+   100,
+   120
+  ]
+ },
+ "15": {
+  "base": {
+   "hits": 2,
+   "dmg": 24.2,
+   "ko": true,
+   "koHits": 2,
+   "end": 124.2,
+   "endX": 7,
+   "sackX": -2
+  },
+  "di": {
+   "in": "2 KO",
+   "out": "2 KO",
+   "up": "2 KO",
+   "down": "2 KO",
+   "cpu8": "2 KO"
+  },
+  "weights": {
+   "Nib 72": "2 KO",
+   "Flint 92": "2 KO",
+   "Sprocket 103": "2",
+   "Hod 121": "2"
+  },
+  "window": [
+   100,
+   110,
+   120,
+   130,
+   140,
+   150,
+   160
+  ]
+ },
+ "16": {
+  "base": {
+   "hits": 3,
+   "dmg": 30.7,
+   "ko": true,
+   "koHits": 3,
+   "end": 105.7,
+   "endX": -139,
+   "sackX": -15
+  },
+  "di": {
+   "in": "3 KO",
+   "out": "3 KO",
+   "up": "3 KO",
+   "down": "3 KO",
+   "cpu8": "2"
+  },
+  "weights": {
+   "Nib 72": "2 KO",
+   "Flint 92": "3 KO",
+   "Sprocket 103": "3 KO",
+   "Hod 121": "2 KO"
+  },
+  "window": [
+   70,
+   80
+  ]
+ },
+ "17": {
+  "base": {
+   "hits": 2,
+   "dmg": 19.7,
+   "ko": true,
+   "koHits": 2,
+   "end": 139.7,
+   "endX": 72,
+   "sackX": 91
+  },
+  "di": {
+   "in": "2",
+   "out": "1 KO",
+   "up": "2 KO",
+   "down": "2 KO",
+   "cpu8": "0"
+  },
+  "weights": {
+   "Nib 72": "2 KO",
+   "Flint 92": "2 KO",
+   "Sprocket 103": "2 KO",
+   "Hod 121": "1"
+  },
+  "window": [
+   120,
+   130,
+   140,
+   150,
+   160
+  ]
+ },
+ "18": {
+  "base": {
+   "hits": 1,
+   "dmg": 21.3,
+   "ko": false,
+   "koHits": 0,
+   "end": 81.3,
+   "endX": 138,
+   "sackX": -20
+  },
+  "di": {
+   "in": "1",
+   "out": "1",
+   "up": "1",
+   "down": "1",
+   "cpu8": "0"
+  },
+  "weights": {
+   "Nib 72": "1",
+   "Flint 92": "1",
+   "Sprocket 103": "1",
+   "Hod 121": "1"
+  },
+  "window": [
+   0,
+   10,
+   20,
+   30,
+   40,
+   50,
+   60,
+   70,
+   80,
+   90,
+   100,
+   110,
+   120,
+   130,
+   140,
+   150,
+   160
+  ]
+ },
+ "19": {
+  "base": {
+   "hits": 0,
+   "dmg": 0,
+   "ko": false,
+   "koHits": 0,
+   "end": 40,
+   "endX": -22,
+   "sackX": 129
+  },
+  "di": {
+   "in": "0",
+   "out": "0",
+   "up": "0",
+   "down": "0",
+   "cpu8": "1"
+  },
+  "weights": {
+   "Nib 72": "0",
+   "Flint 92": "0",
+   "Sprocket 103": "0",
+   "Hod 121": "0"
+  },
+  "window": [
+   0,
+   10,
+   20,
+   30,
+   40,
+   50,
+   60,
+   70,
+   80,
+   90,
+   100,
+   110,
+   120,
+   130,
+   140,
+   150,
+   160
+  ]
+ },
+ "01": {
+  "base": {
+   "hits": 4,
+   "dmg": 34.5,
+   "ko": false,
+   "koHits": 0,
+   "end": 34.5,
+   "endX": 56,
+   "sackX": 73
+  },
+  "di": {
+   "in": "4",
+   "out": "4",
+   "up": "4",
+   "down": "4",
+   "cpu8": "0"
+  },
+  "weights": {
+   "Nib 72": "4",
+   "Flint 92": "4",
+   "Sprocket 103": "4",
+   "Hod 121": "4"
+  },
+  "window": [
+   0
+  ]
+ },
+ "02": {
+  "base": {
+   "hits": 3,
+   "dmg": 41.6,
+   "ko": false,
+   "koHits": 0,
+   "end": 66.6,
+   "endX": 90,
+   "sackX": 13
+  },
+  "di": {
+   "in": "2",
+   "out": "2",
+   "up": "3",
+   "down": "3",
+   "cpu8": "3"
+  },
+  "weights": {
+   "Nib 72": "3",
+   "Flint 92": "3",
+   "Sprocket 103": "3",
+   "Hod 121": "2"
+  },
+  "window": [
+   20
+  ]
+ },
+ "03": {
+  "base": {
+   "hits": 2,
+   "dmg": 26.7,
+   "ko": false,
+   "koHits": 0,
+   "end": 51.7,
+   "endX": 27,
+   "sackX": 25
+  },
+  "di": {
+   "in": "2",
+   "out": "2",
+   "up": "2",
+   "down": "2",
+   "cpu8": "1"
+  },
+  "weights": {
+   "Nib 72": "2",
+   "Flint 92": "2",
+   "Sprocket 103": "2",
+   "Hod 121": "2"
+  },
+  "window": [
+   0,
+   10,
+   20,
+   30
+  ]
+ },
+ "04": {
+  "base": {
+   "hits": 4,
+   "dmg": 36.5,
+   "ko": true,
+   "koHits": 4,
+   "end": 36.5,
+   "endX": 88,
+   "sackX": 74
+  },
+  "di": {
+   "in": "3",
+   "out": "4 KO",
+   "up": "3",
+   "down": "4",
+   "cpu8": "1"
+  },
+  "weights": {
+   "Nib 72": "4 KO",
+   "Flint 92": "4 KO",
+   "Sprocket 103": "4",
+   "Hod 121": "4"
+  },
+  "window": [
+   0
+  ]
+ },
+ "05": {
+  "base": {
+   "hits": 5,
+   "dmg": 51.6,
+   "ko": false,
+   "koHits": 0,
+   "end": 91.6,
+   "endX": -73,
+   "sackX": 19
+  },
+  "di": {
+   "in": "5",
+   "out": "3",
+   "up": "3",
+   "down": "5",
+   "cpu8": "0"
+  },
+  "weights": {
+   "Nib 72": "2",
+   "Flint 92": "5",
+   "Sprocket 103": "2",
+   "Hod 121": "1"
+  },
+  "window": [
+   40,
+   50
+  ]
+ },
+ "06": {
+  "base": {
+   "hits": 4,
+   "dmg": 36.6,
+   "ko": false,
+   "koHits": 0,
+   "end": 76.6,
+   "endX": 30,
+   "sackX": 25
+  },
+  "di": {
+   "in": "4",
+   "out": "4",
+   "up": "4",
+   "down": "4",
+   "cpu8": "0"
+  },
+  "weights": {
+   "Nib 72": "2",
+   "Flint 92": "4",
+   "Sprocket 103": "3",
+   "Hod 121": "1"
+  },
+  "window": [
+   40,
+   50
+  ]
+ },
+ "07": {
+  "base": {
+   "hits": 4,
+   "dmg": 39.8,
+   "ko": false,
+   "koHits": 0,
+   "end": 99.8,
+   "endX": -7,
+   "sackX": 6
+  },
+  "di": {
+   "in": "4",
+   "out": "4",
+   "up": "4",
+   "down": "4",
+   "cpu8": "0"
+  },
+  "weights": {
+   "Nib 72": "2",
+   "Flint 92": "4",
+   "Sprocket 103": "3",
+   "Hod 121": "3"
+  },
+  "window": [
+   60
+  ]
+ },
+ "08": {
+  "base": {
+   "hits": 4,
+   "dmg": 41.8,
+   "ko": false,
+   "koHits": 0,
+   "end": 101.8,
+   "endX": 179,
+   "sackX": 81
+  },
+  "di": {
+   "in": "4",
+   "out": "2",
+   "up": "4",
+   "down": "2",
+   "cpu8": "1"
+  },
+  "weights": {
+   "Nib 72": "1",
+   "Flint 92": "4",
+   "Sprocket 103": "2",
+   "Hod 121": "2"
+  },
+  "window": [
+   60
+  ]
+ },
+ "09": {
+  "base": {
+   "hits": 4,
+   "dmg": 41.5,
+   "ko": true,
+   "koHits": 4,
+   "end": 0,
+   "endX": 0,
+   "sackX": 24
+  },
+  "di": {
+   "in": "2",
+   "out": "2",
+   "up": "2",
+   "down": "3 KO",
+   "cpu8": "0"
+  },
+  "weights": {
+   "Nib 72": "3 KO",
+   "Flint 92": "4 KO",
+   "Sprocket 103": "3",
+   "Hod 121": "3"
+  },
+  "window": [
+   30
+  ]
+ }
+}
