@@ -7884,5 +7884,569 @@
     "end": 0.8
    }
   }
+ },
+ "Vargan": {
+  "file": "assets/vargan/export/vargan-v1.glb",
+  "height": 16,
+  "axe": {
+   "file": "assets/vargan/export/runebreaker.glb",
+   "bone": "axe",
+   "len": 1.55,
+   "hold": 0.22
+  },
+  "clips": {
+   "idle": {
+    "clip": "Idle"
+   },
+   "idle2": {
+    "clip": "Idle2"
+   },
+   "walk": {
+    "clip": "Walk"
+   },
+   "run": {
+    "clip": "Run"
+   },
+   "crouch": {
+    "clip": "Crouch",
+    "at": 0.18
+   },
+   "brake": {
+    "clip": "Land",
+    "from": 0.05,
+    "to": 0.42
+   },
+   "jumpsquat": {
+    "clip": "Squat",
+    "from": 0,
+    "to": 0.1
+   },
+   "rise": {
+    "clip": "Rise",
+    "from": 0,
+    "to": 0.4
+   },
+   "fall": {
+    "clip": "Fall"
+   },
+   "fastfall": {
+    "clip": "FastFall"
+   },
+   "airjump": {
+    "clip": "AirJump",
+    "from": 0,
+    "to": 0.48
+   },
+   "helpless": {
+    "clip": "Helpless"
+   },
+   "land": {
+    "clip": "Land",
+    "from": 0,
+    "to": 0.42
+   },
+   "landHard": {
+    "clip": "LandHard",
+    "from": 0,
+    "to": 0.6
+   },
+   "shield": {
+    "clip": "Shield",
+    "from": 0,
+    "to": 0.12
+   },
+   "shieldHit": {
+    "clip": "ShieldHit",
+    "from": 0,
+    "to": 0.3
+   },
+   "hit": {
+    "clip": "Hit",
+    "from": 0,
+    "to": 0.6
+   },
+   "hitHeavy": {
+    "clip": "HitHeavy",
+    "from": 0,
+    "to": 0.8
+   },
+   "launch": {
+    "clip": "Launch",
+    "from": 0,
+    "to": 0.5
+   },
+   "launchUp": {
+    "clip": "LaunchUp",
+    "from": 0,
+    "to": 0.6
+   },
+   "spike": {
+    "clip": "Spike",
+    "from": 0,
+    "to": 0.6
+   },
+   "tumble": {
+    "clip": "Tumble",
+    "bounce": true
+   },
+   "down": {
+    "clip": "Down",
+    "from": 0,
+    "to": 0.3
+   },
+   "dizzy": {
+    "clip": "Hit",
+    "from": 0,
+    "to": 0.6,
+    "bounce": true
+   },
+   "airdodge": {
+    "clip": "AirDodge",
+    "from": 0,
+    "to": 0.66
+   },
+   "dodge": {
+    "clip": "Dodge",
+    "from": 0,
+    "to": 0.42
+   },
+   "roll": {
+    "clip": "Roll",
+    "from": 0,
+    "to": 1.05
+   },
+   "ledge": {
+    "clip": "Ledge"
+   },
+   "hold": {
+    "clip": "Hold"
+   },
+   "held": {
+    "clip": "Held"
+   },
+   "pummel": {
+    "clip": "Pummel",
+    "from": 0,
+    "to": 0.3
+   },
+   "respawn": {
+    "clip": "Respawn"
+   },
+   "throw": {
+    "clip": "ThrowF",
+    "from": 0,
+    "to": 0.65
+   },
+   "throw_f": {
+    "clip": "ThrowF",
+    "from": 0,
+    "to": 0.65
+   },
+   "throw_b": {
+    "clip": "ThrowB",
+    "from": 0,
+    "to": 0.8166666666666667
+   },
+   "throw_u": {
+    "clip": "ThrowU",
+    "from": 0,
+    "to": 0.7166666666666667
+   },
+   "throw_d": {
+    "clip": "ThrowD",
+    "from": 0,
+    "to": 0.65
+   },
+   "upb": {
+    "clip": "UpB",
+    "from": 0,
+    "to": 1
+   },
+   "upbE": {
+    "clip": "UpBE",
+    "from": 0,
+    "to": 1
+   }
+  },
+  "blade": {
+   "base": "axeHead",
+   "tip": "axeTip",
+   "at": 0,
+   "dot": 0,
+   "col": 16752704,
+   "col2": 16726544
+  },
+  "fire": {
+   "aura": [
+    "chest",
+    "armR",
+    "armL",
+    "shinR",
+    "shinL",
+    "head"
+   ],
+   "fists": [
+    "handR",
+    "handL"
+   ],
+   "feet": [
+    "footR",
+    "footL"
+   ],
+   "shoulder": "armR",
+   "axe": [
+    "axeHead",
+    "axeTip"
+   ]
+  },
+  "strikers": [
+   {
+    "bone": "axeTip",
+    "ext": 0.4
+   },
+   {
+    "bone": "handL",
+    "ext": 1.2
+   },
+   {
+    "bone": "handR",
+    "ext": 1.2
+   },
+   {
+    "bone": "footR",
+    "ext": 1.6
+   },
+   {
+    "bone": "footL",
+    "ext": 1.6
+   }
+  ],
+  "springs": [],
+  "attacks": {
+   "jab": {
+    "clip": "Jab",
+    "start": 0,
+    "contact": [
+     0.11666666666666667,
+     0.15
+    ],
+    "end": 0.43333333333333335
+   },
+   "ftilt": {
+    "clip": "Ftilt",
+    "start": 0,
+    "contact": [
+     0.16666666666666666,
+     0.21666666666666667
+    ],
+    "end": 0.65
+   },
+   "utilt": {
+    "clip": "Utilt",
+    "start": 0,
+    "contact": [
+     0.11666666666666667,
+     0.16666666666666666
+    ],
+    "end": 0.5166666666666667
+   },
+   "dtilt": {
+    "clip": "Dtilt",
+    "start": 0,
+    "contact": [
+     0.16666666666666666,
+     0.21666666666666667
+    ],
+    "end": 0.5833333333333334
+   },
+   "dash": {
+    "clip": "Dash",
+    "start": 0,
+    "contact": [
+     0.16666666666666666,
+     0.3333333333333333
+    ],
+    "end": 0.6166666666666667
+   },
+   "fsmash": {
+    "clip": "Fsmash",
+    "start": 0,
+    "contact": [
+     0.4,
+     0.4666666666666667
+    ],
+    "end": 1.1
+   },
+   "fsmashE": {
+    "clip": "FsmashE",
+    "start": 0,
+    "contact": [
+     0.45,
+     0.5
+    ],
+    "end": 1.05
+   },
+   "usmash": {
+    "clip": "Usmash",
+    "start": 0,
+    "contact": [
+     0.3333333333333333,
+     0.4166666666666667
+    ],
+    "end": 1.0166666666666666
+   },
+   "usmashE": {
+    "clip": "UsmashE",
+    "start": 0,
+    "contact": [
+     0.31666666666666665,
+     0.38333333333333336
+    ],
+    "end": 0.9
+   },
+   "dsmash": {
+    "clip": "Dsmash",
+    "start": 0,
+    "contact": [
+     0.26666666666666666,
+     0.48333333333333334
+    ],
+    "end": 1.0166666666666666
+   },
+   "dsmashE": {
+    "clip": "DsmashE",
+    "start": 0,
+    "contact": [
+     0.26666666666666666,
+     0.4666666666666667
+    ],
+    "end": 0.9166666666666666
+   },
+   "nair": {
+    "clip": "Nair",
+    "start": 0,
+    "contact": [
+     0.11666666666666667,
+     0.45
+    ],
+    "end": 0.6666666666666666
+   },
+   "fair": {
+    "clip": "Fair",
+    "start": 0,
+    "contact": [
+     0.2833333333333333,
+     0.35
+    ],
+    "end": 0.8
+   },
+   "fairE": {
+    "clip": "FairE",
+    "start": 0,
+    "contact": [
+     0.23333333333333334,
+     0.3333333333333333
+    ],
+    "end": 0.7333333333333333
+   },
+   "bair": {
+    "clip": "Bair",
+    "start": 0,
+    "contact": [
+     0.2,
+     0.25
+    ],
+    "end": 0.65
+   },
+   "bairE": {
+    "clip": "BairE",
+    "start": 0,
+    "contact": [
+     0.16666666666666666,
+     0.21666666666666667
+    ],
+    "end": 0.5833333333333334
+   },
+   "uair": {
+    "clip": "Uair",
+    "start": 0,
+    "contact": [
+     0.18333333333333332,
+     0.26666666666666666
+    ],
+    "end": 0.65
+   },
+   "uairE": {
+    "clip": "UairE",
+    "start": 0,
+    "contact": [
+     0.13333333333333333,
+     0.2833333333333333
+    ],
+    "end": 0.55
+   },
+   "dair": {
+    "clip": "Dair",
+    "start": 0,
+    "contact": [
+     0.26666666666666666,
+     0.31666666666666665
+    ],
+    "end": 0.7333333333333333
+   },
+   "grab": {
+    "clip": "Grab",
+    "start": 0,
+    "contact": [
+     0.13333333333333333,
+     0.18333333333333332
+    ],
+    "end": 0.6333333333333333
+   },
+   "dgrab": {
+    "clip": "GrabRun",
+    "start": 0,
+    "contact": [
+     0.18333333333333332,
+     0.23333333333333334
+    ],
+    "end": 0.7666666666666667
+   },
+   "pgrab": {
+    "clip": "GrabTurn",
+    "start": 0,
+    "contact": [
+     0.2,
+     0.25
+    ],
+    "end": 0.6833333333333333
+   },
+   "getup": {
+    "clip": "Getup",
+    "start": 0,
+    "contact": [
+     0.26666666666666666,
+     0.3333333333333333
+    ],
+    "end": 0.6666666666666666
+   },
+   "ledgeatk": {
+    "clip": "LedgeAtk",
+    "start": 0,
+    "contact": [
+     0.38333333333333336,
+     0.43333333333333335
+    ],
+    "end": 0.9166666666666666
+   },
+   "nspec": {
+    "clip": "Throw",
+    "start": 0,
+    "contact": [
+     0.5,
+     0.5166666666666667
+    ],
+    "end": 1.1
+   },
+   "nspecE": {
+    "clip": "Beckon",
+    "start": 0,
+    "contact": [
+     0.13333333333333333,
+     0.15
+    ],
+    "end": 0.4
+   },
+   "sspec": {
+    "clip": "Meteor",
+    "start": 0,
+    "contact": [
+     0.25,
+     0.6833333333333333
+    ],
+    "end": 0.95
+   },
+   "uspec": {
+    "clip": "UpB",
+    "start": 0,
+    "contact": [
+     0.16666666666666666,
+     1.0166666666666666
+    ],
+    "end": 1
+   },
+   "uspecE": {
+    "clip": "UpBE",
+    "start": 0,
+    "contact": [
+     0.16666666666666666,
+     1.0166666666666666
+    ],
+    "end": 1
+   },
+   "uspecL": {
+    "clip": "UpLand",
+    "start": 0,
+    "contact": [
+     0.016666666666666666,
+     0.08333333333333333
+    ],
+    "end": 0.6
+   },
+   "uspecLE": {
+    "clip": "UpLandE",
+    "start": 0,
+    "contact": [
+     0.016666666666666666,
+     0.08333333333333333
+    ],
+    "end": 0.6
+   },
+   "dspec": {
+    "clip": "Counter",
+    "start": 0,
+    "contact": [
+     0.13333333333333333,
+     0.5
+    ],
+    "end": 1.1166666666666667
+   },
+   "dspecHit": {
+    "clip": "CounterHit",
+    "start": 0,
+    "contact": [
+     0.06666666666666667,
+     0.1
+    ],
+    "end": 0.5666666666666667
+   },
+   "dspecHitE": {
+    "clip": "CounterHitE",
+    "start": 0,
+    "contact": [
+     0.06666666666666667,
+     0.1
+    ],
+    "end": 0.5666666666666667
+   },
+   "berserk": {
+    "clip": "Berserk",
+    "start": 0,
+    "contact": [
+     0.06666666666666667,
+     0.08333333333333333
+    ],
+    "end": 0.13333333333333333
+   },
+   "*": {
+    "clip": "Jab",
+    "start": 0,
+    "contact": [
+     0.11666666666666667,
+     0.15
+    ],
+    "end": 0.43333333333333335
+   }
+  }
  }
 }

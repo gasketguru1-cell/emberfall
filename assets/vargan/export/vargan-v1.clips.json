@@ -1,0 +1,209 @@
+{
+ "Idle": {
+  "seconds": 3.2
+ },
+ "Idle2": {
+  "seconds": 2.6
+ },
+ "Walk": {
+  "seconds": 0.633
+ },
+ "Run": {
+  "seconds": 0.367
+ },
+ "Crouch": {
+  "seconds": 0.083
+ },
+ "Squat": {
+  "seconds": 0.05
+ },
+ "Rise": {
+  "seconds": 0.2
+ },
+ "Fall": {
+  "seconds": 0.3
+ },
+ "FastFall": {
+  "seconds": 0.017
+ },
+ "AirJump": {
+  "seconds": 0.233
+ },
+ "Helpless": {
+  "seconds": 0.25
+ },
+ "Land": {
+  "seconds": 0.217
+ },
+ "LandHard": {
+  "seconds": 0.3
+ },
+ "Shield": {
+  "seconds": 0.067
+ },
+ "ShieldHit": {
+  "seconds": 0.15
+ },
+ "Hit": {
+  "seconds": 0.3
+ },
+ "HitHeavy": {
+  "seconds": 0.4
+ },
+ "Launch": {
+  "seconds": 0.25
+ },
+ "LaunchUp": {
+  "seconds": 0.3
+ },
+ "Spike": {
+  "seconds": 0.3
+ },
+ "Tumble": {
+  "seconds": 0.3
+ },
+ "Down": {
+  "seconds": 0.15
+ },
+ "Dodge": {
+  "seconds": 0.217
+ },
+ "Roll": {
+  "seconds": 0.533
+ },
+ "AirDodge": {
+  "seconds": 0.333
+ },
+ "Ledge": {
+  "seconds": 0.7
+ },
+ "Hold": {
+  "seconds": 0.3
+ },
+ "Pummel": {
+  "seconds": 0.15
+ },
+ "Held": {
+  "seconds": 0.25
+ },
+ "ThrowF": {
+  "seconds": 0.65
+ },
+ "ThrowB": {
+  "seconds": 0.817
+ },
+ "ThrowU": {
+  "seconds": 0.717
+ },
+ "ThrowD": {
+  "seconds": 0.65
+ },
+ "Respawn": {
+  "seconds": 1.2
+ },
+ "Jab": {
+  "seconds": 0.433
+ },
+ "Ftilt": {
+  "seconds": 0.65
+ },
+ "Utilt": {
+  "seconds": 0.517
+ },
+ "Dtilt": {
+  "seconds": 0.583
+ },
+ "Dash": {
+  "seconds": 0.617
+ },
+ "Fsmash": {
+  "seconds": 1.1
+ },
+ "FsmashE": {
+  "seconds": 1.05
+ },
+ "Usmash": {
+  "seconds": 1.017
+ },
+ "UsmashE": {
+  "seconds": 0.9
+ },
+ "Dsmash": {
+  "seconds": 1.017
+ },
+ "DsmashE": {
+  "seconds": 0.917
+ },
+ "Nair": {
+  "seconds": 0.667
+ },
+ "Fair": {
+  "seconds": 0.8
+ },
+ "FairE": {
+  "seconds": 0.733
+ },
+ "Bair": {
+  "seconds": 0.65
+ },
+ "BairE": {
+  "seconds": 0.583
+ },
+ "Uair": {
+  "seconds": 0.65
+ },
+ "UairE": {
+  "seconds": 0.55
+ },
+ "Dair": {
+  "seconds": 0.733
+ },
+ "Grab": {
+  "seconds": 0.633
+ },
+ "GrabRun": {
+  "seconds": 0.767
+ },
+ "GrabTurn": {
+  "seconds": 0.683
+ },
+ "Getup": {
+  "seconds": 0.667
+ },
+ "LedgeAtk": {
+  "seconds": 0.917
+ },
+ "Throw": {
+  "seconds": 1.1
+ },
+ "Beckon": {
+  "seconds": 0.4
+ },
+ "Meteor": {
+  "seconds": 0.95
+ },
+ "UpB": {
+  "seconds": 1
+ },
+ "UpBE": {
+  "seconds": 1
+ },
+ "UpLand": {
+  "seconds": 0.6
+ },
+ "UpLandE": {
+  "seconds": 0.6
+ },
+ "Counter": {
+  "seconds": 1.117
+ },
+ "CounterHit": {
+  "seconds": 0.567
+ },
+ "CounterHitE": {
+  "seconds": 0.567
+ },
+ "Berserk": {
+  "seconds": 0.133
+ }
+}

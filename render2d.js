@@ -213,6 +213,36 @@ const ART = {
     g.fillStyle = c[1]; g.fillRect(sx - sr * 0.6, sy - 0.25, sr * 0.55, 0.5);   /* brass hinge strap */
     g.fillStyle = c[2]; g.beginPath(); g.ellipse(sx + 0.25, sy, 0.32, 0.6, 0, 0, TAU); g.fill();   /* the glowing grille */
   },
+  /* Vargan the Ashbound: heavy boots, dark trousers, a studded leather tunic, a fur mantle on one shoulder, a braided red
+     beard, and Runebreaker. The axe is drawn where an axe hit's shape is (as Brand's blade); while it is thrown his hand is
+     empty. In Berserker an orange glow rings him. Faces +x. */
+  Vargan(c, t, f) {
+    const sw = gait(f) * 1.2, bob = Math.sin(t * 0.06) * 0.16, skin = '#d29a76', leather = '#4a2e1c', beard = '#9a4e22';
+    if (f && f.berserk) { g.beginPath(); g.ellipse(0, 8, 6.4, 9.6, 0, 0, TAU); g.fillStyle = 'rgba(255,90,30,.18)'; g.fill(); }
+    limb(-1.5, 5, -1.6 - sw, 1, 1.9, '#3c3a30'); limb(1.5, 5, 1.6 + sw, 1, 1.9, '#3c3a30');
+    for (const s of [-1, 1]) { g.beginPath(); g.rect(s * 1.6 + s * sw - 1.2, 0.2, 2.6, 3.6); ink('#3a2416', 0.28); g.beginPath(); g.ellipse(s * 1.6 + s * sw + 0.6, 0.6, 1.9, 0.8, 0, 0, TAU); ink('#3a2416', 0.28); }
+    g.beginPath(); g.moveTo(-3.6, 4.2); g.quadraticCurveTo(0, 3.4, 3.8, 4.2); g.lineTo(3.2, 12.6 + bob); g.quadraticCurveTo(0, 13.4 + bob, -3.2, 12.6 + bob); g.closePath(); ink(vgrad(leather, 4, 13));   /* tunic */
+    g.fillStyle = c[1]; for (const [x, y] of [[-1.6, 10.6], [1.4, 10.8], [-1.2, 8.4], [1.8, 8.6]]) { g.beginPath(); g.arc(x, y + bob, 0.24, 0, TAU); g.fill(); }
+    g.beginPath(); g.rect(-3.3, 7.4, 6.6, 1.1); ink('#5e3b22', 0.22); g.beginPath(); g.rect(0.3, 7.3, 1.2, 1.3); ink(c[1], 0.18);   /* belt and buckle */
+    /* the axe arm */
+    let tx = 4.2, ty = 13.4, hx = 3.0, hy = 7.6;
+    if (f && f.state === 'attack' && f.move && f.move.h && !f.axeAway) { const m = f.move, h = m.h.find(q => q.ax && f.mf >= q.f0 && f.mf <= q.f1) || m.h.find(q => q.ax && f.mf < q.f0) || m.h.filter(q => q.ax).pop();
+      if (h) { const p = f.mf < h.f0 ? f.mf / h.f0 : f.mf <= h.f1 ? 1 : Math.max(0, 1 - (f.mf - h.f1) / Math.max(1, m.t - h.f1)), e = p * p * (3 - 2 * p), U = 16, a = h.ax[2] * Math.PI / 180;
+        const gx = h.ax[0] * U, gy = h.ax[1] * U; hx += (gx - hx) * e; hy += (gy - hy) * e; tx += (gx + Math.cos(a) * 11 - tx) * e; ty += (gy + Math.sin(a) * 11 - ty) * e; } }
+    limb(1, 11.4 + bob, hx, hy, 1.6, skin);
+    if (!(f && f.axeAway)) { const dx = tx - hx, dy = ty - hy, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, px = hx - ux * 1.8, py = hy - uy * 1.8;
+      g.lineCap = 'round'; g.beginPath(); g.moveTo(px, py); g.lineTo(tx, ty); g.strokeStyle = OL; g.lineWidth = 1.2; g.stroke(); g.strokeStyle = '#6b4226'; g.lineWidth = 0.7; g.stroke();
+      const bx = tx - ux * 2.4, by = ty - uy * 2.4, nx = uy, ny = -ux;   /* the blade on the haft's leading side */
+      g.beginPath(); g.moveTo(bx - ux * 1.2, by - uy * 1.2); g.lineTo(bx - ux * 1.6 + nx * 3, by - uy * 1.6 + ny * 3); g.lineTo(tx + ux * 0.6 + nx * 3, ty + uy * 0.6 + ny * 3); g.lineTo(tx, ty); g.closePath(); ink(f && f.berserk ? '#c9744a' : '#9aa0a8', 0.3);
+      g.beginPath(); g.arc(hx, hy, 0.85, 0, TAU); ink(skin, 0.22); }
+    else { g.beginPath(); g.arc(hx, hy, 0.85, 0, TAU); ink(skin, 0.22); }
+    /* fur mantle, head, beard and braid */
+    g.beginPath(); g.ellipse(-1.2, 12.4 + bob, 2.6, 1.3, -0.2, 0, TAU); ink('#9b9890', 0.26);
+    g.beginPath(); g.arc(0.5, 14.3 + bob, 1.9, 0, TAU); ink(skin, 0.28);
+    g.beginPath(); g.moveTo(-0.3, 13.6 + bob); g.quadraticCurveTo(1.6, 11.2 + bob, 2.5, 13.5 + bob); g.closePath(); ink(beard, 0.22);
+    g.strokeStyle = OL; g.lineWidth = 1.1; g.beginPath(); g.moveTo(-1.2, 14.8 + bob); g.quadraticCurveTo(-2.2, 13.2 + bob, -1.8, 11.6 + bob); g.stroke(); g.strokeStyle = beard; g.lineWidth = 0.6; g.stroke();
+    g.fillStyle = OL; g.beginPath(); g.arc(1.6, 14.6 + bob, 0.2, 0, TAU); g.fill(); g.fillStyle = c[1]; g.fillRect(1.0, 14.9 + bob, 1.2, 0.35);   /* the gold plate over one eye */
+  },
   /* Joey: an ordinary lean man, red cap, a dark mustache, grey camouflage shorts, bare feet. The reaching hand is drawn to
      where the attack's own shape is, as Brand's blade is. Faces +x. */
   Joey(c, t, f) {

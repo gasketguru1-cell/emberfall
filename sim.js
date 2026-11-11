@@ -1554,7 +1554,186 @@ const JOEY = (() => {
   return { name: 'Joey', sub: 'just a regular guy', transform: 1, forms: [human, big] };
 })();
 
-const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE, FOWLS, CHOMP, BRAND, JOEY];
+/* ---------- Vargan the Ashbound (original; the owner's "Nordic Berserker" atlas v1.0, 2026-11-11) ----------
+   A superheavyweight Nordic warrior in worn bronze and iron, a fur mantle and a braided beard, with Runebreaker: a split-head
+   greataxe that is a real object in the world. Thrown, it lands and stays stuck in the stage (or falls slowly past the
+   ledge) until he calls it back by holding special; it hurts whatever it passes through on the way home, harder the further
+   it was left. While the axe is away his forward, back and up airs, his smashes and his up special are the unarmed ones;
+   his jab, tilts, dash attack, neutral and down airs and throws are always unarmed. Down special counters: with the axe in
+   hand an axe-butt uppercut pops the attacker up; with the axe stuck in the stage, the attacker is popped up and the axe
+   tears itself free and homes in on them. Attack and special together turn Berserker on and off: +50% damage, knockback
+   and movement, 5% of his own damage a second, and fire on every attack. Side special is a meteor shoulder charge over
+   exactly 30% of the main floor's width. Frame numbers are the atlas's (frames, active frames, totals and damage; the
+   proposed values as written); positions are in units of his height H = 16 from his feet, placed where the animation puts
+   the fist, boot or blade. Launch angles and growth not given by the atlas are first-pass values of mine. */
+const VAXE = { g: 0.09, slow: 0.55, vx: 1.15, vy: 2.55, r: 3.4, hold: 8, sp0: 1.3, spMax: 4.4, acc: 0.11, turn: 0.2, homeT: 150, backT: 240 };
+const vW = () => MAIN.x1 - MAIN.x0;   /* the main floor's width, W in the atlas (never a side platform's) */
+const vHand = f => [f.x + f.face * 4, f.y + f.st.h * 0.55];
+/* Distance power (atlas II / SCALING FORMULA): t = clamp(D / 0.55 W, 0, 1), D from the fighter to the axe, frozen when the
+   recall is asked for or the counter succeeds. 12% + 9% x t, knockback x (1 + 0.8 t). */
+const vTier = (f, p) => clamp(Math.hypot(p.x - f.x, p.y - (f.y + f.st.h * 0.5)) / (0.55 * vW()), 0, 1);
+const vAxeHit = (t, o) => Object.assign({ d: Math.round((12 + 9 * t) * 100) / 100, a: 45, b: 40, k: 70, kbMul: 1 + 0.8 * t, id: 'Vargan:recall' }, o);
+function vThrow(f) {
+  const p = { x: f.x + f.face * 5, y: f.y + f.st.h * 0.78, vx: VAXE.vx * f.face, vy: VAXE.vy, grav: 0, life: 1e9, hits: 1e9, rehit: 1e9, owner: f.idx, face: f.face, r: VAXE.r, ground: 'pass', plat: null,
+    kind: 'vaxe', tag: 'vaxe', st: 'fly', rot: Math.PI / 2, noClash: 1, h: { d: 15, a: 50, b: 40, k: 70, id: 'Vargan:nspec' }, step: vAxeStep, onHit: vAxeOnHit, onGone: vAxeGone };
+  PROJ.push(p); f.axe = p; f.axeAway = true; f.recallArm = false; f.recallN = 0; beep(240, 0.08, 'sawtooth', 0.05, 0.7);
+}
+/* the axe hits a victim once per trip (out, home, or the counter's homing strike), then passes through them */
+function vAxeOnHit(p) { p.ghost = true; if (p.st === 'home') { p.st = 'return'; p.sp = Math.min(p.sp, 2); } }
+function vAxeGone(p) { const f = F[p.owner]; if (f && f.axe === p) { f.axe = null; f.axeAway = false; spark(f.x, f.y + f.st.h * 0.6, '#ff7a3c', 14, 1.2); beep(520, 0.06, 'triangle', 0.04, 1.4); } }   /* past a blast line it comes back to his hand at once */
+function vStick(p, q, y, wall) {
+  p.st = 'stuck'; p.plat = q; p.vx = p.vy = 0; p.ghost = true; p.y = y; p.wall = wall || 0;
+  p.rot = wall ? (wall > 0 ? Math.PI : 0) : -Math.PI / 2 + p.face * 0.45;   /* the head's direction: into the rock, or down into the floor, leaning back */
+  spark(p.x, p.y, '#d8c49a', 10, 1.1); beep(140, 0.08, 'square', 0.05, 0.7);
+}
+function vRecall(f, p) { p.t = vTier(f, p); p.st = 'recall'; p.h = vAxeHit(p.t); p.ghost = false; p.plat = null; p.sp = VAXE.sp0; p.n = 0; p.vx = 0; p.vy = 1.2; spark(p.x, p.y, '#ff7a3c', 10, 1.2); beep(330, 0.1, 'triangle', 0.05, 1.6); }
+function vCatch(f, p) { p.life = 0; p.gone = true; f.axe = null; f.axeAway = false; spark(p.x, p.y, '#ffb060', 10, 1.2); beep(660, 0.05, 'triangle', 0.04, 1.3); }
+function vSteer(p, tx, ty, spMax, turn) {
+  const dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy) || 1e-6;
+  p.sp = Math.min(spMax, (p.sp || VAXE.sp0) + VAXE.acc); const k = Math.min(1, turn + (p.n || 0) * 0.004);   /* turns harder the longer it flies, so it can never circle for ever */
+  p.vx += (dx / d * p.sp - p.vx) * k; p.vy += (dy / d * p.sp - p.vy) * k; const s = Math.hypot(p.vx, p.vy) || 1; p.vx *= p.sp / s; p.vy *= p.sp / s;
+  p.x += p.vx; p.y += p.vy; p.rot += 0.42 * (sgn(p.vx) || p.face); p.face = sgn(p.vx) || p.face; return d;
+}
+function vAxeStep(p) {
+  const f = F[p.owner]; if (!f || f.axe !== p) { p.life = 0; return; }
+  p.life = 1e9; p.n = (p.n || 0) + 1;
+  if (p.st === 'fly') {
+    const px = p.x, py = p.y; p.vy = Math.max(p.vy - VAXE.g * (Math.abs(p.x) > EDGE ? VAXE.slow : 1), -3); p.x += p.vx; p.y += p.vy; p.rot -= 0.36 * p.face;   /* past the ledge it falls at 0.55 of its gravity */
+    if (p.vy <= 0) for (const q of PLATS) if (py >= q.y && p.y <= q.y && p.x >= q.x0 && p.x <= q.x1) { p.x = clamp(p.x, q.x0 + 1, q.x1 - 1); vStick(p, q, q.y); return; }   /* a pass-through platform holds it too: it lands on the top */
+    const half = p.y < 0 ? stageHalf(p.y) : -1; if (half >= 0 && Math.abs(p.x) < half) { const s = Math.abs(px) >= stageHalf(Math.min(py, 0)) ? sgn(px) || 1 : sgn(p.x) || 1; p.x = s * half; vStick(p, null, p.y, s); }   /* into the island's side or underside */
+  } else if (p.st === 'stuck') { if (p.plat) p.y = p.plat.y; }
+  else if (p.st === 'recall' || p.st === 'return') { const [hx, hy] = vHand(f); if (f.state === 'dead' || f.state === 'respawn') return; const d = vSteer(p, hx, hy, VAXE.spMax, VAXE.turn); if (d < 6 + p.sp || p.n > VAXE.backT) vCatch(f, p); }
+  else if (p.st === 'home') {   /* the counter's homing strike: toward the launched attacker until it hits, or they are gone */
+    const v = F[p.target]; if (!v || v.state === 'dead' || v.state === 'respawn' || p.n > VAXE.homeT) { p.st = 'return'; p.ghost = true; p.n = 0; return; }
+    vSteer(p, v.x, v.y + v.st.h * 0.5, VAXE.spMax * 1.1, VAXE.turn * 1.3);
+  }
+}
+/* A successful counter (atlas II / COUNTER). Axe in hand: the axe-butt uppercut. Axe stuck in the stage: the same pop with an
+   empty hand, and the axe tears free and homes in at the strength its distance from him gives. Axe in the air (going out
+   or coming back): the unarmed uppercut only, no homing (the atlas's proposed fallback). */
+function vCounter(v, a, hx, hy) {
+  a.hitlag = 14; v.hitlag = 6; v.face = sgn(a.x - v.x) || v.face; const p = v.axe;
+  v.startMove('dspecHit');   /* dspecHitE when the axe is away (startMove) */
+  if (p && p.st === 'stuck') { p.st = 'home'; p.target = a.idx; p.t = vTier(v, p); p.h = vAxeHit(p.t, { a: 75, id: 'Vargan:home' }); p.ghost = false; p.plat = null; p.sp = VAXE.sp0; p.n = 0; p.vx = 0; p.vy = 2; spark(p.x, p.y, '#ff5a1e', 22, 2); }
+  spark(hx, hy, '#ffcf6a', 18, 1.8); pop(hx, hy + 12, 'COUNTER', '#ff9a4a'); beep(880, 0.08, 'triangle', 0.05, 0.6);
+}
+const VARGAN = (() => {
+  const U = 16, q = v => Math.round(v * U * 100) / 100;
+  const cap = (f0, f1, x1, y1, x2, y2, r, d, a, b, k, o) => Object.assign({ f0, f1, x: q(x2), y: q(y2), r: q(r), in: [q(x1), q(y1)], n: Math.max(3, Math.ceil(Math.hypot(x2 - x1, y2 - y1) / r) + 1), d, a, b, k }, o);
+  const circ = (f0, f1, x, y, r, d, a, b, k, o) => Object.assign({ f0, f1, x: q(x), y: q(y), r: q(r), in: [q(x), q(y)], n: 1, d, a, b, k }, o);
+  const grab = (f0, f1, x1, y1, x2, y2, r) => ({ f0, f1, x: q(x2), y: q(y2), r: q(r), in: [q(x1), q(y1)], n: 4, grab: 1, d: 0 });
+  /* An axe strike, given as the animation holds it: the fist's middle at (gx, gy), the haft pointing ang degrees (0 straight
+     ahead, 90 straight up) and the edge to the haft's left (es 1, an upward or counter-clockwise swing), right (-1) or across
+     the picture (0). The hit is the blade: a capsule along the haft from 0.6 m to 1.25 m out from the fist, the far end 0.18 m
+     toward the edge, 0.14 H round (the axe is 1.55 m; his height H is 1.902 m in the model). tools/blender/vargan.js reads
+     ax and puts the drawn axe exactly there on these frames. */
+  const AX = { in: 0.6 / 1.902, out: 1.25 / 1.902, edge: 0.18 / 1.902, r: 0.14 };
+  const axe = (f0, f1, gx, gy, ang, es, d, a, b, k, o) => { const c = Math.cos(ang * Math.PI / 180), s = Math.sin(ang * Math.PI / 180);
+    return cap(f0, f1, gx + c * AX.in, gy + s * AX.in, gx + c * AX.out - s * es * AX.edge, gy + s * AX.out + c * es * AX.edge, AX.r, d, a, b, k, Object.assign({ ax: [gx, gy, ang, es] }, o)); };
+  const NB = { nb: 1 };   /* not the blade: a fist, a boot, a shoulder (no axe arc is drawn) */
+  const nb = o => Object.assign({ nb: 1 }, o);
+  const rise = () => (f, n) => { if (n === 1) f.invuln = Math.max(f.invuln, f.pct >= 100 ? 12 : 18); };
+  const walkOn = (f, v) => { const p = f.plat; if (p && (f.x + v < p.x0 + 0.5 || f.x + v > p.x1 - 0.5)) v = 0; f.vx = v; };
+  /* Soaring Plunge (atlas V / Up-B, the reference's rise, hang and dive): frames 1-9 gather, 10 to 38 straight up UP with a
+     little steering, 39 to 47 hang there, 48 to 53 turn over, from 54 straight down fast until he lands (a landing strike on
+     frames 1 to 4 of 36) or takes a ledge (from frame 54). Nothing stops the dive offstage. */
+  const UP = 2.25 * U, UPV = UP / 15;
+  const plunge = (f, n, i) => {
+    if (n < 10) { if (!f.grounded) f.vy = Math.max(f.vy * 0.6, -0.4); f.vx *= 0.8; return; }
+    if (n === 10) lift(f, 0);
+    if (n <= 38) { f.vy = UPV * (1 - (n - 10) / 29); f.vx = clamp(i.lx, -1, 1) * 0.75; }
+    else if (n <= 47) { f.vy = 0; f.vx *= 0.8; }
+    else if (n <= 53) { f.vy = 0.15; f.vx *= 0.8; }
+    else { f.vy = -3.4; f.vx = clamp(i.lx, -1, 1) * 0.25; }
+  };
+  const upHits = fist => fist ? [
+    cap(10, 11, 0.18, 0.6, 0.3, 1.08, 0.13, 6, 90, 0, 0, nb({ g: 1, link: [q(0.05), UP * 0.85, 28] })),
+    ...[39, 41, 43, 45, 47].map((n, k) => circ(n, n, 0.25, 1.05, 0.26, 1.5, 85, 0, 0, nb({ g: 2 + k, link: [0, 0.4, 3] }))),
+    circ(54, 9999, 0.2, 0.3, 0.26, 6, 275, 50, 0, nb({ g: 9 }))] : [
+    axe(10, 11, 0.22, 0.7, 72, 1, 6, 90, 0, 0, { g: 1, link: [q(0.05), UP * 0.85, 28] }),
+    ...[39, 41, 43, 45, 47].map((n, k) => axe(n, n, 0.12, 1.0, 75, 1, 1.5, 85, 0, 0, { g: 2 + k, link: [0, 0.4, 3] })),
+    axe(54, 9999, 0.14, 0.36, -82, 1, 6, 275, 50, 0, { g: 9 })];
+  const upMove = fist => ({ t: 9999, ownPhys: 1, ledge: 1, snap: 54, rise: UP, h: upHits(fist), on: plunge,
+    onLand(f, n) { if (n >= 10) { f.startMove('uspecL'); return true; } } });
+  /* Meteor Shoulder Charge (atlas II / SIDE SPECIAL): coil on 1-14, then from frame 15 straight ahead until exactly 0.30 W
+     is covered (Berserker covers it faster, never further), the shoulder hitting 18% clean to frame 24, 12% late to 40,
+     braking to 57. On the ground it stops at the end of the floor; in the air it flies level, then falls (once per trip). */
+  const meteor = (f, n) => {
+    if (n === 1) { f.metX = f.x; f.vx *= 0.3; }
+    const W3 = 0.3 * vW(), done = Math.abs(f.x - f.metX);
+    if (n < 15) { f.vx = appr(f.vx, 0, 0.12); if (!f.grounded) f.vy = Math.max(f.vy - f.st.grav * 0.4, -0.6); }
+    else if (n <= 40 && done < W3 - 1e-6) { const v = Math.min(W3 / 26 * (f.berserk ? 1.5 : 1), W3 - done); f.vx = f.face * v; if (!f.grounded) f.vy = 0; }
+    else if (n <= 40) { f.vx = 0; if (!f.grounded) f.vy = 0; }   /* there: the root stops dead (the skid is the picture's), still burning to frame 40 */
+    else { f.vx = f.grounded ? 0 : appr(f.vx, 0, 0.04); if (!f.grounded) f.vy = Math.max(f.vy - f.st.grav, -f.st.fall); }   /* on the ground the travel is exactly 0.30 W: the skid after it is only drawn */
+  };
+  return {
+    name: 'Vargan', sub: 'the Ashbound', forms: [{
+      name: 'Vargan', col: ['#5a3a24', '#b07a3a', '#ff5a1e'], alt: ['#3a4a5a', '#9aa4ae', '#ff8a3c'], varg: 1,
+      /* Atlas I / LOCOMOTION: weight 118, walk 0.767, run 1.34, initial dash 1.87, air speed 0.83 and acceleration 0.04,
+         gravity 0.108, fall 1.65 / 2.64, a 3-frame squat (the reference fighter's own numbers, which are this game's units).
+         Jump heights are the reference's (30 / 14.5 / 30.5); traction and the rest are mine. Standing 0.5 x 1 H. */
+      st: { weight: 118, walk: 0.767, walkMul: 0.1, walkAdd: 0.06, trac: 0.115, dash: 1.87, runMul: 0.09, runAdd: 0.04, run: 1.34,
+        jumpX: 0.8, jumpXMul: 0.8, jumpXMax: 1.1, airJumpX: 0.9, jumpH: 30, jumpInit: 16, hopH: 14.5, airJumpH: 30.5, upH: UP,
+        airMul: 0.03, airAdd: 0.01, airSpeed: 0.83, airBrake: 0.01, grav: 0.108, fall: 1.65, ffall: 2.64, jsq: 3, w: 8, h: U, jf: 3, jb: 1.6,
+        crouch: [0.62, 1.15], pummel: 1.6, pumT: 21, jumps: 1, dashF: 14, roll: [31, 1.25, 13], spot: [26, 15, 3] },
+      aiShot: [30, 80], aiSide: 1,
+      moves: mk(1, 1, 1, 1, {
+        /* ---- ground: Iron Straight; Ganondorf-style kick, Technical Uppercut, low kick; Charging Forearm ---- */
+        jab: { t: 26, h: [cap(7, 8, 0.14, 0.66, 0.6, 0.66, 0.1, 11, 40, 30, 72, NB)] },
+        ftilt: { t: 39, tilt: 1, h: [cap(10, 12, 0.12, 0.42, 0.5, 0.45, 0.1, 13, 361, 25, 92, nb({ part: 'near' })), cap(10, 12, 0.5, 0.45, 0.84, 0.48, 0.1, 14, 361, 25, 94, NB)] },
+        utilt: { t: 31, tilt: 1, h: [cap(7, 9, 0.24, 0.62, 0.3, 1.04, 0.1, 9, 85, 50, 28, NB)] },   /* pops them just above him for a follow-up */
+        dtilt: { t: 35, tilt: 1, h: [cap(10, 12, 0.15, 0.14, 0.86, 0.1, 0.09, 14, 30, 40, 75, NB)] },
+        dash: { t: 37, h: [circ(10, 12, 0.42, 0.62, 0.24, 15, 40, 60, 70, NB), circ(13, 19, 0.4, 0.6, 0.22, 11, 40, 45, 62, NB)], on(f, n) { if (n <= 14 && f.grounded) walkOn(f, f.face * f.st.run * (1 - n / 22)); } },
+        /* ---- smashes: Axe Execution, Rising Axe Cleave, Ground Reaper; unarmed: haymaker, rising hammer, two-sided boot sweep ---- */
+        fsmash: { t: 66, chg: 15, h: [axe(24, 27, 0.42, 0.6, 0, -1, 24, 38, 40, 96)] },
+        fsmashE: { t: 63, chg: 17, h: [cap(27, 29, 0.2, 0.6, 0.62, 0.6, 0.14, 22, 38, 40, 96, NB)] },
+        usmash: { t: 61, chg: 12, h: [axe(20, 21, 0.42, 0.42, 25, 1, 22, 88, 40, 90), axe(22, 23, 0.24, 0.82, 62, 1, 22, 88, 40, 90), axe(24, 24, 0.08, 1.0, 95, 1, 22, 88, 40, 90)] },
+        usmashE: { t: 54, chg: 11, h: [cap(19, 22, 0.14, 0.86, 0.14, 1.26, 0.15, 19, 88, 40, 88, NB)] },
+        dsmash: { t: 61, chg: 10, h: [axe(16, 19, 0.42, 0.3, -18, -1, 12, 30, 40, 86), axe(25, 28, -0.42, 0.3, 198, 1, 15, 150, 40, 92)] },
+        dsmashE: { t: 55, chg: 10, h: [cap(16, 18, 0.12, 0.1, 0.7, 0.08, 0.1, 12, 30, 40, 86, NB), cap(25, 27, -0.12, 0.1, -0.68, 0.08, 0.1, 14, 150, 40, 90, NB)] },
+        /* ---- air: the double kick and the stomp always; axe Crusher, Backhand and Skyhook, or the unarmed punch, backfist and flip kick ---- */
+        nair: { t: 40, air: 1, ll: 10, ac0: 3, ac: 36, h: [cap(7, 8, 0.05, 0.4, 0.55, 0.32, 0.1, 7, 45, 30, 70, nb({ g: 1 })), cap(9, 12, 0.05, 0.4, 0.55, 0.32, 0.1, 5.25, 45, 25, 66, nb({ g: 1 })),
+          cap(17, 18, 0.05, 0.45, 0.62, 0.45, 0.11, 12, 361, 30, 95, nb({ g: 2 })), cap(19, 26, 0.05, 0.45, 0.62, 0.45, 0.11, 9.5, 361, 25, 90, nb({ g: 2 }))] },
+        fair: { t: 48, air: 1, ll: 14, ac0: 4, ac: 42, h: [axe(17, 18, 0.3, 0.88, 35, -1, 18, 45, 35, 92), axe(19, 20, 0.36, 0.7, -10, -1, 18, 45, 35, 92)] },
+        fairE: { t: 44, air: 1, ll: 13, ac0: 6, ac: 44, h: [cap(14, 19, 0.15, 0.62, 0.45, 0.6, 0.1, 17, 361, 30, 88, nb({ part: 'near' })), cap(14, 19, 0.45, 0.6, 0.72, 0.6, 0.11, 18, 361, 30, 90, NB)] },
+        bair: { t: 39, air: 1, ll: 12, ac0: 5, ac: 34, h: [axe(12, 14, -0.36, 0.66, 180, 1, 19, 145, 35, 95)] },
+        bairE: { t: 35, air: 1, ll: 11, ac0: 6, ac: 21, h: [cap(10, 12, -0.1, 0.6, -0.4, 0.6, 0.1, 17, 145, 30, 90, nb({ part: 'near' })), cap(10, 12, -0.4, 0.6, -0.68, 0.62, 0.12, 18.5, 145, 30, 95, NB)] },
+        uair: { t: 39, air: 1, ll: 12, ac0: 4, ac: 34, h: [axe(11, 12, 0.22, 0.95, 45, 1, 15, 80, 35, 90), axe(13, 13, 0.04, 1.05, 92, 1, 15, 85, 35, 90), axe(14, 15, -0.16, 0.95, 140, 1, 15, 95, 35, 90)] },
+        uairE: { t: 33, air: 1, ll: 11, ac0: 4, ac: 24, h: [circ(8, 10, 0.45, 0.95, 0.15, 13, 80, 30, 92, NB), circ(11, 13, 0.06, 1.2, 0.15, 10, 85, 25, 88, NB), circ(14, 16, -0.4, 1.0, 0.14, 6, 100, 20, 80, NB)] },
+        dair: { t: 44, air: 1, ll: 16, ac0: 3, ac: 40, h: [circ(16, 18, 0.04, -0.04, 0.16, 19, 270, 20, 90, nb({ vAir: 1 })), circ(16, 18, 0.04, -0.04, 0.16, 19, 80, 40, 85, nb({ vGnd: 1 })), circ(16, 18, 0.0, 0.36, 0.2, 17, 361, 30, 80, NB)] },
+        /* ---- grabs, get-ups ---- */
+        grab: { t: 38, h: [grab(8, 10, 0.18, 0.56, 0.6, 0.56, 0.12)] },
+        dgrab: { t: 46, h: [grab(11, 13, 0.2, 0.56, 0.7, 0.56, 0.12)], on(f, n) { if (n <= 11 && f.grounded) walkOn(f, f.face * 1.1 * (1 - n / 14)); } },
+        pgrab: { t: 41, h: [grab(12, 14, 0.2, 0.56, 0.78, 0.56, 0.12)] },
+        getup: { t: 40, h: [cap(16, 19, 0.1, 0.12, 0.62, 0.1, 0.1, 7, 48, 60, 40, NB), cap(16, 19, -0.1, 0.12, -0.62, 0.1, 0.1, 7, 132, 60, 40, NB)], on: rise() },
+        ledgeatk: { t: 55, h: [cap(23, 25, 0.15, 0.3, 0.72, 0.36, 0.1, 9, 45, 40, 60, NB)], on: rise() },
+        /* ---- specials ---- */
+        /* Axe Throw: a high lobbed arc, the axe leaving his hand on frame 30 (66 in all). With the axe away, neutral special
+           is a beckoning hand, and keeping special held 8 frames calls the axe home (Fighter.varganTick). */
+        nspec: { t: 66, h: [], on(f, n) { if (n === 30) vThrow(f); } },
+        nspecE: { t: 24, h: [] },
+        sspec: { t: 57, ll: 20, once: 1, nodrift: 1, ownPhys: 1, on: meteor, h: [circ(15, 24, 0.38, 0.62, 0.3, 18, 40, 60, 85, NB), circ(25, 40, 0.36, 0.6, 0.28, 12, 40, 45, 70, NB)] },
+        uspec: upMove(false), uspecE: upMove(true),
+        uspecL: { t: 36, h: [axe(1, 4, 0.3, 0.28, -35, -1, 6, 45, 70, 92)] },
+        uspecLE: { t: 36, h: [circ(1, 4, 0.36, 0.16, 0.3, 6, 45, 70, 92, NB)] },
+        /* Counter: the guard catches a strike on frames 8 to 29 (67 frames when nothing comes) */
+        dspec: { t: 67, h: [], vCounter: [8, 29], on(f, n) { if (n === 1) f.vx *= 0.3; } },
+        dspecHit: { t: 34, inv: [1, 6], h: [circ(4, 5, 0.36, 0.78, 0.3, 8, 88, 75, 25, NB)] },   /* the axe's butt end, not its blade */
+        dspecHitE: { t: 34, inv: [1, 6], h: [circ(4, 5, 0.3, 0.74, 0.26, 8, 88, 75, 25, NB)] },
+        /* Berserker: attack and special together, on the ground or in the air; it turns on or off on frame 4 of 8 */
+        berserk: { t: 8, ll: 2, h: [], on(f, n) { if (n === 4) { f.berserk = !f.berserk; f.bzAcc = 0; spark(f.x, f.y + f.st.h * 0.6, f.berserk ? '#ff4a1e' : '#c9c2b8', f.berserk ? 26 : 10, f.berserk ? 2 : 1); pop(f.x, f.y + f.st.h + 8, f.berserk ? 'BERSERKER' : 'CALM', f.berserk ? '#ff5a1e' : '#c9c2b8'); beep(f.berserk ? 160 : 420, 0.2, f.berserk ? 'sawtooth' : 'triangle', 0.06, f.berserk ? 0.6 : 1.2); } } },
+      }, { jabs: 1, throws: {
+        /* Iron Heave 5 + 8, Shoulder Sling 5 + 5 (a kill throw at the ledge), Sky Hurl 10 + 3, Stonebreaker 7 (a bounce to follow) */
+        f: { d: 8, a: 45, b: 65, k: 62, f: 13, t: 39, hits: [[11, 5]] },
+        b: { d: 5, a: 135, b: 60, k: 90, f: 14, t: 49, hits: [[12, 5]] },
+        u: { d: 3, a: 90, b: 70, k: 62, f: 13, t: 43, hits: [[11, 10]], at(f, v, n) { v.x = f.x + f.face * 3; v.y = f.y + Math.min(1, n / 11) * q(0.85); } },
+        d: { d: 7, a: 72, b: 78, k: 40, f: 23, t: 39 } } }),
+    }],
+  };
+})();
+delete VARGAN.forms[0].moves.jab2; delete VARGAN.forms[0].moves.jab3;   /* one jab only */
+
+const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE, FOWLS, CHOMP, BRAND, JOEY, VARGAN];
 /* Hitbox positions measured from the animations (hitboxes.js, written with tools/measure.html). Timing, damage and launch stay as defined above. */
 if (typeof HITBOXES !== 'undefined') for (const def of ROSTER) for (const fm of def.forms) {
   const set = HITBOXES[fm.name]; if (!set) continue;
@@ -1605,6 +1784,9 @@ for (const def of ROSTER) for (const fm of def.forms) {
   st.vRise = jumpV(st.jumpH - st.jumpInit, st.grav); st.boost = MOVE.boost.map(k => k * st.jumpInit); st.vBurst = jumpV(30, st.grav);
   if (u.rise) top = u.rise;   /* a move that launches its user says how high it carries, since it cannot be tried on a stand-in */
   fm.aiRise = top; fm.aiHop = st.airJumpH;
+  /* Vargan's Berserker (atlas II / MODE TOGGLE): walk, run, initial dash, ground and air acceleration and air speed x 1.5;
+     gravity, jumps, fast fall and every frame count stay as they are */
+  if (fm.varg) { const B = 1.5; fm.stB = Object.assign({}, st, { walk: st.walk * B, walkMul: st.walkMul * B, walkAdd: st.walkAdd * B, run: st.run * B, runMul: st.runMul * B, runAdd: st.runAdd * B, dash: st.dash * B, airSpeed: st.airSpeed * B, airMul: st.airMul * B, airAdd: st.airAdd * B }); }
 }
 
 /* ---------- Fighter ---------- */
@@ -1615,7 +1797,7 @@ class Fighter {
     this.pct = 0; this.kos = 0; this.tfLatch = false; this.tfPend = false; this.tfStart = -1; this.noSwap = !!def.transform; this.spawn(true);
   }
   get form() { return this.def.forms[this.fi]; }
-  get st() { return this.form.st; }
+  get st() { return this.berserk && this.form.stB ? this.form.stB : this.form.st; }   /* Vargan's Berserker: his movement x 1.5 (stB) */
   spawn(first) {
     this.x = first ? (this.idx ? 28 : -28) : 0; this.y = first ? 0 : 82; this.vx = this.vy = 0;
     if (first) this.face = this.idx ? -1 : 1;
@@ -1629,6 +1811,17 @@ class Fighter {
     this.chargeT = 0; this.stalled = false; this.stallOk = false; this.cAir = null; this.hopT = 0; this.airUse = {}; this.flying = false; this.selOpen = false; this.sling = null; this.dairUsed = false; this.upC = 0; this.upGo = 0; this.flyV = null; this.flyB = false; this.dove = false; this.burstKind = ''; this.burstX = 0; this.burstDown = false; this.burstUsed = false; this.blastUsed = false; this.swapLock = 0; this.slingUsed = false; this.thermal = false; this.recoil = false; this.bigStone = false; this.armorLeft = 99; this.castHit = false; this.linkT = 0; this.helpLag = 0; this.guarded = false;
     this.fat = 0; this.fatGain = false; this.restT = 0; this.exPend = false; this.exStart = -1; this.paceX = null; this.paceDir = 1;   /* INTENSITY: per stock */
     this.punchC = 0; this.punchUse = 0; this.buryT = 0; this.slapMore = false; this.tether = null; this.adFaf = 0; this.spinVx = 0;   /* per stock: a stored punch charge goes with the stock */
+    this.berserk = false; this.bzAcc = 0; this.axe = null; this.axeAway = false; this.recallArm = true; this.recallN = 0; this.metX = 0;   /* Vargan: per stock (a KO puts the axe back in his hand and ends Berserker) */
+  }
+  /* Vargan, every tick (hitlag included, never while paused): Berserker's cost, 1% every 12 ticks (5% a second, counted in
+     whole ticks so it never rounds away); and the recall, special held 8 ticks in a row while the axe is away and lying or
+     flying, after letting go of the press that threw it. It changes only the axe: whatever he is doing carries on. */
+  varganTick() {
+    if (this.berserk && this.state !== 'dead' && this.state !== 'respawn' && ++this.bzAcc >= 12) { this.bzAcc = 0; this.pct = Math.min(999, this.pct + 1); }
+    if (!this.axeAway) { this.recallN = 0; return; }
+    if (!this.ctl.c.spc) { this.recallArm = true; this.recallN = 0; return; }
+    const p = this.axe; if (!this.recallArm || !p || (p.st !== 'fly' && p.st !== 'stuck')) { this.recallN = 0; return; }
+    if (++this.recallN >= VAXE.hold) { this.recallN = 0; this.recallArm = false; vRecall(this, p); }
   }
   /* Joey's transformation (his guide, sections 04 and 05). The latch and the start tick belong to the fighter for the whole
      match, never to a stock: a KO does not undo it, and a respawn before it finishes picks the growth up where it is. e is
@@ -1654,6 +1847,7 @@ class Fighter {
   dodge() { this.ds = this.dodgeStale; this.dodgeStale = Math.min(5, this.dodgeStale + 1); this.dodgeT = 0; }
   set(s) { this.state = s; this.sf = 0; }
   startMove(n) {
+    if (this.axeAway && n[n.length - 1] !== 'E' && this.form.moves[n + 'E']) n += 'E';   /* Vargan with his axe away: the unarmed version, chosen once as the move starts */
     const m = this.form.moves[n]; if (this.def.transform) this.effort(FAT.move[n]); this.move = m; this.mname = n; this.mf = 0; this.charge = 0; this.chargeT = 0; this.aim = 0;
     this.stallOk = !!m.stall && !this.grounded && !this.stalled; if (this.stallOk) this.stalled = true;
     this.armorLeft = m.armorHits || 99; this.castHit = false; this.bRev = 0;   /* a move that hangs in the air does so once per time off the ground */
@@ -1703,8 +1897,11 @@ class Fighter {
     if (n === 'ftilt') this.aim = i.ly > 0.25 ? 1 : i.ly < -0.25 ? -1 : 0;   /* a forward tilt can be angled up or down */
     if (n === 'dash') this.vx = this.face * this.st.run; else if (n === 'fsmash') this.vx *= 0.3;
   }
+  /* Vargan: attack and special pressed on the same frame toggle Berserker instead of anything either would do alone */
+  bzToggle() { const c = this.ctl; if (!this.form.varg || !(c.buf.atk > 0 && c.buf.atk === c.buf.spc)) return false; c.buf.atk = c.buf.spc = 0; this.startMove('berserk'); return true; }
   groundActs(moving) {
     const c = this.ctl, i = c.c;
+    if (this.bzToggle()) return true;
     if (c.take('grb') || (i.shd && c.take('atk'))) {
       if (moving && i.lx * this.face < -0.5) { this.face = -this.face; this.vx *= 0.5; this.startMove('pgrab'); }
       else this.startMove(moving ? 'dgrab' : 'grab');
@@ -1731,6 +1928,7 @@ class Fighter {
     const c = this.ctl, i = c.c, s = this.st;
     if (this.exStart >= 0) { for (const k in c.buf) c.buf[k] = 0; this.fastFall(); return false; }   /* exhausted in the air: drift only */
     if (c.buf.shd > 0 && !this.airdodged) { c.buf.shd = 0; if (!this.tryWavedash(false)) this.airdodge(); return true; }
+    if (this.bzToggle()) return true;
     if (c.take('spc')) { this.doSpecial(); return true; }
     if (c.take('atk')) { this.startMove(this.aerial(i.lx, i.ly)); return true; }
     if (c.cPress) { this.fastFall(); this.startMove(this.aerial(i.cx, i.cy)); return true; }
@@ -1837,6 +2035,7 @@ class Fighter {
   update() {
     const c = this.ctl, i = c.c;
     if (this.def.transform) this.tfStep();
+    if (this.form.varg) this.varganTick();
     if (this.exStart >= 0 && frame - this.exStart >= FAT.exhaust) { this.exStart = -1; this.fat = 0; this.exPend = false; this.restT = 0; if (this.state === 'exhaust') this.set('idle'); }   /* e = 900: free, with no extra lag */
     if (this.invuln > 0) this.invuln--; if (this.swapLock > 0) this.swapLock--; if (this.ledgeCd > 0) this.ledgeCd--; if (this.dropT > 0) this.dropT--; if (this.flash > 0) this.flash--;
     if (!i.shd) this.wdHold = false;   /* the shield press that made a wavedash does not turn into a shield while still held */
@@ -2232,6 +2431,8 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   const onShield = (v.state === 'shield' || v.state === 'shieldstun') && !poke;
   if (proj) { d *= staleMul(a, id); pushStale(a, id, onShield); }
   else { if (!a.staled) { a.staleM = staleMul(a, id); pushStale(a, id, onShield); a.staled = true; } d *= a.staleM * (1 + a.charge / 60 * CHG_K(a)) * (a.moveSH ? SHORT_HOP_MUL : 1); }
+  const bz = a && a.berserk ? 1.5 : 1; d *= bz;   /* Vargan's Berserker: +50% damage on everything he hits with, the axe included (knockback below) */
+  if (!proj && !h.grab && v.state === 'attack' && v.move && v.move.vCounter && v.mf >= v.move.vCounter[0] && v.mf <= v.move.vCounter[1]) { vCounter(v, a, hx, hy); return; }   /* Vargan's counter takes any strike, from either side */
   if (v.state === 'shieldoff' && v.sf <= SHIELD.parry) {
     v.set('idle'); v.invuln = 4; if (!proj) { a.hitlag = 16; a.parriedBy = v; }
     spark(hx, hy, '#fff', 20, 2); pop(hx, hy + 12, 'PARRY', '#fff'); beep(1200, 0.12, 'triangle', 0.07, 1.3); return;
@@ -2263,7 +2464,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   const chained = v.state === 'hurt' || v.state === 'held' || v.hitlag > 0;
   v.pct = Math.min(999, v.pct + d); v.flash = 6; if (!proj && a.move && a.move.cast) a.castHit = true; comboHit(a, v, d, chained);
   const crouch = v.grounded && v.state === 'idle' && v.ctl.c.ly < CROUCH_Y, charging = v.state === 'attack' && v.charge > 0;
-  const kb = (h.fkv ? knockSet(v, h.fkv, h.b, h.k) : knock(v, d, h.b, h.k) * (h.norage ? 1 : rage(a))) * (crouch ? CROUCH_MUL : 1) * (charging ? CHARGING_MUL : 1);   /* fkv: set knockback, the same at any damage */
+  const kb = (h.fkv ? knockSet(v, h.fkv, h.b, h.k) : knock(v, d / bz, h.b, h.k) * (h.norage ? 1 : rage(a))) * (crouch ? CROUCH_MUL : 1) * (charging ? CHARGING_MUL : 1) * bz * (h.kbMul || 1);   /* fkv: set knockback, the same at any damage. Berserker: x 1.5 on the knockback the unboosted damage gives (so it is not raised twice); kbMul: the recalled axe's distance power */
   const hl = h.hl !== undefined ? h.hl : Math.min(30, Math.floor((d * 0.65 + 6) * (crouch ? 0.67 : 1)));
   /* Armour: a move either shrugs off anything short of a hard launch, or (armorMax) takes one strike of that base damage or less, on the ground only. */
   const am = v.state === 'attack' && v.move && v.move.armor && v.mf >= v.move.armor[0] && v.mf <= v.move.armor[1] ? v.move : null;
@@ -2320,7 +2521,7 @@ function resolveHits() {
     }
   }
   for (const p of PROJ) {
-    const a = F[1 - p.owner]; if (p.life <= 0 || !a || p.ghost || (p.gndBreak && !a.grounded)) continue;
+    const a = F[1 - p.owner]; if (p.life <= 0 || !a || p.ghost || p.noClash || (p.gndBreak && !a.grounded)) continue;   /* noClash: Vargan's axe is never put out */
     for (const h of live(a)) { const dx = a.x + h.x * a.face - p.x, dy = hitY(a, h) - p.y; if (dx * dx + dy * dy <= (h.r + p.r) * (h.r + p.r) && h.d + 9 > p.h.d) { p.life = 0;   /* an attack puts out a projectile less than 9% stronger than itself */ spark(p.x, p.y, '#fff', 8, 1.2); beep(700, 0.04, 'triangle', 0.04); break; } }
   }
   for (const a of F) {
@@ -2400,6 +2601,17 @@ function cpuInput(f, o, m) {
   }
   return i;
 }
+/* Vargan as the CPU: calls his axe home a little while after it lands (holding special 12 frames), turns Berserker on now
+   and then while his damage is low (under 60%) and off once it passes 90%, and counters a swing that has just started in front of him. */
+function vargBrain(f, o, m, L, i, ad) {
+  const off = !f.grounded && (Math.abs(f.x) > EDGE + 4 || f.y < -3), p = f.axe, free = f.state === 'idle' || f.state === 'run' || f.state === 'dash' || f.state === 'air';
+  if (off) { m.call = 0; return null; }
+  if (m.call > 0) { m.call--; i.spc = true; return i; }
+  if (f.axeAway && p && (p.st === 'stuck' || p.st === 'fly')) { m.axeT = (m.axeT || 0) + 1; if (m.axeT > 70 && free && Math.random() < 0.05) { m.call = 12; m.axeT = 0; i.spc = true; return i; } } else m.axeT = 0;
+  if (f.state === 'idle' && m.cd === 0 && ((!f.berserk && f.pct < 60 && Math.random() < 0.004) || (f.berserk && f.pct > 90 && Math.random() < 0.05))) { i.atk = i.spc = true; m.cd = 20; return i; }
+  if (f.grounded && free && m.cd === 0 && o.state === 'attack' && o.mf <= 4 && ad < 20 && Math.random() < L.punish * 0.25) { i.ly = -1; i.spc = true; m.cd = 50; return i; }
+  return null;
+}
 function cpuBrain(f, o, m, L) {
   const i = blankIn(); m.t = (m.t || 0) + 1; if (m.cd > 0) m.cd--; else m.cd = 0;
   const dx = o.x - f.x, dy = o.y - f.y, ad = Math.abs(dx), dir = sgn(dx) || 1;
@@ -2423,6 +2635,7 @@ function cpuBrain(f, o, m, L) {
   if (f.state === 'attack' && f.move && f.move.next && f.mf >= f.move.chain && ad < 18) { i.atk = m.t % 2 === 0; return i; }
   if (f.def.transform && !f.tfLatch) { if (m.tfAt === undefined) m.tfAt = 30 + (Math.random() * 240 | 0); if (m.t >= m.tfAt) i.tf = m.t % 6 < 2; }   /* two taps of the transform action, a moment into the match */
   if (f.state === 'grow') return i;
+  if (f.form.varg) { const r = vargBrain(f, o, m, L, i, ad); if (r) return r; }
   if (f.state === 'buried') { const q = L.mash || 12; i.grb = m.t % q === 0; i.lx = m.t % (q * 2) < q ? 1 : -1; return i; }
   if (f.state === 'carry') { if (f.sf > 8 + (m.t % 20)) { i.atk = m.t % 2 === 0; const r = (m.t >> 3) % 4; if (r === 1) i.ly = 1; else if (r === 2) i.lx = -f.face; else if (r === 3 && Math.abs(f.x) > EDGE - 30) i.lx = f.face; } else if (Math.abs(f.x) < EDGE - 20) i.lx = f.face * 0.8; return i; }
   if (f.state === 'attack' && f.mname === 'nspec' && f.form.cargo && f.mf > 8) { i.spc = (ad < 26 && Math.abs(dy) < 12 && f.face === dir && m.t % 2 === 0) || (o.state === 'attack' && ad < 30 && m.t % 2 === 0) ? true : false; if (!i.spc && ad < 16 && Math.random() < 0.02) i.shd = true; return i; }   /* a Giant Punch on charge: let it go when they are in reach */
@@ -2437,7 +2650,7 @@ function cpuBrain(f, o, m, L) {
     const side = sgn(f.x) || 1, edge = EDGE + f.st.w / 2 + 2, under = false, far = Math.abs(f.x) - EDGE;   /* the island's underside slopes, so rising from beneath it just slides out to the ledge */
     i.lx = under ? side : (f.y > -3 || Math.abs(f.x) > edge + 1) ? -side : 0;   /* beside the wall and below the lip: stay off it and let the ledge or a jump do the work */
     if (f.state !== 'air' || m.t % 5 !== 0) return i;
-    if (!f.sideUsed && f.form.moves.sspec.once && (f.st.airSpeed < 0.9 ? far > 30 && f.y > 32 - f.form.aiRise - (f.jumps > 0 ? f.form.aiHop : 0) : far > 36 && f.y > 14)) { i.lx = -side; i.spc = true; return i; }   /* a slow drifter needs its side special for distance, but only while the jump and up special it has left can pay back the drop */
+    if (!f.sideUsed && f.form.moves.sspec.once && (f.form.st.airSpeed < 0.9 ?   /* the form's own drift: Vargan's Berserker speed does not make him a fast drifter */ far > 30 && f.y > 32 - f.form.aiRise - (f.jumps > 0 ? f.form.aiHop : 0) : far > 36 && f.y > 14)) { i.lx = -side; i.spc = true; return i; }   /* a slow drifter needs its side special for distance, but only while the jump and up special it has left can pay back the drop */
     if (f.st.noLedge && !f.burstUsed && f.vy < 0 && (f.y < 4 || far > 45) && f.y + 30 < BLAST.t - 28) { i.lx = 0; i.ly = -1; i.spc = true; return i; }   /* no ledge to hold: the tumble's free lift comes before the jump and the blast */
     if (f.vy < 0 && !under) {
       const roof = BLAST.t - 28;   /* when launched high, fall first: rising from up there would go out through the top */

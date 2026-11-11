@@ -35,6 +35,14 @@ bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.gltf(filepath=opt['mesh'])
 meshes = [o for o in bpy.context.scene.objects if o.type == 'MESH']
 if not meshes: raise SystemExit('rig: no mesh in ' + opt['mesh'])
+# "parts": [ { "object": name, "bone": name } ]: a separate mesh object in the file (a weapon modelled on its own) is tagged
+# before the meshes are joined, so a rigid entry { "bone", "part": name } can take exactly its vertices, however close they
+# sit to the body (an axe haft through a closed fist).
+for k, pt in enumerate(spec.get('parts', [])):
+    for o in meshes:
+        if o.name == pt['object'] or o.name.startswith(pt['object'] + '.'):
+            at = o.data.attributes.new('part_id', 'INT', 'POINT'); at.data.foreach_set('value', [k + 1] * len(o.data.vertices))
+            print('rig: part %s is mesh object %s (%d vertices)' % (pt['object'], o.name, len(o.data.vertices)))
 bpy.ops.object.select_all(action='DESELECT')
 for o in meshes: o.select_set(True)
 bpy.context.view_layer.objects.active = meshes[0]
@@ -200,8 +208,14 @@ print('rig: weights by %s; %d bones, %d groups, %d vertices unweighted' % (metho
 
 # ---- rigid parts: vertices inside a box follow one bone only ----
 bpy.ops.object.mode_set(mode='OBJECT')
+part_vals = None
+if spec.get('parts') and 'part_id' in mesh.data.attributes:
+    part_vals = [0] * len(mesh.data.vertices); mesh.data.attributes['part_id'].data.foreach_get('value', part_vals)
 for rg in spec.get('rigid', []):
-    if 'capsule' in rg:
+    if 'part' in rg:
+        k = 1 + [pt['object'] for pt in spec['parts']].index(rg['part'])
+        idx = [i for i, v in enumerate(part_vals or []) if v == k]
+    elif 'capsule' in rg:
         a, b = conv(rg['capsule'][0]), conv(rg['capsule'][1]); ab = b - a; L2 = ab.length_squared; r2 = rg['r'] ** 2
         idx = [v.index for v in mesh.data.vertices if (v.co - (a + ab * max(0.0, min(1.0, (v.co - a).dot(ab) / L2)))).length_squared <= r2]
     elif 'disc' in rg:

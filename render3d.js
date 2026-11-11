@@ -93,6 +93,7 @@ function build() {
         M.scene = g.scene; M.clips = Object.fromEntries(g.animations.map(c => [c.name, c]));
         const box = new THREE.Box3().setFromObject(g.scene); M.height = box.max.y - box.min.y; M.ready = true;
       }, undefined, e => { M.error = String((e && e.message) || e); console.warn('model failed to load: ' + name, e); });
+      if (cfg.axe) new GLTFLoader().load(cfg.axe.file, g => { M.axe = g.scene; }, undefined, e => console.warn('axe failed to load: ' + name, e));   /* Vargan's axe on its own, drawn while it is thrown */
     }
   }).catch(e => console.warn('no model manifest', e));
 
@@ -304,6 +305,12 @@ function build() {
     if (kind === 'boulder') { const m = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 0), new THREE.MeshStandardMaterial({ color: 0x8d8794, roughness: 0.95, flatShading: true })); m.castShadow = true; return m; }
     if (kind === 'dummy' || kind === 'clone' || kind === 'egg') { const m = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 9), new THREE.MeshStandardMaterial({ color: kind === 'egg' ? 0xf4ead8 : kind === 'clone' ? 0x2bb8b0 : 0x8a623a, roughness: 0.7 })); if (kind === 'egg') m.scale.set(0.8, 1, 0.8); m.castShadow = true; return m; }   /* wooden ammunition, Pip's doubles, Pearl's egg */
     if (kind === 'tape') { const m = new THREE.Group(), rim = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.55, 18).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xd9c24a, roughness: 0.45, metalness: 0.5 })), hub = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.3, 0.62), new THREE.MeshStandardMaterial({ color: 0x4a4d57, roughness: 0.6 })); rim.castShadow = true; m.add(rim, hub); return m; }   /* Sprocket's tape roll: a steel reel with a dark bar across it, so its turning shows */
+    if (kind === 'vaxe') {   /* Vargan's thrown axe: his own axe model, turned about its balance point 0.85 m up the haft; mirrored by the pivot so the blade leads */
+      const M = MODELS.Vargan, g2 = new THREE.Group(), pivot = new THREE.Group(); g2.add(pivot); g2.userData.pivot = pivot;
+      if (M && M.axe && M.ready) { const s = M.cfg.height / M.height, o = M.axe.clone(true); o.scale.setScalar(s); o.rotation.y = Math.PI / 2; o.position.y = -0.85 * s; o.traverse(q => { if (q.isMesh) { q.castShadow = true; q.frustumCulled = false; } }); pivot.add(o); g2.userData.s = s; }
+      else { const b = new THREE.Mesh(new THREE.BoxGeometry(0.8, 13, 0.8), new THREE.MeshStandardMaterial({ color: 0x5a3a24 })), hd = new THREE.Mesh(new THREE.BoxGeometry(3, 3.4, 0.5), new THREE.MeshStandardMaterial({ color: 0x9aa4ae, metalness: 0.6 })); hd.position.set(1.5, 4.5, 0); pivot.add(b, hd); g2.userData.s = 8.4; }
+      return g2;
+    }
     return new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), e(0xffa040, 2.6));   /* ember and flame */
   };
 
@@ -484,7 +491,7 @@ function build() {
     if (k <= 0 || !A.s.length) { A.mesh.visible = A.tip.visible = A.halo.visible = false; if (!live) { A.s = []; if (!span) A.key = ''; } return; }
     /* the red point: on the sword while it is out, left where it ended while the arc fades */
     const tp = out ? point : A.s[A.s.length - 1].t, r = (B.dot || 0.6) * (out ? 1 : 0.6 + 0.4 * k);
-    A.tip.visible = A.halo.visible = true; A.tip.position.copy(tp); A.tip.scale.setScalar(r); A.tip.material.opacity = k; A.halo.position.copy(tp); A.halo.scale.set(r * 6, r * 6, 1); A.halo.material.opacity = 0.9 * k;
+    A.tip.visible = A.halo.visible = B.dot !== 0;   /* dot 0: an arc with no red point (Vargan's axe) */ A.tip.position.copy(tp); A.tip.scale.setScalar(r); A.tip.material.opacity = k; A.halo.position.copy(tp); A.halo.scale.set(r * 6, r * 6, 1); A.halo.material.opacity = 0.9 * k;
     /* the ribbon: each recorded step, with the blade turned smoothly round its base between steps */
     const pts = [], S = out ? A.s.concat([{ b: base, t: point }]) : A.s;
     for (let i = 0; i < S.length; i++) {
@@ -523,6 +530,50 @@ function build() {
     const lampGlow = new THREE.Sprite(new THREE.SpriteMaterial(glowMat({ map: dot, color: 0xffb866 }))); lampGlow.scale.set(r * 0.9, r * 0.9, 1); lampGlow.position.set(r * 0.3, r * 0.68, 0); g.add(lampGlow);
     g.position.set(x, y, z); g.rotation.y = k * 1.3; g.userData = { y, ph: k * 2.1 }; g.visible = false; scene.add(g); return g;   /* hidden: the painted backdrop has its own scenery now */
   });
+  /* Vargan's fire (his atlas, II / RENDERING): embers that start on his bones and his axe and drift up in the world. In
+     Berserker, wisps round his chest, shoulders, head and greaves, and fire on whatever strikes (the axe's blade, a fist or a
+     boot) through each hit's frames; the meteor charge burns at the shoulder always, hotter in Berserker; the flying axe
+     always trails embers, most when it homes. Picture only, from bones and the axe's place: nothing here touches a hitbox.
+     At most FIRE embers on screen; switched off with the hit effects (the reduced-flash setting). */
+  const FIRE = 520, fPos = new Float32Array(FIRE * 3), fCol = new Float32Array(FIRE * 3), fireGeo = new THREE.BufferGeometry(), fire = [];
+  fireGeo.setAttribute('position', new THREE.BufferAttribute(fPos, 3)); fireGeo.setAttribute('color', new THREE.BufferAttribute(fCol, 3));
+  const firePts = new THREE.Points(fireGeo, new THREE.PointsMaterial(glowMat({ size: 3.4, map: dot, vertexColors: true }))); firePts.frustumCulled = false; firePts.renderOrder = 4; scene.add(firePts);
+  const _fp = new THREE.Vector3();
+  function emit(p, n, spread, hot, vx, vy) {
+    if (!p) return;
+    for (let k = 0; k < n; k++) { if (fire.length >= FIRE) fire.shift(); const life = 12 + Math.random() * 14;
+      fire.push({ x: p.x + (Math.random() - 0.5) * spread, y: p.y + (Math.random() - 0.5) * spread, z: p.z + (Math.random() - 0.5) * spread * 0.6, vx: (vx || 0) + (Math.random() - 0.5) * 0.18, vy: 0.08 + Math.random() * 0.14 + (vy || 0), life, max: life, hot }); }
+  }
+  function fireFighter(f, idx, v) {
+    const cfg = v.model && v.model.cfg.fire; if (!cfg || !DBG.fx || !v.obj || f.state === 'dead') return;
+    if (v.fireTick === tick) return; v.fireTick = tick;
+    if (v.fireKey !== v.key) { v.fireKey = v.key; v.fireB = {}; }
+    const at = n => { let b = v.fireB[n]; if (b === undefined) b = v.fireB[n] = v.obj.getObjectByName(n) || null; return b ? b.getWorldPosition(_fp).clone() : null; };
+    const bz = !!f.berserk;
+    if (bz) for (const n of cfg.aura) if (Math.random() < 0.4) emit(at(n), 1, 2.6, 0.55);
+    if (f.state !== 'attack' || !f.move) return;
+    const m = f.move;
+    if (f.mname === 'sspec') { if (f.mf >= 6 && f.mf <= 44) emit(at(cfg.shoulder), bz ? 6 : 3, bz ? 3.4 : 2.4, bz ? 1 : 0.75, -f.face * (f.mf >= 15 ? 0.9 : 0.1), 0.02); return; }   /* the meteor: always red, a wake behind the shoulder once he flies */
+    if ((f.mname === 'dspecHit' || f.mname === 'dspecHitE') && f.mf <= 8) { emit(at(cfg.fists[0]), bz ? 6 : 3, 2.5, 1, 0, 0.45); return; }   /* the counter's answer: fire up the launcher */
+    if (!bz) return;
+    for (const h of m.h) {
+      if (h.grab || f.mf < h.f0 - 1 || f.mf > h.f1) continue;
+      if (!h.nb && !f.axeAway) { const a = at(cfg.axe[0]), b = at(cfg.axe[1]); if (a && b) for (let k = 0; k < 4; k++) emit(a.clone().lerp(b, Math.random()), 1, 1.6, 1); }
+      else { const hx = f.x + h.x * f.face, hy = f.y + h.y; let best = null, bd = 1e9; for (const n of cfg.fists.concat(cfg.feet)) { const p = at(n); if (p) { const d = Math.hypot(p.x - hx, p.y - hy); if (d < bd) { bd = d; best = p; } } } emit(best, 3, 1.8, 1); }
+      break;
+    }
+  }
+  function fireAxe(p) {
+    if (!DBG.fx || p.st === 'stuck' && Math.random() > 0.08) return; const ow = F[p.owner], k = p.st === 'home' ? 6 : ow && ow.berserk ? 4 : 2;
+    emit(_fp.set(p.x, p.y, 0).clone(), p.st === 'stuck' ? 1 : k, p.st === 'home' ? 3.6 : 2.6, p.st === 'home' ? 1 : 0.8, -(p.vx || 0) * 0.15, -(p.vy || 0) * 0.15);
+  }
+  function fireStep(dt) {
+    let n = 0;
+    for (let i = fire.length - 1; i >= 0; i--) { const q = fire[i]; q.life -= dt; if (q.life <= 0) { fire.splice(i, 1); continue; } q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= Math.pow(0.94, dt); }
+    for (const q of fire) { if (n >= FIRE) break; const u = q.life / q.max, a = Math.min(1, u * 1.6) * (0.55 + 0.45 * q.hot);
+      fPos[n * 3] = q.x; fPos[n * 3 + 1] = q.y; fPos[n * 3 + 2] = q.z + 1; fCol[n * 3] = a; fCol[n * 3 + 1] = a * (0.12 + 0.5 * u * q.hot); fCol[n * 3 + 2] = a * 0.04 * u; n++; }   /* yellow-orange when new, dark red as it dies */
+    fireGeo.setDrawRange(0, n); fireGeo.attributes.position.needsUpdate = true; fireGeo.attributes.color.needsUpdate = true;
+  }
   let fxTick = -1;
   function fxFighter(f, idx, st, alive, v) {
     /* hit flash: when the freeze of a hit begins */
@@ -560,6 +611,7 @@ function build() {
       spPos[n * 3] = p.x; spPos[n * 3 + 1] = p.y; spPos[n * 3 + 2] = 2 + z; spCol[n * 3] = c.r * a; spCol[n * 3 + 1] = c.g * a; spCol[n * 3 + 2] = c.b * a; n++;
     }
     sparkGeo.setDrawRange(0, n); sparkGeo.attributes.position.needsUpdate = true; sparkGeo.attributes.color.needsUpdate = true;
+    fireStep(dt);
     for (const l of flashes) { l.intensity = l.userData.i; if (dt) l.userData.i *= Math.pow(0.7, dt); if (l.userData.i < 20) l.userData.i = 0; }
     for (const b of bursts) {
       const age = tick - b.t0, on = age >= 0 && age < 50; b.ring.visible = b.core.visible = b.beam.visible = on; b.light.intensity = 0;
@@ -637,7 +689,12 @@ function build() {
       if (v.bubble) { const on = !!f.bubble, grow = f.state === 'attack' && f.mname === 'uspec' && !on ? clamp((f.mf - 3) / 5, 0, 1) : 0;   /* it swells from his mouth as he blows, then wobbles round him; it sits round his middle whatever the pivot is doing */
         v.bubble.visible = on || grow > 0; v.bubble.scale.setScalar(on ? 1 + Math.sin(tick * 0.3) * 0.03 : 0.15 + 0.85 * grow); v.bubble.position.x = on ? 0 : 5 * (1 - grow); }
       if (v.springs.length) applySprings(v);
+      if (v.model && v.model.cfg.axe) {   /* Vargan: the axe in his hand is folded away to nothing while the real one is thrown */
+        if (v.axeKey !== v.key) { v.axeKey = v.key; v.axeBone = v.obj.getObjectByName(v.model.cfg.axe.bone); }
+        if (v.axeBone) { v.axeBone.scale.setScalar(f.axeAway ? 1e-4 : 1); v.axeBone.updateMatrixWorld(true); }
+      }
       bladeArc(v, f, idx);
+      fireFighter(f, idx, v);
       if (v.prop && !v.hand) {   /* the living slingshot under its bird: posed by slingWant, the bird riding in its pouch */
         const spinning = f.state === 'attack' && f.move && f.move.spin && f.move.spinAt, rot = spinning ? f.move.spinAt(f, f.mf) : 0, rig = v.prop.userData.rig, step = rig.tick !== tick; rig.tick = tick;
         v.prop.rotation.y = f.face > 0 ? 0 : Math.PI;
@@ -685,6 +742,11 @@ function build() {
       else if (p.kind === 'flame') m.scale.set(p.r * 0.8, p.r * (1.1 + Math.sin(frame * 0.5) * 0.3), p.r * 0.8);
       else if (p.kind === 'ember') m.scale.setScalar(p.r * 0.75);
       else if (p.kind === 'bolt') m.scale.x = p.face;
+      else if (p.kind === 'vaxe') {   /* p.rot is the direction the head points; stuck, the head is buried a hand's width in */
+        m.rotation.z = (p.rot || 0) - Math.PI / 2; m.userData.pivot.scale.x = p.face || 1;
+        if (p.st === 'stuck') { const k = 0.6 * m.userData.s; m.position.x -= Math.cos(p.rot) * k; m.position.y -= Math.sin(p.rot) * k; }
+        fireAxe(p);
+      }
       else if (p.kind === 'coal') { m.userData.core.scale.setScalar(p.r); m.userData.core.rotation.set(frame * 0.05, frame * 0.07, 0); }
       else if (p.kind === 'ant') { m.rotation.y = p.face < 0 ? Math.PI : 0; m.rotation.z = Math.atan2(p.vy, Math.abs(p.vx) + 1e-6); m.userData.legs.forEach((l, k) => { l.rotation.z = Math.sin(frame * 0.8 + k * 1.7) * 0.5; }); }
     }

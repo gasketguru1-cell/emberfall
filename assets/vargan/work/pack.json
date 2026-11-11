@@ -1,0 +1,5 @@
+{
+ "base": "work/vargan-rigged.glb",
+ "texture": 2048,
+ "out": "export/vargan-v1.glb"
+}

@@ -200,6 +200,34 @@ const MOVE_TEXT = {
     u: ['Coal Toss', 'Tosses straight up.'],
     d: ['Into the Ash', 'Pins the opponent down and pops them up in front.'],
   },
+  Vargan: {
+    nspec: ['Axe Throw', 'Slings Runebreaker in a high arc; it leaves his hand on frame 30 and hits for 15%. The axe does not vanish: it sticks where it lands (on any platform, or in the side of the island), falls slowly past the ledge, and stays until he calls it home. With the axe away, neutral special is a beckoning hand.', 'Release f30 · 15%'],
+    sspec: ['Meteor Shoulder Charge', 'Coils for 14 frames, then hurtles shoulder-first, wreathed in red fire, across exactly 30% of the main stage: 18% early (frames 15 to 24), 12% late (to 40), then a heavy skid to frame 57. On the ground it stops at the edge of the floor. In the air it flies level, once per trip off the ground. Berserker covers the same distance faster, never further.'],
+    uspec: ['Soaring Plunge', 'A rising slash on frame 10 that carries the opponent up with him, a hang at the top with five quick hits, then from frame 54 a straight, fast dive with the axe below him until he lands (a landing blow, then 36 frames) or takes a ledge. Nothing stops the dive past the stage. Without the axe the same climb with fists.', 'f10 · 6% · 1.5% x 5 · dive 6% · landing 6%'],
+    dspec: ['Counter', 'Braces on frames 8 to 29: a strike from either side that lands then is answered. Axe in hand: the haft\'s butt snaps up under the attacker (8%) and pops them just above him. Axe stuck in the stage: the same pop, and the axe tears itself free and homes in on them at its distance strength (12 to 21%). Axe still flying: the pop only. Grabs and projectiles are not countered. 67 frames if nothing comes.', 'Window f8-29 · 8% · axe 12-21%'],
+    jab: ['Iron Straight', 'One compact straight from the rear fist down the middle, the axe kept upright in the other hand. Same with or without the axe.'],
+    dash: ['Charging Forearm', 'Leaps in shoulder-first: a heavy early hit, then a weaker one as the body carries through. Not the meteor: no fire, no set distance.'],
+    ftilt: ['Iron Push Kick', 'The lead leg chambers and the boot drives straight out at hip height. Stronger at the boot than near the hip. Same in either weapon state.'],
+    utilt: ['Technical Uppercut', 'A real boxer\'s uppercut, driven from the feet and hips, that pops the opponent just above him for a follow-up.'],
+    dtilt: ['Low Sweep Kick', 'Drops the hips and sweeps the lead boot out along the floor. Long, low, and the same with or without the axe.'],
+    fsmash: ['Axe Execution', 'A brutal two-handed sweep across the chest, the hips pulling the blade through. Axe away: a step-through haymaker, 22% on frames 27 to 29, much shorter.', 'Axe f24 · 24% · haymaker f27 · 22% · chargeable'],
+    usmash: ['Rising Axe Cleave', 'The blade comes up from beside his knee through the front and over his head, clearing a platform above. Axe away: both fists hammered up together, 19% on frames 19 to 22.', 'Axe f20 · 22% · fists f19 · 19% · chargeable'],
+    dsmash: ['Ground Reaper', 'The axe skims the floor in front (12%), the weight carried round, then behind (15%). Axe away: a boot sweep each side, 12% then 14%. One launch a target.', 'Axe f16 / f25 · 12% / 15% · boots f16 / f25 · chargeable'],
+    nair: ['Double Kick', 'Two alternating kicks: the first on frame 7, the second on frame 17, each strongest as it snaps out. The same with or without the axe.'],
+    fair: ['Axe Crusher', 'From over the shoulder down and forward through the front, a deliberate two-handed hit with huge reach. Axe away: a long full-stretch punch, 17 to 18% on frames 14 to 19.', 'Axe f17 · 18% · punch f14 · 17 / 18%'],
+    bair: ['Axe Backhand', 'Turns the blade out behind at shoulder height in a short, violent sweep; a ledge finisher. Axe away: a backfist, 18.5% at the knuckles on frames 10 to 12.', 'Axe f12 · 19% · backfist f10 · 18.5 / 17%'],
+    uair: ['Axe Skyhook', 'A full arc overhead from in front to behind, for juggling. Axe away: a flip kick, strongest early (13%) and weaker as it goes over (10%, 6%).', 'Axe f11 · 15% · kick f8 · 13 / 10 / 6%'],
+    dair: ['Two-Foot Stomp', 'Both boots driven straight down: the soles send someone in the air straight down; the body hits too, less. The same with or without the axe.'],
+    grab: ['Collar Grab', 'A big one-handed grab at the collar or shoulder, with a dash grab and a turnaround grab that reach further.'],
+    pummel: ['Knuckle Crush', 'A short blow without letting go. 1.6% a press.'],
+    f: ['Iron Heave', 'A crushing body-powered shove: 5% on frame 11, released for 8% on frame 13.'],
+    b: ['Shoulder Sling', 'Hips swivel and the opponent goes over his shoulder: 5% and then 5% at release. A real finisher near the ledge.'],
+    u: ['Sky Hurl', 'Both arms drive the opponent up above his head: 10%, then 3% as they leave.'],
+    d: ['Stonebreaker', 'Slams them into the floor at his feet for 7%, bouncing them up at a moderate angle to follow.'],
+    getup: ['Get-up Kick', 'Getting up from the floor, kicks to both sides at once. Briefly intangible as he rises (less above 100%).'],
+    berserk: ['Berserker', 'Attack and special pressed together turn it on, and again turn it off: +50% damage, +50% knockback and +50% movement (walk, run, dash, air speed and acceleration), with fire on every attack, but 5% of his own damage every second, in shield, mid-attack and in the air alike (+50% after 10 seconds, +100% after 20). Frame data, jumps, gravity and dodges stay the same. A lost stock ends it.', '5% a second'],
+    _extra: { title: 'Berserker', keys: ['berserk'] },
+  },
   Brand: {
     nspec: ['Vorpal Thrust', 'Tap for a quick thrust on frames 14 to 16. Keep special held through frame 9 and she draws the arm back for a slower thrust on frames 24 to 26 that hits harder and reaches about a third further. Hold it to catch someone who dodged early. In the air it lands for 16 frames (20 for the held one).', 'Tap f14 · 11%  ·  held f24 · 15%'],
     sspec: ['Shield Bash', 'Raises the stove door on frames 5 to 8, then steps in and bashes on frames 12 to 14. On the ground the raised door stops one strike of 8% or less that comes in from the front: it costs shield like a block and the bash still comes out. Stronger hits, hits from behind or above, grabs and projectiles get through. 24 frames to recover, hit or miss. In the air there is no guard, the bash does 8% and landing takes 17 frames.', 'Guard f5-8 (one hit, 8% or less)  ·  bash f12 · 10%  ·  air 8%'],
@@ -425,6 +453,13 @@ const MOVE_RULES = {
     ['B', 'Through the Shield', 'Tongs Snatch on the ground catches a standing opponent even if they are shielding.'],
     ['Air ↓ B', 'Spike and Thump', 'Bucket Drop in the air sends anyone it hits straight down, and thumps the ground where it lands for anyone it missed.'],
   ],
+  Vargan: [
+    ['B', 'The Axe Stays Out', 'Runebreaker is a real thing in the world. Thrown, it sticks where it lands and stays there; past the ledge it falls slowly. Only one ever exists, and a lost stock puts it back in his hand.'],
+    ['Hold B', 'Calling It Home', 'With the axe away, keep special held for 8 frames (let go of the press that threw it first). The axe flies back to his hand on its own path, whatever he is doing, and hits whatever is in the way once: 12% left close by, up to 21% and much harder knockback when it was left 55% of the stage away or more.'],
+    ['★', 'Two Sets of Moves', 'While the axe is away his smashes, forward, back and up airs and up special are unarmed. His jab, tilts, dash attack, neutral and down airs and throws never use the axe. A move keeps the version it started with if the axe comes back mid-swing.'],
+    ['↓ B', 'Counter, Then the Axe', 'Counter with the axe stuck in the stage and it rips itself out and homes in on the attacker, as strong as the distance it had to travel. It never homes while it is still flying.'],
+    ['A + B', 'Berserker', 'Damage, knockback and speed up by half, fire on everything, and his own damage climbing 5% a second. Turn it off with A + B again before it costs too much.'],
+  ],
   Brand: [
     ['★', 'The Whole Blade', 'Her sword hits the same from the guard to the tip, and it is longer than most swings. Stand where it reaches and the other fighter falls short. While a cut is out its arc stays on screen, with a red spot at the tip: the end of her reach.'],
     ['→ B', 'The Door Guards Once', 'Shield Bash stops one light strike (8% or less) from the front on frames 5 to 8, on the ground only. It is a read: thrown out with nothing to stop, it leaves 24 frames to punish.'],
@@ -443,11 +478,11 @@ const GETUP_TEXT = ['Get-up Attack', 'Getting up from the floor, strikes both si
 const PUMMEL_TEXT = ['Pummel', 'Press attack while holding the opponent to add damage before a throw.'];
 
 /* ---------- Pages, built from the words and the moves themselves ---------- */
-const ML_INPUT = { nspec: 'B', sspec: '→ B', uspec: '↑ B', dspec: '↓ B', jab: 'A', ftilt: '→ A', utilt: '↑ A', dtilt: '↓ A', dash: 'Dash A', fsmash: 'Smash → A', usmash: 'Smash ↑ A', dsmash: 'Smash ↓ A',
+const ML_INPUT = { berserk: 'A + B', nspec: 'B', sspec: '→ B', uspec: '↑ B', dspec: '↓ B', jab: 'A', ftilt: '→ A', utilt: '↑ A', dtilt: '↓ A', dash: 'Dash A', fsmash: 'Smash → A', usmash: 'Smash ↑ A', dsmash: 'Smash ↓ A',
   nair: 'Air A', fair: 'Air → A', bair: 'Air ← A', uair: 'Air ↑ A', dair: 'Air ↓ A', grab: 'Grab', pummel: 'Grab A', f: 'Grab →', b: 'Grab ←', u: 'Grab ↑', d: 'Grab ↓', getup: 'Get-up A', launch: 'In flight' };
 const ML_GROUND = ['jab', 'dash', 'ftilt', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash'], ML_AIR = ['nair', 'fair', 'bair', 'uair', 'dair'], ML_SPEC = ['nspec', 'sspec', 'uspec', 'dspec'];
 /* every move a form has, and the entry that documents it (the move keys that are part of another move) */
-const ML_PART_OF = { nspecR: 'nspec', nspecF: 'nspec', uspecA: 'uspec', dspecA: 'dspec', jab2: 'jab', jab3: 'jab', jabr: 'jab', dgrab: 'grab', pgrab: 'grab', sbrake: 'sspec', dsnap: 'dspec', dcounter: 'dspec', flyStop: 'launch', swingBite: 'sspec', throws: 'grab', nspecH: 'nspec', ledgeatk: 'getup', getupB: 'getup' };
+const ML_PART_OF = { nspecE: 'nspec', fsmashE: 'fsmash', usmashE: 'usmash', dsmashE: 'dsmash', fairE: 'fair', bairE: 'bair', uairE: 'uair', uspecE: 'uspec', uspecL: 'uspec', uspecLE: 'uspec', dspecHit: 'dspec', dspecHitE: 'dspec', nspecR: 'nspec', nspecF: 'nspec', uspecA: 'uspec', dspecA: 'dspec', jab2: 'jab', jab3: 'jab', jabr: 'jab', dgrab: 'grab', pgrab: 'grab', sbrake: 'sspec', dsnap: 'dspec', dcounter: 'dspec', flyStop: 'launch', swingBite: 'sspec', throws: 'grab', nspecH: 'nspec', ledgeatk: 'getup', getupB: 'getup' };
 const pc = v => +(+v).toFixed(1) + '%';
 function mlFd(fm, key) {
   const mv = fm.moves;
