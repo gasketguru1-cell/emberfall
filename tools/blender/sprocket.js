@@ -41,8 +41,11 @@ const sprocket = {
     ...leg('L', 0.28), ...leg('R', -0.19)],
   ik: [{ name: 'c_handL', bone: 'foreL', chain: 2 }, { name: 'c_handR', bone: 'foreR', chain: 2 }, { name: 'c_footL', bone: 'shinL', chain: 2 }, { name: 'c_footR', bone: 'shinR', chain: 2 }],
   copyrot: [{ bone: 'wrench', from: 'c_wrench' }],
-  /* the wrench below the hand: beside the boot it is told apart by being further forward */
-  rigid: [{ bone: 'wrench', box: [[-0.84, 0.26, 0.02], [-0.47, 0.93, 0.6]] }, { bone: 'wrench', box: [[-0.84, -0.05, 0.175], [-0.465, 0.26, 0.6]] }],
+  /* the wrench below the hand, its whole depth (z 0.03 to 0.37). It is told from the trouser leg and boot by how far out it
+     sits: measured from the mesh, the wrench is at x -0.44 and beyond below the knee, the leg never past -0.42 and the boot's
+     sole edge at -0.45, so the cut is at -0.43 above boot height and -0.465 at the boot. (Before 2026-11-11 the lower box
+     started at z 0.175, which left the back half of the jaw on the leg: it stretched into strips whenever the wrench moved.) */
+  rigid: [{ bone: 'wrench', box: [[-0.84, 0.2, -0.05], [-0.43, 0.93, 0.6]] }, { bone: 'wrench', box: [[-0.84, -0.05, -0.05], [-0.465, 0.2, 0.6]], skipDark: 0.1 }, { bone: 'wrench', box: [[-0.7, 0.93, 0.15], [-0.5, 1.0, 0.4]], detach: [-0.1, 0.92], only: true }],   /* and the bit of handle just under the fist; below the fist the wrench is cut free of the leg and boot it touches */
   poses: {
     stand: { all: {}, hips: {}, spine: {}, chest: {}, head: {}, c_handL: {}, c_handR: {}, c_footL: {}, c_footR: {}, c_wrench: {} },
     ready: { c_wrench: R(-28), c_handR: M(0.04, 0.02, 0.04) },   /* the wrench lifted off the floor, angled ahead */
@@ -70,7 +73,7 @@ const sprocket = {
       { t: 0.25, pose: { c_footL: M(0, 0.05, -0.04), c_footR: M(0, 0.1, 0.06), c_handL: M(0.12, 0.56, 0.04), c_wrench: R(30) } },
       { t: 0.5, pose: { c_footL: M(0, 0.1, 0.06), c_footR: M(0, 0.05, -0.04), c_handL: M(0.12, 0.5, 0), c_wrench: R(24) } }] },
     Land: { fps: 30, keys: [{ t: 0, use: 'stand', pose: { hips: M(0, -0.3, 0), spine: R(18), chest: R(12), head: R(-10), c_wrench: R(-30), c_handL: M(0, -0.1, 0.12) } }, { t: 0.18, pose: { hips: M(0, -0.08, 0), spine: R(6), chest: R(4), head: R(-4) } }, { t: 0.4, reset: true, use: 'stand' }] },
-    Shield: { fps: 30, keys: [{ t: 0, use: 'stand' }, { t: 0.15, pose: { hips: M(0, -0.12, 0), spine: R(8), head: R(6), c_handR: M(0.1, 0.05, 0.22), c_wrench: R(0, 0, 78), c_handL: M(-0.5, 0.42, 0.34) } }] },   /* the wrench held across him */
+    Shield: { fps: 30, keys: [{ t: 0, use: 'stand' }, { t: 0.15, pose: { hips: M(0, -0.12, 0), spine: R(8), head: R(6), c_handR: M(0.1, 0.2, 0.4), c_wrench: R(0, 0, 78), c_handL: M(-0.5, 0.56, 0.5) } }] },   /* the wrench held across him */
     Hit: { fps: 30, keys: [{ t: 0, use: 'stand', pose: { hips: M(0, 0, -0.08), spine: R(-14), chest: R(-12), head: R(-16), c_handL: M(0.12, 0.4, -0.12), c_handR: M(-0.06, 0.15, -0.15), c_wrench: R(36), c_footL: M(0, 0.06, 0.12) } },
       { t: 0.3, pose: { spine: R(-8), chest: R(-6), head: R(-6) } }, { t: 0.6, reset: true, use: 'stand' }] },
     Tumble: { fps: 30, keys: [{ t: 0, use: ['stand', 'tuck'] }, { t: 0.3, pose: { spine: R(28), chest: R(20) } }, { t: 0.6, pose: { spine: R(22), chest: R(16) } }] },
@@ -173,9 +176,9 @@ Object.assign(sprocket.clips, {
     { t: 0.6, pose: { c_handL: M(0.2, 0.5, 0.2), c_handR: M(0.1, 0.3, -0.2), c_wrench: R(60), c_footL: M(0, 0.2, 0.1), c_footR: M(0, 0.05, -0.1), head: R(-14) } }] },
   LandHard: { fps: 30, keys: [{ t: 0, use: 'stand', pose: { hips: M(0, -0.4, 0), spine: R(26), chest: R(18), head: R(-18), c_wrench: R(-10), c_handR: M(0.2, -0.3, 0.3), c_handL: M(-0.1, -0.35, 0.3) } },   /* a deep squat, wrench to the floor */
     { t: 0.12, pose: { hips: M(0, -0.44, 0), spine: R(30) } }, { t: 0.3, pose: { hips: M(0, -0.14, 0), spine: R(8), chest: R(4), head: R(-4), c_wrench: R(-30) } }, { t: 0.45, reset: true, use: ['stand', 'ready'] }] },
-  ShieldHit: { fps: 30, keys: [{ t: 0, use: 'stand', pose: { hips: M(0, -0.12, 0), spine: R(8), head: R(6), c_handR: M(0.1, 0.05, 0.22), c_wrench: R(0, 0, 78), c_handL: M(-0.5, 0.42, 0.34) } },
-    { t: 0.06, pose: { hips: M(0, -0.16, -0.1), spine: R(-6), head: R(-6), c_handR: M(0.1, 0.08, 0.12), c_handL: M(-0.5, 0.45, 0.24) }, in: 'out' },
-    { t: 0.3, pose: { hips: M(0, -0.12, 0), spine: R(8), head: R(6), c_handR: M(0.1, 0.05, 0.22), c_handL: M(-0.5, 0.42, 0.34) } }] },
+  ShieldHit: { fps: 30, keys: [{ t: 0, use: 'stand', pose: { hips: M(0, -0.12, 0), spine: R(8), head: R(6), c_handR: M(0.1, 0.2, 0.4), c_wrench: R(0, 0, 78), c_handL: M(-0.5, 0.56, 0.5) } },
+    { t: 0.06, pose: { hips: M(0, -0.16, -0.1), spine: R(-6), head: R(-6), c_handR: M(0.1, 0.22, 0.3), c_handL: M(-0.5, 0.58, 0.4) }, in: 'out' },
+    { t: 0.3, pose: { hips: M(0, -0.12, 0), spine: R(8), head: R(6), c_handR: M(0.1, 0.2, 0.4), c_handL: M(-0.5, 0.56, 0.5) } }] },
   HitHeavy: { fps: 30, keys: [{ t: 0, use: 'stand', pose: { all: R(-18), hips: M(0, 0, -0.14), spine: R(-22), chest: R(-18), head: R(-28), c_handL: M(0.3, 0.62, -0.2), c_handR: M(-0.05, 0.4, -0.3), c_wrench: R(70), c_footL: M(0, 0.18, 0.22), c_footR: M(0, 0.04, 0.05) } },
     { t: 0.3, pose: { all: R(-8), spine: R(-12), chest: R(-8), head: R(-10), c_footL: M(0, 0.04, 0.1) } }, { t: 0.8, reset: true, use: 'stand' }] },
   LaunchUp: { fps: 30, keys: [{ t: 0, use: 'stand', pose: { all: R(-14), spine: R(-14), chest: R(-12), head: R(-30), c_handL: M(0.2, -0.05, -0.15), c_handR: M(-0.05, -0.1, -0.2), c_wrench: R(30), c_footL: M(0, 0.04, -0.06), c_footR: M(0, 0.1, 0.06) } },   /* flung upward: limbs trail below */
@@ -205,10 +208,10 @@ Object.assign(sprocket.clips, {
     { t: 0.12, pose: { chest: R(-8), c_handL: M(-0.3, 0.7, 0.5), c_handR: M(0.25, 0.6, -0.05), c_wrench: R(160) } },
     { t: 0.24, pose: { hips: M(0, -0.24, 0.06), spine: R(20), chest: R(24), head: R(10), c_handL: M(-0.4, -0.3, 0.55), c_handR: M(0.3, -0.25, 0.4), c_wrench: R(-20) }, in: 'snap' },
     { t: 0.36, pose: { c_wrench: R(-12), hips: M(0, -0.28, 0.06) } }, { t: 0.75, reset: true, use: ['stand', 'ready'] }] },
-  Jab2: { fps: 30, keys: [{ t: 0, use: ['stand', 'ready'] },   /* the follow-up: the wrench's handle punched forward */
-    { t: 0.1, pose: { chest: R(0, -10), c_handR: M(0, 0.15, -0.1), c_wrench: R(-30) } },
-    { t: 0.17, pose: { hips: M(0, -0.02, 0.08), chest: R(4, 18), c_handR: M(0.25, 0.38, 0.5), c_wrench: R(-20), c_handL: M(0, 0.05, -0.1) }, in: 'snap' },
-    { t: 0.27, pose: { c_handR: M(0.25, 0.38, 0.52) } }, { t: 0.5, reset: true, use: ['stand', 'ready'] }] },
+  Jab2: { fps: 30, keys: [{ t: 0, use: ['stand', 'ready'] },   /* the follow-up: a short, sharp jab with the wrench thrust straight out */
+    { t: 0.1, pose: { chest: R(0, -12), c_handR: M(0.02, 0.15, -0.12), c_wrench: R(-34) } },
+    { t: 0.17, pose: { hips: M(0, -0.02, 0.08), chest: R(4, 18), c_handR: M(0.12, 0.24, 0.46), c_wrench: R(-96), c_handL: M(0, 0.05, -0.1) }, in: 'snap' },
+    { t: 0.27, pose: { c_handR: M(0.12, 0.24, 0.5) } }, { t: 0.5, reset: true, use: ['stand', 'ready'] }] },
   GetupSwing: { fps: 30, keys: [{ t: 0, use: 'stand', pose: { all: RM(-90, 0, 0, 0, 0.36, 0.9), head: R(-6), c_handL: M(0.15, 0.1, 0) } },   /* off his back: a wrench sweep in front, then one behind */
     { t: 0.22, reset: true, use: 'crouch', pose: { hips: M(0, -0.3, 0), c_handR: M(0.1, -0.5, 0), c_wrench: R(-70, -40) } },
     { t: 0.38, pose: { chest: R(14, 20), c_handR: M(0.3, -0.62, 0.45), c_wrench: R(-84, 30) }, in: 'snap' },

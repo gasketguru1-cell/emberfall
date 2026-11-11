@@ -179,9 +179,38 @@ for rg in spec.get('rigid', []):
     else:
         a, b = conv(rg['box'][0]), conv(rg['box'][1]); mn = [min(a[i], b[i]) for i in range(3)]; mx = [max(a[i], b[i]) for i in range(3)]
         idx = [v.index for v in mesh.data.vertices if all(mn[i] <= v.co[i] <= mx[i] for i in range(3))]
+    if 'skipDark' in rg:   # leave out vertices painted darker than this (a black boot touching a copper tool)
+        lum = globals().get('lum_cache') or vertex_dark(mesh); globals()['lum_cache'] = lum
+        if lum: n0 = len(idx); idx = [i for i in idx if lum[i] >= rg['skipDark']]; print('rig: %d dark vertices left out of %s' % (n0 - len(idx), rg['bone']))
     for vg in mesh.vertex_groups: vg.remove(idx)
     mesh.vertex_groups[rg['bone']].add(idx, 1.0, 'REPLACE')
     print('rig: %d vertices rigid on %s' % (len(idx), rg['bone']))
+    rigid_sets = globals().setdefault('rigid_sets', {}); rigid_sets.setdefault(rg['bone'], set()).update(idx)
+# "only": true on a rigid entry: that bone moves nothing outside its rigid part. Automatic weighting gives a tool's bone some
+# pull on whatever is near it at rest (a boot beside a wrench); that pull would drag the boot along with every swing.
+for bone in {rg['bone'] for rg in spec.get('rigid', []) if rg.get('only')}:
+    part = rigid_sets[bone]; g = mesh.vertex_groups[bone]; gi = g.index; fixed = 0
+    for v in mesh.data.vertices:
+        if v.index in part: continue
+        ws = {e.group: e.weight for e in v.groups if e.weight > 1e-6}
+        if gi not in ws: continue
+        rest = sum(w for k, w in ws.items() if k != gi); g.remove([v.index]); fixed += 1
+        if rest > 1e-6:
+            for k, w in ws.items():
+                if k != gi: mesh.vertex_groups[k].add([v.index], w / rest, 'REPLACE')
+        else: mesh.vertex_groups[arm.bones[bone].parent.name].add([v.index], 1.0, 'REPLACE')
+    print('rig: %s no longer pulls on %d vertices outside its rigid part' % (bone, fixed))
+# "detach": [y0, y1] on a rigid entry removes the faces that join that bone's rigid part to the rest of the mesh between those
+# heights (spec units, feet at 0). A generated mesh is one welded surface, so a tool resting on the floor beside a boot shares
+# faces with it there; those faces would stretch into strips whenever the tool moves, however they were weighted.
+for rg in spec.get('rigid', []):
+    if 'detach' not in rg: continue
+    import bmesh
+    y0, y1 = rg['detach']; part = rigid_sets[rg['bone']]
+    bm = bmesh.new(); bm.from_mesh(mesh.data); bm.faces.ensure_lookup_table()
+    gone = [f for f in bm.faces if 0 < sum(v.index in part for v in f.verts) < len(f.verts) and y0 <= f.calc_center_median().z <= y1]
+    bmesh.ops.delete(bm, geom=gone, context='FACES_ONLY'); bm.to_mesh(mesh.data); bm.free(); mesh.data.update()
+    print('rig: detached %s from the body between heights %.2f and %.2f (%d faces)' % (rg['bone'], y0, y1, len(gone)))
 
 # ---- leg reach (IK): the lower leg's tip follows a control bone; the exporter bakes the result into plain rotations ----
 bpy.context.view_layer.objects.active = rig
