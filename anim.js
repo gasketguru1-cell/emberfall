@@ -93,6 +93,7 @@ function animAlt(f, a) {
     case 'attack': {
       const m = f.move; if (!m) return null;
       if (nm === 'Potato Sack' && f.mname === 'nspec') return !f.scRel ? { key: 'spudCharge', mode: 'loop', v: t * (1 + Math.min(2, (f.scC || 0) / 60)) } : { key: 'spudBurst', mode: 'phase', v: phase(f.mf - f.scRel, 24) };   /* the shake quickens as it charges */
+      if (nm === 'Potato Sack' && f.mname === 'uspec') return { key: 'attack', move: 'uspec', mode: 'marks', seg: 0, whole: true, v: f.mf <= 4 ? 0.12 * f.mf / 4 : 0.12 + 0.045 * Math.min(1, (f.mf - 4) / 15) };   /* Hot Potato: the toss by frame 4, then braced under it until it lands on him (the burst is the launch) */
       if (nm === 'Potato Sack' && f.mname === 'dspec') {
         if (f.mf < 6 || !f.burstKind) return { key: 'tumble_prep', mode: 'phase', v: phase(f.mf, 6) };
         return { key: 'tumble_' + (f.burstKind === 'slide' && !f.grounded ? 'drop' : f.burstKind), mode: 'phase', v: phase(f.mf - 6, m.t - 6) };   /* a slide that leaves the ground has dropped through a platform or off an edge */
