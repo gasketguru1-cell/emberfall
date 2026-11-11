@@ -473,6 +473,9 @@ vm.runInThisContext(`
       check('Potato Sack: neutral air hits four times (three carrying hits and a finisher)', rise.hits === 4 && fall.hits === 4 && rise.dmg > 8 && rise.dmg < 10.5, 'rising: ' + rise.hits + ' hits, ' + rise.dmg.toFixed(1) + '%; falling: ' + fall.hits + ' hits');
       check('Potato Sack: neutral air drags the opponent with him, up or down', rise.gapMax < 9 && fall.gapMax < 9 && Math.sign(rise.oMove) === Math.sign(rise.sMove) && Math.sign(fall.oMove) === Math.sign(fall.sMove) && Math.abs(fall.oMove) > Math.abs(fall.sMove) * 0.5,
         'rising: he moved ' + rise.sMove.toFixed(1) + ', they moved ' + rise.oMove.toFixed(1) + ', never more than ' + rise.gapMax.toFixed(1) + ' apart; falling: ' + fall.sMove.toFixed(1) + ' / ' + fall.oMove.toFixed(1) + ', at most ' + fall.gapMax.toFixed(1) + ' apart');
+      /* toned down: only the first neutral air of an airtime drags */
+      { const [s2, o2] = setup(SACK, FL, 0, 3); airborne(s2, 0, 40); airborne(o2, 3, 38); o2.ctl = new Ctl('none'); o2.x = 200; s2.startMove('nair'); run(3); const first = s2.nairDrag; run(20); airborne(s2, 0, 40); s2.startMove('nair'); run(3); const second = s2.nairDrag; s2.touchDown(MAIN); airborne(s2, 0, 40); s2.startMove('nair'); run(3); const again = s2.nairDrag;
+        check('Potato Sack: only the first neutral air of each airtime drags', first === true && second === false && again === true, 'first: ' + first + ', second in the same air: ' + second + ', after landing: ' + again); }
       check('Potato Sack: neutral air finisher launches them away', late.away > 25, 'at 130%: ' + late.away.toFixed(1) + ' units apart 90 frames after the start'); }
     /* up special bursts on frame 5 */
     { const [s] = setup(SACK, FL, 0, 60); let at = -1; SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = 1; i.spc = true; } }; run(20, () => { if (at < 0 && PROJ.some(p => p.kind === 'blast')) at = s.mf; });

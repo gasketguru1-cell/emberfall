@@ -119,7 +119,19 @@ Added on 2026-11-10 at your request.
 | 28 | 28_Platform_FHNair_Nair_DJNair_UpB_KO_at_30 | opponent on a platform: fh_nair > nair > dj_nair > upb | 30% | 13 hits, KO | 13K/13K/13K/13K/1 | 13K/13/13K |
 | 29 | 29_SpudBomb_TumbleGrab_Nair_TumbleUpB_KO_at_0 | route 04 with the real neutral air | 0% | 6 hits, KO | — | — |
 
-**What this means for balance. This is for you to decide; I have not changed it.**
+**Toned down at your request (later on 2026-11-10).**
+- **The change:** only the first neutral air of each trip into the air drags. Later ones in the same airtime still hit four times but let go. The finisher's base knockback went from 36 to 45 and its growth from 92 to 84, so launch distance stays about where it was.
+- **After the change** (re-run with the same tools; `search-nair.json` is the new search):
+  - **The chain:** four neutral airs in a row now gives 8 hits at 0%, 12 to 16 at 30%, 7 to 8 at 60% and 4 at 90%. Short hops after landing add nothing, where before they reached 32 hits.
+  - **The longest neutral-air route found:** short hop with two neutral airs, then a new jump with two more, for 16 hits and 28.5% at 0%. That's in line with his other combos.
+  - **Kill confirms that remain:**
+    - at 30%: short hop, neutral air, neutral air, double jump, down air, then up B (9 hits, KO);
+    - at 60%: neutral air, double jump, neutral air, Tumble forward, up B (9 hits, KO);
+    - at the ledge at 60%: four neutral airs with a fast fall (12 hits, KO);
+    - with the opponent on a platform at 30%: full hop, neutral air, double jump, neutral air, up B (9 hits, KO).
+- **Clips 23 to 29 were recorded before this change.** Clips 23 and 24 show the loop that has now been removed.
+
+**The analysis below is from before the change:**
 - **Neutral air now combos into itself.** Short hop with two neutral airs, then double jump with two more, is a true combo from 0 to 60% against every DI and every weight tested.
 - **Short hops after landing extend it to 8 neutral airs:** 32 hits and about 50% from one touch at 0%.
 - **It isn't infinite:** by 30%, DI out ends it at 17 hits, and by 90% it is 4 to 8 hits.

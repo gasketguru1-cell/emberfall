@@ -920,9 +920,11 @@ for (const def of ROSTER) for (const fm of def.forms) {
      them away. 1.2% x 3 + 4% = 7.6%, about the 7.5% of the single hit it replaces; the finisher keeps the old 45-degree launch,
      with more base knockback so it sends about as far. */
   const body = { x: 0, y: 6, r: 7 };
-  nair.h = [1, 2, 3].map(g => Object.assign({ f0: 1 + 2 * g, f1: 2 + 2 * g, g, d: 1.2, a: 80, b: 16, k: 0, carry: 1 }, body))
-    .concat([Object.assign({ f0: 9, f1: 10, g: 50, d: 4, a: 45, b: 36, k: 92, away: 1 }, body)]);
-  nair.on = (f, n) => { if (n >= 3 && n <= 9) sackCarry(f); }; }
+  nair.h = [1, 2, 3].map(g => Object.assign({ f0: 1 + 2 * g, f1: 2 + 2 * g, g, d: 1.2, a: 80, b: 16, k: 0, carry: 1, dyn: a => a.nairDrag ? {} : { carry: 0 } }, body))
+    .concat([Object.assign({ f0: 9, f1: 10, g: 50, d: 4, a: 45, b: 45, k: 84, away: 1 }, body)]);
+  /* Toned down (owner's request, 2026-11-10): only the first neutral air of each trip into the air drags. Later ones in the
+     same airtime still hit four times but let go, so the move can no longer carry someone through a chain of itself. */
+  nair.on = (f, n) => { if (n === 1) { f.nairDrag = !f.airUse.nairDrag; f.airUse.nairDrag = 1; } if (n >= 3 && n <= 9 && f.nairDrag) sackCarry(f); }; }
 /* Keeps an opponent caught by Potato Sack's neutral air moving with him: their speed eases toward his and they are pulled
    toward the middle of his body, so the hits that follow connect wherever he is drifting or falling. */
 function sackCarry(f) { const o = opp(f); if (!o || o.dragBy !== f.idx || o.state !== 'hurt' || o.hitlag > 0) return; const cx = f.x + f.face * 2 - o.x, cy = f.y + f.st.h / 2 - (o.y + o.st.h / 2), dd = Math.hypot(cx, cy);
