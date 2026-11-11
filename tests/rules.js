@@ -271,6 +271,16 @@ vm.runInThisContext(`
     const rv = brev(2), late = brev(9), up = brev(2, true), wave = brev(2, false, true);
     check('B-reverse: stick back just after special turns round and reverses the drift', rv.face === -1 && rv.vx < 0 && rv.mv === 'nspec' && rv.puff === 6, 'face ' + rv.face + ', vx ' + rv.vx + ', ' + rv.mv + ', swirl ' + rv.puff);
     check('B-reverse after a turnaround special: a wavebounce (facing forward, drifting back)', wave.face === 1 && wave.vx < 0 && wave.puff === 6, 'face ' + wave.face + ', vx ' + wave.vx);
+    /* Reverse aerial rush: run right, pull back (a turnaround skid, or during the jump's start-up), jump: facing left but still going right, so
+       forward on the stick (right) with attack is a back air that carries the run's speed. */
+    const rarT = (how) => { const [f] = setup(FL, FL, -60, 60); f.ctl.cFall = true; let lift = null, bair = null, st0 = '';
+      SCRIPT[0] = (i, tt) => { if (tt < 2) return; if (tt < 28) i.lx = 1;
+        else if (how === 'skid') { if (tt < 30) i.lx = -1; else if (tt < 32) { i.lx = -1; i.jmp = true; } }
+        else if (tt < 30) { i.lx = tt === 28 ? 1 : -1; i.jmp = true; }
+        if (tt >= 40 && tt < 44) { i.lx = 1; if (tt === 40) i.atk = true; } };
+      run(56, () => { if (t === 27) st0 = f.state; if (!lift && !f.grounded) lift = { face: f.face, vx: +f.vx.toFixed(2) }; if (f.state === 'attack' && f.mname === 'bair' && !bair) bair = 1; if (bair && f.state === 'attack' && f.mname === 'bair') bair = { vx: +f.vx.toFixed(2) }; }); return { st0, lift, bair, top: f.st.jumpXMax }; };
+    for (const how of ['skid', 'jumpsquat']) { const r = rarT(how);
+      check('reverse aerial rush (' + how + '): jump facing back, run speed kept, back air keeps it', r.st0 === 'run' && r.lift && r.lift.face === -1 && r.lift.vx >= r.top * 0.85 && r.bair && r.bair.vx > r.top * 0.7, r.st0 + ', lift-off ' + JSON.stringify(r.lift) + ', back air ' + JSON.stringify(r.bair) + ' (jump speed limit ' + r.top + ')'); }
     check('B-reverse: too late does nothing', late.face === 1, 'face ' + late.face);
     check('B-reverse: not for up specials', up.face === 1 || up.mv !== 'uspec', up.mv + ', face ' + up.face);
     check('jump: tap for a short hop, hold for a full one', short.top > 8 && short.top < full.top * 0.6, 'heights ' + short.top + ' and ' + full.top);
