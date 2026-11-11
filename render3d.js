@@ -307,7 +307,7 @@ function build() {
     if (kind === 'tape') { const m = new THREE.Group(), rim = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.55, 18).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xd9c24a, roughness: 0.45, metalness: 0.5 })), hub = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.3, 0.62), new THREE.MeshStandardMaterial({ color: 0x4a4d57, roughness: 0.6 })); rim.castShadow = true; m.add(rim, hub); return m; }   /* Sprocket's tape roll: a steel reel with a dark bar across it, so its turning shows */
     if (kind === 'vaxe') {   /* Vargan's thrown axe: his own axe model, turned about its balance point 0.85 m up the haft; mirrored by the pivot so the blade leads */
       const M = MODELS.Vargan, g2 = new THREE.Group(), pivot = new THREE.Group(); g2.add(pivot); g2.userData.pivot = pivot;
-      if (M && M.axe && M.ready) { const s = M.cfg.height / M.height, o = M.axe.clone(true); o.scale.setScalar(s); o.rotation.y = Math.PI / 2; o.position.y = -0.85 * s; o.traverse(q => { if (q.isMesh) { q.castShadow = true; q.frustumCulled = false; } }); pivot.add(o); g2.userData.s = s; }
+      if (M && M.axe && M.ready) { const s = M.cfg.height / M.height, o = M.axe.clone(true); o.scale.setScalar(s); o.rotation.y = Math.PI / 2; o.position.y = -(M.cfg.axe.bal || 0.85) * s; o.traverse(q => { if (q.isMesh) { q.castShadow = true; q.frustumCulled = false; } }); pivot.add(o); g2.userData.s = s; }
       else { const b = new THREE.Mesh(new THREE.BoxGeometry(0.8, 13, 0.8), new THREE.MeshStandardMaterial({ color: 0x5a3a24 })), hd = new THREE.Mesh(new THREE.BoxGeometry(3, 3.4, 0.5), new THREE.MeshStandardMaterial({ color: 0x9aa4ae, metalness: 0.6 })); hd.position.set(1.5, 4.5, 0); pivot.add(b, hd); g2.userData.s = 8.4; }
       return g2;
     }
@@ -331,7 +331,7 @@ function build() {
     const sp = M.cfg.clips[a.key] || M.cfg.clips.idle, clip = M.clips[sp.clip], from = sp.from || 0, to = sp.to !== undefined ? sp.to : clip.duration, span = Math.max(1e-3, to - from);
     if (sp.at !== undefined) return [sp.clip, sp.at];
     if (a.mode === 'loop') { const t = a.v * (sp.rate || 1); if (sp.bounce) { const u = t % (2 * span); return [sp.clip, from + (u < span ? u : 2 * span - u)]; } return [sp.clip, from + t % span]; }
-    if (a.mode === 'cycle') return [sp.clip, from + frac(a.v) * span];
+    if (a.mode === 'cycle') return [sp.clip, from + frac(sp.stride && a.d !== undefined ? a.d / sp.stride : a.v) * span];   /* stride: the ground one cycle of this model's clip covers, so its planted feet stay put */
     return [sp.clip, from + clamp(a.v, 0, 1) * span];
   }
   function applyAnim(v, f) {
@@ -342,7 +342,7 @@ function build() {
     if (!v.cur || v.cur.name !== name) { v.prev = v.cur; v.cur = { name, time, since: tick }; }
     v.cur.time = time;
     /* A change of action is instant in the game; only the picture eases across, over four steps. */
-    const b = v.prev ? clamp((tick - v.cur.since + 1) / 4, 0, 1) : 1;
+    const bn = (M.cfg.blendIn && M.cfg.blendIn[name]) || 4, b = v.prev ? clamp((tick - v.cur.since + 1) / bn, 0, 1) : 1;   /* blendIn: a longer ease into some clips (a heavy fighter settling back to his guard) */
     const act = n => v.actions[n] || (v.actions[n] = v.mixer.clipAction(M.clips[n]).play());
     for (const n in v.actions) v.actions[n].setEffectiveWeight(0);
     const set = (c, w) => { const a = act(c.name); a.setEffectiveWeight(w); a.time = clamp(c.time, 0, a.getClip().duration - 1e-4); };
@@ -350,6 +350,46 @@ function build() {
     set(v.cur, v.prev && b < 1 ? b : 1);
     v.mixer.update(0);
     R3.anim = R3.anim || []; R3.anim[f.idx] = name + ' @ ' + time.toFixed(2) + 's';
+  }
+
+  /* Vargan's axe has three places, and is drawn in exactly one of them (or none):
+     - in his hand: the axe part of his own mesh (skinned to the "axe" bone), only inside an axe move between the clip times
+       the manifest gives it (axe.armed: { clip: [draw, stow] }), where the clip has his hand at his back to take it or put it back;
+     - on his back: a copy of the axe model hung from his chest bone (axe.back: pommel, haft direction d and edge e in the
+       model's own metres, the bind pose), the rest of the time;
+     - thrown: the projectile (render of PROJ), while the game says it is away. Neither copy on him shows then.
+     The hand's axe world pose is kept every frame, so a thrown axe can start from exactly where his hand let it go. */
+  const _v3 = new THREE.Vector3(), _v4 = new THREE.Vector3();
+  function axeShow(v, f) {
+    const cfg = v.model.cfg.axe, M = v.model;
+    if (v.axeObj !== v.obj) {
+      v.axeObj = v.obj; v.axeBone = v.obj.getObjectByName(cfg.bone); v.axeMeshes = []; v.backAxe = null;
+      let chest = null, bindInv = null;
+      v.obj.traverse(o => {
+        if (!o.isSkinnedMesh) return;
+        const B = o.skeleton.bones, ai = B.indexOf(v.axeBone), si = o.geometry.attributes.skinIndex, sw = o.geometry.attributes.skinWeight;
+        let n = 0; const m = Math.min(si.count, 200);
+        for (let i = 0; i < m; i++) { let best = 0, bi = -1; for (let c = 0; c < 4; c++) { const w = sw.getComponent(i, c); if (w > best) { best = w; bi = si.getComponent(i, c); } } if (bi === ai) n++; }
+        if (n > m * 0.9) v.axeMeshes.push(o);   /* the axe's own mesh: every vertex on the axe bone */
+        else if (!chest) { const ci = B.findIndex(b => b.name === (cfg.backBone || 'chest')); if (ci >= 0) { chest = B[ci]; bindInv = o.skeleton.boneInverses[ci]; } }
+      });
+      if (chest && M.axe && cfg.back) {
+        const bk = cfg.back, d = new THREE.Vector3(...bk.d).normalize(), e = new THREE.Vector3(...bk.e).normalize(), x = new THREE.Vector3().crossVectors(d, e).normalize();
+        e.crossVectors(x, d).normalize();
+        const mb = new THREE.Matrix4().makeBasis(x, d, e).setPosition(...bk.pommel);   /* the axe model: haft along +y from the pommel, edge +z */
+        const local = bindInv.clone().multiply(mb);   /* from the model's bind space into the chest bone's own */
+        const o = M.axe.clone(true); o.matrixAutoUpdate = false; o.matrix.copy(local); o.traverse(q => { if (q.isMesh) { q.castShadow = true; q.frustumCulled = false; } });
+        chest.add(o); v.backAxe = o;
+      }
+    }
+    const arm = cfg.armed && v.cur && cfg.armed[v.cur.name], inHand = !f.axeAway && !!arm && v.cur.time >= arm[0] && v.cur.time < arm[1];
+    for (const m of v.axeMeshes) m.visible = inHand;
+    if (v.backAxe) v.backAxe.visible = !f.axeAway && !inHand;
+    if (inHand && v.axeBone) {   /* the balance point and the head's direction in the world, for the hand-off to a thrown axe */
+      v.axeBone.updateMatrixWorld(true); const b = cfg.bal - cfg.hold;
+      v.axeBone.localToWorld(_v3.set(0, b, 0)); v.axeBone.localToWorld(_v4.set(0, b + 1, 0)).sub(_v3);
+      v.axeHand = { x: _v3.x, y: _v3.y, rot: Math.atan2(_v4.y, _v4.x), tick };
+    }
   }
 
   /* ---- follow-through: tails, ears and ribbons lag behind the body and settle on their own ----
@@ -689,10 +729,7 @@ function build() {
       if (v.bubble) { const on = !!f.bubble, grow = f.state === 'attack' && f.mname === 'uspec' && !on ? clamp((f.mf - 3) / 5, 0, 1) : 0;   /* it swells from his mouth as he blows, then wobbles round him; it sits round his middle whatever the pivot is doing */
         v.bubble.visible = on || grow > 0; v.bubble.scale.setScalar(on ? 1 + Math.sin(tick * 0.3) * 0.03 : 0.15 + 0.85 * grow); v.bubble.position.x = on ? 0 : 5 * (1 - grow); }
       if (v.springs.length) applySprings(v);
-      if (v.model && v.model.cfg.axe) {   /* Vargan: the axe in his hand is folded away to nothing while the real one is thrown */
-        if (v.axeKey !== v.key) { v.axeKey = v.key; v.axeBone = v.obj.getObjectByName(v.model.cfg.axe.bone); }
-        if (v.axeBone) { v.axeBone.scale.setScalar(f.axeAway ? 1e-4 : 1); v.axeBone.updateMatrixWorld(true); }
-      }
+      if (v.model && v.model.cfg.axe) axeShow(v, f);
       bladeArc(v, f, idx);
       fireFighter(f, idx, v);
       if (v.prop && !v.hand) {   /* the living slingshot under its bird: posed by slingWant, the bird riding in its pouch */
@@ -744,6 +781,10 @@ function build() {
       else if (p.kind === 'bolt') m.scale.x = p.face;
       else if (p.kind === 'vaxe') {   /* p.rot is the direction the head points; stuck, the head is buried a hand's width in */
         m.rotation.z = (p.rot || 0) - Math.PI / 2; m.userData.pivot.scale.x = p.face || 1;
+        if (m.userData.from === undefined) { const h = fighters[p.owner] && fighters[p.owner].axeHand; m.userData.from = h && tick - h.tick <= 2 && p.st === 'fly' ? { x: h.x, y: h.y, rot: h.rot, tick } : null; }
+        const fr = m.userData.from, k = fr ? (tick - fr.tick) / 8 : 1;   /* the first 8 steps ease from where his hand let it go onto the game's own path */
+        if (k < 1) { const u = k * k * (3 - 2 * k); let dr = (p.rot - fr.rot) % (2 * Math.PI); if (dr > Math.PI) dr -= 2 * Math.PI; if (dr < -Math.PI) dr += 2 * Math.PI;
+          m.position.x = fr.x + (m.position.x - fr.x) * u; m.position.y = fr.y + (m.position.y - fr.y) * u; m.rotation.z = fr.rot + dr * u - Math.PI / 2; }
         if (p.st === 'stuck') { const k = 0.6 * m.userData.s; m.position.x -= Math.cos(p.rot) * k; m.position.y -= Math.sin(p.rot) * k; }
         fireAxe(p);
       }

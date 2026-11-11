@@ -228,7 +228,7 @@ const ART = {
     let tx = 4.2, ty = 13.4, hx = 3.0, hy = 7.6;
     if (f && f.state === 'attack' && f.move && f.move.h && !f.axeAway) { const m = f.move, h = m.h.find(q => q.ax && f.mf >= q.f0 && f.mf <= q.f1) || m.h.find(q => q.ax && f.mf < q.f0) || m.h.filter(q => q.ax).pop();
       if (h) { const p = f.mf < h.f0 ? f.mf / h.f0 : f.mf <= h.f1 ? 1 : Math.max(0, 1 - (f.mf - h.f1) / Math.max(1, m.t - h.f1)), e = p * p * (3 - 2 * p), U = 16, a = h.ax[2] * Math.PI / 180;
-        const gx = h.ax[0] * U, gy = h.ax[1] * U; hx += (gx - hx) * e; hy += (gy - hy) * e; tx += (gx + Math.cos(a) * 11 - tx) * e; ty += (gy + Math.sin(a) * 11 - ty) * e; } }
+        const gx = h.ax[0] * U, gy = h.ax[1] * U; hx += (gx - hx) * e; hy += (gy - hy) * e; tx += (gx + Math.cos(a) * 14.3 - tx) * e; ty += (gy + Math.sin(a) * 14.3 - ty) * e; } }
     limb(1, 11.4 + bob, hx, hy, 1.6, skin);
     if (!(f && f.axeAway)) { const dx = tx - hx, dy = ty - hy, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, px = hx - ux * 1.8, py = hy - uy * 1.8;
       g.lineCap = 'round'; g.beginPath(); g.moveTo(px, py); g.lineTo(tx, ty); g.strokeStyle = OL; g.lineWidth = 1.2; g.stroke(); g.strokeStyle = '#6b4226'; g.lineWidth = 0.7; g.stroke();

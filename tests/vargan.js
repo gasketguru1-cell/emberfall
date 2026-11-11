@@ -78,7 +78,7 @@ vm.runInThisContext(`
   function counterAt(D, setAxe) {
     const [v, f] = setup(0, 9); v.face = 1; f.face = -1; vThrow(v); const p = axes()[0]; v.x = 0; v.y = 0; v.grounded = true; v.plat = MAIN; v.vx = 0; v.face = 1; v.set('idle');
     f.x = 9; f.y = 0; f.pct = 0; f.set('idle'); f.vx = f.vy = 0; f.face = -1;
-    if (setAxe) setAxe(p, v); else { p.st = 'stuck'; p.x = -D; p.y = v.y + v.st.h * 0.5; p.plat = null; }
+    if (setAxe) setAxe(p, v); else { p.st = 'stuck'; p.ghost = true; p.x = -D; p.y = v.y + v.st.h * 0.5; p.plat = null; }   /* as vStick leaves it: a stuck axe hurts nobody */
     v.startMove('dspec'); run(9); f.startMove('ftilt'); let home = null, homeHit = 0, pct0 = 0;
     run(260, () => { const q = axes()[0]; if (q && q.st === 'home' && !home) { home = q.h.d; pct0 = f.pct; } if (q && home && !homeHit && f.pct > pct0 + 0.01 && q.st !== 'home') homeHit = f.pct - pct0; });
     return { home, homeHit, v, f, p: axes()[0] };
@@ -106,7 +106,7 @@ vm.runInThisContext(`
 
   /* ---- up special: rises, hangs, dives, lands with a strike ---- */
   { const [v] = setup(-30, 60); v.startMove('uspec'); let top = 0, landed = 0; run(200, () => { top = Math.max(top, v.y); if (v.mname === 'uspecL' && !landed) landed = t; });
-    check('Soaring Plunge: rises about 2.25 H, dives back and lands into its landing strike', top > 30 && top < 40 && landed > 0 && v.grounded, 'peak ' + top.toFixed(1) + ' (H ' + st.h + '), landing strike at tick ' + landed); }
+    check('Soaring Plunge: rises about 2.25 H, dives back and lands into its landing strike', top > 2.0 * st.h && top < 2.5 * st.h && landed > 0 && v.grounded, 'peak ' + top.toFixed(1) + ' (H ' + st.h + '), landing strike at tick ' + landed); }
 
   /* ---- CPU matches: nothing breaks, the axe and Berserker get used ---- */
   { let bad = 0, used = new Set(); for (let k = 0; k < 3; k++) { slots[0] = { dev: 'kb', pick: VI, ready: true }; slots[1] = { dev: 'kb', pick: [0, 7, 8][k], ready: true }; startMatch(); F[0].ctl = new Ctl('cpu'); F[1].ctl = new Ctl('cpu');

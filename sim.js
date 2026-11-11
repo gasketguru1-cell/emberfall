@@ -1566,16 +1566,16 @@ const JOEY = (() => {
    exactly 30% of the main floor's width. Frame numbers are the atlas's (frames, active frames, totals and damage; the
    proposed values as written); positions are in units of his height H = 16 from his feet, placed where the animation puts
    the fist, boot or blade. Launch angles and growth not given by the atlas are first-pass values of mine. */
-const VAXE = { g: 0.09, slow: 0.55, vx: 1.15, vy: 2.55, r: 3.4, hold: 8, sp0: 1.3, spMax: 4.4, acc: 0.11, turn: 0.2, homeT: 150, backT: 240 };
+const VAXE = { g: 0.09, slow: 0.55, vx: 1.15, vy: 2.55, r: 5, hold: 8, sp0: 1.3, spMax: 4.4, acc: 0.11, turn: 0.2, homeT: 150, backT: 240 };
 const vW = () => MAIN.x1 - MAIN.x0;   /* the main floor's width, W in the atlas (never a side platform's) */
-const vHand = f => [f.x + f.face * 4, f.y + f.st.h * 0.55];
+const vHand = f => [f.x + f.face * 4.6, f.y + f.st.h * 0.55];
 /* Distance power (atlas II / SCALING FORMULA): t = clamp(D / 0.55 W, 0, 1), D from the fighter to the axe, frozen when the
    recall is asked for or the counter succeeds. 12% + 9% x t, knockback x (1 + 0.8 t). */
 const vTier = (f, p) => clamp(Math.hypot(p.x - f.x, p.y - (f.y + f.st.h * 0.5)) / (0.55 * vW()), 0, 1);
 const vAxeHit = (t, o) => Object.assign({ d: Math.round((12 + 9 * t) * 100) / 100, a: 45, b: 40, k: 70, kbMul: 1 + 0.8 * t, id: 'Vargan:recall' }, o);
 function vThrow(f) {
-  const p = { x: f.x + f.face * 5, y: f.y + f.st.h * 0.78, vx: VAXE.vx * f.face, vy: VAXE.vy, grav: 0, life: 1e9, hits: 1e9, rehit: 1e9, owner: f.idx, face: f.face, r: VAXE.r, ground: 'pass', plat: null,
-    kind: 'vaxe', tag: 'vaxe', st: 'fly', rot: Math.PI / 2, noClash: 1, h: { d: 15, a: 50, b: 40, k: 70, id: 'Vargan:nspec' }, step: vAxeStep, onHit: vAxeOnHit, onGone: vAxeGone };
+  const p = { x: f.x + f.face * 5.8, y: f.y + f.st.h * 0.78, vx: VAXE.vx * f.face, vy: VAXE.vy, grav: 0, life: 1e9, hits: 1e9, rehit: 1e9, owner: f.idx, face: f.face, r: VAXE.r, ground: 'pass', plat: null,
+    kind: 'vaxe', tag: 'vaxe', st: 'fly', rot: f.face > 0 ? 0.7 : Math.PI - 0.7, noClash: 1, h: { d: 15, a: 50, b: 40, k: 70, id: 'Vargan:nspec' }, step: vAxeStep, onHit: vAxeOnHit, onGone: vAxeGone };
   PROJ.push(p); f.axe = p; f.axeAway = true; f.recallArm = false; f.recallN = 0; beep(240, 0.08, 'sawtooth', 0.05, 0.7);
 }
 /* the axe hits a victim once per trip (out, home, or the counter's homing strike), then passes through them */
@@ -1618,16 +1618,16 @@ function vCounter(v, a, hx, hy) {
   spark(hx, hy, '#ffcf6a', 18, 1.8); pop(hx, hy + 12, 'COUNTER', '#ff9a4a'); beep(880, 0.08, 'triangle', 0.05, 0.6);
 }
 const VARGAN = (() => {
-  const U = 16, q = v => Math.round(v * U * 100) / 100;
+  const U = 18.5, q = v => Math.round(v * U * 100) / 100;   /* his height H: 7.2 ft (2.19 m) against the roster's 16 for six feet and a bit */
   const cap = (f0, f1, x1, y1, x2, y2, r, d, a, b, k, o) => Object.assign({ f0, f1, x: q(x2), y: q(y2), r: q(r), in: [q(x1), q(y1)], n: Math.max(3, Math.ceil(Math.hypot(x2 - x1, y2 - y1) / r) + 1), d, a, b, k }, o);
   const circ = (f0, f1, x, y, r, d, a, b, k, o) => Object.assign({ f0, f1, x: q(x), y: q(y), r: q(r), in: [q(x), q(y)], n: 1, d, a, b, k }, o);
   const grab = (f0, f1, x1, y1, x2, y2, r) => ({ f0, f1, x: q(x2), y: q(y2), r: q(r), in: [q(x1), q(y1)], n: 4, grab: 1, d: 0 });
   /* An axe strike, given as the animation holds it: the fist's middle at (gx, gy), the haft pointing ang degrees (0 straight
      ahead, 90 straight up) and the edge to the haft's left (es 1, an upward or counter-clockwise swing), right (-1) or across
      the picture (0). The hit is the blade: a capsule along the haft from 0.6 m to 1.25 m out from the fist, the far end 0.18 m
-     toward the edge, 0.14 H round (the axe is 1.55 m; his height H is 1.902 m in the model). tools/blender/vargan.js reads
+     toward the edge, 0.16 H round (the axe is 2.015 m; his height H is 1.902 m in the model). tools/blender/vargan.js reads
      ax and puts the drawn axe exactly there on these frames. */
-  const AX = { in: 0.6 / 1.902, out: 1.25 / 1.902, edge: 0.18 / 1.902, r: 0.14 };
+  const AX = { in: 0.78 / 1.902, out: 1.625 / 1.902, edge: 0.234 / 1.902, r: 0.16 };
   const axe = (f0, f1, gx, gy, ang, es, d, a, b, k, o) => { const c = Math.cos(ang * Math.PI / 180), s = Math.sin(ang * Math.PI / 180);
     return cap(f0, f1, gx + c * AX.in, gy + s * AX.in, gx + c * AX.out - s * es * AX.edge, gy + s * AX.out + c * es * AX.edge, AX.r, d, a, b, k, Object.assign({ ax: [gx, gy, ang, es] }, o)); };
   const NB = { nb: 1 };   /* not the blade: a fist, a boot, a shoulder (no axe arc is drawn) */
@@ -1674,7 +1674,7 @@ const VARGAN = (() => {
          Jump heights are the reference's (30 / 14.5 / 30.5); traction and the rest are mine. Standing 0.5 x 1 H. */
       st: { weight: 118, walk: 0.767, walkMul: 0.1, walkAdd: 0.06, trac: 0.115, dash: 1.87, runMul: 0.09, runAdd: 0.04, run: 1.34,
         jumpX: 0.8, jumpXMul: 0.8, jumpXMax: 1.1, airJumpX: 0.9, jumpH: 30, jumpInit: 16, hopH: 14.5, airJumpH: 30.5, upH: UP,
-        airMul: 0.03, airAdd: 0.01, airSpeed: 0.83, airBrake: 0.01, grav: 0.108, fall: 1.65, ffall: 2.64, jsq: 3, w: 8, h: U, jf: 3, jb: 1.6,
+        airMul: 0.03, airAdd: 0.01, airSpeed: 0.83, airBrake: 0.01, grav: 0.108, fall: 1.65, ffall: 2.64, jsq: 3, w: 9.2, h: U, jf: 3, jb: 1.6,
         crouch: [0.62, 1.15], pummel: 1.6, pumT: 21, jumps: 1, dashF: 14, roll: [31, 1.25, 13], spot: [26, 15, 3] },
       aiShot: [30, 80], aiSide: 1,
       moves: mk(1, 1, 1, 1, {
@@ -1714,7 +1714,7 @@ const VARGAN = (() => {
         nspecE: { t: 24, h: [] },
         sspec: { t: 57, ll: 20, once: 1, nodrift: 1, ownPhys: 1, on: meteor, h: [circ(15, 24, 0.38, 0.62, 0.3, 18, 40, 60, 85, NB), circ(25, 40, 0.36, 0.6, 0.28, 12, 40, 45, 70, NB)] },
         uspec: upMove(false), uspecE: upMove(true),
-        uspecL: { t: 36, h: [axe(1, 4, 0.3, 0.28, -35, -1, 6, 45, 70, 92)] },
+        uspecL: { t: 36, h: [axe(1, 4, 0.3, 0.3, -22, -1, 6, 45, 70, 92)] },   /* the blade driven into the floor ahead, its edge just at the floor */
         uspecLE: { t: 36, h: [circ(1, 4, 0.36, 0.16, 0.3, 6, 45, 70, 92, NB)] },
         /* Counter: the guard catches a strike on frames 8 to 29 (67 frames when nothing comes) */
         dspec: { t: 67, h: [], vCounter: [8, 29], on(f, n) { if (n === 1) f.vx *= 0.3; } },
