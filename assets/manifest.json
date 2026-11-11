@@ -1,6 +1,6 @@
 {
  "Flint": {
-  "file": "assets/flint/export/flint-v3.glb",
+  "file": "assets/flint/export/flint-v4.glb",
   "height": 15.2,
   "prop": {
    "type": "lantern",
@@ -36,7 +36,7 @@
     "to": 0.8
    },
    "fall": {
-    "clip": "Fall1"
+    "clip": "Fall"
    },
    "land": {
     "clip": "Regular_Jump",
@@ -89,7 +89,7 @@
     "clip": "Bar_Hang_Idle"
    },
    "hold": {
-    "clip": "Right_Jab_from_Guard",
+    "clip": "Grab",
     "at": 0.63
    },
    "held": {
@@ -105,6 +105,69 @@
    },
    "swap": {
     "clip": "Idle"
+   },
+   "fastfall": {
+    "clip": "FastFall"
+   },
+   "helpless": {
+    "clip": "Fall1",
+    "rate": 1.6
+   },
+   "airjump": {
+    "clip": "AirJump"
+   },
+   "idle2": {
+    "clip": "IdleLook"
+   },
+   "respawn": {
+    "clip": "Respawn"
+   },
+   "landHard": {
+    "clip": "Jump_and_Slam_Back_Down",
+    "from": 1.62,
+    "to": 2.2
+   },
+   "shieldHit": {
+    "clip": "ShieldHit"
+   },
+   "hitHeavy": {
+    "clip": "HitHeavy"
+   },
+   "launchUp": {
+    "clip": "BeHit_FlyUp",
+    "from": 0,
+    "to": 0.3
+   },
+   "spike": {
+    "clip": "Knock_Down",
+    "from": 0.25,
+    "to": 0.5
+   },
+   "launch": {
+    "clip": "Knock_Down",
+    "from": 0.05,
+    "to": 0.35
+   },
+   "pummel": {
+    "clip": "Pummel"
+   },
+   "throw_f": {
+    "clip": "ThrowF"
+   },
+   "throw_b": {
+    "clip": "Over_Shoulder_Throw",
+    "from": 1.9,
+    "to": 3.2
+   },
+   "throw_u": {
+    "clip": "Charged_Upward_Slash",
+    "from": 0.3,
+    "to": 1.6
+   },
+   "throw_d": {
+    "clip": "Grip_and_Throw_Down",
+    "from": 2.4,
+    "to": 3.6
    }
   },
   "attacks": {
@@ -127,7 +190,7 @@
     "end": 0.85
    },
    "utilt": {
-    "clip": "Right_Uppercut_from_Guard",
+    "clip": "UpTilt",
     "start": 0.25,
     "contact": [
      0.5,
@@ -228,7 +291,7 @@
     "end": 1.3
    },
    "grab": {
-    "clip": "Right_Jab_from_Guard",
+    "clip": "Grab",
     "start": 0.3,
     "contact": [
      0.5,
@@ -237,13 +300,13 @@
     "end": 1.05
    },
    "getup": {
-    "clip": "Sweep_Kick",
-    "start": 1.5,
+    "clip": "360_Power_Spin_Jump",
+    "start": 1.25,
     "contact": [
-     2.03,
-     2.15
+     1.45,
+     1.65
     ],
-    "end": 3.3,
+    "end": 2.1,
     "spin": 0.5
    },
    "nspec": {
@@ -292,13 +355,13 @@
     "end": 1.05
    },
    "jab2": {
-    "clip": "Left_Hook_from_Guard",
-    "start": 0.1,
+    "clip": "Jab2",
+    "start": 0.3,
     "contact": [
-     0.28,
-     0.42
+     0.47,
+     0.68
     ],
-    "end": 0.85
+    "end": 1.05
    },
    "jab3": {
     "clip": "Right_Uppercut_from_Guard",

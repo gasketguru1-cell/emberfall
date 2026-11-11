@@ -10,8 +10,10 @@ args = sys.argv[sys.argv.index('--') + 1:]
 opt = {args[i].lstrip('-'): args[i + 1] for i in range(0, len(args), 2)}
 size = int(opt.get('size', 320)); az = math.radians(float(opt.get('az', 60))); out = opt['out']; os.makedirs(out, exist_ok=True)
 scene = bpy.context.scene
-rig = next(o for o in scene.objects if o.type == 'ARMATURE'); mesh = next(o for o in scene.objects if o.type == 'MESH')
-lo = [min(v.co[i] for v in mesh.data.vertices) for i in range(3)]; hi = [max(v.co[i] for v in mesh.data.vertices) for i in range(3)]
+if 'glb' in opt:
+    bpy.ops.wm.read_factory_settings(use_empty=True); bpy.ops.import_scene.gltf(filepath=opt['glb']); scene = bpy.context.scene
+rig = next(o for o in scene.objects if o.type == 'ARMATURE'); mesh = max((o for o in scene.objects if o.type == 'MESH'), key=lambda o: len(o.data.vertices))
+pts = [mesh.matrix_world @ v.co for v in mesh.data.vertices]; lo = [min(p[i] for p in pts) for i in range(3)]; hi = [max(p[i] for p in pts) for i in range(3)]
 h = hi[2] - lo[2]; mid = Vector((0, 0, lo[2] + h * 0.5))
 cam = bpy.data.objects.new('Cam', bpy.data.cameras.new('Cam')); scene.collection.objects.link(cam); scene.camera = cam
 cam.data.type = 'ORTHO'; cam.data.ortho_scale = h * float(opt.get('zoom', 2.3))

@@ -15,7 +15,7 @@ async function auditHitboxes(limit) {
   const man = await (await fetch('assets/manifest.json')).json(), R = window.R3;
   if (!R || !R.ready) throw new Error('3D renderer is not ready');
   DBG.step = true; DBG.advance = 0; DBG.r3d = true;
-  const forms = [[0, 0], [1, 0], [1, 1], [1, 2], [2, 0], [3, 0], [4, 0]], rows = [], r1 = v => Math.round(v * 10) / 10;
+  const forms = window.AUDIT_FORMS || [[0, 0], [1, 0], [1, 1], [1, 2], [2, 0], [3, 0], [4, 0], [5, 0], [5, 1], [5, 2], [5, 3], [5, 4], [5, 5], [5, 6], [5, 7], [5, 8], [5, 9], [6, 0]], rows = [], r1 = v => Math.round(v * 10) / 10;
   const wp = new (R.fighters[0].root.position.constructor)(), wq = wp.clone();
   for (const A of forms) {
     slots[0] = { dev: 'kb', pick: A[0], ready: true }; slots[1] = { dev: 'kb', pick: 0, ready: true };
@@ -53,4 +53,27 @@ async function auditHitboxes(limit) {
   const flagged = rows.filter(r => r.off !== null && r.off > limit && r.note !== 'body burst' && r.note !== 'inner part');
   console.table(rows); window.AUDIT = { rows, flagged };
   return window.AUDIT;
+}
+
+/* Hurtbox audit: stands every fighter in its idle pose and compares the body's hittable box (hurtRect in sim.js) with the
+   model's own outline as drawn: its width and height in game units, measured from the skinned mesh on screen.
+     await auditHurtboxes()   returns rows { fighter, box 'w x h', model 'w x h', dw, dh }; reload the page afterwards */
+async function auditHurtboxes() {
+  const R = window.R3; if (!R || !R.ready) throw new Error('3D renderer is not ready');
+  DBG.step = true; DBG.advance = 0; DBG.r3d = true;
+  const forms = window.AUDIT_FORMS || [[0, 0], [1, 0], [1, 1], [1, 2], [2, 0], [3, 0], [4, 0], [5, 0], [5, 1], [5, 2], [5, 3], [5, 4], [5, 5], [6, 0]], rows = [], r1 = v => Math.round(v * 10) / 10;
+  for (const A of forms) {
+    slots[0] = { dev: 'kb', pick: A[0], ready: true }; slots[1] = { dev: 'kb', pick: 0, ready: true };
+    startMatch(); let g = 0; while (mode !== 'play' && g++ < 400) step();
+    const f = F[0]; f.fi = A[1]; F[1].x = 60; f.x = 0; f.y = 0; f.face = 1; f.grounded = true; f.plat = MAIN; f.state = 'idle'; f.vx = f.vy = 0;
+    const v = R.fighters[0]; for (let k = 0; k < 40; k++) { tick++; draw(); }
+    if (!v.model) { rows.push({ fighter: f.form.name, box: '(no model)' }); continue; }
+    v.springs = []; draw(); v.root.updateWorldMatrix(true, true);
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; const p = new (v.root.position.constructor)();
+    v.obj.traverse(m => { if (!m.isSkinnedMesh) return; const pos = m.geometry.attributes.position, stepN = Math.max(1, Math.floor(pos.count / 4000));
+      for (let i = 0; i < pos.count; i += stepN) { p.fromBufferAttribute(pos, i); m.applyBoneTransform(i, p); p.applyMatrix4(m.matrixWorld); x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); } });
+    const hr = hurtRect(f), bw = hr[2] - hr[0], bh = hr[3] - hr[1];
+    rows.push({ fighter: f.form.name, box: r1(bw) + ' x ' + r1(bh), model: r1(x1 - x0) + ' x ' + r1(y1 - y0), feet: r1(y0 - f.y), dw: r1(bw - (x1 - x0)), dh: r1(bh - (y1 - y0)) });
+  }
+  console.table(rows); window.HURT = rows; return rows;
 }
