@@ -1085,7 +1085,7 @@ const FOWLS = { name: 'Furious Fowls', sub: 'five birds and a slingshot', fowl: 
      - landed: stays 8 seconds. Chomp picks it up by walking over it. B while it lies there: a rope runs from the coal to
        Chomp, wherever he is, every frame, and an ant crawls from the coal along it toward him (from frame 10). The rope
        is in the way: an opponent cannot move through it (see ropeBlock), but it never hurts; only the ant hits (7%, once
-       a trip). An attack on the rope cuts it, and on the ant destroys it; the coal stays where it lies. The ant arriving
+       a trip). A damaging attack on the rope cuts it (a grab or a push with no damage does not), and on the ant destroys it; the coal stays where it lies. The ant arriving
        hands Chomp the coal back.
      - flying off the stage (past the edge, or below the floor): B calls the ant too. The coal stops where it is, in the
        air, for as long as the call and the ant's walk last. If the call is stopped or the rope is cut, it falls again.
@@ -1160,9 +1160,9 @@ function antStep(p) {
     return;
   }
   if (!v || v.state === 'dead') return;
-  /* the opponent's attacks cut the rope */
+  /* the opponent's damaging attacks cut the rope: a grab, or a push that does no damage, leaves it */
   if (v.state === 'attack' && v.move) for (const h of v.move.h) {
-    if (h.grab || v.mf < h.f0 || v.mf > h.f1 || (h.when && !h.when(v))) continue;
+    if (h.grab || !(h.d > 0) || v.mf < h.f0 || v.mf > h.f1 || (h.when && !h.when(v))) continue;
     const [d, t] = segDist(v.x + h.x * v.face, hitY(v, h), x0, y0, mx, my); if (d < h.r && t > 0.02 && t < 0.98) { antCut(p, x0 + (mx - x0) * t, y0 + (my - y0) * t); return; }
   }
   ropeBlock(p, v, x0, y0, mx, my);
@@ -1170,8 +1170,8 @@ function antStep(p) {
 /* The rope is in the way. The opponent's middle cannot pass through it by his own movement: walking, running, rolling,
    jumping or falling into it stops him at the rope (in the air he slides along it). It is never a hit: no damage, no
    hitstun, no freeze, no launch. A rope that swings across him as Chomp moves passes over him, and one lying along the
-   floor is stepped over. Someone launched, held or on the ledge goes through. Any attack still cuts it. */
-const ROPE_PASS = { hurt: 1, dead: 1, held: 1, carry: 1, ledge: 1, buried: 1, down: 1 };
+   floor is stepped over. A launched opponent is stopped by it too. Someone held or on the ledge goes through. Only a damaging attack cuts it. */
+const ROPE_PASS = { dead: 1, held: 1, carry: 1, ledge: 1, buried: 1, down: 1 };
 function ropeBlock(p, v, x0, y0, x1, y1) {
   const bx = v.x, by = v.y + v.st.h / 2, dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy) || 1e-6, nx = -dy / L, ny = dx / L;
   const dist = (x, y) => (x - x0) * nx + (y - y0) * ny, [, t] = segDist(bx, by, x0, y0, x1, y1), was = p.vp; p.vp = [bx, by];

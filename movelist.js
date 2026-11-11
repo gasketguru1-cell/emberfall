@@ -415,7 +415,7 @@ const MOVE_RULES = {
     ['B', 'The Returning Tape', 'Tape Roll curls back toward where it was let go after about 22 frames, so it covers the space in front of Sprocket twice.'],
   ],
   'Chomp Chomp': [
-    ['B', 'The Ant and the Rope', 'With the coal on the floor, B runs a rope from the coal to Chomp, wherever he is, and his ant crawls from the coal along it toward him (from frame 10), following him as he moves. Only the ant hits: 7%, once a trip. The rope never hurts, but it is in the way: an opponent cannot walk, jump or fall through it. Any attack on the rope cuts it, and any attack on the ant beats it; the coal stays. The ant arriving hands Chomp his coal back.'],
+    ['B', 'The Ant and the Rope', 'With the coal on the floor, B runs a rope from the coal to Chomp, wherever he is, and his ant crawls from the coal along it toward him (from frame 10), following him as he moves. Only the ant hits: 7%, once a trip. The rope never hurts, but it is in the way: an opponent cannot walk, jump or fall through it. It stops a launched opponent too. Only an attack that does damage cuts it, and any attack on the ant beats it; the coal stays. The ant arriving hands Chomp his coal back.'],
     ['B', 'Saving the Coal', 'If the coal flies off the stage, press B before it is lost: it stops where it is, in the air, while the ant walks it back along the rope. If the rope is cut, the coal falls again.'],
     ['B', 'One Coal', 'Chomp has one hot coal at a time. Walk over it to pick it up. If it is destroyed or runs out, a new one is ready after a moment.'],
     ['↓ B', 'Gust the Coal', 'Air Cushion pushes a swinging or flying coal further along, to change where it lands. It never pushes the ant.'],

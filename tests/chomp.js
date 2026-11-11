@@ -76,7 +76,7 @@ vm.runInThisContext(`
     c.x = 30; c.face = -1; o.x = 10; o.face = 1; SCRIPT[0] = B(1); let cut = false;
     SCRIPT[1] = (i, tt) => { if (tt === 16) { i.cy = -1; } };   /* a down tilt into the rope ahead of the ant */
     run(60, () => { if (c.ropeCuts > 0) cut = true; });
-    check('Rope: an attack cuts it; the coal stays', cut && !!coal() && !ant(), 'cut: ' + cut + ', coal still there: ' + !!coal()); }
+    check('Rope: a damaging attack cuts it; the coal stays', cut && !!coal() && !ant(), 'cut: ' + cut + ', coal still there: ' + !!coal()); }
   /* 4. the other specials */
   { const [c, o] = setup(0, 80); c.y = 40; c.grounded = false; c.plat = null; c.set('air'); SCRIPT[0] = (i, tt) => { if (tt < 50) i.spc = true; i.lx = tt < 3 ? 1 : 0; }; let maxX = 0, swung = false;
     run(120, () => { if (c.rsGo) swung = true; maxX = Math.max(maxX, c.x); });
@@ -123,6 +123,19 @@ vm.runInThisContext(`
       run(49, () => { maxX = Math.min(maxX, o.x); if (o.state === 'hurt') hurt++; if (ant()) st = ant().blocks || 0; }); return { maxX, hurt, st, dmg: o.pct - pct0, cx: p.x, top: q.y }; };
     const free = tryIt(false), wall = tryIt(true);
     check('Rope: a walking opponent is stopped by a rope slanting up from the floor', wall.st > 0 && wall.maxX - free.maxX > 5 && wall.dmg === 0, 'coal at x ' + wall.cx.toFixed(0) + ', Chomp on the platform at height ' + wall.top + '; no rope: walked to x ' + free.maxX.toFixed(0) + '; with the rope: stopped at x ' + wall.maxX.toFixed(0) + ' (damage ' + wall.dmg.toFixed(1) + ')'); }
+  { /* a launched opponent is stopped by the rope too */
+    const tryIt = rope => { const [c, o] = setup(-20, 56); c.face = 1; coalAt(EDGE + 30, 44, 'fly', { vx: 0, vy: 0 }); if (rope) SCRIPT[0] = (i, tt) => { if (tt === 2) i.spc = true; };
+      o.y = 46; o.grounded = false; o.plat = null; o.set('air'); let low = 99, st = 0, launched = 0;
+      run(40, () => { if (t === 14) { o.vx = 0; o.vy = -1.5; o.hitstun = 30; o.tumble = true; o.set('hurt'); } if (t < 14) { o.y = 46; o.vy = 0; } if (o.state === 'hurt') launched++; if (t > 14 && t < 34) low = Math.min(low, o.y); if (ant()) st = ant().blocks || 0; }); return { low, st, launched }; };
+    const free = tryIt(false), wall = tryIt(true);
+    check('Rope: a launched opponent is stopped by it too', wall.st > 0 && wall.launched > 10 && wall.low - free.low > 6, 'sent down in hitstun: no rope: reached height ' + free.low.toFixed(0) + '; with the rope: stopped at height ' + wall.low.toFixed(0) + ' (frames held back ' + wall.st + ')'); }
+  { /* only a damaging attack cuts it: the same down tilt with its damage taken away leaves the rope */
+    const tryIt = dmg => { const [c, o] = setup(-30, 0, 0); coalAt(-30, 2.4, 'ground'); c.x = 30; c.face = -1; o.x = 10; o.face = 1; SCRIPT[0] = B(1);
+      const hs = o.form.moves.dtilt.h, keep = hs.map(h => h.d); if (!dmg) hs.forEach(h => { h.d = 0; });
+      SCRIPT[1] = (i, tt) => { if (tt === 16) i.cy = -1; }; let cut = false, swung = false; run(40, () => { if (c.ropeCuts > 0) cut = true; if (o.state === 'attack' && o.mname === 'dtilt') swung = true; });
+      hs.forEach((h, k) => { h.d = keep[k]; }); return { cut, swung }; };
+    const hit = tryIt(true), push = tryIt(false);
+    check('Rope: only a damaging attack cuts it', hit.cut && push.swung && !push.cut, 'damaging down tilt cut it: ' + hit.cut + '; the same swing with no damage cut it: ' + push.cut); }
   const bad = results.filter(r => !r[0]);
   for (const r of results) console.log((r[0] ? 'pass  ' : 'FAIL  ') + r[1] + '   ' + r[2]);
   console.log(bad.length ? bad.length + ' of ' + results.length + ' Chomp Chomp checks FAILED' : 'all ' + results.length + ' Chomp Chomp checks pass');
