@@ -107,7 +107,7 @@ const MOVE_TEXT = {
   'Potato Sack': {
     nspec: ['Spud Bomb', 'Hold special to swell up, and let go to burst all round his body 4 frames later. There is no cap: every 10 frames held makes the burst about 1.2 units wider and 1.5% stronger. Tapped, it is a 7-unit ring that KOs a middleweight from about 140%. 20 frames to recover after the burst.', 'Burst 4f after release · 8% tapped, +1.5% per 10f held'],
     sspec: ['Bag It', 'Leaps forward on frame 8 and tries to bag the opponent from frame 10 to 22. It goes through a shield, and whoever it catches is flung up and forward. Once per jump in the air, with landing lag if it misses.', 'Grab f10 · fling 10%'],
-    uspec: ['Hot Potato', 'Tosses a flaming potato straight up. From frame 3 his body already burns with the burst and hits anyone close (once). The potato drops back onto him about frame 19 and bursts, launching him, or bursts at once on anyone it touches on the way, launching them and him. The hot middle KOs most fighters from about 70%; the edge is weaker, about 100 to 125%. The blast also throws the sack upward: it takes 12% itself and flies further the more hurt it is. Tilt the stick to angle the flight. Once per jump.', 'Burst f5 · 15% middle · 10% edge · 12% to himself'],
+    uspec: ['Hot Potato', 'Tosses a flaming potato straight up. From frame 3 his body already burns with the burst and hits anyone close (once). The potato drops back onto him about frame 19 and bursts, launching him, or bursts at once on anyone it touches on the way, launching them and him. The hot middle KOs most fighters from about 70%; the edge is weaker, about 100 to 125%. The blast also throws the sack upward: it takes 12% itself and flies further the more hurt it is. Tilt the stick to angle the flight. Once per jump, and again after he is hit.', 'Burst f5 · 15% middle · 10% edge · 12% to himself'],
     dspec: ['Tumble', 'How the sack really gets about. On frame 6: stick sideways on the floor slides, up lifts, sideways in the air dives down diagonally (and carries on as a slide when it lands), no direction hangs briefly. From frame 7 it can be cut into any action keeping its speed, and a new push of the stick ends it. Hold down to slide through a soft platform. Once per jump.', 'Burst f6 · cancel from f7 · no hit'],
     jab: ['Sack Slap', 'One heavy slap that sends straight out. There is no jab chain: one hit, then reset.'],
     dash: ['Sack Slide', 'Slides in on his side and pops the opponent up at an angle.'],
@@ -258,7 +258,7 @@ const MOVE_TEXT = {
   Joey: {
     nspec: ['Shaker Disaster', 'Shakes a protein shaker, forgets the lid and throws the whole bottle. It leaves on frame 22 in a short arc and breaks on the first thing it touches. One bottle at a time. The powder on his face is only for show.'],
     sspec: ['Resistance Band Betrayal', 'Plants a foot in an exercise band; it slips and his leg kicks out on frames 24 to 27. On the ground he stumbles forward with it (never off an edge). No boost in the air.'],
-    uspec: ['Spot Me!', 'Throws a lifting strap at a ledge just above and beside his hand on frames 10 to 16. If it catches, he is pulled up to the ledge. If not, it falls limp and he simply keeps falling: no lift at all. Once until he lands or holds a ledge.'],
+    uspec: ['Spot Me!', 'Throws a lifting strap at a ledge just above and beside his hand on frames 10 to 16. If it catches, he is pulled up to the ledge. If not, it falls limp and he simply keeps falling: no lift at all. Once until he lands, holds a ledge or is hit.'],
     dspec: ['Ab Wheel Regret', 'Rolls out on an ab wheel much further than intended. The wheel hits on frames 18 to 32; on the ground he rolls forward with it (stopping before an edge). 25 frames of landing in the air.'],
     jab: ['Form Check, Tiny Curl, Personal Best', 'A timid checking palm, a tiny dumbbell curl, then a hugely overprepared two-hand shove. Each needs a new press: frames 12 to 18, then 15 to 22. No rapid jab.'],
     dash: ['Cardio Was a Mistake', 'Three keen jogging steps and a breathless shoulder bump on frames 17 to 20. Then he checks a fitness watch he is not wearing.'],
@@ -350,27 +350,27 @@ const LAUNCH_DEF = { Rusty: 13, Bolt: 10, Cinder: 18, Pip: 13, Pearl: 14 };
 const FOWL_SPEC = {
   Rusty: {
     sspec: ['Redline Launch', 'Aim with the stick during the wind-up (a cannonball arc by default, up or down tilts it), then the bird itself is fired and you fly it. A steady arc with fair steering. On a hit it bounces back off the opponent, angled with the stick. The flight ends when it lands, hits, or you attack, jump, dodge or use a special. The empty slingshot waits where it was.', 'Fires f14 · 9%'],
-    uspec: ['Catapult Cyclone', 'Hold special to stretch the bands (up to 45 frames, sinking slowly in the air), let go, and aim any direction with the stick. The rig spins along the line, dragging the opponent with light hits, and ends with a finisher. More charge flies further, hits more often and harder. Once per jump; helpless after.', '8% tapped · up to 24% fully charged'],
+    uspec: ['Catapult Cyclone', 'Hold special to stretch the bands (up to 45 frames, sinking slowly in the air), let go, and aim any direction with the stick. The rig spins along the line, dragging the opponent with light hits, and ends with a finisher. More charge flies further, hits more often and harder. Once per jump (a hit gives it back); helpless after.', '8% tapped · up to 24% fully charged'],
     dspec: ['Brace & Break', 'Plants and braces. A light hit from the front on frames 8 to 13 is answered with a 10% band snap and a small hop back. Press attack, or let go of special, on frames 10 to 13 to snap early instead, for 6%.', 'Brace f8-13 · counter 10% · early snap 6%'],
   },
   Bolt: {
     sspec: ['Needleflash Launch', 'Aim during the wind-up, then Bolt is fired: the fastest and narrowest flight, with little steering. Press special once in flight for one sharp change of heading, at three quarters of the speed. A hit doesn\'t stop it: it carries on through. Ends when it lands, hits a shield, or you act.', 'Fires f11 · 7%'],
-    uspec: ['Catapult Cyclone', 'Charge by holding special (up to 45 frames), let go and aim with the stick. Bolt\'s cyclone is quicker, spins faster and flies flatter and further sideways, with a lower-angled finisher. Once per jump; helpless after.', '6.5% tapped · up to 22.5% fully charged'],
+    uspec: ['Catapult Cyclone', 'Charge by holding special (up to 45 frames), let go and aim with the stick. Bolt\'s cyclone is quicker, spins faster and flies flatter and further sideways, with a lower-angled finisher. Once per jump (a hit gives it back); helpless after.', '6.5% tapped · up to 22.5% fully charged'],
     dspec: ['Skitter Step', 'A low, elastic skid along the floor on frame 6 with a light hit. Pull the stick back once to reverse it. Press jump on frames 13 to 16 for a low hop out of it. A shield stops it dead and costs six more frames. Once per jump in the air.'],
   },
   Cinder: {
     sspec: ['Meteor Launch', 'Aim during the wind-up, then Cinder is fired: slow and heavy, with the hardest hit of the five but very little steering. Hold down in flight to tuck and dive. Ends when it lands, hits, or you act.', 'Fires f19 · 15%'],
-    uspec: ['Catapult Cyclone', 'Charge by holding special (up to 45 frames), let go and aim. Cinder\'s cyclone is slower and bigger, with one hit fewer but each one harder, and a heavier finisher. Once per jump; helpless after.', '9.5% tapped · up to 28% fully charged'],
+    uspec: ['Catapult Cyclone', 'Charge by holding special (up to 45 frames), let go and aim. Cinder\'s cyclone is slower and bigger, with one hit fewer but each one harder, and a heavier finisher. Once per jump (a hit gives it back); helpless after.', '9.5% tapped · up to 28% fully charged'],
     dspec: ['Anvil Drop', 'Drives the handle into the floor on frame 15, with a small shock running out on both sides. In the air the slingshot plunges and sends the shock out where it lands. Shorter landing lag if it hit something.', 'Slam f15 · 8% · shocks 6%'],
   },
   Pip: {
     sspec: ['Trio Launch', 'Aim during the wind-up, then Pip is fired with two Pip doubles flying beside it in a staggered formation; the doubles hit too. After about 20 frames they break into a close orbit and can no longer hit. Ends when it lands, hits, or you act.', 'Fires f14 · 5% · doubles 2% each'],
-    uspec: ['Catapult Cyclone', 'Charge by holding special (up to 45 frames), let go and aim. Two Pip doubles orbit the spinning rig and widen its reach; the finisher is a little lighter. Once per jump; helpless after.', '7.5% tapped · up to 23.5% fully charged'],
+    uspec: ['Catapult Cyclone', 'Charge by holding special (up to 45 frames), let go and aim. Two Pip doubles orbit the spinning rig and widen its reach; the finisher is a little lighter. Once per jump (a hit gives it back); helpless after.', '7.5% tapped · up to 23.5% fully charged'],
     dspec: ['Orbit Parade', 'Two Pip doubles circle the slingshot for 18 frames while it moves at 70% speed; each can hit twice. Press down + special again to pull them in for a burst in the middle, which ends it early.', 'Doubles from f8 · 1.5% each · burst 3%'],
   },
   Pearl: {
     sspec: ['Glide Release', 'Aim during the wind-up, then Pearl is fired: floaty, with the best steering of the five and a soft, glancing hit that lifts Pearl past. Ends when it lands, hits, or you act.', 'Fires f15 · 6%'],
-    uspec: ['Catapult Cyclone', 'Charge by holding special (up to 45 frames), let go and aim. Pearl\'s cyclone floats, rising a little as it goes, with slower turns and lighter hits. Once per jump; helpless after.', '5.8% tapped · up to 19.4% fully charged'],
+    uspec: ['Catapult Cyclone', 'Charge by holding special (up to 45 frames), let go and aim. Pearl\'s cyclone floats, rising a little as it goes, with slower turns and lighter hits. Once per jump (a hit gives it back); helpless after.', '5.8% tapped · up to 19.4% fully charged'],
     dspec: ['Nest Marker', 'Plants one nest on frame 12, on the floor or a platform below. It stays for 150 frames; an opponent who walks into it takes a small hit and is lifted a little, and Pearl gets a lift too if nearby in the air. One nest at a time.', 'Plant f12 · 2%'],
   },
 };
@@ -472,7 +472,7 @@ const MOVE_RULES = {
     ['→ B', 'Firing the Bird', 'Side special fires the bird itself, and you play the bird alone. The empty slingshot stays where it was, falls to the floor, and comes back near the ledge if it is lost.'],
     ['↓ B', 'Back to the Pouch', 'As the bird alone, down special close to the slingshot hops back in. The bird alone is lighter and quicker, with weaker attacks and its own three specials. In the air it has five tiny flutter hops that barely lift it but push it along sideways.'],
     ['Air A', 'Sling Spin Drag', 'Neutral air and Catapult Cyclone drag the opponent round with light hits before the finisher. SDI and DI still decide where they end up.'],
-    ['↑ B', 'Once per Jump', 'Catapult Cyclone can be used once each time in the air, and leaves the slingshot helpless.'],
+    ['↑ B', 'Once per Jump', 'Catapult Cyclone can be used once each time in the air, and leaves the slingshot helpless. Getting hit gives it back.'],
   ],
 };
 const GETUP_TEXT = ['Get-up Attack', 'Getting up from the floor, strikes both sides at once. Briefly intangible as it rises (less above 100%).'];

@@ -90,6 +90,7 @@ const TIPS = [
   'Let go of shield just before a hit lands to parry it.',
   'Jump + attack together gives a short-hop aerial. Two jump buttons pressed together always give a short hop.',
   'Reverse aerial rush: while running, pull back (or pull back as you jump) and you jump facing back but still sliding forward; forward + attack is a back air that keeps the speed.',
+  'Push the right stick forward while dashing or running for a dash attack.',
   'B-reverse: just after pressing special, pull the stick the other way to turn round; in the air your drift turns round too.',
   'Flick down while falling to fast-fall. Flick the right stick down instead and the left stick stays free to steer.',
   'Change your buttons or keys on the controls screen: − on a controller, Backspace on the keyboard.',

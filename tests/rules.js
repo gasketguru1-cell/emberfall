@@ -281,6 +281,22 @@ vm.runInThisContext(`
       run(56, () => { if (t === 27) st0 = f.state; if (!lift && !f.grounded) lift = { face: f.face, vx: +f.vx.toFixed(2) }; if (f.state === 'attack' && f.mname === 'bair' && !bair) bair = 1; if (bair && f.state === 'attack' && f.mname === 'bair') bair = { vx: +f.vx.toFixed(2) }; }); return { st0, lift, bair, top: f.st.jumpXMax }; };
     for (const how of ['skid', 'jumpsquat']) { const r = rarT(how);
       check('reverse aerial rush (' + how + '): jump facing back, run speed kept, back air keeps it', r.st0 === 'run' && r.lift && r.lift.face === -1 && r.lift.vx >= r.top * 0.85 && r.bair && r.bair.vx > r.top * 0.7, r.st0 + ', lift-off ' + JSON.stringify(r.lift) + ', back air ' + JSON.stringify(r.bair) + ' (jump speed limit ' + r.top + ')'); }
+    /* Getting hit always gives the up special back: Potato Sack's once-per-trip blast, used and then hit, is ready again; not hit, it stays spent. */
+    const upAgain = (hit) => { const [f] = setup(SACK, FL, 0, 80); airborne(f, 0, 70); let first = '', second = '';
+      SCRIPT[0] = (i, tt) => { if (tt === 1 || tt === 90) { i.spc = true; i.ly = 1; } };
+      run(89, () => { if (!first && f.state === 'attack') first = f.mname; }); f.move = null; airborne(f, 0, 70); if (hit) f.launch(30, 1.2, 1);
+      run(40, () => { if (f.state === 'hurt') return; f.vy = 0; f.y = 70; }); SCRIPT[0] = (i) => { i.spc = true; i.ly = 1; }; run(3, () => { if (!second && f.state === 'attack') second = f.mname; });
+      return { first, second, used: f.blastUsed }; };
+    const hitUp = upAgain(true), noHit = upAgain(false);
+    check('hit after an up special: the up special is back (the Potato Sack blast)', hitUp.first === 'uspec' && hitUp.second === 'uspec', 'first ' + hitUp.first + ', after the hit ' + (hitUp.second || 'nothing'));
+    check('no hit: a once-per-trip up special stays spent', noHit.first === 'uspec' && noHit.second !== 'uspec', 'first ' + noHit.first + ', again ' + (noHit.second || 'nothing'));
+    /* The right stick forward while dashing or running: a dash attack. Backward: still a turnaround forward tilt. Standing: a forward tilt. */
+    const cDash = (frames, dir) => { const [f] = setup(FL, FL, -60, 60); f.ctl.cFall = true; let mv = '';
+      SCRIPT[0] = (i, tt) => { if (tt < 2) return; if (tt < 2 + frames) i.lx = 1; else if (tt < 2 + frames + 2) { i.lx = frames ? 1 : 0; i.cx = dir; } };
+      run(frames + 10, () => { if (!mv && f.state === 'attack') mv = f.mname; }); return mv; };
+    const inDash = cDash(4, 1), inRun = cDash(24, 1), backRun = cDash(24, -1), stand = cDash(0, 1);
+    check('right stick forward in a dash or a run: a dash attack', inDash === 'dash' && inRun === 'dash', 'dash ' + inDash + ', run ' + inRun);
+    check('right stick back in a run, or standing: a forward tilt', backRun === 'ftilt' && stand === 'ftilt', 'back ' + backRun + ', standing ' + stand);
     check('B-reverse: too late does nothing', late.face === 1, 'face ' + late.face);
     check('B-reverse: not for up specials', up.face === 1 || up.mv !== 'uspec', up.mv + ', face ' + up.face);
     check('jump: tap for a short hop, hold for a full one', short.top > 8 && short.top < full.top * 0.6, 'heights ' + short.top + ' and ' + full.top);

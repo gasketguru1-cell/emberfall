@@ -1966,7 +1966,9 @@ class Fighter {
     /* Jump and attack pressed together: a short-hop aerial (the attack stays buffered for the jump). */
     if (c.buf.jmp > 0 && c.buf.atk > 0 && Math.abs(c.buf.jmp - c.buf.atk) <= 1) { c.buf.jmp = 0; this.set('jsq'); return true; }
     if (c.take('atk')) { this.groundAttack(moving); return true; }
-    /* The right stick is a tilt stick: a tilt in the direction pushed, turning round for a sideways one. */
+    /* The right stick is a tilt stick: a tilt in the direction pushed, turning round for a sideways one. Pushed forward in a dash or a run
+       it is a dash attack, like attack would be (people only, cFall, so seeded CPU matches play out as before). */
+    if (c.cPress && moving && c.cFall && Math.abs(i.cx) >= Math.abs(i.cy) && sgn(i.cx) === this.face) { this.startMove('dash'); this.vx = this.face * this.st.run; return true; }
     if (c.cPress) { let n; if (Math.abs(i.cy) > Math.abs(i.cx)) n = i.cy > 0 ? 'utilt' : 'dtilt'; else { this.face = sgn(i.cx); n = 'ftilt'; } this.startMove(n); if (n === 'ftilt') this.aim = i.cy > 0.25 ? 1 : i.cy < -0.25 ? -1 : 0; this.vx *= 0.3; return true; }
     if (c.take('jmp')) { this.set('jsq'); return true; }
     if (i.shd && !this.wdHold) { c.buf.shd = 0; this.set('shield'); return true; }
@@ -2067,10 +2069,14 @@ class Fighter {
     if (s === 'attack' && this.move && this.move.burst) return true;   /* a tumble carries off the edge */
     return s === 'idle' ? Math.abs(this.ctl.c.lx) > 0.2 : (s === 'dash' || s === 'run' || s === 'brake' || s === 'hurt' || s === 'wd');
   }
+  /* Being hit always gives the up special back: the once-per-trip ones (Potato Sack's blast, the Fowls' cyclone, Joey's Spot Me!)
+     are ready again, and a launch out of helpless is an ordinary tumble. The other once-per-trip specials are left as they are. */
+  upBack() { const u = this.form.moves.uspec; if (u && u.blast) this.blastUsed = false; if (u && u.burst) this.burstUsed = false; if (this.airUse) delete this.airUse.spot; this.helpLag = 0; }
   breakShield() { this.shieldHp = SHIELD.hp * 0.75;   /* Ultimate: a broken shield comes back at 75% */ this.grounded = false; this.plat = null; this.vy = 3.2; this.vx = 0; this.set('broken'); spark(this.x, this.y + 8, '#9cf', 30, 2.4); beep(200, 0.4, 'sawtooth', 0.08, 0.3); shake = 10; }
   launch(kb, ang, dir, lsi) {
     this.freeVictim(); this.selOpen = false; const sp = kb * 0.03 * (lsi || 1); this.sdi = 0; this.tumble = kb >= TUMBLE_KB; this.ledgeGrabs = 0; this.shortHop = false; this.vx = Math.cos(ang) * sp * dir; this.vy = Math.sin(ang) * sp;
-    this.hitstun = Math.max(4, Math.floor(kb * HITSTUN * COMBO_EASE) - 1); this.move = null; this.ff = false; this.linkT = 0;   /* Ultimate: 0.4 x knockback, one frame less, at least 4; then Emberfall's combo ease */
+    this.hitstun = Math.max(4, Math.floor(kb * HITSTUN * COMBO_EASE) - 1); this.move = null; this.ff = false; this.linkT = 0;
+    this.upBack();   /* any hit gives the up special back */   /* Ultimate: 0.4 x knockback, one frame less, at least 4; then Emberfall's combo ease */
     if (this.grounded) { if (this.vy < 0) this.vy = -this.vy * 0.8; if (kb < 30 || this.vy < 0.05) this.vy = 0; else { this.grounded = false; this.plat = null; } }
     this.set('hurt');
   }
@@ -2520,7 +2526,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
     spark(hx, hy, '#9cf', 6, 1); beep(400, 0.05, 'triangle', 0.04); return;
   }
   const chained = v.state === 'hurt' || v.state === 'held' || v.hitlag > 0;
-  v.pct = Math.min(999, v.pct + d); v.flash = 6; if (!proj && a.move && a.move.cast) a.castHit = true; comboHit(a, v, d, chained);
+  v.pct = Math.min(999, v.pct + d); v.flash = 6; v.upBack(); if (!proj && a.move && a.move.cast) a.castHit = true; comboHit(a, v, d, chained);
   const crouch = v.grounded && v.state === 'idle' && v.ctl.c.ly < CROUCH_Y, charging = v.state === 'attack' && v.charge > 0;
   const kb = (h.fkv ? knockSet(v, h.fkv, h.b, h.k) : knock(v, d / bz, h.b, h.k) * (h.norage ? 1 : rage(a))) * (crouch ? CROUCH_MUL : 1) * (charging ? CHARGING_MUL : 1) * bz * (h.kbMul || 1);   /* fkv: set knockback, the same at any damage. Berserker: x 1.5 on the knockback the unboosted damage gives (so it is not raised twice); kbMul: the recalled axe's distance power */
   const hl = h.hl !== undefined ? h.hl : Math.min(30, Math.floor((d * 0.65 + 6) * (crouch ? 0.67 : 1)));
