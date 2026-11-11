@@ -1,6 +1,6 @@
 {
   "name": "emberfall",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "scripts": {
     "test": "node tests/headless.js && node tests/rules.js && node tests/fuzz.js 20 && node tests/net.js && node tests/chomp.js && node tests/brand.js && node tests/joey.js",
     "start": "node serve.js",
