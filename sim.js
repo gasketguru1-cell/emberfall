@@ -334,6 +334,12 @@ function ffSpark(x, y) {
   for (let k = 0; k < 4; k++) { const a = k * TAU / 4; PART.push({ x, y, vx: Math.cos(a) * 1.5, vy: Math.sin(a) * 1.5, life: 12, col: '#fff3b0', r: 0.55 }); }
   PART.push({ x, y, vx: 0, vy: 0, life: 10, col: '#ffffff', r: 1.3 }); beep(1700, 0.035, 'sine', 0.012, 1.4);
 }
+/* B-reverse: how many frames after a special starts the stick can still turn it round, and the little swirl when it does. */
+const B_REV = 5;
+function brevPuff(x, y) {
+  for (let k = 0; k < 6; k++) { const a = k * TAU / 6; PART.push({ x: x + Math.cos(a) * 2, y: y + Math.sin(a) * 2, vx: -Math.sin(a) * 1.2, vy: Math.cos(a) * 1.2, life: 11, col: '#a8e0ff', r: 0.5 }); }
+  beep(1250, 0.04, 'triangle', 0.012, 0.8);
+}
 function pop(x, y, text, col) { POPS.push({ x, y, text, col, life: 50 }); }
 
 /* ---------- Moves ---------- */
@@ -453,7 +459,8 @@ const TUNE = {
   /* Furious Fowls: the owner asked for 55 to 65% (2026-11-10) */
   Rusty: { kb: 0.92 }, Bolt: { kb: 0.86, lag: 1.15 }, Cinder: { kb: 0.92 }, Pip: { kb: 1.18 }, Pearl: { kb: 1.0 },
   'Chomp Chomp': { kb: 0.84, lag: 1.35 },   /* CPU-vs-CPU 84% wins untuned (2026-11-10): toned toward the 55 to 65% band */
-  Brand: { kb: 0.72 },   /* CPU-vs-CPU 75% wins untuned (2026-11-10); 0.75 gave 54 to 58%, 0.7 gave 46 to 53% */
+  /* Brand: none. The owner asked (2026-11-11) for every number in the fighter 03 document as written; the 0.72 launch
+     setting of 2026-11-10 (CPU-vs-CPU 75% wins without it) was taken out. */
 };
 const NORMALS = ['jab', 'jab2', 'jab3', 'dash', 'ftilt', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash', 'nair', 'fair', 'bair', 'uair', 'dair'];
 function applyTune(fm) {
@@ -1244,9 +1251,12 @@ const CHOMP = {
 /* ---------- Brand (original; frames, damage, launch, shapes and movement from the owner's document for fighter 03) ----------
    The captain of the forge town's night watch: a quilted coat, a kettle hat, a round shield made from a cast-iron stove
    door and a broad sword whose edge glows like iron fresh from the forge. A sword-and-shield duelist: she stands where
-   the blade reaches and the other fighter's swing falls short. The blade hits the same along its whole length. Stove Door
-   Bash guards one light strike from the front before it hits; About-Face Cut and Forge Cleave take the stock. Average
+   the blade reaches and the other fighter's swing falls short. The blade hits the same along its whole length. Shield
+   Bash guards one light strike from the front before it hits; Reverse Cut and Vorpal Cleave take the stock. Average
    bursts of speed and a narrow, mostly vertical recovery; an empty bash is easy to punish.
+   Full rework to the document (owner's request, 2026-11-11): its move names (two that name another game's world are Ember
+   Cut and Ember Rise here), its launch numbers with no balance setting, the back throw's release point, the back-down
+   floor attack and the pummel's own clock. The blade's arc and a red point at its tip show on every active frame (render3d).
    Shapes are the document's, in units of Flint's height H = 14, from her feet: circ is a circle, cap a capsule from its
    inner end to its tip (drawn and tested as a run of overlapping circles). Frame 1 is the frame the input is taken. */
 const BRAND = (() => {
@@ -1255,7 +1265,7 @@ const BRAND = (() => {
   const circ = (f0, f1, x, y, r, d, a, b, k, o) => Object.assign({ f0, f1, x: q(x), y: q(y), r: q(r), in: [q(x), q(y)], n: 1, d, a, b, k }, o);
   const grab = (f0, f1, x1, y1, x2, y2, r) => ({ f0, f1, x: q(x2), y: q(y2), r: q(r), in: [q(x1), q(y1)], n: 4, grab: 1, d: 0 });
   const rise = () => (f, n) => { if (n === 1) f.invuln = Math.max(f.invuln, f.pct >= 100 ? 12 : 18); };   /* the shared protection of a get-up */
-  const UP = 2.05 * U, UPV = UP / 11;   /* Watchfire Rise: 2.05 H over frames 5 to 25, fastest at the start */
+  const UP = 2.05 * U, UPV = UP / 11;   /* Ember Rise: 2.05 H over frames 5 to 25, fastest at the start */
   return {
     name: 'Brand', sub: 'the night-watch captain', forms: [{
       name: 'Brand', col: ['#4a5d7e', '#c9a24a', '#ff8a3c'], alt: ['#6e4a4a', '#b9b4ac', '#7fe0ff'],
@@ -1264,53 +1274,58 @@ const BRAND = (() => {
       st: { weight: 99, walk: 1.19, walkMul: 0.143, walkAdd: 0.102, trac: 0.105, dash: 1.96, runMul: 0.112, runAdd: 0.045, run: 1.65,
         jumpX: 0.95, jumpXMul: 0.8, jumpXMax: 1.3, airJumpX: 0.9, jumpH: 33.3, jumpInit: 18.3, hopH: 16.5, airJumpH: 33.5, upH: UP,
         airMul: 0.061, airAdd: 0.0094, airSpeed: 1.056, airBrake: 0.01, grav: 0.0918, fall: 1.58, ffall: 2.53, jsq: 3, w: 7.84, h: 14.42, jf: 3, jb: 1.4,
-        crouch: [0.72 / 1.03, 0.62 / 0.56], pummel: 1.3, jumps: 1, dashF: 12, roll: [28, 1.35, 13], spot: [22, 15] },
+        crouch: [0.72 / 1.03, 0.62 / 0.56], pummel: 1.3, pumAt: 4, pumT: 12, pumLock: 1, jumps: 1, dashF: 12, roll: [28, 1.35, 13], spot: [22, 15] },
       aiBash: 1,
       moves: mk(1, 1, 1, 1, {
-        /* ---- ground ---- */
-        jab: { t: 16, next: 'jab2', chain: 7, chainEnd: 13, h: [circ(4, 5, 0.33, 0.53, 0.17, 2.5, 60, 15, 25)] },
+        /* ---- ground: Hilt Tap, Short Cut, Cross Cut; Shield Drive; Ember Cut, Crown Guard, Greave Cut; Vorpal Cleave, Gate Raise, Rampart Sweep ---- */
+        jab: { t: 16, next: 'jab2', chain: 7, chainEnd: 13, h: [circ(4, 5, 0.33, 0.53, 0.17, 2.5, 60, 15, 25, { nb: 1 })] },   /* nb: not the blade (no arc is drawn): the hilt, the door, a shoulder */
         jab2: { t: 19, next: 'jab3', chain: 8, chainEnd: 15, h: [cap(5, 6, 0.29, 0.52, 0.59, 0.58, 0.14, 2.5, 66, 17, 27)] },
         jab3: { t: 26, h: [cap(7, 9, 0.29, 0.55, 0.72, 0.63, 0.15, 4.5, 42, 34, 59)] },
-        dash: { t: 33, h: [circ(9, 12, 0.48, 0.53, 0.27, 10, 54, 34, 67)], on(f, n) { if (n <= 10) f.vx = f.face * 0.39 * U / 10; } },   /* a shoulder behind the stove door: 0.39 H by frame 10 */
+        dash: { t: 33, h: [circ(9, 12, 0.48, 0.53, 0.27, 10, 54, 34, 67, { nb: 1 })], on(f, n) { if (n <= 10) f.vx = f.face * 0.39 * U / 10; } },   /* a shoulder behind the stove door: 0.39 H by frame 10 */
         ftilt: { t: 24, tilt: 1, h: [cap(7, 9, 0.31, 0.53, 0.90, 0.59, 0.14, 9, 36, 34, 67)] },
         utilt: { t: 25, tilt: 1, h: [cap(7, 8, 0.45, 0.69, 0.28, 1.07, 0.16, 8, 83, 27, 61), cap(9, 10, 0.26, 1.14, -0.44, 0.87, 0.16, 8, 96, 27, 61)] },   /* up in front, then over the hat brim and behind: one hit between them */
         dtilt: { t: 23, tilt: 1, h: [cap(6, 8, 0.29, 0.24, 0.83, 0.19, 0.13, 7, 69, 24, 51)] },
         fsmash: { t: 47, chg: 8, h: [cap(16, 19, 0.34, 0.55, 1.04, 0.64, 0.19, 17, 38, 40, 104)] },
         /* the shield's rim scoops the target up a set 0.14 H, then the blade cleaves upward */
-        usmash: { t: 46, chg: 6, h: [circ(13, 14, 0.38, 0.42, 0.22, 3, 83, 0, 0, { g: 1, link: [0.03 * U, 0.14 * U, 5] }), cap(15, 17, 0.31, 0.68, 0.06, 1.20, 0.22, 12, 87, 37, 97)] },
+        usmash: { t: 46, chg: 6, h: [circ(13, 14, 0.38, 0.42, 0.22, 3, 83, 0, 0, { g: 1, nb: 1, link: [0.03 * U, 0.14 * U, 5] }), cap(15, 17, 0.31, 0.68, 0.06, 1.20, 0.22, 12, 87, 37, 97)] },
         dsmash: { t: 42, chg: 5, h: [cap(12, 13, 0.35, 0.20, 0.84, 0.19, 0.16, 13, 30, 40, 86), cap(17, 18, -0.31, 0.20, -0.78, 0.20, 0.16, 12, 149, 38, 84)] },
-        /* ---- air: landing lag, and the frames that land without it (ac0 and earlier, after ac) ---- */
-        nair: { t: 36, air: 1, ll: 10, ac0: 4, ac: 31, h: [cap(6, 7, -0.15, 0.47, 0.41, 0.51, 0.20, 4, 70, 0, 0, { g: 1, link: [0.04 * U, 0.08 * U, 9] }), cap(13, 15, -0.49, 0.51, 0.66, 0.57, 0.18, 7, 48, 31, 64)] },
+        /* ---- air: Guard Wheel, High Guard, Reverse Cut, Crown Arc, Blade Drop. Landing lag, and the frames that land without it (ac0 and earlier, after ac) ---- */
+        nair: { t: 36, air: 1, ll: 10, ac0: 4, ac: 31, h: [cap(6, 7, -0.15, 0.47, 0.41, 0.51, 0.20, 4, 70, 0, 0, { g: 1, nb: 1, link: [0.04 * U, 0.08 * U, 9] }), cap(13, 15, -0.49, 0.51, 0.66, 0.57, 0.18, 7, 48, 31, 64)] },
         fair: { t: 30, air: 1, ll: 9, ac0: 4, ac: 25, h: [cap(7, 10, 0.31, 0.57, 0.91, 0.62, 0.16, 9, 43, 32, 70)] },
         bair: { t: 34, air: 1, ll: 12, ac0: 5, ac: 30, h: [cap(8, 10, -0.32, 0.58, -0.93, 0.63, 0.17, 13, 144, 39, 95)] },
         uair: { t: 27, air: 1, ll: 8, ac0: 4, ac: 24, h: [cap(6, 9, 0.36, 0.88, -0.31, 1.14, 0.18, 8, 86, 25, 62)] },
         /* the point sends someone in the air straight down; anyone standing, or caught by the blade above the point, is popped up */
         dair: { t: 41, air: 1, ll: 15, ac0: 5, ac: 37, h: [circ(13, 15, 0.13, -0.23, 0.19, 13, 275, 30, 94, { vAir: 1 }), cap(13, 15, 0.10, 0.32, 0.12, -0.03, 0.17, 9, 59, 35, 65), circ(13, 15, 0.13, -0.23, 0.19, 9, 59, 35, 65, { vGnd: 1 }), circ(16, 16, 0.10, 0.04, 0.17, 7, 55, 30, 58)] },
-        /* ---- grabs and get-ups ---- */
+        /* ---- grabs (Gauntlet Grab, Lunge Grab, Turn Grab) and get-ups (Guard Sweep, Rising Cut) ---- */
         grab: { t: 30, h: [grab(7, 8, 0.21, 0.54, 0.57, 0.56, 0.13)] },
         dgrab: { t: 38, h: [grab(10, 11, 0.23, 0.52, 0.60, 0.54, 0.13)], on(f, n) { if (n <= 11) f.vx = f.face * 0.33 * U / 11; } },
         pgrab: { t: 36, h: [grab(11, 12, 0.23, 0.54, 0.67, 0.55, 0.13)] },
         getup: { t: 47, h: [cap(19, 20, 0.27, 0.24, 0.65, 0.23, 0.17, 7, 43, 45, 56), cap(24, 25, -0.28, 0.23, -0.61, 0.23, 0.17, 7, 137, 45, 56)], on: rise() },
+        /* lying on her back: the same two cuts with front and rear swapped, behind first */
+        getupB: { t: 47, h: [cap(19, 20, -0.28, 0.23, -0.61, 0.23, 0.17, 7, 137, 45, 56), cap(24, 25, 0.27, 0.24, 0.65, 0.23, 0.17, 7, 43, 45, 56)], on: rise() },
         ledgeatk: { t: 46, h: [cap(20, 22, 0.26, 0.33, 0.73, 0.38, 0.16, 8, 39, 42, 59)], on: rise() },
         /* ---- specials ---- */
-        /* Hot Iron Thrust: let go of special before frame 9 for the quick thrust (frames 14 to 16, 11%); keep it held through
+        /* Vorpal Thrust: let go of special before frame 9 for the quick thrust (frames 14 to 16, 11%); keep it held through
            frame 9 and she draws the arm back for the long one (frames 24 to 26, 15%, a third further). */
         nspec: { t: 38, ll: 16, h: [cap(14, 16, 0.32, 0.56, 0.96, 0.57, 0.14, 11, 40, 36, 72)], on(f, n, i) { if (n === 9 && i.spc) { f.startMove('nspecH'); f.mf = 9; } } },
         nspecH: { t: 52, ll: 20, h: [cap(24, 26, 0.35, 0.56, 1.26, 0.59, 0.15, 15, 37, 40, 88)] },
-        /* Stove Door Bash: the door comes up on frames 5 to 8 (on the ground) and stops one strike of 8% or less from the
+        /* Shield Bash: the door comes up on frames 5 to 8 (on the ground) and stops one strike of 8% or less from the
            front; then a short step and a bash on frames 12 to 14. 24 frames after it, hit or miss. */
         sspec: { t: 38, ll: 17, guard: [5, 8], guardMax: 8, guardC: [q(0.32), q(0.52), q(0.26)],
-          h: [circ(12, 14, 0.52, 0.53, 0.25, 10, 53, 35, 70, { gndOnly: 1 }), circ(12, 14, 0.44, 0.51, 0.23, 8, 48, 32, 62, { airOnly: 1 })],
+          h: [circ(12, 14, 0.52, 0.53, 0.25, 10, 53, 35, 70, { gndOnly: 1, nb: 1 }), circ(12, 14, 0.44, 0.51, 0.23, 8, 48, 32, 62, { airOnly: 1, nb: 1 })],
           on(f, n) { if (n === 1) f.guarded = false; if (n >= 9 && n <= 14) f.vx = f.face * (f.grounded ? 0.32 : 0.18) * U / 6; else if (n === 15) f.vx = 0; } },
-        /* Watchfire Rise: a rising cut on frames 7 to 9, then straight up 2.05 H by frame 25 with a little steering (0.46 H at
+        /* Ember Rise: a rising cut on frames 7 to 9, then straight up 2.05 H by frame 25 with a little steering (0.46 H at
            most). The ledge can be taken from frame 11. Special fall after; 20 frames on landing. */
         uspec: { t: 25, helpless: 1, ledge: 1, snap: 11, nodrift: 1, ll: 20, hll: 20, rise: UP, h: [cap(7, 9, 0.19, 0.56, 0.33, 0.97, 0.17, 8, 76, 35, 62)],
           on(f, n, i) { if (n < 5) { hang(f); return; } if (n === 5) lift(f, 0); f.vy = UPV * (1 - (n - 5) / 21); f.vx = clamp(i.lx, -1, 1) * 0.46 * U / 21; } },
-        /* Night Step: on the ground she steps back 0.28 H on frames 4 to 8 (never off an edge), comes back in 0.16 H on frames
+        /* Grave Step: on the ground she steps back 0.28 H on frames 4 to 8 (never off an edge), comes back in 0.16 H on frames
            12 to 15 and cuts low on frames 15 to 17. In the air there is no step, only the cut. */
         dspec: { t: 39, ll: 16, h: [cap(15, 17, 0.32, 0.22, 0.95, 0.25, 0.15, 11, 41, 37, 72)],
           on(f, n) { if (!f.grounded) return; let v = n >= 4 && n <= 8 ? -f.face * 0.28 * U / 5 : n >= 12 && n <= 15 ? f.face * 0.16 * U / 4 : 0; const p = f.plat; if (p && (f.x + v < p.x0 || f.x + v > p.x1)) v = 0; f.vx = v; } },
-      }, { jabs: 3, throws: { f: { d: 8, a: 40, b: 43, k: 68, f: 10, t: 29 }, b: { d: 8, a: 143, b: 43, k: 68, f: 13, t: 33 }, u: { d: 7, a: 88, b: 44, k: 68, f: 14, t: 34 }, d: { d: 6, a: 71, b: 33, k: 51, f: 16, t: 33 } } }),
+      /* throws: Shield Shove, Gauntlet Turn, Crown Lift, Kneel Break. Gauntlet Turn holds the target at the usual place in front
+         until it lets go on frame 13 at 0.41 H behind her, measured from where she stood and faced on frame 1. */
+      }, { jabs: 3, throws: { f: { d: 8, a: 40, b: 43, k: 68, f: 10, t: 29 },
+        b: { d: 8, a: 143, b: 43, k: 68, f: 13, t: 33, at(f, v, n) { if (n <= 1 || f.twX === undefined) { f.twX = f.x; f.twFace = f.face; } v.x = n >= 13 ? f.twX - f.twFace * q(0.41) : f.x + f.face * 8; v.y = f.y; } }, u: { d: 7, a: 88, b: 44, k: 68, f: 14, t: 34 }, d: { d: 6, a: 71, b: 33, k: 51, f: 16, t: 33 } } }),
     }],
   };
 })();
@@ -1566,7 +1581,7 @@ class Fighter {
     this.pct = 0; this.shieldHp = 50; this.invuln = 0; this.hitlag = 0; this.hitstun = 0; this.ledgeCd = 0; this.dropT = 0; this.dropPlat = null;
     this.move = null; this.mf = 0; this.charge = 0; this.hitG = new Set(); this.parriedBy = null; this.victim = null; this.lag = 0; this.flash = 0;
     this.stale = []; this.staled = false; this.staleM = 1; this.shortHop = false; this.moveSH = false; this.shMacro = false; this.grabImm = 0; this.ledgeGrabs = 0;
-    this.dodgeStale = 0; this.dodgeT = 0; this.ds = 0; this.tumble = false; this.techT = 0; this.techLock = 0; this.pumT = 0; this.wdHold = false;
+    this.dodgeStale = 0; this.dodgeT = 0; this.ds = 0; this.tumble = false; this.techT = 0; this.techLock = 0; this.pumT = 0; this.pumHit = 0; this.downBack = false; this.wdHold = false;
     this.chargeT = 0; this.stalled = false; this.stallOk = false; this.cAir = null; this.hopT = 0; this.airUse = {}; this.flying = false; this.selOpen = false; this.sling = null; this.dairUsed = false; this.upC = 0; this.upGo = 0; this.flyV = null; this.flyB = false; this.dove = false; this.burstKind = ''; this.burstX = 0; this.burstDown = false; this.burstUsed = false; this.blastUsed = false; this.swapLock = 0; this.slingUsed = false; this.thermal = false; this.recoil = false; this.bigStone = false; this.armorLeft = 99; this.castHit = false; this.linkT = 0; this.helpLag = 0; this.guarded = false;
     this.fat = 0; this.fatGain = false; this.restT = 0; this.exPend = false; this.exStart = -1; this.paceX = null; this.paceDir = 1;   /* INTENSITY: per stock */
     this.punchC = 0; this.punchUse = 0; this.buryT = 0; this.slapMore = false; this.tether = null; this.adFaf = 0; this.spinVx = 0;   /* per stock: a stored punch charge goes with the stock */
@@ -1597,7 +1612,7 @@ class Fighter {
   startMove(n) {
     const m = this.form.moves[n]; if (this.def.transform) this.effort(FAT.move[n]); this.move = m; this.mname = n; this.mf = 0; this.charge = 0; this.chargeT = 0; this.aim = 0;
     this.stallOk = !!m.stall && !this.grounded && !this.stalled; if (this.stallOk) this.stalled = true;
-    this.armorLeft = m.armorHits || 99; this.castHit = false;   /* a move that hangs in the air does so once per time off the ground */
+    this.armorLeft = m.armorHits || 99; this.castHit = false; this.bRev = 0;   /* a move that hangs in the air does so once per time off the ground */
     this.selOpen = false;   /* a bird wheel left open by an interrupted Neutral B never outlives it */
     if (!m.rapid) this.rapidN = 0; this.hitG = new Set(); this.parriedBy = null; this.staled = false; this.moveSH = !!(m.air && this.shortHop); this.set('attack');
     if (m.once && !this.grounded) this.sideUsed = true;
@@ -1622,11 +1637,12 @@ class Fighter {
     if (Math.abs(i.lx) > 0.5 && Math.abs(i.lx) >= Math.abs(i.ly)) { this.face = sgn(i.lx); n = (!this.grounded && this.sideUsed) ? 'nspec' : 'sspec'; }
     else if (i.ly > 0.5) n = 'uspec'; else if (i.ly < -0.5) n = 'dspec';
     /* Turnaround special: holding back turns the fighter round first; in the air a neutral special also reverses its drift. */
-    let mv = this.form.moves[n]; if (mv.pick) { n = mv.pick(this) || n; mv = this.form.moves[n]; }   /* a special with a ground and an air form, or a stored charge */
+    const dir = n; let turned = false, mv = this.form.moves[n]; if (mv.pick) { n = mv.pick(this) || n; mv = this.form.moves[n]; }   /* a special with a ground and an air form, or a stored charge */
     if (!this.grounded && ((mv.burst && this.burstUsed) || (mv.blast && this.blastUsed))) return;
     if (mv.swap && this.swapLock > 0) return;   /* too soon after the last swap */   /* spent until it lands */
-    if (n !== 'sspec' && Math.abs(i.lx) > 0.35 && sgn(i.lx) !== this.face) { this.face = sgn(i.lx); if (n === 'nspec' && !this.grounded) this.vx = -this.vx * 0.9; }
-    this.startMove(n);
+    if (n !== 'sspec' && Math.abs(i.lx) > 0.35 && sgn(i.lx) !== this.face) { this.face = sgn(i.lx); if (n === 'nspec' && !this.grounded) { this.vx = -this.vx * 0.9; turned = true; } }
+    this.startMove(n); this.bRevV = !turned;   /* the drift already turned round with the fighter: a B-reverse after it only turns them back (a wavebounce) */
+    if (dir !== 'uspec' && !mv.swap && this.ctl.cFall) this.bRev = B_REV;   /* people only (cFall, as for the right-stick fast fall), so seeded CPU matches play out as before */
   }
   aerial(x, y) { if (Math.abs(y) > 0.5 && Math.abs(y) >= Math.abs(x)) return y > 0 ? 'uair' : 'dair'; if (Math.abs(x) > 0.3) return sgn(x) === this.face ? 'fair' : 'bair'; return 'nair'; }
   groundAttack(moving) {
@@ -1745,7 +1761,7 @@ class Fighter {
         if (this.techT > 0) {
           this.techT = 0; this.invuln = 20; spark(this.x, this.y, '#9ff', 10, 1.2); beep(900, 0.05, 'triangle', 0.04);
           if (Math.abs(lx) > 0.5) { this.rollDir = sgn(lx); this.ds = 0; this.set('roll'); } else { this.vx = 0; this.lag = 26; this.set('land'); }
-        } else { this.vx *= 0.5; spark(this.x, this.y, '#ddd', 8, 1.2); beep(130, 0.08, 'square', 0.05); this.set('down'); }
+        } else { this.downBack = this.vx * this.face < 0; this.vx *= 0.5; spark(this.x, this.y, '#ddd', 8, 1.2); beep(130, 0.08, 'square', 0.05); this.set('down'); }   /* downBack: carried backward, so lying on the back */
       } else { this.lag = 4; this.set('land'); }
     }
     else if (st === 'helpless') { this.lag = this.helpLag || 12; this.helpLag = 0; this.set('land'); }
@@ -1857,6 +1873,9 @@ class Fighter {
         /* A smash is charged by keeping attack held: its power grows for a second, and it can be held back for two more. */
         if (m.chg && this.mf === m.chg && this.chargeT < (m.chgHold || SMASH_HOLD) && i.atk) { this.chargeT++; if (this.charge < 60) this.charge++; } else this.mf++;
         if (m.inv && this.mf === m.inv[0]) this.invuln = Math.max(this.invuln, m.inv[1] - m.inv[0]);   /* some moves cannot be hit for a few frames */
+        /* B-reverse: in a special's first few frames, pull the stick the other way to turn round; in the air the drift turns round too.
+           With a turnaround special first (back held as special is pressed) it becomes a wavebounce. Once per special; not for up specials. */
+        if (this.bRev > 0) { this.bRev--; if (Math.abs(i.lx) > 0.5 && Math.abs(i.lx) >= Math.abs(i.ly) && sgn(i.lx) === -this.face) { this.bRev = 0; this.face = -this.face; if (!this.grounded && this.bRevV) this.vx = -this.vx; brevPuff(this.x, this.y + this.st.h * 0.45); } }
         if (m.on) m.on(this, this.mf, i);
         if (this.state === 'attack' && this.move === m && m.cancel && this.mf >= m.cancel) {   /* cut short into any action, keeping the speed */
           if (this.grounded) { if (this.groundActs(false)) break; }
@@ -1911,7 +1930,7 @@ class Fighter {
         this.vx = appr(this.vx, 0, 0.1);
         if (this.sf >= 20) {
           if (this.exStart >= 0) { c.buf.atk = 0; if (i.ly > 0.5 || Math.abs(i.lx) > 0.5 || this.sf >= 100) { this.lag = 22; this.invuln = 16; this.set('land'); } break; }   /* exhausted: only gets up */
-          if (c.take('atk')) { this.startMove('getup'); break; }
+          if (c.take('atk')) { this.startMove(this.downBack && this.form.moves.getupB ? 'getupB' : 'getup'); break; }   /* getupB: a floor attack of its own when lying on the back */
           if (Math.abs(i.lx) > 0.5) { this.rollDir = sgn(i.lx); this.ds = 0; this.invuln = 14; this.set('roll'); break; }
           if (i.ly > 0.5 || c.take('jmp') || i.shd || this.sf >= 100) { this.lag = 22; this.invuln = 16; this.set('land'); }
         }
@@ -1931,7 +1950,10 @@ class Fighter {
         v.x = this.x + this.face * 8; v.y = this.y; v.vx = v.vy = 0; v.face = -this.face;
         if (this.sf > 6) {
           if (this.pumT > 0) this.pumT--;
-          if (this.pumT === 0 && c.take('atk')) { this.effort(FAT.pummel); this.pumT = this.st.pumT || 14; v.pct += (this.st.pummel || 1.3) * DMG_1V1; v.flash = 5; spark(v.x, v.y + 8, '#fff', 4, 0.8); beep(260, 0.04, 'square', 0.04); }
+          const pumHit = () => { v.pct += (this.st.pummel || 1.3) * DMG_1V1; v.flash = 5; spark(v.x, v.y + 8, '#fff', 4, 0.8); beep(260, 0.04, 'square', 0.04); };
+          if (this.pumHit > 0 && --this.pumHit === 0) pumHit();   /* pumAt: a pummel whose hit lands a few frames after the press */
+          if (this.pumT === 0 && c.take('atk')) { this.effort(FAT.pummel); this.pumT = this.st.pumT || 14; if (this.st.pumAt > 1) this.pumHit = this.st.pumAt - 1; else pumHit(); }
+          if (this.st.pumLock && this.pumT > 0) break;   /* pumLock: the pummel runs on its own clock; nothing else until its free frame */
           /* Throw with either stick, held or flicked: the right stick wins if both are pushed. */
           const cs = Math.hypot(i.cx, i.cy) >= 0.5, tx = cs ? i.cx : i.lx, ty = cs ? i.cy : i.ly; let k = null;
           if (cs || Math.hypot(i.lx, i.ly) >= 0.6) k = Math.abs(ty) > Math.abs(tx) ? (ty > 0 ? 'u' : 'd') : (sgn(tx) === this.face ? 'f' : 'b');
@@ -2150,7 +2172,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
     if (h.cmd) {   /* a grab that is its own throw: caught and flung in one motion, on the ground or in the air */
       v.freeVictim(); a.move = null; a.victim = v; a.throwK = h.cmd; a.vx = a.vy = 0; a.set('throw'); v.move = null; v.grounded = false; v.plat = null; v.set('held'); beep(330, 0.06, 'triangle', 0.05); return;
     }
-    v.freeVictim(); a.move = null; a.set('hold'); a.victim = v; a.holdT = Math.min(300, 90 + v.pct * 1.7); a.pumT = 0; v.move = null; v.grounded = false; v.plat = null; v.set('held'); beep(330, 0.06, 'triangle', 0.05); return;
+    v.freeVictim(); a.move = null; a.set('hold'); a.victim = v; a.holdT = Math.min(300, 90 + v.pct * 1.7); a.pumT = 0; a.pumHit = 0; v.move = null; v.grounded = false; v.plat = null; v.set('held'); beep(330, 0.06, 'triangle', 0.05); return;
   }
   if (!proj && a.parriedBy === v) return;
   if (h.wind) {   /* a gust: no damage and no hitstun, just a shove, weaker on someone standing; a shield stops it */
@@ -2170,7 +2192,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
     if (h.d <= v.move.counterMax) { a.hitlag = 12; v.hitlag = 6; v.startMove('dcounter'); spark(hx, hy, '#ffd98a', 16, 1.8); pop(hx, hy + 12, 'BRACE', '#ffd98a'); beep(880, 0.08, 'triangle', 0.05, 0.6); return; }
     d *= 0.5;   /* a strong hit overpowers the brace, for half its damage */
   }
-  /* A guard window (Brand's Stove Door Bash): on the ground it stops one light strike that comes in from the front, for the
+  /* A guard window (Brand's Shield Bash): on the ground it stops one light strike that comes in from the front, for the
      usual shield cost and freeze, and the move carries on. Too strong, from behind or above, a grab or a projectile: no guard. */
   if (!proj && v.state === 'attack' && v.move && v.move.guard && v.grounded && !v.guarded && v.mf >= v.move.guard[0] && v.mf <= v.move.guard[1] && h.d * (1 + a.charge / 60 * CHG_K(a)) <= v.move.guardMax) {
     const gc = v.move.guardC, gx = v.x + gc[0] * v.face, gy = v.y + gc[1], c = at || [a.x + h.x * a.face, hitY(a, h), h.r];

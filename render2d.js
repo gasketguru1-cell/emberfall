@@ -198,6 +198,8 @@ const ART = {
       const q = g.createLinearGradient(hx, hy, tx, ty); q.addColorStop(0, 'rgba(255,138,60,0)'); q.addColorStop(0.35, c[2]); q.addColorStop(1, '#ffd98a'); g.beginPath(); g.moveTo(hx + ux * L * 0.25 - uy * 0.25, hy + uy * L * 0.25 + ux * 0.25); g.lineTo(tx - uy * 0.2, ty + ux * 0.2); g.strokeStyle = q; g.lineWidth = 0.42; g.stroke();
       g.beginPath(); g.moveTo(hx + ux * 0.9 - uy * 1.1, hy + uy * 0.9 + ux * 1.1); g.lineTo(hx + ux * 0.9 + uy * 1.1, hy + uy * 0.9 - ux * 1.1); g.strokeStyle = OL; g.lineWidth = 0.75; g.stroke(); g.strokeStyle = '#33353c'; g.lineWidth = 0.4; g.stroke();   /* crossguard */
       g.beginPath(); g.arc(hx, hy, 0.75, 0, TAU); ink(skin, 0.22); }
+    /* while a sword hit is out, the red point at the end of the blade (as in 3D) */
+    if (f && f.state === 'attack' && f.move && f.move.h && f.move.h.some(q => !q.grab && !q.nb && q.d > 0 && f.mf >= q.f0 && f.mf <= q.f1)) { g.beginPath(); g.arc(tx, ty, 0.55, 0, TAU); g.fillStyle = '#ff1414'; g.fill(); }
     /* head, braid and kettle hat */
     g.strokeStyle = OL; g.lineWidth = 1.5; g.beginPath(); g.moveTo(-1.2, 13 + bob); g.quadraticCurveTo(-2.4, 11.4 + bob, -1.9, 8.8 + bob); g.stroke(); g.strokeStyle = hair; g.lineWidth = 0.9; g.stroke();
     g.beginPath(); g.arc(0.3, 13 + bob, 1.75, 0, TAU); ink(skin, 0.28);

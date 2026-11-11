@@ -1,5 +1,5 @@
 // Brand, the night-watch captain: scripted checks against the owner's document for fighter 03 (frames, damage, shapes,
-// movement, the guard on Stove Door Bash, linking hits, landing rules, recovery).
+// movement, the guard on Shield Bash, linking hits, landing rules, recovery).
 // Usage: node tests/brand.js        (exit code 1 if any check fails)
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const root = path.join(__dirname, '..');
@@ -7,7 +7,7 @@ const ctx = new Proxy({}, { get: (t, k) => k in t ? t[k] : () => ({ addColorStop
 global.document = { getElementById: () => ({ getContext: () => ctx }) }; global.window = global; global.addEventListener = () => {}; global.requestAnimationFrame = () => {};
 Object.defineProperty(global, 'navigator', { value: { getGamepads: () => [] }, configurable: true });
 let seed = 5; Math.random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
-for (const f of ['hitboxes.js', 'sim.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
+for (const f of ['hitboxes.js', 'sim.js', 'movelist.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 vm.runInThisContext(`
 (function () {
   const BI = ROSTER.findIndex(d => d.name === 'Brand'), BR = [BI, 0], FL = [0, 0], HOD = [1, 2];
@@ -43,8 +43,8 @@ vm.runInThisContext(`
       ['utilt', 7, 8, 8, 83, 27, 61, 26], ['dtilt', 6, 8, 7, 69, 24, 51, 24], ['fsmash', 16, 19, 17, 38, 40, 104, 48], ['dsmash', 12, 13, 13, 30, 40, 86, 43],
       ['fair', 7, 10, 9, 43, 32, 70, 31], ['bair', 8, 10, 13, 144, 39, 95, 35], ['uair', 6, 9, 8, 86, 25, 62, 28], ['nspec', 14, 16, 11, 40, 36, 72, 39], ['nspecH', 24, 26, 15, 37, 40, 88, 53],
       ['sspec', 12, 14, 10, 53, 35, 70, 39], ['uspec', 7, 9, 8, 76, 35, 62, 26], ['dspec', 15, 17, 11, 41, 37, 72, 40], ['ledgeatk', 20, 22, 8, 39, 42, 59, 47], ['getup', 19, 20, 7, 43, 45, 56, 48]];
-    const bad = rows.filter(r => { const x = h(r[0]); return !(x.f0 === r[1] && x.f1 === r[2] && x.d === r[3] && x.a === r[4] && x.b === r[5] && x.k === Math.round(r[6] * (TUNE.Brand.kb || 1)) && mv[r[0]].t + 1 === r[7]); }).map(r => r[0]);
-    check('document: active frames, damage, angle, launch and first free frame of ' + rows.length + ' moves', !bad.length, bad.length ? 'differs: ' + bad.join(', ') : 'all as listed (growth scaled by the balance setting ' + (TUNE.Brand.kb || 1) + ')');
+    const bad = rows.filter(r => { const x = h(r[0]); return !(x.f0 === r[1] && x.f1 === r[2] && x.d === r[3] && x.a === r[4] && x.b === r[5] && x.k === r[6] && mv[r[0]].t + 1 === r[7]); }).map(r => r[0]);
+    check('document: active frames, damage, angle, launch and first free frame of ' + rows.length + ' moves', !bad.length, bad.length ? 'differs: ' + bad.join(', ') : 'all as listed, with no balance setting (' + !TUNE.Brand + ')');
     const u = mv.usmash.h, n = mv.nair.h, d = mv.dair.h, ds = mv.dsmash.h[1], ut = mv.utilt.h[1];
     check('document: two-part moves', u[0].f0 === 13 && u[0].d === 3 && u[1].f0 === 15 && u[1].f1 === 17 && u[1].d === 12 && n[0].f0 === 6 && n[0].d === 4 && n[1].f0 === 13 && n[1].d === 7 && d[0].d === 13 && d[0].a === 275 && d[1].d === 9 && d[3].f0 === 16 && d[3].d === 7 && ds.f0 === 17 && ds.d === 12 && ds.a === 149 && ut.f0 === 9 && ut.a === 96,
       'up smash 3% then 12%, neutral air 4% then 7%, down air 13% point / 9% blade / 7% late, down smash rear f17 12%, up tilt arc f9');
@@ -74,7 +74,7 @@ vm.runInThisContext(`
     check('the blade hits the same along its length', near(inner.pct, outer.pct, 0.01) && near(inner.pct, 9 * B, 0.05), 'close ' + pct(inner.pct) + ', at the end ' + pct(outer.pct));
     /* jab chain by pressing attack */
     { const [b, f] = setup(BR, FL, 0, 7); SCRIPT[0] = (i, tt) => { i.atk = tt % 6 < 2; }; let seen = new Set(); run(70, () => { if (b.state === 'attack') seen.add(b.mname); });
-      check('jab: three presses give Hilt Rap, Quick Cut, Watch Cut', seen.has('jab') && seen.has('jab2') && seen.has('jab3') && f.pct > 9 * B && f.pct < 12, [...seen].join(' > ') + ', target at ' + pct(f.pct) + ' (9.5% before the one-on-one bonus)'); }
+      check('jab: three presses give Hilt Tap, Short Cut, Cross Cut', seen.has('jab') && seen.has('jab2') && seen.has('jab3') && f.pct > 9 * B && f.pct < 12, [...seen].join(' > ') + ', target at ' + pct(f.pct) + ' (9.5% before the one-on-one bonus)'); }
     /* two-phase moves that hit once */
     const ut = swing('utilt', 6), utb = swing('utilt', -5, { face: 1 }), ds = swing('dsmash', 9), dsb = swing('dsmash', -9, { face: 1 }), gu = swing('getup', 7), gub = swing('getup', -7, { face: 1 });
     check('up tilt, down smash and floor attack: one hit a target, front or behind', ut.hits === 1 && ut.first === 7 && utb.hits === 1 && utb.first >= 9 && ds.hits === 1 && ds.first === 12 && dsb.hits === 1 && dsb.first === 17 && dsb.vx < 0 && gu.hits === 1 && gub.hits === 1 && gub.first === 24,
@@ -99,7 +99,7 @@ vm.runInThisContext(`
     check('landing lag and auto-cancel windows of the five aerials', !bad.length, bad.length ? bad.join('; ') : 'neutral 10 (free 1-4, 32+), forward 9 (1-4, 26+), back 12 (1-5, 31+), up 8 (1-4, 25+), down 15 (1-5, 38+)');
   }
 
-  /* ---- Hot Iron Thrust ---- */
+  /* ---- Vorpal Thrust ---- */
   {
     const thrust = (hold, gap) => { const [b, f] = setup(BR, FL, 0, gap); SCRIPT[0] = (i, tt) => { if (tt >= 1 && tt < 1 + hold) i.spc = true; }; let first = 0, name = ''; run(80, () => { if (!first && f.pct > 0) { first = b.mf; name = b.mname; } }); return { first, pct: f.pct, name }; };
     const tapT = thrust(3, 14), held = thrust(14, 14), far = thrust(14, 21), farTap = thrust(3, 21);
@@ -107,7 +107,7 @@ vm.runInThisContext(`
       'tap: f' + tapT.first + ' ' + pct(tapT.pct) + '; held: f' + held.first + ' ' + pct(held.pct) + '; at 1.5 H the held one hits and the tap ' + (farTap.first ? 'hits' : 'misses'));
   }
 
-  /* ---- Stove Door Bash ---- */
+  /* ---- Shield Bash ---- */
   {
     /* Brand is put on a chosen frame of the bash and Flint strikes with a real hitbox from where he stands */
     const bash = (o) => { const [b, f] = setup(BR, FL, 0, o.gap === undefined ? 7 : o.gap); if (o.air) { airborne(b, 0, 20); airborne(f, 7, 20); } b.face = 1; b.startMove('sspec'); b.mf = o.mf === undefined ? 6 : o.mf; const hp = b.shieldHp;
@@ -132,7 +132,7 @@ vm.runInThisContext(`
     check('bash: played for real, a 7% forward tilt (Nib) is stopped and the bash hits back', guard && b.pct === 0 && f.pct > 0, 'guarded: ' + guard + ', Brand ' + pct(b.pct) + ', Nib ' + pct(f.pct));
   }
 
-  /* ---- Watchfire Rise ---- */
+  /* ---- Ember Rise ---- */
   {
     const up = (lx) => { const [b] = setup(BR, FL, 0, 60); airborne(b, 0, 30); let top = 30, st0 = '', f25 = 0; SCRIPT[0] = (i, tt) => { if (tap(1)(tt)) { i.ly = 1; i.spc = true; } else i.lx = lx; }; run(34, () => { top = Math.max(top, b.y); if (b.state === 'attack' && b.mf === 24) f25 = b.y; if (!st0 && b.state !== 'attack' && b.state !== 'air') st0 = b.state; }); return { top, dx: b.x, st0, by: f25 }; };
     const a = up(0), s = up(1);
@@ -148,7 +148,7 @@ vm.runInThisContext(`
     check('rise: reaches the ledge from below and beside it; too deep or too far out it does not', below && beside && !deep && !wide, 'below ' + below + ', beside ' + beside + ', 4.3 H under ' + deep + ', 4.3 H out ' + wide);
   }
 
-  /* ---- Night Step ---- */
+  /* ---- Grave Step ---- */
   {
     const [b] = setup(BR, FL, 0, 60); b.startMove('dspec'); const x0 = b.x; let back = 0; run(39, () => { if (b.mf === 8) back = b.x - x0; }); const net = b.x - x0, free = b.state;
     check('step: back 0.28 H by frame 8, in again 0.16 H by frame 15, free on frame 40', near(back / H, -0.28, 0.01) && near(net / H, -0.12, 0.01) && free !== 'attack', 'back ' + (back / H).toFixed(2) + ' H, ends ' + (net / H).toFixed(2) + ' H from the start, ' + free + ' after 39 frames');
@@ -177,6 +177,25 @@ vm.runInThisContext(`
     check('dash attack carries 0.39 H by frame 10, dash grab 0.33 H by frame 11', near(d10 / H, 0.39, 0.02) && near(d11 / H, 0.33, 0.02), 'dash attack ' + (d10 / H).toFixed(2) + ' H, dash grab ' + (d11 / H).toFixed(2) + ' H');
     const [b4, f4] = setup(BR, FL, 0, EDGE - 14); b4.x = EDGE + 5; b4.y = -st.h + 1; b4.grounded = false; b4.plat = null; b4.face = -1; b4.set('ledge'); f4.face = 1; let name = ''; SCRIPT[0] = (i, tt) => { if (tt >= 12 && tt < 14) i.atk = true; }; run(60, () => { if (b4.state === 'attack') name = b4.mname; });
     check('ledge attack: its own cut (8%, frames 20 to 22)', name === 'ledgeatk' && near(f4.pct, 8 * B, 0.05), 'move ' + name + ', target at ' + pct(f4.pct));
+    /* Gauntlet Turn lets go 0.41 H behind where she stood on throw frame 1 */
+    { const [b, f] = setup(BR, FL, 0, 6); b.startMove('grab'); let relX = null, bx = 0, held7 = null; SCRIPT[0] = () => {}; run(20, () => { if (b.state === 'hold') return false; });
+      SCRIPT[0] = i => { if (b.state === 'hold') i.lx = -1; }; run(40, () => { if (b.state === 'throw' && b.sf === 1) bx = b.x; if (b.state === 'throw' && b.sf === 7) held7 = (f.x - b.x) * b.face; if (b.state === 'throw' && b.sf === 13 && relX === null) relX = (f.x - bx) * b.face; });
+      check('back throw: held in front, released 0.41 H behind her on frame 13', relX !== null && near(relX / H, -0.41, 0.01) && held7 > 0, 'in front by ' + (held7 / H).toFixed(2) + ' H on frame 7, released at ' + (relX / H).toFixed(2) + ' H'); }
+    /* Pommel Tap: the hit on frame 4, the next pummel or a throw on frame 13 */
+    { const [b, f] = setup(BR, FL, 0, 6); b.startMove('grab'); run(20, () => { if (b.state === 'hold' && b.sf > 7) return false; }); const p0 = f.pct; let press = -1, hitAt = -1, nextAt = -1, thrAt = -1;
+      SCRIPT[0] = (i, tt) => { if (press < 0) { i.atk = true; return; } if (tt - press >= 5) i.lx = 1; };
+      run(40, () => { if (press < 0 && b.pumT > 0) press = t - 1; if (press >= 0 && hitAt < 0 && f.pct > p0 + 0.01) hitAt = t - press; if (press >= 0 && thrAt < 0 && b.state === 'throw') thrAt = t - press; });
+      const [b2, f2] = setup(BR, FL, 0, 6); b2.startMove('grab'); run(20, () => { if (b2.state === 'hold' && b2.sf > 7) return false; }); let pr = -1, n2 = 0;
+      SCRIPT[0] = (i, tt) => { i.atk = (tt % 2) === 0; }; let lastP = f2.pct, hits = []; run(30, () => { if (f2.pct > lastP + 0.01) { hits.push(t); lastP = f2.pct; } });
+      check('pummel: 1.3% on frame 4; another pummel or a throw only from frame 13', hitAt === 4 && thrAt >= 13 && hits.length >= 2 && hits[1] - hits[0] === 12, 'hit on frame ' + hitAt + ', a throw held from frame 6 started on frame ' + thrAt + ', mashed pummels ' + (hits[1] - hits[0]) + ' frames apart'); }
+    /* lying on her back the floor attack cuts behind first */
+    { const down = (back) => { const [b, f] = setup(BR, FL, 0, back ? -7 : 7); b.face = 1; f.face = back ? 1 : -1; b.set('down'); b.downBack = !!back; b.sf = 25; SCRIPT[0] = (i, tt) => { i.atk = tt < 2; }; let first = 0, vx = 0; const p0 = f.pct; run(50, () => { if (!first && f.pct > p0) { first = b.mf; vx = f.vx; } }); return { move: b.mname, first, vx }; };
+      const fd = down(false), bd = down(true);
+      check('floor attack: face down in front on frame 19; on her back behind on frame 19, launched back', fd.move === 'getup' && fd.first === 19 && fd.vx > 0 && bd.move === 'getupB' && bd.first === 19 && bd.vx < 0, 'face down: ' + fd.move + ' f' + fd.first + '; on her back: ' + bd.move + ' f' + bd.first); }
+    /* the document's names */
+    { const T = MOVE_TEXT && MOVE_TEXT.Brand; const want = { jab: 'Hilt Tap, Short Cut, Cross Cut', dash: 'Shield Drive', utilt: 'Crown Guard', dtilt: 'Greave Cut', fsmash: 'Vorpal Cleave', usmash: 'Gate Raise', dsmash: 'Rampart Sweep', nair: 'Guard Wheel', fair: 'High Guard', bair: 'Reverse Cut', uair: 'Crown Arc', dair: 'Blade Drop', grab: 'Gauntlet Grab', pummel: 'Pommel Tap', f: 'Shield Shove', b: 'Gauntlet Turn', u: 'Crown Lift', d: 'Kneel Break', nspec: 'Vorpal Thrust', sspec: 'Shield Bash', dspec: 'Grave Step' };
+      const bad = T ? Object.keys(want).filter(k => !T[k] || T[k][0] !== want[k]) : ['(no move list loaded)'];
+      check('move list: the document\u2019s move names', !bad.length, bad.length ? 'differs: ' + bad.join(', ') : Object.keys(want).length + ' names'); }
   }
 
   let fail = 0;
