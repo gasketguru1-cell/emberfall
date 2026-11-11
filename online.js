@@ -100,7 +100,7 @@
     if (NET.session()) return;
     ov.style.display = 'none'; UI_MODAL = false; padNav.stop(); kb.hide();
     TRAINING = false; slots[0] = { dev: 'kb', pick: pick0, ready: true }; slots[1] = { dev: 'kb', pick: pick1, ready: true }; startMatch();
-    for (const f of F) f.ctl = new Ctl('cpu');
+    for (const f of F) { f.ctl = new Ctl('cpu'); f.ctl.cFall = true; }   /* people on both ends: the right stick fast-falls */
     const local = () => { const k = readKb(), pads = navigator.getGamepads ? [...navigator.getGamepads()].filter(Boolean) : [], p = pads.length ? readPad(pads[0].index) : null;
       if (!p) return k; for (const key in k) if (typeof k[key] === 'boolean') k[key] = k[key] || p[key]; if (Math.abs(p.lx) > Math.abs(k.lx)) k.lx = p.lx; if (Math.abs(p.ly) > Math.abs(k.ly)) k.ly = p.ly; if (Math.abs(p.cx) > Math.abs(k.cx)) k.cx = p.cx; if (Math.abs(p.cy) > Math.abs(k.cy)) k.cy = p.cy; return k; };
     NET.start(me, link, { local });

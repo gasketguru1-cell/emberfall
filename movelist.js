@@ -469,8 +469,8 @@ function mlInput(c) {
   if (!hx) ML.rep = 0; ML.hx = hx; ML.vy = vy;
   if (c.pressed('atk')) mlTurn(1);
 }
-/* The pause menu: Resume, Move List, Exit. Returns 'held' when it used this frame's input, 'resume' or 'exit' to act on. */
-const PAUSE_ITEMS = ['Resume', 'Move List', 'Exit to fighter select'];
+/* The pause menu: Resume, Move List, Controls, Exit. Returns 'held' when it used this frame's input, 'resume' or 'exit' to act on. */
+const PAUSE_ITEMS = ['Resume', 'Move List', 'Controls', 'Exit to fighter select'];
 function pauseMenuStep(starter) {
   if (ML.open) { if (ML.ctl) mlInput(ML.ctl); return 'held'; }
   if (starter) return null;   /* Start: the usual resume */
@@ -478,7 +478,8 @@ function pauseMenuStep(starter) {
     if (c.dev === 'kb' && mlPlusKey()) { mlOpenFor(f); return 'held'; }
     const up = c.c.ly > 0.6 && !(c.p.ly > 0.6), dn = c.c.ly < -0.6 && !(c.p.ly < -0.6);
     if (up || dn) { PAUSE_SEL = (PAUSE_SEL + (dn ? 1 : -1) + PAUSE_ITEMS.length) % PAUSE_ITEMS.length; beep(480, 0.03, 'square', 0.02); return 'held'; }
-    if (c.pressed('atk')) { if (PAUSE_SEL === 0) return 'resume'; if (PAUSE_SEL === 2) return 'exit'; mlOpenFor(F[PAUSED_BY] && F[PAUSED_BY].ctl.dev !== 'cpu' ? F[PAUSED_BY] : f); return 'held'; }
+    if (c.pressed('atk')) { if (PAUSE_SEL === 0) return 'resume'; if (PAUSE_SEL === 3) return 'exit'; if (PAUSE_SEL === 2) { openCMenu(c.dev); return 'held'; }   /* the controls screen (sim.js), for whoever chose it */
+      mlOpenFor(F[PAUSED_BY] && F[PAUSED_BY].ctl.dev !== 'cpu' ? F[PAUSED_BY] : f); return 'held'; }
   }
   return null;
 }
@@ -491,7 +492,7 @@ function drawPauseMenu() {
     if (on) { g.save(); g.shadowColor = 'rgba(255,140,50,.55)'; g.shadowBlur = 20; const q = g.createLinearGradient(0, y, 0, y + bh); q.addColorStop(0, '#ffc867'); q.addColorStop(1, '#ef6d2a'); g.fillStyle = q; rr(x, y, bw, bh, 23); g.fill(); g.restore(); }
     else { g.fillStyle = 'rgba(20,17,36,.86)'; rr(x, y, bw, bh, 23); g.fill(); g.strokeStyle = 'rgba(255,255,255,.16)'; g.lineWidth = 1; g.stroke(); }
     g.font = (on ? '900 ' : 'bold ') + '19px system-ui, sans-serif'; spaced(on ? 2 : 1); g.fillStyle = on ? '#2a1208' : '#e6e0f6'; g.fillText(t.toUpperCase(), W / 2, y + 30); spaced(0); });
-  let hx = W / 2 - 300; const hy = H * 0.3 + 64 + 3 * (bh + 12) + 26;
+  let hx = W / 2 - 300; const hy = H * 0.3 + 64 + PAUSE_ITEMS.length * (bh + 12) + 26;
   for (const [cap, a] of [['↑ ↓', 'Choose'], ['A / Z', 'Select'], ['Start / Enter', 'Resume'], ['B / X', 'Exit to fighter select'], ['+', 'Move list']]) hx = keyHint(hx, hy, cap, a);
 }
 

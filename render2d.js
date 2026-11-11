@@ -247,7 +247,7 @@ function drawFighter(f, three) {
   if (f.invuln > 0 && (frame >> 1) % 2) g.globalAlpha = 0.45;
   if (f.state === 'spot' || f.state === 'airdodge') g.globalAlpha = 0.5;
   ART[fm.name](col, frame + f.idx * 40, f);
-  if (f.flash > 0 || f.hitlag > 0 && f.state === 'hurt') { g.globalCompositeOperation = 'lighter'; g.globalAlpha = 0.5; ART[fm.name](['#ffffff', '#ffffff', '#ffffff'], frame, f); g.globalCompositeOperation = 'source-over'; }
+  if ((f.flash > 0 || f.hitlag > 0 && f.state === 'hurt') && !(typeof finalT !== 'undefined' && finalT > 0 && finalT < FINAL_FREEZE - 3)) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = 0.5; ART[fm.name](['#ffffff', '#ffffff', '#ffffff'], frame, f); g.globalCompositeOperation = 'source-over'; }
   g.restore(); g.globalAlpha = 1;
   }
   /* Attack arcs: only with the switch on (start screen, or G). */
@@ -323,6 +323,8 @@ function draw() {
   if (mode === 'select') {   /* start screen: over the live island in 3D, over the stage picture otherwise */
     SHK.x = SHK.y = 0; if (three) g.clearRect(0, 0, W, H); drawSelect(three); if (typeof drawMoveList === 'function') drawMoveList(); if (three) window.R3.render(); return;
   }
+  if (typeof finalT !== 'undefined' && finalT > 0 && FINAL && typeof drawFinal === 'function') {   /* the final hit: frozen on the red screen, no HUD (finalhit.js) */
+    SHK.x = SHK.y = 0; if (drawFinal(three)) { if (three) window.R3.render(); return; } }
   if (three) g.clearRect(0, 0, W, H);
   SHK.x = shake > 0 ? (Math.random() - 0.5) * shake : 0; SHK.y = shake > 0 ? (Math.random() - 0.5) * shake : 0;
   g.save(); g.translate(SHK.x, SHK.y);

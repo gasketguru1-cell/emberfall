@@ -44,8 +44,9 @@ function build() {
   const deck = new THREE.Mesh(new THREE.BoxGeometry(EDGE * 2 + 4, 3, 48), new THREE.MeshStandardMaterial({ color: 0xffffff, map: planks, roughness: 0.82 })); deck.position.set(0, -1.5, 0); deck.castShadow = deck.receiveShadow = true; plain.add(deck);
   /* floating slabs: weathered stone with a copper band and a glowing ember line along the top edge */
   const slab = new THREE.MeshStandardMaterial({ color: 0x8a8079, roughness: 0.9, flatShading: true }), copper = new THREE.MeshStandardMaterial({ color: 0xa8623a, roughness: 0.45, metalness: 0.7 }), emberLine = new THREE.MeshStandardMaterial({ color: 0xffb060, emissive: 0xff8a30, emissiveIntensity: 2.4, roughness: 0.5 });
+  const slabs = [];
   for (const p of PLATS) if (p.soft) {
-    const w = p.x1 - p.x0, cx = (p.x0 + p.x1) / 2, g = new THREE.Group(); g.position.set(cx, p.y, 0); scene.add(g);
+    const w = p.x1 - p.x0, cx = (p.x0 + p.x1) / 2, g = new THREE.Group(); g.position.set(cx, p.y, 0); scene.add(g); slabs.push(g);
     const top = new THREE.Mesh(new THREE.BoxGeometry(w, 1.4, 15), slab); top.position.y = -0.7; top.castShadow = top.receiveShadow = true; g.add(top);
     const sh = new THREE.Shape([[-w / 2 + 1, 0], [w / 2 - 1, 0], [w / 2 - 4, -2.6], [-w / 2 + 4, -2.6]].map(q => new THREE.Vector2(q[0], q[1])));   /* the chamfered underside */
     const under = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 13, bevelEnabled: false }), slab); under.position.set(0, -1.4, -6.5); under.castShadow = true; g.add(under);
@@ -523,6 +524,24 @@ function build() {
     for (const g of islands) g.position.y = g.userData.y + Math.sin(tick * 0.008 + g.userData.ph) * 2.2;
   }
 
+  /* ---- the final hit (finalhit.js): while the game is frozen, the island goes, the backdrop shows the red burst filling the
+     view exactly, a red light comes from behind, and the view tilts ---- */
+  const finalCv = document.createElement('canvas'); finalCv.width = 1280; finalCv.height = 720;
+  const finalTex = new THREE.CanvasTexture(finalCv); finalTex.colorSpace = THREE.SRGBColorSpace;
+  const finalLight = new THREE.DirectionalLight(0xff3a1e, 0); finalLight.position.set(0, 60, -160); scene.add(finalLight);
+  let finalOn = false, bdMap = null, bdCol = null;
+  function finalView(s, vH, lift) {
+    const on = typeof finalT !== 'undefined' && finalT > 0 && !!FINAL && !!F[FINAL.v] && typeof finalBg === 'function';
+    const world = [plain, embers, R3.stage, ...slabs].filter(Boolean);
+    if (on && !finalOn) { bdMap = backdrop.material.map; bdCol = backdrop.material.color.getHex(); backdrop.material.map = finalTex; backdrop.material.color.set(0xffffff); backdrop.material.needsUpdate = true; world.forEach(o => { o.userData.finalWas = o.visible; o.visible = false; }); scene.fog.far = 1e6; }
+    if (!on && finalOn) { backdrop.material.map = bdMap; backdrop.material.color.setHex(bdCol); backdrop.material.needsUpdate = true; world.forEach(o => { if (o.userData.finalWas !== undefined) { o.visible = o.userData.finalWas; delete o.userData.finalWas; } }); scene.fog.far = 3600; backdrop.rotation.z = 0; finalLight.intensity = 0; }
+    finalOn = on; if (!on) return;
+    finalBg(finalCv.getContext('2d'), W, H, finalSpots()); finalTex.needsUpdate = true;
+    const bd = camera.position.z + 2600, fh = 2 * bd * Math.tan(THREE.MathUtils.degToRad(FOV / 2));
+    backdrop.scale.set(fh * 1.06 / 9, fh * 1.06 / 9, 1); backdrop.position.set(camera.position.x, camera.position.y - lift / vH * fh, -2600); backdrop.rotation.z = FINAL_ROLL;   /* turns with the camera: the picture carries its own tilt */
+    camera.rotation.z = FINAL_ROLL; finalLight.intensity = 4.5;
+  }
+
   let lastW = 0, lastH = 0;
   R3.show = on => { glc.style.visibility = on ? 'visible' : 'hidden'; };
   R3.render = () => {
@@ -536,6 +555,7 @@ function build() {
     { const bd = camera.position.z + 2600, fh = 2 * bd * Math.tan(THREE.MathUtils.degToRad(FOV / 2)), k = 1.34;
       backdrop.scale.set(fh * k / 9, fh * k / 9, 1);
       backdrop.position.set(camera.position.x - cam.x * 0.35, camera.position.y - lift / vH * fh - (cam.y - 30) * 0.3 + fh * 0.05, -2600); }
+    finalView(s, vH, lift);
     lamps.forEach((l, k) => { l.intensity = l.userData.i * (1 + Math.sin(frame * 0.31 + k * 2) * 0.07 + Math.sin(frame * 0.113 + k) * 0.05); });   /* forge and lantern flicker */
 
     F.forEach((f, idx) => {
@@ -557,7 +577,7 @@ function build() {
       v.root.position.set(f.x, f.y, 0); v.root.rotation.y = (flat ? 0.55 * v.flip : v.yaw) + (v.model && v.turned ? Math.PI : 0) - (v.model ? (v.spin || 0) * f.face : 0);
       v.pivot.position.set(p.shx !== undefined ? p.shx : f.hitlag > 0 && f.state === 'hurt' ? ((tick & 1) ? 0.35 : -0.35) : 0, p.oy + (p.shy || 0), 0); v.pivot.rotation.z = -p.rot; v.pivot.scale.set(p.sx, p.sy, p.sx);
       v.pivot.children.forEach(c => { if (c.userData.y0 === undefined) c.userData.y0 = c.position.y; c.position.y = c.userData.y0 - p.oy; });
-      const ghost = (f.invuln > 0 && (tick >> 1) % 2) || f.state === 'spot' || f.state === 'airdodge', hot = f.flash > 0 || (f.hitlag > 0 && f.state === 'hurt');
+      const ghost = (f.invuln > 0 && (tick >> 1) % 2) || f.state === 'spot' || f.state === 'airdodge', hot = (f.flash > 0 || (f.hitlag > 0 && f.state === 'hurt')) && !(typeof finalT !== 'undefined' && finalT > 0 && finalT < FINAL_FREEZE - 3);   /* the final-hit freeze shows the fighter, not a white flash */
       for (const m of v.mats) { m.transparent = ghost; m.opacity = ghost ? 0.45 : 1; m.emissive.setHex(hot ? 0xffffff : 0x000000); m.emissiveIntensity = hot ? 0.8 : 0; }
       if (v.shield.visible) { const [sx, sy, r] = shieldCircle(f); v.shield.scale.setScalar(r); v.shield.position.set(sx, sy, 0); }
       if (v.pad.visible) v.pad.position.set(f.x, f.y - 0.8, 0);
