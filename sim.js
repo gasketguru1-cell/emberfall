@@ -325,6 +325,7 @@ const TUNE = {
   Flint: { kb: 0.84, lag: 1.2 }, Nib: { kb: 1.09 }, Loom: { kb: 1.11, lag: 0.95 }, Hod: { kb: 1.31, lag: 0.8 }, 'Potato Sack': { kb: 0.9 }, Sprocket: { kb: 0.8, lag: 1.3 }, Scuttle: { kb: 0.91, lag: 1.2 },
   /* Furious Fowls: the owner asked for 55 to 65% (2026-11-10) */
   Rusty: { kb: 0.92 }, Bolt: { kb: 0.86, lag: 1.15 }, Cinder: { kb: 0.92 }, Pip: { kb: 1.18 }, Pearl: { kb: 1.0 },
+  'Chomp Chomp': { kb: 0.84, lag: 1.35 },   /* CPU-vs-CPU 84% wins untuned (2026-11-10): toned toward the 55 to 65% band */
 };
 const NORMALS = ['jab', 'jab2', 'jab3', 'dash', 'ftilt', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash', 'nair', 'fair', 'bair', 'uair', 'dair'];
 function applyTune(fm) {
@@ -1096,7 +1097,7 @@ const CHOMP = {
        gravity and fall a little low, jump squat 4, a high full hop. Squat and round. */
     st: { weight: 94, walk: 1.21, walkMul: 0.15, walkAdd: 0.1, trac: 0.11, dash: 2.2, runMul: 0.12, runAdd: 0.045, run: 1.91,
       jumpX: 0.95, jumpXMul: 0.85, jumpXMax: 1.35, airJumpX: 0.9, jumpH: 37, jumpInit: 19.6, hopH: 17, airJumpH: 35, upH: 28,
-      airMul: 0.07, airAdd: 0.012, airSpeed: 1.1, airBrake: 0.01, grav: 0.084, fall: 1.47, ffall: 2.4, jsq: 4, w: 9, h: 11, jf: 3, jb: 1.6,
+      airMul: 0.06, airAdd: 0.01, airSpeed: 1.0, airBrake: 0.01, grav: 0.088, fall: 1.52, ffall: 2.45, jsq: 4, w: 10, h: 11, jf: 3, jb: 1.6,
       jumps: 1, dashF: 12, roll: [28, 1.35, 13], spot: [22, 15] },
     aiShot: [30, 90],
     moves: mk(0.95, 1, 1, 0.8, {
