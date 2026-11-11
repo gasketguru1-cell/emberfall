@@ -1082,12 +1082,15 @@ const FOWLS = { name: 'Furious Fowls', sub: 'five birds and a slingshot', fowl: 
      - swinging: B again is a relay. Pressed within 3 frames of the moment the coal swings out past its mark, it hops to a new
        rope further on, keeping its speed (a little faster within 1 frame). Up to 3 relays. Pressed at any other moment it
        lets go, and the coal flies on with the speed it had. Left alone it lets go at the far end of its swing.
-     - landed: stays 6 seconds. Chomp picks it up by walking over it. B while it lies there: a rope runs from the coal to
+     - landed: stays 8 seconds. Chomp picks it up by walking over it. B while it lies there: a rope runs from the coal to
        Chomp, wherever he is, every frame, and an ant crawls from the coal along it toward him (from frame 10). The rope
-       snags an opponent who crosses it but never hurts; only the ant hits (7%, once a trip). An attack on the rope cuts it,
-       and on the ant destroys it; the coal stays where it lies. The ant arriving hands Chomp the coal back.
+       is in the way: an opponent cannot move through it (see ropeBlock), but it never hurts; only the ant hits (7%, once
+       a trip). A damaging attack on the rope cuts it (a grab or a push with no damage does not), and on the ant destroys it; the coal stays where it lies. The ant arriving
+       hands Chomp the coal back.
+     - flying off the stage (past the edge, or below the floor): B calls the ant too. The coal stops where it is, in the
+       air, for as long as the call and the ant's walk last. If the call is stopped or the rope is cut, it falls again.
    Its damage grows with its speed: 5% slow, up to 12% at full tilt after relays. */
-const COAL = { g: 0.11, mark: 0.55, win: 3, relays: 3, boost: 1.1, keep: 0.97, vmax: 3.4, arc: 70, ground: 360, cd: 50, antV: 1.15, antD: 7, burn: 3 };
+const COAL = { g: 0.11, mark: 0.55, win: 3, relays: 3, boost: 1.1, keep: 0.97, vmax: 3.4, arc: 70, ground: 480, cd: 50, antV: 1.15, antD: 7, burn: 3 };
 const chompCoal = f => PROJ.find(p => p.owner === f.idx && p.tag === 'coal' && p.life > 0);
 const chompAnt = f => PROJ.find(p => p.owner === f.idx && p.tag === 'ant' && p.life > 0);
 const chompMouth = f => [f.x + f.face * 3, f.y + 5];
@@ -1114,8 +1117,12 @@ function coalStep(p) {
     if (p.y < BLAST.b || Math.abs(p.x) > BLAST.r) p.life = 0;
     return;
   }
-  /* on the ground: Chomp picks it up by walking over it, unless his ant is carrying it */
   p.vx = p.vy = 0;
+  if (p.st === 'hang') {   /* stopped in the air off the stage while the ant is called and walks: it falls again if the call is stopped or the rope is cut */
+    if (!chompAnt(ow) && !(ow.state === 'attack' && ow.mname === 'nspec' && ow.ccAct === 'ant' && ow.mf <= 10)) { p.st = 'fly'; p.cool = Math.max(p.cool || 0, 5); }
+    return;
+  }
+  /* on the ground: Chomp picks it up by walking over it, unless his ant is carrying it */
   if (!chompAnt(ow) && p.age - p.landAge > 20 && Math.abs(ow.x - p.x) < 5 && Math.abs(ow.y - (p.y - p.r)) < 3) { p.picked = true; p.life = 0; spark(p.x, p.y, '#ffb13b', 6, 0.8); beep(700, 0.05, 'triangle', 0.04); }
 }
 function coalLetGo(p) { p.st = 'fly'; p.ax = p.ay = undefined; beep(300, 0.05, 'triangle', 0.03, 0.7); }
@@ -1144,8 +1151,8 @@ function antStep(p) {
   if (!ow || ow.state === 'dead' || !c || c.life <= 0 || !PROJ.includes(c)) { p.life = 0; return; }
   const [mx, my] = chompMouth(ow), x0 = c.x, y0 = c.y, L = Math.hypot(mx - x0, my - y0) || 1e-6;
   p.rope = [x0, y0, mx, my];
-  /* a rope through solid stage is cut */
-  for (const t of [0.25, 0.5, 0.75]) { const x = x0 + (mx - x0) * t, y = y0 + (my - y0) * t; if (y < -1 && Math.abs(x) < stageHalf(y)) { antCut(p, x, y); return; } }
+  /* a rope through solid stage is cut (not the rope to a coal stopped off the stage: that one always reaches) */
+  if (c.st !== 'hang') for (const t of [0.25, 0.5, 0.75]) { const x = x0 + (mx - x0) * t, y = y0 + (my - y0) * t; if (y < -1 && Math.abs(x) < stageHalf(y)) { antCut(p, x, y); return; } }
   p.s = Math.min(p.s + COAL.antV, L); const x = x0 + (mx - x0) * p.s / L, y = y0 + (my - y0) * p.s / L;
   p.vx = x - p.x; p.vy = y - p.y; p.x = x; p.y = y; p.face = sgn(mx - x0) || 1;
   if (L - p.s < 2.5) {   /* home: the coal comes back to Chomp */
@@ -1153,15 +1160,32 @@ function antStep(p) {
     return;
   }
   if (!v || v.state === 'dead') return;
-  /* the opponent's attacks cut the rope */
+  /* the opponent's damaging attacks cut the rope: a grab, or a push that does no damage, leaves it */
   if (v.state === 'attack' && v.move) for (const h of v.move.h) {
-    if (h.grab || v.mf < h.f0 || v.mf > h.f1 || (h.when && !h.when(v))) continue;
+    if (h.grab || !(h.d > 0) || v.mf < h.f0 || v.mf > h.f1 || (h.when && !h.when(v))) continue;
     const [d, t] = segDist(v.x + h.x * v.face, hitY(v, h), x0, y0, mx, my); if (d < h.r && t > 0.02 && t < 0.98) { antCut(p, x0 + (mx - x0) * t, y0 + (my - y0) * t); return; }
   }
-  /* crossing the rope: a gentle snag that slows the crosser, never a hit (no damage, no hitstun, no freeze, no launch) */
-  const bx = v.x, by = v.y + v.st.h / 2, side = sgn((mx - x0) * (by - y0) - (my - y0) * (bx - x0)), [d, t] = segDist(bx, by, x0, y0, mx, my);
-  if (p.side && side && side !== p.side && d < v.st.h / 2 + 1 && t > 0.03 && t < 0.97 && !(p.snagT > 0)) { v.vx *= 0.5; if (!v.grounded) v.vy *= 0.6; p.snagT = 15; p.snags = (p.snags || 0) + 1; }
-  if (p.snagT > 0) p.snagT--; if (side) p.side = side;
+  ropeBlock(p, v, x0, y0, mx, my);
+}
+/* The rope is in the way. The opponent's middle cannot pass through it by his own movement: walking, running, rolling,
+   jumping or falling into it stops him at the rope (in the air he slides along it). It is never a hit: no damage, no
+   hitstun, no freeze, no launch. A rope that swings across him as Chomp moves passes over him, and one lying along the
+   floor is stepped over. A launched opponent is stopped by it too. Someone held or on the ledge goes through. Only a damaging attack cuts it. */
+const ROPE_PASS = { dead: 1, held: 1, carry: 1, ledge: 1, buried: 1, down: 1 };
+function ropeBlock(p, v, x0, y0, x1, y1) {
+  const bx = v.x, by = v.y + v.st.h / 2, dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy) || 1e-6, nx = -dy / L, ny = dx / L;
+  const dist = (x, y) => (x - x0) * nx + (y - y0) * ny, [, t] = segDist(bx, by, x0, y0, x1, y1), was = p.vp; p.vp = [bx, by];
+  if (ROPE_PASS[v.state] || t <= 0.03 || t >= 0.97) return;
+  const cur = dist(bx, by), prev = was ? dist(was[0], was[1]) : cur, crossed = prev * cur < 0, side = sgn(crossed ? prev : cur) || 1;
+  const m = v.st.w / 2 * Math.abs(nx) + 0.5, push = m - cur * side;   /* how far inside the rope he is, from the side he came from */
+  if (push <= 0 || push > 9) return;
+  if (v.grounded) {   /* on the floor he is only moved along it */
+    if (Math.abs(nx) < 0.3) return;
+    v.x += push / (nx * side); if (v.vx * nx * side < 0) v.vx = 0;
+  } else {
+    v.x += nx * side * push; v.y += ny * side * push; const vn = (v.vx * nx + v.vy * ny) * side; if (vn < 0) { v.vx -= vn * side * nx; v.vy -= vn * side * ny; }
+  }
+  p.vp = [v.x, v.y + v.st.h / 2]; p.blocks = (p.blocks || 0) + 1;   /* frames it has held him back */
 }
 function antCut(p, x, y) { p.life = 0; p.cut = true; const ow = F[p.owner]; if (ow) ow.ropeCuts = (ow.ropeCuts || 0) + 1; spark(x, y, '#d8c49a', 10, 1); beep(240, 0.06, 'square', 0.04, 0.6); }
 /* the ant's rope and the coal's swing rope, for the renderers and the hitbox view: picture only */
@@ -1169,7 +1193,9 @@ function chompRopes() { const out = []; for (const p of PROJ) { if (p.tag === 'c
 function chompNspec(f, n, i) {
   if (n === 1) {
     const c = chompCoal(f), a = chompAnt(f);
-    f.ccAct = !c ? (frame < (f.coalReady || 0) ? 'none' : 'throw') : c.st === 'swing' ? 'relay' : c.st === 'ground' && !a ? 'ant' : 'none';
+    const off = c && c.st === 'fly' && (Math.abs(c.x) > EDGE || c.y < 0);   /* flying off the stage: past the edge, or below the floor */
+    f.ccAct = !c ? (frame < (f.coalReady || 0) ? 'none' : 'throw') : c.st === 'swing' ? 'relay' : (c.st === 'ground' || off) && !a ? 'ant' : 'none';
+    if (f.ccAct === 'ant' && off) { c.st = 'hang'; c.vx = c.vy = 0; c.h.d = 5; spark(c.x, c.y, '#ffd27a', 8, 0.9); beep(620, 0.05, 'triangle', 0.04); }   /* the coal stops where it is */
     if (f.ccAct === 'relay') { f.ccRelay = coalRelay(f, c); f.mf = f.move.t - 8; }   /* a quick flick of the head */
     else if (f.ccAct === 'none') f.mf = f.move.t - 6;
     if (!f.grounded) hang(f);
@@ -1183,29 +1209,47 @@ function chompNspec(f, n, i) {
   }
   if (f.ccAct === 'ant' && n === 10) {
     const c = chompCoal(f);
-    if (c && c.st === 'ground' && !chompAnt(f)) PROJ.push({ x: c.x, y: c.y, vx: 0, vy: 0, grav: 0, life: 9999, owner: f.idx, face: f.face, r: 2.2, ground: 'pass', plat: null, kind: 'ant', tag: 'ant',
+    if (c && (c.st === 'ground' || c.st === 'hang') && !chompAnt(f)) PROJ.push({ x: c.x, y: c.y, vx: 0, vy: 0, grav: 0, life: 9999, owner: f.idx, face: f.face, r: 2.2, ground: 'pass', plat: null, kind: 'ant', tag: 'ant',
       coal: c, s: 0, hits: 99, rehit: 9999, h: { d: COAL.antD, a: 55, b: 40, k: 50, id: 'Chomp Chomp:ant' }, step: antStep });
     f.mf = Math.max(f.mf, f.move.t - 8);
   }
 }
 function coalGone(p) { if (!p.picked) { const ow = F[p.owner]; if (ow) ow.coalReady = frame + COAL.cd; } }
-/* Side B, Rope Swing: a rope to a hook above and ahead on frame 11 (once per time in the air), then a pendulum swing. Push
-   the stick to pump it. Let go of special to release along the swing with the mouth open: 9% clean, 6% after. A swing ends
-   by itself after 80 frames, or on landing. The rope never hits. */
+/* Side B, Rope Swing: a rope to a hook above and ahead on frame 11 (once per time in the air), then a pendulum swing.
+   Out of a move of his that has just hit (not one that was shielded), side special cuts that move short and the rope hooks
+   on frame 3 instead: the swing as a combo extension (ropeOut on the form; see the attack state). Push
+   the stick to pump it. From the ground the rope pulls in a little as it takes his weight, so the swing clears the floor.
+   While swinging: special again throws a new rope to a hook further on and he swings on from that one, keeping his speed
+   (up to ROPE.max ropes in one go); attack lets go along the swing with the mouth open: 9% clean, 6% after; jump hops off
+   the rope with no bite, keeping the swing's speed (a short hop's lift; his air jump is kept). Attack and jump work from the
+   second frame on the rope, so he can leave early. A rope left alone for 80 frames ends in the bite too. Landing ends the
+   swing. The rope never hits. */
+const ROPE = { max: 4, gap: 8, off: 1 };   /* ropes in one go; frames on a rope before the next rope; frames on a rope before attack or jump can leave it */
 function chompSwing(f, n, i) {
   const s = f.st, by = () => f.y + s.h / 2;
-  if (n === 1) { f.rsGo = false; if (!f.grounded) { if (f.airUse.rope) { f.mf = f.move.t; return; } f.airUse.rope = 1; } }
-  if (n < 11) { hang(f); return; }
-  if (n === 11) {
+  if (n === 1) { f.rsGo = false; f.rsN = 0; f.rsHook = f.rsQuick !== undefined && frame - f.rsQuick <= 3 ? 3 : 11; f.rsQuick = undefined; if (!f.grounded) { if (f.airUse.rope) { f.mf = f.move.t; return; } f.airUse.rope = 1; } }
+  const hook = f.rsHook || 11;
+  if (!f.rsGo && n < hook) { hang(f); return; }
+  if (n === hook && !f.rsGo) {
     f.rsAx = f.x + f.face * 12; f.rsAy = by() + 22; const dx = f.x - f.rsAx, dy = by() - f.rsAy;
-    f.rsL = Math.hypot(dx, dy); f.rsTh = Math.atan2(dx, -dy); f.rsW = f.face * 0.05 + (f.vx * Math.cos(f.rsTh)) / f.rsL; f.rsGo = true; f.grounded = false; f.plat = null;
+    f.rsL = Math.hypot(dx, dy); f.rsTh = Math.atan2(dx, -dy); f.rsW = f.face * 0.05 + (f.vx * Math.cos(f.rsTh)) / f.rsL; f.rsGo = true; f.rsN = 1; f.rsT = 0;
+    f.rsReel = f.grounded ? f.rsL - 19 : 0; f.airUse.rope = 1; f.grounded = false; f.plat = null;
     beep(500, 0.05, 'triangle', 0.04, 1.4);
   }
   if (!f.rsGo) return;
+  f.rsT++;
+  if (f.rsReel > 0) { const k = Math.min(1.5, f.rsReel); f.rsL -= k; f.rsReel -= k; }
+  const c = f.ctl, again = c && c.pressed('spc') && f.rsT > ROPE.gap, bite = c && c.pressed('atk') && f.rsT > ROPE.off, hop = c && !bite && c.pressed('jmp') && f.rsT > ROPE.off;
+  if (again && !bite && !hop && f.rsN < ROPE.max) {   /* the next rope: hooked ahead at the same height as the last, so he starts behind it and swings on through */
+    const sp = Math.max(Math.abs(f.rsW) * f.rsL, 1.3), th = -f.face * Math.acos(clamp((f.rsAy - by()) / f.rsL, -1, 1));
+    f.rsAx = f.x - f.rsL * Math.sin(th); f.rsTh = th; f.rsW = f.face * sp / f.rsL; f.rsN++; f.rsT = 0; f.mf = 12;
+    spark(f.rsAx, f.rsAy, '#ffd27a', 6, 0.9); beep(500 + f.rsN * 60, 0.05, 'triangle', 0.04, 1.4);
+  }
   f.rsW += -(0.11 / f.rsL) * Math.sin(f.rsTh) + clamp(i.lx * f.face, -1, 1) * 0.0012 * f.face; f.rsW = clamp(f.rsW, -0.14, 0.14); f.rsTh += f.rsW;
   const x = f.rsAx + f.rsL * Math.sin(f.rsTh), y = f.rsAy - f.rsL * Math.cos(f.rsTh) - s.h / 2;
   f.vx = x - f.x; f.vy = y - f.y;
-  if ((n > 16 && !i.spc) || n >= 91) { f.rsGo = false; f.startMove('swingBite'); f.vx = clamp(f.vx, -3, 3); f.vy = clamp(f.vy, -2.5, 3); }   /* let go: fly on along the swing, mouth first */
+  if (hop) { c.take('jmp'); f.rsGo = false; f.vx = clamp(f.vx, -3, 3); f.vy = Math.max(clamp(f.vy, -2.5, 3), s.vHop); f.move = null; f.set('air'); spark(f.x, by(), '#ffd27a', 6, 0.8); beep(560, 0.05, 'triangle', 0.04, 1.3); return; }   /* jumps off the rope: no bite */
+  if (bite || f.mf >= 91) { f.rsGo = false; f.startMove('swingBite'); f.vx = clamp(f.vx, -3, 3); f.vy = clamp(f.vy, -2.5, 3); }   /* let go: fly on along the swing, mouth first */
 }
 /* Up B, Bubble Ride: a bubble forms on frame 8 and carries him up for up to 55 frames, steering gently. Up B again pops it
    (4% round him) with a small push the way the stick points; it pops by itself at the end. Falls helpless after. */
@@ -1230,7 +1274,7 @@ function chompCushion(f, n) {
 }
 const CHOMP = {
   name: 'Chomp Chomp', sub: 'the hungry critter', forms: [{
-    name: 'Chomp Chomp', col: ['#2a5fd6', '#5fc23a', '#ffb13b'], alt: ['#8a3fd0', '#ffcf3a', '#ff6a3c'], reachMul: 1.0,
+    name: 'Chomp Chomp', ropeOut: 1, col: ['#2a5fd6', '#5fc23a', '#ffb13b'], alt: ['#8a3fd0', '#ffcf3a', '#ff6a3c'], reachMul: 1.0,
     /* the design's targets against an average fighter (Flint): weight 94, walk 108, dash 115, run 110, air speed average,
        gravity and fall a little low, jump squat 4, a high full hop. Squat and round. */
     st: { weight: 94, walk: 1.21, walkMul: 0.15, walkAdd: 0.1, trac: 0.11, dash: 2.2, runMul: 0.12, runAdd: 0.045, run: 1.91,
@@ -1507,7 +1551,7 @@ const JOEY = (() => {
       cd: { d: 11, a: 46, b: 70, k: 45, f: 17, t: 44, at: over } } }),
   };
   delete big.moves.jab3;   /* two jabs only */
-  return { name: 'Joey', sub: 'fairly jacked guy', transform: 1, forms: [human, big] };
+  return { name: 'Joey', sub: 'just a regular guy', transform: 1, forms: [human, big] };
 })();
 
 const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE, FOWLS, CHOMP, BRAND, JOEY];
@@ -1877,6 +1921,11 @@ class Fighter {
            With a turnaround special first (back held as special is pressed) it becomes a wavebounce. Once per special; not for up specials. */
         if (this.bRev > 0) { this.bRev--; if (Math.abs(i.lx) > 0.5 && Math.abs(i.lx) >= Math.abs(i.ly) && sgn(i.lx) === -this.face) { this.bRev = 0; this.face = -this.face; if (!this.grounded && this.bRevV) this.vx = -this.vx; brevPuff(this.x, this.y + this.st.h * 0.45); } }
         if (m.on) m.on(this, this.mf, i);
+        /* Chomp Chomp: out of a move that has hit (and was not shielded), side special cuts it short into a Rope Swing that hooks on frame 3 */
+        if (this.form.ropeOut && this.state === 'attack' && this.move === m && this.hitG.size && !blocked(this) && this.mname !== 'sspec' && this.mname !== 'swingBite' && !(m.h[0] && m.h[0].grab)
+          && c.buf.spc > 0 && Math.abs(i.lx) > 0.5 && Math.abs(i.lx) >= Math.abs(i.ly) && (this.grounded || !this.airUse.rope)) {
+          c.buf.spc = 0; this.face = sgn(i.lx); this.startMove('sspec'); this.rsQuick = frame; break;
+        }
         if (this.state === 'attack' && this.move === m && m.cancel && this.mf >= m.cancel) {   /* cut short into any action, keeping the speed */
           if (this.grounded) { if (this.groundActs(false)) break; }
           else { const j = this.jumps; if (this.airActs()) break; if (this.jumps < j) { this.endMove(); break; } }

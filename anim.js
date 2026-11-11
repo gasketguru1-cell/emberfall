@@ -104,7 +104,7 @@ function animAlt(f, a) {
           if (f.ccAct === 'none') return { key: 'coalNone', mode: 'phase', v: phase(f.mf - (m.t - 6), 6) };
           return { key: 'coalToss', mode: 'phase', v: phase(f.mf, m.t) };
         }
-        if (f.mname === 'sspec') return f.rsGo ? { key: 'ropeSwing', mode: 'loop', v: t } : { key: 'ropeToss', mode: 'phase', v: phase(f.mf, 11) };   /* hooks the rope on frame 11, then hangs from it */
+        if (f.mname === 'sspec') return f.rsGo ? { key: 'ropeSwing', mode: 'loop', v: t } : { key: 'ropeToss', mode: 'phase', v: phase(f.mf, f.rsHook || 11) };   /* hooks the rope on frame 11, then hangs from it */
         if (f.mname === 'uspec') return f.bubble ? { key: 'bubbleRide', mode: 'loop', v: t } : { key: 'bubbleBlow', mode: 'phase', v: phase(f.mf, 8) };   /* the bubble forms on frame 8 */
       }
       if (f.form && f.form.cargo && f.mname === 'nspec') return { key: 'punchWind', mode: 'loop', v: t };   /* Cronky Dong winding up The Entire Gym */

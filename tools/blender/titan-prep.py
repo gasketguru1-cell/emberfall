@@ -2,7 +2,7 @@
 # (the floor cracks round the fists), reduces the faces, stands it on the floor at the origin, facing +Z in glTF.
 # Optionally replaces the legs below a height with stick-figure legs (thin dark ink strokes): the human form.
 #   blender -b <sculpt.blend> --python tools/blender/titan-prep.py -- --out out.glb [--faces 60000]
-#       [--stick legs.json]   legs.json: {"cut": y, "keep_x": half width kept, "r": radius, "legs": [[hip, knee, ankle, toe] x2]}
+#       [--lift m] [--stick legs.json]   legs.json: {"cut": y, "keep_x": half width kept, "r": radius, "legs": [[hip, knee, ankle, toe] x2]}
 #   Points in legs.json are model coordinates after standing it up: metres, y up, +z forward, x his left.
 import bpy, bmesh, sys, json, math
 from mathutils import Vector
@@ -74,6 +74,8 @@ vs = ob.data.vertices; lo = Vector([min(v.co[i] for v in vs) for i in range(3)])
 off = Vector((-(lo.x + hi.x) / 2, -(lo.y + hi.y) / 2, -lo.z))
 ob.data.transform(__import__('mathutils').Matrix.Translation(off)); ob.data.update()
 print('prep: size %.3f wide, %.3f deep, %.3f tall' % (hi.x - lo.x, hi.y - lo.y, hi.z - lo.z))
+if opt.get('lift'):   # a sculpt that ends at the shorts: raise it so the stick legs can stand under it
+    ob.data.transform(__import__('mathutils').Matrix.Translation(Vector((0, 0, float(opt['lift']))))); ob.data.update(); print('prep: lifted %s m' % opt['lift'])
 conv = lambda p: Vector((p[0], -p[2], p[1]))   # model (y up, +z forward) -> Blender
 # ---- stick legs ----
 if opt.get('stick'):
