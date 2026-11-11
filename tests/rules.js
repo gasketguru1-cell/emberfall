@@ -264,6 +264,15 @@ vm.runInThisContext(`
     check('right stick down while falling: a fast-falling down air', dn.ff && dn.mv === 'dair' && dn.glint === 4, dn.mv + ', fast fall ' + dn.ff + ', glint sparks ' + dn.glint);
     check('right stick down in the middle of an aerial: fast fall, same aerial', mid.ff && mid.mv === 'nair', mid.mv + ', fast fall ' + mid.ff);
     check('right stick sideways: no fast fall', !side.ff && side.mv === 'fair', side.mv + ', fast fall ' + side.ff);
+    /* B-reverse: special pressed while drifting right, stick pulled left a frame or two later: turned round, drift reversed. Too late, or an up special: nothing. */
+    const brev = (late, up, wave) => { const [f] = setup(FL, FL, 0, 60); f.ctl.cFall = true; airborne(f, 0, 40); f.face = 1; f.vx = 1; f.vy = 0.5; let face0 = 0, vx0 = 0, puff = 0;
+      SCRIPT[0] = (i, tt) => { if (tt === 1) { i.spc = true; if (up) i.ly = 1; if (wave) i.lx = -1; } if (tt >= 1 + late && tt < 1 + late + 3) { i.lx = wave ? 1 : -1; i.ly = 0; } };
+      run(late + 6, (tt) => { puff = Math.max(puff, PART.filter(p => p.col === '#a8e0ff').length); }); return { face: f.face, vx: +f.vx.toFixed(2), mv: f.mname, puff }; };
+    const rv = brev(2), late = brev(9), up = brev(2, true), wave = brev(2, false, true);
+    check('B-reverse: stick back just after special turns round and reverses the drift', rv.face === -1 && rv.vx < 0 && rv.mv === 'nspec' && rv.puff === 6, 'face ' + rv.face + ', vx ' + rv.vx + ', ' + rv.mv + ', swirl ' + rv.puff);
+    check('B-reverse after a turnaround special: a wavebounce (facing forward, drifting back)', wave.face === 1 && wave.vx < 0 && wave.puff === 6, 'face ' + wave.face + ', vx ' + wave.vx);
+    check('B-reverse: too late does nothing', late.face === 1, 'face ' + late.face);
+    check('B-reverse: not for up specials', up.face === 1 || up.mv !== 'uspec', up.mv + ', face ' + up.face);
     check('jump: tap for a short hop, hold for a full one', short.top > 8 && short.top < full.top * 0.6, 'heights ' + short.top + ' and ' + full.top);
     check('jump + attack together: a short-hop aerial', macro.sh === 'nair (short-hop, weaker) in the air', String(macro.sh));
   }

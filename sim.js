@@ -334,6 +334,12 @@ function ffSpark(x, y) {
   for (let k = 0; k < 4; k++) { const a = k * TAU / 4; PART.push({ x, y, vx: Math.cos(a) * 1.5, vy: Math.sin(a) * 1.5, life: 12, col: '#fff3b0', r: 0.55 }); }
   PART.push({ x, y, vx: 0, vy: 0, life: 10, col: '#ffffff', r: 1.3 }); beep(1700, 0.035, 'sine', 0.012, 1.4);
 }
+/* B-reverse: how many frames after a special starts the stick can still turn it round, and the little swirl when it does. */
+const B_REV = 5;
+function brevPuff(x, y) {
+  for (let k = 0; k < 6; k++) { const a = k * TAU / 6; PART.push({ x: x + Math.cos(a) * 2, y: y + Math.sin(a) * 2, vx: -Math.sin(a) * 1.2, vy: Math.cos(a) * 1.2, life: 11, col: '#a8e0ff', r: 0.5 }); }
+  beep(1250, 0.04, 'triangle', 0.012, 0.8);
+}
 function pop(x, y, text, col) { POPS.push({ x, y, text, col, life: 50 }); }
 
 /* ---------- Moves ---------- */
@@ -1597,7 +1603,7 @@ class Fighter {
   startMove(n) {
     const m = this.form.moves[n]; if (this.def.transform) this.effort(FAT.move[n]); this.move = m; this.mname = n; this.mf = 0; this.charge = 0; this.chargeT = 0; this.aim = 0;
     this.stallOk = !!m.stall && !this.grounded && !this.stalled; if (this.stallOk) this.stalled = true;
-    this.armorLeft = m.armorHits || 99; this.castHit = false;   /* a move that hangs in the air does so once per time off the ground */
+    this.armorLeft = m.armorHits || 99; this.castHit = false; this.bRev = 0;   /* a move that hangs in the air does so once per time off the ground */
     this.selOpen = false;   /* a bird wheel left open by an interrupted Neutral B never outlives it */
     if (!m.rapid) this.rapidN = 0; this.hitG = new Set(); this.parriedBy = null; this.staled = false; this.moveSH = !!(m.air && this.shortHop); this.set('attack');
     if (m.once && !this.grounded) this.sideUsed = true;
@@ -1622,11 +1628,12 @@ class Fighter {
     if (Math.abs(i.lx) > 0.5 && Math.abs(i.lx) >= Math.abs(i.ly)) { this.face = sgn(i.lx); n = (!this.grounded && this.sideUsed) ? 'nspec' : 'sspec'; }
     else if (i.ly > 0.5) n = 'uspec'; else if (i.ly < -0.5) n = 'dspec';
     /* Turnaround special: holding back turns the fighter round first; in the air a neutral special also reverses its drift. */
-    let mv = this.form.moves[n]; if (mv.pick) { n = mv.pick(this) || n; mv = this.form.moves[n]; }   /* a special with a ground and an air form, or a stored charge */
+    const dir = n; let turned = false, mv = this.form.moves[n]; if (mv.pick) { n = mv.pick(this) || n; mv = this.form.moves[n]; }   /* a special with a ground and an air form, or a stored charge */
     if (!this.grounded && ((mv.burst && this.burstUsed) || (mv.blast && this.blastUsed))) return;
     if (mv.swap && this.swapLock > 0) return;   /* too soon after the last swap */   /* spent until it lands */
-    if (n !== 'sspec' && Math.abs(i.lx) > 0.35 && sgn(i.lx) !== this.face) { this.face = sgn(i.lx); if (n === 'nspec' && !this.grounded) this.vx = -this.vx * 0.9; }
-    this.startMove(n);
+    if (n !== 'sspec' && Math.abs(i.lx) > 0.35 && sgn(i.lx) !== this.face) { this.face = sgn(i.lx); if (n === 'nspec' && !this.grounded) { this.vx = -this.vx * 0.9; turned = true; } }
+    this.startMove(n); this.bRevV = !turned;   /* the drift already turned round with the fighter: a B-reverse after it only turns them back (a wavebounce) */
+    if (dir !== 'uspec' && !mv.swap && this.ctl.cFall) this.bRev = B_REV;   /* people only (cFall, as for the right-stick fast fall), so seeded CPU matches play out as before */
   }
   aerial(x, y) { if (Math.abs(y) > 0.5 && Math.abs(y) >= Math.abs(x)) return y > 0 ? 'uair' : 'dair'; if (Math.abs(x) > 0.3) return sgn(x) === this.face ? 'fair' : 'bair'; return 'nair'; }
   groundAttack(moving) {
@@ -1857,6 +1864,9 @@ class Fighter {
         /* A smash is charged by keeping attack held: its power grows for a second, and it can be held back for two more. */
         if (m.chg && this.mf === m.chg && this.chargeT < (m.chgHold || SMASH_HOLD) && i.atk) { this.chargeT++; if (this.charge < 60) this.charge++; } else this.mf++;
         if (m.inv && this.mf === m.inv[0]) this.invuln = Math.max(this.invuln, m.inv[1] - m.inv[0]);   /* some moves cannot be hit for a few frames */
+        /* B-reverse: in a special's first few frames, pull the stick the other way to turn round; in the air the drift turns round too.
+           With a turnaround special first (back held as special is pressed) it becomes a wavebounce. Once per special; not for up specials. */
+        if (this.bRev > 0) { this.bRev--; if (Math.abs(i.lx) > 0.5 && Math.abs(i.lx) >= Math.abs(i.ly) && sgn(i.lx) === -this.face) { this.bRev = 0; this.face = -this.face; if (!this.grounded && this.bRevV) this.vx = -this.vx; brevPuff(this.x, this.y + this.st.h * 0.45); } }
         if (m.on) m.on(this, this.mf, i);
         if (this.state === 'attack' && this.move === m && m.cancel && this.mf >= m.cancel) {   /* cut short into any action, keeping the speed */
           if (this.grounded) { if (this.groundActs(false)) break; }
