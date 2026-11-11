@@ -1,6 +1,8 @@
 # Builds a custom skeleton for a generated mesh, weights the mesh to it, adds keyed animation clips, and writes a GLB.
 # Run headless:
-#   blender -b --factory-startup --python tools/blender/rig.py -- --mesh in.glb --spec spec.json --out out.glb
+#   blender -b --factory-startup --python tools/blender/rig.py -- --mesh in.glb --spec spec.json --out out.glb [--start 0]
+#   --start 0 makes a key at t seconds play at exactly t in the game (the default, 1, exports every key one frame late; the
+#   models built before 2026-11-10's animation overhaul use it, and their markers allow for it)
 #
 # The spec is written in the model's own coordinates (metres, Y up, the character faces +Z):
 #   "prep":  { "yaw": degrees, "translate": [x,y,z] }   turn and move the mesh first (applied in that order), so it stands at the origin facing +Z
@@ -107,13 +109,38 @@ def delta(rot):
     p, y, r = (math.radians(a) for a in rot)
     return (Quaternion(UP, y) @ Quaternion(RIGHT, p) @ Quaternion(FWD, r)).to_matrix()
 
+# "scale": [x, y, z] in a pose is squash and stretch along the model's axes (1 = rest). A bone's own axes rarely line up with the
+# model's exactly, so each of its axes takes the model scale it lies closest to (weighted by how much it lies along each).
+def bone_scale(R, s):
+    S = conv(s); S = Vector((abs(S[0]), abs(S[1]), abs(S[2])))
+    out = []
+    for i in range(3):
+        ax = R.col[i]; w = Vector((abs(ax[0]), abs(ax[1]), abs(ax[2]))); t = w[0] + w[1] + w[2]
+        out.append((w[0] * S[0] + w[1] * S[1] + w[2] * S[2]) / t if t > 1e-6 else 1)
+    return Vector(out)
+
+# "in" on a key says how the motion arrives there: "back" overshoots and settles (follow-through), "snap" leaves the last key
+# slowly and arrives fast (a strike), "out" leaves fast and eases in (a recoil), "hold" jumps (no in-between), "elastic" wobbles
+# in. Without it Blender's smooth ease in and out is used.
+EASE = {'back': ('BACK', 'EASE_OUT'), 'snap': ('EXPO', 'EASE_IN'), 'out': ('EXPO', 'EASE_OUT'), 'hold': ('CONSTANT', 'AUTO'), 'elastic': ('ELASTIC', 'EASE_OUT'), 'lin': ('LINEAR', 'AUTO'), 'quad': ('QUAD', 'EASE_OUT')}
+def fcurves_of(act):
+    try:
+        fc = list(act.fcurves)
+        if fc: return fc
+    except Exception: pass
+    out = []
+    for layer in getattr(act, 'layers', []):
+        for strip in layer.strips:
+            for bag in getattr(strip, 'channelbags', []): out.extend(bag.fcurves)
+    return out
+
 rest = {b.name: b.matrix_local.to_3x3() for b in arm.bones}
 ad = rig.animation_data_create(); scene = bpy.context.scene; last = 1
 for name, clip in spec.get('clips', {}).items():
     fps = clip.get('fps', 30); scene.render.fps = fps
     act = bpy.data.actions.new(name); ad.action = act
-    for pb in rig.pose.bones: pb.rotation_mode = 'QUATERNION'; pb.rotation_quaternion = Quaternion(); pb.location = Vector()
-    state = {}; lastq = {}
+    for pb in rig.pose.bones: pb.rotation_mode = 'QUATERNION'; pb.rotation_quaternion = Quaternion(); pb.location = Vector(); pb.scale = Vector((1, 1, 1))
+    state = {}; lastq = {}; eases = []; prevf = None
     for key in clip['keys']:
         f = round(key['t'] * fps) + 1; last = max(last, f)
         if key.get('reset'): state = {b: {} for b in state}
@@ -126,12 +153,25 @@ for name, clip in spec.get('clips', {}).items():
             if bname in lastq and lastq[bname].dot(q) < 0: q.negate()   # keep to the near side of the last key, so a turn goes the short way round
             lastq[bname] = q.copy(); pb.rotation_quaternion = q
             pb.location = R.inverted() @ conv(tr.get('move', [0, 0, 0]))
-            pb.keyframe_insert('rotation_quaternion', frame=f); pb.keyframe_insert('location', frame=f)
-    track = ad.nla_tracks.new(); track.name = name; track.strips.new(name, 1, act); ad.action = None
-    print('rig: clip %s, %d keys' % (name, len(clip['keys'])))
-for pb in rig.pose.bones: pb.rotation_quaternion = Quaternion(); pb.location = Vector()
+            pb.scale = bone_scale(R, tr.get('scale', [1, 1, 1]))
+            pb.keyframe_insert('rotation_quaternion', frame=f); pb.keyframe_insert('location', frame=f); pb.keyframe_insert('scale', frame=f)
+        if key.get('in') and prevf is not None: eases.append((prevf, key['in']))
+        prevf = f
+    fcs = fcurves_of(act)
+    for fr, kind in eases:
+        ip, ez = EASE[kind]
+        for fc in fcs:
+            for kp in fc.keyframe_points:
+                if abs(kp.co[0] - fr) < 0.5: kp.interpolation = ip; kp.easing = ez
+                if ip == 'BACK' and abs(kp.co[0] - fr) < 0.5: kp.back = 1.4
+    track = ad.nla_tracks.new(); track.name = name; track.strips.new(name, int(opt.get('start', 1)), act); ad.action = None
+    print('rig: clip %s, %d keys%s' % (name, len(clip['keys']), (', %d eased' % len(eases)) if eases else ''))
+for pb in rig.pose.bones: pb.rotation_quaternion = Quaternion(); pb.location = Vector(); pb.scale = Vector((1, 1, 1))
 scene.frame_start = 1; scene.frame_end = last
 
+if opt.get('blend'):   # also keep the rigged, animated scene as a .blend, for opening and editing in Blender
+    bpy.ops.wm.save_as_mainfile(filepath=opt['blend'])
+    print('rig: saved ' + opt['blend'])
 bpy.ops.export_scene.gltf(filepath=opt['out'], export_format='GLB', export_animations=True, export_animation_mode='NLA_TRACKS',
                           export_skins=True, export_yup=True, export_frame_range=False, export_force_sampling=True, export_def_bones=True)
 print('rig: wrote ' + opt['out'])

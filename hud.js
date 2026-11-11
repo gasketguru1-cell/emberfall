@@ -17,7 +17,8 @@ function drawHud() {
   if (typeof slowT !== 'undefined' && slowT > 0) { const k = Math.min(1, slowT / 10); g.fillStyle = 'rgba(0,0,0,' + (0.82 * k).toFixed(2) + ')'; g.fillRect(0, 0, W, 64 * k); g.fillRect(0, H - 64 * k, W, 64 * k); }
   g.textAlign = 'center';
   if (mode === 'countdown') { const n = countdown > 130 ? '3' : countdown > 90 ? '2' : countdown > 50 ? '1' : 'GO!'; big(n, H * 0.42, 110); }
-  if (paused) { g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(0, 0, W, H); big('PAUSED', H * 0.42, 80); g.font = 'bold 20px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Start: resume          Special: exit to fighter select          − or Backspace: controls', W / 2, H * 0.42 + 54); }
+  if (paused && typeof drawPauseMenu === 'function') { if (!ML.open) drawPauseMenu(); }   /* movelist.js: Resume, Move List, Exit */
+  else if (paused) { g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(0, 0, W, H); big('PAUSED', H * 0.42, 80); g.font = 'bold 20px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Start: resume          Special: exit to fighter select          − or Backspace: controls', W / 2, H * 0.42 + 54); }
   drawCMenu();
   if (mode === 'over') { big(overT < 90 ? 'GAME!' : result, H * 0.42, 100); if (overT > 100) { g.font = '22px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Press Start or Attack', W / 2, H * 0.42 + 56); drawUpdateNote(H * 0.42 + 80); } }
 }
@@ -34,6 +35,7 @@ function drawUpdateNote(y) {
 const TITLE_ART = typeof Image !== 'undefined' ? new Image() : null; if (TITLE_ART) TITLE_ART.src = 'assets/stage/source/concept.webp';
 const TIPS = [
   'Smash: flick the stick with attack, or press attack + special together. Keep attack held to charge it.',
+  'Choose the CPU’s fighter: point at its token, press A to pick it up, and A again on a fighter to put it down.',
   'After a grab, push either stick to throw. Keep the stick still if you want to pummel first.',
   'Wren swaps companions with down + special: Nib is quick, Loom floats, Hod hits hard.',
   'Jump, then shield with a direction just as you leave the ground, to wavedash.',
@@ -52,7 +54,7 @@ const TIPS = [
   'Flint’s down special and Wren’s swap hang in the air once each time you leave the ground.',
   'Back + attack out of a run turns and strikes. Jump on a head to spring off it.',
   'Above 100%, getting up from the ledge is slower and less protected.',
-  'Keyboard tools: B hitboxes · P freeze · O step one frame · M switch 2D / 3D.',
+  'Keyboard tools: B hitboxes · G attack arcs · P freeze · O step one frame · M switch 2D / 3D.',
 ];
 function spaced(px) { if ('letterSpacing' in g) g.letterSpacing = px + 'px'; }
 /* A key cap with its action after it; returns the x where the next one starts. */
@@ -214,6 +216,15 @@ function drawSelect(three) {
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Hit sparks', x + 12, y + 22);
     g.fillStyle = on ? '#ffd166' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
     g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('Shield  or  H key', x + 128, y + 22); }
+  { const on = DBG.arcs, w = 214, x = W - 44 - w, y = 140;   /* attack arcs switch: the circles and sweeps over an attack while it can hit */
+    g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = on ? '#8fd3ff' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
+    g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Attack arcs', x + 12, y + 22);
+    g.fillStyle = on ? '#8fd3ff' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
+    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point + A  or  G key', x + 128, y + 22); }
+  if (DESKTOP()) for (const [box, label, hint, col, hot] of [[ONLINE_PILL, 'Online', 'point + A: host or join', '#ffb35c', false], [QUIT_PILL, QUIT_ASK > 0 ? 'Quit?' : 'Quit', QUIT_ASK > 0 ? 'press A again to quit' : 'point + A, twice', '#ff6a6a', QUIT_ASK > 0]]) {   /* desktop app: reachable with a controller's cursor */
+    const [x, y, w] = box; g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = hot ? col : 'rgba(255,255,255,.16)'; g.lineWidth = hot ? 2 : 1; g.stroke();
+    g.textAlign = 'left'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = col; g.fillText(label, x + 12, y + 22);
+    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(hint, x + 80, y + 22); }
   /* ---- each player's cursor: a round token with a pointer at its top left, where it points ---- */
   for (let k = 0; k < 2; k++) { const sl = slots[k]; if (!sl || sl.cx === undefined) continue; const x = sl.cx, y = sl.cy, pc = PC[k];
     g.save(); g.shadowColor = 'rgba(0,0,0,.55)'; g.shadowBlur = 8; g.shadowOffsetY = 2;
@@ -222,7 +233,7 @@ function drawSelect(three) {
     g.strokeStyle = '#fff'; g.lineWidth = 2.5; g.beginPath(); g.arc(x + 24, y + 24, 16, 0, TAU); g.stroke();
     g.textAlign = 'center'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = '#16121f'; g.fillText('P' + (k + 1), x + 24, y + 29); }
   /* ---- the CPU's token, while the second slot is the CPU: drag it with the mouse onto a fighter ---- */
-  if (!slots[1]) { const x = CPU_TOK.x, y = CPU_TOK.y, lift = CPU_TOK.drag ? 4 : 0, hov = CPU_TOK.drag || (MOUSE && cpuTokOn(MOUSE.x, MOUSE.y));
+  if (!slots[1]) { const x = CPU_TOK.x, y = CPU_TOK.y, lift = CPU_TOK.drag ? 4 : 0, hov = CPU_TOK.drag || (MOUSE && cpuTokOn(MOUSE.x, MOUSE.y)) || slots.some(q => q && q.cx !== undefined && cpuTokOn(q.cx, q.cy));
     if (CPU_PICK >= 0 && !CPU_TOK.drag) { const b = rosterTile(CPU_PICK); g.strokeStyle = '#c9c3dc'; g.lineWidth = 3; g.setLineDash([6, 5]); rr(b[0] - 2, b[1] - 2, b[2] + 4, b[3] + 4, 12); g.stroke(); g.setLineDash([]); }
     g.save(); g.shadowColor = 'rgba(0,0,0,.6)'; g.shadowBlur = 10 + lift * 2; g.shadowOffsetY = 2 + lift;
     g.fillStyle = '#c9c3dc'; g.beginPath(); g.moveTo(x, y - lift); g.lineTo(x + 20, y + 7 - lift); g.lineTo(x + 7, y + 20 - lift); g.closePath(); g.fill();
@@ -249,7 +260,9 @@ function drawCombo() {
 }
 function drawFowlWheel() {
   if (mode !== 'play' && mode !== 'countdown') return;
-  for (const f of F) { if (!f.selOpen || !f.def.fowl) continue; const cx = SX(f.x), cy = SY(f.y + 12), R = 92, r0 = 34;
+  for (const f of F) { if (!f.selOpen || !f.def.fowl || f.state !== 'attack' || !f.move || !f.move.sel) continue;   /* only while the selector itself is running */ const R = 92, r0 = 34;
+    /* above the slingshot rather than over it, so the fighter stays in view, and kept on screen near the edges */
+    const cx = clamp(SX(f.x), R + 8, W - R - 8), cy = clamp(SY(f.y + f.st.h) - R - 10, R + 8, H - R - 8);
     g.save(); g.globalAlpha = 0.95; for (let k = 0; k < 5; k++) { const a0 = -Math.PI / 2 + (k - 0.5) * Math.PI * 2 / 5 + 0.04, a1 = a0 + Math.PI * 2 / 5 - 0.08, fm = f.def.forms[k], on = k === f.selPick;
       g.beginPath(); g.arc(cx, cy, R, a0, a1); g.arc(cx, cy, r0, a1, a0, true); g.closePath(); g.fillStyle = on ? fm.col[0] : 'rgba(18,14,30,.82)'; g.fill(); g.strokeStyle = on ? '#fff' : fm.col[0]; g.lineWidth = on ? 3 : 1.5; g.stroke();
       const am = (a0 + a1) / 2, tx = cx + Math.cos(am) * (R + r0) / 2, ty = cy + Math.sin(am) * (R + r0) / 2; g.textAlign = 'center'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(fm.label || fm.name, tx, ty);

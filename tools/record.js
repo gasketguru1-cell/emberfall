@@ -27,6 +27,7 @@
     return cat([header, el(0x18538067, cat([info, tracks].concat(clusters)))]);
   }
   /* ---- record one route ---- */
+  REC.webm = webm;   /* the WebM writer, for other recorders (tools/anim-clips.js) */
   REC.clip = async function (name, dir, route, sit) {
     DBG.boxes = false;   /* hitboxes hidden; the page's own loop cannot run while this works, as it never yields */
     const W2 = 1280, H2 = 720, comp = document.createElement('canvas'); comp.width = W2; comp.height = H2; const cg = comp.getContext('2d');

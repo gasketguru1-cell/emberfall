@@ -1,0 +1,578 @@
+{
+ "jumpsquat": [
+  {
+   "fighter": "Flint",
+   "airborneFrame": 4
+  },
+  {
+   "fighter": "Nib",
+   "airborneFrame": 4
+  },
+  {
+   "fighter": "Loom",
+   "airborneFrame": 4
+  },
+  {
+   "fighter": "Hod",
+   "airborneFrame": 4
+  },
+  {
+   "fighter": "Potato Sack",
+   "airborneFrame": 4
+  },
+  {
+   "fighter": "Sprocket",
+   "airborneFrame": 4
+  },
+  {
+   "fighter": "Scuttle",
+   "airborneFrame": 4
+  }
+ ],
+ "dash": [
+  {
+   "fighter": "Flint",
+   "dashFrames": 12,
+   "firstRunFrame": 13,
+   "topSpeed": 1.92,
+   "runSt": 1.74
+  },
+  {
+   "fighter": "Nib",
+   "dashFrames": 10,
+   "firstRunFrame": 11,
+   "topSpeed": 2.36,
+   "runSt": 2.23
+  },
+  {
+   "fighter": "Loom",
+   "dashFrames": 14,
+   "firstRunFrame": 15,
+   "topSpeed": 1.68,
+   "runSt": 1.51
+  },
+  {
+   "fighter": "Hod",
+   "dashFrames": 15,
+   "firstRunFrame": 16,
+   "topSpeed": 1.46,
+   "runSt": 1.32
+  },
+  {
+   "fighter": "Potato Sack",
+   "dashFrames": 13,
+   "firstRunFrame": 14,
+   "topSpeed": 2.24,
+   "runSt": 1.6
+  },
+  {
+   "fighter": "Sprocket",
+   "dashFrames": 12,
+   "firstRunFrame": 13,
+   "topSpeed": 1.69,
+   "runSt": 1.53
+  },
+  {
+   "fighter": "Scuttle",
+   "dashFrames": 11,
+   "firstRunFrame": 12,
+   "topSpeed": 2.44,
+   "runSt": 2.02
+  }
+ ],
+ "dodges": [
+  {
+   "fighter": "Flint",
+   "spot": "4-18 of 22",
+   "neutralAirdodge": "4-27 of 29"
+  },
+  {
+   "fighter": "Nib",
+   "spot": "4-17 of 20",
+   "neutralAirdodge": "4-26 of 26"
+  },
+  {
+   "fighter": "Loom",
+   "spot": "4-19 of 24",
+   "neutralAirdodge": "4-27 of 31"
+  },
+  {
+   "fighter": "Hod",
+   "spot": "4-17 of 24",
+   "neutralAirdodge": "4-22 of 22"
+  },
+  {
+   "fighter": "Potato Sack",
+   "spot": "4-18 of 23",
+   "neutralAirdodge": "4-24 of 24"
+  },
+  {
+   "fighter": "Sprocket",
+   "spot": "4-18 of 23",
+   "neutralAirdodge": "4-26 of 26"
+  },
+  {
+   "fighter": "Scuttle",
+   "spot": "4-17 of 21",
+   "neutralAirdodge": "4-26 of 26"
+  }
+ ],
+ "oos": [
+  {
+   "fighter": "Flint",
+   "grabStartsAfterPress": 1,
+   "jumpAirborneAfterPress": 4
+  },
+  {
+   "fighter": "Nib",
+   "grabStartsAfterPress": 1,
+   "jumpAirborneAfterPress": 4
+  },
+  {
+   "fighter": "Loom",
+   "grabStartsAfterPress": 1,
+   "jumpAirborneAfterPress": 4
+  },
+  {
+   "fighter": "Hod",
+   "grabStartsAfterPress": 1,
+   "jumpAirborneAfterPress": 4
+  },
+  {
+   "fighter": "Potato Sack",
+   "grabStartsAfterPress": 1,
+   "jumpAirborneAfterPress": 4
+  },
+  {
+   "fighter": "Sprocket",
+   "grabStartsAfterPress": 1,
+   "jumpAirborneAfterPress": 4
+  },
+  {
+   "fighter": "Scuttle",
+   "grabStartsAfterPress": 1,
+   "jumpAirborneAfterPress": 4
+  }
+ ],
+ "shieldDrop": {
+  "framesInShieldoff": 11
+ },
+ "launch": {
+  "move": {
+   "d": 17,
+   "a": 361,
+   "b": 28,
+   "k": 70
+  },
+  "rows": [
+   {
+    "target": "Flint",
+    "weight": 92,
+    "pct": 0,
+    "kb": 66.2,
+    "hitstun": 26,
+    "tumble": false,
+    "launchSpeed": 1.99,
+    "ultHitstunWouldBe": 25
+   },
+   {
+    "target": "Flint",
+    "weight": 92,
+    "pct": 50,
+    "kb": 126,
+    "hitstun": 50,
+    "tumble": true,
+    "launchSpeed": 3.78,
+    "ultHitstunWouldBe": 49
+   },
+   {
+    "target": "Flint",
+    "weight": 92,
+    "pct": 100,
+    "kb": 185.7,
+    "hitstun": 74,
+    "tumble": true,
+    "launchSpeed": 5.57,
+    "ultHitstunWouldBe": 73
+   },
+   {
+    "target": "Flint",
+    "weight": 92,
+    "pct": 150,
+    "kb": 245.5,
+    "hitstun": 98,
+    "tumble": true,
+    "launchSpeed": 7.37,
+    "ultHitstunWouldBe": 97
+   },
+   {
+    "target": "Nib",
+    "weight": 72,
+    "pct": 0,
+    "kb": 69.2,
+    "hitstun": 27,
+    "tumble": false,
+    "launchSpeed": 2.08,
+    "ultHitstunWouldBe": 26
+   },
+   {
+    "target": "Nib",
+    "weight": 72,
+    "pct": 50,
+    "kb": 135.9,
+    "hitstun": 54,
+    "tumble": true,
+    "launchSpeed": 4.08,
+    "ultHitstunWouldBe": 53
+   },
+   {
+    "target": "Nib",
+    "weight": 72,
+    "pct": 100,
+    "kb": 202.6,
+    "hitstun": 81,
+    "tumble": true,
+    "launchSpeed": 6.08,
+    "ultHitstunWouldBe": 80
+   },
+   {
+    "target": "Nib",
+    "weight": 72,
+    "pct": 150,
+    "kb": 269.3,
+    "hitstun": 107,
+    "tumble": true,
+    "launchSpeed": 8.08,
+    "ultHitstunWouldBe": 106
+   },
+   {
+    "target": "Loom",
+    "weight": 79,
+    "pct": 0,
+    "kb": 68.1,
+    "hitstun": 27,
+    "tumble": false,
+    "launchSpeed": 2.04,
+    "ultHitstunWouldBe": 26
+   },
+   {
+    "target": "Loom",
+    "weight": 79,
+    "pct": 50,
+    "kb": 132.2,
+    "hitstun": 52,
+    "tumble": true,
+    "launchSpeed": 3.97,
+    "ultHitstunWouldBe": 51
+   },
+   {
+    "target": "Loom",
+    "weight": 79,
+    "pct": 100,
+    "kb": 196.3,
+    "hitstun": 78,
+    "tumble": true,
+    "launchSpeed": 5.89,
+    "ultHitstunWouldBe": 77
+   },
+   {
+    "target": "Loom",
+    "weight": 79,
+    "pct": 150,
+    "kb": 260.4,
+    "hitstun": 104,
+    "tumble": true,
+    "launchSpeed": 7.81,
+    "ultHitstunWouldBe": 103
+   },
+   {
+    "target": "Hod",
+    "weight": 121,
+    "pct": 0,
+    "kb": 62.8,
+    "hitstun": 25,
+    "tumble": false,
+    "launchSpeed": 1.89,
+    "ultHitstunWouldBe": 24
+   },
+   {
+    "target": "Hod",
+    "weight": 121,
+    "pct": 50,
+    "kb": 114.8,
+    "hitstun": 45,
+    "tumble": true,
+    "launchSpeed": 3.44,
+    "ultHitstunWouldBe": 44
+   },
+   {
+    "target": "Hod",
+    "weight": 121,
+    "pct": 100,
+    "kb": 166.7,
+    "hitstun": 66,
+    "tumble": true,
+    "launchSpeed": 5,
+    "ultHitstunWouldBe": 65
+   },
+   {
+    "target": "Hod",
+    "weight": 121,
+    "pct": 150,
+    "kb": 218.6,
+    "hitstun": 87,
+    "tumble": true,
+    "launchSpeed": 6.56,
+    "ultHitstunWouldBe": 86
+   },
+   {
+    "target": "Potato Sack",
+    "weight": 106,
+    "pct": 0,
+    "kb": 64.5,
+    "hitstun": 25,
+    "tumble": false,
+    "launchSpeed": 1.93,
+    "ultHitstunWouldBe": 24
+   },
+   {
+    "target": "Potato Sack",
+    "weight": 106,
+    "pct": 50,
+    "kb": 120.2,
+    "hitstun": 48,
+    "tumble": true,
+    "launchSpeed": 3.61,
+    "ultHitstunWouldBe": 47
+   },
+   {
+    "target": "Potato Sack",
+    "weight": 106,
+    "pct": 100,
+    "kb": 175.9,
+    "hitstun": 70,
+    "tumble": true,
+    "launchSpeed": 5.28,
+    "ultHitstunWouldBe": 69
+   },
+   {
+    "target": "Potato Sack",
+    "weight": 106,
+    "pct": 150,
+    "kb": 231.6,
+    "hitstun": 92,
+    "tumble": true,
+    "launchSpeed": 6.95,
+    "ultHitstunWouldBe": 91
+   },
+   {
+    "target": "Sprocket",
+    "weight": 103,
+    "pct": 0,
+    "kb": 64.8,
+    "hitstun": 25,
+    "tumble": false,
+    "launchSpeed": 1.94,
+    "ultHitstunWouldBe": 24
+   },
+   {
+    "target": "Sprocket",
+    "weight": 103,
+    "pct": 50,
+    "kb": 121.3,
+    "hitstun": 48,
+    "tumble": true,
+    "launchSpeed": 3.64,
+    "ultHitstunWouldBe": 47
+   },
+   {
+    "target": "Sprocket",
+    "weight": 103,
+    "pct": 100,
+    "kb": 177.9,
+    "hitstun": 71,
+    "tumble": true,
+    "launchSpeed": 5.34,
+    "ultHitstunWouldBe": 70
+   },
+   {
+    "target": "Sprocket",
+    "weight": 103,
+    "pct": 150,
+    "kb": 234.4,
+    "hitstun": 93,
+    "tumble": true,
+    "launchSpeed": 7.03,
+    "ultHitstunWouldBe": 92
+   },
+   {
+    "target": "Scuttle",
+    "weight": 75,
+    "pct": 0,
+    "kb": 68.7,
+    "hitstun": 27,
+    "tumble": false,
+    "launchSpeed": 2.06,
+    "ultHitstunWouldBe": 26
+   },
+   {
+    "target": "Scuttle",
+    "weight": 75,
+    "pct": 50,
+    "kb": 134.3,
+    "hitstun": 53,
+    "tumble": true,
+    "launchSpeed": 4.03,
+    "ultHitstunWouldBe": 52
+   },
+   {
+    "target": "Scuttle",
+    "weight": 75,
+    "pct": 100,
+    "kb": 199.8,
+    "hitstun": 79,
+    "tumble": true,
+    "launchSpeed": 6,
+    "ultHitstunWouldBe": 78
+   },
+   {
+    "target": "Scuttle",
+    "weight": 75,
+    "pct": 150,
+    "kb": 265.4,
+    "hitstun": 106,
+    "tumble": true,
+    "launchSpeed": 7.96,
+    "ultHitstunWouldBe": 105
+   }
+  ]
+ },
+ "ledge": [
+  {
+   "airtime": 30,
+   "pct": 0,
+   "emberfall": 25,
+   "ultimate": 50
+  },
+  {
+   "airtime": 30,
+   "pct": 60,
+   "emberfall": 15,
+   "ultimate": 28
+  },
+  {
+   "airtime": 30,
+   "pct": 120,
+   "emberfall": 6,
+   "ultimate": 23
+  },
+  {
+   "airtime": 120,
+   "pct": 0,
+   "emberfall": 34,
+   "ultimate": 68
+  },
+  {
+   "airtime": 120,
+   "pct": 60,
+   "emberfall": 24,
+   "ultimate": 46
+  },
+  {
+   "airtime": 120,
+   "pct": 120,
+   "emberfall": 14,
+   "ultimate": 24
+  },
+  {
+   "airtime": 300,
+   "pct": 0,
+   "emberfall": 52,
+   "ultimate": 104
+  },
+  {
+   "airtime": 300,
+   "pct": 60,
+   "emberfall": 42,
+   "ultimate": 82
+  },
+  {
+   "airtime": 300,
+   "pct": 120,
+   "emberfall": 32,
+   "ultimate": 60
+  }
+ ],
+ "sakurai": {
+  "airborneDeg": "see sim.js:1502 (45)",
+  "groundedThresholds": "60/88 -> 0..38"
+ },
+ "utiltRepeat": {
+  "comboLast": {
+   "hits": 1,
+   "dmg": 8.82
+  },
+  "comboBest": {
+   "hits": 1,
+   "dmg": 8.82
+  },
+  "victimPct": 8.8
+ },
+ "stale": {
+  "emberfall": [
+   0.09,
+   0.08545,
+   0.07635,
+   0.0679,
+   0.05945,
+   0.05035,
+   0.04255,
+   0.03575,
+   0.02965
+  ],
+  "sum": 0.5374,
+  "ultimateWiki": [
+   0.09,
+   0.08545,
+   0.07635,
+   0.0679,
+   0.05945,
+   0.05035,
+   0.04255,
+   0.03345,
+   0.025
+  ]
+ },
+ "constants": {
+  "DMG_1V1": 1.2,
+  "FRESH": 1.05,
+  "SHORT_HOP_MUL": 0.85,
+  "TUMBLE_KB": 80,
+  "CROUCH_MUL": 0.85,
+  "CHARGING_MUL": 1.2,
+  "SHIELD": {
+   "hp": 50,
+   "drain": 0.15,
+   "regen": 0.08,
+   "dmg": 1.19,
+   "release": 11,
+   "parry": 5,
+   "stun": {
+    "ground": 0.8,
+    "smash": 0.725,
+    "air": 0.33,
+    "proj": 0.29
+   }
+  },
+  "buffer": 9,
+  "STOCKS": 3,
+  "MATCH_FRAMES": 28800,
+  "BLAST": {
+   "l": -223,
+   "r": 223,
+   "t": 140,
+   "b": -140
+  },
+  "EDGE": 68
+ }
+}

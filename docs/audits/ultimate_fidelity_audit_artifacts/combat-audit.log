@@ -1,0 +1,245 @@
+== movement
+┌─────────┬───────────────┬───────────────┬───────────────────────┬───────────────────┬───────────────────┬────────────────────┬───────────────────┬──────────────────┐
+│ (index) │ fighter       │ walk full (f) │ dash to run speed (f) │ stop from run (f) │ turn from run (f) │ air drift full (f) │ short hop air (f) │ full hop air (f) │
+├─────────┼───────────────┼───────────────┼───────────────────────┼───────────────────┼───────────────────┼────────────────────┼───────────────────┼──────────────────┤
+│ 0       │ 'Flint'       │ 4             │ 200                   │ 11                │ 7                 │ 80                 │ 38                │ 52               │
+│ 1       │ 'Nib'         │ 4             │ 200                   │ 11                │ 8                 │ 80                 │ 35                │ 51               │
+│ 2       │ 'Loom'        │ 4             │ 200                   │ 12                │ 8                 │ 80                 │ 40                │ 59               │
+│ 3       │ 'Hod'         │ 5             │ 200                   │ 9                 │ 8                 │ 80                 │ 31                │ 42               │
+│ 4       │ 'Potato Sack' │ 2             │ 200                   │ 2                 │ 2                 │ 80                 │ 33                │ 46               │
+│ 5       │ 'Sprocket'    │ 4             │ 200                   │ 10                │ 7                 │ 80                 │ 35                │ 48               │
+│ 6       │ 'Scuttle'     │ 4             │ 200                   │ 11                │ 6                 │ 80                 │ 35                │ 49               │
+└─────────┴───────────────┴───────────────┴───────────────────────┴───────────────────┴───────────────────┴────────────────────┴───────────────────┴──────────────────┘
+== coverage
+┌─────────┬───────────────┬──────────┬─────────┬──────────┬────────┬────────────────────────────────┐
+│ (index) │ fighter       │ move     │ nearest │ farthest │ behind │ holes                          │
+├─────────┼───────────────┼──────────┼─────────┼──────────┼────────┼────────────────────────────────┤
+│ 0       │ 'Flint'       │ 'jab'    │ 0       │ 16       │ -4     │ ''                             │
+│ 1       │ 'Flint'       │ 'ftilt'  │ 0       │ 15       │ -5     │ ''                             │
+│ 2       │ 'Flint'       │ 'utilt'  │ 0       │ 12       │ -6     │ ''                             │
+│ 3       │ 'Flint'       │ 'dtilt'  │ 0       │ 14       │ -5     │ ''                             │
+│ 4       │ 'Flint'       │ 'dash'   │ 0       │ 20       │ -8     │ ''                             │
+│ 5       │ 'Flint'       │ 'fsmash' │ 0       │ 18       │ -6     │ ''                             │
+│ 6       │ 'Flint'       │ 'usmash' │ 0       │ 12       │ -10    │ ''                             │
+│ 7       │ 'Flint'       │ 'dsmash' │ 0       │ 17       │ -17    │ ''                             │
+│ 8       │ 'Flint'       │ 'nair'   │ 0       │ 11       │ -11    │ ''                             │
+│ 9       │ 'Flint'       │ 'fair'   │ 0       │ 16       │ -5     │ ''                             │
+│ 10      │ 'Flint'       │ 'bair'   │ 0       │ 5        │ -16    │ ''                             │
+│ 11      │ 'Flint'       │ 'uair'   │ 0       │ 9        │ -9     │ ''                             │
+│ 12      │ 'Flint'       │ 'dair'   │ 0       │ 11       │ -10    │ ''                             │
+│ 13      │ 'Flint'       │ 'nspec'  │ 0       │ 22       │ ''     │ ''                             │
+│ 14      │ 'Flint'       │ 'sspec'  │ 0       │ 33       │ ''     │ ''                             │
+│ 15      │ 'Flint'       │ 'dspec'  │ 0       │ 22       │ -2     │ ''                             │
+│ 16      │ 'Nib'         │ 'jab'    │ 0       │ 14       │ -4     │ ''                             │
+│ 17      │ 'Nib'         │ 'ftilt'  │ 0       │ 16       │ -3     │ ''                             │
+│ 18      │ 'Nib'         │ 'utilt'  │ 0       │ 6        │ -12    │ ''                             │
+│ 19      │ 'Nib'         │ 'dtilt'  │ 0       │ 16       │ -3     │ '-2'                           │
+│ 20      │ 'Nib'         │ 'dash'   │ 0       │ 22       │ -7     │ ''                             │
+│ 21      │ 'Nib'         │ 'fsmash' │ 0       │ 17       │ -4     │ ''                             │
+│ 22      │ 'Nib'         │ 'usmash' │ 0       │ 8        │ -11    │ ''                             │
+│ 23      │ 'Nib'         │ 'dsmash' │ 0       │ 14       │ -17    │ ''                             │
+│ 24      │ 'Nib'         │ 'nair'   │ 0       │ 9        │ -9     │ ''                             │
+│ 25      │ 'Nib'         │ 'fair'   │ 0       │ 16       │ -4     │ ''                             │
+│ 26      │ 'Nib'         │ 'bair'   │ 0       │ 4        │ -16    │ ''                             │
+│ 27      │ 'Nib'         │ 'uair'   │ 0       │ 7        │ -11    │ ''                             │
+│ 28      │ 'Nib'         │ 'dair'   │ 0       │ 13       │ -3     │ ''                             │
+│ 29      │ 'Nib'         │ 'nspec'  │ 0       │ 26       │ ''     │ ''                             │
+│ 30      │ 'Nib'         │ 'sspec'  │ 0       │ 34       │ ''     │ ''                             │
+│ 31      │ 'Loom'        │ 'jab'    │ 0       │ 18       │ -3     │ ''                             │
+│ 32      │ 'Loom'        │ 'ftilt'  │ 0       │ 20       │ -3     │ ''                             │
+│ 33      │ 'Loom'        │ 'utilt'  │ 0       │ 11       │ -9     │ ''                             │
+│ 34      │ 'Loom'        │ 'dtilt'  │ 0       │ 17       │ -4     │ ''                             │
+│ 35      │ 'Loom'        │ 'dash'   │ 0       │ 26       │ -8     │ ''                             │
+│ 36      │ 'Loom'        │ 'fsmash' │ 0       │ 24       │ -4     │ ''                             │
+│ 37      │ 'Loom'        │ 'usmash' │ 0       │ 13       │ -10    │ ''                             │
+│ 38      │ 'Loom'        │ 'dsmash' │ 0       │ 18       │ -18    │ ''                             │
+│ 39      │ 'Loom'        │ 'nair'   │ 0       │ 11       │ -11    │ ''                             │
+│ 40      │ 'Loom'        │ 'fair'   │ 0       │ 21       │ -3     │ ''                             │
+│ 41      │ 'Loom'        │ 'bair'   │ 0       │ 3        │ -21    │ ''                             │
+│ 42      │ 'Loom'        │ 'uair'   │ 0       │ 7        │ -6     │ ''                             │
+│ 43      │ 'Loom'        │ 'dair'   │ 0       │ 10       │ -10    │ ''                             │
+│ 44      │ 'Loom'        │ 'nspec'  │ 0       │ 19       │ -5     │ ''                             │
+│ 45      │ 'Loom'        │ 'sspec'  │ 0       │ 21       │ ''     │ ''                             │
+│ 46      │ 'Hod'         │ 'jab'    │ 0       │ 17       │ ''     │ ''                             │
+│ 47      │ 'Hod'         │ 'ftilt'  │ 0       │ 18       │ -4     │ ''                             │
+│ 48      │ 'Hod'         │ 'utilt'  │ 0       │ 11       │ -8     │ ''                             │
+│ 49      │ 'Hod'         │ 'dtilt'  │ 0       │ 20       │ ''     │ ''                             │
+│ 50      │ 'Hod'         │ 'dash'   │ 0       │ 18       │ -8     │ ''                             │
+│ 51      │ 'Hod'         │ 'fsmash' │ 0       │ 20       │ -5     │ ''                             │
+│ 52      │ 'Hod'         │ 'usmash' │ 0       │ 13       │ -10    │ ''                             │
+│ 53      │ 'Hod'         │ 'dsmash' │ 0       │ 18       │ -20    │ ''                             │
+│ 54      │ 'Hod'         │ 'nair'   │ 0       │ 11       │ -11    │ ''                             │
+│ 55      │ 'Hod'         │ 'fair'   │ 0       │ 18       │ -4     │ ''                             │
+│ 56      │ 'Hod'         │ 'bair'   │ 0       │ 2        │ -22    │ ''                             │
+│ 57      │ 'Hod'         │ 'uair'   │ 0       │ 12       │ -8     │ ''                             │
+│ 58      │ 'Hod'         │ 'dair'   │ '-'     │ '-'      │        │ 'never hits a standing target' │
+│ 59      │ 'Hod'         │ 'nspec'  │ 0       │ 40       │ ''     │ ''                             │
+│ 60      │ 'Hod'         │ 'sspec'  │ 0       │ 40       │ ''     │ ''                             │
+│ 61      │ 'Potato Sack' │ 'jab'    │ 0       │ 15       │ -4     │ ''                             │
+│ 62      │ 'Potato Sack' │ 'ftilt'  │ 0       │ 16       │ -4     │ ''                             │
+│ 63      │ 'Potato Sack' │ 'utilt'  │ 0       │ 9        │ -9     │ ''                             │
+│ 64      │ 'Potato Sack' │ 'dtilt'  │ 0       │ 15       │ -5     │ ''                             │
+│ 65      │ 'Potato Sack' │ 'dash'   │ 0       │ 17       │ -8     │ ''                             │
+│ 66      │ 'Potato Sack' │ 'fsmash' │ 0       │ 18       │ ''     │ ''                             │
+│ 67      │ 'Potato Sack' │ 'usmash' │ 0       │ 10       │ -10    │ ''                             │
+│ 68      │ 'Potato Sack' │ 'dsmash' │ 0       │ 16       │ -16    │ ''                             │
+│ 69      │ 'Potato Sack' │ 'nair'   │ 0       │ 11       │ -11    │ ''                             │
+│ 70      │ 'Potato Sack' │ 'fair'   │ 0       │ 17       │ -5     │ ''                             │
+│ 71      │ 'Potato Sack' │ 'bair'   │ 0       │ 2        │ -16    │ ''                             │
+│ 72      │ 'Potato Sack' │ 'uair'   │ 0       │ 9        │ -9     │ ''                             │
+│ 73      │ 'Potato Sack' │ 'dair'   │ 0       │ 9        │ -9     │ ''                             │
+│ 74      │ 'Potato Sack' │ 'nspec'  │ 0       │ 11       │ -11    │ ''                             │
+│ 75      │ 'Potato Sack' │ 'sspec'  │ 0       │ 40       │ ''     │ ''                             │
+│ 76      │ 'Potato Sack' │ 'dspec'  │ '-'     │ '-'      │        │ 'never hits a standing target' │
+│ 77      │ 'Sprocket'    │ 'jab'    │ 0       │ 15       │ -5     │ ''                             │
+│ 78      │ 'Sprocket'    │ 'ftilt'  │ 0       │ 23       │ ''     │ ''                             │
+│ 79      │ 'Sprocket'    │ 'utilt'  │ 0       │ 9        │ -10    │ ''                             │
+│ 80      │ 'Sprocket'    │ 'dtilt'  │ 0       │ 18       │ -3     │ ''                             │
+│ 81      │ 'Sprocket'    │ 'dash'   │ 0       │ 16       │ -8     │ ''                             │
+│ 82      │ 'Sprocket'    │ 'fsmash' │ 0       │ 23       │ -4     │ ''                             │
+│ 83      │ 'Sprocket'    │ 'usmash' │ 0       │ 11       │ -10    │ ''                             │
+│ 84      │ 'Sprocket'    │ 'dsmash' │ 0       │ 19       │ -17    │ ''                             │
+│ 85      │ 'Sprocket'    │ 'nair'   │ 0       │ 11       │ -11    │ ''                             │
+│ 86      │ 'Sprocket'    │ 'fair'   │ 0       │ 22       │ -2     │ ''                             │
+│ 87      │ 'Sprocket'    │ 'bair'   │ 0       │ 2        │ -17    │ ''                             │
+│ 88      │ 'Sprocket'    │ 'uair'   │ 0       │ 10       │ -10    │ ''                             │
+│ 89      │ 'Sprocket'    │ 'dair'   │ 0       │ 11       │ -8     │ ''                             │
+│ 90      │ 'Sprocket'    │ 'nspec'  │ 0       │ 40       │ ''     │ ''                             │
+│ 91      │ 'Sprocket'    │ 'sspec'  │ 0       │ 17       │ ''     │ ''                             │
+│ 92      │ 'Sprocket'    │ 'dspec'  │ 0       │ 18       │ ''     │ ''                             │
+│ 93      │ 'Scuttle'     │ 'jab'    │ 0       │ 15       │ -4     │ ''                             │
+│ 94      │ 'Scuttle'     │ 'ftilt'  │ 0       │ 18       │ -3     │ ''                             │
+│ 95      │ 'Scuttle'     │ 'utilt'  │ 0       │ 9        │ -8     │ ''                             │
+│ 96      │ 'Scuttle'     │ 'dtilt'  │ 0       │ 14       │ -4     │ ''                             │
+│ 97      │ 'Scuttle'     │ 'dash'   │ 0       │ 20       │ -8     │ ''                             │
+│ 98      │ 'Scuttle'     │ 'fsmash' │ 0       │ 18       │ -5     │ ''                             │
+│ 99      │ 'Scuttle'     │ 'usmash' │ 0       │ 10       │ -10    │ ''                             │
+│ 100     │ 'Scuttle'     │ 'dsmash' │ 0       │ 15       │ -15    │ ''                             │
+│ 101     │ 'Scuttle'     │ 'nair'   │ 0       │ 10       │ -10    │ ''                             │
+│ 102     │ 'Scuttle'     │ 'fair'   │ 0       │ 17       │ -4     │ ''                             │
+│ 103     │ 'Scuttle'     │ 'bair'   │ 0       │ 5        │ -16    │ ''                             │
+│ 104     │ 'Scuttle'     │ 'uair'   │ 0       │ 9        │ -9     │ ''                             │
+│ 105     │ 'Scuttle'     │ 'dair'   │ 0       │ 9        │ -8     │ ''                             │
+│ 106     │ 'Scuttle'     │ 'nspec'  │ 0       │ 18       │ ''     │ ''                             │
+│ 107     │ 'Scuttle'     │ 'sspec'  │ 0       │ 31       │ -3     │ ''                             │
+│ 108     │ 'Scuttle'     │ 'dspec'  │ 0       │ 13       │ -7     │ ''                             │
+└─────────┴───────────────┴──────────┴─────────┴──────────┴────────┴────────────────────────────────┘
+== combos
+┌─────────┬───────────────┬───────────┬──────┬───────────────────────┬────────────┐
+│ (index) │ fighter       │ move      │ at % │ attacker ahead by (f) │ apart then │
+├─────────┼───────────────┼───────────┼──────┼───────────────────────┼────────────┤
+│ 0       │ 'Flint'       │ 'dtilt'   │ 20   │ 1                     │ 10         │
+│ 1       │ 'Flint'       │ 'dtilt'   │ 60   │ 8                     │ 14         │
+│ 2       │ 'Flint'       │ 'utilt'   │ 20   │ 4                     │ 9          │
+│ 3       │ 'Flint'       │ 'utilt'   │ 60   │ 14                    │ 17         │
+│ 4       │ 'Flint'       │ 'ftilt'   │ 20   │ -20                   │ 9          │
+│ 5       │ 'Flint'       │ 'ftilt'   │ 60   │ 12                    │ 53         │
+│ 6       │ 'Flint'       │ 'nair'    │ 20   │ 9                     │ 14         │
+│ 7       │ 'Flint'       │ 'nair'    │ 60   │ 19                    │ 29         │
+│ 8       │ 'Flint'       │ 'uair'    │ 20   │ 14                    │ 18         │
+│ 9       │ 'Flint'       │ 'uair'    │ 60   │ 25                    │ 28         │
+│ 10      │ 'Flint'       │ 'throw d' │ 20   │ 11                    │ 18         │
+│ 11      │ 'Flint'       │ 'throw d' │ 60   │ 14                    │ 20         │
+│ 12      │ 'Flint'       │ 'throw u' │ 20   │ 12                    │ 23         │
+│ 13      │ 'Flint'       │ 'throw u' │ 60   │ 18                    │ 28         │
+│ 14      │ 'Nib'         │ 'dtilt'   │ 20   │ 5                     │ 13         │
+│ 15      │ 'Nib'         │ 'dtilt'   │ 60   │ 12                    │ 18         │
+│ 16      │ 'Nib'         │ 'utilt'   │ 20   │ 9                     │ 11         │
+│ 17      │ 'Nib'         │ 'utilt'   │ 60   │ 21                    │ 21         │
+│ 18      │ 'Nib'         │ 'ftilt'   │ 20   │ -14                   │ 15         │
+│ 19      │ 'Nib'         │ 'ftilt'   │ 60   │ 17                    │ 58         │
+│ 20      │ 'Nib'         │ 'nair'    │ 20   │ 10                    │ 16         │
+│ 21      │ 'Nib'         │ 'nair'    │ 60   │ 20                    │ 32         │
+│ 22      │ 'Nib'         │ 'uair'    │ 20   │ 16                    │ 21         │
+│ 23      │ 'Nib'         │ 'uair'    │ 60   │ 30                    │ 34         │
+│ 24      │ 'Nib'         │ 'throw d' │ 20   │ 9                     │ 18         │
+│ 25      │ 'Nib'         │ 'throw d' │ 60   │ 12                    │ 21         │
+│ 26      │ 'Nib'         │ 'throw u' │ 20   │ 6                     │ 19         │
+│ 27      │ 'Nib'         │ 'throw u' │ 60   │ 10                    │ 22         │
+│ 28      │ 'Loom'        │ 'dtilt'   │ 20   │ 1                     │ 12         │
+│ 29      │ 'Loom'        │ 'dtilt'   │ 60   │ 7                     │ 16         │
+│ 30      │ 'Loom'        │ 'utilt'   │ 20   │ 6                     │ 12         │
+│ 31      │ 'Loom'        │ 'utilt'   │ 60   │ 19                    │ 25         │
+│ 32      │ 'Loom'        │ 'ftilt'   │ 20   │ -1                    │ 31         │
+│ 33      │ 'Loom'        │ 'ftilt'   │ 60   │ -1                    │ 44         │
+│ 34      │ 'Loom'        │ 'nair'    │ 20   │ 11                    │ 18         │
+│ 35      │ 'Loom'        │ 'nair'    │ 60   │ 22                    │ 38         │
+│ 36      │ 'Loom'        │ 'uair'    │ 20   │ 11                    │ 17         │
+│ 37      │ 'Loom'        │ 'uair'    │ 60   │ 21                    │ 25         │
+│ 38      │ 'Loom'        │ 'throw d' │ 20   │ 11                    │ 24         │
+│ 39      │ 'Loom'        │ 'throw d' │ 60   │ 14                    │ 28         │
+│ 40      │ 'Loom'        │ 'throw u' │ 20   │ 21                    │ 32         │
+│ 41      │ 'Loom'        │ 'throw u' │ 60   │ 30                    │ 43         │
+│ 42      │ 'Hod'         │ 'dtilt'   │ 20   │ 4                     │ 17         │
+│ 43      │ 'Hod'         │ 'dtilt'   │ 60   │ 8                     │ 34         │
+│ 44      │ 'Hod'         │ 'utilt'   │ 20   │ 9                     │ 18         │
+│ 45      │ 'Hod'         │ 'utilt'   │ 60   │ 28                    │ 44         │
+│ 46      │ 'Hod'         │ 'ftilt'   │ 20   │ -12                   │ 33         │
+│ 47      │ 'Hod'         │ 'ftilt'   │ 60   │ 19                    │ 83         │
+│ 48      │ 'Hod'         │ 'nair'    │ 20   │ 'no hit'              │ ''         │
+│ 49      │ 'Hod'         │ 'nair'    │ 60   │ 'no hit'              │ ''         │
+│ 50      │ 'Hod'         │ 'uair'    │ 20   │ 'no hit'              │ ''         │
+│ 51      │ 'Hod'         │ 'uair'    │ 60   │ 'no hit'              │ ''         │
+│ 52      │ 'Hod'         │ 'throw d' │ 20   │ 16                    │ 32         │
+│ 53      │ 'Hod'         │ 'throw d' │ 60   │ 9                     │ 45         │
+│ 54      │ 'Hod'         │ 'throw u' │ 20   │ 27                    │ 40         │
+│ 55      │ 'Hod'         │ 'throw u' │ 60   │ 43                    │ 65         │
+│ 56      │ 'Potato Sack' │ 'dtilt'   │ 20   │ 1                     │ 11         │
+│ 57      │ 'Potato Sack' │ 'dtilt'   │ 60   │ 7                     │ 15         │
+│ 58      │ 'Potato Sack' │ 'utilt'   │ 20   │ 1                     │ 10         │
+│ 59      │ 'Potato Sack' │ 'utilt'   │ 60   │ 11                    │ 17         │
+│ 60      │ 'Potato Sack' │ 'ftilt'   │ 20   │ 0                     │ 32         │
+│ 61      │ 'Potato Sack' │ 'ftilt'   │ 60   │ 7                     │ 49         │
+│ 62      │ 'Potato Sack' │ 'nair'    │ 20   │ -5                    │ 3          │
+│ 63      │ 'Potato Sack' │ 'nair'    │ 60   │ -5                    │ 3          │
+│ 64      │ 'Potato Sack' │ 'uair'    │ 20   │ 13                    │ 18         │
+│ 65      │ 'Potato Sack' │ 'uair'    │ 60   │ 25                    │ 29         │
+│ 66      │ 'Potato Sack' │ 'throw d' │ 20   │ 11                    │ 19         │
+│ 67      │ 'Potato Sack' │ 'throw d' │ 60   │ 14                    │ 22         │
+│ 68      │ 'Potato Sack' │ 'throw u' │ 20   │ 15                    │ 27         │
+│ 69      │ 'Potato Sack' │ 'throw u' │ 60   │ 23                    │ 35         │
+│ 70      │ 'Sprocket'    │ 'dtilt'   │ 20   │ 0                     │ 13         │
+│ 71      │ 'Sprocket'    │ 'dtilt'   │ 60   │ 7                     │ 17         │
+│ 72      │ 'Sprocket'    │ 'utilt'   │ 20   │ 1                     │ 10         │
+│ 73      │ 'Sprocket'    │ 'utilt'   │ 60   │ 12                    │ 18         │
+│ 74      │ 'Sprocket'    │ 'ftilt'   │ 20   │ -4                    │ 27         │
+│ 75      │ 'Sprocket'    │ 'ftilt'   │ 60   │ -14                   │ 27         │
+│ 76      │ 'Sprocket'    │ 'nair'    │ 20   │ 12                    │ 15         │
+│ 77      │ 'Sprocket'    │ 'nair'    │ 60   │ 22                    │ 31         │
+│ 78      │ 'Sprocket'    │ 'uair'    │ 20   │ 'no hit'              │ ''         │
+│ 79      │ 'Sprocket'    │ 'uair'    │ 60   │ 'no hit'              │ ''         │
+│ 80      │ 'Sprocket'    │ 'throw d' │ 20   │ 11                    │ 18         │
+│ 81      │ 'Sprocket'    │ 'throw d' │ 60   │ 14                    │ 21         │
+│ 82      │ 'Sprocket'    │ 'throw u' │ 20   │ 12                    │ 24         │
+│ 83      │ 'Sprocket'    │ 'throw u' │ 60   │ 19                    │ 30         │
+│ 84      │ 'Scuttle'     │ 'dtilt'   │ 20   │ 4                     │ 11         │
+│ 85      │ 'Scuttle'     │ 'dtilt'   │ 60   │ 11                    │ 15         │
+│ 86      │ 'Scuttle'     │ 'utilt'   │ 20   │ 6                     │ 9          │
+│ 87      │ 'Scuttle'     │ 'utilt'   │ 60   │ 16                    │ 17         │
+│ 88      │ 'Scuttle'     │ 'ftilt'   │ 20   │ 4                     │ 33         │
+│ 89      │ 'Scuttle'     │ 'ftilt'   │ 60   │ 8                     │ 48         │
+│ 90      │ 'Scuttle'     │ 'nair'    │ 20   │ 11                    │ 16         │
+│ 91      │ 'Scuttle'     │ 'nair'    │ 60   │ 22                    │ 33         │
+│ 92      │ 'Scuttle'     │ 'uair'    │ 20   │ 14                    │ 18         │
+│ 93      │ 'Scuttle'     │ 'uair'    │ 60   │ 24                    │ 28         │
+│ 94      │ 'Scuttle'     │ 'throw d' │ 20   │ 11                    │ 18         │
+│ 95      │ 'Scuttle'     │ 'throw d' │ 60   │ 14                    │ 21         │
+│ 96      │ 'Scuttle'     │ 'throw u' │ 20   │ 13                    │ 24         │
+│ 97      │ 'Scuttle'     │ 'throw u' │ 60   │ 19                    │ 30         │
+└─────────┴───────────────┴───────────┴──────┴───────────────────────┴────────────┘
+== edge
+┌─────────┬───────────────┬───────────┬─────────────────┬─────────────────────┬────────────┬──────────────────┬──────────────────────┬────────────┬──────────────────┬──────────────────────┐
+│ (index) │ fighter       │ dtilt out │ dtilt below lip │ dtilt hits a hanger │ fsmash out │ fsmash below lip │ fsmash hits a hanger │ dsmash out │ dsmash below lip │ dsmash hits a hanger │
+├─────────┼───────────────┼───────────┼─────────────────┼─────────────────────┼────────────┼──────────────────┼──────────────────────┼────────────┼──────────────────┼──────────────────────┤
+│ 0       │ 'Flint'       │ -1        │ '-'             │ 'yes'               │ 14         │ 2                │ 'yes'                │ 14         │ 4                │ 'yes'                │
+│ 1       │ 'Nib'         │ -1        │ '-'             │ 'yes'               │ 14         │ -0               │ 'yes'                │ -1         │ '-'              │ 'yes'                │
+│ 2       │ 'Loom'        │ 14        │ 4               │ 'yes'               │ 20         │ 12               │ 'yes'                │ 14         │ 4                │ 'yes'                │
+│ 3       │ 'Hod'         │ 16        │ 10              │ 'yes'               │ 16         │ 14               │ 'yes'                │ 14         │ 8                │ 'yes'                │
+│ 4       │ 'Potato Sack' │ -1        │ '-'             │ 'yes'               │ 14         │ 6                │ 'yes'                │ -1         │ '-'              │ 'yes'                │
+│ 5       │ 'Sprocket'    │ 14        │ 8               │ 'yes'               │ 18         │ 12               │ 'yes'                │ 16         │ 8                │ 'yes'                │
+│ 6       │ 'Scuttle'     │ -1        │ '-'             │ 'yes'               │ 14         │ 8                │ 'yes'                │ -1         │ '-'              │ 'yes'                │
+└─────────┴───────────────┴───────────┴─────────────────┴─────────────────────┴────────────┴──────────────────┴──────────────────────┴────────────┴──────────────────┴──────────────────────┘
+== gaps (1)
+  Nib dtilt: misses at -2 inside its own reach
+(node:26984) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)

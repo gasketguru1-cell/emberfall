@@ -10,7 +10,7 @@ let seed = 5; Math.random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; 
 for (const f of ['hitboxes.js', process.env.EMBERFALL_SIM || 'sim.js']) vm.runInThisContext(fs.readFileSync(path.resolve(root, f), 'utf8'), { filename: f });   /* EMBERFALL_SIM: measure another copy of the rules */
 vm.runInThisContext(`
 (function () {
-  const FORMS = [['Flint', 0, 0], ['Nib', 1, 0], ['Loom', 1, 1], ['Hod', 1, 2], ['Potato Sack', 2, 0]];
+  const FORMS = [['Flint', 0, 0], ['Nib', 1, 0], ['Loom', 1, 1], ['Hod', 1, 2], ['Potato Sack', 2, 0], ['Sprocket', 3, 0], ['Scuttle', 4, 0]];
   PLATS.length = 1;   /* measure on the bare main stage, so no jump lands on a platform */
   let SCRIPT = null, t = 0;
   cpuInput = function (f) { const i = blankIn(); if (f.idx === 0 && SCRIPT) SCRIPT(i, t, f); return i; };
@@ -20,7 +20,7 @@ vm.runInThisContext(`
     F[0].ctl = new Ctl('cpu'); F[1].ctl = new Ctl('cpu'); F[0].fi = fi; F[0].x = -(EDGE - 3); F[0].face = 1; t = 0; SCRIPT = null; return F[0];
   }
   /* Run a script for n frames; returns per-frame samples of the first fighter. */
-  function run(n, script) { SCRIPT = script; const out = [], o = F[1]; for (let k = 0; k < n; k++) { o.x = 0; o.y = 150; o.vx = o.vy = 0; o.grounded = false; o.plat = null; o.state = 'air'; step(); t++;   /* the other fighter is parked in the air, out of the way */ const f = F[0]; out.push({ x: f.x, y: f.y, vx: f.vx, vy: f.vy, state: f.state, g: f.grounded }); } return out; }
+  function run(n, script) { SCRIPT = script; const out = [], o = F[1]; for (let k = 0; k < n; k++) { o.x = 0; o.y = 120;   /* parked in the air out of the way, below the ceiling (140 since 2026-11-10) */ o.vx = o.vy = 0; o.grounded = false; o.plat = null; o.state = 'air'; step(); t++;   /* the other fighter is parked in the air, out of the way */ const f = F[0]; out.push({ x: f.x, y: f.y, vx: f.vx, vy: f.vy, state: f.state, g: f.grounded }); } return out; }
   const r1 = v => Math.round(v * 10) / 10, r2 = v => Math.round(v * 100) / 100;
   function jump(f, script, n) {
     const y0 = f.y, s = run(n || 220, script), up = s.findIndex(q => !q.g), down = s.findIndex((q, k) => k > up && q.g);

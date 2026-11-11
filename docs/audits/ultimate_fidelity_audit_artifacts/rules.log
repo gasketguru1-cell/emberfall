@@ -1,0 +1,182 @@
+pass  armour: Ram Plate takes one light strike, and the damagean 8% strike on frame 15: kept going, Hod took 10.1% (armour frames 13-19)
+pass  armour: a second strike gets through            two 3% strikes: kept going, hurt
+pass  armour: a stronger hit stops the charge         a 9% strike: hurt
+pass  armour: none before the window, none in the air frame 12: hurt; in the air: hurt
+pass  armour: the charge itself hits for 13%          Flint took 16.4%
+pass  projectile: a tilt puts a weak shot out         17 of 17 timings stopped the bolt, 0 were hit by it
+pass  projectile: it hits when nothing meets it       Flint took 5.0%
+pass  projectile: a jab can knock out the tapped stone2 of 26 timings stopped the 7% stone, 24 were hit by it
+pass  projectile: a jab cannot stop the held stone    26 of 26 timings were hit by the 11% stone, 0 stopped it
+pass  hitlag nudge: three flicks move 3.3 units       toward 3.30, away -3.30, nudges counted 3
+pass  wall: no input bounces off                      {"state":"hurt","vx":2.1,"vy":-0.56,"inv":0}
+pass  wall tech: shield stops dead with protection    {"state":"air","vx":0,"vy":0,"inv":14}
+pass  wall tech: holding jump springs off             {"state":"air","vx":1.1,"vy":2.3,"inv":14}
+pass  wall tech: a spent shield press does not tech   {"state":"hurt","vx":2.1,"vy":-0.56,"inv":0}
+pass  wall jump: Nib kicks off the wall               best upward speed 2.35, touched the wall: true
+pass  wall jump: Flint cannot                         best upward speed -0.09, touched the wall: true
+pass  clank: equal smashes cancel, nobody is hurt     both recoiled: true, damage 0 / 0
+pass  ledge: protection grows with air time, shrinks with damageframes protected: short hop 26, long fall 54, at 120% 8
+pass  ledge: climbing up is slower above 100%         frames to stand: 16 fresh, 24 at 120%
+pass  ledge: get-up attack comes out later above 100% first active frame after 18 fresh, 26 at 120%
+pass  jab: holding attack runs all three              jab > jab2 > jab3
+pass  jab: Nib has three hits, 2% 2% 3%               jab > jab2 > jab3, target at 8.8% (7% before the one-on-one bonus)
+pass  angled tilt: up, level and down                 level: ftilt aim 0 y 11.0 | up: ftilt aim 1 y 14.2 | down: ftilt aim -1 y 7.8
+pass  angled tilt: a mostly sideways diagonal is still a forward tiltsteep diagonal: ftilt aim 1 y 14.2 | mostly up: utilt aim 0 y 12.6
+pass  stick up never jumps                            height reached: held 0.0, flicked 0.0
+pass  shield: a full shield blocks a low attack       shieldstun blocked (dtilt)
+pass  shield: a worn shield gets poked at the feet    hurt hit (dtilt)
+pass  shield: tilting the worn shield down covers themshieldstun blocked (dtilt)
+pass  run: back + attack is a turnaround tilt or smashgentle: ftilt facing left | hard: fsmash facing left
+pass  wavedash: long, short and in place              start speeds 2 / 1.1 / 0, slides 23.2 and 7.3 units
+pass  wavedash: can act on frame 7                    attack buffered during the slide -> attack after 7 frames
+pass  platform: a down flick drops through, a slow tilt crouchesflick ends at height 0 (idle>air>land>idle), slow tilt stays at 26
+pass  shield drop: down in shield drops through a platform, spot-dodges on the stageon a platform: shield>air>land>idle | on the stage: shield>spot>idle
+pass  platform: holding down in the air falls through itlands at height 26 normally, 0 holding down
+pass  parry: releasing shield just before the hit     no shield: 2.5% | held: shieldstun | released in time: 0%, attacker frozen 16 frames
+pass  tech: shield before hitting the floor           nothing: hurt>down | shield: hurt>land | shield + direction: hurt>roll
+pass  stale moves: the same attack weakens when repeatedthree jabs did 2.52, 2.18, 1.98%
+pass  jump: tap for a short hop, hold for a full one  heights 16.5 and 34
+pass  jump + attack together: a short-hop aerial      nair (short-hop, weaker) in the air
+pass  match: starts with 3 stocks and 8 minutes       3 stocks each, 8 minutes
+pass  time-out: more stocks wins, then less damage    stocks 2 v 3: WREN WINS | 40% v 90%: FLINT WINS
+pass  time-out: a full tie goes to sudden death       mode play, both at 300 / 300%, stocks 1 / 1
+pass  push: running into a standing fighter does not pass throughFlint ends 6.0 behind the other, who was shoved 16.7
+pass  push: the one run into is shoved along, a heavy one lessFlint shoves in 70 frames: Flint 16.7, Nib 18.8, Hod 14.7
+pass  push: a roll goes through and a jump goes over  roll passed: true, jump passed: true
+pass  push: nobody standing still is shoved off the stagethe one at the edge is at 68.0 of 68, standing
+pass  push: fighters standing inside each other slide apartapart by 6.0 after 30 frames
+pass  grab: holds at least 30 frames at 0% against any mashingheld for 31 frames
+pass  throw: a held left stick throws at 0%           threw u after 7 frames of holding, 8.8% dealt
+pass  throw: the right stick throws in all four directionsright stick forward / back / up / down -> f / b / u / d
+pass  right stick: tilts on the ground                right / left / up / down -> ftilt, ftilt (turned), utilt, dtilt
+pass  smash: a flick with attack smashes, a held stick tiltsflick + attack -> fsmash, flick up + attack -> usmash, stick held then attack -> ftilt
+pass  smash: attack + special together                no direction -> fsmash, up -> usmash
+pass  smash: holding attack charges for a second, holds for two morecharge: tapped 0, held 38 frames 29, held throughout 60 (released after 180 frames)
+pass  right stick: in the start-up of a jump it gives an aerialfair in the air
+pass  Flint: down special hangs in the air, once      first use: 49 frames, fell 0.0; second use before landing: fell 33.6
+pass  Wren (Nib): down special hangs in the air, once first use: 32 frames, fell 0.0; second use before landing: fell 29.4
+pass  island: an up special from underneath always gets out16 starts beneath the island, all reached the ledge or the stage
+pass  island: rising under it is never stopped        no frame with upward speed and no upward movement
+pass  document: every attack has its listed frame and damagechecked 6 fighters against the table
+pass  Flint: Banked Coal leaves one ember for 45 frames, and a new coal clears the oldember lasted 45 frames at 4%; most of his shots alive at once: 1
+pass  Flint: Lamp Rush lunges about 1.1 H, 10% clean and 7% latetravelled 16.6 (15.4); close target 10.5%, far target 7.4%
+pass  Flint: Updraft lifts about 2 H                  rose 28.0 (28)
+pass  Flint: Bellows Burst hits for 15% in a short conein the cone: 15.8% on frame 26; at 30 away: 0.0%
+pass  Flint: Bellows Burst uses up his ember and sends a flame furtherember there before: 1, after: 0; a target beyond the cone took 8.4%
+pass  Nib: Quick Bolt is fast, weak and short (about 1.8 H)at 20 away: 4.2% on frame 13; at 36 away: 0.0%
+pass  Nib: False Start let go is a pounce of about 1.3 H for 9%travelled 20.0 (18.2), 9.5%
+pass  Nib: False Start held stops short at about 0.55 H, with no hittravelled 7.5 (7.7), 0.0%, free on frame 24
+pass  Nib: Spring Vault goes steep, or diagonal with the sticksteep: up 38.0, across 0.0; diagonal: up 27.0, across 72.5
+pass  Loom: Crossbreeze deals 3% up close and only pushes further outclose: 3.1%; pushed in the air 50.3, on the ground 3.1, no damage
+pass  Loom: a shield blocks the gust                  a shielding target moved 0.0
+pass  Loom: Ribbon Sling is 11% at the weight and 6% on the inner ribbonwell spaced 11.6%, close 6.3%
+pass  Loom: the sling recoils about 0.3 H, once per time off the groundon the ground 4.2 (4.2); in the air first -4.0, second 0.5
+pass  Loom: Thermal is a short lift on a tap, about 2.4 H heldtapped: 10.2; held: 34.5 (33.6)
+pass  Hod: Boulder Roll is a 7% stone on a tap and an 11% stone heldtap: 7.4% released on frame 21; held: 11.6% on frame 35
+pass  Hod: one stone at a time                        most stones alive at once from two taps: 1
+pass  Hod: Stone Step climbs about 1.65 H             rose 23.0 (23.1)
+pass  Wren: the swap hands over on frame 16 and frees her on frame 33changed on move frame 16, free on frame 33
+pass  Wren: 60 frames must pass before the next swap  pressed again 38 frames later: still companion 1; after 68 frames: companion 2
+pass  Wren: a hit before the handover keeps the old companionhit on frame 8 of the swap: companion 0 is still in
+pass  Potato Sack: walks and runs in hops with a stop betweenwalking: 4 hops, 30 frames stopped of 81; running: 3 hops, 10 stopped
+pass  Potato Sack: tumble slides along the floor without hurtingslid 45.2 units (idle>attack>idle)
+pass  Potato Sack: tumble lifts straight up in the airrose 27.9, drifted 0.0
+pass  Potato Sack: a tumble dive that reaches the floor carries on as a slidefrom 40 up: went 63.9 (air>attack>air>land>idle); from 3 up: went 25.2 (air>attack>idle)
+pass  Potato Sack: a tumble never ends on its back, from any heightair>attack>air>land>idle / air>attack>idle / air>attack>idle / air>attack>idle / air>attack>air>land>idle / air>attack>idle
+pass  Potato Sack: any action comes out the frame after the burstftilt on frame 10 moving at 2.99; jump: idle>attack>jsq>air>land>idle; shield: idle>attack>shield
+pass  Potato Sack: can act the moment a dive touches downjab on frame 15 (air>attack>idle)
+pass  Potato Sack: a push the other way ends a slide, holding the same way does notturned back after 2.5 units, kept going for 42.8
+pass  Potato Sack: tumble with no direction hangs in the airkind stall, rose 0.0
+pass  Potato Sack: a slide can be cut short into an attack, keeping speedjab on frame 20 still moving at 1.89
+pass  Potato Sack: one tumble per time off the ground rose 27.9 in all (air>attack>air)
+pass  Potato Sack: cannot hold the ledge              Flint caught it: true; the sack fell to -65
+pass  Potato Sack: Bag It grabs through a shield and flingscaught: true, flung: true, 12.6% dealt
+pass  Potato Sack: Bag It catches in the air          caught: true, flung: true
+pass  Potato Sack: Hot Potato launches it and costs damagerose 44.0 for 12%
+pass  Potato Sack: the more hurt, the further the blast throws itat 0%: 44.0, at 100%: 104.6
+pass  Potato Sack: the blast is steered with the stick and hurts a neighbourheld right: carried 41.3 sideways; a neighbour took 18.9%
+pass  Potato Sack: one Hot Potato per time off the ground1 blast(s) from two presses in the air
+pass  Potato Sack: Spud Bomb grows the longer it is heldtapped: 10.1% up close, nothing at 22 away; held 4 seconds: a KO at 22 away
+pass  Potato Sack: Spud Bomb is a kill move           tapped at 150%: KO; held 1.5 s at 50%: KO
+pass  Potato Sack: two neutral airs fit in one short hop2 neutral airs before landing
+pass  Potato Sack: neutral air hits four times (three carrying hits and a finisher)rising: 4 hits, 9.6%; falling: 4 hits
+pass  Potato Sack: neutral air drags the opponent with him, up or downrising: he moved 7.2, they moved 7.0, never more than 4.9 apart; falling: -15.1 / -13.6, at most 3.2 apart
+pass  Potato Sack: neutral air finisher launches them awayat 130%: 77.6 units apart 90 frames after the start
+pass  Potato Sack: Hot Potato bursts on frame 5       burst on frame 5
+pass  Potato Sack: a tumble with down held passes through a platformwith down held: went straight through; without: landed on it and slid
+pass  Sprocket: frames and damage are the document’s  jab f5, forward tilt f8 10% (handle 7%), forward smash f21 20%, grab f7
+pass  Sprocket: weight and movement against Flint     weight 112, ground speed 88, air drift 82, gravity 110 (targets 112, 88, 82, 110)
+pass  Sprocket: the tape rolls out, curls back and ends where it was let gothrown on frame 17, ran out 38.7, last seen -1.3 from the start, gone: true
+pass  Sprocket: one tape at a time                    1 at once after two throws
+pass  Sprocket: the tape hits for 6% and breaks       target at 7.6% (6% before the one-on-one bonus)
+pass  Sprocket: the wrench head hooks for 9% and tugs inwardtarget above and ahead: 11.3%, sent toward him
+pass  Sprocket: the handle hits for 7% and pushes outwardtarget close in: 8.8%, sent away
+pass  Sprocket: Ratchet Spin goes straight up or on a diagonalstraight: rose 23.4 (Flint’s Updraft 28), drifted 0.0; diagonal: rose 15.7, carried 73.0
+pass  Sprocket: the vise takes a shielding opponent and throws them behind for 12%caught: true, thrown behind: true, 15.1% (12% before the one-on-one bonus)
+pass  Sprocket: a jump beats the vise, and it catches nothing in the airjumped: caught false; both in the air: caught false
+pass  Sprocket: a missed vise leaves 30 frames        active 18 to 19, 30 frames after
+pass  Scuttle: frames and damage are the document’s   jab f3, forward tilt f6 7%, forward smash f16 17%, up smash 13%, grab f6
+pass  Scuttle: weight and movement against Flint      weight 82, run 116, dash 127, air drift 110, gravity 107, height 0.75 H
+pass  Scuttle: the tongs take a shielding opponent and fling them for 8%caught: true, 10.1% (8% before the one-on-one bonus)
+pass  Scuttle: in the air the tongs swipe for 5% insteadcaught: false, 6.3%
+pass  Scuttle: the roll covers about 1.65 H on the floor and 0.9 H in the airfloor 1.69 H, air 0.95 H
+pass  Scuttle: the roll hits once, 10% clean          target at 12.6% (10% before the one-on-one bonus)
+pass  Scuttle: Steam Pop lifts about 2.15 H           rose 2.10 H
+pass  Scuttle: Bucket Drop on the floor hits for 13%  target at 16.4%
+pass  Scuttle: the air dive falls at 1.4 times fast fall and thumps where it landsfell at 1.40 times fast fall; a target standing beside the landing took 12.6% (10% before the bonus)
+pass  Scuttle: the dive sends an airborne target straight downtarget in the air took 15.1%, sent down
+pass  Potato Sack: the hot middle of the burst KOs Flint at about 70%at 60%: survives, at 80%: KO, 1 hit
+pass  Potato Sack: the edge of the burst KOs Flint at about 100 to 125%at 90%: survives, at 125%: KO
+pass  Potato Sack: the burst scales with the target’s damage, not the sack’sFlint at 60% with the sack at 150%: survives
+pass  Furious Fowls: each bird’s slingshot normals are the overhaul’sFlint forward tilt f8 8%, Bolt forward smash f15 14%, Cinder forward smash f24 21%, Cinder back air landing 17, Bolt grab f7
+pass  Furious Fowls: the bird is called Flint on screenFlint / Flint alone
+pass  Furious Fowls: neutral special taps to the next bird, or opens a wheel to point at onetap: Bolt; held and pointed down-left: Pip (wheel opened: true); shots fired: 0
+pass  Furious Fowls: side special fires the bird, which flies until it landsslingshot stayed at -40; the bird flew 35 frames and stopped by landing; damage still 37%
+pass  Furious Fowls: Bolt’s flight takes one sharp correctionturned straight up mid-flight: true
+pass  Furious Fowls: down special alone hops back into the slingshot only when close25 away: stays out; 12 away: back in the pouch
+pass  Furious Fowls: Sling Spin lands its light hits and a finisher, per birdFlint 5 hits for 12.6%, Bolt 6 for 12.0%, Cinder 4 for 16.4% (4+1, 5+1, 3+1 expected)
+pass  Furious Fowls: the handle end of the spin hits tooa target below the rig was hit 5 times
+pass  Furious Fowls: the rig turns end over end, twice round for Flintturned 2.00 times
+pass  Furious Fowls: Catapult Cyclone hits more and harder the longer it is chargedtapped: 3 hits, 10.1%; full charge: 6 hits, 30.2%
+pass  Furious Fowls: a full Cyclone ends in an ordinary fall and stays under the ceilingfell and landed, stocks 3
+pass  Furious Fowls: Flint’s Brace & Break answers a light frontal hitcountered: true; Flint took 0.0%, the attacker 12.6%
+pass  Furious Fowls: Bolt’s Skitter Step is a low, quick skidskidded 31 units, low: true
+pass  Furious Fowls: Cinder’s Anvil Drop shocks the floor beside hima neighbour 9 away took 10.1%
+pass  Furious Fowls: Pip’s Orbit Parade circles two doubles that hit at most twice each2 doubles; the target took 3.5%
+pass  Furious Fowls: Pearl’s Nest Marker plants one nest that lifts whoever walks in1 nest after two presses; the opponent walking in was lifted: true
+pass  Furious Fowls: Flint alone gets a second hop only on a second pressone press: rose 25; two presses: 39
+pass  Furious Fowls: Bolt alone brakes and bursts the other waymoving at -2.80 after drifting forward at 1.2
+pass  Furious Fowls: Cinder’s Pressure Cooker grows from 6% to 11% with the holdtapped 7.6%, held 13.9% (6 and 11 before the one-on-one bonus)
+pass  Furious Fowls: Pip alone swaps places with a doublemoved -14 units; 2 doubles shown
+pass  Furious Fowls: Pearl’s Feather Brake slows her fallfell 29 normally, 10 with the brake, in 30 frames
+pass  Furious Fowls: each bird’s own recovery; Pearl climbs highestFlint 25, Bolt 26, Cinder 29, Pip 19, Pearl 41
+pass  Furious Fowls: losing a stock alone puts the bird back in the pouchstocks 2, form Flint, slingshot gone
+pass  Furious Fowls: the same inputs give the same game (ready for rollback)two runs of 400 frames ended identically
+pass  training: a jab string counts as one true combo, with its damage2 hits for 5.0%
+pass  training: a hit after the target recovers starts a new combonext hit: 1 hit, best kept at 2
+pass  training: no clock, and stocks never run out    stocks 3 after a KO; clock stopped
+pass  audit: an up tilt hits someone standing beside the attacker, and still misses out of reachbeside: 10.1%, 30 away: 0.0%
+pass  audit: covering the limb does not lengthen an attackFlint forward tilt reaches 15, forward smash 18
+pass  audit: a fast shot cannot pass through a body between framesa shot moving 14 a frame at a body 8 wide: hit
+pass  audit: a ledge grab can be hit for its first two frames2 open frames, then protected
+pass  audit: turning round out of a full run takes a skid14 frames to be running the other way
+pass  Flint: hop heights match the numbers            full 34.0 (34), short 16.5 (16.5), with air jump 68.5 (68.5)
+pass  Flint: a full hop pops off the floor            18.7 high after four frames (18.7)
+pass  Flint: fast fall drops at full speed at once    air time 52 frames, 36 with a fast fall from the top
+pass  Flint: dash, run, walk and stop speeds          dash 1.92 (1.92), run 1.74 (1.74), walk at 60% stick 0.67 (0.67), stopped true
+pass  Nib: hop heights match the numbers              full 35.0 (35), short 15.0 (15), with air jump 71.0 (71)
+pass  Nib: a full hop pops off the floor              19.3 high after four frames (19.25)
+pass  Nib: fast fall drops at full speed at once      air time 51 frames, 35 with a fast fall from the top
+pass  Nib: dash, run, walk and stop speeds            dash 2.36 (2.36), run 2.23 (2.23), walk at 60% stick 0.83 (0.83), stopped true
+pass  Loom: hop heights match the numbers             full 30.0 (30), short 13.5 (13.5), with air jump 57.0 (57)
+pass  Loom: a full hop pops off the floor             16.5 high after four frames (16.5)
+pass  Loom: fast fall drops at full speed at once     air time 59 frames, 41 with a fast fall from the top
+pass  Loom: dash, run, walk and stop speeds           dash 1.68 (1.68), run 1.51 (1.51), walk at 60% stick 0.57 (0.57), stopped true
+pass  Hod: hop heights match the numbers              full 27.5 (27.5), short 13.5 (13.5), with air jump 55.4 (55.5)
+pass  Hod: a full hop pops off the floor              15.1 high after four frames (15.1)
+pass  Hod: fast fall drops at full speed at once      air time 42 frames, 29 with a fast fall from the top
+pass  Hod: dash, run, walk and stop speeds            dash 1.46 (1.46), run 1.32 (1.32), walk at 60% stick 0.50 (0.50), stopped true
+pass  air: a running jump carries speed, then settles to air speedleft the ground at 1.30 (cap 1.3), 1.13 later (air speed 1.1)
+all 179 rule checks pass
+(node:29392) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)

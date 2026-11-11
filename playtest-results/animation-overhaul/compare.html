@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Animation before and after</title>
+<style>
+  :root { --bg: #0e1020; --panel: #171a2e; --ink: #e8e9f3; --dim: #9aa0c4; --acc: #ffb35c; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px system-ui, sans-serif; }
+  header { padding: 18px 20px 6px; } h1 { margin: 0 0 4px; font-size: 22px; } p { margin: 4px 0 12px; color: var(--dim); }
+  nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 20px 12px; }
+  nav button { background: var(--panel); color: var(--ink); border: 1px solid #333a66; border-radius: 8px; padding: 6px 10px; cursor: pointer; font: inherit; }
+  nav button.on { border-color: var(--acc); color: var(--acc); }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 20px 20px; }
+  @media (max-width: 800px) { .pair { grid-template-columns: 1fr; } }
+  figure { margin: 0; background: var(--panel); border-radius: 10px; padding: 8px; } figcaption { color: var(--dim); margin: 2px 2px 6px; }
+  video { width: 100%; border-radius: 6px; display: block; background: #000; }
+  .ctl { padding: 0 20px 10px; color: var(--dim); }
+</style></head><body>
+<header><h1>Furious Fowls and Potato Sack: animation before and after</h1>
+<p>The same scripted inputs played in the real game: on the left the previous build (the playtest link before this work), on the right the overhaul. Both play together.</p></header>
+<nav id="nav"></nav>
+<div class="ctl"><label><input type="checkbox" id="slow"> half speed</label></div>
+<div class="pair"><figure><figcaption>Before</figcaption><video id="a" muted playsinline loop></video></figure><figure><figcaption>After</figcaption><video id="b" muted playsinline loop></video></figure></div>
+<script>
+const CLIPS = ['sack-movement', 'sack-ground-normals', 'sack-smashes', 'sack-aerials', 'sack-throws', 'sack-specials', 'sack-tumble-drop', 'sack-hit-reactions',
+  'fowl-birds-idle-run', 'fowl-normals', 'fowl-sling-spin-cyclone', 'fowl-selector', 'fowl-separate-rejoin', 'fowl-pip-trio', 'fowl-hit-reactions', 'ko-respawn'];
+const a = document.getElementById('a'), b = document.getElementById('b'), nav = document.getElementById('nav'), slow = document.getElementById('slow');
+function show(n) { a.src = 'before/' + n + '.webm'; b.src = 'after/' + n + '.webm'; [...nav.children].forEach(x => x.classList.toggle('on', x.dataset.n === n)); Promise.all([a.play(), b.play()]).catch(() => {}); rate(); }
+function rate() { a.playbackRate = b.playbackRate = slow.checked ? 0.5 : 1; }
+slow.onchange = rate; a.onplay = () => { b.currentTime = a.currentTime; };
+CLIPS.forEach(n => { const x = document.createElement('button'); x.textContent = n.replace(/-/g, ' '); x.dataset.n = n; x.onclick = () => show(n); nav.appendChild(x); });
+show(CLIPS[0]);
+</script></body></html>

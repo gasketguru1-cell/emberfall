@@ -1,0 +1,6 @@
+20 matches, 48381 frames, 77 stocks lost, 24 of 26 states and 180 different moves reached
+never reached: rebound, broken
+longest time in one state: helpless 139, attack 105, air 94, airdodge 56, hurt 50, shield 45
+ok: no crashes, broken numbers or impossible states
+(node:7512) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)

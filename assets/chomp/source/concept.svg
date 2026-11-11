@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 640" width="900" height="640">
+  <!-- Chomp Chomp, concept v1 (Emberfall, original). A squat royal-blue creature: small beady eyes, a huge mouth of
+       triangular teeth, stubby feet and side fins, thick black outlines, and a leaf sprout on top. With his hot coal and his ant. -->
+  <defs>
+    <radialGradient id="body" cx="0.42" cy="0.35" r="0.75">
+      <stop offset="0" stop-color="#4f8dff"/>
+      <stop offset="0.6" stop-color="#2a5fd6"/>
+      <stop offset="1" stop-color="#1b3f9c"/>
+    </radialGradient>
+    <radialGradient id="coal" cx="0.4" cy="0.35" r="0.7">
+      <stop offset="0" stop-color="#fff2b0"/>
+      <stop offset="0.35" stop-color="#ffb13b"/>
+      <stop offset="0.75" stop-color="#e2461b"/>
+      <stop offset="1" stop-color="#5a1a0e"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffb13b" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ff6a1f" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6efe0"/><stop offset="1" stop-color="#e7dcc6"/></linearGradient>
+  </defs>
+  <rect width="900" height="640" fill="url(#bg)"/>
+  <text x="30" y="46" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="700" fill="#3a2f2a">CHOMP CHOMP — concept v1</text>
+  <text x="30" y="74" font-family="Segoe UI, Arial, sans-serif" font-size="16" fill="#6a5d55">leaf sprout · small beady eyes · big toothy mouth · stubby feet and fins · hot coal and ant helper</text>
+  <ellipse cx="330" cy="560" rx="170" ry="22" fill="#000" opacity="0.15"/>
+  <!-- feet -->
+  <g stroke="#111" stroke-width="7" stroke-linejoin="round">
+    <ellipse cx="262" cy="540" rx="52" ry="26" fill="#2a5fd6"/>
+    <ellipse cx="398" cy="540" rx="52" ry="26" fill="#2a5fd6"/>
+    <path d="M232 548 q30 10 62 0" fill="none" stroke="#7c8aa8" stroke-width="6"/>
+    <path d="M368 548 q30 10 62 0" fill="none" stroke="#7c8aa8" stroke-width="6"/>
+  </g>
+  <!-- side fins -->
+  <g stroke="#111" stroke-width="7" stroke-linejoin="round" fill="#2353c2">
+    <path d="M148 380 q-62 8 -70 66 q44 -6 78 -34 z"/>
+    <path d="M512 380 q62 8 70 66 q-44 -6 -78 -34 z"/>
+  </g>
+  <!-- body -->
+  <path d="M330 168 C 470 168 545 262 545 385 C 545 482 460 540 330 540 C 200 540 115 482 115 385 C 115 262 190 168 330 168 Z" fill="url(#body)" stroke="#111" stroke-width="9"/>
+  <!-- belly sheen -->
+  <path d="M215 250 q40 -50 110 -58" fill="none" stroke="#9cc2ff" stroke-width="10" stroke-linecap="round" opacity="0.7"/>
+  <!-- leaf sprout -->
+  <g stroke="#111" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M330 172 q-6 -40 6 -66" fill="none" stroke="#2f6b1e" stroke-width="10"/>
+    <path d="M336 108 q48 -46 104 -18 q-30 58 -104 18 z" fill="#5fc23a"/>
+    <path d="M334 118 q-46 -34 -92 -8 q30 44 92 8 z" fill="#4aa62c"/>
+    <path d="M340 108 q34 -10 62 -6" fill="none" stroke="#2f6b1e" stroke-width="4"/>
+  </g>
+  <!-- small beady eyes, set high and close -->
+  <g stroke="#111" stroke-width="5">
+    <ellipse cx="292" cy="268" rx="15" ry="17" fill="#111"/>
+    <ellipse cx="370" cy="268" rx="15" ry="17" fill="#111"/>
+  </g>
+  <circle cx="297" cy="262" r="5" fill="#fff"/><circle cx="375" cy="262" r="5" fill="#fff"/>
+  <path d="M268 238 q22 -12 44 -2 M350 236 q22 -10 44 2" fill="none" stroke="#111" stroke-width="6" stroke-linecap="round"/>
+  <!-- the huge mouth -->
+  <path d="M175 330 Q 330 300 485 330 Q 470 480 330 492 Q 190 480 175 330 Z" fill="#5a0f1c" stroke="#111" stroke-width="8"/>
+  <path d="M235 450 Q 330 425 425 450 Q 400 482 330 486 Q 260 482 235 450 Z" fill="#e3546a"/>
+  <!-- teeth: top row and bottom row of triangles -->
+  <g fill="#fff" stroke="#111" stroke-width="4" stroke-linejoin="round">
+    <path d="M190 334 l22 38 l18 -42 z"/><path d="M232 328 l20 40 l20 -42 z"/><path d="M274 324 l20 42 l20 -43 z"/><path d="M316 322 l14 44 l16 -44 z"/>
+    <path d="M348 322 l18 43 l18 -42 z"/><path d="M388 325 l20 42 l18 -40 z"/><path d="M428 330 l18 40 l22 -36 z"/>
+    <path d="M232 462 l16 -30 l18 34 z"/><path d="M286 474 l16 -32 l16 34 z"/><path d="M336 476 l16 -32 l16 32 z"/><path d="M388 466 l16 -30 l16 30 z"/>
+  </g>
+  <!-- the hot coal on its rope, and the ant -->
+  <g transform="translate(690 230)">
+    <path d="M-20 -110 q-6 50 10 96" fill="none" stroke="#8a6a3a" stroke-width="5" stroke-dasharray="10 5"/>
+    <circle cx="-8" cy="-112" r="9" fill="#6b5a4a" stroke="#111" stroke-width="4"/>
+    <circle cx="0" cy="12" r="70" fill="url(#glow)"/>
+    <path d="M-30 -2 l18 -26 l30 4 l16 28 l-12 30 l-32 6 l-24 -18 z" fill="url(#coal)" stroke="#111" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M-10 4 l10 -6 l12 8" fill="none" stroke="#fff3c0" stroke-width="3" opacity="0.8"/>
+    <text x="-50" y="86" font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#3a2f2a">hot coal</text>
+  </g>
+  <g transform="translate(700 470)" stroke="#111" stroke-width="4" stroke-linecap="round">
+    <path d="M-30 6 l-14 18 M-14 10 l-8 22 M2 10 l6 22 M18 8 l16 18 M-30 -2 l-18 -10 M20 -2 l20 -12" fill="none"/>
+    <ellipse cx="-34" cy="0" rx="20" ry="15" fill="#c2402a"/>
+    <ellipse cx="-4" cy="2" rx="12" ry="10" fill="#c2402a"/>
+    <circle cx="22" cy="-4" r="15" fill="#c2402a"/>
+    <path d="M28 -18 q10 -18 22 -16 M18 -18 q4 -20 16 -22" fill="none"/>
+    <circle cx="28" cy="-6" r="4" fill="#111"/>
+    <text x="-56" y="56" font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#3a2f2a" stroke="none">ant helper</text>
+  </g>
+</svg>

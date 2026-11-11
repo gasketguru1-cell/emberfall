@@ -49,13 +49,26 @@ const BLAST = { l: -(EDGE + 155), r: EDGE + 155, t: 140, b: -140 };   /* the cei
 
 /* ---------- Combat rules ---------- */
 const DMG_1V1 = 1.2;                 /* one-on-one damage bonus */
-const STALE = [0.09, 0.08545, 0.07635, 0.0679, 0.05945, 0.05035, 0.04255, 0.03575, 0.02965];   /* repeated moves weaken */
+const STALE = [0.09, 0.08545, 0.07635, 0.0679, 0.05945, 0.05035, 0.04255, 0.03345, 0.025];   /* repeated moves weaken (Ultimate's queue, SmashWiki "Stale Moves"); a use that hit a shield counts 0.85 of its slot */
+const STALE_SHIELD = 0.85;
+/* Hitstun is Ultimate's (0.4 x knockback, minus a frame, at least 4) times COMBO_EASE: the owner asked (2026-11-10) for combos
+   about 15% easier than in Ultimate. Measured as the follow-up window (frames the attacker is free before the target, after
+   every fighter's usual starters at 20% and 60%, tests/combat-audit.js), 1.065 widens it by 15% on average over Ultimate's
+   hitstun (1.15 would widen it by a third). Cutting long hitstun short (air
+   dodge from frame 40, anything from 45) stays Ultimate's, so the extra mostly lengthens low and mid percent combos, not
+   the reach of high percent launches. Set COMBO_EASE to 1 for Ultimate's hitstun exactly. */
+const HITSTUN = 0.4, COMBO_EASE = 1.065;
+/* Ledges and techs, Ultimate's rules (SmashWiki "Edge" and "Tech", checked 2026-11-10): intangibility on a ledge grab is
+   60 x airtime / 300 + 44 - 44 x damage / 120 frames (airtime up to 300, damage up to 120), between 23 and 123; the second grab
+   before landing or being hit gets 0.8 of it, the third 0.5, later ones none; at most six grabs; hanging lets go after 6.5 s. */
+const LEDGE_INV = (air, pct) => clamp(Math.round(60 * Math.min(air, 300) / 300 + 44 - Math.min(pct, 120) / 120 * 44), 23, 123);
+const LEDGE_REGRAB = [1, 0.8, 0.5], LEDGE_HANG = 390, TECH_WINDOW = 11;
 const SMASH_HOLD = 180, GRAB_MIN = 30;   /* frames a smash can be held; frames a grab holds at the very least, however hard the victim mashes */
 const FRESH = 1.05, SHORT_HOP_MUL = 0.85, TUMBLE_KB = 80, CROUCH_MUL = 0.85, CHARGING_MUL = 1.2;
 const CROUCH_Y = -0.4;   /* how far down the stick must be held to crouch */
 const SHIELD = { hp: 50, drain: 0.15, regen: 0.08, dmg: 1.19, release: 11, parry: 5, stun: { ground: 0.8, smash: 0.725, air: 0.33, proj: 0.29 } };
-function staleMul(a, id) { let r = 0, seen = false; a.stale.forEach((m, k) => { if (m === id) { r += STALE[k]; seen = true; } }); return seen ? 1 - r : FRESH; }
-function pushStale(a, id) { a.stale.unshift(id); if (a.stale.length > 9) a.stale.pop(); }
+function staleMul(a, id) { let r = 0, seen = false; a.stale.forEach((m, k) => { if (m === id) { r += STALE[k]; seen = true; } else if (m === id + '|s') { r += STALE[k] * STALE_SHIELD; seen = true; } }); return seen ? 1 - r : FRESH; }
+function pushStale(a, id, shield) { a.stale.unshift(shield ? id + '|s' : id); if (a.stale.length > 9) a.stale.pop(); }
 function rage(a) { return a.pct <= 35 ? 1 : a.pct >= 150 ? 1.1 : 1 + (a.pct - 35) / 115 * 0.1; }
 
 /* ---------- Sound ---------- */
@@ -93,15 +106,17 @@ function thwack(kb) {
 /* ---------- Input ---------- */
 const keys = {};
 addEventListener('keydown', e => {
-  keys[e.code] = true; if (!e.ctrlKey && !e.metaKey && !e.altKey && !/^Fd+$/.test(e.code)) e.preventDefault();   /* any key may be a game key now; browser shortcuts and the F keys still work */
+  keys[e.code] = true; if (!e.ctrlKey && !e.metaKey && !e.altKey && !/^F\d+$/.test(e.code) && !(e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))) e.preventDefault();   /* any key may be a game key now; browser shortcuts, the F keys and typing in a text box (the online menu) still work */
   if (CMENU) { if (CMENU.capture && !e.repeat) cmenuKey(e.code); return; }
   if (!e.repeat || e.code === 'KeyO') debugKey(e.code);
 });
 /* Debug tools: B shows hitboxes and hurtboxes, P freezes the game, O advances one frame, M switches between the 2D and 3D renderers. */
-const DBG = { step: false, boxes: false, advance: 0, r3d: true, fx: true };   /* fx: the burst of sparks and the flash of light where a hit lands */
+const DBG = { step: false, boxes: false, advance: 0, r3d: true, fx: true, arcs: false };   /* arcs: the circles and sweeps drawn over an attack while it can hit (off unless switched on: the owner asked, 2026-11-10) */   /* fx: the burst of sparks and the flash of light where a hit lands */
 /* Showing hitboxes: switched with the jump button on the start screen or B on the keyboard, and remembered. */
 try { DBG.boxes = localStorage.getItem('emberfall.boxes') === '1'; } catch (e) { /* no storage */ }
 try { DBG.fx = localStorage.getItem('emberfall.hitfx') !== '0'; } catch (e) { /* no storage */ }
+try { DBG.arcs = localStorage.getItem('emberfall.arcs') === '1'; } catch (e) { /* no storage */ }
+function setArcs(on) { DBG.arcs = !!on; try { localStorage.setItem('emberfall.arcs', on ? '1' : '0'); } catch (e) { /* no storage */ } }
 function setHitFx(on) { DBG.fx = !!on; try { localStorage.setItem('emberfall.hitfx', on ? '1' : '0'); } catch (e) { /* no storage */ } }
 /* Training mode: no clock, stocks never run out, and a true-combo counter. A combo is every hit landed while the target is
    still in hitstun (or held) from the one before; it ends the moment the target can act again. */
@@ -120,7 +135,7 @@ function comboStep() {   /* a combo ends when its target is free to act */
 function setBoxes(on) { DBG.boxes = !!on; try { localStorage.setItem('emberfall.boxes', on ? '1' : '0'); } catch (e) { /* no storage */ } }
 function debugKey(code) {
   if (code === 'KeyP') { DBG.step = !DBG.step; DBG.advance = 0; } else if (code === 'KeyO') { if (DBG.step) DBG.advance++; }
-  else if (code === 'KeyT' && mode === 'select') setTraining(!TRAINING); else if (code === 'KeyB') setBoxes(!DBG.boxes); else if (code === 'KeyH') setHitFx(!DBG.fx); else if (code === 'KeyM') DBG.r3d = !DBG.r3d;
+  else if (code === 'KeyT' && mode === 'select') setTraining(!TRAINING); else if (code === 'KeyB') setBoxes(!DBG.boxes); else if (code === 'KeyH') setHitFx(!DBG.fx); else if (code === 'KeyG') setArcs(!DBG.arcs); else if (code === 'KeyM') DBG.r3d = !DBG.r3d;
 }
 addEventListener('keyup', e => { keys[e.code] = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
@@ -187,7 +202,7 @@ function readPad(n) {
    bad setup can always be put right: arrows / Enter / Backspace on the keyboard, stick / A / B on a controller, or the mouse. */
 let CMENU = null;
 const CM = { x: 190, y: 50, w: 900, h: 620, done: [968, 66, 100, 34] };
-const KEY_NO = /^(Enter|Backspace|Delete|Tab|Escape|Control|Alt|Meta|OS|ContextMenu|CapsLock|NumLock|ScrollLock|PrintScreen|Pause|F\d+$|Key[BPOMHT]$)/;
+const KEY_NO = /^(Enter|Backspace|Delete|Tab|Escape|Equal|NumpadAdd|Control|Alt|Meta|OS|ContextMenu|CapsLock|NumLock|ScrollLock|PrintScreen|Pause|F\d+$|Key[BPOMHT]$)/;
 function menuRaw(dev) {
   if (dev === 'kb') return { x: (keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0), y: (keys.ArrowDown ? 1 : 0) - (keys.ArrowUp ? 1 : 0), ok: !!(keys.Enter || keys.Space), back: !!(keys.Backspace || keys.Escape), clear: !!keys.Delete };
   const p = navigator.getGamepads ? navigator.getGamepads()[+dev.slice(3)] : null; if (!p) return { x: 0, y: 0, ok: false, back: true, clear: false };   /* unplugged: leave */
@@ -221,7 +236,7 @@ function cmenuOk(it, d) {
 function cmenuKey(code) {   /* a key pressed while a row is waiting for one */
   const m = CMENU, it = cmenuItems()[m.row];
   if (code === 'Escape' || !it || it.kind !== 'bind') { m.capture = false; m.wait = true; return; }
-  if (KEY_NO.test(code)) { cmenuNote(keyName(code) + ' is kept for the menus and debug tools. Press a different key, or Escape to cancel.'); beep(200, 0.08, 'square', 0.03); return; }
+  if (KEY_NO.test(code)) { cmenuNote(keyName(code) + ' is kept for the menus, the move list and debug tools. Press a different key, or Escape to cancel.'); beep(200, 0.08, 'square', 0.03); return; }
   const su = setupOf(m.dev), old = su.map[it.key]; for (const k in su.map) if (k !== it.key && su.map[k] === code) { su.map[k] = old; cmenuNote(keyName(code) + ' was already in use, so the two have swapped.'); }
   su.map[it.key] = code; su.touched = true; m.capture = false; m.wait = true; saveControls(); beep(800, 0.06, 'triangle', 0.04);
 }
@@ -384,6 +399,11 @@ const KIT = {
     fsmash: [21, 20, { sour: 15 }], usmash: [15, 17], dsmash: [16, 15, { rear: [24, 13] }],
     nair: [7, 9, { late: 6 }], fair: [11, 13, { sour: 8 }], bair: [10, 14, { late: 8 }], uair: [10, 10], dair: [16, 15, { sour: 8 }],
     grab: 7, pummel: 1.5, throws: { f: 9, b: 11, u: 8, d: 7 } },
+  /* Chomp Chomp: the owner's design v2 (2026-11-10) */
+  'Chomp Chomp': { jab: [3, 2], jab2: [5, 2], jab3: [8, 4], dash: [9, 9, { late: 6 }], ftilt: [7, 7], utilt: [6, 7], dtilt: [5, 6],
+    fsmash: [17, 16], usmash: [14, 14], dsmash: [15, 13, { rear: [17, 13] }],
+    nair: [7, 8, { late: 5 }], fair: [9, 10], bair: [8, 9], uair: [7, 8], dair: [12, 12, { late: 7 }],
+    grab: 9, pummel: 1.3, throws: { f: 8, b: 9, u: 8, d: 7 } },
   Scuttle: { jab: [3, 2], jab2: [4, 2], jab3: [6, 4], dash: [7, 9, { late: 5 }], ftilt: [6, 7], utilt: [5, 6], dtilt: [5, 6],
     fsmash: [16, 17, { late: 11 }], usmash: [11, 13], dsmash: [13, 13, { rear: [18, 11] }],
     nair: [4, 8, { late: 4 }], fair: [6, 8], bair: [8, 12, { sour: 8 }], uair: [5, 7], dair: [13, 11, { sour: 8 }],
@@ -414,6 +434,7 @@ const TUNE = {
   Flint: { kb: 0.84, lag: 1.2 }, Nib: { kb: 1.09 }, Loom: { kb: 1.11, lag: 0.95 }, Hod: { kb: 1.31, lag: 0.8 }, 'Potato Sack': { kb: 0.9 }, Sprocket: { kb: 0.8, lag: 1.3 }, Scuttle: { kb: 0.91, lag: 1.2 },
   /* Furious Fowls: the owner asked for 55 to 65% (2026-11-10) */
   Rusty: { kb: 0.92 }, Bolt: { kb: 0.86, lag: 1.15 }, Cinder: { kb: 0.92 }, Pip: { kb: 1.18 }, Pearl: { kb: 1.0 },
+  'Chomp Chomp': { kb: 0.84, lag: 1.35 },   /* CPU-vs-CPU 84% wins untuned (2026-11-10): toned toward the 55 to 65% band */
 };
 const NORMALS = ['jab', 'jab2', 'jab3', 'dash', 'ftilt', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash', 'nair', 'fair', 'bair', 'uair', 'dair'];
 function applyTune(fm) {
@@ -957,16 +978,28 @@ function makeSolo(name) {
 }
 
 /* ---- the selector: Neutral B in the slingshot ---- */
-const SELECTOR = { t: 200, h: [], sel: 1,
+/* Tap: the next bird. Hold 8 frames: the wheel opens; point with the stick and let go to confirm. Then a six-frame pouch
+   swap, with the bird changing halfway through it. The stick only points while the wheel is open: it does not drift the
+   slingshot, and a pick needs the stick in the same slice two frames running, so a stick springing back to the middle
+   (which can bounce through the opposite side) does not change the choice. */
+const SEL_SWAP = 6;
+const SELECTOR = { t: 40, h: [], sel: 1, nodrift: 1,
   on(f, n, i) {
-    if (n === 1) { f.selOpen = false; f.selPick = f.fi; f.selDone = false; f.selHold = 0; }
-    if (f.selDone) return;
+    if (n === 1) { f.selOpen = false; f.selPick = f.fi; f.selDone = false; f.selHold = 0; f.selCand = -1; f.selCandN = 0; f.selRel = 0; f.selTo = -1; }
+    if (f.selDone) {   /* the pouch swap */
+      if (n === f.move.t - (SEL_SWAP >> 1) && f.selTo >= 0 && f.selTo !== f.fi) { f.fi = f.selTo; spark(f.x, f.y + 12, '#fff', 10, 1.2); beep(660, 0.05, 'triangle', 0.04); }
+      return;
+    }
     if (i.spc && ++f.selHold < 240) {
-      if (n >= 8) { f.selOpen = true; const m = Math.hypot(i.lx, i.ly); if (m > 0.5) f.selPick = ((Math.round(Math.atan2(i.lx, i.ly) / (Math.PI * 2 / 5)) % 5) + 5) % 5; }   /* clockwise from straight up: Flint, Bolt, Cinder, Pip, Pearl */
+      if (n >= 8) {
+        f.selOpen = true; const m = Math.hypot(i.lx, i.ly);
+        if (m > 0.6) { const k = ((Math.round(Math.atan2(i.lx, i.ly) / (Math.PI * 2 / 5)) % 5) + 5) % 5;   /* clockwise from straight up: Flint, Bolt, Cinder, Pip, Pearl */
+          f.selCandN = k === f.selCand ? f.selCandN + 1 : 1; f.selCand = k; if (f.selCandN >= 2) f.selPick = k; }
+        else { f.selCand = -1; f.selCandN = 0; }
+      }
       if (n > 9) f.mf = 9; return; }
-    const to = f.selOpen ? f.selPick : (f.fi + 1) % 5; f.selOpen = false; f.selDone = true;
-    if (to !== f.fi) { f.fi = to; spark(f.x, f.y + 12, '#fff', 10, 1.2); beep(660, 0.05, 'triangle', 0.04); }
-    f.mf = f.move.t - 5;   /* a five-frame pouch swap */
+    f.selTo = f.selOpen ? f.selPick : (f.fi + 1) % 5; f.selOpen = false; f.selDone = true; f.selRel = Math.min(n, 9);
+    f.mf = f.move.t - SEL_SWAP;
   } };
 
 const FOWLS = { name: 'Furious Fowls', sub: 'five birds and a slingshot', fowl: 1, cycle: 5, forms: [] };
@@ -1010,8 +1043,183 @@ const FOWLS = { name: 'Furious Fowls', sub: 'five birds and a slingshot', fowl: 
   });
   FOWLS.forms = combined.concat(solo);
 })();
-{ const nair = SACK.forms[0].moves.nair; nair.t = 15; nair.ll = 5; nair.ac = 10; for (const h of nair.h) { h.f0 = 3; h.f1 = 9; } }   /* Potato Sack's neutral air: 15 frames long, so two fit in one short hop (owner's request, 2026-11-10) */
-const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE, FOWLS];
+
+/* ---------- Chomp Chomp (original; the owner's design v2, 2026-11-10) ----------
+   A squat blue critter with a leaf sprout, small beady eyes and a huge toothy mouth. He bites, swings on a rope, rides a
+   bubble, puffs an air cushion, and plays a hot coal round the stage that his ant can carry back to him.
+   Neutral B, the hot coal (one per Chomp at any time; all of it lives in PROJ, so it is part of every snapshot):
+     - no coal: tosses it out on a rope from a little hook above and ahead (out on frame 13, can hit from frame 18). It swings
+       as a pendulum.
+     - swinging: B again is a relay. Pressed within 3 frames of the moment the coal swings out past its mark, it hops to a new
+       rope further on, keeping its speed (a little faster within 1 frame). Up to 3 relays. Pressed at any other moment it
+       lets go, and the coal flies on with the speed it had. Left alone it lets go at the far end of its swing.
+     - landed: stays 6 seconds. Chomp picks it up by walking over it. B while it lies there: a rope runs from the coal to
+       Chomp, wherever he is, every frame, and an ant crawls from the coal along it toward him (from frame 10). The rope
+       snags an opponent who crosses it but never hurts; only the ant hits (7%, once a trip). An attack on the rope cuts it,
+       and on the ant destroys it; the coal stays where it lies. The ant arriving hands Chomp the coal back.
+   Its damage grows with its speed: 5% slow, up to 12% at full tilt after relays. */
+const COAL = { g: 0.11, mark: 0.55, win: 3, relays: 3, boost: 1.1, keep: 0.97, vmax: 3.4, arc: 70, ground: 360, cd: 50, antV: 1.15, antD: 7, burn: 3 };
+const chompCoal = f => PROJ.find(p => p.owner === f.idx && p.tag === 'coal' && p.life > 0);
+const chompAnt = f => PROJ.find(p => p.owner === f.idx && p.tag === 'ant' && p.life > 0);
+const chompMouth = f => [f.x + f.face * 3, f.y + 5];
+function segDist(px, py, x0, y0, x1, y1) { const dx = x1 - x0, dy = y1 - y0, l2 = dx * dx + dy * dy || 1e-6, t = clamp(((px - x0) * dx + (py - y0) * dy) / l2, 0, 1); return [Math.hypot(px - x0 - dx * t, py - y0 - dy * t), t]; }
+/* a pendulum step: angle from straight down, positive toward +x */
+function coalSwing(p) { p.w += -(COAL.g / p.L) * Math.sin(p.th); const x = p.ax + p.L * Math.sin(p.th + p.w), y = p.ay - p.L * Math.cos(p.th + p.w); p.th += p.w; p.vx = x - p.x; p.vy = y - p.y; p.x = x; p.y = y; }
+function coalSpeedHit(p) { const sp = Math.hypot(p.vx, p.vy); p.h.d = Math.round(clamp(4 + sp * 2.3, 5, 12) * 10) / 10; p.face = sgn(p.vx) || p.face; }
+function coalStep(p) {
+  const ow = F[p.owner]; if (!ow || ow.state === 'dead') { p.life = 0; return; }
+  if (p.st === 'swing') {
+    coalSwing(p); p.arcT++;
+    /* the relay mark: the frame it swings out past COAL.mark (forward of its hook) */
+    if (p.markAge === undefined && sgn(p.w) === p.dir && p.th * p.dir >= COAL.mark) p.markAge = p.age;
+    coalSpeedHit(p);
+    if (p.y - p.r < 0 && Math.abs(p.x) < EDGE) { p.y = p.r; coalLand(p, MAIN); return; }   /* swung into the floor */
+    if (p.markAge !== undefined && sgn(p.w) !== p.dir) { coalLetGo(p); return; }   /* left alone it lets go at the far end of the swing and drops there */
+    if (p.arcT > COAL.arc) coalLetGo(p);
+    return;
+  }
+  if (p.st === 'fly') {
+    p.vy -= 0.1; const py = p.y - p.r; p.x += p.vx; p.y += p.vy; coalSpeedHit(p);
+    if (p.vy <= 0) for (const q of PLATS) if (py >= q.y && p.y - p.r <= q.y && p.x >= q.x0 && p.x <= q.x1) { p.y = q.y + p.r; coalLand(p, q); return; }
+    if (p.y < -1 && Math.abs(p.x) - p.r < stageHalf(p.y)) { p.life = 0; return; }   /* into the side of the island */
+    if (p.y < BLAST.b || Math.abs(p.x) > BLAST.r) p.life = 0;
+    return;
+  }
+  /* on the ground: Chomp picks it up by walking over it, unless his ant is carrying it */
+  p.vx = p.vy = 0;
+  if (!chompAnt(ow) && p.age - p.landAge > 20 && Math.abs(ow.x - p.x) < 5 && Math.abs(ow.y - (p.y - p.r)) < 3) { p.picked = true; p.life = 0; spark(p.x, p.y, '#ffb13b', 6, 0.8); beep(700, 0.05, 'triangle', 0.04); }
+}
+function coalLetGo(p) { p.st = 'fly'; p.ax = p.ay = undefined; beep(300, 0.05, 'triangle', 0.03, 0.7); }
+function coalLand(p, q) { p.st = 'ground'; p.plat = null; p.onPlat = q; p.vx = p.vy = 0; p.landAge = p.age; p.life = COAL.ground; p.h = { d: COAL.burn, a: 75, b: 30, k: 20, id: p.h.id }; p.cool = 0; p.rehit = 45; spark(p.x, p.y, '#ffb13b', 8, 0.9); beep(180, 0.06, 'triangle', 0.04, 0.8); }
+/* a relay press: in the window it moves the coal onto a new rope further on; anywhere else it lets go */
+function coalRelay(f, p) {
+  if (p.relay >= COAL.relays) { coalLetGo(p); return 'release'; }
+  let off = null;
+  if (p.markAge !== undefined && p.age - p.markAge <= COAL.win) off = p.age - p.markAge;   /* late side */
+  else if (p.markAge === undefined) {   /* early side: would it pass the mark within the window? */
+    let th = p.th, w = p.w; for (let k = 1; k <= COAL.win; k++) { w += -(COAL.g / p.L) * Math.sin(th); th += w; if (sgn(w) === p.dir && th * p.dir >= COAL.mark) { off = k; break; } }
+  }
+  if (off === null) { coalLetGo(p); return 'release'; }
+  const sp = Math.hypot(p.vx, p.vy) * (off <= 1 ? COAL.boost : COAL.keep), v = Math.min(COAL.vmax, sp);
+  /* the new rope: hooked ahead at the same height as the last, so the coal starts behind it and swings on through the same
+     low point and out again: each relay carries it about one rope width further */
+  const th = -p.dir * Math.acos(clamp((p.ay - p.y) / p.L, -1, 1)); p.ax = p.x - p.L * Math.sin(th); p.th = th; p.w = p.dir * v / p.L;
+  p.relay++; p.arcT = 0; p.markAge = undefined; p.perfect = off <= 1; p.offs = (p.offs || []).concat(off);
+  spark(p.x, p.y, off <= 1 ? '#fff6c8' : '#ffd27a', off <= 1 ? 12 : 7, 1.1); beep(off <= 1 ? 880 : 660, 0.06, 'square', 0.04, 1.3);
+  return off <= 1 ? 'perfect' : 'relay';
+}
+/* The ant: it starts at the coal and walks along the rope toward Chomp's mouth, wherever he is now. Its progress is the
+   distance it has walked from the coal; when Chomp moves, the rope swings round the coal and the ant stays that far along. */
+function antStep(p) {
+  const ow = F[p.owner], c = p.coal, v = F[1 - p.owner];
+  if (!ow || ow.state === 'dead' || !c || c.life <= 0 || !PROJ.includes(c)) { p.life = 0; return; }
+  const [mx, my] = chompMouth(ow), x0 = c.x, y0 = c.y, L = Math.hypot(mx - x0, my - y0) || 1e-6;
+  p.rope = [x0, y0, mx, my];
+  /* a rope through solid stage is cut */
+  for (const t of [0.25, 0.5, 0.75]) { const x = x0 + (mx - x0) * t, y = y0 + (my - y0) * t; if (y < -1 && Math.abs(x) < stageHalf(y)) { antCut(p, x, y); return; } }
+  p.s = Math.min(p.s + COAL.antV, L); const x = x0 + (mx - x0) * p.s / L, y = y0 + (my - y0) * p.s / L;
+  p.vx = x - p.x; p.vy = y - p.y; p.x = x; p.y = y; p.face = sgn(mx - x0) || 1;
+  if (L - p.s < 2.5) {   /* home: the coal comes back to Chomp */
+    p.life = 0; c.life = 0; c.picked = true; p.home = true; spark(mx, my, '#ffb13b', 10, 1); beep(520, 0.05, 'triangle', 0.04); beep(780, 0.05, 'triangle', 0.04);
+    return;
+  }
+  if (!v || v.state === 'dead') return;
+  /* the opponent's attacks cut the rope */
+  if (v.state === 'attack' && v.move) for (const h of v.move.h) {
+    if (h.grab || v.mf < h.f0 || v.mf > h.f1 || (h.when && !h.when(v))) continue;
+    const [d, t] = segDist(v.x + h.x * v.face, hitY(v, h), x0, y0, mx, my); if (d < h.r && t > 0.02 && t < 0.98) { antCut(p, x0 + (mx - x0) * t, y0 + (my - y0) * t); return; }
+  }
+  /* crossing the rope: a gentle snag that slows the crosser, never a hit (no damage, no hitstun, no freeze, no launch) */
+  const bx = v.x, by = v.y + v.st.h / 2, side = sgn((mx - x0) * (by - y0) - (my - y0) * (bx - x0)), [d, t] = segDist(bx, by, x0, y0, mx, my);
+  if (p.side && side && side !== p.side && d < v.st.h / 2 + 1 && t > 0.03 && t < 0.97 && !(p.snagT > 0)) { v.vx *= 0.5; if (!v.grounded) v.vy *= 0.6; p.snagT = 15; p.snags = (p.snags || 0) + 1; }
+  if (p.snagT > 0) p.snagT--; if (side) p.side = side;
+}
+function antCut(p, x, y) { p.life = 0; p.cut = true; const ow = F[p.owner]; if (ow) ow.ropeCuts = (ow.ropeCuts || 0) + 1; spark(x, y, '#d8c49a', 10, 1); beep(240, 0.06, 'square', 0.04, 0.6); }
+/* the ant's rope and the coal's swing rope, for the renderers and the hitbox view: picture only */
+function chompRopes() { const out = []; for (const p of PROJ) { if (p.tag === 'coal' && p.st === 'swing' && p.ax !== undefined) out.push([p.ax, p.ay, p.x, p.y, 'swing']); if (p.tag === 'ant' && p.rope) out.push([...p.rope, 'ant']); } return out; }
+function chompNspec(f, n, i) {
+  if (n === 1) {
+    const c = chompCoal(f), a = chompAnt(f);
+    f.ccAct = !c ? (frame < (f.coalReady || 0) ? 'none' : 'throw') : c.st === 'swing' ? 'relay' : c.st === 'ground' && !a ? 'ant' : 'none';
+    if (f.ccAct === 'relay') { f.ccRelay = coalRelay(f, c); f.mf = f.move.t - 8; }   /* a quick flick of the head */
+    else if (f.ccAct === 'none') f.mf = f.move.t - 6;
+    if (!f.grounded) hang(f);
+    return;
+  }
+  if (f.ccAct === 'throw' && n === 13) {   /* out of his mouth, onto a rope from a little hook above and ahead */
+    const dir = f.face, up = clamp(i.ly, -1, 1), ax = f.x + dir * 14, ay = f.y + 26 + up * 5, x = f.x + dir * 4, y = f.y + 6, L = Math.hypot(x - ax, y - ay), th = Math.atan2(x - ax, ay - y);
+    PROJ.push({ x, y, vx: 0, vy: 0, grav: 0, life: 9999, owner: f.idx, face: dir, dir, r: 2.4, ground: 'pass', plat: null, kind: 'coal', tag: 'coal', st: 'swing',
+      ax, ay, L, th, w: dir * (0.06 + 0.012 * up), arcT: 0, relay: 0, hits: 99, rehit: 9999, cool: 5, h: { d: 5, a: 50, b: 30, k: 55, id: 'Chomp Chomp:nspec' }, step: coalStep, onGone: coalGone });
+    beep(420, 0.07, 'triangle', 0.04, 1.2);
+  }
+  if (f.ccAct === 'ant' && n === 10) {
+    const c = chompCoal(f);
+    if (c && c.st === 'ground' && !chompAnt(f)) PROJ.push({ x: c.x, y: c.y, vx: 0, vy: 0, grav: 0, life: 9999, owner: f.idx, face: f.face, r: 2.2, ground: 'pass', plat: null, kind: 'ant', tag: 'ant',
+      coal: c, s: 0, hits: 99, rehit: 9999, h: { d: COAL.antD, a: 55, b: 40, k: 50, id: 'Chomp Chomp:ant' }, step: antStep });
+    f.mf = Math.max(f.mf, f.move.t - 8);
+  }
+}
+function coalGone(p) { if (!p.picked) { const ow = F[p.owner]; if (ow) ow.coalReady = frame + COAL.cd; } }
+/* Side B, Rope Swing: a rope to a hook above and ahead on frame 11 (once per time in the air), then a pendulum swing. Push
+   the stick to pump it. Let go of special to release along the swing with the mouth open: 9% clean, 6% after. A swing ends
+   by itself after 80 frames, or on landing. The rope never hits. */
+function chompSwing(f, n, i) {
+  const s = f.st, by = () => f.y + s.h / 2;
+  if (n === 1) { f.rsGo = false; if (!f.grounded) { if (f.airUse.rope) { f.mf = f.move.t; return; } f.airUse.rope = 1; } }
+  if (n < 11) { hang(f); return; }
+  if (n === 11) {
+    f.rsAx = f.x + f.face * 12; f.rsAy = by() + 22; const dx = f.x - f.rsAx, dy = by() - f.rsAy;
+    f.rsL = Math.hypot(dx, dy); f.rsTh = Math.atan2(dx, -dy); f.rsW = f.face * 0.05 + (f.vx * Math.cos(f.rsTh)) / f.rsL; f.rsGo = true; f.grounded = false; f.plat = null;
+    beep(500, 0.05, 'triangle', 0.04, 1.4);
+  }
+  if (!f.rsGo) return;
+  f.rsW += -(0.11 / f.rsL) * Math.sin(f.rsTh) + clamp(i.lx * f.face, -1, 1) * 0.0012 * f.face; f.rsW = clamp(f.rsW, -0.14, 0.14); f.rsTh += f.rsW;
+  const x = f.rsAx + f.rsL * Math.sin(f.rsTh), y = f.rsAy - f.rsL * Math.cos(f.rsTh) - s.h / 2;
+  f.vx = x - f.x; f.vy = y - f.y;
+  if ((n > 16 && !i.spc) || n >= 91) { f.rsGo = false; f.startMove('swingBite'); f.vx = clamp(f.vx, -3, 3); f.vy = clamp(f.vy, -2.5, 3); }   /* let go: fly on along the swing, mouth first */
+}
+/* Up B, Bubble Ride: a bubble forms on frame 8 and carries him up for up to 55 frames, steering gently. Up B again pops it
+   (4% round him) with a small push the way the stick points; it pops by itself at the end. Falls helpless after. */
+function chompBubble(f, n, i) {
+  if (n < 8) { hang(f); return; }
+  if (n === 8) f.bubble = true;
+  if (!f.bubble) return;
+  f.vy = 0.95; f.vx = appr(f.vx, clamp(i.lx, -1, 1) * 0.75, 0.06);
+  if ((n > 14 && f.ctl && f.ctl.pressed('spc')) || n >= 63) {
+    f.bubble = false; const m = Math.hypot(i.lx, i.ly), dx = m > 0.3 ? i.lx / m : 0, dy = m > 0.3 ? i.ly / m : 1;
+    f.vx = dx * 1.8; f.vy = dy * 1.8 + 0.4;
+    PROJ.push({ x: f.x, y: f.y + f.st.h / 2, vx: 0, vy: 0, grav: 0, life: 3, owner: f.idx, face: f.face, r: 8, ground: 'pass', plat: null, kind: 'blast', h: { d: 4, a: 70, b: 40, k: 40, id: 'Chomp Chomp:uspec' } });
+    spark(f.x, f.y + f.st.h / 2, '#cfe8ff', 14, 1.4); beep(900, 0.05, 'sine', 0.04, 0.6); f.mf = f.move.t;
+  }
+}
+/* Down B, Air Cushion: squeezes a little cushion. A gust on frames 9 to 13 pushes the opponent away (3%) and nudges a
+   swinging or flying coal along; it leaves the ant alone. In the air the first one each jump pushes Chomp back. 18 after. */
+function chompCushion(f, n) {
+  if (n === 9) { if (!f.grounded && !f.airUse.cush) { f.airUse.cush = 1; f.vx = -f.face * 1.6; f.vy = Math.max(f.vy, 0.7); } else if (f.grounded) f.vx = -f.face * 0.5; beep(260, 0.08, 'sine', 0.04, 0.5); }
+  if (n >= 9 && n <= 13) { const c = chompCoal(f); if (c && (c.st === 'swing' || c.st === 'fly')) { const dx = c.x - f.x, dy = c.y - (f.y + 5), d = Math.hypot(dx, dy);
+    if (d < 22 && dx * f.face > 0 && Math.abs(dy) < d * 0.7) { if (c.st === 'swing') c.w += f.face * 0.006; else { c.vx += f.face * 0.4; c.vy += 0.12; } c.gusted = (c.gusted || 0) + 1; } } }
+}
+const CHOMP = {
+  name: 'Chomp Chomp', sub: 'the hungry critter', forms: [{
+    name: 'Chomp Chomp', col: ['#2a5fd6', '#5fc23a', '#ffb13b'], alt: ['#8a3fd0', '#ffcf3a', '#ff6a3c'], reachMul: 1.0,
+    /* the design's targets against an average fighter (Flint): weight 94, walk 108, dash 115, run 110, air speed average,
+       gravity and fall a little low, jump squat 4, a high full hop. Squat and round. */
+    st: { weight: 94, walk: 1.21, walkMul: 0.15, walkAdd: 0.1, trac: 0.11, dash: 2.2, runMul: 0.12, runAdd: 0.045, run: 1.91,
+      jumpX: 0.95, jumpXMul: 0.85, jumpXMax: 1.35, airJumpX: 0.9, jumpH: 37, jumpInit: 19.6, hopH: 17, airJumpH: 35, upH: 28,
+      airMul: 0.06, airAdd: 0.01, airSpeed: 1.0, airBrake: 0.01, grav: 0.088, fall: 1.52, ffall: 2.45, jsq: 4, w: 10, h: 11, jf: 3, jb: 1.6,
+      jumps: 1, dashF: 12, roll: [28, 1.35, 13], spot: [22, 15] },
+    aiShot: [30, 90],
+    moves: mk(0.95, 1, 1, 0.8, {
+      nspec: { t: 22, h: [], on: chompNspec },   /* the toss: out on frame 13, free again on 22, before the coal reaches its first relay mark */
+      sspec: { t: 92, nodrift: 1, h: [], on: chompSwing },
+      swingBite: { t: 26, air: 1, ll: 10, h: [{ f0: 1, f1: 4, x: 5, y: 6, r: 5.5, d: 9, a: 40, b: 40, k: 75 }, { f0: 5, f1: 9, x: 4.5, y: 6, r: 5, d: 6, a: 45, b: 30, k: 60, part: 'late' }] },
+      uspec: { t: 70, helpless: 1, ledge: 1, nodrift: 1, rise: 78, h: [], on: chompBubble },   /* rise: about 52 in the bubble and 26 from the pop */
+      dspec: { t: 32, h: [{ f0: 9, f1: 13, x: 10, y: 5, r: 7.5, d: 3, a: 20, b: 48, k: 12, away: 1 }], on: chompCushion },
+    }, { jabs: 3, grab: { t: 32, h: { f0: 9, f1: 10, x: 10.5, r: 4.4 } } }),
+  }],
+};
+
+const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE, FOWLS, CHOMP];
 /* Hitbox positions measured from the animations (hitboxes.js, written with tools/measure.html). Timing, damage and launch stay as defined above. */
 if (typeof HITBOXES !== 'undefined') for (const def of ROSTER) for (const fm of def.forms) {
   const set = HITBOXES[fm.name]; if (!set) continue;
@@ -1022,6 +1230,22 @@ for (const def of ROSTER) for (const fm of def.forms) {
   /* where an attack has a weaker part near the body, that part is tried first: a close target takes the weak hit, and only a well-spaced one takes the tip */
   for (const k in fm.moves) { const m = fm.moves[k]; if (m && Array.isArray(m.h) && m.h.some(x => x.part === 'near')) m.hp = m.h.filter(x => x.part === 'near').concat(m.h.filter(x => x.part !== 'near')); }
 }
+/* (after the kits, which would otherwise rewrite it) */
+{ const nair = SACK.forms[0].moves.nair; nair.t = 15; nair.ll = 5; nair.ac = 10;   /* Potato Sack's neutral air: 15 frames long, so two fit in one short hop (owner's request, 2026-11-10) */
+  /* Multi-hit and dragging (owner's request, 2026-11-10): three light hits on frames 3, 5 and 7 catch the opponent and carry
+     them along with the sack (carry: they take on his speed and are pulled to his body), then a finisher on frame 9 launches
+     them away. 1.2% x 3 + 4% = 7.6%, about the 7.5% of the single hit it replaces; the finisher keeps the old 45-degree launch,
+     with more base knockback so it sends about as far. */
+  const body = { x: 0, y: 6, r: 7 };
+  nair.h = [1, 2, 3].map(g => Object.assign({ f0: 1 + 2 * g, f1: 2 + 2 * g, g, d: 1.2, a: 80, b: 16, k: 0, carry: 1, dyn: a => a.nairDrag ? {} : { carry: 0 } }, body))
+    .concat([Object.assign({ f0: 9, f1: 10, g: 50, d: 4, a: 45, b: 45, k: 84, away: 1 }, body)]);
+  /* Toned down (owner's request, 2026-11-10): only the first neutral air of each trip into the air drags. Later ones in the
+     same airtime still hit four times but let go, so the move can no longer carry someone through a chain of itself. */
+  nair.on = (f, n) => { if (n === 1) { f.nairDrag = !f.airUse.nairDrag; f.airUse.nairDrag = 1; } if (n >= 3 && n <= 9 && f.nairDrag) sackCarry(f); }; }
+/* Keeps an opponent caught by Potato Sack's neutral air moving with him: their speed eases toward his and they are pulled
+   toward the middle of his body, so the hits that follow connect wherever he is drifting or falling. */
+function sackCarry(f) { const o = opp(f); if (!o || o.dragBy !== f.idx || o.state !== 'hurt' || o.hitlag > 0) return; const cx = f.x + f.face * 2 - o.x, cy = f.y + f.st.h / 2 - (o.y + o.st.h / 2), dd = Math.hypot(cx, cy);
+  o.vx = appr(o.vx, f.vx + clamp(cx * 0.25, -1.5, 1.5), 0.6); o.vy = appr(o.vy, f.vy + clamp(cy * 0.25, -1.5, 1.5), 0.6); }
 /* Strike shapes (combat audit, 2026-11-10).
    - A strike whose tip is clear of the body also covers the 45% of the way back toward the body's middle (h.in): the
      arm, leg or tool hits, not only its end. Moves that already have a weaker part near the body keep that instead. */
@@ -1061,7 +1285,7 @@ class Fighter {
     this.x = first ? (this.idx ? 28 : -28) : 0; this.y = first ? 0 : 82; this.vx = this.vy = 0;
     if (first) this.face = this.idx ? -1 : 1;
     this.grounded = !!first; this.plat = first ? MAIN : null; this.state = first ? 'idle' : 'respawn'; this.sf = 0;
-    this.jumps = this.st.jumps || 1; this.airdodged = false; this.sideUsed = false; this.ledgeUsed = false; this.ff = false;
+    this.jumps = this.st.jumps || 1; this.airdodged = false; this.sideUsed = false; this.ff = false;
     this.wall = 0; this.wallT = 0; this.wallJumps = 0; this.sdi = 0; this.airT = 0; this.jr = 0; this.jrV = 0; this.rapidN = 0; this.aim = 0;
     this.pct = 0; this.shieldHp = 50; this.invuln = 0; this.hitlag = 0; this.hitstun = 0; this.ledgeCd = 0; this.dropT = 0; this.dropPlat = null;
     this.move = null; this.mf = 0; this.charge = 0; this.hitG = new Set(); this.parriedBy = null; this.victim = null; this.lag = 0; this.flash = 0;
@@ -1076,6 +1300,7 @@ class Fighter {
     const m = this.form.moves[n]; this.move = m; this.mname = n; this.mf = 0; this.charge = 0; this.chargeT = 0; this.aim = 0;
     this.stallOk = !!m.stall && !this.grounded && !this.stalled; if (this.stallOk) this.stalled = true;
     this.armorLeft = m.armorHits || 99; this.castHit = false;   /* a move that hangs in the air does so once per time off the ground */
+    this.selOpen = false;   /* a bird wheel left open by an interrupted Neutral B never outlives it */
     if (!m.rapid) this.rapidN = 0; this.hitG = new Set(); this.parriedBy = null; this.staled = false; this.moveSH = !!(m.air && this.shortHop); this.set('attack');
     if (m.once && !this.grounded) this.sideUsed = true;
   }
@@ -1203,7 +1428,7 @@ class Fighter {
     }
     this.vy -= s.grav; const mf = this.ff ? s.ffall : s.fall; if (this.vy < -mf) this.vy = -mf;
   }
-  touchDown(p) { this.airUse = {}; this.flying = false; this.grounded = true; this.plat = p; this.y = p.y; this.vy = 0; this.jr = 0; this.stalled = false; this.burstUsed = false; this.blastUsed = false; this.slingUsed = false; this.dairUsed = false; this.wallJumps = 0; this.jumps = this.st.jumps || 1; this.airdodged = false; this.sideUsed = false; this.ledgeUsed = false; this.ledgeGrabs = 0; this.ff = false; this.shortHop = false; }
+  touchDown(p, fromLedge) { if (!fromLedge) this.ledgeGrabs = 0; this.airUse = {}; this.flying = false; this.grounded = true; this.plat = p; this.y = p.y; this.vy = 0; this.jr = 0; this.stalled = false; this.burstUsed = false; this.blastUsed = false; this.slingUsed = false; this.dairUsed = false; this.wallJumps = 0; this.jumps = this.st.jumps || 1; this.airdodged = false; this.sideUsed = false; this.ff = false; this.shortHop = false; }
   land(p) {
     const st = this.state, hard = this.ff; this.touchDown(p);
     if (st === 'attack' && this.move.burst) {   /* a tumble never falls over: a dive that reaches the floor carries on as a slide, anything else lands ready to act */
@@ -1232,10 +1457,10 @@ class Fighter {
     if (s === 'attack' && this.move && this.move.burst) return true;   /* a tumble carries off the edge */
     return s === 'idle' ? Math.abs(this.ctl.c.lx) > 0.2 : (s === 'dash' || s === 'run' || s === 'brake' || s === 'hurt' || s === 'wd');
   }
-  breakShield() { this.shieldHp = 30; this.grounded = false; this.plat = null; this.vy = 3.2; this.vx = 0; this.set('broken'); spark(this.x, this.y + 8, '#9cf', 30, 2.4); beep(200, 0.4, 'sawtooth', 0.08, 0.3); shake = 10; }
+  breakShield() { this.shieldHp = SHIELD.hp * 0.75;   /* Ultimate: a broken shield comes back at 75% */ this.grounded = false; this.plat = null; this.vy = 3.2; this.vx = 0; this.set('broken'); spark(this.x, this.y + 8, '#9cf', 30, 2.4); beep(200, 0.4, 'sawtooth', 0.08, 0.3); shake = 10; }
   launch(kb, ang, dir, lsi) {
-    this.freeVictim(); const sp = kb * 0.03 * (lsi || 1); this.sdi = 0; this.tumble = kb >= TUMBLE_KB; this.ledgeGrabs = 0; this.shortHop = false; this.vx = Math.cos(ang) * sp * dir; this.vy = Math.sin(ang) * sp;
-    this.hitstun = Math.floor(kb * 0.4); this.move = null; this.ff = false;
+    this.freeVictim(); this.selOpen = false; const sp = kb * 0.03 * (lsi || 1); this.sdi = 0; this.tumble = kb >= TUMBLE_KB; this.ledgeGrabs = 0; this.shortHop = false; this.vx = Math.cos(ang) * sp * dir; this.vy = Math.sin(ang) * sp;
+    this.hitstun = Math.max(4, Math.floor(kb * HITSTUN * COMBO_EASE) - 1); this.move = null; this.ff = false;   /* Ultimate: 0.4 x knockback, one frame less, at least 4; then Emberfall's combo ease */
     if (this.grounded) { if (this.vy < 0) this.vy = -this.vy * 0.8; if (kb < 30 || this.vy < 0.05) this.vy = 0; else { this.grounded = false; this.plat = null; } }
     this.set('hurt');
   }
@@ -1252,7 +1477,7 @@ class Fighter {
     if (this.invuln > 0) this.invuln--; if (this.swapLock > 0) this.swapLock--; if (this.ledgeCd > 0) this.ledgeCd--; if (this.dropT > 0) this.dropT--; if (this.flash > 0) this.flash--;
     if (!i.shd) this.wdHold = false;   /* the shield press that made a wavedash does not turn into a shield while still held */
     if (this.grabImm > 0) this.grabImm--; if (this.wallT > 0) this.wallT--; if (this.techT > 0) this.techT--; if (this.techLock > 0) this.techLock--;
-    if (c.pressed('shd')) { if (this.techLock === 0) this.techT = 20; this.techLock = 40; }
+    if (c.pressed('shd')) { if (this.techLock === 0) this.techT = TECH_WINDOW; this.techLock = 40; }   /* Ultimate: an 11-frame window, 40 before the next try */
     if (this.grounded || this.state === 'ledge' || this.state === 'respawn') this.airT = 0; else this.airT++;   /* frames since last standing on something */
     if (this.dodgeStale > 0 && ++this.dodgeT >= 90) { this.dodgeStale--; this.dodgeT = 0; }
     if (this.state !== 'shield' && this.state !== 'shieldstun' && this.shieldHp < SHIELD.hp) this.shieldHp = Math.min(SHIELD.hp, this.shieldHp + SHIELD.regen);
@@ -1422,10 +1647,10 @@ class Fighter {
         if (this.sf > 8) {
           const toward = -side * i.lx, slow = this.pct >= 100;   /* worn down: every way up is slower and less protected */
           if (c.take('jmp')) { this.vy = s.vJump * 1.05; this.vx = -side * 0.7; this.ledgeCd = 30; this.set('air'); }
-          else if (i.shd) { this.x = side * (EDGE - 22); this.touchDown(MAIN); this.ledgeUsed = true; this.lag = slow ? 26 : 18; this.invuln = slow ? 20 : 18; this.set('land'); }
-          else if (c.take('atk')) { this.x = side * (EDGE - 6); this.touchDown(MAIN); this.ledgeUsed = true; this.startMove('getup'); if (slow) this.mf = -8; }
-          else if (toward > 0.5 || i.ly > 0.5) { this.x = side * (EDGE - 5); this.touchDown(MAIN); this.ledgeUsed = true; this.lag = slow ? 22 : 14; this.invuln = slow ? 16 : 14; this.set('land'); }
-          else if (toward < -0.5 || i.ly < -0.5 || this.sf > 240) { this.ledgeCd = 30; this.vy = -0.5; this.x += side * 2; this.set('air'); }
+          else if (i.shd) { this.x = side * (EDGE - 22); this.touchDown(MAIN, true); this.lag = slow ? 26 : 18; this.invuln = slow ? 20 : 18; this.set('land'); }
+          else if (c.take('atk')) { this.x = side * (EDGE - 6); this.touchDown(MAIN, true); this.startMove('getup'); if (slow) this.mf = -8; }
+          else if (toward > 0.5 || i.ly > 0.5) { this.x = side * (EDGE - 5); this.touchDown(MAIN, true); this.lag = slow ? 22 : 14; this.invuln = slow ? 16 : 14; this.set('land'); }
+          else if (toward < -0.5 || i.ly < -0.5 || this.sf > LEDGE_HANG) { this.ledgeCd = 30; this.vy = -0.5; this.x += side * 2; this.set('air'); }
         }
         break;
       }
@@ -1487,7 +1712,7 @@ class Fighter {
         if (o && o.state === 'ledge' && sgn(o.x) === side) { o.set('air'); o.vy = 1.3; o.vx = side * 0.9; o.ledgeCd = 45; o.invuln = 0; pop(o.x, o.y + 20, 'TRUMP', '#fff'); }
         this.ledgeGrabs++; this.shortHop = false;
         this.x = side * (EDGE + hw + 0.5); this.y = -s.h + 1; this.vx = this.vy = 0; this.face = -side; this.move = null; this.ff = false;
-        this.jumps = s.jumps || 1; this.wallJumps = 0; this.airdodged = false; this.sideUsed = false; this.stalled = false; this.airUse = {}; this.ledgeInv = 0; if (!this.ledgeUsed) { this.ledgeInv = clamp(Math.round(24 + Math.min(this.airT, 300) * 0.1 - Math.min(this.pct, 120) * 0.17), 8, 54); this.ledgeUsed = true; }   /* longer in the air earns more, damage takes it away */
+        this.jumps = s.jumps || 1; this.wallJumps = 0; this.airdodged = false; this.sideUsed = false; this.stalled = false; this.airUse = {}; this.ledgeInv = Math.round(LEDGE_INV(this.airT, this.pct) * (LEDGE_REGRAB[this.ledgeGrabs - 1] || 0));   /* Ultimate's rule: longer in the air earns more, damage takes it away, and regrabs before landing or being hit earn less, then none */
         this.set('ledge'); beep(700, 0.04, 'triangle', 0.03);
       }
     }
@@ -1549,6 +1774,11 @@ function wouldKO(v) {
   return false;
 }
 let slowT = 0, focus = null;   /* slow motion and camera focus after a hit that will take the last stock */
+/* The final hit, as in Ultimate: when a hit will take the last stock and end the match, the game stops dead for FINAL_FREEZE
+   frames with the camera punched in on the victim against a red burst (finalhit.js draws it), then plays the launch out in
+   the slow motion above. FINAL holds what the picture needs: victim, attacker, where the hit landed and the launch angle. */
+const FINAL_FREEZE = 48;
+let finalT = 0, FINAL = null;
 function canBeHit(v) { return v.invuln === 0 && v.state !== 'dead' && v.state !== 'respawn' && v.state !== 'held'; }
 function applyHit(a, v, h, face, srcX, proj, poke) { sparkOff = !DBG.fx; try { applyHitRaw(a, v, h, face, srcX, proj, poke); } finally { sparkOff = false; } }
 function applyHitRaw(a, v, h, face, srcX, proj, poke) {
@@ -1568,8 +1798,9 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke) {
   }
   if (proj && h.cast && a.castHit) return;   /* the follow-up of a cast that already hit this target */
   const id = h.id || (a.form.name + ':' + a.mname); let d = (h.dd ? h.dd(a) : h.d) * DMG_1V1;   /* dd: damage worked out when it lands (a charged launch) */
-  if (proj) { d *= staleMul(a, id); pushStale(a, id); }
-  else { if (!a.staled) { a.staleM = staleMul(a, id); pushStale(a, id); a.staled = true; } d *= a.staleM * (1 + a.charge / 60 * 0.4) * (a.moveSH ? SHORT_HOP_MUL : 1); }
+  const onShield = (v.state === 'shield' || v.state === 'shieldstun') && !poke;
+  if (proj) { d *= staleMul(a, id); pushStale(a, id, onShield); }
+  else { if (!a.staled) { a.staleM = staleMul(a, id); pushStale(a, id, onShield); a.staled = true; } d *= a.staleM * (1 + a.charge / 60 * 0.4) * (a.moveSH ? SHORT_HOP_MUL : 1); }
   if (v.state === 'shieldoff' && v.sf <= SHIELD.parry) {
     v.set('idle'); v.invuln = 4; if (!proj) { a.hitlag = 16; a.parriedBy = v; }
     spark(hx, hy, '#fff', 20, 2); pop(hx, hy + 12, 'PARRY', '#fff'); beep(1200, 0.12, 'triangle', 0.07, 1.3); return;
@@ -1582,7 +1813,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke) {
   if ((v.state === 'shield' || v.state === 'shieldstun') && !poke) {
     v.shieldHp -= d * SHIELD.dmg;
     const sm = proj ? SHIELD.stun.proj : a.move && a.move.air ? SHIELD.stun.air : a.move && a.move.chg ? SHIELD.stun.smash : SHIELD.stun.ground;
-    if (v.shieldHp <= 0) v.breakShield(); else { v.stunT = Math.floor(d * sm) + 2; v.set('shieldstun'); v.vx = (sgn(v.x - srcX) || face) * (0.3 + d * 0.04); }
+    if (v.shieldHp <= 0) v.breakShield(); else { v.stunT = Math.floor(d * sm) + 2; v.set('shieldstun'); v.vx = (sgn(v.x - srcX) || face) * Math.min(1.3, (v.stunT + 1) * 0.09); }   /* pushback as in Ultimate: (shieldstun + 1) x 0.09, at most 1.3 */
     const hl = Math.min(20, Math.floor((d * 0.65 + 6) * 0.67)); v.hitlag = hl; if (!proj) a.hitlag = hl;
     spark(hx, hy, '#9cf', 6, 1); beep(400, 0.05, 'triangle', 0.04); return;
   }
@@ -1595,7 +1826,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke) {
   const am = v.state === 'attack' && v.move && v.move.armor && v.mf >= v.move.armor[0] && v.mf <= v.move.armor[1] ? v.move : null;
   if (am && (am.armorMax ? v.grounded && h.d <= am.armorMax && v.armorLeft > 0 : kb < 95)) { if (am.armorMax) v.armorLeft--; v.hitlag = hl; if (!proj) a.hitlag = hl; spark(hx, hy, '#ccc', 8, 1); beep(150, 0.06, 'square', 0.05); return; }
   /* 361 is the "natural" angle: flat along the ground for weak hits, steeper as the hit gets stronger, 45 in the air. */
-  let deg = h.a !== 361 ? h.a : !v.grounded ? 45 : kb < 60 ? 0 : kb >= 88 ? 38 : (kb - 60) / 28 * 38;
+  let deg = h.a !== 361 ? h.a : !v.grounded ? 38 : kb < 60 ? 0 : kb >= 88 ? 38 : (kb - 60) / 28 * 38;   /* Ultimate's values (SmashWiki "Sakurai angle") */
   if (!proj && a.aim) deg = Math.max(0, deg + a.aim * 8);   /* an angled tilt sends a little higher or lower */
   let ang = deg * Math.PI / 180;
   let dir = h.away ? (sgn(v.x - srcX) || face) : face;
@@ -1606,11 +1837,16 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke) {
   /* Holding up or down stretches or shortens the launch, except for near-vertical ones. */
   const nd = ((ang * 180 / Math.PI) % 360 + 360) % 360, vertical = (nd > 65 && nd < 115) || (nd > 245 && nd < 295);
   const lsi = vertical ? 1 : i.ly > 0.5 ? 1.095 : i.ly < -0.5 ? 0.92 : 1;
-  v.launch(kb, ang, dir, lsi); if (h.drag) { v.vx += a.vx; v.vy += a.vy; v.dragBy = a.idx; } else v.dragBy = -1;   /* carried along with a travelling rig (see fowlCarry) */ v.hitlag = hl; if (!proj) a.hitlag = hl; rumble(v.ctl, 60 + kb, Math.min(1, 0.25 + kb / 150)); rumble(a.ctl, 50, 0.25);
+  v.launch(kb, ang, dir, lsi); if (h.drag) { v.vx += a.vx; v.vy += a.vy; v.dragBy = a.idx; } else if (h.carry && !proj) { const cx = a.x + a.face * 2 - v.x, cy = a.y + a.st.h / 2 - (v.y + v.st.h / 2); v.grounded = false; v.plat = null; v.vx = a.vx + clamp(cx * 0.3, -2, 2); v.vy = a.vy + clamp(cy * 0.3, -2, 2) + 0.2; v.dragBy = a.idx; } else v.dragBy = -1;   /* carry: caught and taken along (sackCarry) */   /* carried along with a travelling rig (see fowlCarry) */ v.hitlag = hl; if (!proj) a.hitlag = hl; rumble(v.ctl, 60 + kb, Math.min(1, 0.25 + kb / 150)); rumble(a.ctl, 50, 0.25);
   if (wouldKO(v)) {   /* a hit that will KO lands harder: longer freeze, a bigger burst, and slow motion if it takes the last stock */
     v.hitlag += 8; if (!proj) a.hitlag += 8; shake = Math.max(shake, 14); rumble(v.ctl, 300, 1);
     spark(hx, hy, '#ff5a4d', 40, 4.2); spark(hx, hy, '#ffe9a8', 24, 2.6); beep(70, 0.5, 'sawtooth', 0.11, 0.5);
-    if (v.stocks === 1) { slowT = 54; focus = { x: hx, y: hy }; }
+    if (v.stocks === 1) { slowT = 54; focus = { x: hx, y: hy };
+      if (!TRAINING && !finalT) {   /* the match-ending hit: the red final-hit screen */
+        finalT = FINAL_FREEZE; FINAL = { v: v.idx, a: a && a.idx !== undefined ? a.idx : 1 - v.idx, x: hx, y: hy, ang: Math.atan2(v.vy, v.vx), t0: frame };
+        v.hitlag = Math.min(v.hitlag, 3); if (a && a.hitlag) a.hitlag = Math.min(a.hitlag, 3);   /* the freeze stands in for the hit's own freeze, so the launch plays out in the slow motion after it */
+        shake = 0; rumble(v.ctl, 600, 1); if (a && a.ctl) rumble(a.ctl, 400, 0.8);
+        beep(55, 0.9, 'sawtooth', 0.13, 0.4); beep(1400, 0.35, 'triangle', 0.06, 2.2); } }
   }
   spark(hx, hy, kb > 110 ? '#ffd166' : '#fff', Math.min(40, 6 + kb / 6 | 0), 1 + kb / 80);
   if (kb > 110) shake = Math.max(shake, 8);
@@ -1659,6 +1895,7 @@ function updateProj() {
   for (const p of PROJ.slice()) {
     p.life--; p.age = (p.age || 0) + 1; const py = p.y - p.r;
     if (p.cool > 0) p.cool--;
+    if (p.step) { p.step(p); continue; }   /* moves itself (Chomp Chomp's coal and ant) */
     if (p.track) { const ow = F[p.owner]; if (!ow || ow.state === 'dead') { p.life = 0; continue; } const q = p.track(ow, p); p.vx = q[0] - p.x; p.vy = q[1] - p.y; p.x = q[0]; p.y = q[1]; continue; }   /* placed by a rule from its owner (Pip's doubles) */
     if (p.lateAt && p.age === p.lateAt) p.h = Object.assign({ id: p.h.id }, p.lateH);
     if (p.split && p.age === p.split) { p.split = 0; for (const vy of [0.55, -0.55]) PROJ.push(Object.assign({}, p, { vy, age: p.age, h: Object.assign({}, p.h, { d: vy > 0 ? 3 : 2 }) })); }
@@ -1679,6 +1916,7 @@ function updateProj() {
     }
     if (p.y < -1 && Math.abs(p.x) - p.r < stageHalf(p.y)) p.life = 0;   /* into the side or underside of the island */
   }
+  for (const p of PROJ) if (p.onGone && !p.gone && (p.life <= 0 || p.y <= BLAST.b || Math.abs(p.x) >= BLAST.r)) { p.gone = true; p.onGone(p); }
   PROJ = PROJ.filter(p => p.life > 0 && p.y > BLAST.b && Math.abs(p.x) < BLAST.r);
 }
 
@@ -1819,6 +2057,7 @@ function jostle() {
 let sudden = false;
 let tick = 0;   /* counts every step of a match, countdown and finish included; drives idle loops and follow-through, never gameplay */
 let mode = 'select', frame = 0, timer = MATCH_FRAMES, countdown = 0, paused = false, overT = 0, result = '';
+let PAUSED_BY = 0, PAUSE_SEL = 0;   /* who pressed Start, and the pause menu's highlighted line (movelist.js draws and runs the menu) */
 let slots = [null, null], DEVS = {};
 const cam = { x: 0, y: 30, s: 3.4 };
 function devCtl(dev) { return DEVS[dev] || (DEVS[dev] = new Ctl(dev)); }
@@ -1828,7 +2067,7 @@ function startMatch() {
   const c0 = devCtl(s0.dev), c1 = s1.dev === 'cpu' ? new Ctl('cpu') : devCtl(s1.dev);
   F = [new Fighter(0, ROSTER[s0.pick], c0, false), new Fighter(1, ROSTER[s1.pick], c1, s1.pick === s0.pick)];
   for (const c of COMBO) Object.assign(c, { hits: 0, dmg: 0, last: null, best: null, t: 0 });
-  PROJ = []; PART = []; POPS = []; timer = MATCH_FRAMES; sudden = false; slowT = 0; focus = null; countdown = 190; paused = false; mode = 'countdown'; cam.x = 0; cam.y = 30; cam.s = 3.4;
+  PROJ = []; PART = []; POPS = []; timer = MATCH_FRAMES; sudden = false; slowT = 0; focus = null; finalT = 0; FINAL = null; countdown = 190; paused = false; mode = 'countdown'; cam.x = 0; cam.y = 30; cam.s = 3.4;
 }
 /* Start screen: the fighters chosen so far stand on the island, for show only (nothing here is played). They are
    rebuilt whenever a choice changes; Wren's three companions take turns. The camera sits close on the island. */
@@ -1848,7 +2087,11 @@ function selectPreview() {
 /* The fighter select screen: where each roster tile and the CPU card are (the HUD draws them from the same numbers), and
    which one a player's cursor is over. */
 function rosterTile(k) { const n = ROSTER.length, tw = Math.min(168, (W - 120) / n - 12), gap = 12, x0 = (W - (n * tw + (n - 1) * gap)) / 2; return [x0 + k * (tw + gap), 158, tw, 124]; }
-const CPU_CARD = [W - 44 - 460, 446, 460, 158], TRAIN_PILL = [W - 44 - 214, 100, 214, 34];
+const CPU_CARD = [W - 44 - 460, 446, 460, 158], TRAIN_PILL = [W - 44 - 214, 100, 214, 34], ARC_PILL = [W - 44 - 214, 140, 214, 34];
+/* Desktop app only (window.desktop): Online and Quit, under the switches, so a controller can reach them too. */
+const ONLINE_PILL = [W - 44 - 214, 180, 214, 34], QUIT_PILL = [W - 44 - 214, 220, 214, 34];
+const DESKTOP = () => typeof window !== 'undefined' && !!window.desktop;
+let UI_MODAL = false, QUIT_ASK = 0;   /* UI_MODAL: a screen drawn over the game (the online menu) has the controllers; QUIT_ASK: frames left to confirm quitting */
 const inBox = (b, x, y) => x >= b[0] && x <= b[0] + b[2] && y >= b[1] && y <= b[1] + b[3];
 function tileUnder(x, y) { for (let k = 0; k < ROSTER.length; k++) if (inBox(rosterTile(k), x, y)) return k; return -1; }
 /* The CPU's token: dragged with the mouse (or a finger) onto a fighter's tile to choose the CPU's fighter. Dropped anywhere
@@ -1861,9 +2104,11 @@ function cpuGrab(x, y) { if (!cpuTokOn(x, y)) return false; CPU_TOK.drag = true;
 function cpuDrag(x, y) { if (!CPU_TOK.drag) return; CPU_TOK.x = clamp(x + CPU_TOK.dx, 0, W - 48); CPU_TOK.y = clamp(y + CPU_TOK.dy, 0, H - 48); const k = tileUnder(CPU_TOK.x, CPU_TOK.y); if (k >= 0 && k !== CPU_PICK) { CPU_PICK = k; beep(440, 0.03, 'square', 0.02); } }
 function cpuDrop(x, y) { if (!CPU_TOK.drag) return; cpuDrag(x, y); CPU_TOK.drag = false; CPU_PICK = tileUnder(CPU_TOK.x, CPU_TOK.y); cpuTokHome(); beep(CPU_PICK >= 0 ? 800 : 420, 0.06, 'triangle', 0.04); }
 function stepSelect() {
-  selectPreview();
+  selectPreview(); if (QUIT_ASK > 0) QUIT_ASK--;
   for (const dev of allDevs()) {
     const c = devCtl(dev); c.poll(readDev(dev));
+    if (UI_MODAL) continue;   /* the online menu is open: it reads the controllers itself */
+    if (typeof ML !== 'undefined' && ML.open) { if (dev === ML.dev) mlInput(c); continue; }   /* a move list is open (movelist.js): only its player turns the pages */
     if (c.pressed('sel')) { openCMenu(dev); return; }   /* Backspace, or - on a controller: the controls screen for that device */
     if (c.pressed('jmp')) { setBoxes(!DBG.boxes); beep(DBG.boxes ? 700 : 420, 0.05, 'square', 0.03); }   /* jump button: show or hide hitboxes */
     if (c.pressed('shd')) { setHitFx(!DBG.fx); beep(DBG.fx ? 700 : 420, 0.05, 'square', 0.03); }   /* shield button: hit sparks and flash on or off */
@@ -1875,9 +2120,20 @@ function stepSelect() {
     const mag = Math.hypot(c.c.lx, c.c.ly); if (mag > 0.15) { const sp = 4 + 9 * Math.min(1, mag); sl.cx = clamp(sl.cx + c.c.lx / mag * sp, 8, W - 8); sl.cy = clamp(sl.cy - c.c.ly / mag * sp, 8, H - 8); }
     const over = tileUnder(sl.cx, sl.cy), onCpu = !slots[1] && inBox(CPU_CARD, sl.cx, sl.cy);
     if (over >= 0 && !sl.ready && sl.pick !== over) { sl.pick = over; beep(440, 0.03, 'square', 0.02); }
-    if (c.pressed('start')) { if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; } }
+    /* The CPU's fighter: point at its token and press Attack to pick it up, move it onto a fighter, Attack again to put it down
+       (the mouse can still drag it). Off any fighter, it goes back to random. */
+    if (sl.tok) { CPU_TOK.x = clamp(sl.cx - 24, 0, W - 48); CPU_TOK.y = clamp(sl.cy - 24, 0, H - 48); CPU_TOK.drag = true;
+      if (c.pressed('atk') || c.pressed('spc') || slots[1]) { sl.tok = false; CPU_TOK.drag = false; if (!slots[1] && c.pressed('atk')) CPU_PICK = tileUnder(sl.cx, sl.cy); cpuTokHome(); beep(CPU_PICK >= 0 ? 800 : 420, 0.06, 'triangle', 0.04); }
+      continue; }
+    if (c.pressed('atk') && !CPU_TOK.drag && cpuTokOn(sl.cx, sl.cy)) { sl.tok = true; beep(600, 0.04, 'triangle', 0.03); continue; }
+    /* + (Start, or the + key) while pointing at a fighter opens its move list; once everyone is ready, Start fights instead */
+    if (typeof mlOpen === 'function' && over >= 0 && dev === 'kb' && mlPlusKey()) { mlOpen(ROSTER[over], 0, c); continue; }
+    if (c.pressed('start')) { if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; } if (typeof mlOpen === 'function' && over >= 0) { mlOpen(ROSTER[over], 0, c); continue; } }
     else if (c.pressed('atk')) {
+      if (DESKTOP() && inBox(ONLINE_PILL, sl.cx, sl.cy)) { if (window.openOnline) window.openOnline(); beep(600, 0.05, 'square', 0.03); continue; }
+      if (DESKTOP() && inBox(QUIT_PILL, sl.cx, sl.cy)) { if (QUIT_ASK > 0) window.close(); else { QUIT_ASK = 150; beep(300, 0.08, 'square', 0.04); } continue; }   /* press twice to quit */
       if (inBox(TRAIN_PILL, sl.cx, sl.cy)) { setTraining(!TRAINING); beep(TRAINING ? 700 : 420, 0.05, 'square', 0.03); }
+      if (inBox(ARC_PILL, sl.cx, sl.cy)) { setArcs(!DBG.arcs); beep(DBG.arcs ? 700 : 420, 0.05, 'square', 0.03); }
       else if (onCpu) { setCpuLevel(CPU_LEVEL + 1 > 9 ? 0 : CPU_LEVEL + 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
       else if (over >= 0) { sl.pick = over; sl.ready = true; beep(800, 0.08, 'triangle', 0.05); }
       else if (sl.ready && slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; }
@@ -1893,20 +2149,25 @@ function pollMatch() {
 }
 function finish(text) { result = text; mode = 'over'; overT = 0; beep(300, 0.5, 'triangle', 0.08, 2); }
 function resetFighters() {
-  PROJ = []; slowT = 0; focus = null; shake = 0;
+  PROJ = []; slowT = 0; focus = null; finalT = 0; FINAL = null; shake = 0;
   for (const f of F) { if (f.def.fowl) { f.sling = null; f.fi %= 5; } f.freeVictim(); f.victim = null; f.stocks = STOCKS; f.spawn(true); for (const k in f.ctl.buf) f.ctl.buf[k] = 0; }
   beep(520, 0.08, 'triangle', 0.05, 1.4);
 }
 function stepPlay() {
-  if (F.some(f => f.ctl.dev !== 'cpu' && f.ctl.pressed('start'))) { paused = !paused; return; }
+  const starter = F.find(f => f.ctl.dev !== 'cpu' && f.ctl.pressed('start'));
+  const quit = () => { paused = false; mode = 'select'; for (const s of slots) if (s) s.ready = false; F = []; PROJ = []; PART = []; POPS = []; beep(300, 0.1, 'triangle', 0.05); };
+  if (paused && typeof pauseMenuStep === 'function') {   /* the pause menu and the move list (movelist.js) */
+    const r = pauseMenuStep(starter); if (r === 'held') return; if (r === 'resume') { paused = false; return; } if (r === 'exit') { quit(); return; } }
+  if (starter) { paused = !paused; if (paused) { PAUSED_BY = starter.idx; PAUSE_SEL = 0; } return; }
   if (paused) {   /* paused: Special leaves the match and goes back to the fighter select */
     const cm = F.find(f => f.ctl.dev !== 'cpu' && f.ctl.pressed('sel')); if (cm) { openCMenu(cm.ctl.dev); return; }
-    if (F.some(f => f.ctl.dev !== 'cpu' && f.ctl.pressed('spc'))) { paused = false; mode = 'select'; for (const s of slots) if (s) s.ready = false; F = []; PROJ = []; PART = []; POPS = []; beep(300, 0.1, 'triangle', 0.05); }
+    if (F.some(f => f.ctl.dev !== 'cpu' && f.ctl.pressed('spc'))) quit();
     return;
   }
   /* Testing shortcut: attack + special + grab (A + B + L or R on a controller, Z + X + A or S on the keyboard) pressed together puts both
      fighters back where a match starts, with full stocks and no damage. The clock keeps running. */
   if (F.some(f => f.ctl.dev !== 'cpu' && f.ctl.c.atk && f.ctl.c.spc && f.ctl.c.grb && !(f.ctl.p.atk && f.ctl.p.spc && f.ctl.p.grb))) { resetFighters(); return; }
+  if (finalT > 0) { finalT--; if (!finalT) shake = 10; return; }   /* the final hit: everything stands still on the red screen */
   if (slowT > 0) { slowT--; if (slowT % 3) return; }   /* one step in three while the finishing hit plays out */
   frame++;
   for (const f of F) { f.px = f.x; f.py = f.y; }   /* where each was before this frame, for sweeping hits */
@@ -1934,7 +2195,11 @@ function stepFx() {
   if (shake > 0) shake--;
   if (!F.length) return;
   const live = F.filter(f => f.state !== 'dead');
-  if (slowT > 0 && focus) { cam.x += (focus.x - cam.x) * 0.18; cam.y += (focus.y - cam.y) * 0.18; cam.s += (CAM.max + 1 - cam.s) * 0.14; return; }
+  if (finalT > 0 && FINAL && F[FINAL.v]) {   /* punch in hard on the victim, between them and where the hit landed */
+    const v = F[FINAL.v], tx = (v.x * 2 + FINAL.x) / 3, ty = (v.y + v.st.h / 2) * 2 / 3 + FINAL.y / 3, k = finalT > FINAL_FREEZE - 3 ? 0.6 : 0.25;
+    cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k; cam.s += (CAM.max * 1.55 - cam.s) * k; return; }
+  if (slowT > 0 && focus) { const fv = FINAL && F[FINAL.v] && F[FINAL.v].state !== 'dead' ? F[FINAL.v] : null, fx = fv ? fv.x : focus.x, fy = fv ? fv.y + fv.st.h / 2 : focus.y;   /* after the final hit: follow the victim out */
+    cam.x += (fx - cam.x) * 0.18; cam.y += (fy - cam.y) * 0.18; cam.s += (CAM.max + 1 - cam.s) * 0.14; return; }
   /* Each fighter carries a box the camera must keep in view: room all round, more in front and in the direction of travel.
      The view is the tightest frame round those boxes, so it closes in when the fighters are together and opens up as they
      part. Nothing else is forced into the picture. Fighters past the camera limits are followed no further. */
