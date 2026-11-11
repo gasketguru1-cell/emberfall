@@ -1664,6 +1664,11 @@ function wouldKO(v) {
   return false;
 }
 let slowT = 0, focus = null;   /* slow motion and camera focus after a hit that will take the last stock */
+/* The final hit, as in Ultimate: when a hit will take the last stock and end the match, the game stops dead for FINAL_FREEZE
+   frames with the camera punched in on the victim against a red burst (finalhit.js draws it), then plays the launch out in
+   the slow motion above. FINAL holds what the picture needs: victim, attacker, where the hit landed and the launch angle. */
+const FINAL_FREEZE = 48;
+let finalT = 0, FINAL = null;
 function canBeHit(v) { return v.invuln === 0 && v.state !== 'dead' && v.state !== 'respawn' && v.state !== 'held'; }
 function applyHit(a, v, h, face, srcX, proj, poke) { sparkOff = !DBG.fx; try { applyHitRaw(a, v, h, face, srcX, proj, poke); } finally { sparkOff = false; } }
 function applyHitRaw(a, v, h, face, srcX, proj, poke) {
@@ -1726,7 +1731,12 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke) {
   if (wouldKO(v)) {   /* a hit that will KO lands harder: longer freeze, a bigger burst, and slow motion if it takes the last stock */
     v.hitlag += 8; if (!proj) a.hitlag += 8; shake = Math.max(shake, 14); rumble(v.ctl, 300, 1);
     spark(hx, hy, '#ff5a4d', 40, 4.2); spark(hx, hy, '#ffe9a8', 24, 2.6); beep(70, 0.5, 'sawtooth', 0.11, 0.5);
-    if (v.stocks === 1) { slowT = 54; focus = { x: hx, y: hy }; }
+    if (v.stocks === 1) { slowT = 54; focus = { x: hx, y: hy };
+      if (!TRAINING && !finalT) {   /* the match-ending hit: the red final-hit screen */
+        finalT = FINAL_FREEZE; FINAL = { v: v.idx, a: a && a.idx !== undefined ? a.idx : 1 - v.idx, x: hx, y: hy, ang: Math.atan2(v.vy, v.vx), t0: frame };
+        v.hitlag = Math.min(v.hitlag, 3); if (a && a.hitlag) a.hitlag = Math.min(a.hitlag, 3);   /* the freeze stands in for the hit's own freeze, so the launch plays out in the slow motion after it */
+        shake = 0; rumble(v.ctl, 600, 1); if (a && a.ctl) rumble(a.ctl, 400, 0.8);
+        beep(55, 0.9, 'sawtooth', 0.13, 0.4); beep(1400, 0.35, 'triangle', 0.06, 2.2); } }
   }
   spark(hx, hy, kb > 110 ? '#ffd166' : '#fff', Math.min(40, 6 + kb / 6 | 0), 1 + kb / 80);
   if (kb > 110) shake = Math.max(shake, 8);
@@ -1947,7 +1957,7 @@ function startMatch() {
   const c0 = devCtl(s0.dev), c1 = s1.dev === 'cpu' ? new Ctl('cpu') : devCtl(s1.dev);
   F = [new Fighter(0, ROSTER[s0.pick], c0, false), new Fighter(1, ROSTER[s1.pick], c1, s1.pick === s0.pick)];
   for (const c of COMBO) Object.assign(c, { hits: 0, dmg: 0, last: null, best: null, t: 0 });
-  PROJ = []; PART = []; POPS = []; timer = MATCH_FRAMES; sudden = false; slowT = 0; focus = null; countdown = 190; paused = false; mode = 'countdown'; cam.x = 0; cam.y = 30; cam.s = 3.4;
+  PROJ = []; PART = []; POPS = []; timer = MATCH_FRAMES; sudden = false; slowT = 0; focus = null; finalT = 0; FINAL = null; countdown = 190; paused = false; mode = 'countdown'; cam.x = 0; cam.y = 30; cam.s = 3.4;
 }
 /* Start screen: the fighters chosen so far stand on the island, for show only (nothing here is played). They are
    rebuilt whenever a choice changes; Wren's three companions take turns. The camera sits close on the island. */
@@ -2029,7 +2039,7 @@ function pollMatch() {
 }
 function finish(text) { result = text; mode = 'over'; overT = 0; beep(300, 0.5, 'triangle', 0.08, 2); }
 function resetFighters() {
-  PROJ = []; slowT = 0; focus = null; shake = 0;
+  PROJ = []; slowT = 0; focus = null; finalT = 0; FINAL = null; shake = 0;
   for (const f of F) { if (f.def.fowl) { f.sling = null; f.fi %= 5; } f.freeVictim(); f.victim = null; f.stocks = STOCKS; f.spawn(true); for (const k in f.ctl.buf) f.ctl.buf[k] = 0; }
   beep(520, 0.08, 'triangle', 0.05, 1.4);
 }
@@ -2046,6 +2056,7 @@ function stepPlay() {
   /* Testing shortcut: attack + special + grab (A + B + L or R on a controller, Z + X + A or S on the keyboard) pressed together puts both
      fighters back where a match starts, with full stocks and no damage. The clock keeps running. */
   if (F.some(f => f.ctl.dev !== 'cpu' && f.ctl.c.atk && f.ctl.c.spc && f.ctl.c.grb && !(f.ctl.p.atk && f.ctl.p.spc && f.ctl.p.grb))) { resetFighters(); return; }
+  if (finalT > 0) { finalT--; if (!finalT) shake = 10; return; }   /* the final hit: everything stands still on the red screen */
   if (slowT > 0) { slowT--; if (slowT % 3) return; }   /* one step in three while the finishing hit plays out */
   frame++;
   for (const f of F) { f.px = f.x; f.py = f.y; }   /* where each was before this frame, for sweeping hits */
@@ -2073,7 +2084,11 @@ function stepFx() {
   if (shake > 0) shake--;
   if (!F.length) return;
   const live = F.filter(f => f.state !== 'dead');
-  if (slowT > 0 && focus) { cam.x += (focus.x - cam.x) * 0.18; cam.y += (focus.y - cam.y) * 0.18; cam.s += (CAM.max + 1 - cam.s) * 0.14; return; }
+  if (finalT > 0 && FINAL && F[FINAL.v]) {   /* punch in hard on the victim, between them and where the hit landed */
+    const v = F[FINAL.v], tx = (v.x * 2 + FINAL.x) / 3, ty = (v.y + v.st.h / 2) * 2 / 3 + FINAL.y / 3, k = finalT > FINAL_FREEZE - 3 ? 0.6 : 0.25;
+    cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k; cam.s += (CAM.max * 1.55 - cam.s) * k; return; }
+  if (slowT > 0 && focus) { const fv = FINAL && F[FINAL.v] && F[FINAL.v].state !== 'dead' ? F[FINAL.v] : null, fx = fv ? fv.x : focus.x, fy = fv ? fv.y + fv.st.h / 2 : focus.y;   /* after the final hit: follow the victim out */
+    cam.x += (fx - cam.x) * 0.18; cam.y += (fy - cam.y) * 0.18; cam.s += (CAM.max + 1 - cam.s) * 0.14; return; }
   /* Each fighter carries a box the camera must keep in view: room all round, more in front and in the direction of travel.
      The view is the tightest frame round those boxes, so it closes in when the fighters are together and opens up as they
      part. Nothing else is forced into the picture. Fighters past the camera limits are followed no further. */

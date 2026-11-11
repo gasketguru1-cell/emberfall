@@ -52,7 +52,7 @@ const NET = (function () {
   N.save = () => {
     if (!fixed) markFixed();
     const g = copyGraph([F, PROJ, COMBO]);
-    return { g, timer, sudden, slowT, focus, frame, mode, countdown, overT, result, paused, tick };
+    return { g, timer, sudden, slowT, focus, finalT, FINAL: FINAL && Object.assign({}, FINAL), frame, mode, countdown, overT, result, paused, tick };
   };
   N.load = s => {
     /* write each copy back into the very object it was taken from, so outside references (the renderer's) stay good */
@@ -65,7 +65,7 @@ const NET = (function () {
       else { for (const k of Object.keys(live)) if (!(k in c)) delete live[k]; for (const k of Object.keys(c)) live[k] = tr(c[k]); }
     }
     F = back.get(s.g.roots[0]); PROJ = back.get(s.g.roots[1]);
-    timer = s.timer; sudden = s.sudden; slowT = s.slowT; focus = s.focus && back.has(s.focus) ? back.get(s.focus) : s.focus; frame = s.frame; mode = s.mode; countdown = s.countdown; overT = s.overT; result = s.result; paused = s.paused; tick = s.tick;
+    timer = s.timer; sudden = s.sudden; slowT = s.slowT; finalT = s.finalT || 0; FINAL = s.FINAL && Object.assign({}, s.FINAL); focus = s.focus && back.has(s.focus) ? back.get(s.focus) : s.focus; frame = s.frame; mode = s.mode; countdown = s.countdown; overT = s.overT; result = s.result; paused = s.paused; tick = s.tick;
   };
   /* a checksum of what decides the match: every fighter's numbers and state, every projectile's position */
   N.hash = () => {

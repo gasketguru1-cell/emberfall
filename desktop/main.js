@@ -74,6 +74,15 @@ app.whenReady().then(() => {
   win.webContents.on('before-input-event', (e, input) => {
     if (input.type === 'keyDown' && input.key === 'F11' && !input.isAutoRepeat) { win.setFullScreen(!win.isFullScreen()); e.preventDefault(); }
   });
+  /* The DEV copy (started from the project, not installed): its title and a badge say so, so it is never mistaken for
+     the installed game. It plays the project's files as they are saved. */
+  if (!app.isPackaged) {
+    let branch = ''; try { branch = require('child_process').execSync('git branch --show-current', { cwd: path.join(__dirname, '..'), stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch (e) { /* no git */ }
+    const title = `Emberfall DEV - live from your project${branch ? ' (' + branch + ')' : ''}`;
+    win.setTitle(title);
+    win.on('page-title-updated', e => e.preventDefault());
+    ipcMain.on('dev-info', e => { e.returnValue = { dev: true, branch, version: app.getVersion() }; });
+  } else ipcMain.on('dev-info', e => { e.returnValue = { dev: false }; });
   win.loadURL('app://game/index.html');
   require('./updater.js').start(() => win);   /* signed updates (desktop/updater.js, docs/RELEASING.md) */
   if (process.env.EMBERFALL_DEVTOOLS) win.webContents.openDevTools({ mode: 'detach' });
