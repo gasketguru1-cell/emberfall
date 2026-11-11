@@ -33,7 +33,8 @@
       "desktop/main.js",
       "desktop/preload.js",
       "desktop/eos.js",
-      "package.json"
+      "package.json",
+      "desktop/logo/icon-256.png"
     ],
     "extraResources": [
       {
@@ -50,13 +51,19 @@
     ],
     "win": {
       "target": "nsis",
-      "signAndEditExecutable": false
+      "signAndEditExecutable": true,
+      "icon": "desktop/logo/icon.ico"
     },
     "nsis": {
       "oneClick": true,
       "perMachine": false,
       "allowElevation": false,
-      "artifactName": "Emberfall-Setup-${version}.exe"
+      "artifactName": "Emberfall-Setup-${version}.exe",
+      "installerIcon": "desktop/logo/icon.ico",
+      "uninstallerIcon": "desktop/logo/icon.ico",
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "Emberfall"
     }
   }
 }

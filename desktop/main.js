@@ -45,7 +45,7 @@ if (eos) eos.wire(ipcMain, () => win);
 
 app.whenReady().then(() => {
   serve(); Menu.setApplicationMenu(null);
-  win = new BrowserWindow({ width: 1280, height: 760, backgroundColor: '#0b0d16', title: 'Emberfall', autoHideMenuBar: true,
+  win = new BrowserWindow({ width: 1280, height: 760, backgroundColor: '#0b0d16', title: 'Emberfall', autoHideMenuBar: true, icon: path.join(__dirname, 'logo', 'icon-256.png'),
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, backgroundThrottling: false } });
   win.loadURL('app://game/index.html');
   if (process.env.EMBERFALL_DEVTOOLS) win.webContents.openDevTools({ mode: 'detach' });
