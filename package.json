@@ -1,12 +1,11 @@
 {
   "name": "emberfall",
   "version": "1.0.0",
-  "directories": {
-    "test": "tests"
-  },
   "scripts": {
-    "test": "node tests/headless.js && node tests/rules.js && node tests/fuzz.js 20",
-    "start": "node serve.js"
+    "test": "node tests/headless.js && node tests/rules.js && node tests/fuzz.js 20 && node tests/net.js",
+    "start": "node serve.js",
+    "desktop": "electron .",
+    "dist": "node tools/stage-desktop.js && electron-builder --win nsis"
   },
   "type": "commonjs",
   "private": "true",
@@ -17,6 +16,47 @@
     "@gltf-transform/core": "^4.5.1",
     "@gltf-transform/extensions": "^4.5.1",
     "@gltf-transform/functions": "^4.5.1",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
     "sharp": "^0.35.5"
+  },
+  "main": "desktop/main.js",
+  "description": "Emberfall, an original platform fighter",
+  "author": "Emberfall",
+  "build": {
+    "appId": "com.emberfall.game",
+    "productName": "Emberfall",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "desktop/main.js",
+      "desktop/preload.js",
+      "desktop/eos.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "build/game",
+        "to": "game"
+      },
+      {
+        "from": "desktop/eos",
+        "to": "eos",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowElevation": false,
+      "artifactName": "Emberfall-Setup-${version}.exe"
+    }
   }
 }

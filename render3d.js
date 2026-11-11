@@ -117,7 +117,7 @@ function build() {
   }
   function dress(v, f) {
     const fm = f.form, col = f.alt ? fm.alt : fm.col, st = fm.st, M = MODELS[fm.name], useModel = !!(M && M.ready), k = fm.name + (f.alt ? '*' : '') + (useModel ? '#model' : '');
-    if (v.key === k) return; v.key = k;
+    if (v.key === k) return; const prevKey = v.key; v.key = k;
     while (v.pivot.children.length) { const c = v.pivot.children.pop(); if (c.geometry) c.geometry.dispose(); }
     if (v.mixer) v.mixer.stopAllAction();
     v.mixer = null; v.model = null; v.actions = {}; v.cur = null; v.prev = null; v.hand = null; v.springs = []; v.springTick = -1;
@@ -129,7 +129,7 @@ function build() {
       obj.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; o.frustumCulled = false; o.material = o.material.clone(); if (f.alt) o.material.color.setRGB(0.78, 0.9, 1.25); v.mats.push(o.material); } });
       v.pivot.add(obj); v.model = M; v.mixer = new THREE.AnimationMixer(obj); setupSprings(v, M);
       if (M.cfg.lift) obj.position.y = M.cfg.lift;   /* a rider: the model sits this high above the fighter's feet */
-      if (M.cfg.prop && M.cfg.prop.type === 'sling') { v.prop = makeSling(); v.hand = null; scene.add(v.prop); }
+      if (M.cfg.prop && M.cfg.prop.type === 'sling') { v.prop = makeSling(); v.hand = null; scene.add(v.prop); if (/ alone/.test(prevKey)) v.prop.userData.rig.k = { py: -2.2, sq: -0.14, bend: 0.15 }; }   /* the bird drops back into the pouch: the bands take its weight */
       if (M.cfg.prop && M.cfg.prop.type === 'lantern') { v.hand = obj.getObjectByName(M.cfg.prop.bone) || null; if (v.hand) { v.prop = makeLantern(); scene.add(v.prop); } }
       return;
     }
@@ -144,19 +144,96 @@ function build() {
   /* ---- projectiles ---- */
   /* The living slingshot (Furious Fowls): a forked branch on two small feet, with two bands and a leather pouch. Built here, not generated. Faces +x. */
   const emptySlings = [];
+  /* Built as a small puppet: feet, a trunk that bends from its base, the fork bending again above it, two bands drawn fresh
+     each frame from the fork tips to a pouch that hangs on a spring. Poses come from slingWant, which only reads the game. */
   const makeSling = () => {
-    const grp = new THREE.Group(), wood = new THREE.MeshStandardMaterial({ color: 0xb8742f, roughness: 0.75 }), dark = new THREE.MeshStandardMaterial({ color: 0x7a3a26, roughness: 0.8 }), band = new THREE.MeshStandardMaterial({ color: 0xc8562c, roughness: 0.6 });
-    const stick = (x0, y0, z0, x1, y1, z1, r0, r1, mat) => { const a = new THREE.Vector3(x0, y0, z0), b = new THREE.Vector3(x1, y1, z1), m = new THREE.Mesh(new THREE.CylinderGeometry(r1, r0, a.distanceTo(b), 10), mat); m.position.copy(a).add(b).multiplyScalar(0.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize()); m.castShadow = true; grp.add(m); return m; };
-    stick(0, 0.6, 0, 0, 6.4, 0, 0.75, 0.65, wood); stick(0, 6, 0, 0, 14.2, 4.2, 0.6, 0.48, wood); stick(0, 6, 0, 0, 14.2, -4.2, 0.6, 0.48, wood);   /* trunk and the two arms of the fork, spread toward and away from the camera */
-    for (const z of [4.4, -4.4]) { const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.62, 0.9, 10), dark); cap.position.set(0, 13.4, z * 0.93); grp.add(cap); stick(0, 13.2, z * 0.9, 0.3, 9.6, z * 0.32, 0.28, 0.28, band); }
-    const pouch = new THREE.Mesh(new THREE.SphereGeometry(2.7, 14, 10, 0, Math.PI * 2, Math.PI * 0.5, Math.PI * 0.5), dark); pouch.position.set(0.2, 10.6, 0); pouch.scale.set(1, 0.8, 1.1); grp.add(pouch);
-    for (const z of [1.2, -1.2]) { const foot = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), wood); foot.scale.set(1.0, 0.45, 0.7); foot.position.set(0.5, 0.5, z); foot.castShadow = true; grp.add(foot); }
-    const eye = new THREE.MeshBasicMaterial({ color: 0x2a1a12 }); for (const z of [0.5, -0.5]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 6), eye); e.position.set(1.42, 3.6, z); grp.add(e); }
-    const out = new THREE.Group(); grp.rotation.y = 0.95; out.add(grp); out.visible = false; return out;   /* turned so the fork shows from the side */
+    const grp = new THREE.Group(), wood = new THREE.MeshStandardMaterial({ color: 0xb8742f, roughness: 0.75 }), dark = new THREE.MeshStandardMaterial({ color: 0x7a3a26, roughness: 0.8 }), bandM = new THREE.MeshStandardMaterial({ color: 0xc8562c, roughness: 0.6 });
+    const stick = (parent, x0, y0, z0, x1, y1, z1, r0, r1, mat) => { const a = new THREE.Vector3(x0, y0, z0), b = new THREE.Vector3(x1, y1, z1), m = new THREE.Mesh(new THREE.CylinderGeometry(r1, r0, a.distanceTo(b), 10), mat); m.position.copy(a).add(b).multiplyScalar(0.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize()); m.castShadow = true; parent.add(m); return m; };
+    const trunk = new THREE.Group(); trunk.position.y = 0.6; grp.add(trunk);                     /* bends at its base */
+    stick(trunk, 0, 0, 0, 0, 5.8, 0, 0.75, 0.65, wood);
+    const fork = new THREE.Group(); fork.position.y = 5.4; trunk.add(fork);                    /* bends again where it forks */
+    stick(fork, 0, 0, 0, 0, 8.2, 4.2, 0.6, 0.48, wood); stick(fork, 0, 0, 0, 0, 8.2, -4.2, 0.6, 0.48, wood);
+    const tips = [];
+    for (const z of [4.4, -4.4]) { const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.62, 0.9, 10), dark); cap.position.set(0, 7.4, z * 0.93); fork.add(cap); const tip = new THREE.Object3D(); tip.position.set(0, 7.2, z * 0.9); fork.add(tip); tips.push(tip); }
+    const pouch = new THREE.Mesh(new THREE.SphereGeometry(2.7, 14, 10, 0, Math.PI * 2, Math.PI * 0.5, Math.PI * 0.5), dark); pouch.scale.set(1, 0.8, 1.1); grp.add(pouch);
+    const seat = new THREE.Object3D(); seat.position.set(0.2, 4.6, 0); fork.add(seat);       /* where the pouch hangs when nothing pulls it */
+    const unitY = new THREE.Vector3(0, 1, 0), bands = [0, 1].map(() => { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 1, 8), bandM); m.castShadow = true; grp.add(m); return m; });
+    const feet = [1.2, -1.2].map(z => { const foot = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), wood); foot.scale.set(1.0, 0.45, 0.7); foot.position.set(0.5, 0.5, z); foot.castShadow = true; grp.add(foot); return foot; });
+    const eye = new THREE.MeshBasicMaterial({ color: 0x2a1a12 }); for (const z of [0.5, -0.5]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 6), eye); e.position.set(1.42, 3.0, z); trunk.add(e); }
+    const out = new THREE.Group(); grp.rotation.y = 0.95; out.add(grp); out.visible = false;   /* turned so the fork shows from the side */
+    const rig = { grp, trunk, fork, tips, pouch, seat, bands, feet, bend: 0, bendV: 0, sq: 1, sqV: 0, px: 0, py: 0, pvx: 0, pvy: 0, tick: -1, lastVy: 0, lastState: '', lastKey: '', k: null, seatRest: null };
+    /* Each game step every part chases the pose it is asked for on a spring, so it overshoots and settles (follow-through).
+       Returns how far the pouch sits from its resting place, in the slingshot's own space, so a rider can move with it. */
+    rig.drive = (want, step) => {
+      const kick = rig.k; rig.k = null;
+      if (step) {
+        rig.bendV = (rig.bendV + (want.bend - rig.bend) * 0.22) * 0.74 + (kick && kick.bend || 0); rig.bend += rig.bendV;
+        rig.sqV = (rig.sqV + (want.sq - rig.sq) * 0.3) * 0.7 + (kick && kick.sq || 0); rig.sq += rig.sqV;
+        rig.pvx = (rig.pvx + (want.px - rig.px) * 0.2) * 0.78 + (kick && kick.px || 0); rig.px += rig.pvx;
+        rig.pvy = (rig.pvy + (want.py - rig.py) * 0.2) * 0.78 + (kick && kick.py || 0); rig.py += rig.pvy;
+        rig.bend = clamp(rig.bend, -0.9, 0.9); rig.sq = clamp(rig.sq, 0.6, 1.35);
+      }
+      rig.trunk.rotation.z = -rig.bend * 0.55; rig.fork.rotation.z = -rig.bend * 0.45; const thin = 1 / Math.sqrt(rig.sq); rig.trunk.scale.set(thin, rig.sq, thin);
+      for (let i = 0; i < 2; i++) { const ft = rig.feet[i]; ft.position.y = 0.5 + (want.feet ? Math.max(0, want.feet[i]) : 0); ft.position.x = 0.5 + (want.footX || 0); }
+      rig.grp.updateMatrixWorld(true);
+      const c = rig.seat.getWorldPosition(new THREE.Vector3()); rig.grp.worldToLocal(c);
+      if (!rig.seatRest) rig.seatRest = new THREE.Vector3(0.2, 10.6, 0);
+      /* pulls are along the stage (the slingshot's own frame before its turn to show the fork), so turn them into the fork's frame */
+      const off = c.clone().sub(rig.seatRest), ca = Math.cos(0.95), sa = Math.sin(0.95); c.x += rig.px * ca; c.z += rig.px * sa; c.y += rig.py; off.x += rig.px * ca; off.z += rig.px * sa; off.y += rig.py;
+      rig.pouch.position.copy(c); rig.pouch.rotation.z = clamp(rig.pvx * -0.3, -0.6, 0.6);
+      const thinB = 1 / (1 + Math.hypot(rig.px, rig.py) * 0.08);   /* stretched bands get thinner */
+      rig.tips.forEach((tp, i) => { const a = tp.getWorldPosition(new THREE.Vector3()); rig.grp.worldToLocal(a); const b = c.clone().add(new THREE.Vector3(0.1, -0.6, i ? -1.4 : 1.4)), m = rig.bands[i];
+        m.position.copy(a).add(b).multiplyScalar(0.5); m.scale.set(thinB, Math.max(0.1, a.distanceTo(b)), thinB); m.quaternion.setFromUnitVectors(unitY, b.clone().sub(a).normalize()); });
+      return off;
+    };
+    out.userData.rig = rig; return out;
   };
+  /* What the slingshot is asked to do this frame. bend > 0 leans its top the way it faces; sq < 1 squashes it; px, py pull
+     the pouch (px < 0 is back). [wind-up lean, strike lean, squash at the strike] per attack. Picture only: reads the game. */
+  const SLING_ATK = { jab: [0.15, 0.25], jab2: [0.15, 0.3], jab3: [0.3, 0.55], ftilt: [0.35, 0.5], dtilt: [0.2, 0.45, 0.78], utilt: [0.2, -0.2, 1.18], dash: [0.2, 0.6],
+    fsmash: [0.6, 0.8], usmash: [0.3, -0.3, 1.25], dsmash: [0.25, 0.1, 0.72], fair: [0.3, 0.55], bair: [-0.3, -0.6], uair: [0.1, -0.2, 1.2], dair: [0.1, 0.2, 0.8], grab: [0.2, 0.45], dgrab: [0.2, 0.5], pgrab: [0.3, 0.5], getup: [0.2, 0.5, 0.8] };
+  const phase01 = (a, b) => b > 0 ? Math.min(1, Math.max(0, a / b)) : 1;
+  function slingWant(f, rig) {
+    const s = f.state, w = { bend: 0, sq: 1, px: 0, py: 0, feet: null, footX: 0 }, fr = tick, vxF = f.vx * f.face;
+    if (s === 'idle') { w.sq = 1 + Math.sin(fr * 0.07) * 0.02; w.bend = Math.sin(fr * 0.035) * 0.04; w.py = Math.sin(fr * 0.07 + 1) * 0.3;
+      if (f.ctl.c.ly < CROUCH_Y) { w.sq = 0.78; w.bend = 0.1; }
+      if (Math.abs(f.vx) > 0.2) { w.bend = clamp(vxF * 0.12, -0.25, 0.25); w.feet = [Math.max(0, Math.sin(fr * 0.4)) * 0.8, Math.max(0, -Math.sin(fr * 0.4)) * 0.8]; } }
+    else if (s === 'dash' || s === 'run') { w.bend = clamp(vxF * 0.16, -0.4, 0.4); w.sq = 0.96; w.px = -1.6; w.feet = [Math.max(0, Math.sin(fr * 0.55)) * 1.2, Math.max(0, -Math.sin(fr * 0.55)) * 1.2]; }
+    else if (s === 'brake') { w.bend = -0.35; w.sq = 0.9; w.px = 1.6; w.footX = 1.2; }
+    else if (s === 'jsq') w.sq = 0.78;
+    else if (s === 'air' || s === 'helpless') { w.sq = f.vy > 0.5 ? 1.08 : 1; w.py = clamp(-f.vy * 0.5, -1.5, 1.5); w.bend = clamp(vxF * 0.08, -0.2, 0.2); if (f.ff) { w.sq = 1.12; w.py = 1.5; } }
+    else if (s === 'land' || s === 'wd') w.sq = f.lag >= 9 ? 0.72 : 0.86;
+    else if (s === 'shield' || s === 'shieldstun') { w.sq = 0.84; w.bend = -0.15; }
+    else if (s === 'hurt') { w.bend = -0.4 * Math.sign(vxF || 1); w.sq = f.grounded ? 0.9 : 1.05; w.px = -vxF * 0.8; }
+    else if (s === 'held') { w.sq = 1.12; w.bend = Math.sin(fr * 0.5) * 0.2; }
+    else if (s === 'hold') { w.bend = 0.15; w.sq = 0.92; }
+    else if (s === 'throw') { w.bend = (f.throwK === 'b' ? -0.6 : f.throwK === 'u' ? -0.1 : 0.5) * Math.sin(Math.min(1, f.sf / 14) * Math.PI); w.sq = f.throwK === 'd' ? 0.8 : f.throwK === 'u' ? 1.2 : 0.95; }
+    else if (s === 'down') { w.sq = 0.75; w.bend = -0.6; }
+    else if (s === 'ledge') { w.bend = 0.5; w.sq = 1.1; }
+    else if (s === 'attack' && f.move) {
+      const m = f.move, a = animState(f), tbl = SLING_ATK[f.mname];
+      if (m.fowlUp && !f.upGo) { const c = (f.upC || 0) / 45; w.px = -2 - 5 * c; w.py = -1.5 - 2.5 * c; w.bend = -0.15 - 0.35 * c; w.sq = 0.92 - 0.12 * c; }   /* Catapult Cyclone charging: bands stretch, trunk leans back */
+      else if (m.spin) { w.py = 2.6; w.sq = 1.1; }   /* end over end: the pouch is flung outward */
+      else if (f.mname === 'sspec') { const k = phase01(f.mf, m.t); w.px = k < 0.6 ? -5 * k / 0.6 : 0; w.py = k < 0.6 ? -1.5 : 0; w.bend = k < 0.6 ? -0.25 : 0.1; }   /* aiming: drawn back, then let go */
+      else if (f.mname === 'nspec') { w.sq = 1 + Math.sin(fr * 0.3) * 0.04; w.py = Math.sin(fr * 0.3) * 0.6; }   /* the selector open: the pouch jiggles */
+      else if (tbl && a.mode === 'marks') { const [wind, hit, sq] = tbl, e = a.seg === 0 ? Math.sin(a.v * Math.PI / 2) : 1;
+        if (a.seg === 0) { w.bend = -wind * e; w.sq = 1 - 0.1 * e; w.px = -1.5 * e; } else if (a.seg === 1) { w.bend = hit; w.sq = sq || 1; w.px = 1.5; } else { w.bend = hit * (1 - a.v) * 0.4; w.sq = 1 + ((sq || 1) - 1) * (1 - a.v); } }
+      else w.sq = 1 - 0.12 * Math.sin(phase01(f.mf, m.t) * Math.PI);
+    }
+    /* one-off impulses at the moment something happens, so the follow-through shows */
+    if (rig.lastState !== s) {
+      if (s === 'land' || s === 'wd') rig.k = { sq: -0.08 - Math.min(0.12, Math.abs(rig.lastVy) * 0.03), py: -1.2 };
+      else if (s === 'air' && rig.lastState === 'jsq') rig.k = { sq: 0.1, py: -2 };
+      else if (s === 'hurt') rig.k = { bend: -0.25 * Math.sign(vxF || 1), sq: 0.06, px: -vxF * 1.5 };
+      else if (s === 'brake') rig.k = { bend: -0.2, px: 1.5 };
+      rig.lastState = s;
+    }
+    rig.lastVy = f.vy;
+    return w;
+  }
   const shots = new Map();
   const shotMesh = kind => {
-    if (kind === 'pipmate') { const M = MODELS['Pip alone']; if (M && M.ready) { const o = cloneSkinned(M.scene), g2 = new THREE.Group(); o.scale.setScalar(M.cfg.height * 0.8 / M.height); o.rotation.y = Math.PI / 2; o.traverse(q => { if (q.isMesh) { q.castShadow = true; q.frustumCulled = false; } }); g2.add(o); return g2; }
+    if (kind === 'pipmate') { const M = MODELS['Pip alone']; if (M && M.ready) { const o = cloneSkinned(M.scene), g2 = new THREE.Group(); o.scale.setScalar(M.cfg.height * 0.8 / M.height); o.rotation.y = Math.PI / 2; o.traverse(q => { if (q.isMesh) { q.castShadow = true; q.frustumCulled = false; } }); g2.add(o); g2.userData.mixer = new THREE.AnimationMixer(o); g2.userData.acts = {}; g2.userData.ph = (shots.size % 3) * 0.37; return g2; }   /* Pip's companions animate too, each a little out of step */
       return new THREE.Mesh(new THREE.SphereGeometry(2.2, 12, 9), new THREE.MeshStandardMaterial({ color: 0x2bb8b0, roughness: 0.6 })); }
     if (kind === 'sackglow') { const m = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 14), new THREE.MeshBasicMaterial({ color: 0xffa040, transparent: true, opacity: 0.28, depthWrite: false })); return m; }   /* Potato Sack's swelling Spud Bomb */
     if (kind === 'nest') { const g2 = new THREE.Group(), twig = new THREE.MeshStandardMaterial({ color: 0x8a6a3e, roughness: 0.9 }); const ring = new THREE.Mesh(new THREE.TorusGeometry(2.6, 0.9, 6, 14), twig); ring.rotation.x = Math.PI / 2; g2.add(ring);
@@ -173,6 +250,11 @@ function build() {
   /* ---- animation: the simulation says which action and which frame; this only poses the model to match ---- */
   const lerp = (a, b, t) => a + (b - a) * t, frac = x => x - Math.floor(x);
   function clipTime(M, a) {
+    const alt = a.alt, as = alt && M.cfg.clips[alt.key], ac = as && M.clips[as.clip];
+    if (ac && !(alt.mode === 'once' && alt.v >= ac.duration)) {   /* a variant this model has a clip for (anim.js animAlt) */
+      if (alt.mode === 'once') return [as.clip, (as.from || 0) + alt.v];
+      return clipTime(M, alt);
+    }
     if (a.key === 'attack') {
       /* Moves without a clip of their own borrow a related one: later jabs use the jab, dash and pivot grabs use the grab. */
       const at = M.cfg.attacks[a.move] || M.cfg.attacks[{ jab2: 'jab', jab3: 'jab', jabr: 'jab', dgrab: 'grab', pgrab: 'grab' }[a.move]] || M.cfg.attacks['*'];
@@ -244,6 +326,28 @@ function build() {
     }
   }
 
+  /* A layer over the clips for the fighters animated for it (manifest "feel"): whole-body squash and stretch on a spring,
+     kicked when something happens (landing hard, taking off, being hit, a strike landing), a lean into air movement, and a
+     hit-freeze shake along the direction of the hit instead of side to side. Picture only. */
+  function feelLayer(v, f, p) {
+    const fe = v.fe || (v.fe = { s: 0, sv: 0, tick: -1, st: '', seg: -1, vy: 0, vx: 0 }), step = fe.tick !== tick; fe.tick = tick;
+    if (step) {
+      const s = f.state, a = f.state === 'attack' ? animState(f) : null, seg = a && a.mode === 'marks' ? a.seg : -1;
+      if (s !== fe.st) {
+        if (s === 'land' || s === 'wd') fe.sv += Math.min(0.32, 0.06 + Math.abs(fe.vy) * 0.045);   /* harder landings squash more */
+        else if (s === 'air' && fe.st === 'jsq') fe.sv -= 0.14;                                       /* take-off stretch */
+        else if (s === 'hurt') fe.sv -= 0.08 + Math.min(0.12, Math.hypot(f.vx, f.vy) * 0.02);
+        else if (s === 'jsq') fe.sv += 0.1;
+        fe.st = s;
+      }
+      if (seg === 1 && fe.seg === 0) fe.sv -= 0.1;   /* the strike: a snap of stretch as it lands */
+      if (seg === 2 && fe.seg === 1) fe.sv += 0.06;   /* and a little settle afterwards */
+      fe.seg = seg; fe.sv = (fe.sv - fe.s * 0.28) * 0.72; fe.s = clamp(fe.s + fe.sv, -0.3, 0.35); fe.vy = f.vy; fe.vx = f.vx;
+    }
+    const k = fe.s; p.sx *= 1 + k * 0.5; p.sy *= 1 - k;
+    if (!f.grounded && (f.state === 'air' || f.state === 'helpless')) p.rot += clamp(f.vx * f.face * 0.06, -0.16, 0.16);   /* leans into drift */
+    if (f.hitlag > 0 && f.state === 'hurt') { const m = Math.hypot(f.vx, f.vy) || 1, amp = 0.25 + Math.min(0.6, f.hitlag * 0.05), sg = (tick & 1) ? 1 : -1; p.shx = sg * amp * f.vx / m * f.face; p.shy = sg * amp * f.vy / m; }
+  }
   function poseOf(f, hasModel) {
     const h = f.st.h; let sx = 1, sy = 1, rot = 0, oy = 0;
     if (hasModel) {   /* a model animates itself; only whole-body spins and the swap shrink stay procedural */
@@ -384,6 +488,7 @@ function build() {
       dress(v, f);
       if (v.model) applyAnim(v, f);
       const p = poseOf(f, !!v.model), want = f.face > 0 ? -0.35 : Math.PI + 0.35;
+      if (v.model && v.model.cfg.feel) feelLayer(v, f, p);
       v.yaw += (want - v.yaw) * 0.4;
       /* A fighter that faces the camera (Loom) is not turned side-on: it angles a little toward where it is heading and is
          mirrored to turn round, flipping through edge-on like a kite. Its clips treat +X as forward. */
@@ -391,25 +496,37 @@ function build() {
       if (v.model && f.state === 'attack' && f.aim) { p.rot -= f.aim * 0.3 * (flat ? f.face : 1); p.oy = st.h * 0.55; }   /* an angled tilt leans the body up or down about the chest */
       if (flat) { v.flip += (f.face - v.flip) * 0.3; v.obj.scale.x = v.unit * (Math.abs(v.flip) < 0.08 ? 0.08 * (v.flip < 0 ? -1 : 1) : v.flip); }
       v.root.position.set(f.x, f.y, 0); v.root.rotation.y = (flat ? 0.55 * v.flip : v.yaw) + (v.model && v.turned ? Math.PI : 0) - (v.model ? (v.spin || 0) * f.face : 0);
-      v.pivot.position.set(f.hitlag > 0 && f.state === 'hurt' ? ((tick & 1) ? 0.35 : -0.35) : 0, p.oy, 0); v.pivot.rotation.z = -p.rot; v.pivot.scale.set(p.sx, p.sy, p.sx);
+      v.pivot.position.set(p.shx !== undefined ? p.shx : f.hitlag > 0 && f.state === 'hurt' ? ((tick & 1) ? 0.35 : -0.35) : 0, p.oy + (p.shy || 0), 0); v.pivot.rotation.z = -p.rot; v.pivot.scale.set(p.sx, p.sy, p.sx);
       v.pivot.children.forEach(c => { if (c.userData.y0 === undefined) c.userData.y0 = c.position.y; c.position.y = c.userData.y0 - p.oy; });
       const ghost = (f.invuln > 0 && (tick >> 1) % 2) || f.state === 'spot' || f.state === 'airdodge', hot = f.flash > 0 || (f.hitlag > 0 && f.state === 'hurt');
       for (const m of v.mats) { m.transparent = ghost; m.opacity = ghost ? 0.45 : 1; m.emissive.setHex(hot ? 0xffffff : 0x000000); m.emissiveIntensity = hot ? 0.8 : 0; }
       if (v.shield.visible) { const [sx, sy, r] = shieldCircle(f); v.shield.scale.setScalar(r); v.shield.position.set(sx, sy, 0); }
       if (v.pad.visible) v.pad.position.set(f.x, f.y - 0.8, 0);
       if (v.springs.length) applySprings(v);
-      if (v.prop && !v.hand) {   /* the living slingshot under its bird: it leans into its run and squashes a little in an attack */
-        const spinning = f.state === 'attack' && f.move && f.move.spin && f.move.spinAt, rot = spinning ? f.move.spinAt(f, f.mf) : 0;
+      if (v.prop && !v.hand) {   /* the living slingshot under its bird: posed by slingWant, the bird riding in its pouch */
+        const spinning = f.state === 'attack' && f.move && f.move.spin && f.move.spinAt, rot = spinning ? f.move.spinAt(f, f.mf) : 0, rig = v.prop.userData.rig, step = rig.tick !== tick; rig.tick = tick;
         v.prop.rotation.y = f.face > 0 ? 0 : Math.PI;
         if (spinning) { v.prop.rotation.z = -rot; v.prop.position.set(f.x - f.face * FP * Math.sin(rot), f.y + FP - FP * Math.cos(rot), 0); }   /* the handle swings round the same middle, opposite the bird */
-        else { v.prop.position.set(f.x, f.y, 0); v.prop.rotation.z = clamp(-f.vx * 0.06, -0.3, 0.3) * (f.face > 0 ? 1 : -1); } const sq = f.state === 'attack' ? 1 - 0.12 * Math.sin(Math.min(1, f.mf / (f.move ? f.move.t : 1)) * Math.PI) : f.state === 'jsq' || f.state === 'land' ? 0.85 : 1; v.prop.scale.set(1, sq, 1); v.prop.visible = true;
+        else { v.prop.position.set(f.x, f.y, 0); v.prop.rotation.z = 0; }
+        v.prop.scale.set(1, 1, 1); v.prop.visible = true;
+        const off = rig.drive(slingWant(f, rig), step);
+        /* the bird rides the pouch: move it by the pouch's offset, carried into the fighter's own turned frame */
+        if (v.obj && !spinning) {   /* the pouch's movement in the play plane, carried into the fighter's own turned frame (depth ignored) */
+          const wo = new THREE.Vector3(off.x, off.y, off.z); rig.grp.localToWorld(wo); const w0 = new THREE.Vector3(); rig.grp.localToWorld(w0); wo.sub(w0); wo.z = 0; if (wo.length() > 3.5) wo.setLength(3.5);
+          v.root.updateWorldMatrix(true, false); wo.applyMatrix3(new THREE.Matrix3().setFromMatrix4(v.root.matrixWorld).invert()); v.obj.position.set(wo.x * 0.85, (v.obj.userData.y0 !== undefined ? v.obj.userData.y0 : (v.model.cfg.lift || 0)) - p.oy + wo.y * 0.85, wo.z * 0.85); }   /* keeping the pivot's own height correction */
       } else if (v.prop) {
         v.root.updateWorldMatrix(true, true); v.hand.getWorldPosition(v.prop.position);
         v.prop.rotation.z = clamp(-f.vx * 0.12, -0.5, 0.5) + Math.sin(frame * 0.12 + idx) * 0.05;
         v.prop.userData.glow.material.opacity = 0.85 + Math.sin(frame * 0.37 + idx * 2) * 0.12; v.prop.visible = true;
       }
     });
-    F.forEach((f, idx) => { let e = emptySlings[idx]; if (f.sling && f.state !== 'dead') { if (!e) { e = emptySlings[idx] = makeSling(); scene.add(e); } e.position.set(f.sling.x, f.sling.y, 0); e.rotation.y = f.sling.face > 0 ? 0 : Math.PI; e.rotation.z = Math.sin(frame * 0.05 + idx) * 0.03; e.visible = true; } else if (e) e.visible = false; });   /* the empty slingshot, waiting for its bird */
+    F.forEach((f, idx) => { let e = emptySlings[idx];   /* the empty slingshot, waiting for its bird: it recoils from the launch, then stands slack */
+      if (f.sling && f.state !== 'dead') { if (!e) { e = emptySlings[idx] = makeSling(); scene.add(e); } const rig = e.userData.rig, step = rig.tick !== tick; rig.tick = tick;
+        if (!e.visible) { rig.k = { bend: -0.5, px: 4, py: 2, sq: 0.1 }; rig.bend = 0; rig.px = rig.py = 0; }   /* just fired: the bands snap forward and the trunk whips back */
+        e.position.set(f.sling.x, f.sling.y, 0); e.rotation.y = f.sling.face > 0 ? 0 : Math.PI; e.visible = true;
+        const fr = tick, airborne = !f.sling.plat && f.sling.vy !== 0, lost = f.sling.lost > 0;
+        rig.drive({ bend: Math.sin(fr * 0.05 + idx) * 0.06 + (lost ? 0.3 * Math.sin(fr * 0.3) : 0), sq: airborne ? 1.06 : 1, px: 0.6, py: airborne ? 1.5 : -1.8, feet: airborne ? [0.6, 0.6] : null }, step);
+      } else if (e) e.visible = false; });
     for (let k = F.length; k < 2; k++) { if (emptySlings[k]) emptySlings[k].visible = false; }
     for (let k = F.length; k < 2; k++) { if (fighters[k].prop) fighters[k].prop.visible = false; fighters[k].root.visible = false; fighters[k].shield.visible = false; fighters[k].pad.visible = false; }
 
@@ -419,7 +536,14 @@ function build() {
       m.position.set(p.x, p.y, 0);
       if (p.kind === 'boulder' || p.kind === 'tape') { m.scale.setScalar(p.r); m.rotation.z = -(p.rot || 0); }
       else if (p.kind === 'dummy' || p.kind === 'clone' || p.kind === 'egg') { m.scale.setScalar(p.r); m.rotation.z = -frame * 0.3 * p.face; }
-      else if (p.kind === 'pipmate') { m.position.y = p.y - 3; m.rotation.y = (p.vx || F[p.owner] && F[p.owner].face || 1) < 0 ? Math.PI : 0; m.visible = true; }
+      else if (p.kind === 'pipmate') { m.position.y = p.y - 3; m.rotation.y = (p.vx || F[p.owner] && F[p.owner].face || 1) < 0 ? Math.PI : 0; m.visible = true;
+        const u = m.userData, PM = MODELS['Pip alone'];
+        if (u.mixer && PM && PM.ready) {   /* flying while it moves, its own idle when it stops; a hop when it turns round */
+          const sp = Math.hypot(p.x - (u.lx === undefined ? p.x : u.lx), p.y - (u.ly === undefined ? p.y : u.ly)); u.lx = p.x; u.ly = p.y;
+          const want = sp > 0.35 ? 'Fly' : 'Idle', t = frame / 60 + u.ph;
+          for (const n of ['Fly', 'Idle']) { const c = PM.clips[n]; if (!c) continue; const a = u.acts[n] || (u.acts[n] = u.mixer.clipAction(c).play()); a.setEffectiveWeight(n === want ? 1 : 0); a.time = t % c.duration; }
+          u.mixer.update(0); m.rotation.z = sp > 0.35 ? clamp((p.y - (u.py || p.y)) * 0.15, -0.5, 0.5) : 0; u.py = p.y;
+        } }
       else if (p.kind === 'sackglow') { m.scale.setScalar(p.r * (1 + Math.sin(frame * 0.6) * 0.04)); m.material.opacity = 0.2 + Math.min(0.25, p.r / 200); }
       else if (p.kind === 'nest') { m.position.y = p.y - 1.8; m.scale.setScalar(1 + Math.sin(frame * 0.2) * 0.03); }
       else if (p.kind === 'gust') { m.rotation.y = Math.PI / 2; m.rotation.x = frame * 0.25; }

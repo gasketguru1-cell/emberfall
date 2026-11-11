@@ -1,68 +1,149 @@
 {
  "Idle": {
-  "seconds": 2.033
+  "seconds": 1.6
+ },
+ "Idle2": {
+  "seconds": 0.8
  },
  "Hop": {
-  "seconds": 0.4
+  "seconds": 0.367
  },
- "Crouch": {
+ "Run": {
   "seconds": 0.233
  },
- "Rise": {
-  "seconds": 0.433
- },
- "Fall": {
-  "seconds": 0.433
- },
- "Land": {
-  "seconds": 0.433
- },
- "Shield": {
-  "seconds": 0.167
- },
- "Hit": {
-  "seconds": 0.633
- },
- "Tumble": {
-  "seconds": 0.633
- },
- "Down": {
+ "Skid": {
   "seconds": 0.333
  },
+ "Crouch": {
+  "seconds": 0.2
+ },
+ "Rise": {
+  "seconds": 0.4
+ },
+ "Fall": {
+  "seconds": 0.333
+ },
+ "FastFall": {
+  "seconds": 0.2
+ },
+ "Land": {
+  "seconds": 0.4
+ },
+ "LandHard": {
+  "seconds": 0.6
+ },
+ "Shield": {
+  "seconds": 0.133
+ },
+ "ShieldHit": {
+  "seconds": 0.133
+ },
+ "Hit": {
+  "seconds": 0.6
+ },
+ "HitHeavy": {
+  "seconds": 0.6
+ },
+ "LaunchUp": {
+  "seconds": 0.6
+ },
+ "Spike": {
+  "seconds": 0.6
+ },
+ "Launch": {
+  "seconds": 0.6
+ },
+ "Tumble": {
+  "seconds": 0.6
+ },
+ "Down": {
+  "seconds": 0.3
+ },
  "Dodge": {
-  "seconds": 0.433
+  "seconds": 0.4
+ },
+ "AirDodge": {
+  "seconds": 0.8
  },
  "Hold": {
-  "seconds": 0.633
+  "seconds": 0.6
  },
  "Held": {
-  "seconds": 0.433
+  "seconds": 0.4
  },
- "Peck": {
-  "seconds": 0.567
+ "ThrowF": {
+  "seconds": 0.9
  },
- "Bash": {
-  "seconds": 0.967
- },
- "Flap": {
+ "ThrowB": {
   "seconds": 0.933
  },
+ "ThrowU": {
+  "seconds": 0.9
+ },
+ "ThrowD": {
+  "seconds": 0.9
+ },
+ "Ledge": {
+  "seconds": 0.6
+ },
+ "Respawn": {
+  "seconds": 0.8
+ },
+ "Select": {
+  "seconds": 0.5
+ },
+ "Peck": {
+  "seconds": 0.9
+ },
+ "Peck2": {
+  "seconds": 0.9
+ },
+ "Bash": {
+  "seconds": 0.9
+ },
+ "Lunge": {
+  "seconds": 0.9
+ },
+ "Flick": {
+  "seconds": 0.9
+ },
+ "Flap": {
+  "seconds": 0.9
+ },
  "Sweep": {
+  "seconds": 0.933
+ },
+ "TailSweep": {
   "seconds": 0.9
  },
  "Spin": {
-  "seconds": 0.733
+  "seconds": 0.7
  },
- "Fly": {
-  "seconds": 0.333
+ "Fling": {
+  "seconds": 0.9
+ },
+ "Dive": {
+  "seconds": 0.9
+ },
+ "Flip": {
+  "seconds": 0.9
  },
  "Kick": {
-  "seconds": 0.933
+  "seconds": 0.9
  },
  "Stomp": {
-  "seconds": 0.967
+  "seconds": 0.9
+ },
+ "Snatch": {
+  "seconds": 0.9
  },
  "Puff": {
-  "seconds": 0.933
+  "seconds": 0.9
+ },
+ "HopIn": {
+  "seconds": 0.267
+ },
+ "Fly": {
+  "seconds": 0.3
  }
 }
