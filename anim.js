@@ -44,6 +44,11 @@ function animBase(f) {
     case 'attack': {
       const m = f.move; if (!m) break;
       if (m.swap) return { key: 'swap', mode: 'phase', v: phase(f.mf, m.t) };
+      if (m.sel) {   /* the bird selector: the pouch draws back while Neutral B is held (and stays there while the wheel is open), then the swap plays from wherever it was let go */
+        const pull = 0.43;
+        if (!f.selDone) return { key: 'attack', move: f.mname, mode: 'marks', seg: 0, v: phase(Math.min(f.mf, 9), 9) * pull, whole: true };
+        const a = phase(f.selRel || 0, 9) * pull; return { key: 'attack', move: f.mname, mode: 'marks', seg: 0, v: a + (1 - a) * phase(f.mf - (m.t - SEL_SWAP), SEL_SWAP), whole: true };
+      }
       if (!m.h.length) return { key: 'attack', move: f.mname, mode: 'marks', seg: 0, v: phase(f.mf, m.t), whole: true };   /* no hitbox of its own (projectile moves): play straight through */
       const a0 = Math.min(...m.h.map(h => h.f0)), a1 = Math.max(...m.h.map(h => h.f1));
       if (f.mf < a0) return { key: 'attack', move: f.mname, mode: 'marks', seg: 0, v: phase(f.mf, a0), charge: f.charge };

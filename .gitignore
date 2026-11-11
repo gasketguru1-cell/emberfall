@@ -15,3 +15,7 @@ dist/
 desktop/eos/
 assets/*/work/*.blend
 assets/_backup-anim-v1/
+
+# local logs
+dist-release.log
+tools/daily-snapshot.log

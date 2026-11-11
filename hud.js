@@ -17,7 +17,8 @@ function drawHud() {
   if (typeof slowT !== 'undefined' && slowT > 0) { const k = Math.min(1, slowT / 10); g.fillStyle = 'rgba(0,0,0,' + (0.82 * k).toFixed(2) + ')'; g.fillRect(0, 0, W, 64 * k); g.fillRect(0, H - 64 * k, W, 64 * k); }
   g.textAlign = 'center';
   if (mode === 'countdown') { const n = countdown > 130 ? '3' : countdown > 90 ? '2' : countdown > 50 ? '1' : 'GO!'; big(n, H * 0.42, 110); }
-  if (paused) { g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(0, 0, W, H); big('PAUSED', H * 0.42, 80); g.font = 'bold 20px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Start: resume          Special (B, or X on the keyboard): exit to fighter select', W / 2, H * 0.42 + 54); }
+  if (paused && typeof drawPauseMenu === 'function') { if (!ML.open) drawPauseMenu(); }   /* movelist.js: Resume, Move List, Exit */
+  else if (paused) { g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(0, 0, W, H); big('PAUSED', H * 0.42, 80); g.font = 'bold 20px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Start: resume          Special (B, or X on the keyboard): exit to fighter select', W / 2, H * 0.42 + 54); }
   if (mode === 'over') { big(overT < 90 ? 'GAME!' : result, H * 0.42, 100); if (overT > 100) { g.font = '22px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Press Start or Attack', W / 2, H * 0.42 + 56); drawUpdateNote(H * 0.42 + 80); } }
 }
 function big(t, y, sz) { g.font = `900 ${sz}px system-ui, sans-serif`; g.textAlign = 'center'; g.lineWidth = 10; g.strokeStyle = '#1a1230'; g.strokeText(t, W / 2, y); g.fillStyle = '#ffd98a'; g.fillText(t, W / 2, y); }
@@ -209,7 +210,9 @@ function drawCombo() {
 }
 function drawFowlWheel() {
   if (mode !== 'play' && mode !== 'countdown') return;
-  for (const f of F) { if (!f.selOpen || !f.def.fowl) continue; const cx = SX(f.x), cy = SY(f.y + 12), R = 92, r0 = 34;
+  for (const f of F) { if (!f.selOpen || !f.def.fowl || f.state !== 'attack' || !f.move || !f.move.sel) continue;   /* only while the selector itself is running */ const R = 92, r0 = 34;
+    /* above the slingshot rather than over it, so the fighter stays in view, and kept on screen near the edges */
+    const cx = clamp(SX(f.x), R + 8, W - R - 8), cy = clamp(SY(f.y + f.st.h) - R - 10, R + 8, H - R - 8);
     g.save(); g.globalAlpha = 0.95; for (let k = 0; k < 5; k++) { const a0 = -Math.PI / 2 + (k - 0.5) * Math.PI * 2 / 5 + 0.04, a1 = a0 + Math.PI * 2 / 5 - 0.08, fm = f.def.forms[k], on = k === f.selPick;
       g.beginPath(); g.arc(cx, cy, R, a0, a1); g.arc(cx, cy, r0, a1, a0, true); g.closePath(); g.fillStyle = on ? fm.col[0] : 'rgba(18,14,30,.82)'; g.fill(); g.strokeStyle = on ? '#fff' : fm.col[0]; g.lineWidth = on ? 3 : 1.5; g.stroke();
       const am = (a0 + a1) / 2, tx = cx + Math.cos(am) * (R + r0) / 2, ty = cy + Math.sin(am) * (R + r0) / 2; g.textAlign = 'center'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(fm.label || fm.name, tx, ty);

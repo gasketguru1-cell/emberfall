@@ -299,14 +299,14 @@ function draw() {
   const three = !!(DBG.r3d && window.R3 && window.R3.ready);
   if (window.R3) window.R3.show(three);
   if (mode === 'select') {   /* start screen: over the live island in 3D, over the stage picture otherwise */
-    SHK.x = SHK.y = 0; if (three) g.clearRect(0, 0, W, H); drawSelect(three); if (three) window.R3.render(); return;
+    SHK.x = SHK.y = 0; if (three) g.clearRect(0, 0, W, H); drawSelect(three); if (typeof drawMoveList === 'function') drawMoveList(); if (three) window.R3.render(); return;
   }
   if (three) g.clearRect(0, 0, W, H);
   SHK.x = shake > 0 ? (Math.random() - 0.5) * shake : 0; SHK.y = shake > 0 ? (Math.random() - 0.5) * shake : 0;
   g.save(); g.translate(SHK.x, SHK.y);
   if (!three) { drawBg(); drawStage(); drawProj(); }
   if (!three) for (const f of F) if (f.sling) { g.save(); g.translate(SX(f.sling.x), SY(f.sling.y)); g.scale(cam.s * f.sling.face, -cam.s); fowlSling2d(); g.restore(); }   /* the empty slingshot, waiting */
-  for (const f of F) drawFighter(f, three); drawFx(three); drawDebug(); g.restore(); drawHud(); drawCombo(); drawFowlWheel(); drawDebugText();
+  for (const f of F) drawFighter(f, three); drawFx(three); drawDebug(); g.restore(); drawHud(); drawCombo(); drawFowlWheel(); drawDebugText(); if (typeof drawMoveList === 'function') drawMoveList();
   if (three) window.R3.render();
 }
 

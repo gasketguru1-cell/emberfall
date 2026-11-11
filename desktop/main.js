@@ -28,14 +28,36 @@ const enc = (ip, port) => { let n = BigInt(ip.split('.').reduce((a, b) => a * 25
 const dec = code => { const c = code.toUpperCase().replace(/[^0-9A-Z]/g, ''); if (c.length !== 10) throw new Error('a code is 10 letters and numbers'); let n = 0n; for (const ch of c) { const v = B32.indexOf(ch); if (v < 0) throw new Error('that is not a valid code'); n = n * 32n + BigInt(v); } const port = Number(n % 65536n), ipN = Number(n / 65536n); return { ip: [ipN >>> 24, (ipN >> 16) & 255, (ipN >> 8) & 255, ipN & 255].join('.'), port }; };
 function lanIp() { for (const list of Object.values(os.networkInterfaces())) for (const a of list) if (a.family === 'IPv4' && !a.internal) return a.address; return '127.0.0.1'; }
 const socks = new Map(); let nextId = 1;
+/* Both players must run the same version (an older or newer copy would desync): each side sends { __ev: version } until
+   the other's has arrived; the game's own messages pass only once the two match. A mismatch (or a copy too old to say
+   its version) shows a message asking to update, through preload.js. */
+const VERSION = app.getVersion();
+const sendRaw = (k, obj) => { if (k.peer) k.s.send(Buffer.from(JSON.stringify(obj)), k.peer.port, k.peer.ip); };
+const mismatch = (theirs) => { if (win && !win.isDestroyed()) win.webContents.send('version-mismatch', { mine: VERSION, theirs }); };
 ipcMain.handle('udp-open', (e, role, code) => new Promise((resolve, reject) => {
   const id = nextId++, s = dgram.createSocket('udp4'); let peer = null;
   if (role === 'join') { try { peer = dec(code); } catch (err) { reject(err); return; } }
-  s.on('message', (buf, rinfo) => { if (!peer) peer = { ip: rinfo.address, port: rinfo.port }; if (rinfo.address !== peer.ip || rinfo.port !== peer.port) return; try { win && win.webContents.send('udp-msg', id, JSON.parse(buf.toString())); } catch (err) { /* not ours */ } });
+  const k = { s, get peer() { return peer; }, theirs: null, oldTimer: null };
+  s.on('message', (buf, rinfo) => {
+    if (!peer) peer = { ip: rinfo.address, port: rinfo.port };
+    if (rinfo.address !== peer.ip || rinfo.port !== peer.port) return;
+    let msg; try { msg = JSON.parse(buf.toString()); } catch (err) { return; }   /* not ours */
+    if (msg && msg.__ev !== undefined) {
+      if (k.theirs === null) { k.theirs = String(msg.__ev); clearTimeout(k.oldTimer); sendRaw(k, { __ev: VERSION }); if (k.theirs !== VERSION) mismatch(k.theirs); }
+      return;
+    }
+    if (k.theirs === null) {   /* the other copy hasn't said its version: ours goes out; none at all within 4 s means an old copy */
+      sendRaw(k, { __ev: VERSION });
+      if (!k.oldTimer) k.oldTimer = setTimeout(() => { if (k.theirs === null) mismatch('an older version'); }, 4000);
+      return;
+    }
+    if (k.theirs !== VERSION) return;
+    win && win.webContents.send('udp-msg', id, msg);
+  });
   s.on('error', err => reject(err));
-  s.bind(role === 'host' ? 0 : 0, () => { socks.set(id, { s, get peer() { return peer; } }); resolve({ id, code: role === 'host' ? enc(lanIp(), s.address().port) : code }); });
+  s.bind(role === 'host' ? 0 : 0, () => { socks.set(id, k); if (peer) sendRaw(k, { __ev: VERSION }); resolve({ id, code: role === 'host' ? enc(lanIp(), s.address().port) : code }); });
 }));
-ipcMain.on('udp-send', (e, id, msg) => { const k = socks.get(id); if (!k || !k.peer) return; const b = Buffer.from(JSON.stringify(msg)); k.s.send(b, k.peer.port, k.peer.ip); });
+ipcMain.on('udp-send', (e, id, msg) => { const k = socks.get(id); if (!k || !k.peer) return; if (k.theirs === null) sendRaw(k, { __ev: VERSION }); sendRaw(k, msg); });
 ipcMain.on('udp-close', (e, id) => { const k = socks.get(id); if (k) { k.s.close(); socks.delete(id); } });
 
 /* ---- EOS: loaded only when its SDK and settings are present (see desktop/EOS-SETUP.md) ---- */
@@ -45,9 +67,15 @@ if (eos) eos.wire(ipcMain, () => win);
 
 app.whenReady().then(() => {
   serve(); Menu.setApplicationMenu(null);
-  win = new BrowserWindow({ width: 1280, height: 760, backgroundColor: '#0b0d16', title: 'Emberfall', autoHideMenuBar: true, icon: path.join(__dirname, 'logo', 'icon-256.png'),
+  /* Fullscreen by default; F11 switches to a window and back. Self-tests and EMBERFALL_WINDOWED=1 start in a window. */
+  const fullscreen = !process.env.EMBERFALL_WINDOWED && !process.env.EMBERFALL_AUTOTEST;
+  win = new BrowserWindow({ width: 1280, height: 760, fullscreen, backgroundColor: '#0b0d16', title: 'Emberfall', autoHideMenuBar: true, icon: path.join(__dirname, 'logo', 'icon-256.png'),
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, backgroundThrottling: false } });
+  win.webContents.on('before-input-event', (e, input) => {
+    if (input.type === 'keyDown' && input.key === 'F11' && !input.isAutoRepeat) { win.setFullScreen(!win.isFullScreen()); e.preventDefault(); }
+  });
   win.loadURL('app://game/index.html');
+  require('./updater.js').start(() => win);   /* signed updates (desktop/updater.js, docs/RELEASING.md) */
   if (process.env.EMBERFALL_DEVTOOLS) win.webContents.openDevTools({ mode: 'detach' });
   if (process.env.EMBERFALL_AUTOTEST) win.webContents.once('did-finish-load', () => autotest(process.env.EMBERFALL_AUTOTEST));
 });

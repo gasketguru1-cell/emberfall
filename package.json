@@ -1,11 +1,12 @@
 {
   "name": "emberfall",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "test": "node tests/headless.js && node tests/rules.js && node tests/fuzz.js 20 && node tests/net.js",
     "start": "node serve.js",
     "desktop": "electron .",
-    "dist": "node tools/stage-desktop.js && electron-builder --win nsis"
+    "dist": "node tools/stage-desktop.js && electron-builder --win nsis",
+    "release": "node tools/release.js all"
   },
   "type": "commonjs",
   "private": "true",
@@ -34,7 +35,9 @@
       "desktop/preload.js",
       "desktop/eos.js",
       "package.json",
-      "desktop/logo/icon-256.png"
+      "desktop/logo/icon-256.png",
+      "desktop/updater.js",
+      "desktop/update-key.pub.pem"
     ],
     "extraResources": [
       {
@@ -65,5 +68,8 @@
       "createStartMenuShortcut": true,
       "shortcutName": "Emberfall"
     }
+  },
+  "emberfall": {
+    "releaseRepo": "gasketguru1-cell/emberfall-releases"
   }
 }

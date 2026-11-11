@@ -15,4 +15,34 @@ const eos = { id: 'eos', label: 'Internet (Epic Online Services)', host: async (
 /* EOS is offered first when it is set up; direct is always there */
 const transports = [direct];
 ipcRenderer.invoke('eos-available').then(ok => { if (ok) transports.unshift(eos); });
+/* ---- notices from the desktop app (updates, a version mismatch online): a small panel of its own, over the game ---- */
+function notice(text, button, onClick, sticky) {
+  const show = () => {
+    let el = document.getElementById('ef-notice');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'ef-notice';
+      el.style.cssText = 'position:fixed;right:18px;bottom:18px;z-index:99999;max-width:360px;padding:12px 16px;border-radius:10px;' +
+        'background:rgba(11,13,22,0.94);border:1px solid #ff8a3d;box-shadow:0 0 18px rgba(255,120,40,0.35);color:#f3ead8;' +
+        'font:600 14px/1.4 system-ui,sans-serif;display:flex;gap:12px;align-items:center';
+      document.body.appendChild(el);
+    }
+    el.textContent = '';
+    const t = document.createElement('div'); t.textContent = text; el.appendChild(t);
+    if (button) {
+      const b = document.createElement('button'); b.textContent = button;
+      b.style.cssText = 'flex:none;padding:6px 12px;border:0;border-radius:6px;background:#ff8a3d;color:#0b0d16;font:700 13px system-ui,sans-serif;cursor:pointer';
+      b.onclick = onClick; el.appendChild(b);
+    }
+    clearTimeout(el._t);
+    if (!sticky) el._t = setTimeout(() => el.remove(), 8000);
+  };
+  if (document.body) show(); else window.addEventListener('DOMContentLoaded', show, { once: true });
+}
+ipcRenderer.on('update-status', (e, s) => {
+  if (s.state === 'downloading') notice(`Downloading Emberfall ${s.version}...`);
+  else if (s.state === 'ready') notice(`Emberfall ${s.version} is ready${s.notes ? ': ' + s.notes : ''}. It installs when you close the game.`, 'Restart now', () => ipcRenderer.send('update-install'), true);
+});
+ipcRenderer.on('version-mismatch', (e, v) => notice(`The other player has Emberfall ${v.theirs}; you have ${v.mine}. Both players need the same version: restart the game to update.`, null, null, true));
+
 contextBridge.exposeInMainWorld('desktop', { getTransports: () => transports.map(t => ({ id: t.id, label: t.label, host: t.host, join: t.join })) });

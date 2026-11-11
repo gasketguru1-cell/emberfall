@@ -122,11 +122,25 @@ vm.runInThisContext(`
     check('clank: equal smashes cancel, nobody is hurt', both && a.pct === 0 && b.pct === 0, 'both recoiled: ' + both + ', damage ' + a.pct + ' / ' + b.pct);
   }
 
+  /* ---- Hitstun: Ultimate's (0.4 x knockback, one frame less, at least 4) times the combo ease ---- */
+  {
+    const [a, v] = setup(FL, FL, -40, 40); const hs = kb => { airborne(v, 40, 40); v.launch(kb, Math.PI / 4, 1); return v.hitstun; };
+    const h100 = hs(100), h10 = hs(10), ult100 = Math.floor(100 * 0.4) - 1;
+    check('hitstun: Ultimate’s rule, made longer for easier combos', COMBO_EASE > 1 && h100 === Math.floor(100 * 0.4 * COMBO_EASE) - 1 && h100 > ult100 && h10 === 4, 'at 100 knockback ' + h100 + ' frames (Ultimate ' + ult100 + '); at 10 knockback ' + h10 + ' (at least 4)');
+  }
+
   /* ---- Ledge protection: more after a long time in the air, less when damaged ---- */
   {
     const grab = (airT, pct) => { const [f] = setup(FL, FL, 0, -40); airborne(f, EDGE + f.st.w / 2 + 3, -6); f.vy = -0.5; f.airT = airT; f.pct = pct; let inv = null; let open = 0; run(12, () => { if (f.state === 'ledge') { if (f.invuln === 0 && f.sf <= 2) open++; if (f.sf === 2 && inv === null) { inv = f.invuln + 2; return false; } } }); grab.open = open; return inv; };
     const short = grab(20, 0), long = grab(300, 0), worn = grab(20, 120);
     check('ledge: protection grows with air time, shrinks with damage', short !== null && long > short + 15 && worn < short - 10 && worn >= 7, 'frames protected: short hop ' + short + ', long fall ' + long + ', at 120% ' + worn);
+    /* Ultimate's numbers (SmashWiki "Edge"): 60 x a/300 + 44 - 44 x p/120, between 23 and 123 */
+    const mid = grab(150, 60);
+    check('ledge: protection follows the Ultimate formula', short === 48 && long === 104 && worn === 23 && mid === 52, 'short hop ' + short + ' (48), long fall ' + long + ' (104), at 120% ' + worn + ' (23), 150 frames at 60% ' + mid + ' (52)');
+    /* regrabs before landing or being hit: 0.8, then 0.5, then nothing */
+    const [f] = setup(FL, FL, 0, -40); const got = [];
+    for (let k = 0; k < 4; k++) { f.invuln = 0; airborne(f, EDGE + f.st.w / 2 + 3, -6); f.vy = -0.5; f.airT = 150; f.ledgeCd = 0; let inv = null; run(12, () => { if (f.state === 'ledge' && f.sf === 2) { inv = f.invuln + 2; return false; } }); got.push(inv); f.set('air'); }
+    check('ledge: regrabs earn 0.8, then 0.5, then no protection', got[0] === 74 && got[1] === 59 && got[2] === 37 && got[3] === 2, 'grabs in one airtime: ' + got.join(', ') + ' (74, 59, 37, none)');
   }
   /* ---- Ledge get-ups are slower above 100% ---- */
   {
@@ -221,6 +235,10 @@ vm.runInThisContext(`
     const floor = (shield, lx) => { const [a, v] = setup(FL, FL, -60, 0); airborne(v, 0, 22); v.launch(120, -Math.PI / 2, 1); const seen = [];
       SCRIPT[1] = (i, tt) => { if (shield && tt < 2) i.shd = true; i.lx = lx; }; run(30, () => { if (seen[seen.length - 1] !== v.state) seen.push(v.state); }); return seen.join('>'); };
     const none = floor(false, 0), tech = floor(true, 0), roll = floor(true, 1);
+    const late = (n) => { const [a, v] = setup(FL, FL, -60, 0); airborne(v, 0, 80); v.launch(120, -Math.PI / 2, 1); let land = -1;
+      SCRIPT[1] = (i, tt) => { if (tt === n) i.shd = true; }; run(30, () => { if (land < 0 && v.state !== 'hurt') land = t; }); return { st: v.state, land }; };
+    const probe = late(-1); let teched = 0; for (let n = probe.land - 18; n <= probe.land + 2; n++) if (late(n).st !== 'down') teched++;
+    check('tech: the window is 11 frames, as in Ultimate', teched === 11, teched + ' press frames tech (11)');
     check('tech: shield before hitting the floor', /hurt>down/.test(none) && /hurt>land/.test(tech) && /hurt>roll/.test(roll), 'nothing: ' + none + ' | shield: ' + tech + ' | shield + direction: ' + roll);
   }
   {
@@ -576,6 +594,13 @@ vm.runInThisContext(`
     { const [f] = setup(FOW, FL, 0, 60); SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) i.spc = true; }; let shots = 0; run(30, () => { shots = Math.max(shots, PROJ.length); }); const tapped = f.form.label;
       const [g] = setup(FOW, FL, 0, 60); let open = false; SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 30) { i.spc = true; if (tt > 12) { i.lx = -0.6; i.ly = -0.8; } } }; run(50, () => { if (g.selOpen) open = true; });
       check('Furious Fowls: neutral special taps to the next bird, or opens a wheel to point at one', tapped === 'Bolt' && open && g.form.label === 'Pip' && shots === 0, 'tap: ' + tapped + '; held and pointed down-left: ' + g.form.label + ' (wheel opened: ' + open + '); shots fired: ' + shots); }
+    /* The wheel: a stick springing back through the opposite slice does not change the pick; pointing does not drift the
+       slingshot in the air; a hit while the wheel is open closes it for good; the swap takes six frames after release. */
+    { const [f] = setup(FOW, FL, 0, 60); SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 30) { i.spc = true; if (tt > 12 && tt < 28) i.lx = 1; if (tt === 28) i.lx = -1; } }; let endAt = 0; run(50, () => { if (!endAt && f.state !== 'attack') endAt = t; });
+      const bounceKept = f.form.label === 'Bolt';
+      const [g] = setup(FOW, FL, 0, 60); airborne(g, 0, 60); SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 30) { i.spc = true; if (tt > 12) i.lx = -1; } }; const x0 = g.x; run(26); const drift = Math.abs(g.x - x0);
+      const [h, o] = setup(FOW, FL, 0, 12); SCRIPT[0] = (i, tt) => { if (tt >= 2) i.spc = true; if (tt > 12) i.ly = -1; }; run(14); const wasOpen = h.selOpen; applyHit(o, h, { d: 8, a: 45, b: 40, k: 60 }, -1, o.x, false, false); run(30); const stuck = h.selOpen;
+      check('Furious Fowls: the bird wheel ignores a stick bouncing back, does not drift, and closes when hit', bounceKept && drift < 0.5 && wasOpen && !stuck && endAt > 0, 'pointed at Bolt then a one-frame bounce the other way: ' + f.form.label + '; drift while pointing in the air: ' + drift.toFixed(2) + '; wheel open before the hit ' + wasOpen + ', after ' + stuck); }
     /* Side B: the living bird, no flight timer, the slingshot left behind */
     { const [f] = setup(FOW, FL, -40, 60); f.pct = 37; SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.lx = 1; i.spc = true; } }; let flew = 0, left = null, endedBy = ''; run(150, () => { if (f.flying) flew++; if (f.sling && !left) left = f.sling.x; if (!endedBy && flew && !f.flying) endedBy = f.grounded ? 'landing' : f.state; });
       check('Furious Fowls: side special fires the bird, which flies until it lands', left !== null && Math.abs(left + 40) < 1 && f.fi === 5 && flew > 25 && endedBy === 'landing' && f.pct === 37, 'slingshot stayed at ' + (left === null ? '-' : left.toFixed(0)) + '; the bird flew ' + flew + ' frames and stopped by ' + endedBy + '; damage still ' + f.pct + '%');
@@ -637,8 +662,8 @@ vm.runInThisContext(`
   /* ---- Training mode: endless stocks, no clock, and a true-combo counter ---- */
   {
     const was = TRAINING; TRAINING = true;
-    const [f, o] = setup(FL, FL, 0, 9); o.ctl = new Ctl('none'); o.pct = 70; const tm = timer;   /* at 70% each jab still holds the target in hitstun for the next */ let most = 0; SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 40) i.atk = true; }; run(70, () => { most = Math.max(most, COMBO[0].hits); });
-    const chain = COMBO[0].last; SCRIPT[0] = (i, tt) => { if (tap(120)(tt)) i.atk = true; }; run(80); const lone = COMBO[0].last;
+    const [f, o] = setup(FL, FL, 0, 9); o.ctl = new Ctl('none'); o.pct = 70; const tm = timer;   /* at 70% each jab still holds the target in hitstun for the next */ let most = 0; SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 22) i.atk = true; }; run(100, () => { most = Math.max(most, COMBO[0].hits); });   /* long enough for the last jab's hitstun to run out */
+    const chain = COMBO[0].last; SCRIPT[0] = (i, tt) => { if (tap(140)(tt)) i.atk = true; }; run(80); const lone = COMBO[0].last;
     check('training: a jab string counts as one true combo, with its damage', chain && chain.hits >= 2 && Math.abs(chain.dmg - (o.pct - 70) + (lone ? lone.dmg : 0)) < 0.01 && most === chain.hits, chain ? chain.hits + ' hits for ' + chain.dmg.toFixed(1) + '%' : 'nothing counted');
     check('training: a hit after the target recovers starts a new combo', lone && lone.hits === 1 && COMBO[0].best.hits === chain.hits, lone ? 'next hit: ' + lone.hits + ' hit, best kept at ' + COMBO[0].best.hits : 'nothing counted');
     airborne(o, 400, 50); run(20); check('training: no clock, and stocks never run out', o.stocks === STOCKS && timer === tm, 'stocks ' + o.stocks + ' after a KO; clock ' + (timer === tm ? 'stopped' : 'running'));
