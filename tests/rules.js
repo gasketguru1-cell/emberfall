@@ -516,9 +516,21 @@ vm.runInThisContext(`
       { const [s2, o2] = setup(SACK, FL, 0, 3); airborne(s2, 0, 40); airborne(o2, 3, 38); o2.ctl = new Ctl('none'); o2.x = 200; s2.startMove('nair'); run(3); const first = s2.nairDrag; run(20); airborne(s2, 0, 40); s2.startMove('nair'); run(3); const second = s2.nairDrag; s2.touchDown(MAIN); airborne(s2, 0, 40); s2.startMove('nair'); run(3); const again = s2.nairDrag;
         check('Potato Sack: only the first neutral air of each airtime drags', first === true && second === false && again === true, 'first: ' + first + ', second in the same air: ' + second + ', after landing: ' + again); }
       check('Potato Sack: neutral air finisher launches them away', late.away > 25, 'at 130%: ' + late.away.toFixed(1) + ' units apart 90 frames after the start'); }
-    /* up special bursts on frame 5 */
-    { const [s] = setup(SACK, FL, 0, 60); let at = -1; SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = 1; i.spc = true; } }; run(20, () => { if (at < 0 && PROJ.some(p => p.kind === 'blast')) at = s.mf; });
-      check('Potato Sack: Hot Potato bursts on frame 5', at === 5, 'burst on frame ' + at); }
+    /* up special: a flaming potato thrown up on frame 4 falls back on him and bursts there */
+    { const [s] = setup(SACK, FL, 0, 60); let at = -1, thrown = -1, top = 0, bx = 0, by = 0; SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = 1; i.spc = true; } };
+      run(40, () => { const sp = PROJ.find(p => p.kind === 'hotspud'); if (sp) { if (thrown < 0) thrown = s.mf; top = Math.max(top, sp.y - s.y); } if (at < 0) { const b = PROJ.find(p => p.kind === 'blast'); if (b) { at = s.mf; bx = b.x - s.x; by = b.y - s.y; } } });
+      check('Potato Sack: Hot Potato throws a potato up on frame 4 that falls back on him and bursts there', thrown === 4 && at >= 16 && at <= 24 && top > 15 && Math.abs(bx) < 0.5 && by > 2 && by < 7, 'thrown on frame ' + thrown + ', rose to ' + top.toFixed(1) + ' over his feet, burst on frame ' + at + ' at his middle (' + bx.toFixed(1) + ', ' + by.toFixed(1) + ')'); }
+    /* the potato bursts early on an opponent in its way: both are sent flying, with the same burst */
+    { const [s, o] = setup(SACK, FL, 0, 60); o.ctl = new Ctl('none'); airborne(o, 0, 21); o.vy = 0; let at = -1; const p0 = s.pct;
+      SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = 1; i.spc = true; } }; run(4); airborne(o, 0, 21);
+      run(40, () => { if (o.state !== 'hurt' && at < 0) { o.y = 21; o.vy = 0; } if (at < 0 && PROJ.some(p => p.kind === 'blast')) at = s.mf; });
+      const [s2, o2] = setup(SACK, FL, 0, 5); o2.ctl = new Ctl('none'); SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = 1; i.spc = true; } }; run(60);
+      check('Potato Sack: an opponent in the potato’s way sets it off early, sending both flying with the same burst', at > 4 && at < 12 && o.pct > 10 && o.state === 'hurt' && s.state === 'hurt' && s.pct - p0 === 12 && Math.abs(o.pct - o2.pct) < 0.01,
+        'burst on frame ' + at + '; opponent ' + o.pct.toFixed(1) + '% (a neighbour on the ground takes ' + o2.pct.toFixed(1) + '%), sack ' + s.state + ' +' + (s.pct - p0) + '%'); }
+    /* his body carries the burst from frame 3: a neighbour is hit then, once; he is launched only when the potato lands on him */
+    { const [s, o] = setup(SACK, FL, 0, 5); o.ctl = new Ctl('none'); s.startMove('uspec'); let hitAt = -1, hits = 0, was = o.pct, launchedAt = -1, stateAtHit = '';
+      run(60, () => { if (o.pct > was + 0.01) { hits++; was = o.pct; if (hitAt < 0) { hitAt = s.mf; stateAtHit = s.state; } } if (launchedAt < 0 && s.state === 'hurt') launchedAt = s.mf; });
+      check('Potato Sack: Hot Potato’s body burst hits from frame 3, once, and he flies only when the potato lands', hitAt === 3 && hits === 1 && stateAtHit === 'attack' && launchedAt >= 16, 'hit on frame ' + hitAt + ' (' + hits + ' hit), launched on frame ' + launchedAt); }
     /* tumble with down held goes through a soft platform; without it he lands as before */
     { const thru = down => { const [s] = setup(SACK, FL, 0, 60); airborne(s, -42, 36); SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = -1; i.spc = true; } else if (tt >= 4 && tt < 9) { i.lx = 1; } if (down && tt >= 9) i.ly = -1; }; let onPlat = false; run(60, () => { if (s.plat && s.plat.soft) onPlat = true; }); return onPlat; };
       const held = thru(true), plain = thru(false);

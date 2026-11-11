@@ -465,7 +465,7 @@ const TUNE = {
 const NORMALS = ['jab', 'jab2', 'jab3', 'dash', 'ftilt', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash', 'nair', 'fair', 'bair', 'uair', 'dair'];
 function applyTune(fm) {
   const T = TUNE[fm.name], mv = fm.moves; if (!T) return;
-  if (T.kb) { for (const k in mv) { const m = mv[k]; if (m && Array.isArray(m.h)) for (const h of m.h) if (h.k) h.k = Math.round(h.k * T.kb); } for (const k in mv.throws) mv.throws[k].k = Math.round(mv.throws[k].k * T.kb); }
+  if (T.kb) { for (const k in mv) { const m = mv[k]; if (m && Array.isArray(m.h)) for (const h of m.h) if (h.k && !h.untuned) h.k = Math.round(h.k * T.kb); }   /* untuned: a hit that must match a projectile's numbers exactly (Hot Potato's body) */ for (const k in mv.throws) mv.throws[k].k = Math.round(mv.throws[k].k * T.kb); }
   if (T.lag) for (const k of ['dash', 'fsmash', 'usmash', 'dsmash']) {   /* committal moves only: tilts, jabs and aerials keep their recovery, so hits lead to follow-ups */ const m = mv[k]; if (!m || !m.h || !m.h[0]) continue; const last = Math.max(...m.h.map(x => x.f1)); m.t = last + Math.max(6, Math.round((m.t - last) * T.lag)); }
 }
 
@@ -592,11 +592,23 @@ const WREN = {
    70% and the edge (sour) from about 100 to 125%, both from the victim's own damage; the sweet spot hits about half again
    as hard as the burst throws the sack itself at the same damage. One hit per target: the middle is tried first. */
 const SACK_BLAST = { sweet: { r: 6, d: 15, a: 75, b: 50, k: 112 }, sour: { r: 12, d: 10, a: 70, b: 35, k: 100 } };   /* measured with no DI at centre stage: sweet KOs at 55-90% (most near 70), sour at 105-130% (heavies later) */
-function sackBlast(f, i) {
-  spark(f.x, f.y + 4, '#ffb347', 30, 2.6); beep(120, 0.3, 'sawtooth', 0.08, 0.4); shake = Math.max(shake, 6);
-  for (const part of ['sweet', 'sour']) { const q = SACK_BLAST[part]; shoot(f, { kind: 'blast', grp: 'hotpotato', ox: 0.01, oy: 4, vx: 0, r: q.r, life: 4, h: { d: q.d, a: q.a, b: q.b, k: q.k, norage: 1 } }); }   /* norage: the sack's own damage does not add to it */
+function sackBlast(f, i, at) {   /* at: where the burst is centred (the hot potato's spot when it goes off early), else his middle; no burst hit on someone his body already caught this move */
+  const bx = at ? at[0] : f.x, by = at ? at[1] : f.y + 4;
+  spark(bx, by, '#ffb347', 30, 2.6); spark(bx, by, '#ff5a1a', 18, 1.8); beep(120, 0.3, 'sawtooth', 0.08, 0.4); shake = Math.max(shake, 6);
+  if (!(f.hitG && f.hitG.has(1))) for (const part of ['sweet', 'sour']) { const q = SACK_BLAST[part]; shoot(f, { kind: 'blast', grp: 'hotpotato', vx: 0, r: q.r, life: 4, h: { d: q.d, a: q.a, b: q.b, k: q.k, norage: 1 } }); const b = PROJ[PROJ.length - 1]; b.x = bx; b.y = by; }   /* norage: the sack's own damage does not add to it */
   const d = 12; f.pct = Math.min(999, f.pct + d); f.flash = 6; f.blastUsed = !f.grounded || true;
   f.launch(knock(f, d, 100, 70), (90 - clamp(i.lx, -1, 1) * 28) * Math.PI / 180, 1); f.hitlag = 4;
+}
+/* The hot potato itself: thrown straight up from his head, it stays over him (it follows him sideways) and falls back on him.
+   Up and back down to his head in 16 frames. A burst only while he is still doing the up special; otherwise it fizzles. */
+const SPUD = { vy: 1.75, grav: 0.22, r: 2.4 };
+function spudStep(p) {
+  const f = F[p.owner], v = F[1 - p.owner], live = f && f.state === 'attack' && f.mname === 'uspec';
+  if (!live) { spark(p.x, p.y, '#ffb347', 6, 0.8); p.life = 0; return; }
+  p.vy -= p.grav; p.y += p.vy; p.x = f.x; p.rot = (p.rot || 0) + 0.25 * f.face;
+  const head = f.y + f.st.h + 0.5;
+  const touch = v && canBeHit(v) && circRect(p.x, p.y, p.r, ...hurtRect(v));
+  if (touch || (p.vy < 0 && p.y <= head) || p.life <= 0) { p.life = 0; f.spudOut = true; sackBlast(f, f.ctl.c, touch ? [p.x, p.y] : null); }
 }
 const SACK = {
   name: 'Potato Sack', sub: 'a sack of forge-town spuds', forms: [{
@@ -620,7 +632,18 @@ const SACK = {
           spark(f.x, f.y + 5, '#ffb347', Math.min(80, 20 + c / 4 | 0), 2 + Math.min(6, c / 60)); beep(90, 0.35, 'sawtooth', 0.09, 0.4); shake = Math.max(shake, Math.min(20, 6 + c / 30)); }
         if (f.mf >= f.scRel + 24) { if (glow) glow.life = 0; f.mf = f.move.t; } } },
       sspec: { t: 50, once: 1, nodrift: 1, ll: 14, h: [{ f0: 10, f1: 22, x: 7, y: 6, r: 6, grab: 1, cmd: 's', d: 0 }], on(f, n) { if (n === 8) { lift(f, 1.6); f.vx = f.face * 2.3; } } },
-      uspec: { t: 29, rise: 40, blast: 1, h: [], on(f, n, i) { if (n < 5 && !f.grounded) f.vy = Math.max(f.vy, -0.5); if (n === 5) sackBlast(f, i); } },   /* bursts on frame 5 (owner's request, 2026-11-10) */
+      /* Hot Potato (owner's request, 2026-11-11): on frame 4 he tosses a flaming potato straight up over his head; it drops back
+         onto him and bursts (sackBlast: the same burst on others and the same launch for him as before). He hangs in the air
+         while he waits. If the potato touches the opponent first it bursts there and then, launching them both. */
+      /* (owner's request, 2026-11-11) from frame 3 his body carries the burst's own hitbox, sweet middle then sour edge, until the
+         potato lands: one hit per opponent between the body and the burst. He is only launched when the potato hits him. */
+      uspec: { t: 60, rise: 40, blast: 1, h: ['sweet', 'sour'].map(k => { const q = SACK_BLAST[k]; return { f0: 3, f1: 58, x: 0, y: 4, r: q.r, d: q.d, a: q.a, b: q.b, k: q.k, norage: 1, untuned: 1, g: 1 }; }), on(f, n, i) {
+        if (n === 1) f.spudOut = false;
+        if (!f.spudOut && !f.grounded) f.vy = Math.max(f.vy, -0.5);
+        if (n === 4) { f.spudOut = false; PROJ = PROJ.filter(p => !(p.owner === f.idx && p.kind === 'hotspud'));
+          PROJ.push({ x: f.x, y: f.y + f.st.h + 2, vx: 0, vy: SPUD.vy, grav: SPUD.grav, life: 90, owner: f.idx, face: f.face, r: SPUD.r, ground: 'pass', plat: null, kind: 'hotspud', ghost: 1, h: { d: 0, a: 0, b: 0, k: 0 }, step: spudStep });
+          beep(330, 0.08, 'triangle', 0.05, 1.6); }
+        if (n === 59 && !f.spudOut && PROJ.some(p => p.owner === f.idx && p.kind === 'hotspud')) f.mf = 58;   /* waits for the potato: the move ends only by the burst */ } },
       dspec: { t: 38, burst: 1, cancel: 7, nodrift: 1, h: [], on(f, n, i) {
         if (n === 1) { f.burstKind = ''; if (!f.grounded) f.burstUsed = true; }
         if (n < 6 && !f.grounded) { f.vy = Math.max(f.vy, -0.3); f.vx *= 0.9; }
@@ -1756,9 +1779,27 @@ for (const def of ROSTER) for (const fm of def.forms) {
   /* Toned down (owner's request, 2026-11-10): only the first neutral air of each trip into the air drags. Later ones in the
      same airtime still hit four times but let go, so the move can no longer carry someone through a chain of itself. */
   nair.on = (f, n) => { if (n === 1) { f.nairDrag = !f.airUse.nairDrag; f.airUse.nairDrag = 1; } if (n >= 3 && n <= 9 && f.nairDrag) sackCarry(f); }; }
+/* Potato Sack's back air, the Spud Drill (owner's request, 2026-11-11): he turns into a drill pointing backward and bores
+   through the air behind him for 0.45 s (frames 6 to 32, 27 frames). Six light hits drag whoever they catch along with him
+   (sackCarry, held behind his back), then a seventh pops them up behind him with 20 frames of extra hitstun, so the next
+   drill can catch them: 0.9% x 6 + 2.6% = 8%. Drills in a row on a target that has not recovered are counted (drillN); the
+   third one's last hit is a real launch instead, so from 0% exactly three connect (short hop, land and short hop, double
+   jump). The pop has no growth, so at higher percents the chain only gets shorter. While it bores he pushes backward and
+   his fall slows, for the first three drills of each trip into the air. */
+{ const bair = SACK.forms[0].moves.bair, body = { x: -7, y: 6, r: 6.5 };
+  bair.t = 36; bair.ll = 9; bair.ac = 34; bair.drill = 1;
+  const link = { a: 120, b: 40, k: 0, hs: 20 }, send = { a: 135, b: 40, k: 70, hs: 0 };
+  bair.h = [6, 10, 14, 18, 22, 26].map((f0, k) => Object.assign({ f0, f1: f0 + 1, g: k + 1, d: 0.9, a: 80, b: 16, k: 0, carry: 1, carryX: -9 }, body))
+    .concat([Object.assign({ f0: 30, f1: 32, g: 50, d: 2.6, dyn: a => (a.drillN || 1) >= 3 ? send : link }, link, body)]);
+  bair.on = (f, n) => { const o = opp(f);
+    if (n === 1) { f.drillN = o && o.state === 'hurt' && o.drillBy === f.idx && frame <= (o.drillUntil || 0) ? (f.drillN || 1) + 1 : 1; f.drillMk = false;
+      f.drillPush = (f.airUse.drill || 0) < 3; f.airUse.drill = (f.airUse.drill || 0) + 1; }
+    if (n >= 6 && n <= 32) { if (f.drillPush && !f.grounded) { f.vx = appr(f.vx, -f.face * 1.1, 0.12); f.vy = Math.max(f.vy, -0.6); } sackCarry(f, -9); }
+    if (!f.drillMk && f.hitG.has(50) && o) { f.drillMk = true; o.drillBy = f.idx; o.drillUntil = frame + Math.max(0, o.hitstun - o.sf); }
+    if (n >= 6 && n <= 32 && n % 4 === 2) spark(f.x - f.face * 9, f.y + 6, '#e6d3a6', 3, 0.8); }; }
 /* Keeps an opponent caught by Potato Sack's neutral air moving with him: their speed eases toward his and they are pulled
    toward the middle of his body, so the hits that follow connect wherever he is drifting or falling. */
-function sackCarry(f) { const o = opp(f); if (!o || o.dragBy !== f.idx || o.state !== 'hurt' || o.hitlag > 0) return; const cx = f.x + f.face * 2 - o.x, cy = f.y + f.st.h / 2 - (o.y + o.st.h / 2), dd = Math.hypot(cx, cy);
+function sackCarry(f, off) { const o = opp(f); if (!o || o.dragBy !== f.idx || o.state !== 'hurt' || o.hitlag > 0) return; const cx = f.x + f.face * (off === undefined ? 2 : off) - o.x, cy = f.y + f.st.h / 2 - (o.y + o.st.h / 2), dd = Math.hypot(cx, cy);
   o.vx = appr(o.vx, f.vx + clamp(cx * 0.25, -1.5, 1.5), 0.6); o.vy = appr(o.vy, f.vy + clamp(cy * 0.25, -1.5, 1.5), 0.6); }
 /* Strike shapes (combat audit, 2026-11-10).
    - A strike whose tip is clear of the body also covers the 45% of the way back toward the body's middle (h.in): the
@@ -2486,7 +2527,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   /* Holding up or down stretches or shortens the launch, except for near-vertical ones. */
   const nd = ((ang * 180 / Math.PI) % 360 + 360) % 360, vertical = (nd > 65 && nd < 115) || (nd > 245 && nd < 295);
   const lsi = vertical ? 1 : i.ly > 0.5 ? 1.095 : i.ly < -0.5 ? 0.92 : 1;
-  v.launch(kb, ang, dir, lsi); if (h.hs) v.hitstun += h.hs; if (h.drag) { v.vx += a.vx; v.vy += a.vy; v.dragBy = a.idx; } else if (h.carry && !proj) { const cx = a.x + a.face * 2 - v.x, cy = a.y + a.st.h / 2 - (v.y + v.st.h / 2); v.grounded = false; v.plat = null; v.vx = a.vx + clamp(cx * 0.3, -2, 2); v.vy = a.vy + clamp(cy * 0.3, -2, 2) + 0.2; v.dragBy = a.idx; } else v.dragBy = -1;
+  v.launch(kb, ang, dir, lsi); if (h.hs) v.hitstun += h.hs; if (h.drag) { v.vx += a.vx; v.vy += a.vy; v.dragBy = a.idx; } else if (h.carry && !proj) { const cx = a.x + a.face * (h.carryX !== undefined ? h.carryX : 2) - v.x, cy = a.y + a.st.h / 2 - (v.y + v.st.h / 2); v.grounded = false; v.plat = null; v.vx = a.vx + clamp(cx * 0.3, -2, 2); v.vy = a.vy + clamp(cy * 0.3, -2, 2) + 0.2; v.dragBy = a.idx; } else v.dragBy = -1;
   if (h.link) { v.tumble = false; v.grounded = false; v.plat = null; v.hitstun = v.linkT = h.link[2]; v.vx = face * h.link[0] / h.link[2]; v.vy = h.link[1] / h.link[2]; }   /* a linking hit: the target is moved a set distance over a set time, whatever its damage, so the next hit of the move connects */   /* carry: caught and taken along (sackCarry) */   /* carried along with a travelling rig (see fowlCarry) */ v.hitlag = hl; if (!proj) a.hitlag = hl; rumble(v.ctl, 60 + kb, Math.min(1, 0.25 + kb / 150)); rumble(a.ctl, 50, 0.25);
   if (wouldKO(v)) {   /* a hit that will KO lands harder: longer freeze, a bigger burst, and slow motion if it takes the last stock */
     v.hitlag += 8; if (!proj) a.hitlag += 8; shake = Math.max(shake, 14); rumble(v.ctl, 300, 1);

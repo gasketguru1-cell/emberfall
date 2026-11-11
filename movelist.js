@@ -107,7 +107,7 @@ const MOVE_TEXT = {
   'Potato Sack': {
     nspec: ['Spud Bomb', 'Hold special to swell up, and let go to burst all round his body 4 frames later. There is no cap: every 10 frames held makes the burst about 1.2 units wider and 1.5% stronger. Tapped, it is a 7-unit ring that KOs a middleweight from about 140%. 20 frames to recover after the burst.', 'Burst 4f after release · 8% tapped, +1.5% per 10f held'],
     sspec: ['Bag It', 'Leaps forward on frame 8 and tries to bag the opponent from frame 10 to 22. It goes through a shield, and whoever it catches is flung up and forward. Once per jump in the air, with landing lag if it misses.', 'Grab f10 · fling 10%'],
-    uspec: ['Hot Potato', 'Cooks a potato that bursts on frame 5. The hot middle KOs most fighters from about 70%; the edge is weaker, about 100 to 125%. The blast also throws the sack upward: it takes 12% itself and flies further the more hurt it is. Tilt the stick to angle the flight. Once per jump.', 'Burst f5 · 15% middle · 10% edge · 12% to himself'],
+    uspec: ['Hot Potato', 'Tosses a flaming potato straight up. From frame 3 his body already burns with the burst and hits anyone close (once). The potato drops back onto him about frame 19 and bursts, launching him, or bursts at once on anyone it touches on the way, launching them and him. The hot middle KOs most fighters from about 70%; the edge is weaker, about 100 to 125%. The blast also throws the sack upward: it takes 12% itself and flies further the more hurt it is. Tilt the stick to angle the flight. Once per jump.', 'Burst f5 · 15% middle · 10% edge · 12% to himself'],
     dspec: ['Tumble', 'How the sack really gets about. On frame 6: stick sideways on the floor slides, up lifts, sideways in the air dives down diagonally (and carries on as a slide when it lands), no direction hangs briefly. From frame 7 it can be cut into any action keeping its speed, and a new push of the stick ends it. Hold down to slide through a soft platform. Once per jump.', 'Burst f6 · cancel from f7 · no hit'],
     jab: ['Sack Slap', 'One heavy slap that sends straight out. There is no jab chain: one hit, then reset.'],
     dash: ['Sack Slide', 'Slides in on his side and pops the opponent up at an angle.'],
@@ -119,7 +119,7 @@ const MOVE_TEXT = {
     dsmash: ['Spill Sweep', 'Sweeps in front, then behind. The rear hit comes later and sends back and up.'],
     nair: ['Sack Shake', 'Three light hits that catch the opponent and carry them along, then a finisher that sends them away. Only 15 frames long, so two fit in one short hop. Only the first one each time in the air carries; later ones still hit but let go.'],
     fair: ['Lumpy Swing', 'A forward swing that sends diagonally out.'],
-    bair: ['Back Bump', 'A heavy bump behind him with a strong backward launch. His best aerial finisher.'],
+    bair: ['Spud Drill', 'He turns into a drill pointing backward and bores through the air behind him for almost half a second, dragging whoever it catches along, then pops them up behind him. 8% in all. Chains into itself: from 0% three drills in a row connect, and the third sends them off.'],
     uair: ['Tuft Flick', 'Flicks the tuft upward to keep an opponent above him.'],
     dair: ['Sack Drop', 'Drops the bottom of the sack. Sends an airborne opponent straight down: a spike off the stage.'],
     grab: ['Sack Snatch', 'Catches the opponent against the sack. Further reach out of a dash or a run turnaround, with more recovery.'],

@@ -96,6 +96,19 @@ function build() {
       if (cfg.axe) new GLTFLoader().load(cfg.axe.file, g => { M.axe = g.scene; }, undefined, e => console.warn('axe failed to load: ' + name, e));   /* Fyrdsman's axe on its own, drawn while it is thrown */
     }
   }).catch(e => console.warn('no model manifest', e));
+  /* Props the owner made (2026-11-11): Sack's hot potato, Flint's ball of light, Chomp Chomp's coal on its rope (three parts:
+     Loop, Cord, Coal) and Joey's steroid needle. Burning ones glow with their own colours. */
+  const PROPS = {};
+  const NEEDLE = { from: 0.5, to: 1.15, len: 3.2, z: 2.2 };   /* seconds into Grow it is in his hand; length in game units; how far in front of his middle it is kept */
+  R3.NEEDLE = NEEDLE; R3.PROPS = PROPS;
+  for (const [k, file, glow] of [['hotspud', 'assets/potato-sack/export/hot-potato.glb', 0.9], ['light', 'assets/flint/export/light-ball.glb', 1.3], ['coalrope', 'assets/chomp/export/coal-rope.glb', 0], ['needle', 'assets/joey/export/needle.glb', 0]])
+    new GLTFLoader().load(file, g => { g.scene.traverse(q => { if (!q.isMesh) return; q.castShadow = true; q.frustumCulled = false;
+        let hot = glow; for (let u = q; u; u = u.parent) if (k === 'coalrope' && u.name === 'Coal') hot = 1;
+        if (hot && q.material && q.material.map) { q.material = q.material.clone(); q.material.emissiveMap = q.material.map; q.material.emissive = new THREE.Color(0xffffff); q.material.emissiveIntensity = hot; } });
+      PROPS[k] = g.scene; }, undefined, e => console.warn('prop failed to load: ' + k, e));
+  /* a prop (or one named part of it) centred on its middle and scaled so its longest side is 1 */
+  function propOf(k, part) { const src = PROPS[k] && (part ? PROPS[k].getObjectByName(part) : PROPS[k]); if (!src) return null; const o = src.clone(true); o.position.set(0, 0, 0); o.updateMatrixWorld(true);
+    const b = new THREE.Box3().setFromObject(o), c = b.getCenter(new THREE.Vector3()), d = b.getSize(new THREE.Vector3()), s = 1 / Math.max(d.x, d.y, d.z); o.scale.multiplyScalar(s); o.position.copy(c).multiplyScalar(-s); const g2 = new THREE.Group(); g2.add(o); return g2; }
 
   /* ---- fighters ---- */
   const PCOL = [0xff7b6c, 0x6cb4ff];
@@ -276,18 +289,32 @@ function build() {
   }
   /* Chomp Chomp's ropes (from the simulation: chompRopes) drawn as thin cords; they never hit, so they never glow */
   const ropePool = [], ropeMat = new THREE.MeshStandardMaterial({ color: 0xb08a55, roughness: 0.9 }), hookMat = new THREE.MeshStandardMaterial({ color: 0x6b5a4a, roughness: 0.8 });
+  const ROPE_TH = 12;   /* the model rope's thickness and loop size, x its own */
   function drawRopes() {
     const list = typeof chompRopes === 'function' ? chompRopes().slice() : [];
     for (const f of F) if (f.state === 'attack' && f.mname === 'sspec' && f.rsGo) { const cy = f.y + f.st.h / 2, dx = f.rsAx - f.x, dy = f.rsAy - cy, d = Math.hypot(dx, dy) || 1; list.push([f.rsAx, f.rsAy, f.x + dx / d * 4.2, cy + dy / d * 4.2, 'swing']); }   /* the rope he swings on, from its hook to his teeth */
-    while (ropePool.length < list.length) { const cord = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 1, 6), ropeMat), hook = new THREE.Mesh(new THREE.SphereGeometry(0.8, 8, 6), hookMat); scene.add(cord, hook); ropePool.push({ cord, hook }); }
+    if (PROPS.coalrope && !ropePool.model) { for (const q of ropePool) scene.remove(q.cord, q.hook); ropePool.length = 0; ropePool.model = true; }   /* the owner's rope arrived: rebuild with it */
+    while (ropePool.length < list.length) {
+      let cord, hook;
+      if (PROPS.coalrope) {   /* the model's cord runs along +X from its loop end (1.282 long): stretched along X to the rope's length; its loop sits at the hook */
+        const c0 = PROPS.coalrope.getObjectByName('Cord').clone(true), l0 = PROPS.coalrope.getObjectByName('Loop').clone(true); c0.position.set(0, 0, 0); l0.position.set(0, 0, 0);
+        cord = new THREE.Group(); cord.add(c0); cord.userData.model = true; hook = new THREE.Group(); hook.add(l0);
+      } else { cord = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 1, 6), ropeMat); hook = new THREE.Mesh(new THREE.SphereGeometry(0.8, 8, 6), hookMat); }
+      scene.add(cord, hook); ropePool.push({ cord, hook }); }
     ropePool.forEach((q, k) => { const r = list[k]; q.cord.visible = !!r; q.hook.visible = !!r && r[4] === 'swing'; if (!r) return;
       const a = new THREE.Vector3(r[0], r[1], 0), b = new THREE.Vector3(r[2], r[3], 0), len = Math.max(0.01, a.distanceTo(b));
+      if (q.cord.userData.model) { const qu = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(1, 0, 0), b.clone().sub(a).normalize()), th = ROPE_TH;
+        q.cord.position.copy(a); q.cord.quaternion.copy(qu); q.cord.scale.set(len / 1.282, th, th); q.hook.position.copy(a); q.hook.quaternion.copy(qu); q.hook.scale.setScalar(th); return; }
       q.cord.position.copy(a).add(b).multiplyScalar(0.5); q.cord.scale.set(1, len, 1); q.cord.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize()); q.hook.position.copy(a); });
   }
   const shots = new Map();
   const shotMesh = kind => {
     if (kind === 'pipmate') { const M = MODELS['Pip alone']; if (M && M.ready) { const o = cloneSkinned(M.scene), g2 = new THREE.Group(); o.scale.setScalar(M.cfg.height * 0.8 / M.height); o.rotation.y = Math.PI / 2; o.traverse(q => { if (q.isMesh) { q.castShadow = true; q.frustumCulled = false; } }); g2.add(o); g2.userData.mixer = new THREE.AnimationMixer(o); g2.userData.acts = {}; g2.userData.ph = (shots.size % 3) * 0.37; return g2; }   /* Pip's companions animate too, each a little out of step */
       return new THREE.Mesh(new THREE.SphereGeometry(2.2, 12, 9), new THREE.MeshStandardMaterial({ color: 0x2bb8b0, roughness: 0.6 })); }
+    if (kind === 'hotspud') { const m = propOf('hotspud'); if (m) return m; const f2 = new THREE.Mesh(new THREE.SphereGeometry(0.5, 12, 9), e(0xff8a2a, 1.6)); f2.userData.wantProp = 'hotspud'; return f2; }   /* Potato Sack's flaming potato */
+    if (kind === 'ember') { const m = propOf('light'); if (m) return m; const f2 = new THREE.Mesh(new THREE.SphereGeometry(0.25, 14, 10), e(0xffa040, 2.6)); f2.userData.wantProp = 'light'; return f2; }   /* Flint's ball of light: the head leads, the flames trail */
+    if (kind === 'coal' && PROPS.coalrope) { const g2 = new THREE.Group(), m = propOf('coalrope', 'Coal');
+      const glow2 = new THREE.Sprite(new THREE.SpriteMaterial({ map: dot, color: 0xffa040, transparent: true, opacity: 0.4, depthWrite: false, blending: THREE.AdditiveBlending })); glow2.scale.setScalar(6); g2.add(m, glow2); g2.userData.core = m; g2.userData.prop = 1; return g2; }   /* Chomp Chomp's hot coal, the owner's model */
     if (kind === 'coal') { const g2 = new THREE.Group(), m = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 0), new THREE.MeshStandardMaterial({ color: 0xff8a2a, emissive: 0xff5a10, emissiveIntensity: 1.6, roughness: 0.7, flatShading: true }));
       const glow2 = new THREE.Sprite(new THREE.SpriteMaterial({ map: dot, color: 0xffa040, transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending })); glow2.scale.setScalar(5); m.castShadow = true; g2.add(m, glow2); g2.userData.core = m; return g2; }   /* Chomp Chomp's hot coal */
     if (kind === 'ant') { const g2 = new THREE.Group(), red = new THREE.MeshStandardMaterial({ color: 0xc2402a, roughness: 0.5 }), legM = new THREE.MeshStandardMaterial({ color: 0x2a1a14 });
@@ -462,6 +489,9 @@ function build() {
       if (f.state === 'attack' && f.mname === 'sspec' && f.rsGo && f.rsTh !== undefined) return { sx, sy, rot: -f.rsTh * f.face, oy: h / 2 };   /* Chomp Chomp hanging from his rope: turned to lie along it */
       if (f.state === 'hurt' && !f.grounded && f.tumble) return { sx, sy, rot: f.sf * 0.2, oy: h / 2 };
       if (f.state === 'attack' && f.move && f.move.spin && f.move.spinAt) return { sx, sy, rot: f.move.spinAt(f, f.mf), oy: FP };   /* Sling Spin and Catapult Cyclone: end over end round the rig's middle */
+      if (f.state === 'attack' && f.move && f.move.drill) {   /* Potato Sack's Spud Drill: tips flat with his top pointing backward, then spins along his length */
+        const n = f.mf, k = n < 6 ? n / 6 : n <= 32 ? 1 : Math.max(0, 1 - (n - 32) / 6), sp = n < 6 ? n * n * 0.05 : n <= 32 ? 1.8 + (n - 6) * 0.95 + (f.hitlag > 0 ? tick * 0.6 : 0) : 26.5 + (n - 32) * 0.4;
+        return { sx: 1 - 0.12 * k, sy: 1 + 0.18 * k, rot: -Math.PI / 2 * k, oy: h / 2, drill: sp * k }; }
       if (f.state === 'attack' && f.move && f.move.swap) { const k = 1 - Math.sin(Math.min(1, f.mf / 34) * Math.PI) * 0.7; return { sx: k, sy: k, rot, oy }; }
       return { sx, sy, rot, oy };
     }
@@ -719,7 +749,7 @@ function build() {
       if (v.model && f.state === 'attack' && f.aim) { p.rot -= f.aim * 0.3 * (flat ? f.face : 1); p.oy = st.h * 0.55; }   /* an angled tilt leans the body up or down about the chest */
       if (flat) { v.flip += (f.face - v.flip) * 0.3; v.obj.scale.x = v.unit * (Math.abs(v.flip) < 0.08 ? 0.08 * (v.flip < 0 ? -1 : 1) : v.flip); }
       v.root.position.set(f.x, f.y, 0); v.root.rotation.y = (flat ? 0.55 * v.flip : v.yaw) + (v.model && v.turned ? Math.PI : 0) - (v.model ? (v.spin || 0) * f.face : 0);
-      v.pivot.position.set(p.shx !== undefined ? p.shx : f.hitlag > 0 && f.state === 'hurt' ? ((tick & 1) ? 0.35 : -0.35) : 0, p.oy + (p.shy || 0), 0); v.pivot.rotation.z = -p.rot; v.pivot.scale.set(p.sx, p.sy, p.sx);
+      v.pivot.position.set(p.shx !== undefined ? p.shx : f.hitlag > 0 && f.state === 'hurt' ? ((tick & 1) ? 0.35 : -0.35) : 0, p.oy + (p.shy || 0), 0); v.pivot.rotation.order = 'ZYX'; v.pivot.rotation.z = -p.rot; v.pivot.rotation.y = p.drill || 0; v.pivot.scale.set(p.sx, p.sy, p.sx);   /* ZYX: a drill spins about the body's own length, then the body is tipped */
       v.pivot.children.forEach(c => { if (c.userData.y0 === undefined) c.userData.y0 = c.position.y; c.position.y = c.userData.y0 - p.oy; });
       const ghost = (f.invuln > 0 && (tick >> 1) % 2) || f.state === 'spot' || f.state === 'airdodge', hot = (f.flash > 0 || (f.hitlag > 0 && f.state === 'hurt')) && !(typeof finalT !== 'undefined' && finalT > 0 && finalT < FINAL_FREEZE - 3);   /* the final-hit freeze shows the fighter, not a white flash */
       for (const m of v.mats) { m.transparent = ghost; m.opacity = ghost ? 0.45 : 1; m.emissive.setHex(hot ? 0xffffff : 0x000000); m.emissiveIntensity = hot ? 0.8 : 0; }
@@ -730,6 +760,16 @@ function build() {
         v.bubble.visible = on || grow > 0; v.bubble.scale.setScalar(on ? 1 + Math.sin(tick * 0.3) * 0.03 : 0.15 + 0.85 * grow); v.bubble.position.x = on ? 0 : 5 * (1 - grow); }
       if (v.springs.length) applySprings(v);
       if (v.model && v.model.cfg.axe) axeShow(v, f);
+      if (v.model && f.def.transform && !v.needleTried && PROPS.needle) { v.needleTried = true; v.needle = propOf('needle'); v.needle.visible = false; scene.add(v.needle); }   /* Joey's steroid needle, the owner's model */
+      if (v.needle) {   /* in his right hand from the pocket to just after the jab */
+        const sec = f.state === 'grow' && v.model === MODELS['Joey'] ? f.sf / 60 : -1, on = sec >= NEEDLE.from && sec <= NEEDLE.to;
+        if (on && v.handKey !== v.model) { v.handKey = v.model; v.handR = v.obj.getObjectByName('handR'); }
+        const hb = on ? v.handR : null; v.needle.visible = !!hb;
+        /* his right hand is the far one from the camera, so the needle is kept just in front of his body and laid flat to
+           the screen, its point along his fingers (the hand bone's length) */
+        if (hb) { hb.updateMatrixWorld(true); hb.getWorldPosition(v.needle.position); const e = hb.matrixWorld.elements, d = new THREE.Vector3(e[4], e[5], 0);
+          if (d.lengthSq() < 1e-6) d.set(f.face, 0, 0); d.normalize(); v.needle.position.z = Math.max(v.needle.position.z, NEEDLE.z); v.needle.position.addScaledVector(d, NEEDLE.len * 0.3);
+          v.needle.quaternion.setFromUnitVectors(new THREE.Vector3(-1, 0, 0), d); v.needle.scale.setScalar(NEEDLE.len); } }
       bladeArc(v, f, idx);
       fireFighter(f, idx, v);
       if (v.prop && !v.hand) {   /* the living slingshot under its bird: posed by slingWant, the bird riding in its pouch */
@@ -761,7 +801,7 @@ function build() {
 
     for (const [p, m] of shots) if (!PROJ.includes(p)) { scene.remove(m); m.traverse(o => { if (o.geometry) o.geometry.dispose(); }); shots.delete(p); }   /* a shot may be a group of parts (the tape roll) */
     for (const p of PROJ) {
-      let m = shots.get(p); if (!m || m.userData.kind !== p.kind) { if (m) { scene.remove(m); } m = shotMesh(p.kind); m.userData.kind = p.kind; shots.set(p, m); scene.add(m); }
+      let m = shots.get(p); if (!m || m.userData.kind !== p.kind || (m.userData.wantProp && PROPS[m.userData.wantProp]) || (p.kind === 'coal' && PROPS.coalrope && !m.userData.prop)) { if (m) { scene.remove(m); } m = shotMesh(p.kind); m.userData.kind = p.kind; shots.set(p, m); scene.add(m); }
       m.position.set(p.x, p.y, 0);
       if (p.kind === 'boulder' || p.kind === 'tape') { m.scale.setScalar(p.r); m.rotation.z = -(p.rot || 0); }
       else if (p.kind === 'dummy' || p.kind === 'clone' || p.kind === 'egg') { m.scale.setScalar(p.r); m.rotation.z = -frame * 0.3 * p.face; }
@@ -777,7 +817,8 @@ function build() {
       else if (p.kind === 'nest') { m.position.y = p.y - 1.8; m.scale.setScalar(1 + Math.sin(frame * 0.2) * 0.03); }
       else if (p.kind === 'gust') { m.rotation.y = Math.PI / 2; m.rotation.x = frame * 0.25; }
       else if (p.kind === 'flame') m.scale.set(p.r * 0.8, p.r * (1.1 + Math.sin(frame * 0.5) * 0.3), p.r * 0.8);
-      else if (p.kind === 'ember') m.scale.setScalar(p.r * 0.75);
+      else if (p.kind === 'ember') { m.scale.setScalar(m.userData.wantProp ? p.r * 3 : p.r * 3.2); m.rotation.set(0, 0, Math.atan2(p.vy || 0, p.vx || p.face || 1)); }   /* head first along its path */
+      else if (p.kind === 'hotspud') { m.scale.setScalar(p.r * 3.7); m.rotation.set(Math.sin(frame * 0.2) * 0.15, frame * 0.18, Math.sin(frame * 0.13) * 0.2); }   /* flames up, turning as it rises and falls */
       else if (p.kind === 'bolt') m.scale.x = p.face;
       else if (p.kind === 'vaxe') {   /* p.rot is the direction the head points; stuck, the head is buried a hand's width in */
         m.rotation.z = (p.rot || 0) - Math.PI / 2; m.userData.pivot.scale.x = p.face || 1;
@@ -788,7 +829,7 @@ function build() {
         if (p.st === 'stuck') { const k = 0.6 * m.userData.s; m.position.x -= Math.cos(p.rot) * k; m.position.y -= Math.sin(p.rot) * k; }
         fireAxe(p);
       }
-      else if (p.kind === 'coal') { m.userData.core.scale.setScalar(p.r); m.userData.core.rotation.set(frame * 0.05, frame * 0.07, 0); }
+      else if (p.kind === 'coal') { m.userData.core.scale.setScalar(m.userData.prop ? p.r * 2.6 : p.r); m.userData.core.rotation.set(frame * 0.05, frame * 0.07, 0); }
       else if (p.kind === 'ant') { m.rotation.y = p.face < 0 ? Math.PI : 0; m.rotation.z = Math.atan2(p.vy, Math.abs(p.vx) + 1e-6); m.userData.legs.forEach((l, k) => { l.rotation.z = Math.sin(frame * 0.8 + k * 1.7) * 0.5; }); }
     }
     drawRopes();

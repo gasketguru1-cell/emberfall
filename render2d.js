@@ -354,11 +354,12 @@ function drawFighter(f, three) {
   else if (f.state === 'broken') rot = Math.sin(frame * 0.2) * 0.25;
   else if (f.state === 'roll') { rot = f.sf * 0.45 * f.rollDir * f.face; oy = st.h / 2; }
   else if (f.state === 'helpless') rot = 0.35;
+  else if (f.state === 'attack' && f.move && f.move.drill) { const n = f.mf, k = n < 6 ? n / 6 : n <= 32 ? 1 : Math.max(0, 1 - (n - 32) / 6); rot = -Math.PI / 2 * k; oy = st.h / 2; sx = 1 - k * 0.6 * Math.abs(Math.sin(frame * 0.8)); sy = 1 + 0.15 * k; }   /* Spud Drill: tipped flat, top backward, spinning */
   else if (f.state === 'attack' && f.move && f.move.swap) { sx = sy = 1 - Math.sin(Math.min(1, f.mf / 34) * Math.PI) * 0.7; }
   else if (f.state === 'air') sy = 1 + clamp(Math.abs(f.vy) * 0.03, 0, 0.12);
   else if (f.state === 'idle' && f.ctl.c.ly < CROUCH_Y) { sy = 0.72; sx = 1.1; }
   else if (f.state === 'down') { sy = 0.45; sx = 1.25; }
-  if (!f.grounded && f.state !== 'ledge' && f.state !== 'hurt' && f.state !== 'roll') oy = 0;
+  if (!f.grounded && f.state !== 'ledge' && f.state !== 'hurt' && f.state !== 'roll' && !(f.state === 'attack' && f.move && f.move.drill)) oy = 0;
   g.scale(s * f.face, -s);
   if (oy) { g.translate(0, oy); g.rotate(-rot); g.translate(0, -oy); } else g.rotate(-rot);
   g.scale(sx, sy);
