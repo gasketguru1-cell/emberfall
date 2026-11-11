@@ -94,10 +94,12 @@ function thwack(kb) {
 const keys = {};
 addEventListener('keydown', e => { keys[e.code] = true; if (/^(Arrow|Space|Enter|Backspace)/.test(e.code)) e.preventDefault(); if (!e.repeat || e.code === 'KeyO') debugKey(e.code); });
 /* Debug tools: B shows hitboxes and hurtboxes, P freezes the game, O advances one frame, M switches between the 2D and 3D renderers. */
-const DBG = { step: false, boxes: false, advance: 0, r3d: true, fx: true };   /* fx: the burst of sparks and the flash of light where a hit lands */
+const DBG = { step: false, boxes: false, advance: 0, r3d: true, fx: true, arcs: false };   /* arcs: the circles and sweeps drawn over an attack while it can hit (off unless switched on: the owner asked, 2026-11-10) */   /* fx: the burst of sparks and the flash of light where a hit lands */
 /* Showing hitboxes: switched with the jump button on the start screen or B on the keyboard, and remembered. */
 try { DBG.boxes = localStorage.getItem('emberfall.boxes') === '1'; } catch (e) { /* no storage */ }
 try { DBG.fx = localStorage.getItem('emberfall.hitfx') !== '0'; } catch (e) { /* no storage */ }
+try { DBG.arcs = localStorage.getItem('emberfall.arcs') === '1'; } catch (e) { /* no storage */ }
+function setArcs(on) { DBG.arcs = !!on; try { localStorage.setItem('emberfall.arcs', on ? '1' : '0'); } catch (e) { /* no storage */ } }
 function setHitFx(on) { DBG.fx = !!on; try { localStorage.setItem('emberfall.hitfx', on ? '1' : '0'); } catch (e) { /* no storage */ } }
 /* Training mode: no clock, stocks never run out, and a true-combo counter. A combo is every hit landed while the target is
    still in hitstun (or held) from the one before; it ends the moment the target can act again. */
@@ -116,7 +118,7 @@ function comboStep() {   /* a combo ends when its target is free to act */
 function setBoxes(on) { DBG.boxes = !!on; try { localStorage.setItem('emberfall.boxes', on ? '1' : '0'); } catch (e) { /* no storage */ } }
 function debugKey(code) {
   if (code === 'KeyP') { DBG.step = !DBG.step; DBG.advance = 0; } else if (code === 'KeyO') { if (DBG.step) DBG.advance++; }
-  else if (code === 'KeyT' && mode === 'select') setTraining(!TRAINING); else if (code === 'KeyB') setBoxes(!DBG.boxes); else if (code === 'KeyH') setHitFx(!DBG.fx); else if (code === 'KeyM') DBG.r3d = !DBG.r3d;
+  else if (code === 'KeyT' && mode === 'select') setTraining(!TRAINING); else if (code === 'KeyB') setBoxes(!DBG.boxes); else if (code === 'KeyH') setHitFx(!DBG.fx); else if (code === 'KeyG') setArcs(!DBG.arcs); else if (code === 'KeyM') DBG.r3d = !DBG.r3d;
 }
 addEventListener('keyup', e => { keys[e.code] = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
@@ -1754,7 +1756,7 @@ function selectPreview() {
 /* The fighter select screen: where each roster tile and the CPU card are (the HUD draws them from the same numbers), and
    which one a player's cursor is over. */
 function rosterTile(k) { const n = ROSTER.length, tw = Math.min(168, (W - 120) / n - 12), gap = 12, x0 = (W - (n * tw + (n - 1) * gap)) / 2; return [x0 + k * (tw + gap), 158, tw, 124]; }
-const CPU_CARD = [W - 44 - 460, 446, 460, 158], TRAIN_PILL = [W - 44 - 214, 100, 214, 34];
+const CPU_CARD = [W - 44 - 460, 446, 460, 158], TRAIN_PILL = [W - 44 - 214, 100, 214, 34], ARC_PILL = [W - 44 - 214, 140, 214, 34];
 const inBox = (b, x, y) => x >= b[0] && x <= b[0] + b[2] && y >= b[1] && y <= b[1] + b[3];
 function tileUnder(x, y) { for (let k = 0; k < ROSTER.length; k++) if (inBox(rosterTile(k), x, y)) return k; return -1; }
 /* The CPU's token: dragged with the mouse (or a finger) onto a fighter's tile to choose the CPU's fighter. Dropped anywhere
@@ -1784,6 +1786,7 @@ function stepSelect() {
     if (c.pressed('start')) { if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; } }
     else if (c.pressed('atk')) {
       if (inBox(TRAIN_PILL, sl.cx, sl.cy)) { setTraining(!TRAINING); beep(TRAINING ? 700 : 420, 0.05, 'square', 0.03); }
+      if (inBox(ARC_PILL, sl.cx, sl.cy)) { setArcs(!DBG.arcs); beep(DBG.arcs ? 700 : 420, 0.05, 'square', 0.03); }
       else if (onCpu) { setCpuLevel(CPU_LEVEL + 1 > 9 ? 0 : CPU_LEVEL + 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
       else if (over >= 0) { sl.pick = over; sl.ready = true; beep(800, 0.08, 'triangle', 0.05); }
       else if (sl.ready && slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; }

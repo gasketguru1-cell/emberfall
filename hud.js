@@ -49,7 +49,7 @@ const TIPS = [
   'Flint’s down special and Wren’s swap hang in the air once each time you leave the ground.',
   'Back + attack out of a run turns and strikes. Jump on a head to spring off it.',
   'Above 100%, getting up from the ledge is slower and less protected.',
-  'Keyboard tools: B hitboxes · P freeze · O step one frame · M switch 2D / 3D.',
+  'Keyboard tools: B hitboxes · G attack arcs · P freeze · O step one frame · M switch 2D / 3D.',
 ];
 function spaced(px) { if ('letterSpacing' in g) g.letterSpacing = px + 'px'; }
 /* A key cap with its action after it; returns the x where the next one starts. */
@@ -165,6 +165,11 @@ function drawSelect(three) {
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Hit sparks', x + 12, y + 22);
     g.fillStyle = on ? '#ffd166' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
     g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('Shield  or  H key', x + 128, y + 22); }
+  { const on = DBG.arcs, w = 214, x = W - 44 - w, y = 140;   /* attack arcs switch: the circles and sweeps over an attack while it can hit */
+    g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = on ? '#8fd3ff' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
+    g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Attack arcs', x + 12, y + 22);
+    g.fillStyle = on ? '#8fd3ff' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
+    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point + A  or  G key', x + 128, y + 22); }
   /* ---- each player's cursor: a round token with a pointer at its top left, where it points ---- */
   for (let k = 0; k < 2; k++) { const sl = slots[k]; if (!sl || sl.cx === undefined) continue; const x = sl.cx, y = sl.cy, pc = PC[k];
     g.save(); g.shadowColor = 'rgba(0,0,0,.55)'; g.shadowBlur = 8; g.shadowOffsetY = 2;

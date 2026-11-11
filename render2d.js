@@ -231,14 +231,14 @@ function drawFighter(f, three) {
   if (f.flash > 0 || f.hitlag > 0 && f.state === 'hurt') { g.globalCompositeOperation = 'lighter'; g.globalAlpha = 0.5; ART[fm.name](['#ffffff', '#ffffff', '#ffffff'], frame, f); g.globalCompositeOperation = 'source-over'; }
   g.restore(); g.globalAlpha = 1;
   }
-  /* Attack arcs. */
-  if (f.state === 'attack' && f.move) for (const h of f.move.h) if (f.mf >= h.f0 && f.mf <= h.f1 && !h.grab) {
+  /* Attack arcs: only with the switch on (start screen, or G). */
+  if (DBG.arcs && f.state === 'attack' && f.move) for (const h of f.move.h) if (f.mf >= h.f0 && f.mf <= h.f1 && !h.grab) {
     const hx = SX(f.x + h.x * f.face), hy = SY(hitY(f, h)), k = (f.mf - h.f0 + 1) / (h.f1 - h.f0 + 1);
     g.strokeStyle = col[1]; g.globalAlpha = 0.85 - k * 0.5; g.lineWidth = 1.6 * s; g.beginPath(); g.arc(hx, hy, h.r * s * 0.8, -1.2 + k * 2.4 * f.face, 1.2 + k * 2.4 * f.face); g.stroke();
     g.fillStyle = col[2]; g.globalAlpha = 0.18; g.beginPath(); g.arc(hx, hy, h.r * s, 0, TAU); g.fill(); g.globalAlpha = 1;
   }
-  if (f.state === 'attack' && f.move && f.move.h[0] && f.move.h[0].grab && f.mf >= 5 && f.mf <= 10) { g.strokeStyle = '#fff'; g.lineWidth = 0.8 * s; g.beginPath(); g.moveTo(x + 3 * s * f.face, y - 7 * s); g.lineTo(x + 11 * s * f.face, y - 7 * s); g.stroke(); }
-  if (f.charge > 0 && (frame >> 1) % 2) { g.strokeStyle = '#ffd166'; g.lineWidth = 2; g.beginPath(); g.arc(x, y - st.h * s / 2, (st.h * 0.7 + f.charge * 0.05) * s, 0, TAU); g.stroke(); }
+  if (DBG.arcs && f.state === 'attack' && f.move && f.move.h[0] && f.move.h[0].grab && f.mf >= 5 && f.mf <= 10) { g.strokeStyle = '#fff'; g.lineWidth = 0.8 * s; g.beginPath(); g.moveTo(x + 3 * s * f.face, y - 7 * s); g.lineTo(x + 11 * s * f.face, y - 7 * s); g.stroke(); }
+  if (DBG.arcs && f.charge > 0 && (frame >> 1) % 2) { g.strokeStyle = '#ffd166'; g.lineWidth = 2; g.beginPath(); g.arc(x, y - st.h * s / 2, (st.h * 0.7 + f.charge * 0.05) * s, 0, TAU); g.stroke(); }
   if (!three && (f.state === 'shield' || f.state === 'shieldstun')) {
     const sc = shieldCircle(f); g.fillStyle = f.idx ? 'rgba(110,180,255,.45)' : 'rgba(255,125,110,.45)'; g.beginPath(); g.arc(SX(sc[0]), SY(sc[1]), sc[2] * s, 0, TAU); g.fill();
     g.strokeStyle = 'rgba(255,255,255,.7)'; g.lineWidth = 2; g.stroke();
