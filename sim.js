@@ -761,7 +761,7 @@ function fowlNormals(m, src, unit, cy, jabs) {
 }
 function fowlLate(mv, d) { const h = mv.h[0], cut = h.f0 + Math.max(1, Math.round((h.f1 - h.f0) * 0.35)); mv.h.push(Object.assign({}, h, { f0: cut + 1, d, k: Math.round(h.k * 0.8), part: 'late' })); h.f1 = cut; }
 function fowlBoom(p) { const b = p.boom; PROJ.push({ x: p.x, y: p.y, vx: 0, vy: 0, grav: 0, life: 4, owner: p.owner, face: p.face, r: b.r, ground: 'pass', plat: null, kind: 'blast', h: { d: b.d, a: 70, b: 40, k: b.k || 70, id: p.h.id + ':boom' } }); spark(p.x, p.y, '#ffb347', 18, 2); beep(120, 0.2, 'sawtooth', 0.06, 0.5); }
-function fowlRejoin(f) { const s = f.sling; f.x = s.x; f.y = s.y; f.fi -= 5; f.sling = null; f.move = null; f.vx = f.vy = 0; f.grounded = !!s.plat; f.plat = s.plat; f.set(f.grounded ? 'idle' : 'air'); spark(f.x, f.y + 8, '#fff', 12, 1.4); beep(520, 0.08, 'triangle', 0.05, 1.2); }
+function fowlRejoin(f) { const s = f.sling; f.x = s.x; f.y = s.y; f.fi -= 5; f.sling = null; f.move = null; f.vx = f.vy = 0; f.jumps = Math.min(f.jumps, f.st.jumps); f.grounded = !!s.plat; f.plat = s.plat; f.set(f.grounded ? 'idle' : 'air'); spark(f.x, f.y + 8, '#fff', 12, 1.4); beep(520, 0.08, 'triangle', 0.05, 1.2); }
 function fowlSlings() {   /* the empty slingshot: it falls to the floor, and comes back by the nearest ledge if it is lost */
   for (const f of F) { const s = f.sling; if (!s) continue;
     if (!s.plat) { const y0 = s.y; s.vy = Math.max(s.vy - 0.1, -2.4); s.y += s.vy; for (const q of PLATS) if (y0 >= q.y && s.y <= q.y && s.x >= q.x0 && s.x <= q.x1) { s.plat = q; s.y = q.y; s.vy = 0; } }
@@ -893,7 +893,7 @@ function fowlFlyEnd(f, name, how) {   /* how: 'hit', 'shield' or 'free' */
     else if (name === 'Pip') { f.vx *= 0.6; f.vy = 1.3; }
     else { f.vx *= 0.55; f.vy = 1.4; }                                        /* Pearl glances past with a soft lift */
   }
-  f.move = null; f.set('air');
+  f.move = null; f.set('air'); f.jumps = f.st.jumps;   /* out of the pouch: its five little hops */
 }
 function makeLaunch(name) {
   const L = LAUNCH[name];
@@ -1060,7 +1060,9 @@ const FOWLS = { name: 'Furious Fowls', sub: 'five birds and a slingshot', fowl: 
   const SLH = { Rusty: 16.5, Bolt: 16.5, Cinder: 18.5, Pip: 15.5, Pearl: 17 };   /* the tallest each reaches through its idle bob */
   const stat = (b, solo) => Object.assign({}, base, { weight: Math.round(base.weight * b.weight / 100 * (solo ? 0.8 : 1)), walk: +(base.walk * b.run).toFixed(2), dash: +(base.dash * b.run * (solo ? 1.05 : 1)).toFixed(2), run: +(base.run * b.run * (solo ? 1.05 : 1)).toFixed(2),
     airSpeed: +(base.airSpeed * b.air).toFixed(2), grav: +(base.grav * b.grav).toFixed(3), fall: +(base.fall * b.grav).toFixed(2), ffall: +(base.ffall * b.grav).toFixed(2), w: solo ? FB : FW, h: solo ? 7 : SLH[b.name], jf: solo ? 2.6 : 3.4, jb: solo ? 1.4 : 2,
-    upH: solo ? UPH[b.name] : undefined, pummel: solo ? 1 : FN[b.name].pum });
+    upH: solo ? UPH[b.name] : undefined, pummel: solo ? 1 : FN[b.name].pum },
+    /* a bird alone flutters: five tiny air jumps (the owner, 2026-11-11), each barely a body high, that mostly push it sideways */
+    solo ? { jumps: 5, airJumpH: 3, airJumpX: 1.5 } : {});
   const combined = FOWL.forms.map(b => { const C = FOWL.combined, nm = b.name, L = LAUNCH[nm];
     const m = fowlNormals(mk(1, 1, 1, 1, {
       nspec: SELECTOR,

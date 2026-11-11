@@ -678,6 +678,11 @@ vm.runInThisContext(`
     { const [f, o] = setup(BIRD(4), FL, 0, 40); o.ctl = new Ctl('none'); SCRIPT[0] = (i, tt) => { if (tap(2)(tt) || tap(40)(tt)) { i.ly = -1; i.spc = true; } }; let nests = 0; run(60, () => { nests = Math.max(nests, PROJ.filter(p => p.kind === 'nest').length); });
       const nest = PROJ.find(p => p.kind === 'nest'); o.x = nest ? nest.x + 6 : 40; SCRIPT[1] = (i) => { i.lx = -0.6; }; let lifted = false; run(60, () => { if (o.vy > 0.5 && o.pct > 0) lifted = true; });
       check('Furious Fowls: Pearl’s Nest Marker plants one nest that lifts whoever walks in', nests === 1 && lifted, nests + ' nest after two presses; the opponent walking in was lifted: ' + lifted); }
+    /* a bird alone has five tiny air jumps that mostly carry it sideways */
+    { const [f] = setup(FOW, FL, 0, 60); bird(f, 5); f.jumps = f.st.jumps; airborne(f, 0, 60); const x0 = f.x; let top = 60, fast = 0, t = 0;
+      SCRIPT[0] = (i, tt) => { i.lx = 1; if (tt % 12 === 2 && tt < 72) i.jmp = true; };
+      run(74, () => { top = Math.max(top, f.y); fast = Math.max(fast, f.vx); });
+      check('Furious Fowls: a bird alone flutters with five tiny hops, mostly sideways', f.def.forms[5].st.jumps === 5 && f.def.forms[0].st.jumps === 1 && f.jumps === 0 && top - 60 < 6 && fast > f.st.airSpeed * 1.3, 'jumps alone ' + f.def.forms[5].st.jumps + ' (slingshot ' + f.def.forms[0].st.jumps + '), left after six presses ' + f.jumps + '; rose at most ' + (top - 60).toFixed(1) + ' above where it started; sideways burst ' + fast.toFixed(2) + ' vs air speed ' + f.st.airSpeed + '; travelled ' + (f.x - x0).toFixed(0)); }
     /* bird-alone specials */
     { const vault = second => { const [f] = setup(FOW, FL, 0, 60); bird(f, 5); airborne(f, 0, 20); let top = 20; SCRIPT[0] = (i, tt) => { if (tap(2)(tt) || (second && tap(24)(tt))) { i.ly = 1; i.spc = true; } }; run(60, () => { top = Math.max(top, f.y); }); return top - 20; };
       const one = vault(false), two = vault(true);

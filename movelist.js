@@ -470,7 +470,7 @@ const MOVE_RULES = {
   'Furious Fowls': [
     ['B', 'Choosing a Bird', 'In the slingshot, tap special for the next bird. Hold it 8 frames to open the wheel, point with the stick and let go: clockwise from the top, Flint, Bolt, Cinder, Pip, Pearl. Each bird changes the slingshot\'s weight, speed and every attack.'],
     ['→ B', 'Firing the Bird', 'Side special fires the bird itself, and you play the bird alone. The empty slingshot stays where it was, falls to the floor, and comes back near the ledge if it is lost.'],
-    ['↓ B', 'Back to the Pouch', 'As the bird alone, down special close to the slingshot hops back in. The bird alone is lighter and quicker, with weaker attacks and its own three specials.'],
+    ['↓ B', 'Back to the Pouch', 'As the bird alone, down special close to the slingshot hops back in. The bird alone is lighter and quicker, with weaker attacks and its own three specials. In the air it has five tiny flutter hops that barely lift it but push it along sideways.'],
     ['Air A', 'Sling Spin Drag', 'Neutral air and Catapult Cyclone drag the opponent round with light hits before the finisher. SDI and DI still decide where they end up.'],
     ['↑ B', 'Once per Jump', 'Catapult Cyclone can be used once each time in the air, and leaves the slingshot helpless.'],
   ],
