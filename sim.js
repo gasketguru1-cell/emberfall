@@ -1492,7 +1492,7 @@ const JOEY = (() => {
       cd: { d: 11, a: 46, b: 70, k: 45, f: 17, t: 44, at: over } } }),
   };
   delete big.moves.jab3;   /* two jabs only */
-  return { name: 'Joey', sub: 'a regular guy (for now)', transform: 1, forms: [human, big] };
+  return { name: 'Joey', sub: 'fairly jacked guy', transform: 1, forms: [human, big] };
 })();
 
 const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE, FOWLS, CHOMP, BRAND, JOEY];
@@ -2467,7 +2467,7 @@ function selectPreview() {
     shown.forEach((s, k) => { if (!s) return; const n = list.length, f = new Fighter(n, ROSTER[s.pick], new Ctl('cpu'), k === 1 && !!slots[0] && slots[0].pick === s.pick); f.x = n ? 16 : -16; f.face = n ? -1 : 1; list.push(f); });
     F = list; F.preview = true; PROJ = []; PART = []; POPS = [];
   }
-  for (const f of F) if (f.def.forms.length > 1) f.fi = Math.floor(tick / 170) % (f.def.cycle || f.def.forms.length);
+  for (const f of F) if (f.def.forms.length > 1 && !f.def.transform) f.fi = Math.floor(tick / 170) % (f.def.cycle || f.def.forms.length);   /* Joey stays himself: his other form is a surprise */
   cam.x = Math.sin(tick * 0.004) * 3; cam.y = 5; cam.s = 9;
 }
 /* The fighter select screen: where each roster tile and the CPU card are (the HUD draws them from the same numbers), and
@@ -2513,8 +2513,8 @@ function stepSelect() {
       continue; }
     if (c.pressed('atk') && !CPU_TOK.drag && cpuTokOn(sl.cx, sl.cy)) { sl.tok = true; beep(600, 0.04, 'triangle', 0.03); continue; }
     /* + (Start, or the + key) while pointing at a fighter opens its move list; once everyone is ready, Start fights instead */
-    if (typeof mlOpen === 'function' && dev === 'kb' && mlPlusKey()) { if (over >= 0) mlOpen(ROSTER[over], 0, c); else setSwitches(!SWITCHES); continue; }
-    if (c.pressed('start')) { if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; } if (typeof mlOpen === 'function' && over >= 0) { mlOpen(ROSTER[over], 0, c); continue; } setSwitches(!SWITCHES); continue; }   /* anywhere else: hide or show the switches */
+    if (typeof mlOpen === 'function' && dev === 'kb' && mlPlusKey()) { if (over >= 0) mlOpen(ROSTER[over], 0, c, 0, true); else setSwitches(!SWITCHES); continue; }
+    if (c.pressed('start')) { if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; } if (typeof mlOpen === 'function' && over >= 0) { mlOpen(ROSTER[over], 0, c, 0, true); continue; } setSwitches(!SWITCHES); continue; }   /* anywhere else: hide or show the switches */
     else if (c.pressed('atk')) {
       if (SWITCHES && DESKTOP() && inBox(ONLINE_PILL, sl.cx, sl.cy)) { if (window.openOnline) window.openOnline(); beep(600, 0.05, 'square', 0.03); continue; }
       if (SWITCHES && DESKTOP() && inBox(QUIT_PILL, sl.cx, sl.cy)) { if (QUIT_ASK > 0) window.close(); else { QUIT_ASK = 150; beep(300, 0.08, 'square', 0.04); } continue; }   /* press twice to quit */
