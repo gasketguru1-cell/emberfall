@@ -20,3 +20,6 @@ assets/_backup-anim-v1/
 dist-release.log
 tools/daily-snapshot.log
 playtest-results/glb-preview/
+
+# prepared sculpts for Joey (rebuilt from the owner's .blend files by build-joey.sh prep)
+assets/*/work/titan/

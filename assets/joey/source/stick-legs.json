@@ -1,0 +1,65 @@
+{
+ "note": "Joey's human form: the owner's 'human form' sculpt with stick-figure legs drawn in below the shorts. Model coordinates after tools/blender/titan-prep.py stands it up: metres, y up, +z forward, x his left.",
+ "cut": 0.72,
+ "keep": [
+  [
+   [
+    -0.75,
+    -0.1,
+    0.24
+   ],
+   [
+    0.8,
+    0.74,
+    1.2
+   ]
+  ]
+ ],
+ "r": 0.026,
+ "legs": [
+  [
+   [
+    -0.62,
+    0.8,
+    -0.22
+   ],
+   [
+    -0.67,
+    0.42,
+    -0.08
+   ],
+   [
+    -0.68,
+    0.05,
+    -0.2
+   ],
+   [
+    -0.68,
+    0.03,
+    0
+   ]
+  ],
+  [
+   [
+    0.52,
+    0.8,
+    -0.34
+   ],
+   [
+    0.59,
+    0.42,
+    -0.2
+   ],
+   [
+    0.62,
+    0.05,
+    -0.36
+   ],
+   [
+    0.62,
+    0.03,
+    -0.16
+   ]
+  ]
+ ]
+}

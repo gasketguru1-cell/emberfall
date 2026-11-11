@@ -148,6 +148,23 @@ if not spec.get('weights') and missing > len(mesh.data.vertices) * 0.01:
     bpy.ops.object.select_all(action='DESELECT'); mesh.select_set(True); rig.select_set(True); bpy.context.view_layer.objects.active = rig
     bpy.ops.object.parent_set(type='ARMATURE')
     missing = sum(1 for v in mesh.data.vertices if not any(g.weight > 1e-4 for g in v.groups)); method = 'voxel proxy (proxy gaps %d)' % pm
+# last resort, when heat weighting finds no solution even on the proxy (a mesh with thin separate parts, like stick legs):
+# each vertex follows its nearest bones, by distance to each bone's segment, sharpest for the nearest
+if missing > len(mesh.data.vertices) * 0.5:
+    for vg in list(mesh.vertex_groups): mesh.vertex_groups.remove(vg)
+    deform = [b for b in arm.bones if b.use_deform]; groups = {b.name: mesh.vertex_groups.new(name=b.name) for b in deform}
+    segs = [(b.name, b.head_local.copy(), b.tail_local.copy()) for b in deform]
+    for v in mesh.data.vertices:
+        ds = []
+        for n, a, b in segs:
+            ab = b - a; t = max(0.0, min(1.0, (v.co - a).dot(ab) / max(1e-9, ab.length_squared))); ds.append(((v.co - (a + ab * t)).length, n))
+        ds.sort(); best = ds[:3]; ws = [1 / (d + 0.03) ** 4 for d, _ in best]; s = sum(ws)
+        for (d, n), w in zip(best, ws):
+            if w / s > 0.02: groups[n].add([v.index], w / s, 'REPLACE')
+    if mesh.parent != rig:
+        bpy.ops.object.select_all(action='DESELECT'); mesh.select_set(True); rig.select_set(True); bpy.context.view_layer.objects.active = rig
+        bpy.ops.object.parent_set(type='ARMATURE')
+    missing = 0; method = 'distance to bones (heat weighting found no solution)'
 # vertices the weighting missed would stay behind when the skeleton moves: give each the weights of the nearest vertex that has some
 if missing:
     from mathutils import kdtree
