@@ -15,7 +15,7 @@ TAN="${TAN:-138,86,58}"; PALE="${PALE:-176,130,102}"
 if [ "$which" = prep ]; then
   : "${SCULPTS:?set SCULPTS to the folder holding the Red Cap Stance and Red Cap Titan .blend files}"
   "$B" -b "$SCULPTS/Meshy_AI_Red_Cap_Stance_20261111_texture.blend" --python tools/blender/titan-prep.py -- --out "$T/human-a.glb" --faces 90000 | grep prep:
-  "$B" -b "$SCULPTS/Meshy_AI_Red_Cap_Titan_20261111_texture.blend" --python tools/blender/titan-prep.py -- --out "$T/big-a.glb" --faces 90000 | grep prep:
+  "$B" -b "$SCULPTS/Meshy_AI_Red_Cap_Titan_20261111_texture.blend" --python tools/blender/titan-prep.py -- --out "$T/big-a.glb" --faces 90000 --legs 0.1,0.72,0.7 | grep prep:   # shorter legs, an ape's proportions
   exit 0
 fi
 node tools/blender/joey.js

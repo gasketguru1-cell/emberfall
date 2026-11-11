@@ -76,6 +76,11 @@ ob.data.transform(__import__('mathutils').Matrix.Translation(off)); ob.data.upda
 print('prep: size %.3f wide, %.3f deep, %.3f tall' % (hi.x - lo.x, hi.y - lo.y, hi.z - lo.z))
 if opt.get('lift'):   # a sculpt that ends at the shorts: raise it so the stick legs can stand under it
     ob.data.transform(__import__('mathutils').Matrix.Translation(Vector((0, 0, float(opt['lift']))))); ob.data.update(); print('prep: lifted %s m' % opt['lift'])
+if opt.get('legs'):   # --legs "y0,y1,s": shorter legs. Heights y0..y1 (ankles to just under the shorts' hem) squeeze to s of
+    y0, y1, s = (float(v) for v in opt['legs'].split(','))   # their length; the feet stay as they are, everything above drops
+    for v in ob.data.vertices:
+        z = v.co.z; v.co.z = z if z <= y0 else y0 + (z - y0) * s if z <= y1 else z - (y1 - y0) * (1 - s)
+    ob.data.update(); print('prep: legs between %.2f and %.2f squeezed to %.0f%% (%.3f m shorter)' % (y0, y1, s * 100, (y1 - y0) * (1 - s)))
 conv = lambda p: Vector((p[0], -p[2], p[1]))   # model (y up, +z forward) -> Blender
 # ---- stick legs ----
 if opt.get('stick'):

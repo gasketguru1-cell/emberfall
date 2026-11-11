@@ -435,8 +435,12 @@ const TBA = both({ note: 'Cronky Dong: the owner\'s A-pose model. Metres, feet o
   pelvis: [0, 0.92, -0.12], waist: [0, 1.08, -0.12], ribs: [0, 1.3, -0.1], neck: [0, 1.6, -0.08], top: [0, 1.9, -0.06],
   sho: [[-0.42, 1.44, -0.11]], elb: [[-0.59, 1.13, -0.03]], wri: [[-0.72, 0.83, 0.12]], knu: [[-0.82, 0.65, 0.24]], mid: [[-0.845, 0.575, 0.275]], tip: [[-0.835, 0.51, 0.29]],
   thb: [[-0.68, 0.79, 0.15]], tht: [[-0.62, 0.66, 0.3]],
-  hip: [[-0.17, 0.86, -0.14]], knee: [[-0.24, 0.37, -0.13]], ankle: [[-0.29, 0.08, -0.17]], toe: [[-0.33, 0.02, 0.06]],
+  hip: [[-0.17, 0.86, -0.14]], knee: [[-0.23, 0.37, -0.05]], ankle: [[-0.29, 0.08, -0.17]], toe: [[-0.33, 0.02, 0.06]],
   headBox: [[-0.13, 1.64, -0.26], [0.13, 1.95, 0.14]] });
+/* (the knee sits a little ahead of the line from hip to ankle, so it bends forward over the foot, not out to the side) */
+/* his legs are shortened in the preparation (titan-prep.py --legs 0.1,0.72,0.7): every joint height follows */
+{ const y0 = 0.1, y1 = 0.72, s = 0.7, sq = y => y <= y0 ? y : y <= y1 ? y0 + (y - y0) * s : y - (y1 - y0) * (1 - s);
+  for (const [k, v] of Object.entries(TBA)) if (Array.isArray(v)) for (const p of (Array.isArray(v[0]) ? v : [v])) p[1] = +sq(p[1]).toFixed(4); }
 /* re-place an old clip's hand and foot targets on a new body. A hand target below the shoulder keeps its height (plus
    `lift` near the floor: a bigger fist stands taller on its knuckles), above it scales with the arm; sideways, reach out
    to the old shoulder's width becomes the new shoulder's width, past it scales with the arm; forward scales with the arm.
@@ -445,10 +449,12 @@ function retarget(old, J, T, o) {
   const s = apose(T), k = o.arm, kl = o.leg, ox = Math.abs(J.sho[0][0]), nx = Math.abs(T.sho[0][0]);
   const hand = (i, mv) => { const sd = i ? 1 : -1, a = add(J.wri[i], mv || [0, 0, 0]), u = a[0] * sd;
     const x = sd * (u <= 0 ? u : u < ox ? u * nx / ox : nx + (u - ox) * k);
-    const y = a[1] > J.sho[i][1] ? T.sho[i][1] + (a[1] - J.sho[i][1]) * k : a[1] + o.lift * Math.max(0, 1 - a[1] / J.sho[i][1]);
+    const y = a[1] > J.sho[i][1] ? T.sho[i][1] + (a[1] - J.sho[i][1]) * k : a[1] * T.sho[i][1] / J.sho[i][1] + o.lift * Math.max(0, 1 - a[1] / J.sho[i][1]);
     return [x - T.wri[i][0], y - T.wri[i][1], a[2] * k - T.wri[i][2]]; };
+  /* feet: as far out from the hips as they were on the old body (under the hips, not out at the A-pose's spread) */
   const foot = (i, mv) => { const sd = i ? 1 : -1, a = add(J.ankle[i], mv || [0, 0, 0]);
-    return [a[0] + sd * (Math.abs(T.ankle[i][0]) - Math.abs(J.ankle[i][0])) - T.ankle[i][0], a[1] - J.ankle[i][1], (a[2] - J.ankle[i][2]) * kl]; };
+    const x = a[0] + sd * (Math.abs(T.hip[i][0]) - Math.abs(J.hip[i][0])), y = (a[1] - J.ankle[i][1]) * kl + T.ankle[i][1], z = (a[2] - J.hip[i][2]) * kl + T.hip[i][2];
+    return [x - T.ankle[i][0], y - T.ankle[i][1], z - T.ankle[i][2]]; };
   const f = pose => { const out = {};
     for (const [bn, tr] of Object.entries(pose)) {
       const n = Object.assign({}, tr);
@@ -524,8 +530,51 @@ K.Idle2 = keys([{ t: 0, use: GB, pose: kn({}) },
   { t: 1.6, pose: { chest: R(2, -10, 8), c_handR: b.HR(-0.1, 1.7, -0.75) } }, { t: 1.9, pose: { chest: R(4, -6, 10), c_handR: b.HR(-0.45, 1.25, -0.7) } },
   { t: 2.2, pose: { chest: R(8, 0, 4), head: R(-30, 4), c_handR: b.HR(0.3, 0.8, -0.65) } }, { t: 2.65, pose: kn({ hips: HP(0, -0.03) }) }, { t: 3.0, pose: kn({}) }]);
 
+/* ---- matched to the atlas's picture plates (six frames a move): the forward tilt winds the arm back behind him first; the
+   down tilt goes flat with the free arm thrown back; the forward smash rears up with both arms spread back and lunges
+   into a low clap far out in front; the up smash sinks with both palms by the floor, claps overhead and opens up; the
+   down smash lifts both fists together overhead and slams them wide, front and back; the punch and the headbutt throw
+   the free arm(s) back; the grab reaches with one hand while the other lifts behind; the ground spin ends arms raised;
+   the ground Hand Slap keeps the free arm straight up while the other slaps ---- */
+K.Backhand = keys([{ t: 0, use: GB }, { t: 0.15, pose: { hips: HP(0, 0.04, -0.08), spine: R(24), chest: R(16, 30, 4), head: R(-44, -12), c_handR: b.HR(-0.55, 1.25, -0.7), c_handL: b.HL(0.45, 0.13, 0.4) } },
+  { t: 0.23, in: 'snap', pose: Object.assign(SW(0.16, 0.04), { spine: R(32), chest: R(18, -14), head: R(-50, 8), c_handR: b.HR(1.25, 0.85, -0.25) }) },
+  { t: 0.3, pose: { chest: R(18, -24), c_handR: b.HR(1.1, 0.8, -0.05) } }, { t: 0.7, in: 'quad', pose: { hips: HP(0, 0.02, 0.04), chest: R(22, -8), c_handR: b.HR(0.6, 0.35, -0.45) } }, { t: 1.15, ...backB }]);
+K.LowSlap = keys([{ t: 0, use: GB }, { t: 0.1, pose: { hips: HP(0, -0.04, -0.04), spine: R(36), c_handR: b.HR(0.2, 0.5, -0.45) } },
+  { t: 0.17, in: 'snap', pose: Object.assign(SW(0.06, 0.16), { spine: R(44), chest: R(26, -10), head: R(-64), c_handR: b.HR(1.15, 0.12, -0.2), c_handL: b.HL(-0.15, 0.45, 0.55) }) }, { t: 0.23, pose: { c_handR: b.HR(1.1, 0.12, -0.15) } },
+  { t: 0.55, in: 'quad', pose: { hips: HP(0, -0.02, 0), c_handR: b.HR(0.6, 0.13, -0.38), c_handL: b.HL(0.36, 0.13, 0.38) } }, { t: 0.83, ...backB }]);
+K.Clap = keys([{ t: 0, use: GB }, { t: 0.2, pose: { hips: HP(0, 0.08, -0.1), spine: R(14), chest: R(4, 12), head: R(-30), c_handR: b.HR(0.5, 1.0, -0.6), c_handL: b.HL(0.5, 1.0, 0.6) } },
+  { t: 0.45, pose: { hips: HP(0, 0.16, -0.2), spine: R(2), chest: R(-12, 18), head: R(-14, -10), c_handR: b.HR(-0.45, 1.3, -0.9), c_handL: b.HL(-0.4, 1.32, 0.9) } },
+  { t: 0.73, in: 'snap', pose: Object.assign(SW(0.3, 0.06), { spine: R(40), chest: R(18, 0), head: R(-56), c_handR: b.HR(1.4, 0.6, -0.05), c_handL: b.HL(1.4, 0.6, 0.05), c_footR: b.FR(0.25, 0, -0.26) }) },
+  { t: 0.85, pose: { c_handR: b.HR(1.38, 0.58, -0.05), c_handL: b.HL(1.38, 0.58, 0.05) } },
+  { t: 1.4, in: 'quad', pose: { hips: HP(0, 0.04, 0.1), spine: R(30), chest: R(20), head: R(-48), c_handR: b.HR(0.8, 0.5, -0.5), c_handL: b.HL(0.8, 0.5, 0.5), c_footR: b.FR(0.05, 0, -0.24) } }, { t: 1.85, ...backB }]);
+K.OverClap = keys([{ t: 0, use: GB }, { t: 0.25, pose: { hips: HP(0, -0.1, -0.02), spine: R(34), chest: R(20), head: R(-50), c_handR: b.HR(0.3, 0.15, -0.85), c_handL: b.HL(0.3, 0.15, 0.85), c_footR: b.FR(-0.06, 0, -0.3), c_footL: b.FL(-0.1, 0, 0.3) } },
+  { t: 0.47, in: 'snap', pose: { hips: HP(0, 0.24, 0), spine: R(4), chest: R(-10), head: R(-14), c_handR: b.HR(0.12, 1.95, -0.05), c_handL: b.HL(0.12, 1.95, 0.05), c_footR: b.FR(-0.06, 0, -0.26), c_footL: b.FL(-0.1, 0, 0.26) } },
+  { t: 0.56, pose: { c_handR: b.HR(0.12, 1.93, -0.05), c_handL: b.HL(0.12, 1.93, 0.05) } },
+  { t: 0.85, in: 'out', pose: { hips: HP(0, 0.18, 0), chest: R(-4), c_handR: b.HR(0.15, 1.75, -0.6), c_handL: b.HL(0.15, 1.75, 0.6) } }, { t: 1.65, ...backB }]);
+K.Hammer = keys([{ t: 0, use: GB }, { t: 0.2, pose: { hips: HP(0, 0.24, 0), spine: R(6), chest: R(-8), head: R(-16), c_handR: b.HR(0.15, 1.95, -0.08), c_handL: b.HL(0.15, 1.95, 0.08), c_footR: b.FR(-0.06, 0, -0.3), c_footL: b.FL(-0.1, 0, 0.3) } },
+  { t: 0.37, in: 'snap', pose: Object.assign(SW(0, 0.16), { spine: R(38), chest: R(20), head: R(-56), c_handR: b.HR(0.95, 0.12, -0.3), c_handL: b.HL(-0.75, 0.12, 0.3) }) }, { t: 0.47, pose: {} },
+  { t: 0.95, in: 'quad', pose: { hips: HP(0, 0.06, 0), spine: R(26), chest: R(14), head: R(-42), c_handR: b.HR(0.6, 0.15, -0.4), c_handL: b.HL(-0.2, 0.15, 0.4) } }, { t: 1.85, ...backB }]);
+K.Punch = keys([{ t: 0, use: GB, pose: { chest: R(10, 34), c_handR: b.HR(-0.45, 1.4, -0.65) } }, { t: 0.5, pose: { hips: HP(0, 0.06, -0.12), chest: R(6, 46), head: R(-40, -16), c_handR: b.HR(-0.65, 1.25, -0.55), c_handL: b.HL(0.45, 0.7, 0.45) } },
+  { t: 0.63, in: 'snap', pose: Object.assign(SW(0.3), { spine: R(32), chest: R(14, -34), head: R(-46, 14), c_handR: b.HR(1.45, 0.95, -0.02), c_handL: b.HL(-0.45, 0.95, 0.5), c_footR: b.FR(0.28, 0, -0.26) }) },
+  { t: 0.8, pose: { c_handR: b.HR(1.42, 0.93, -0.02) } }, { t: 1.5, in: 'quad', pose: { hips: HP(0, 0.02, 0.1), chest: R(20, -10), c_handR: b.HR(0.7, 0.4, -0.35), c_handL: b.HL(0.3, 0.13, 0.38), c_footR: b.FR(0.05, 0, -0.24) } }, { t: 2.05, ...backB }]);
+K.Headbutt = keys([{ t: 0, use: GB }, { t: 0.4, pose: { hips: HP(0, 0.18, -0.2), spine: R(-6), chest: R(-14), head: R(-6), c_handR: b.HR(0.2, 1.4, -0.6), c_handL: b.HL(0.2, 1.4, 0.6) } },
+  { t: 0.67, in: 'snap', pose: Object.assign(SW(0.35, 0.02), { spine: R(52), chest: R(26), head: R(-22), c_handR: b.HR(-0.55, 1.0, -0.5), c_handL: b.HL(-0.55, 1.0, 0.5), c_footR: b.FR(0.2, 0, -0.26) }) }, { t: 0.73, pose: {} },
+  { t: 1.4, in: 'quad', pose: { hips: HP(0, 0.04, 0.12), spine: R(36), chest: R(22), head: R(-50), c_handR: b.HR(0.3, 0.13, -0.4), c_handL: b.HL(0.3, 0.13, 0.4), c_footR: b.FR(0.05, 0, -0.24) } }, { t: 2.1, ...backB }]);
+K.SpinG = keys([{ t: 0, use: GB }, { t: 0.15, pose: { hips: M(0, -0.06, 0), spine: R(6), chest: R(0), head: R(-8), c_handR: b.HR(0.0, 1.3, -1.05), c_handL: b.HL(0.0, 1.3, 1.05), c_footR: b.FR(-0.06, 0, -0.3), c_footL: b.FL(-0.1, 0, 0.3) } },
+  ...Array.from({ length: 12 }, (_, k) => ({ t: 0.63 + k * 0.125, pose: { all: R(0, (k + 1) * 180) } })),
+  { t: 2.3, in: 'out', pose: { hips: M(0, -0.12, 0), spine: R(-4), head: R(-8), c_handR: b.HR(0.15, 1.9, -0.55), c_handL: b.HL(0.15, 1.9, 0.55) } },
+  { t: 2.9, pose: { hips: M(0, -0.1, 0), c_handR: b.HR(0.1, 1.7, -0.7), c_handL: b.HL(0.1, 1.7, 0.7) } }, { t: 3.5, reset: true, use: GB }]);
+K.Slap = keys([{ t: 0, use: GB }, { t: 0.2, pose: { hips: HP(0, -0.08, -0.02), spine: R(30), chest: R(18, 0, 10), head: R(-48), c_handR: b.HR(0.3, 2.0, -0.4), c_handL: b.HL(0.5, 0.13, 0.45), c_footR: b.FR(-0.06, 0, -0.32), c_footL: b.FL(-0.1, 0, 0.32) } },
+  { t: 0.4, in: 'snap', pose: { chest: R(28, 0, -10), c_handR: b.HR(0.75, 0.1, -0.4), c_handL: b.HL(0.25, 1.9, 0.4) } },
+  { t: 0.58, pose: { chest: R(22, 0, -12), c_handR: b.HR(0.6, 0.35, -0.45), c_handL: b.HL(0.3, 2.0, 0.4) } },
+  { t: 0.77, in: 'snap', pose: { chest: R(28, 0, 10), c_handR: b.HR(0.25, 1.9, -0.4), c_handL: b.HL(0.75, 0.1, 0.4) } },
+  { t: 1.1, in: 'quad', pose: { chest: R(22), c_handR: b.HR(0.4, 0.13, -0.4), c_handL: b.HL(0.5, 0.13, 0.4) } }, { t: 1.55, ...backB }]);
+K.Grab = keys([{ t: 0, use: GB }, { t: 0.17, pose: { hips: HP(0, 0.06, -0.04), chest: R(16, 14), c_handR: b.HR(0.3, 1.0, -0.35), c_handL: b.HL(0.2, 0.9, 0.45) } },
+  { t: 0.27, in: 'snap', pose: Object.assign(SW(0.14), { spine: R(24), chest: R(14, -14), head: R(-42), c_handR: b.HR(1.1, 0.95, -0.1), c_handL: b.HL(-0.35, 1.35, 0.5) }) }, { t: 0.33, pose: {} },
+  { t: 0.8, in: 'quad', pose: { hips: HP(0, 0.04, 0), chest: R(20, 0), c_handR: b.HR(0.5, 0.5, -0.35), c_handL: b.HL(0.36, 0.13, 0.38) } }, { t: 1.25, ...backB }]);
+
 const humanA = retarget(human, JH, THA, { arm: 1.05, leg: 1, lift: 0 });
-const bigA = retarget(big, JB, TBA, { arm: 1.18, leg: 0.92, lift: 0.09 });
+const bigA = retarget(big, JB, TBA, { arm: 1.18, leg: 0.7, lift: 0.09 });
 
 /* ---- the hands: how closed each hand is (0 open, 1 a fist) through every clip, added to each key ----
    Cronky Dong walks on his knuckles, so his hands are fists on the ground unless a move slaps, claps or grabs; in the air
@@ -583,7 +632,7 @@ cur.Joey = { file: 'assets/joey/export/joey-v1.glb', height: 13.5, feel: 1,
     fsmash: A('PR', 1.0, 1.07, 0, 2.4), usmash: A('Clean', 0.93, 1.0, 0, 2.35), dsmash: A('Lunge', 0.77, 1.27, 0, 2.4), nair: A('Jack', 0.36, 0.5, 0, 1.25), fair: A('Front', 0.53, 0.6, 0, 1.5), bair: A('Kick', 0.43, 0.53, 0, 1.35), uair: A('High5', 0.4, 0.47, 0, 1.2), dair: A('Box', 0.67, 0.77, 0, 1.8),
     grab: A('Reach', 0.37, 0.43, 0, 1.3), dgrab: A('Reach', 0.37, 0.43, 0, 1.3), pgrab: A('Reach', 0.37, 0.43, 0, 1.3), getup: A('Lunge', 0.77, 0.8, 0, 1.6), ledgeatk: A('Shove', 0.5, 0.57, 0, 1.3),
     nspec: A('Shake', 0.73, 0.8, 0, 1.4), sspec: A('Band', 0.8, 0.9, 0, 1.9), uspec: A('Strap', 0.33, 0.55, 0, 1.4), dspec: A('Wheel', 0.6, 1.07, 0, 2.2), '*': A('Palm', 0.23, 0.27, 0, 0.7) } };
-cur['Cronky Dong'] = { file: 'assets/joey/export/cronky-v1.glb', height: 27, feel: 1,
+cur['Cronky Dong'] = { file: 'assets/joey/export/cronky-v1.glb', height: 24.4, feel: 1,
   clips: Object.assign(common(0.12), { throw: { clip: 'Toss', from: 0, to: 1.4 }, carry: { clip: 'Carry' }, carryWalk: { clip: 'CarryWalk' }, punchWind: { clip: 'Wind' }, buried: { clip: 'Buried' },
     brake: { clip: 'Skid', from: 0, to: 0.4 }, jumpsquat: { clip: 'Squat', from: 0, to: 0.1 }, crouch: { clip: 'Crouch', at: 0.15 }, rise: { clip: 'Rise', from: 0, to: 0.45 }, airjump: { clip: 'AirJump', from: 0, to: 0.48 },
     fastfall: { clip: 'FastFall' }, helpless: { clip: 'Helpless' }, land: { clip: 'Land', from: 0, to: 0.4 }, landHard: { clip: 'LandHard', from: 0, to: 0.65 }, shieldHit: { clip: 'ShieldHit', from: 0, to: 0.3 },
