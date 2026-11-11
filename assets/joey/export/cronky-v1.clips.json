@@ -1,32 +1,71 @@
 {
- "Idle": {
-  "seconds": 2.7
- },
- "Idle2": {
-  "seconds": 2.4
- },
- "Walk": {
+ "Carry": {
   "seconds": 1.2
  },
+ "CarryWalk": {
+  "seconds": 1.4
+ },
+ "Idle": {
+  "seconds": 1.2
+ },
+ "Idle2": {
+  "seconds": 3
+ },
+ "Walk": {
+  "seconds": 1
+ },
  "Run": {
-  "seconds": 0.467
+  "seconds": 0.5
+ },
+ "Skid": {
+  "seconds": 0.4
  },
  "Crouch": {
   "seconds": 0.133
  },
+ "Squat": {
+  "seconds": 0.1
+ },
  "Rise": {
-  "seconds": 0.4
+  "seconds": 0.467
  },
  "Fall": {
-  "seconds": 0.8
+  "seconds": 1.2
+ },
+ "FastFall": {
+  "seconds": 0.4
+ },
+ "Helpless": {
+  "seconds": 0.6
+ },
+ "AirJump": {
+  "seconds": 0.6
  },
  "Land": {
   "seconds": 0.4
  },
+ "LandHard": {
+  "seconds": 0.667
+ },
  "Shield": {
   "seconds": 0.133
  },
+ "ShieldHit": {
+  "seconds": 0.3
+ },
  "Hit": {
+  "seconds": 0.6
+ },
+ "HitHeavy": {
+  "seconds": 0.8
+ },
+ "Launch": {
+  "seconds": 0.5
+ },
+ "LaunchUp": {
+  "seconds": 0.6
+ },
+ "Spike": {
   "seconds": 0.6
  },
  "Tumble": {
@@ -38,17 +77,41 @@
  "Dodge": {
   "seconds": 0.467
  },
+ "AirDodge": {
+  "seconds": 0.667
+ },
+ "Ball": {
+  "seconds": 0.6
+ },
  "Ledge": {
   "seconds": 1.6
+ },
+ "Respawn": {
+  "seconds": 2.4
  },
  "Hold": {
   "seconds": 0.8
  },
- "Carry": {
-  "seconds": 1.2
+ "Pummel": {
+  "seconds": 0.233
  },
- "CarryWalk": {
-  "seconds": 1.4
+ "ThrowB": {
+  "seconds": 0.9
+ },
+ "ThrowU": {
+  "seconds": 0.933
+ },
+ "ThrowD": {
+  "seconds": 0.933
+ },
+ "ThrowCB": {
+  "seconds": 0.933
+ },
+ "ThrowCU": {
+  "seconds": 0.933
+ },
+ "ThrowCD": {
+  "seconds": 0.933
  },
  "Held": {
   "seconds": 0.6
