@@ -630,4 +630,7 @@ cur['Cronky Dong'] = { file: 'assets/joey/export/cronky-v1.glb', height: 27, fee
     grab: A('Grab', 0.27, 0.33, 0, 1.25), dgrab: A('Grab', 0.27, 0.33, 0, 1.25), pgrab: A('Grab', 0.27, 0.33, 0, 1.25), ledgeatk: A('Backhand', 0.23, 0.3, 0, 1.15), getup: A('Hammer', 0.37, 0.47, 0, 1.85),
     nspec: A('Wind', 0, 0.5, 0, 0.5), nspecR: A('Punch', 0.63, 0.7, 0, 2.05), nspecF: A('Punch', 0.63, 0.7, 0, 2.05), sspec: A('Headbutt', 0.67, 0.73, 0, 2.1), uspec: A('SpinG', 0.63, 2.1, 0, 3.5), uspecA: A('SpinA', 0.13, 1.43, 0, 2.3),
     dspec: A('Slap', 0.4, 0.77, 0, 1.55), dspecA: A('SlapAir', 0.63, 0.93, 0, 1.65), '*': A('Check', 0.17, 0.2, 0, 0.8) } };
+/* the fighter select shows the regular Joey (the first, photo-faced model, kept as joey-regular.glb from commit 793eebf),
+   so nothing there hints at what he becomes; render3d.js uses an entry named '<form> (select)' while players choose */
+cur['Joey (select)'] = { file: 'assets/joey/export/joey-regular.glb', height: 13.5, feel: 1, clips: common(0.15), strikers: [], springs: [], attacks: {} };
 fs.writeFileSync(mf, JSON.stringify(cur, null, 1) + '\n'); console.log('manifest: ' + Object.keys(cur).join(', '));

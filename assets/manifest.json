@@ -7884,5 +7884,101 @@
     "end": 0.8
    }
   }
+ },
+ "Joey (select)": {
+  "file": "assets/joey/export/joey-regular.glb",
+  "height": 13.5,
+  "feel": 1,
+  "clips": {
+   "idle": {
+    "clip": "Idle"
+   },
+   "idle2": {
+    "clip": "Idle2"
+   },
+   "walk": {
+    "clip": "Walk"
+   },
+   "run": {
+    "clip": "Run"
+   },
+   "crouch": {
+    "clip": "Crouch",
+    "at": 0.2
+   },
+   "brake": {
+    "clip": "Land",
+    "from": 0.05,
+    "to": 0.4
+   },
+   "jumpsquat": {
+    "clip": "Crouch",
+    "from": 0,
+    "to": 0.2
+   },
+   "rise": {
+    "clip": "Rise",
+    "from": 0,
+    "to": 0.4
+   },
+   "fall": {
+    "clip": "Fall"
+   },
+   "land": {
+    "clip": "Land",
+    "from": 0,
+    "to": 0.4
+   },
+   "shield": {
+    "clip": "Shield",
+    "from": 0,
+    "to": 0.15
+   },
+   "hit": {
+    "clip": "Hit",
+    "from": 0,
+    "to": 0.6
+   },
+   "tumble": {
+    "clip": "Tumble",
+    "bounce": true
+   },
+   "down": {
+    "clip": "Down",
+    "from": 0,
+    "to": 0.3
+   },
+   "dizzy": {
+    "clip": "Hit",
+    "from": 0,
+    "to": 0.6,
+    "bounce": true
+   },
+   "airdodge": {
+    "clip": "Tumble",
+    "bounce": true
+   },
+   "dodge": {
+    "clip": "Dodge",
+    "from": 0,
+    "to": 0.45
+   },
+   "roll": {
+    "clip": "Tumble",
+    "bounce": true
+   },
+   "ledge": {
+    "clip": "Ledge"
+   },
+   "hold": {
+    "clip": "Hold"
+   },
+   "held": {
+    "clip": "Held"
+   }
+  },
+  "strikers": [],
+  "springs": [],
+  "attacks": {}
  }
 }
