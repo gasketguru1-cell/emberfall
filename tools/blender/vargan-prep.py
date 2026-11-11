@@ -1,4 +1,4 @@
-# Turns the owner's two Meshy sculpts for Vargan the Ashbound into game-sized GLBs (no Meshy calls; the files are on disk).
+# Turns the owner's two Meshy sculpts for Fyrdsman the Ashbound into game-sized GLBs (no Meshy calls; the files are on disk).
 #   body:  blender -b <Ironhide_Berserker.blend> --python tools/blender/vargan-prep.py -- --part body --out body-a.glb [--faces 90000]
 #   axe:   blender -b <Runebreaker.blend>        --python tools/blender/vargan-prep.py -- --part axe  --out axe.glb [--faces 9000] [--len 1.55]
 # Body: faces reduced, lowest point on the floor, centred over the origin (front faces +Z in glTF, as Meshy stands it).

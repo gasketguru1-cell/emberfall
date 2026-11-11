@@ -1,15 +1,15 @@
 {
  "Idle": {
-  "seconds": 3.2
+  "seconds": 1.6
  },
  "Idle2": {
-  "seconds": 2.6
+  "seconds": 1.4
  },
  "Walk": {
-  "seconds": 0.633
+  "seconds": 0.5
  },
  "Run": {
-  "seconds": 0.367
+  "seconds": 0.3
  },
  "Crouch": {
   "seconds": 0.083
@@ -39,7 +39,7 @@
   "seconds": 0.3
  },
  "Shield": {
-  "seconds": 0.067
+  "seconds": 0.05
  },
  "ShieldHit": {
   "seconds": 0.15
@@ -111,7 +111,7 @@
   "seconds": 0.517
  },
  "Dtilt": {
-  "seconds": 0.583
+  "seconds": 0.617
  },
  "Dash": {
   "seconds": 0.617
@@ -119,17 +119,17 @@
  "Fsmash": {
   "seconds": 1.1
  },
- "FsmashE": {
-  "seconds": 1.05
- },
  "Usmash": {
   "seconds": 1.017
  },
- "UsmashE": {
-  "seconds": 0.9
- },
  "Dsmash": {
   "seconds": 1.017
+ },
+ "FsmashE": {
+  "seconds": 1.05
+ },
+ "UsmashE": {
+  "seconds": 0.9
  },
  "DsmashE": {
   "seconds": 0.917

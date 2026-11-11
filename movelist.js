@@ -200,7 +200,7 @@ const MOVE_TEXT = {
     u: ['Coal Toss', 'Tosses straight up.'],
     d: ['Into the Ash', 'Pins the opponent down and pops them up in front.'],
   },
-  Vargan: {
+  Fyrdsman: {
     nspec: ['Axe Throw', 'Slings Runebreaker in a high arc; it leaves his hand on frame 30 and hits for 15%. The axe does not vanish: it sticks where it lands (on any platform, or in the side of the island), falls slowly past the ledge, and stays until he calls it home. With the axe away, neutral special is a beckoning hand.', 'Release f30 · 15%'],
     sspec: ['Meteor Shoulder Charge', 'Coils for 14 frames, then hurtles shoulder-first, wreathed in red fire, across exactly 30% of the main stage: 18% early (frames 15 to 24), 12% late (to 40), then a heavy skid to frame 57. On the ground it stops at the edge of the floor. In the air it flies level, once per trip off the ground. Berserker covers the same distance faster, never further.'],
     uspec: ['Soaring Plunge', 'A rising slash on frame 10 that carries the opponent up with him, a hang at the top with five quick hits, then from frame 54 a straight, fast dive with the axe below him until he lands (a landing blow, then 36 frames) or takes a ledge. Nothing stops the dive past the stage. Without the axe the same climb with fists.', 'f10 · 6% · 1.5% x 5 · dive 6% · landing 6%'],
@@ -453,7 +453,7 @@ const MOVE_RULES = {
     ['B', 'Through the Shield', 'Tongs Snatch on the ground catches a standing opponent even if they are shielding.'],
     ['Air ↓ B', 'Spike and Thump', 'Bucket Drop in the air sends anyone it hits straight down, and thumps the ground where it lands for anyone it missed.'],
   ],
-  Vargan: [
+  Fyrdsman: [
     ['B', 'The Axe Stays Out', 'Runebreaker is a real thing in the world. Thrown, it sticks where it lands and stays there; past the ledge it falls slowly. Only one ever exists, and a lost stock puts it back in his hand.'],
     ['Hold B', 'Calling It Home', 'With the axe away, keep special held for 8 frames (let go of the press that threw it first). The axe flies back to his hand on its own path, whatever he is doing, and hits whatever is in the way once: 12% left close by, up to 21% and much harder knockback when it was left 55% of the stage away or more.'],
     ['★', 'Two Sets of Moves', 'While the axe is away his smashes, forward, back and up airs and up special are unarmed. His jab, tilts, dash attack, neutral and down airs and throws never use the axe. A move keeps the version it started with if the axe comes back mid-swing.'],

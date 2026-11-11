@@ -1,4 +1,4 @@
-// Writes the skeleton and animation spec for Vargan the Ashbound (assets/vargan/work/rig.json), which tools/blender/rig.py
+// Writes the skeleton and animation spec for Fyrdsman the Ashbound (assets/vargan/work/rig.json), which tools/blender/rig.py
 // turns into a rigged, animated model, and adds his entry to the game's manifest.
 //   node tools/blender/vargan.js
 //   bash tools/blender/build-vargan.sh [shots.json outdir]
@@ -14,13 +14,13 @@
 // the hit is.
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const ROOT = path.join(__dirname, '..', '..'), OUT = path.join(ROOT, 'assets', 'vargan', 'work');
-/* ---- the game's own numbers: load sim.js as the tests do and take Vargan's moves ---- */
+/* ---- the game's own numbers: load sim.js as the tests do and take Fyrdsman's moves ---- */
 const MV = (() => {
   const ctx = new Proxy({}, { get: (t, k) => k in t ? t[k] : () => ({ addColorStop() {} }), set: (t, k, v) => { t[k] = v; return true; } });
   const g = { document: { getElementById: () => ({ getContext: () => ctx }) }, addEventListener() {}, requestAnimationFrame() {}, navigator: { getGamepads: () => [] }, localStorage: { getItem: () => null, setItem() {} }, console, Math, performance: { now: () => 0 } };
   g.window = g; vm.createContext(g);
   for (const f of ['hitboxes.js', 'sim.js']) vm.runInContext(fs.readFileSync(path.join(ROOT, f), 'utf8'), g, { filename: f });
-  return vm.runInContext('ROSTER.find(d => d.name === "Vargan").forms[0].moves', g);
+  return vm.runInContext('ROSTER.find(d => d.name === "Fyrdsman").forms[0].moves', g);
 })();
 const R = (p, y, r) => ({ rot: [p, y || 0, r || 0] }), M = (x, y, z) => ({ move: [x, y, z] });
 const add = (a, b, k) => a.map((v, i) => v + b[i] * (k === undefined ? 1 : k)), sub = (a, b) => a.map((v, i) => v - b[i]), dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
@@ -37,8 +37,8 @@ const J = {
   knu: [-0.775, 0.95, 0.14], mid: [-0.79, 0.88, 0.145], tip: [-0.79, 0.815, 0.13], thb: [-0.715, 1.02, 0.17], tht: [-0.718, 1.0, 0.3],
   hip: [-0.13, 0.9, 0.0], knee: [-0.2, 0.52, 0.06], ankle: [-0.27, 0.12, 0.04], toe: [-0.29, 0.03, 0.22] };
 /* the axe in the bind pose: through the right fist (G), haft straight ahead, edge down; held 0.22 m up from the pommel */
-const G = [-0.74, 0.915, 0.14], HOLD = 0.22, H0 = [0, 0, 1], E0 = [0, -1, 0];
-const AXHEAD = add(G, H0, 1.0), AXTIP = add(add(G, H0, 1.13), E0, 0.33);   /* where the blade starts on the haft, and the middle of its edge */
+const G = [-0.74, 0.915, 0.14], HOLD = 0.286, H0 = [0, 0, 1], E0 = [0, -1, 0];   /* the axe is 2.015 m (the owner asked for a bigger one: 1.3 x the first 1.55) */
+const AXHEAD = add(G, H0, 1.3), AXTIP = add(add(G, H0, 1.47), E0, 0.43);   /* where the blade starts on the haft, and the middle of its edge */
 const side = (s, k) => { const P = p => k ? mir(p) : p; return [
   { name: 'arm' + s, head: P(J.sho), tail: P(J.elb), parent: 'chest' },
   { name: 'fore' + s, head: P(J.elb), tail: P(J.wri), parent: 'arm' + s, connect: true },
@@ -50,9 +50,9 @@ const side = (s, k) => { const P = p => k ? mir(p) : p; return [
   { name: 'thigh' + s, head: P(J.hip), tail: P(J.knee), parent: 'hips' },
   { name: 'shin' + s, head: P(J.knee), tail: P(J.ankle), parent: 'thigh' + s, connect: true },
   { name: 'foot' + s, head: P(J.ankle), tail: P(J.toe), parent: 'shin' + s },
-  { name: 'c_foot' + s, head: P(J.ankle), tail: add(P(J.ankle), [0, 0, 0.12]), parent: 'all', deform: false }]; };
+  { name: 'c_foot' + s, head: P(J.ankle), tail: add(P(J.ankle), unit(sub(P(J.toe), P(J.ankle))).map(v => v * 0.12)), parent: 'all', deform: false }]; };   /* along the foot, so the foot can copy its turn (heel and toe) */
 const spec = {
-  note: 'Vargan the Ashbound: metres, feet on y = 0, facing +Z, his right is -X. Joint positions measured from the owner\'s A-pose sculpt.',
+  note: 'Fyrdsman the Ashbound: metres, feet on y = 0, facing +Z, his right is -X. Joint positions measured from the owner\'s A-pose sculpt.',
   prep: { yaw: 0, translate: [0, 0, 0] },
   parts: [{ object: 'Axe', bone: 'axe' }],
   bones: [
@@ -67,15 +67,16 @@ const spec = {
     { name: 'axeTip', head: AXTIP, tail: add(AXTIP, H0, 0.05), parent: 'axe' },
     { name: 'c_axe', head: G, tail: add(G, H0, 0.3), parent: 'all', deform: false }],
   ik: [{ name: 'c_handL', bone: 'foreL', chain: 2 }, { name: 'c_handR', bone: 'foreR', chain: 2 }, { name: 'c_footL', bone: 'shinL', chain: 2 }, { name: 'c_footR', bone: 'shinR', chain: 2 }],
-  copyrot: [{ bone: 'axe', from: 'c_axe' }],
+  copyrot: [{ bone: 'axe', from: 'c_axe' }, { bone: 'footR', from: 'c_footR' }, { bone: 'footL', from: 'c_footL' }],   /* the feet keep the sole where the pose puts it (flat unless turned), whatever the shin does */
   rigid: [{ bone: 'head', box: [[-0.15, 1.62, -0.17], [0.15, 1.96, 0.22]] }, { bone: 'axe', part: 'Axe', only: true }],
   poses: {}, clips: {} };
 
 /* ---- targets: absolute places in the model, as moves from where each control rests ---- */
 const HR = (z, y, x) => M((x === undefined ? -0.34 : x) - J.wri[0], y - J.wri[1], z - J.wri[2]);
 const HL = (z, y, x) => M((x === undefined ? 0.34 : x) + J.wri[0], y - J.wri[1], z - J.wri[2]);
-const FR = (z, y, x) => M((x === undefined ? -0.19 : x) - J.ankle[0], y || 0, z - J.ankle[2]);
-const FL = (z, y, x) => M((x === undefined ? 0.19 : x) + J.ankle[0], y || 0, z - J.ankle[2]);
+/* feet: p turns the sole about the ankle, degrees (+ the toes down, - the toes up: a heel strike) */
+const FR = (z, y, x, p) => Object.assign(M((x === undefined ? -0.19 : x) - J.ankle[0], y || 0, z - J.ankle[2]), p ? { rot: [p, 0, 0] } : {});
+const FL = (z, y, x, p) => Object.assign(M((x === undefined ? 0.19 : x) + J.ankle[0], y || 0, z - J.ankle[2]), p ? { rot: [p, 0, 0] } : {});
 /* The axe: haft direction d and edge e (model space) as an aim and a twist. rig.py turns the bind direction to d the short
    way round, then twists about d; the twist is worked out so the bind edge (down) lands on e. */
 function AIMT(d, e) {
@@ -100,244 +101,428 @@ function axe(P, ang, es, o) {
 }
 /* an axe hit from the game: its grip (H, from his feet) and angle, at depth x */
 const AXHIT = (move, i, x, o) => { const h = MV[move].h[i], [gx, gy, ang, es] = h.ax; return axe([x === undefined ? -0.28 : x, gy * HMOD, gx * HMOD], ang, es, o); };
-const HIP = (x, y, z) => ({ hips: M(x, y, z) });
 
 /* ---- poses ---- */
 const P = spec.poses, C = spec.clips;
-/* the carry: the axe upright at his right side, head above his shoulder, edge forward (the owner's concept picture) */
-const CARRY = axe([-0.36, 0.98, 0.16], 84, -1);
-P.stand = { all: {}, hips: {}, spine: {}, chest: {}, head: {}, c_handL: {}, c_handR: {}, c_footL: {}, c_footR: {}, c_axe: {} };
-/* the guard: wide and low, left foot leading, the axe's head up in front of his right shoulder, the left fist up */
-const GUARD = cat(HIP(0, -0.07, 0), { spine: R(4), chest: R(4, -12), head: R(-4, 10), c_footL: FL(0.2, 0, 0.2), c_footR: FR(-0.16, 0, -0.24), c_handL: HL(0.34, 1.3, 0.12) }, axe([-0.34, 1.0, 0.28], 66, -1, { hip: [0, -0.07, 0] }));
-P.guard = GUARD;
-P.crouch = cat(HIP(0, -0.36, 0.02), { spine: R(20), chest: R(10, -12), head: R(-18, 10), c_footL: FL(0.2, 0, 0.24), c_footR: FR(-0.16, 0, -0.26), c_handL: HL(0.36, 0.95, 0.14) }, axe([-0.36, 0.66, 0.34], 30, -1, { hip: [0, -0.36, 0.02] }));
-P.air = cat(HIP(0, 0.02, 0), { chest: R(2, -8), head: R(-2, 6), c_footL: FL(0.12, 0.2, 0.18), c_footR: FR(-0.08, 0.1, -0.2), c_handL: HL(0.28, 1.25, 0.2) }, axe([-0.38, 1.02, 0.18], 70, -1));
-P.tuck = cat(HIP(0, 0.06, 0), { spine: R(26), chest: R(18), head: R(10), c_footL: FL(0.16, 0.36, 0.16), c_footR: FR(0.12, 0.36, -0.16), c_handL: HL(0.3, 1.0, 0.16) }, axe([-0.34, 1.0, 0.3], 30, -1));
-const GD = ['stand', 'guard'], AIR = ['stand', 'air'], back = { reset: true, use: GD }, backAir = { reset: true, use: AIR };
+/* Where Runebreaker rides when it is not in his hand: across his back, the pommel up behind his right shoulder (so the near
+   hand takes it over the shoulder) and the head down behind his left hip, the blade flat to his back, edge out to his left.
+   The game hangs its own copy of the axe there (render3d axeShow, manifest axe.back); the drawn axe takes over from it at
+   the clip time each axe move gives (axe.armed), on a key where his hand is exactly at this grip. */
+const BACK = { pommel: [-0.36, 2.08, -0.34], d: unit([0.6, -0.8, 0]), e: unit([0.8, 0.6, 0]) };
+const BGRIP = add(BACK.pommel, BACK.d, HOLD);
+const BG = hip => ({ c_axe: AIMT(BACK.d, BACK.e), c_handR: (w => HR(w[2], w[1], w[0]))(wrist(BGRIP, 0, hip)) });
+/* B: a pose from short names. hp/hr the hips' move and turn, sp/ch/hd the spine, chest and head turns, R/L the wrists
+   [z, y, x], fr/fl the ankles [z, y, x, sole pitch], ax an axe hold (axe(), AXHIT(), BG()), all the whole body. */
+const B = o => {
+  const r = {};
+  if (o.hp || o.hr) r.hips = { move: o.hp || [0, 0, 0], rot: o.hr || [0, 0, 0] };
+  if (o.sp) r.spine = R(...o.sp); if (o.ch) r.chest = R(...o.ch); if (o.hd) r.head = R(...o.hd);
+  if (o.R) r.c_handR = HR(...o.R); if (o.L) r.c_handL = HL(...o.L);
+  if (o.fr) r.c_footR = FR(...o.fr); if (o.fl) r.c_footL = FL(...o.fl);
+  if (o.all) r.all = Array.isArray(o.all) ? R(...o.all) : o.all;
+  return Object.assign(r, o.ax || {});
+};
+const K = (t, o, e) => Object.assign({ t, pose: B(o) }, e ? { in: e } : {});
 const keys = (list, fps) => ({ fps: fps || 60, keys: list });
+P.stand = { all: {}, hips: {}, spine: {}, chest: {}, head: {}, c_handL: {}, c_handR: {}, c_footL: {}, c_footR: {}, c_axe: AIMT(BACK.d, BACK.e) };
+/* the guard: a brawler's stance, wide and low, left foot and left fist leading, the right fist by the jaw, the axe on his back */
+const GUARD_O = { hp: [0, -0.08, 0], hr: [0, -10, 0], sp: [6], ch: [6, -10], hd: [-6, 18], fl: [0.22, 0, 0.21], fr: [-0.2, 0, -0.25], L: [0.36, 1.36, 0.16], R: [0.16, 1.26, -0.22] };
+P.guard = B(GUARD_O);
+P.crouch = B({ hp: [0, -0.38, 0.02], hr: [8, -10, 0], sp: [18], ch: [10, -10], hd: [-20, 16], fl: [0.24, 0, 0.22], fr: [-0.2, 0, -0.27, 10], L: [0.4, 0.98, 0.16], R: [0.26, 0.92, -0.24] });
+P.air = B({ hp: [0, 0.02, 0], hr: [0, -6, 0], sp: [4], ch: [2, -6], hd: [-2, 8], fl: [0.12, 0.2, 0.18, 25], fr: [-0.08, 0.1, -0.2, 30], L: [0.3, 1.3, 0.22], R: [0.12, 1.22, -0.26] });
+P.tuck = B({ hp: [0, 0.06, 0], sp: [28], ch: [18], hd: [12], fl: [0.18, 0.4, 0.16, 20], fr: [0.14, 0.4, -0.16, 20], L: [0.32, 1.0, 0.2], R: [0.3, 0.98, -0.22] });
+const GD = ['stand', 'guard'], AIR = ['stand', 'air'], back = { reset: true, use: GD }, backAir = { reset: true, use: AIR };
+const GDK = (t, o, e) => Object.assign({ t, use: GD, pose: B(o || {}) }, e ? { in: e } : {});
+const AIRK = (t, o, e) => Object.assign({ t, use: AIR, pose: B(o || {}) }, e ? { in: e } : {});
+const BK = (t, e) => Object.assign({ t, ...back }, { in: e || 'quad' }), BKA = (t, e) => Object.assign({ t, ...backAir }, { in: e || 'quad' });
 
 /* ---- standing, moving ---- */
-C.Idle = keys([{ t: 0, use: GD }, { t: 0.8, pose: { hips: M(0, -0.08, 0), chest: R(6, -12), head: R(-2, 8), c_handL: HL(0.34, 1.28, 0.12) } }, { t: 1.6, pose: { hips: M(0, -0.07, 0), chest: R(4, -12), head: R(-4, 12), c_handL: HL(0.34, 1.3, 0.12) } },
-  { t: 2.4, pose: { hips: M(0, -0.08, 0), chest: R(6, -12), head: R(-3, 8) } }, { t: 3.2, use: GD }]);   /* heavy breathing in a heavy guard */
-/* now and then: the axe rolled up onto his shoulder and back down, a look at the opponent */
-C.Idle2 = keys([{ t: 0, use: GD }, { t: 0.5, pose: cat({ chest: R(0, -6), head: R(-6, 4) }, axe([-0.3, 1.38, 0.12], 150, 1)) }, { t: 1.4, pose: cat({ head: R(-10, 20) }, axe([-0.3, 1.36, 0.1], 155, 1)) }, { t: 2.0, pose: { head: R(-4, 4) } }, { t: 2.6, use: GD }]);
-{ const st = (a, lean, lift, axeAng) => [
-    cat({ hips: M(0, -0.09, 0), chest: R(lean, -10), c_footL: FL(a, 0, 0.19), c_footR: FR(-a, lift * 0.3, -0.19) }, axe([-0.38, 0.98, 0.2], axeAng, -1, { hip: [0, -0.09, 0] })),
-    cat({ hips: M(0, -0.05, 0), chest: R(lean, -12), c_footL: FL(0.02, 0, 0.19), c_footR: FR(0, lift, -0.19) }, axe([-0.38, 1.0, 0.2], axeAng + 3, -1, { hip: [0, -0.05, 0] })),
-    cat({ hips: M(0, -0.09, 0), chest: R(lean, -14), c_footL: FL(-a, lift * 0.3, 0.19), c_footR: FR(a, 0, -0.19) }, axe([-0.38, 0.98, 0.2], axeAng, -1, { hip: [0, -0.09, 0] })),
-    cat({ hips: M(0, -0.05, 0), chest: R(lean, -12), c_footL: FL(0, lift, 0.19), c_footR: FR(0.02, 0, -0.19) }, axe([-0.38, 1.0, 0.2], axeAng + 3, -1, { hip: [0, -0.05, 0] }))];
-  const w = st(0.22, 6, 0.1, 70);
-  C.Walk = keys([{ t: 0, use: GD, pose: w[0] }, { t: 0.32, pose: w[1] }, { t: 0.64, pose: w[2] }, { t: 0.96, pose: w[3] }, { t: 1.28, pose: w[0] }], 30);
-  /* the run: leaning in, the axe trailing low behind him, the left arm pumping */
-  const run = (a, lift, arm) => [
-    cat({ hips: M(0, -0.12, 0.06), spine: R(10), chest: R(10, -6), head: R(-12, 4), c_footL: FL(a, 0, 0.18), c_footR: FR(-a * 0.9, lift * 0.4, -0.18), c_handL: HL(-arm * 0.5 + 0.18, 1.18, 0.2) }, axe([-0.4, 0.9, -0.12], 200, 1, { hip: [0, -0.12, 0.06] })),
-    cat({ hips: M(0, -0.06, 0.06), c_footL: FL(0.02, 0, 0.18), c_footR: FR(0.05, lift, -0.18), c_handL: HL(0.18, 1.2, 0.2) }, axe([-0.4, 0.92, -0.1], 196, 1, { hip: [0, -0.06, 0.06] })),
-    cat({ hips: M(0, -0.12, 0.06), c_footL: FL(-a * 0.9, lift * 0.4, 0.18), c_footR: FR(a, 0, -0.18), c_handL: HL(arm * 0.5 + 0.18, 1.18, 0.2) }, axe([-0.4, 0.9, -0.12], 200, 1, { hip: [0, -0.12, 0.06] })),
-    cat({ hips: M(0, -0.06, 0.06), c_footL: FL(0.05, lift, 0.18), c_footR: FR(0.02, 0, -0.18), c_handL: HL(0.18, 1.2, 0.2) }, axe([-0.4, 0.92, -0.1], 196, 1, { hip: [0, -0.06, 0.06] }))];
-  const r = run(0.42, 0.26, 0.5);
-  C.Run = keys([{ t: 0, use: GD, pose: r[0] }, { t: 0.18, pose: r[1] }, { t: 0.36, pose: r[2] }, { t: 0.54, pose: r[3] }, { t: 0.72, pose: r[0] }], 30); }
-C.Crouch = keys([{ t: 0, use: GD }, { t: 0.18, use: 'crouch' }], 30);
-C.Squat = keys([{ t: 0, use: GD }, { t: 0.1, pose: cat(HIP(0, -0.2, 0), { spine: R(12), c_handL: HL(0.2, 1.0, 0.2) }, axe([-0.38, 0.8, 0.12], 40, -1, { hip: [0, -0.2, 0] })) }], 30);
-C.Rise = keys([{ t: 0, use: AIR, pose: { chest: R(-4, -8), head: R(-8, 6), c_footR: FR(-0.1, 0.26, -0.2), c_footL: FL(0.06, 0.04, 0.18) } }, { t: 0.4, pose: { c_footR: FR(-0.08, 0.16, -0.2), c_footL: FL(0.1, 0.14, 0.18) } }], 30);
-C.Fall = keys([{ t: 0, use: AIR, pose: cat({ chest: R(6, -8), c_handL: HL(0.2, 1.4, 0.3) }, axe([-0.4, 1.15, 0.12], 100, -1)) }, { t: 0.3, pose: { c_footR: FR(-0.06, 0.14, -0.2), c_footL: FL(0.14, 0.24, 0.18) } }, { t: 0.6, pose: { c_footR: FR(-0.08, 0.1, -0.2), c_footL: FL(0.12, 0.2, 0.18) } }], 30);
-C.FastFall = keys([{ t: 0, use: AIR, pose: cat({ chest: R(-4, -8), head: R(-6, 6), c_footR: FR(-0.04, 0.04, -0.2), c_footL: FL(0.04, 0.04, 0.18), c_handL: HL(0.0, 1.6, 0.3) }, axe([-0.4, 1.4, 0.0], 110, -1)) }], 30);
-C.AirJump = keys([{ t: 0, use: AIR, pose: { c_footR: FR(-0.1, 0.4, -0.2), c_footL: FL(0.1, 0.42, 0.18), spine: R(20) } }, { t: 0.2, pose: { spine: R(-4), c_footR: FR(-0.14, 0.02, -0.2), c_footL: FL(0.04, 0.04, 0.18) } }, { t: 0.48, use: AIR }], 30);
-C.Helpless = keys([{ t: 0, use: AIR, pose: cat({ head: R(-8, 0, 6), c_handL: HL(-0.1, 1.55, 0.4) }, axe([-0.42, 1.2, 0.0], 130, -1)) }, { t: 0.25, pose: { head: R(-8, 0, -6), c_footR: FR(0.12, 0.2, -0.2), c_footL: FL(-0.04, 0.06, 0.18) } }, { t: 0.5, pose: { head: R(-8, 0, 6), c_footR: FR(-0.06, 0.06, -0.2), c_footL: FL(0.12, 0.22, 0.18) } }], 30);
-C.Land = keys([{ t: 0, use: ['stand', 'crouch'] }, { t: 0.2, pose: cat(HIP(0, -0.2, 0), { spine: R(10), chest: R(6, -12) }, axe([-0.38, 0.82, 0.3], 40, -1, { hip: [0, -0.2, 0] })) }, { t: 0.42, ...back }], 30);
-C.LandHard = keys([{ t: 0, use: ['stand', 'crouch'] }, { t: 0.15, pose: cat(HIP(0, -0.42, 0.02), { spine: R(28), chest: R(14, -12), head: R(-24) }, axe([-0.38, 0.5, 0.45], 10, -1, { hip: [0, -0.42, 0.02] })) }, { t: 0.6, ...back }], 30);
-/* the shield: braced behind the haft held crossways in both fists */
-C.Shield = keys([{ t: 0, use: GD }, { t: 0.12, pose: cat(HIP(0, -0.14, -0.02), { spine: R(10), chest: R(6, -20), head: R(6, 14) }, axe([-0.2, 1.05, 0.34], 100, -1, { two: true, hip: [0, -0.14, -0.02], dx: 0.25 })) }], 30);
-C.ShieldHit = keys([{ t: 0, use: GD, pose: cat(HIP(0, -0.14, -0.06), { spine: R(4), chest: R(0, -20) }, axe([-0.2, 1.05, 0.26], 100, -1, { two: true, hip: [0, -0.14, -0.06], dx: 0.25 })) }, { t: 0.3, pose: cat(HIP(0, -0.14, -0.02), { spine: R(10), chest: R(6, -20) }, axe([-0.2, 1.05, 0.34], 100, -1, { two: true, hip: [0, -0.14, -0.02], dx: 0.25 })) }], 30);
-/* ---- being hit ---- */
-C.Hit = keys([{ t: 0, use: GD, pose: cat(HIP(0, -0.04, -0.1), { spine: R(-14), chest: R(-12, -12), head: R(-18), c_handL: HL(0.0, 1.3, 0.4), c_footL: FL(0.3, 0.06, 0.2) }, axe([-0.44, 1.1, 0.0], 120, -1, { hip: [0, -0.04, -0.1] })) }, { t: 0.3, pose: { spine: R(-8), chest: R(-6, -12), head: R(-6) } }, { t: 0.6, ...back }], 30);
-C.HitHeavy = keys([{ t: 0, use: GD, pose: cat(HIP(0, -0.06, -0.16), { spine: R(-22), chest: R(-18, -6), head: R(-26), c_handL: HL(-0.1, 1.45, 0.45), c_footL: FL(0.36, 0.1, 0.2) }, axe([-0.48, 1.2, -0.08], 140, -1, { hip: [0, -0.06, -0.16] })) }, { t: 0.4, pose: { spine: R(-10), chest: R(-8, -10), head: R(-10) } }, { t: 0.8, ...back }], 30);
-C.Launch = keys([{ t: 0, use: AIR, pose: cat({ spine: R(-24), chest: R(-18), head: R(-26), c_handL: HL(-0.2, 1.5, 0.5), c_footL: FL(0.3, 0.3, 0.2), c_footR: FR(0.2, 0.2, -0.2) }, axe([-0.5, 1.3, -0.1], 150, -1)) }, { t: 0.5, pose: { spine: R(-10), chest: R(-8) } }], 30);
-C.LaunchUp = keys([{ t: 0, use: AIR, pose: cat({ spine: R(-10), chest: R(-12), head: R(-30), c_handL: HL(0.0, 1.0, 0.5), c_footL: FL(0.0, 0.0, 0.25), c_footR: FR(0.0, 0.0, -0.25) }, axe([-0.5, 0.9, 0.0], -60, -1)) }, { t: 0.6, pose: { spine: R(0), head: R(-10) } }], 30);
-C.Spike = keys([{ t: 0, use: AIR, pose: cat({ spine: R(30), chest: R(20), head: R(20), c_handL: HL(0.0, 1.7, 0.4), c_footL: FL(-0.1, 0.4, 0.2), c_footR: FR(-0.2, 0.3, -0.2) }, axe([-0.44, 1.6, -0.1], 110, -1)) }, { t: 0.6, pose: { spine: R(14), chest: R(10) } }], 30);
-C.Tumble = keys([{ t: 0, use: ['stand', 'tuck'] }, { t: 0.3, pose: { spine: R(32), chest: R(22) } }, { t: 0.6, pose: { spine: R(26), chest: R(18) } }], 30);
-C.Down = keys([{ t: 0, use: 'stand', pose: cat({ all: R(-50) }, axe([-0.4, 0.98, 0.2], 60, -1)) }, { t: 0.3, pose: cat({ all: { rot: [-90, 0, 0], move: [0, 0.3, 0.95] }, c_handL: HL(-0.05, 1.05, 0.5), head: R(-8) }, axe([-0.5, 1.0, 0.1], 30, 1)) }], 30);
+/* heavy breathing in a heavy guard: the ribs rise first, the shoulders and fists follow a beat later, the weight drifts */
+C.Idle = keys([GDK(0),
+  K(0.5, { hp: [0, -0.07, 0.005], hr: [0, -9, 0], ch: [3, -10], hd: [-8, 18] }),
+  K(0.9, { L: [0.37, 1.39, 0.16], R: [0.17, 1.29, -0.22] }),
+  K(1.6, { hp: [0.01, -0.095, 0], hr: [0, -11, 1], ch: [7, -10], hd: [-4, 16], L: [0.35, 1.35, 0.16], R: [0.16, 1.24, -0.22] }),
+  K(2.1, { hp: [0, -0.07, 0.005], ch: [3, -11], hd: [-7, 20] }),
+  K(2.5, { L: [0.37, 1.38, 0.15], R: [0.17, 1.28, -0.21] }),
+  K(3.2, P.guard ? GUARD_O : {})], 30);
+/* now and then: the neck rolled, one fist ground into the other palm, a look at the opponent */
+C.Idle2 = keys([GDK(0),
+  K(0.4, { hd: [-2, 16, 14], ch: [4, -8] }), K(0.8, { hd: [-12, 22, -10] }),
+  K(1.2, { hd: [-6, 18], L: [0.32, 1.22, 0.06], R: [0.3, 1.24, -0.06], ch: [8, -4] }),
+  K(1.5, { R: [0.31, 1.23, -0.05], ch: [9, -2] }), K(1.8, { R: [0.3, 1.25, -0.07], ch: [8, -5] }),
+  K(2.2, { hd: [-10, 30] }), K(2.8, GUARD_O)], 30);
+/* walk and run: cycles keyed from the planted foot. The game turns one cycle per `stride` units walked (manifest), so the
+   foot on the floor moves back exactly as fast as he moves forward. A: the foot that lands at the start (his right). */
+{ const cycle = (T, half) => {   /* half: [u, poseA, poseB, rest] for 0 <= u < 0.5; the second half swaps the feet and the arms */
+    const out = [];
+    for (const side of [0, 1]) for (const [u, a, b, o] of half) {
+      const fa = side ? 'fl' : 'fr', fb = side ? 'fr' : 'fl', xA = side ? 0.19 : -0.19, xB = -xA;
+      const q = Object.assign({}, o); q[fa] = [a[0], a[1], xA, a[2]]; q[fb] = [b[0], b[1], xB, b[2]];
+      if (side) { q.hr = [q.hr[0], -q.hr[1], q.hr[2]]; q.ch = [q.ch[0], -q.ch[1] + 2 * (o.chBase || 0), q.ch[2] || 0]; const r = q.R, l = q.L; q.R = [l[0], l[1], -0.3]; q.L = [r[0], r[1], 0.3]; }
+      delete q.chBase; out.push(K((u + side * 0.5) * T, q));
+    }
+    out.push(Object.assign({}, out[0], { t: T })); return out;
+  };
+  /* the walk: a heavy, rolling stride; the right hip swings forward with the right foot, the shoulders counter-turn */
+  C.Walk = keys(cycle(1.0, [
+    [0.0, [0.36, 0, -18], [-0.34, 0.03, 28], { hp: [0, -0.07, 0], hr: [2, 8, 0], sp: [6], ch: [4, -8], hd: [-4, 4], R: [-0.08, 1.05, -0.3], L: [0.32, 1.12, 0.3] }],
+    [0.125, [0.18, 0, 0], [-0.12, 0.14, 20], { hp: [0, -0.12, 0], hr: [3, 6, 0], sp: [7], ch: [5, -6], hd: [-6, 3], R: [-0.02, 1.02, -0.3], L: [0.28, 1.1, 0.3] }],
+    [0.25, [0.0, 0, 0], [0.06, 0.17, 2], { hp: [0, -0.04, 0], hr: [1, 0, 0], sp: [5], ch: [3, 0], hd: [-4, 0], R: [0.12, 1.06, -0.3], L: [0.14, 1.08, 0.3] }],
+    [0.375, [-0.18, 0.02, 10], [0.26, 0.09, -12], { hp: [0, -0.05, 0], hr: [1, -5, 0], sp: [5], ch: [3, 5], hd: [-4, -3], R: [0.26, 1.1, -0.3], L: [0.0, 1.04, 0.3] }]]), 30);
+  /* the run: leaning in, a long flight between strides, the knee driven high, the fists pumping, the head steady */
+  C.Run = keys(cycle(0.6, [
+    [0.0, [0.42, 0, -8], [-0.3, 0.32, 40], { hp: [0, -0.12, 0.06], hr: [8, 10, 0], sp: [16], ch: [6, -12], hd: [-18, 6], R: [-0.28, 1.02, -0.3], L: [0.46, 1.36, 0.3] }],
+    [0.075, [0.08, 0, 0], [-0.05, 0.4, 30], { hp: [0, -0.18, 0.06], hr: [9, 6, 0], sp: [18], ch: [8, -8], hd: [-20, 4], R: [-0.18, 1.0, -0.3], L: [0.4, 1.3, 0.3] }],
+    [0.15, [-0.3, 0.04, 35], [0.3, 0.32, -5], { hp: [0, -0.07, 0.06], hr: [7, 0, 0], sp: [15], ch: [6, 0], hd: [-17, 0], R: [0.1, 1.12, -0.3], L: [0.1, 1.12, 0.3] }],
+    [0.3, [-0.42, 0.3, 45], [0.5, 0.16, -12], { hp: [0, -0.04, 0.06], hr: [7, -8, 0], sp: [15], ch: [6, 10], hd: [-17, -5], R: [0.42, 1.34, -0.3], L: [-0.26, 1.04, 0.3] }]]), 30); }
+C.Crouch = keys([GDK(0), Object.assign({ t: 0.18, use: 'crouch' }, { in: 'out' })], 30);
+C.Squat = keys([GDK(0), K(0.1, { hp: [0, -0.24, 0], hr: [10, -6, 0], sp: [14], ch: [8, -6], hd: [-12, 10], L: [0.24, 1.02, 0.22], R: [0.12, 0.98, -0.26], fr: [-0.2, 0, -0.25, 0] }, 'out')], 30);
+C.Rise = keys([AIRK(0, { hp: [0, 0.04, 0], sp: [-4], ch: [-6, -6], hd: [-10, 8], fr: [-0.14, 0.04, -0.2, 45], fl: [0.08, 0.06, 0.18, 35], L: [0.26, 1.5, 0.24], R: [0.1, 1.42, -0.28] }),
+  K(0.22, { sp: [2], fr: [-0.1, 0.18, -0.2, 35], fl: [0.12, 0.24, 0.18, 25], L: [0.3, 1.36, 0.22], R: [0.12, 1.28, -0.26] }), K(0.4, { fr: [-0.08, 0.12, -0.2, 30], fl: [0.12, 0.22, 0.18, 25] })], 30);
+C.Fall = keys([AIRK(0, { ch: [6, -6], L: [0.24, 1.42, 0.32], R: [0.04, 1.36, -0.34] }), K(0.3, { fr: [-0.06, 0.14, -0.2, 30], fl: [0.14, 0.24, 0.18, 20] }), K(0.6, { fr: [-0.08, 0.1, -0.2, 32], fl: [0.12, 0.2, 0.18, 22] })], 30);
+C.FastFall = keys([AIRK(0, { sp: [-4], ch: [-4, -6], hd: [-8, 6], fr: [-0.04, 0.04, -0.2, 40], fl: [0.04, 0.04, 0.18, 40], L: [0.0, 1.62, 0.34], R: [-0.06, 1.58, -0.34] })], 30);
+C.AirJump = keys([AIRK(0, { sp: [22], ch: [12, -4], fr: [-0.06, 0.44, -0.2, 20], fl: [0.12, 0.46, 0.18, 20], L: [0.32, 1.0, 0.22], R: [0.28, 0.98, -0.24] }),
+  K(0.16, { sp: [-6], ch: [-6, -6], hd: [-10, 6], fr: [-0.16, 0.0, -0.2, 50], fl: [0.02, 0.04, 0.18, 45], L: [0.2, 1.62, 0.3], R: [0.02, 1.55, -0.32] }, 'out'), Object.assign(AIRK(0.48), { in: 'quad' })], 30);
+C.Helpless = keys([AIRK(0, { hd: [-8, 0, 6], L: [-0.1, 1.55, 0.42], R: [-0.14, 1.5, -0.42] }), K(0.25, { hd: [-8, 0, -6], fr: [0.12, 0.2, -0.2, 20], fl: [-0.04, 0.06, 0.18, 40] }), K(0.5, { hd: [-8, 0, 6], fr: [-0.06, 0.06, -0.2, 40], fl: [0.12, 0.22, 0.18, 20] })], 30);
+/* landings: the hips take the weight a frame after the feet, sink past the guard and come back up through it */
+C.Land = keys([Object.assign({ t: 0, use: ['stand', 'crouch'] }), K(0.07, { hp: [0, -0.3, 0.02], hr: [10, -8, 0], sp: [16], ch: [10, -10], hd: [-16, 14] }, 'out'), K(0.2, { hp: [0, -0.16, 0], hr: [4, -10, 0], sp: [10], ch: [7, -10] }), BK(0.42)], 30);
+C.LandHard = keys([Object.assign({ t: 0, use: ['stand', 'crouch'] }), K(0.08, { hp: [0, -0.48, 0.04], hr: [14, -8, 0], sp: [30], ch: [16, -10], hd: [-26, 12], L: [0.5, 0.5, 0.28], R: [0.4, 0.42, -0.3] }, 'out'), K(0.3, { hp: [0, -0.3, 0.02], sp: [20], ch: [12, -10] }), BK(0.6)], 30);
+/* the shield: forearms crossed in front of his face, braced low */
+const SH = { hp: [0, -0.16, -0.02], hr: [4, -14, 0], sp: [12], ch: [8, -16], hd: [6, 20], L: [0.42, 1.48, 0.0], R: [0.4, 1.42, -0.06], fr: [-0.24, 0, -0.27, 0], fl: [0.24, 0, 0.22] };
+C.Shield = keys([GDK(0), K(0.1, SH, 'out')], 30);
+C.ShieldHit = keys([GDK(0, Object.assign({}, SH, { hp: [0, -0.18, -0.1], sp: [2], ch: [0, -16], L: [0.34, 1.5, 0.0], R: [0.32, 1.44, -0.06] })), K(0.3, SH)], 30);
+/* ---- being hit: the head and chest snap back first, the arms fly out after them, then he gathers himself ---- */
+C.Hit = keys([GDK(0, { hp: [0, -0.04, -0.1], hr: [-6, -10, 0], sp: [-14], ch: [-12, -14], hd: [-20, 10], L: [0.0, 1.34, 0.42], R: [-0.06, 1.3, -0.4], fl: [0.32, 0.06, 0.2, -20] }),
+  K(0.1, { sp: [-16], hd: [-24, 14], L: [-0.08, 1.4, 0.46], R: [-0.12, 1.36, -0.44] }, 'out'), K(0.32, { sp: [-6], ch: [-4, -12], hd: [-8, 16] }), BK(0.6)], 30);
+C.HitHeavy = keys([GDK(0, { hp: [0, -0.06, -0.16], hr: [-10, -10, 0], sp: [-22], ch: [-18, -8], hd: [-28, 6], L: [-0.12, 1.5, 0.5], R: [-0.16, 1.44, -0.5], fl: [0.38, 0.1, 0.2, -25] }),
+  K(0.12, { sp: [-26], hd: [-32, 8], L: [-0.2, 1.58, 0.52], R: [-0.24, 1.5, -0.52] }, 'out'), K(0.45, { sp: [-10], ch: [-8, -10], hd: [-10, 12] }), BK(0.8)], 30);
+C.Launch = keys([AIRK(0, { sp: [-24], ch: [-18], hd: [-28], L: [-0.24, 1.55, 0.52], R: [-0.28, 1.5, -0.52], fl: [0.3, 0.3, 0.2, 30], fr: [0.2, 0.2, -0.2, 30] }), K(0.2, { sp: [-28], hd: [-32], L: [-0.3, 1.62, 0.55], R: [-0.34, 1.58, -0.55] }, 'out'), K(0.5, { sp: [-12], ch: [-8] })], 30);
+C.LaunchUp = keys([AIRK(0, { sp: [-10], ch: [-12], hd: [-30], L: [0.0, 1.0, 0.52], R: [0.0, 0.96, -0.52], fl: [0.0, 0.0, 0.25, 45], fr: [0.0, 0.0, -0.25, 45] }), K(0.6, { sp: [0], hd: [-10] })], 30);
+C.Spike = keys([AIRK(0, { sp: [30], ch: [20], hd: [20], L: [0.0, 1.72, 0.42], R: [-0.04, 1.68, -0.42], fl: [-0.1, 0.4, 0.2, 30], fr: [-0.2, 0.3, -0.2, 30] }), K(0.6, { sp: [14], ch: [10] })], 30);
+C.Tumble = keys([{ t: 0, use: ['stand', 'tuck'] }, K(0.3, { sp: [34], ch: [24] }), K(0.6, { sp: [26], ch: [18] })], 30);
+C.Down = keys([{ t: 0, use: 'stand', pose: B({ all: [-50] }) }, K(0.3, { all: { rot: [-90, 0, 0], move: [0, 0.3, 0.95] }, L: [-0.05, 1.05, 0.52], R: [-0.05, 1.0, -0.52], hd: [-8] }, 'out')], 30);
 /* ---- dodges, ledge, grabs ---- */
-C.Dodge = keys([{ t: 0, use: GD }, { t: 0.14, pose: cat({ all: R(0, 30), hips: M(0, -0.1, -0.2), spine: R(-12), chest: R(-8, -12) }, axe([-0.4, 1.1, 0.0], 110, -1, { hip: [0, -0.1, -0.2] })) }, { t: 0.42, ...back }], 30);
-C.Roll = keys([{ t: 0, use: ['stand', 'tuck'] }, { t: 0.5, pose: { spine: R(30) } }, { t: 0.9, pose: { spine: R(26) } }, { t: 1.05, ...back }], 30);
-C.AirDodge = keys([{ t: 0, use: AIR }, { t: 0.12, pose: cat({ spine: R(16), chest: R(10), head: R(10), c_footL: FL(0.1, 0.32, 0.18), c_footR: FR(0.06, 0.3, -0.18), c_handL: HL(0.2, 1.2, 0.12) }, axe([-0.34, 1.0, 0.2], 30, -1)) }, { t: 0.5, pose: { spine: R(10) } }, { t: 0.66, ...backAir }], 30);
-C.Ledge = keys([{ t: 0, use: 'stand', pose: cat({ chest: R(-4), head: R(-12), c_handL: HL(0.25, 2.0, 0.15), c_footL: FL(0.06, 0, 0.18), c_footR: FR(-0.04, 0.06, -0.18) }, axe([-0.4, 0.8, 0.05], -80, -1)) },
-  { t: 0.7, pose: { c_footL: FL(-0.04, 0.06, 0.18), c_footR: FR(0.04, 0, -0.18) } }, { t: 1.4, pose: { c_footL: FL(0.06, 0, 0.18), c_footR: FR(-0.04, 0.06, -0.18) } }], 30);   /* one hand on the lip, the axe hanging */
-const HOLDP = cat({ chest: R(6, 10), c_handL: HL(0.62, 1.12, 0.06) }, axe([-0.4, 0.98, 0.1], 80, -1));
-C.Hold = keys([{ t: 0, use: GD, pose: HOLDP }, { t: 0.3, pose: { chest: R(8, 12) } }, { t: 0.6, pose: { chest: R(6, 10) } }], 30);
-C.Pummel = keys([{ t: 0, use: GD, pose: HOLDP }, { t: 0.08, pose: cat({ chest: R(4, -6) }, axe([-0.36, 1.12, 0.06], 80, -1)) }, { t: 0.14, in: 'snap', pose: cat({ chest: R(10, 22) }, axe([-0.2, 1.1, 0.42], 80, -1)) }, { t: 0.3, use: GD, pose: HOLDP }], 30);   /* a short knuckle-and-haft blow, the grip kept */
-C.Held = keys([{ t: 0, use: AIR, pose: { hips: M(0, 0.06, 0), head: R(-10), c_handL: HL(0.15, 1.4, 0.3) } }, { t: 0.25, pose: { c_footL: FL(0.1, 0.16, 0.18), c_footR: FR(-0.05, 0.06, -0.18) } }, { t: 0.5, pose: { c_footL: FL(-0.06, 0.08, 0.18), c_footR: FR(0.12, 0.16, -0.18) } }], 30);
-C.ThrowF = keys([{ t: 0, use: GD, pose: HOLDP }, { t: fr(8), pose: cat(HIP(0, -0.1, -0.06), { c_footR: FR(-0.3, 0, -0.24), chest: R(4, 20), c_handL: HL(0.4, 1.05, 0.06) }) }, { t: fr(13), in: 'snap', pose: cat(HIP(0, -0.12, 0.16), { spine: R(12), chest: R(10, -20), c_handL: HL(0.85, 1.15, 0.06) }) }, { t: fr(39), ...back }]);   /* Iron Heave */
-C.ThrowB = keys([{ t: 0, use: GD, pose: HOLDP }, { t: fr(8), pose: { all: R(0, -60), chest: R(4, 30), c_handL: HL(0.4, 1.2, 0.0) } }, { t: fr(14), in: 'snap', pose: { all: R(0, -170), spine: R(-10), chest: R(-12, -10), c_handL: HL(-0.2, 1.65, 0.1) } }, { t: fr(30), pose: { all: R(0, -180) } }, { t: fr(49), ...back }]);   /* Shoulder Sling */
-C.ThrowU = keys([{ t: 0, use: GD, pose: HOLDP }, { t: fr(8), pose: cat(HIP(0, -0.26, 0), { spine: R(14), c_handL: HL(0.35, 0.9, 0.06) }) }, { t: fr(13), in: 'snap', pose: cat(HIP(0, 0.04, 0), { spine: R(-8), head: R(-30), c_handL: HL(0.15, 2.05, 0.06) }, axe([-0.36, 1.6, 0.05], 110, -1)) }, { t: fr(22), pose: { head: R(-20) } }, { t: fr(43), ...back }]);   /* Sky Hurl */
-C.ThrowD = keys([{ t: 0, use: GD, pose: HOLDP }, { t: fr(10), pose: cat(HIP(0, -0.04, 0), { c_handL: HL(0.5, 1.65, 0.06), chest: R(-8, 6) }) }, { t: fr(23), in: 'snap', pose: cat(HIP(0, -0.42, 0.06), { spine: R(34), chest: R(16), head: R(-30), c_handL: HL(0.62, 0.15, 0.06) }) }, { t: fr(39), ...back }]);   /* Stonebreaker */
-C.Respawn = keys([{ t: 0, use: GD, pose: cat({ head: R(-6, 10) }, axe([-0.3, 1.38, 0.12], 150, 1)) }, { t: 1.2, pose: { head: R(-8, -6) } }, { t: 2.4, pose: { head: R(-6, 10) } }], 30);
+C.Dodge = keys([GDK(0), K(0.12, { all: [0, 30], hp: [0, -0.12, -0.2], hr: [0, -10, 0], sp: [-12], ch: [-8, -12], L: [0.2, 1.5, 0.2], R: [0.0, 1.45, -0.3] }, 'out'), BK(0.42)], 30);
+C.Roll = keys([{ t: 0, use: ['stand', 'tuck'] }, K(0.5, { sp: [32] }), K(0.9, { sp: [26] }), BK(1.05)], 30);
+C.AirDodge = keys([AIRK(0), K(0.1, { sp: [18], ch: [12], hd: [12], fl: [0.1, 0.34, 0.18, 30], fr: [0.06, 0.32, -0.18, 30], L: [0.24, 1.18, 0.14], R: [0.22, 1.14, -0.16] }, 'out'), K(0.5, { sp: [10] }), BKA(0.66)], 30);
+C.Ledge = keys([{ t: 0, use: 'stand', pose: B({ ch: [-4], hd: [-12], L: [0.25, 2.0, 0.15], R: [0.1, 0.9, -0.36], fl: [0.06, 0, 0.18, 20], fr: [-0.04, 0.06, -0.18, 30] }) },
+  K(0.7, { fl: [-0.04, 0.06, 0.18, 30], fr: [0.04, 0, -0.18, 20], R: [0.12, 0.92, -0.36] }), K(1.4, { fl: [0.06, 0, 0.18, 20], fr: [-0.04, 0.06, -0.18, 30], R: [0.1, 0.9, -0.36] })], 30);   /* one hand on the lip, the other hanging */
+/* holding: his right hand on the opponent's collar, the left fist cocked */
+const HOLD_O = { hr: [0, 6, 0], ch: [6, 12], R: [0.62, 1.16, -0.08], L: [0.1, 1.3, 0.24] };
+C.Hold = keys([GDK(0, HOLD_O), K(0.3, { ch: [8, 14] }), K(0.6, { ch: [6, 12] })], 30);
+/* Knuckle Crush: the left fist hooks in short, the grip kept */
+C.Pummel = keys([GDK(0, HOLD_O), K(0.06, { ch: [4, -6], L: [-0.02, 1.34, 0.3] }), K(0.12, { ch: [10, 26], L: [0.6, 1.2, 0.02] }, 'snap'), K(0.16, { L: [0.58, 1.22, 0.04] }), K(0.3, HOLD_O, 'quad')], 30);
+C.Held = keys([AIRK(0, { hp: [0, 0.06, 0], hd: [-10], L: [0.15, 1.42, 0.3], R: [0.15, 1.4, -0.3] }), K(0.25, { fl: [0.1, 0.16, 0.18, 30], fr: [-0.05, 0.06, -0.18, 30] }), K(0.5, { fl: [-0.06, 0.08, 0.18, 30], fr: [0.12, 0.16, -0.18, 30] })], 30);
+/* Iron Heave: a step in and both palms drive him away */
+C.ThrowF = keys([GDK(0, HOLD_O), K(fr(8), { hp: [0, -0.12, -0.06], hr: [0, -18, 0], ch: [4, -16], fr: [-0.32, 0, -0.25, 15], R: [0.36, 1.12, -0.12], L: [0.38, 1.1, 0.12] }),
+  K(fr(13), { hp: [0, -0.14, 0.18], hr: [4, 14, 0], sp: [14], ch: [10, 18], hd: [-12, -10], R: [0.95, 1.15, -0.1], L: [0.95, 1.13, 0.1], fr: [-0.32, 0.02, -0.25, 30] }, 'snap'),
+  K(fr(16), { R: [0.98, 1.16, -0.1], L: [0.98, 1.14, 0.1] }), K(fr(26), { hp: [0, -0.1, 0.1], ch: [8, 6], R: [0.5, 1.15, -0.2], L: [0.5, 1.15, 0.2], fr: [-0.2, 0, -0.25] }, 'out'), BK(fr(39))]);
+/* Shoulder Sling: he hauls him round over his shoulder and hurls him behind */
+C.ThrowB = keys([GDK(0, HOLD_O), K(fr(8), { all: [0, -50], hp: [0, -0.1, 0], ch: [4, 30], R: [0.4, 1.35, -0.06], L: [0.35, 1.3, 0.1] }),
+  K(fr(14), { all: [0, -170], hp: [0, -0.06, 0], sp: [-10], ch: [-12, -16], hd: [-14], R: [-0.2, 1.75, -0.12], L: [-0.15, 1.7, 0.1] }, 'snap'),
+  K(fr(18), { all: [0, -178], R: [-0.4, 1.4, -0.12], L: [-0.35, 1.35, 0.1], sp: [8] }), K(fr(30), { all: [0, -180], sp: [4] }), K(fr(49), { reset: true, use: GD })]);
+C.ThrowB.keys[C.ThrowB.keys.length - 1] = BK(fr(49));
+/* Sky Hurl: a deep squat, then both arms heave him straight up and the head follows him */
+C.ThrowU = keys([GDK(0, HOLD_O), K(fr(8), { hp: [0, -0.3, 0], sp: [16], ch: [8], R: [0.4, 0.88, -0.1], L: [0.4, 0.88, 0.1] }),
+  K(fr(13), { hp: [0, 0.04, 0], sp: [-8], ch: [-10], hd: [-32], R: [0.18, 2.05, -0.1], L: [0.18, 2.05, 0.1], fr: [-0.2, 0.04, -0.25, 30], fl: [0.22, 0.04, 0.21, 30] }, 'snap'),
+  K(fr(17), { R: [0.18, 2.1, -0.1], L: [0.18, 2.1, 0.1] }), K(fr(24), { hd: [-24], fr: [-0.2, 0, -0.25], fl: [0.22, 0, 0.21] }), BK(fr(43))]);
+/* Stonebreaker: both fists lifted together overhead, then a hammer blow driving him into the floor */
+C.ThrowD = keys([GDK(0, HOLD_O), K(fr(10), { hp: [0, -0.04, 0], ch: [-10, 0], hd: [-12], R: [0.35, 1.85, -0.06], L: [0.35, 1.85, 0.06] }),
+  K(fr(20), { hp: [0, 0, -0.04], ch: [-14], R: [0.25, 2.0, -0.06], L: [0.25, 2.0, 0.06] }),
+  K(fr(23), { hp: [0, -0.44, 0.06], hr: [12, 0, 0], sp: [34], ch: [16], hd: [-30], R: [0.62, 0.2, -0.06], L: [0.62, 0.2, 0.06] }, 'snap'),
+  K(fr(27), { hp: [0, -0.46, 0.06] }), K(fr(32), { hp: [0, -0.3, 0.02], sp: [20], R: [0.5, 0.5, -0.12], L: [0.5, 0.5, 0.12] }, 'out'), BK(fr(39))]);
+C.Respawn = keys([GDK(0, { hd: [-6, 10], L: [0.3, 1.24, 0.08], R: [0.3, 1.26, -0.08] }), K(1.2, { hd: [-8, -6] }), K(2.4, { hd: [-6, 10] })], 30);
 
 /* ---- attacks: keyed on the game's frames (n / 60); each maps one to one onto its move ---- */
-const lunge = (dz, drop, fl) => ({ hips: M(0, -drop, dz), c_footL: FL(0.2 + (fl === undefined ? dz * 1.3 : fl), 0, 0.2) });
-const hp = (dz, drop) => [0, -drop, dz];
 const AF = (clip, a0, a1, t, extra) => Object.assign({ clip, start: 0, contact: [fr(a0), fr(a1 + 1)], end: fr(t) }, extra || {});
-/* Iron Straight: the left (rear) fist straight down the middle, 7 and 8; the axe tucked upright in the right */
-C.Jab = keys([{ t: 0, use: GD }, { t: fr(4), pose: { chest: R(2, -20), c_handL: HL(0.22, 1.3, 0.14) } },
-  { t: fr(7), in: 'snap', pose: cat(lunge(0.08, 0.08), { chest: R(6, 18), head: R(-4, -8), c_handL: HL(0.98, 1.27, 0.0) }, axe([-0.34, 1.0, 0.18], 86, -1, { hip: hp(0.08, 0.08) })) },
-  { t: fr(9), pose: { c_handL: HL(0.96, 1.26, 0.0) } }, { t: fr(15), pose: { chest: R(4, -4), c_handL: HL(0.5, 1.3, 0.1) } }, { t: fr(26), ...back }]);
-/* the push kick: the lead (left) leg chambers and drives the boot straight out at hip height, 10 to 12 */
-C.Ftilt = keys([{ t: 0, use: GD }, { t: fr(4), pose: cat(HIP(0, -0.06, -0.06), { spine: R(-4), c_footL: FL(0.22, 0.42, 0.16) }) },
-  { t: fr(10), in: 'snap', pose: cat(HIP(0, -0.04, -0.08), { spine: R(-14), chest: R(-8, -16), head: R(4, 12), c_footL: FL(1.42, 0.68, 0.12), c_footR: FR(-0.2, 0, -0.22) }) },
-  { t: fr(12), pose: { c_footL: FL(1.44, 0.7, 0.12) } }, { t: fr(18), pose: cat(HIP(0, -0.06, -0.04), { spine: R(-4), c_footL: FL(0.4, 0.4, 0.16) }) }, { t: fr(39), ...back }]);
-/* Technical Uppercut: knees load, hips and trunk turn up, the bent left arm drives up the middle (7 to 9), the right still guarding */
-C.Utilt = keys([{ t: 0, use: GD }, { t: fr(4), pose: cat(HIP(0, -0.18, 0.02), { spine: R(10), chest: R(6, 16), head: R(4, -10), c_handL: HL(0.3, 1.0, 0.1) }) },
-  { t: fr(7), in: 'snap', pose: cat(HIP(0, -0.02, 0.06), { spine: R(-6), chest: R(-8, -24), head: R(-16, 14), c_handL: HL(0.5, 1.72, 0.04), c_footR: FR(-0.1, 0.04, -0.22) }) },
-  { t: fr(9), pose: { c_handL: HL(0.5, 1.82, 0.04) } }, { t: fr(16), pose: cat(HIP(0, -0.08, 0.02), { chest: R(0, -12), c_handL: HL(0.4, 1.4, 0.1) }) }, { t: fr(31), ...back }]);
-/* the low kick: hips drop, the lead boot sweeps out along the floor, 10 to 12 */
-C.Dtilt = keys([{ t: 0, use: GD }, { t: fr(5), use: 'crouch' },
-  { t: fr(10), in: 'snap', pose: cat(HIP(0, -0.42, -0.06), { spine: R(14), chest: R(4, -16), head: R(-10, 12), c_footL: FL(1.55, 0.06, 0.16), c_footR: FR(-0.2, 0, -0.24), c_handL: HL(0.1, 0.95, 0.26) }) },
-  { t: fr(12), pose: { c_footL: FL(1.58, 0.06, 0.16) } }, { t: fr(22), use: 'crouch' }, { t: fr(35), ...back }]);
-/* Charging Forearm: hips low, the lead shoulder rolls forward and the body slams in, early 10 to 12, late 13 to 19 */
-C.Dash = keys([{ t: 0, use: GD, pose: { spine: R(10) } }, { t: fr(6), pose: cat(HIP(0, -0.16, 0.06), { spine: R(20), chest: R(12, 40), head: R(-14, -30), c_handL: HL(0.2, 1.15, 0.24) }, axe([-0.42, 0.92, -0.1], 200, 1, { hip: [0, -0.16, 0.06] })) },
-  { t: fr(10), in: 'snap', pose: cat(HIP(0, -0.12, 0.26), { spine: R(24), chest: R(14, 55), head: R(-16, -42), c_footL: FL(0.62, 0, 0.18), c_footR: FR(-0.2, 0.1, -0.2), c_handL: HL(0.48, 1.18, 0.12) }) },
-  { t: fr(19), pose: cat(HIP(0, -0.14, 0.3), { c_footL: FL(0.66, 0, 0.18) }) }, { t: fr(28), pose: cat(HIP(0, -0.1, 0.12), { spine: R(8), chest: R(6, 0) }) }, { t: fr(37), ...back }]);
+/* the draw: the right hand goes up over his shoulder (reach), takes the axe exactly where it rides (draw), and the stow puts it back */
+const REACH = { R: [-0.12, 1.66, -0.24], ch: [0, -4], hd: [-6, 12] };
+const DRAW = (t, o) => K(t, Object.assign({ hp: [0, -0.06, 0], hr: [0, 0, 0], sp: [0], ch: [0], ax: BG([0, -0.06, 0]) }, o || {}));
+/* Iron Straight (Ganondorf's jab timing): the rear (right) fist straight down the middle on 7 and 8, the rear heel turning,
+   the lead fist guarding the chin; the forearm comes back while the torso brakes */
+C.Jab = keys([GDK(0),
+  K(fr(3), { hr: [0, -18, 0], ch: [6, -20], R: [0.1, 1.28, -0.22], fr: [-0.2, 0, -0.25, 0] }),
+  K(fr(5), { hp: [0, -0.1, 0.06], hr: [2, 0, 0], ch: [8, 4], R: [0.5, 1.3, -0.14], L: [0.3, 1.42, 0.14] }),
+  K(fr(7), { hp: [0, -0.12, 0.14], hr: [4, 18, 0], sp: [10], ch: [10, 26], hd: [-8, -20], R: [1.0, 1.28, -0.02], L: [0.28, 1.44, 0.14], fr: [-0.24, 0.03, -0.25, 25] }, 'snap'),
+  K(fr(9), { ch: [12, 30], R: [1.04, 1.27, 0.0] }),
+  K(fr(12), { hr: [3, 10, 0], ch: [9, 12], R: [0.62, 1.3, -0.12] }, 'out'),
+  K(fr(17), { hp: [0, -0.09, 0.04], hr: [1, -4, 0], ch: [7, -6], R: [0.24, 1.27, -0.2], fr: [-0.2, 0, -0.25, 0] }),
+  BK(fr(26))]);
+/* Ganondorf's kick: the arms rise as the weight rocks back onto the rear foot, the lead knee chambers, and the boot drives out
+   sole-first at hip height (10 to 12), held out to 19, then drawn back and set down with weight */
+C.Ftilt = keys([GDK(0),
+  K(fr(3), { hp: [0, -0.06, -0.08], hr: [-4, -22, 0], sp: [-4], ch: [-4, -20], hd: [0, 30], R: [-0.12, 1.72, -0.36], L: [0.3, 1.52, 0.24] }),
+  K(fr(7), { hp: [0, -0.04, -0.1], sp: [-10], fl: [0.38, 0.55, 0.16, -20], R: [-0.16, 1.8, -0.38] }),
+  K(fr(10), { hp: [0, -0.04, -0.1], hr: [-8, -26, 0], sp: [-20], ch: [-10, -24], hd: [6, 36], fl: [1.4, 0.8, 0.12, -70], fr: [-0.22, 0, -0.25, 0], R: [-0.3, 1.5, -0.4], L: [0.4, 1.3, 0.3] }, 'snap'),
+  K(fr(12), { fl: [1.46, 0.82, 0.12, -70] }),
+  K(fr(19), { fl: [1.36, 0.74, 0.12, -60], sp: [-18] }),
+  K(fr(25), { hp: [0, -0.06, -0.06], sp: [-8], fl: [0.42, 0.42, 0.16, -10], R: [-0.04, 1.5, -0.32] }, 'out'),
+  K(fr(30), { hp: [0, -0.14, 0.0], hr: [4, -12, 0], sp: [8], fl: [0.24, 0, 0.21] }, 'quad'),
+  BK(fr(39))]);
+/* Technical Uppercut: the knees load and the hips wind, then foot, hips and trunk turn up together and the bent rear arm
+   drives the fist up the middle (7 to 9); the lead hand stays on guard */
+C.Utilt = keys([GDK(0),
+  K(fr(3), { hp: [0, -0.2, 0.02], hr: [8, -18, 0], sp: [12], ch: [12, -18], hd: [-6, 20], R: [0.26, 0.98, -0.24] }),
+  K(fr(5), { hp: [0, -0.12, 0.04], hr: [4, -4, 0], sp: [6], ch: [4, 0], R: [0.42, 1.24, -0.16] }),
+  K(fr(7), { hp: [0, -0.01, 0.06], hr: [-4, 18, 0], sp: [-8], ch: [-10, 24], hd: [-22, -8], R: [0.5, 1.86, -0.06], L: [0.3, 1.42, 0.16], fr: [-0.22, 0.04, -0.25, 30] }, 'snap'),
+  K(fr(9), { R: [0.48, 1.93, -0.05], hd: [-26, -8] }),
+  K(fr(14), { hp: [0, -0.04, 0.04], hr: [-2, 10, 0], ch: [-6, 14], R: [0.42, 1.62, -0.1] }, 'out'),
+  K(fr(19), { hp: [0, -0.08, 0.02], ch: [2, -2], R: [0.3, 1.36, -0.18], fr: [-0.2, 0, -0.25, 0] }),
+  BK(fr(31))]);
+/* Ganondorf's low kick: he drops and turns into it, the right hand planted on the floor behind, the lead boot sweeping out
+   along the floor (10 to 12) and held there, then pulled back through the crouch */
+C.Dtilt = keys([GDK(0),
+  K(fr(4), { hp: [0, -0.3, -0.04], hr: [10, -30, 0], sp: [20], ch: [12, -26], hd: [-10, 30], R: [-0.3, 0.4, -0.42], L: [0.3, 0.95, 0.3] }),
+  K(fr(7), { hp: [0, -0.46, -0.08], fl: [0.42, 0.16, 0.2, -10], R: [-0.44, 0.13, -0.46] }),
+  K(fr(10), { hp: [0, -0.5, -0.1], hr: [-6, -24, 0], sp: [-6], ch: [-4, -20], hd: [8, 24], fl: [1.52, 0.1, 0.16, -50], fr: [-0.24, 0, -0.27, 20], R: [-0.46, 0.13, -0.48], L: [0.42, 0.92, 0.32] }, 'snap'),
+  K(fr(12), { fl: [1.57, 0.08, 0.16, -50] }),
+  K(fr(24), { fl: [1.42, 0.1, 0.16, -40], hp: [0, -0.48, -0.08] }),
+  K(fr(30), { hp: [0, -0.4, -0.02], hr: [6, -14, 0], sp: [14], fl: [0.4, 0.04, 0.2, 0], R: [0.0, 0.7, -0.36] }, 'out'),
+  Object.assign({ t: fr(34), use: 'crouch', in: 'quad' }), BK(fr(37))]);
+/* Charging Forearm: he drops his weight and runs in low, right shoulder first with the forearm across his chest, slams in
+   (10 to 12), keeps driving (to 19) and skids to a stop, the boots dragging */
+C.Dash = keys([GDK(0, { sp: [10], hp: [0, -0.1, 0.04] }),
+  K(fr(4), { hp: [0, -0.18, 0.06], hr: [10, 20, 0], sp: [28], ch: [12, 34], hd: [-24, -40], R: [0.32, 1.26, 0.06], L: [-0.28, 1.1, 0.34], fr: [-0.46, 0.06, -0.2, 35], fl: [0.34, 0.12, 0.2, 0] }),
+  K(fr(10), { hp: [0, -0.18, 0.3], hr: [12, 26, 0], sp: [36], ch: [14, 44], hd: [-30, -48], R: [0.62, 1.22, 0.04], L: [-0.36, 1.06, 0.36], fl: [0.68, 0, 0.18, 0], fr: [-0.52, 0.2, -0.2, 45] }, 'snap'),
+  K(fr(13), { hp: [0, -0.2, 0.34], R: [0.66, 1.2, 0.04] }),
+  K(fr(19), { hp: [0, -0.22, 0.3], fr: [-0.24, 0.04, -0.2, 20] }),
+  K(fr(26), { hp: [0, -0.2, 0.16], hr: [8, 8, 0], sp: [24], ch: [10, 14], hd: [-20, -10], fl: [0.58, 0, 0.18, -15], fr: [-0.28, 0, -0.22, 0], R: [0.4, 1.0, -0.2], L: [0.2, 1.0, 0.36] }, 'out'),
+  BK(fr(37))]);
 /* ---- smashes ---- */
-/* Axe Execution: the axe lowered behind the rear shoulder, knees compressed, then hips turn and pull the blade across the
-   chest (24 to 27, both hands on the haft), the torso over-rotating after it */
-{ const h0 = hp(0.24, 0.14);
-  C.Fsmash = keys([{ t: 0, use: GD },
-    { t: fr(8), pose: cat(HIP(0, -0.12, -0.12), { spine: R(-4), chest: R(-6, -60), head: R(-4, 50), c_footL: FL(0.26, 0, 0.22), c_footR: FR(-0.3, 0, -0.26) }, axe([-0.2, 1.3, -0.3], 160, -1, { two: true, hip: [0, -0.12, -0.12] })) },
-    { t: fr(15), pose: cat(HIP(0, -0.14, -0.14), { chest: R(-8, -70), head: R(-4, 58) }, axe([-0.2, 1.3, -0.34], 168, -1, { two: true, hip: [0, -0.14, -0.14] })) },
-    { t: fr(21), pose: cat(HIP(0, -0.13, 0.04), { chest: R(2, -30), head: R(-4, 26) }, axe([-0.5, 1.2, 0.1], 120, -1, { two: true, dx: -0.3, hip: [0, -0.13, 0.04] })) },
-    { t: fr(24), in: 'snap', pose: cat(lunge(0.24, 0.14), { spine: R(14), chest: R(14, 16), head: R(-10, -12), c_footR: FR(-0.36, 0, -0.26) }, AXHIT('fsmash', 0, -0.12, { two: true, hip: h0 })) },
-    { t: fr(27), pose: cat({ chest: R(14, 30) }, AXHIT('fsmash', 0, -0.06, { two: true, hip: h0 })) },
-    { t: fr(36), pose: cat({ chest: R(10, 70), head: R(-8, -50) }, axe([0.2, 1.1, 0.6], 20, -1, { two: true, dx: 0.4, hip: h0 })) },
-    { t: fr(50), pose: cat(HIP(0, -0.1, 0.1), { chest: R(6, 20) }, axe([-0.1, 1.15, 0.45], 50, -1, { two: true })) }, { t: fr(66), ...back }]); }
-C.FsmashE = keys([{ t: 0, use: GD },   /* the haymaker: hands up, hips coil against the braced heel, the right fist hooks across */
-  { t: fr(10), pose: cat(HIP(0, -0.1, -0.1), { chest: R(-4, -50), head: R(-4, 40), c_handL: HL(0.3, 1.35, 0.16), c_handR: HR(-0.3, 1.3, -0.4), c_footR: FR(-0.3, 0, -0.26) }) },
-  { t: fr(20), pose: cat(HIP(0, -0.12, -0.14), { chest: R(-6, -64), head: R(-4, 52), c_handR: HR(-0.36, 1.3, -0.42) }) },
-  { t: fr(27), in: 'snap', pose: cat(lunge(0.22, 0.12), { spine: R(14), chest: R(14, 40), head: R(-10, -30), c_handR: HR(1.08, 1.18, 0.0), c_handL: HL(0.2, 1.2, 0.3), c_footR: FR(0.0, 0, -0.24) }) },
-  { t: fr(29), pose: { c_handR: HR(1.1, 1.16, 0.06) } }, { t: fr(40), pose: cat(HIP(0, -0.1, 0.16), { chest: R(10, 60), c_handR: HR(0.6, 1.0, 0.3) }) }, { t: fr(63), ...back }]);
-/* Rising Axe Cleave: the head low by the rear knee, both hands tighten, then up through the front (20, 22) to overhead (24) */
-C.Usmash = keys([{ t: 0, use: GD },
-  { t: fr(8), pose: cat(HIP(0, -0.3, 0), { spine: R(18), chest: R(10, -30), head: R(-16, 24) }, axe([-0.3, 0.6, -0.12], 225, -1, { two: true, hip: [0, -0.3, 0] })) },
-  { t: fr(14), pose: cat(HIP(0, -0.34, 0), { spine: R(20) }, axe([-0.3, 0.56, -0.15], 232, -1, { two: true, hip: [0, -0.34, 0] })) },
-  { t: fr(20), in: 'snap', pose: cat(HIP(0, -0.16, 0.06), { spine: R(6), chest: R(2, -6), head: R(-20) }, AXHIT('usmash', 0, -0.14, { two: true, hip: [0, -0.16, 0.06] })) },
-  { t: fr(22), pose: cat(HIP(0, -0.04, 0.04), { spine: R(-4), chest: R(-8, 0), head: R(-28) }, AXHIT('usmash', 1, -0.14, { two: true, hip: [0, -0.04, 0.04] })) },
-  { t: fr(24), pose: cat(HIP(0, 0.02, 0), { spine: R(-10), chest: R(-14, 6), head: R(-32), c_footR: FR(-0.2, 0.06, -0.24) }, AXHIT('usmash', 2, -0.14, { two: true, hip: [0, 0.02, 0] })) },
-  { t: fr(32), pose: cat({ spine: R(-14), chest: R(-16) }, axe([-0.14, 1.85, -0.2], 160, 1, { two: true })) }, { t: fr(46), pose: cat(HIP(0, -0.08, 0), { chest: R(2, -10) }, axe([-0.3, 1.5, 0.05], 110, -1)) }, { t: fr(61), ...back }]);
-C.UsmashE = keys([{ t: 0, use: GD },   /* the rising hammer: a loaded squat, fists by the ribs, then both forearms drive up (19 to 22) */
-  { t: fr(9), pose: cat(HIP(0, -0.38, 0), { spine: R(18), chest: R(12), head: R(-16), c_handR: HR(0.18, 0.95, -0.24), c_handL: HL(0.18, 0.95, 0.24) }) },
-  { t: fr(19), in: 'snap', pose: cat(HIP(0, 0.04, 0.02), { spine: R(-8), chest: R(-10), head: R(-28), c_handR: HR(0.24, 2.0, -0.16), c_handL: HL(0.24, 2.0, 0.16), c_footR: FR(-0.16, 0.06, -0.22) }) },
-  { t: fr(22), pose: { c_handR: HR(0.26, 2.08, -0.16), c_handL: HL(0.26, 2.08, 0.16) } }, { t: fr(36), pose: cat(HIP(0, -0.1, 0), { c_handR: HR(0.3, 1.4, -0.4), c_handL: HL(0.3, 1.4, 0.4) }) }, { t: fr(54), ...back }]);
-/* Ground Reaper: low in front (16 to 19), the weight carried round behind him, low behind (25 to 28), feet planted */
-C.Dsmash = keys([{ t: 0, use: GD },
-  { t: fr(8), pose: cat(HIP(0, -0.3, 0), { spine: R(16), chest: R(10, -50), head: R(-12, 40) }, axe([-0.4, 0.62, -0.1], 200, 1, { two: true, hip: [0, -0.3, 0] })) },
-  { t: fr(16), in: 'snap', pose: cat(HIP(0, -0.42, 0.04), { spine: R(26), chest: R(16, 10), head: R(-20) }, AXHIT('dsmash', 0, -0.18, { two: true, hip: [0, -0.42, 0.04] })) },
-  { t: fr(19), pose: cat({ chest: R(16, 30) }, AXHIT('dsmash', 0, -0.1, { two: true, hip: [0, -0.42, 0.04] })) },
-  { t: fr(22), pose: cat(HIP(0, -0.4, 0), { chest: R(12, 90), head: R(-16, -60) }, axe([0.1, 0.55, 0.0], 270, 1, { two: true, dx: 0.5, hip: [0, -0.4, 0] })) },
-  { t: fr(25), in: 'snap', pose: cat(HIP(0, -0.42, -0.04), { spine: R(24), chest: R(14, 160), head: R(-18, -150) }, AXHIT('dsmash', 1, 0.1, { two: true, hip: [0, -0.42, -0.04] })) },
-  { t: fr(28), pose: cat({ chest: R(14, 170) }, AXHIT('dsmash', 1, 0.16, { two: true, hip: [0, -0.42, -0.04] })) },
-  { t: fr(42), pose: cat(HIP(0, -0.2, 0), { chest: R(8, 40), head: R(-8, -20) }, axe([-0.3, 0.8, 0.3], 30, -1, { hip: [0, -0.2, 0] })) }, { t: fr(61), ...back }]);
-C.DsmashE = keys([{ t: 0, use: GD },   /* two-sided boot sweep: the lead heel forward (16 to 18), round across the base, the other boot behind (25 to 27) */
-  { t: fr(8), pose: cat(HIP(0, -0.3, 0), { spine: R(16), chest: R(10) }) },
-  { t: fr(16), in: 'snap', pose: cat(HIP(0, -0.46, -0.04), { spine: R(20), chest: R(10, -10), c_footL: FL(1.3, 0.05, 0.18), c_footR: FR(-0.1, 0, -0.24), c_handL: HL(0.0, 0.7, 0.4) }) },
-  { t: fr(18), pose: { c_footL: FL(1.32, 0.05, 0.18) } },
-  { t: fr(25), in: 'snap', pose: cat(HIP(0, -0.46, 0.04), { spine: R(20), chest: R(10, 20), c_footL: FL(0.1, 0, 0.2), c_footR: FR(-1.28, 0.05, -0.2) }) },
-  { t: fr(27), pose: { c_footR: FR(-1.3, 0.05, -0.2) } }, { t: fr(40), use: 'crouch' }, { t: fr(55), ...back }]);
+/* Axe Execution: the axe drawn over the shoulder and lowered behind the rear shoulder, base wide, knees compressed (held while
+   charging, 15); the hips turn first and pull the chest, the chest pulls the arms and the blade comes last, across the chest
+   (24 to 27); the torso over-rotates after it, the feet replant and the axe goes back over his shoulder */
+{ const h0 = [0, -0.14, 0.24];
+  C.Fsmash = keys([GDK(0),
+    K(fr(3), REACH), DRAW(fr(5)),
+    K(fr(10), { hp: [0, -0.12, -0.12], hr: [0, -24, 0], sp: [-4], ch: [-6, -40], hd: [-4, 52], fl: [0.3, 0, 0.24], fr: [-0.34, 0, -0.29], ax: axe([-0.2, 1.3, -0.3], 160, -1, { two: true, hip: [0, -0.12, -0.12] }) }),
+    K(fr(15), { hp: [0, -0.17, -0.14], hr: [4, -28, 0], ch: [-8, -46], hd: [-4, 58], ax: axe([-0.2, 1.3, -0.34], 170, -1, { two: true, hip: [0, -0.17, -0.14] }) }, 'out'),
+    K(fr(19), { hp: [0, -0.16, -0.08], hr: [2, -6, 0], ch: [-6, -42], ax: axe([-0.24, 1.32, -0.3], 165, -1, { two: true, hip: [0, -0.16, -0.08] }) }),
+    K(fr(22), { hp: [0, -0.14, 0.06], hr: [4, 18, 0], sp: [6], ch: [2, -16], hd: [-6, 20], ax: axe([-0.5, 1.2, 0.1], 120, -1, { two: true, dx: -0.3, hip: [0, -0.14, 0.06] }) }, 'snap'),
+    K(fr(24), { hp: h0, hr: [6, 30, 0], sp: [14], ch: [14, 16], hd: [-10, -26], fl: [0.46, 0, 0.24], fr: [-0.38, 0.04, -0.29, 30], ax: AXHIT('fsmash', 0, -0.12, { two: true, hip: h0 }) }, 'snap'),
+    K(fr(27), { ch: [14, 32], ax: AXHIT('fsmash', 0, -0.06, { two: true, hip: h0 }) }),
+    K(fr(32), { hr: [6, 40, 0], ch: [12, 58], hd: [-8, -50], ax: axe([0.2, 1.1, 0.6], 20, -1, { two: true, dx: 0.4, hip: h0 }) }, 'out'),
+    K(fr(38), { ch: [11, 66], ax: axe([0.26, 1.08, 0.56], 12, -1, { two: true, dx: 0.45, hip: h0 }) }),
+    K(fr(48), { hp: [0, -0.1, 0.08], hr: [2, 6, 0], sp: [6], ch: [6, 10], hd: [-6, 4], fr: [-0.3, 0, -0.27], ax: axe([-0.1, 1.2, 0.4], 60, -1, { two: true, hip: [0, -0.1, 0.08] }) }, 'quad'),
+    K(fr(54), Object.assign({}, REACH, { L: [0.36, 1.36, 0.16], ax: axe([-0.26, 1.5, 0.0], 110, -1) })),
+    DRAW(fr(58)), BK(fr(66))]); }
+/* Rising Axe Cleave: drawn, then the head low by the rear knee in both hands (held, 12), up through the front (20, 22) to
+   overhead (24), the trunk arching after it; the axe comes down in front and goes back over his shoulder */
+C.Usmash = keys([GDK(0),
+  K(fr(2), REACH), DRAW(fr(4)),
+  K(fr(8), { hp: [0, -0.3, 0], hr: [8, -14, 0], sp: [18], ch: [10, -24], hd: [-16, 30], ax: axe([-0.52, 0.62, -0.1], 222, -1, { two: true, hip: [0, -0.3, 0] }) }),
+  K(fr(12), { hp: [0, -0.36, 0], sp: [22], ax: axe([-0.54, 0.58, -0.14], 228, -1, { two: true, hip: [0, -0.36, 0] }) }, 'out'),
+  K(fr(17), { hp: [0, -0.26, 0.04], hr: [4, 0, 0], sp: [12], ch: [6, -10], ax: axe([-0.48, 0.52, 0.12], 262, -1, { two: true, dx: -0.1, hip: [0, -0.26, 0.04] }) }),
+  K(fr(20), { hp: [0, -0.16, 0.06], hr: [0, 8, 0], sp: [6], ch: [2, -6], hd: [-20], ax: AXHIT('usmash', 0, -0.14, { two: true, hip: [0, -0.16, 0.06] }) }, 'snap'),
+  K(fr(22), { hp: [0, -0.04, 0.04], sp: [-4], ch: [-8, 0], hd: [-28], fr: [-0.22, 0.03, -0.25, 25], ax: AXHIT('usmash', 1, -0.14, { two: true, hip: [0, -0.04, 0.04] }) }),
+  K(fr(24), { hp: [0, 0.02, 0], sp: [-10], ch: [-14, 6], hd: [-34], fr: [-0.22, 0.06, -0.25, 35], ax: AXHIT('usmash', 2, -0.14, { two: true, hip: [0, 0.02, 0] }) }),
+  K(fr(30), { sp: [-16], ch: [-18], hd: [-26], ax: axe([-0.14, 1.85, -0.2], 160, 1, { two: true }) }, 'out'),
+  K(fr(40), { hp: [0, -0.1, 0], sp: [4], ch: [2, -10], hd: [-8], fr: [-0.2, 0, -0.25], ax: axe([-0.3, 1.45, 0.12], 100, -1, { two: true }) }, 'quad'),
+  K(fr(48), Object.assign({}, REACH, { L: [0.36, 1.36, 0.16], ax: axe([-0.26, 1.5, 0.0], 110, -1) })),
+  DRAW(fr(52)), BK(fr(61))]);
+/* Ground Reaper: drawn, low in front (16 to 19), the hips and chest turn the weight round so the blade passes his near side
+   low, and it lands low behind him (25 to 28), feet planted; then up and back over the shoulder */
+C.Dsmash = keys([GDK(0),
+  K(fr(2), REACH), DRAW(fr(4)),
+  K(fr(8), { hp: [0, -0.3, 0], hr: [8, 20, 0], sp: [16], ch: [10, 26], hd: [-12, -30], fl: [0.3, 0, 0.26], fr: [-0.3, 0, -0.3], ax: axe([-0.4, 0.62, -0.1], 200, 1, { two: true, hip: [0, -0.3, 0] }) }),
+  K(fr(10), { hp: [0, -0.34, 0], ax: axe([-0.4, 0.6, -0.14], 204, 1, { two: true, hip: [0, -0.34, 0] }) }, 'out'),
+  K(fr(14), { hp: [0, -0.38, 0.02], hr: [8, 0, 0], sp: [22], ch: [12, 0], ax: axe([-0.4, 0.5, 0.1], 260, -1, { two: true, dx: -0.2, hip: [0, -0.38, 0.02] }) }),
+  K(fr(16), { hp: [0, -0.42, 0.04], hr: [10, -10, 0], sp: [26], ch: [16, 6], hd: [-20, 4], ax: AXHIT('dsmash', 0, -0.18, { two: true, hip: [0, -0.42, 0.04] }) }, 'snap'),
+  K(fr(19), { ch: [16, 16], ax: AXHIT('dsmash', 0, -0.1, { two: true, hip: [0, -0.42, 0.04] }) }),
+  K(fr(22), { hp: [0, -0.4, 0], hr: [8, -40, 0], ch: [12, -30], hd: [-16, 50], ax: axe([-0.62, 0.55, 0.0], 230, 1, { two: true, hip: [0, -0.4, 0] }) }),
+  K(fr(25), { hp: [0, -0.42, -0.04], hr: [10, -55, 0], sp: [24], ch: [14, -45], hd: [-18, 70], ax: AXHIT('dsmash', 1, 0.1, { two: true, hip: [0, -0.42, -0.04] }) }, 'snap'),
+  K(fr(28), { ch: [14, -52], ax: AXHIT('dsmash', 1, 0.16, { two: true, hip: [0, -0.42, -0.04] }) }),
+  K(fr(36), { hp: [0, -0.34, -0.02], hr: [8, -45, 0], ch: [12, -40], ax: axe([-0.5, 0.65, -0.3], 210, 1, { two: true, hip: [0, -0.34, -0.02] }) }, 'out'),
+  K(fr(44), { hp: [0, -0.14, 0], hr: [2, -8, 0], sp: [6], ch: [4, -8], hd: [-6, 14], ax: axe([-0.3, 1.2, 0.2], 90, -1, { hip: [0, -0.14, 0] }), L: [0.36, 1.3, 0.16] }, 'quad'),
+  K(fr(49), REACH), DRAW(fr(53)), BK(fr(61))]);
+/* the unarmed smashes, while the axe is away (atlas: proposed) */
+C.FsmashE = keys([GDK(0),   /* the haymaker: hands up, the hips coil against the braced rear heel, the right fist hooks across */
+  K(fr(10), { hp: [0, -0.1, -0.1], hr: [0, -24, 0], ch: [-4, -40], hd: [-4, 50], L: [0.3, 1.36, 0.16], R: [-0.3, 1.32, -0.42], fr: [-0.32, 0, -0.27] }),
+  K(fr(17), { hp: [0, -0.13, -0.14], hr: [2, -30, 0], ch: [-6, -48], hd: [-4, 60], R: [-0.36, 1.32, -0.44] }, 'out'),
+  K(fr(24), { hp: [0, -0.12, 0.0], hr: [2, -6, 0], ch: [0, -30], R: [-0.1, 1.3, -0.4] }),
+  K(fr(27), { hp: [0, -0.13, 0.22], hr: [4, 26, 0], sp: [14], ch: [14, 36], hd: [-10, -40], R: [1.08, 1.2, 0.0], L: [0.2, 1.3, 0.3], fr: [-0.34, 0.04, -0.27, 30] }, 'snap'),
+  K(fr(29), { R: [1.12, 1.18, 0.06], ch: [15, 42] }),
+  K(fr(38), { hp: [0, -0.1, 0.16], hr: [2, 34, 0], ch: [10, 54], R: [0.6, 1.0, 0.3] }, 'out'), BK(fr(63))]);
+C.UsmashE = keys([GDK(0),   /* the rising hammer: a loaded squat, fists by the ribs, then both forearms drive up (19 to 22) */
+  K(fr(9), { hp: [0, -0.38, 0], hr: [10, 0, 0], sp: [18], ch: [12], hd: [-16], R: [0.18, 0.95, -0.24], L: [0.18, 0.95, 0.24] }),
+  K(fr(15), { hp: [0, -0.42, 0], sp: [22] }, 'out'),
+  K(fr(19), { hp: [0, 0.04, 0.02], hr: [-4, 0, 0], sp: [-8], ch: [-10], hd: [-28], R: [0.24, 2.0, -0.16], L: [0.24, 2.0, 0.16], fr: [-0.2, 0.06, -0.25, 35], fl: [0.22, 0.06, 0.21, 35] }, 'snap'),
+  K(fr(22), { R: [0.26, 2.08, -0.16], L: [0.26, 2.08, 0.16] }),
+  K(fr(32), { hp: [0, -0.1, 0], R: [0.3, 1.4, -0.4], L: [0.3, 1.4, 0.4], fr: [-0.2, 0, -0.25], fl: [0.22, 0, 0.21] }, 'out'), BK(fr(54))]);
+C.DsmashE = keys([GDK(0),   /* two-sided boot sweep: the lead heel forward (16 to 18), round across the base, the other boot behind (25 to 27) */
+  K(fr(8), { hp: [0, -0.32, 0], hr: [8, -10, 0], sp: [16], ch: [10], R: [0.0, 0.5, -0.45], L: [0.2, 0.7, 0.4] }),
+  K(fr(16), { hp: [0, -0.48, -0.04], hr: [6, -20, 0], sp: [18], ch: [10, -10], fl: [1.3, 0.05, 0.18, -50], fr: [-0.1, 0, -0.25], R: [-0.1, 0.13, -0.46], L: [0.0, 0.7, 0.42] }, 'snap'),
+  K(fr(18), { fl: [1.34, 0.05, 0.18, -50] }),
+  K(fr(22), { hp: [0, -0.48, 0], hr: [6, 10, 0], fl: [0.3, 0.1, 0.2], fr: [-0.4, 0.1, -0.22, 20], R: [0.2, 0.6, -0.4], L: [0.4, 0.13, 0.44] }),
+  K(fr(25), { hp: [0, -0.48, 0.04], hr: [6, 22, 0], ch: [10, 20], fl: [0.1, 0, 0.2], fr: [-1.28, 0.05, -0.2, 50] }, 'snap'),
+  K(fr(27), { fr: [-1.32, 0.05, -0.2, 50] }), Object.assign({ t: fr(40), use: 'crouch', in: 'out' }), BK(fr(55))]);
 /* ---- air ---- */
-/* the double kick: the first boot out on 7 and 8 (lingering to 12), the knee back, the other boot out on 17 and 18 (to 26) */
-C.Nair = keys([{ t: 0, use: AIR, pose: { c_footL: FL(0.14, 0.42, 0.18), c_footR: FR(0.08, 0.38, -0.18) } },
-  { t: fr(7), in: 'snap', pose: { spine: R(-10), chest: R(-6, -10), c_footR: FR(0.96, 0.6, -0.16), c_footL: FL(0.08, 0.44, 0.18) } }, { t: fr(12), pose: { c_footR: FR(0.94, 0.58, -0.16) } },
-  { t: fr(15), pose: { spine: R(0), c_footR: FR(0.1, 0.42, -0.16), c_footL: FL(0.2, 0.5, 0.18) } },
-  { t: fr(17), in: 'snap', pose: { spine: R(-12), chest: R(-6, 10), c_footL: FL(1.12, 0.78, 0.16), c_footR: FR(0.0, 0.36, -0.18) } }, { t: fr(26), pose: { c_footL: FL(1.1, 0.76, 0.16) } }, { t: fr(32), pose: { spine: R(4), c_footL: FL(0.2, 0.4, 0.18) } }, { t: fr(40), ...backAir }]);
-/* Axe Crusher: feet under the hips, the axe high behind the shoulder, the ribs turn and the blade comes over and down through the front (17 to 20) */
-C.Fair = keys([{ t: 0, use: AIR },
-  { t: fr(8), pose: cat({ spine: R(-10), chest: R(-12, -24), head: R(-6, 16) }, axe([-0.24, 1.75, -0.2], 140, -1, { two: true })) },
-  { t: fr(14), pose: cat({ spine: R(-14), chest: R(-14, -28) }, axe([-0.24, 1.85, -0.25], 125, -1, { two: true })) },
-  { t: fr(17), in: 'snap', pose: cat({ spine: R(6), chest: R(6, 10), head: R(-2, -6), c_footL: FL(0.3, 0.3, 0.18) }, AXHIT('fair', 0, -0.12, { two: true })) },
-  { t: fr(19), pose: cat({ spine: R(16), chest: R(14, 16) }, AXHIT('fair', 1, -0.12, { two: true })) }, { t: fr(20), pose: AXHIT('fair', 1, -0.12, { two: true }) },
-  { t: fr(28), pose: cat({ spine: R(22), chest: R(18, 14), head: R(-14) }, axe([-0.14, 0.75, 0.55], -60, -1, { two: true })) }, { t: fr(48), ...backAir }]);
-/* the unarmed forward air: the shoulder loads, the spine turns and the right fist drives to full stretch (14 to 19) */
-C.FairE = keys([{ t: 0, use: AIR }, { t: fr(8), pose: { spine: R(-8), chest: R(-6, -40), head: R(-4, 30), c_handR: HR(-0.3, 1.35, -0.42), c_handL: HL(0.3, 1.3, 0.2) } },
-  { t: fr(14), in: 'snap', pose: { spine: R(10), chest: R(10, 30), head: R(-8, -22), c_handR: HR(1.25, 1.2, -0.02), c_handL: HL(-0.1, 1.25, 0.35), c_footL: FL(-0.1, 0.32, 0.18), c_footR: FR(0.25, 0.3, -0.18) } },
-  { t: fr(19), pose: { c_handR: HR(1.27, 1.18, -0.02) } }, { t: fr(28), pose: { chest: R(4, 10), c_handR: HR(0.5, 1.2, -0.3) } }, { t: fr(44), ...backAir }]);
-/* Axe Backhand: elbows in round the haft, the torso turns away, the blade flashes out behind at shoulder height (12 to 14) */
-C.Bair = keys([{ t: 0, use: AIR }, { t: fr(6), pose: cat({ chest: R(0, 30), head: R(0, -20) }, axe([-0.1, 1.15, 0.36], 20, -1, { two: true })) },
-  { t: fr(12), in: 'snap', pose: cat({ spine: R(-6), chest: R(-8, -70), head: R(2, 30), c_footL: FL(0.32, 0.26, 0.18), c_footR: FR(0.2, 0.22, -0.18) }, AXHIT('bair', 0, -0.1, { two: true })) },
-  { t: fr(14), pose: AXHIT('bair', 0, -0.06, { two: true }) }, { t: fr(22), pose: cat({ chest: R(-4, -40) }, axe([-0.2, 1.2, -0.3], 150, 1, { two: true })) }, { t: fr(39), ...backAir }]);
-/* the unarmed backfist: knees tuck, the right fist snaps out behind across the shoulder (10 to 12) */
-C.BairE = keys([{ t: 0, use: AIR }, { t: fr(5), pose: { chest: R(0, 30), c_handR: HR(0.2, 1.4, 0.0), c_footL: FL(0.14, 0.4, 0.18), c_footR: FR(0.1, 0.4, -0.18) } },
-  { t: fr(10), in: 'snap', pose: { spine: R(-4), chest: R(-4, -40), head: R(0, 26), c_handR: HR(-1.25, 1.18, -0.3) } }, { t: fr(12), pose: { c_handR: HR(-1.27, 1.2, -0.3) } }, { t: fr(22), pose: { chest: R(0, -10), c_handR: HR(-0.2, 1.3, -0.4) } }, { t: fr(35), ...backAir }]);
-/* Axe Skyhook: the axe across the belly, then a circle up and over from in front (11) through the top (13) to behind (15) */
-C.Uair = keys([{ t: 0, use: AIR }, { t: fr(5), pose: cat({ spine: R(10), c_footL: FL(0.14, 0.4, 0.18), c_footR: FR(0.1, 0.4, -0.18) }, axe([-0.2, 0.95, 0.35], -10, 1, { two: true })) },
-  { t: fr(11), in: 'snap', pose: cat({ spine: R(-6), chest: R(-10), head: R(-22) }, AXHIT('uair', 0, -0.12, { two: true })) }, { t: fr(12), pose: AXHIT('uair', 0, -0.12, { two: true }) },
-  { t: fr(13), pose: cat({ spine: R(-10), chest: R(-16), head: R(-30) }, AXHIT('uair', 1, -0.12, { two: true })) },
-  { t: fr(14), pose: cat({ spine: R(-12), chest: R(-20) }, AXHIT('uair', 2, -0.12, { two: true })) }, { t: fr(15), pose: AXHIT('uair', 2, -0.12, { two: true }) },
-  { t: fr(24), pose: cat({ spine: R(0), chest: R(-4), head: R(-6), c_footL: FL(0.2, 0.2, 0.25), c_footR: FR(-0.1, 0.1, -0.25) }, axe([-0.3, 1.2, -0.2], 200, 1)) }, { t: fr(39), ...backAir }]);
-/* the unarmed flip kick: the torso leans back, the leg snaps up over the front (8 to 10), across the top and down behind (to 16) */
-C.UairE = keys([{ t: 0, use: AIR }, { t: fr(4), pose: { spine: R(-10), c_footR: FR(0.3, 0.45, -0.16) } },
-  { t: fr(8), in: 'snap', pose: { spine: R(-22), chest: R(-12), head: R(-18), c_footR: FR(0.85, 1.75, -0.12) } }, { t: fr(11), pose: { spine: R(-28), c_footR: FR(0.15, 2.25, -0.12) } },
-  { t: fr(14), pose: { spine: R(-24), c_footR: FR(-0.7, 1.85, -0.12) } }, { t: fr(16), pose: { c_footR: FR(-0.75, 1.7, -0.12) } }, { t: fr(24), pose: { spine: R(0), c_footR: FR(-0.08, 0.2, -0.18) } }, { t: fr(33), ...backAir }]);
-/* the two-foot stomp: knees to the chest, arms out for balance, both boots driven straight down (16 to 18) */
-C.Dair = keys([{ t: 0, use: AIR }, { t: fr(9), pose: cat({ hips: M(0, 0.2, 0), spine: R(14), c_footL: FL(0.08, 0.62, 0.16), c_footR: FR(0.06, 0.62, -0.16), c_handL: HL(0.0, 1.45, 0.62) }, axe([-0.62, 1.4, 0.0], 60, -1)) },
-  { t: fr(16), in: 'snap', pose: { hips: M(0, 0.1, 0), spine: R(-4), chest: R(-4), head: R(10), c_footL: FL(0.08, -0.62, 0.12), c_footR: FR(0.08, -0.62, -0.12) } }, { t: fr(18), pose: { c_footL: FL(0.08, -0.64, 0.12), c_footR: FR(0.08, -0.64, -0.12) } },
-  { t: fr(30), pose: { hips: M(0, 0.14, 0), spine: R(8), c_footL: FL(0.1, 0.3, 0.16), c_footR: FR(0.06, 0.3, -0.16) } }, { t: fr(44), ...backAir }]);
+/* Ganondorf's double kick: knees folded, the near boot out on 7 and 8 (lingering to 12), drawn back as the far knee chambers,
+   the far boot out on 17 and 18 (lingering to 26), then both knees tuck and he settles into his fall */
+C.Nair = keys([AIRK(0, { fl: [0.16, 0.44, 0.18, 30], fr: [0.1, 0.4, -0.18, 30], sp: [10] }),
+  K(fr(4), { sp: [6], fr: [0.3, 0.5, -0.17, 10], ch: [0, 8] }),
+  K(fr(7), { sp: [-10], ch: [-6, -8], hd: [0, 6], fr: [0.98, 0.62, -0.16, -60], fl: [0.06, 0.44, 0.18, 30], R: [-0.2, 1.4, -0.4], L: [0.36, 1.3, 0.3] }, 'snap'),
+  K(fr(12), { fr: [0.95, 0.6, -0.16, -55] }),
+  K(fr(15), { sp: [2], fr: [0.12, 0.42, -0.16, 20], fl: [0.24, 0.52, 0.18, 0] }, 'out'),
+  K(fr(17), { sp: [-12], ch: [-6, 10], hd: [0, -6], fl: [1.12, 0.8, 0.16, -60], fr: [0.0, 0.36, -0.18, 30], R: [0.3, 1.32, -0.34], L: [-0.2, 1.42, 0.4] }, 'snap'),
+  K(fr(26), { fl: [1.08, 0.76, 0.16, -55] }),
+  K(fr(32), { sp: [6], fl: [0.2, 0.42, 0.18, 25], R: [0.14, 1.22, -0.26], L: [0.3, 1.3, 0.22] }, 'out'), BKA(fr(40))]);
+/* Axe Crusher: drawn, feet under the hips, the axe high behind the shoulder; the ribs turn and the blade comes over and down
+   through the front (17 to 20) and follows through low; then back over the shoulder */
+C.Fair = keys([AIRK(0),
+  K(fr(3), REACH), DRAW(fr(5), { hp: [0, 0.02, 0] }),
+  K(fr(10), { sp: [-10], ch: [-12, -24], hd: [-6, 18], fl: [0.06, 0.3, 0.18, 20], ax: axe([-0.24, 1.75, -0.2], 140, -1, { two: true }) }),
+  K(fr(15), { sp: [-15], ch: [-14, -28], ax: axe([-0.24, 1.86, -0.26], 124, -1, { two: true }) }, 'out'),
+  K(fr(17), { sp: [6], ch: [6, 10], hd: [-2, -6], fl: [0.3, 0.3, 0.18, 0], ax: AXHIT('fair', 0, -0.12, { two: true }) }, 'snap'),
+  K(fr(19), { sp: [16], ch: [14, 16], ax: AXHIT('fair', 1, -0.12, { two: true }) }), K(fr(20), { ax: AXHIT('fair', 1, -0.12, { two: true }) }),
+  K(fr(27), { sp: [22], ch: [18, 14], hd: [-14], ax: axe([-0.14, 0.75, 0.55], -60, -1, { two: true }) }, 'out'),
+  K(fr(35), Object.assign({}, REACH, { sp: [6], ch: [2], L: [0.3, 1.3, 0.22], ax: axe([-0.26, 1.45, 0.0], 110, -1) })),
+  DRAW(fr(40), { hp: [0, 0.02, 0] }), BKA(fr(48))]);
+/* the unarmed forward air (Ganondorf's): the arm rises up and back, then the fist hammers over and down through the front
+   (14 to 19) and the body folds after it, the legs trailing */
+C.FairE = keys([AIRK(0),
+  K(fr(8), { sp: [-10], ch: [-8, -20], hd: [-6, 16], R: [-0.2, 1.85, -0.38], L: [0.3, 1.3, 0.24] }),
+  K(fr(12), { sp: [-14], R: [-0.1, 2.0, -0.34] }, 'out'),
+  K(fr(14), { sp: [4], ch: [4, 12], hd: [-10, -8], R: [0.85, 1.75, -0.1] }, 'snap'),
+  K(fr(17), { sp: [20], ch: [14, 16], R: [1.1, 1.1, -0.06], fr: [-0.3, 0.5, -0.18, 50], fl: [-0.2, 0.42, 0.18, 50] }),
+  K(fr(19), { sp: [26], R: [0.9, 0.7, -0.12] }),
+  K(fr(30), { sp: [22], ch: [14, 8], R: [0.6, 0.6, -0.2] }, 'out'), BKA(fr(44))]);
+/* Axe Backhand: drawn, elbows in round the haft, the torso turns away and the blade flashes out behind at shoulder height
+   (12 to 14), the body turned after it; then back over the shoulder */
+C.Bair = keys([AIRK(0),
+  K(fr(2), REACH), DRAW(fr(4), { hp: [0, 0.02, 0] }),
+  K(fr(8), { hr: [0, 20, 0], ch: [0, 30], hd: [0, -24], fr: [0.0, 0.32, -0.2, 30], fl: [0.12, 0.38, 0.18, 30], ax: axe([-0.16, 1.2, 0.3], 100, 1, { two: true }) }),
+  K(fr(12), { hr: [0, -14, 0], sp: [-6], ch: [-8, -60], hd: [2, 40], fl: [0.32, 0.26, 0.18, 10], fr: [0.2, 0.22, -0.18, 10], ax: AXHIT('bair', 0, -0.1, { two: true }) }, 'snap'),
+  K(fr(14), { ch: [-8, -66], ax: AXHIT('bair', 0, -0.06, { two: true }) }),
+  K(fr(21), { hr: [0, -8, 0], ch: [-4, -40], ax: axe([-0.2, 1.2, -0.3], 150, 1, { two: true }) }, 'out'),
+  K(fr(27), Object.assign({}, REACH, { hr: [0, 0, 0], ch: [0, -4], L: [0.3, 1.3, 0.22], ax: axe([-0.26, 1.45, 0.0], 110, -1) })),
+  DRAW(fr(31), { hp: [0, 0.02, 0] }), BKA(fr(39))]);
+/* Ganondorf's backfist: the knees tuck, the body turns away and the right fist snaps out behind across the shoulder (10 to
+   12), held out while he turns back */
+C.BairE = keys([AIRK(0),
+  K(fr(5), { hr: [0, 16, 0], ch: [0, 30], hd: [0, -20], R: [0.24, 1.4, 0.0], fl: [0.14, 0.42, 0.18, 30], fr: [0.1, 0.42, -0.18, 30] }),
+  K(fr(10), { hr: [0, -14, 0], sp: [-4], ch: [-4, -44], hd: [0, 30], R: [-1.25, 1.18, -0.3], fr: [-0.16, 0.2, -0.18, 40] }, 'snap'),
+  K(fr(12), { R: [-1.28, 1.2, -0.3] }),
+  K(fr(20), { R: [-1.15, 1.22, -0.32], ch: [-4, -36] }),
+  K(fr(26), { hr: [0, -4, 0], ch: [0, -10], R: [-0.2, 1.3, -0.4] }, 'out'), BKA(fr(35))]);
+/* Axe Skyhook: drawn, the axe across the belly, then a circle up and over from in front (11) through the top (13) to behind
+   (15); then back over the shoulder */
+C.Uair = keys([AIRK(0),
+  K(fr(2), REACH), DRAW(fr(4), { hp: [0, 0.02, 0] }),
+  K(fr(7), { sp: [10], fl: [0.14, 0.42, 0.18, 30], fr: [0.1, 0.42, -0.18, 30], ax: axe([-0.2, 0.95, 0.35], -10, 1, { two: true }) }, 'out'),
+  K(fr(11), { sp: [-6], ch: [-10], hd: [-22], ax: AXHIT('uair', 0, -0.12, { two: true }) }, 'snap'), K(fr(12), { ax: AXHIT('uair', 0, -0.12, { two: true }) }),
+  K(fr(13), { sp: [-10], ch: [-16], hd: [-30], ax: AXHIT('uair', 1, -0.12, { two: true }) }),
+  K(fr(14), { sp: [-12], ch: [-20], ax: AXHIT('uair', 2, -0.12, { two: true }) }), K(fr(15), { ax: AXHIT('uair', 2, -0.12, { two: true }) }),
+  K(fr(22), { sp: [0], ch: [-4], hd: [-6], fl: [0.2, 0.2, 0.25, 20], fr: [-0.1, 0.1, -0.25, 30], ax: axe([-0.3, 1.25, -0.2], 190, 1) }, 'out'),
+  K(fr(27), Object.assign({}, REACH, { L: [0.3, 1.3, 0.22], ax: axe([-0.26, 1.5, -0.1], 130, 1) })),
+  DRAW(fr(31), { hp: [0, 0.02, 0] }), BKA(fr(39))]);
+/* Ganondorf's flip kick: the torso leans back and the leg whips up over the front (8 to 10), across the top and down behind
+   (to 16), the whole body turning over with it and coming back round upright */
+C.UairE = keys([AIRK(0),
+  K(fr(4), { sp: [-12], ch: [-6], fr: [0.3, 0.45, -0.16, 0], L: [0.1, 1.1, 0.42], R: [0.0, 1.15, -0.42] }),
+  K(fr(8), { hp: [0, 0.18, 0], sp: [-24], ch: [-12], hd: [-18], fr: [0.85, 1.85, -0.12, -40], fl: [0.0, 0.2, 0.18, 40], L: [-0.1, 1.0, 0.44], R: [-0.2, 1.05, -0.44] }, 'snap'),
+  K(fr(11), { hp: [0, 0.34, -0.04], sp: [-30], hd: [-24], fr: [0.15, 2.4, -0.12, -10] }),
+  K(fr(14), { hp: [0, 0.24, -0.04], sp: [-26], fr: [-0.75, 1.95, -0.12, 20] }), K(fr(16), { fr: [-0.75, 1.7, -0.12, 30] }),
+  K(fr(24), { sp: [4], ch: [0], hd: [-4], fr: [-0.08, 0.2, -0.18, 30], fl: [0.12, 0.3, 0.18, 30], L: [0.3, 1.3, 0.22], R: [0.12, 1.22, -0.26] }, 'out'), BKA(fr(33))]);
+/* Ganondorf's stomp: knees to the chest with the arms up for balance (1 to 15), both boots driven straight down (16 to 18) and
+   held there, then the knees come back up */
+C.Dair = keys([AIRK(0),
+  K(fr(6), { hp: [0, 0.16, 0], sp: [12], fl: [0.08, 0.56, 0.16, 20], fr: [0.06, 0.56, -0.16, 20], L: [0.0, 1.5, 0.6], R: [-0.04, 1.46, -0.6] }),
+  K(fr(13), { hp: [0, 0.22, 0], sp: [16], fl: [0.08, 0.64, 0.16, 20], fr: [0.06, 0.64, -0.16, 20], L: [-0.06, 1.62, 0.62], R: [-0.08, 1.58, -0.62] }, 'out'),
+  K(fr(16), { hp: [0, 0.1, 0], sp: [-4], ch: [-4], hd: [10], fl: [0.08, -0.62, 0.12, 40], fr: [0.08, -0.62, -0.12, 40], L: [0.1, 1.3, 0.55], R: [0.08, 1.26, -0.55] }, 'snap'),
+  K(fr(18), { fl: [0.08, -0.65, 0.12, 40], fr: [0.08, -0.65, -0.12, 40] }),
+  K(fr(30), { hp: [0, 0.12, 0], sp: [6], fl: [0.08, -0.4, 0.14, 30], fr: [0.06, -0.4, -0.14, 30] }),
+  K(fr(38), { hp: [0, 0.14, 0], sp: [8], fl: [0.1, 0.3, 0.16, 25], fr: [0.06, 0.3, -0.16, 25], L: [0.28, 1.3, 0.24], R: [0.12, 1.24, -0.26] }, 'quad'), BKA(fr(44))]);
 /* ---- grabs, get-ups ---- */
-C.Grab = keys([{ t: 0, use: GD }, { t: fr(4), pose: { c_handL: HL(0.3, 1.25, 0.2) } }, { t: fr(8), in: 'snap', pose: cat(lunge(0.1, 0.06), { chest: R(8, 20), c_handL: HL(0.98, 1.12, 0.06) }) }, { t: fr(10), pose: { c_handL: HL(0.98, 1.12, 0.06) } }, { t: fr(38), ...back }]);
-C.GrabRun = keys([{ t: 0, use: GD, pose: { spine: R(10) } }, { t: fr(6), pose: cat(lunge(0.2, 0.14), { c_handL: HL(0.5, 1.15, 0.2) }) }, { t: fr(11), in: 'snap', pose: cat(lunge(0.26, 0.12), { chest: R(10, 26), c_handL: HL(1.12, 1.1, 0.06) }) }, { t: fr(13), pose: {} }, { t: fr(46), ...back }]);
-C.GrabTurn = keys([{ t: 0, use: GD }, { t: fr(6), pose: { all: R(0, 120), chest: R(4, -20) } }, { t: fr(12), in: 'snap', pose: cat({ all: R(0, 180) }, lunge(0.1, 0.06), { chest: R(8, 30), c_handL: HL(1.2, 1.12, 0.06) }) }, { t: fr(14), pose: {} }, { t: fr(41), reset: true, use: GD, pose: { all: R(0, 180) } }]);
-C.Getup = keys([{ t: 0, use: 'crouch', pose: { hips: M(0, -0.55, 0) } }, { t: fr(12), use: 'crouch' },
-  { t: fr(16), in: 'snap', pose: cat(HIP(0, -0.5, 0), { spine: R(30), c_footL: FL(1.15, 0.04, 0.16), c_footR: FR(-1.15, 0.04, -0.16), c_handL: HL(0.0, 0.3, 0.45) }) }, { t: fr(19), pose: {} }, { t: fr(40), ...back }]);
-C.LedgeAtk = keys([{ t: 0, use: 'crouch' }, { t: fr(18), pose: { c_footL: FL(0.2, 0.3, 0.16) } }, { t: fr(23), in: 'snap', pose: cat(HIP(0, -0.12, -0.06), { spine: R(-12), c_footL: FL(1.35, 0.6, 0.12) }) }, { t: fr(25), pose: {} }, { t: fr(55), ...back }]);
+C.Grab = keys([GDK(0), K(fr(4), { hr: [0, -12, 0], ch: [4, -14], R: [0.3, 1.26, -0.24], L: [0.4, 1.2, 0.22] }),
+  K(fr(8), { hp: [0, -0.12, 0.1], hr: [4, 14, 0], sp: [8], ch: [8, 18], hd: [-6, -10], R: [1.0, 1.12, -0.08], L: [0.6, 1.12, 0.16], fl: [0.34, 0, 0.21] }, 'snap'),
+  K(fr(10), { R: [1.02, 1.12, -0.06] }), K(fr(20), { hp: [0, -0.1, 0.06], R: [0.7, 1.1, -0.14], L: [0.4, 1.15, 0.2] }, 'out'), BK(fr(38))]);
+C.GrabRun = keys([GDK(0, { sp: [10] }), K(fr(6), { hp: [0, -0.16, 0.2], hr: [6, 10, 0], sp: [14], R: [0.5, 1.15, -0.2], L: [0.4, 1.1, 0.24], fl: [0.46, 0, 0.21] }),
+  K(fr(11), { hp: [0, -0.14, 0.28], hr: [6, 18, 0], ch: [10, 22], R: [1.14, 1.1, -0.06], L: [0.7, 1.1, 0.16], fr: [-0.4, 0.06, -0.25, 30] }, 'snap'),
+  K(fr(13), { R: [1.16, 1.1, -0.06] }), K(fr(26), { hp: [0, -0.12, 0.14], R: [0.7, 1.0, -0.2], fr: [-0.24, 0, -0.25] }, 'out'), BK(fr(46))]);
+C.GrabTurn = keys([GDK(0), K(fr(6), { all: [0, 120], ch: [4, -20] }),
+  K(fr(12), { all: [0, 180], hp: [0, -0.12, 0.1], hr: [4, 14, 0], ch: [8, 26], R: [1.2, 1.12, -0.06], L: [0.6, 1.12, 0.16] }, 'snap'),
+  K(fr(14), { all: [0, 180] }), Object.assign({ t: fr(41), reset: true, use: GD, pose: B({ all: [0, 180] }), in: 'quad' })]);
+C.Getup = keys([{ t: 0, use: 'crouch', pose: B({ hp: [0, -0.55, 0] }) }, Object.assign({ t: fr(12), use: 'crouch' }),
+  K(fr(16), { hp: [0, -0.5, 0], sp: [30], fl: [1.15, 0.04, 0.16, -50], fr: [-1.15, 0.04, -0.16, 50], L: [0.0, 0.3, 0.46], R: [0.0, 0.3, -0.46] }, 'snap'), K(fr(19), {}), BK(fr(40))]);
+C.LedgeAtk = keys([{ t: 0, use: 'crouch' }, K(fr(18), { fl: [0.2, 0.3, 0.16, -10] }), K(fr(23), { hp: [0, -0.12, -0.06], sp: [-12], fl: [1.35, 0.6, 0.12, -60] }, 'snap'), K(fr(25), {}), BK(fr(55))]);
 /* ---- specials ---- */
-/* Axe Throw: the axe pulled back behind the shoulder, front foot forward, slung through and let go on frame 30 */
-C.Throw = keys([{ t: 0, use: GD },
-  { t: fr(14), pose: cat(HIP(0, -0.08, -0.12), { spine: R(-10), chest: R(-10, -40), head: R(-4, 30), c_footL: FL(0.3, 0, 0.2), c_handL: HL(0.5, 1.4, 0.12) }, axe([-0.4, 1.7, -0.4], 200, 1, { hip: [0, -0.08, -0.12] })) },
-  { t: fr(24), pose: cat(HIP(0, -0.1, -0.16), { chest: R(-14, -50) }, axe([-0.42, 1.75, -0.45], 210, 1, { hip: [0, -0.1, -0.16] })) },
-  { t: fr(30), in: 'snap', pose: cat(lunge(0.24, 0.12), { spine: R(14), chest: R(14, 20), head: R(-10, -10), c_handL: HL(0.1, 1.15, 0.36) }, axe([-0.32, 1.45, 0.62], 40, -1, { hip: hp(0.24, 0.12) })) },
-  { t: fr(40), pose: cat({ chest: R(16, 26), c_handR: HR(0.7, 0.95, -0.2) }) }, { t: fr(66), reset: true, use: GD, pose: { c_handR: HR(0.25, 1.25, -0.3), c_handL: HL(0.34, 1.3, 0.12) } }]);
-/* with the axe away: an open hand held out toward it, calling */
-C.Beckon = keys([{ t: 0, use: GD, pose: { c_handR: HR(0.3, 1.2, -0.3) } }, { t: fr(8), pose: { chest: R(0, -30), head: R(-6, 20), c_handR: HR(0.85, 1.45, -0.3) } }, { t: fr(24), pose: { c_handR: HR(0.82, 1.42, -0.3) } }]);
-/* Meteor Shoulder Charge: shoulder sinks into a crouch (1 to 14), explodes forward on 15 shoulder-first and head tucked,
-   carries through the travel (to 40), then the boots skid and the shoulders recoil */
-C.Meteor = keys([{ t: 0, use: GD },
-  { t: fr(10), pose: cat(HIP(0, -0.3, -0.12), { spine: R(24), chest: R(14, 60), head: R(-20, -45), c_footL: FL(0.3, 0, 0.2), c_footR: FR(-0.42, 0, -0.24), c_handL: HL(0.2, 0.95, 0.28) }, axe([-0.44, 0.8, -0.3], 200, 1, { hip: [0, -0.3, -0.12] })) },
-  { t: fr(15), in: 'snap', pose: cat(HIP(0, -0.24, 0.22), { spine: R(38), chest: R(16, 70), head: R(-30, -50), c_footL: FL(0.5, 0.16, 0.2), c_footR: FR(-0.6, 0.12, -0.24), c_handL: HL(0.36, 1.05, 0.2) }, axe([-0.44, 0.92, -0.32], 200, 1, { hip: [0, -0.24, 0.22] })) },
-  { t: fr(28), pose: { hips: M(0, -0.22, 0.24), c_footL: FL(0.3, 0.3, 0.2), c_footR: FR(-0.5, 0.2, -0.24) } }, { t: fr(40), pose: { hips: M(0, -0.24, 0.22), c_footL: FL(0.5, 0.16, 0.2), c_footR: FR(-0.6, 0.12, -0.24) } },
-  { t: fr(46), pose: cat(HIP(0, -0.3, -0.06), { spine: R(10), chest: R(4, 20), head: R(-6, -10), c_footL: FL(0.4, 0, 0.2), c_footR: FR(-0.3, 0, -0.24) }, axe([-0.4, 0.9, 0.2], 50, -1, { hip: [0, -0.3, -0.06] })) }, { t: fr(57), ...back }]);
-/* Soaring Plunge, played by the game from frame 0 to 60 of the move and held there: gather (1 to 9), the rising slash and
-   climb (10 to 38), the hang with the axe overhead (39 to 47), the turn over (48 to 53), the dive head-first behind the axe */
-const upClip = fist => keys([{ t: 0, use: GD },
-  { t: fr(8), pose: cat(HIP(0, -0.3, 0), { spine: R(18), chest: R(10, -10), head: R(-14) }, fist ? { c_handR: HR(0.25, 0.95, -0.25), c_handL: HL(0.25, 0.95, 0.25) } : axe([-0.3, 0.7, 0.4], -20, 1, { two: true, hip: [0, -0.3, 0] })) },
-  { t: fr(10), in: 'snap', pose: cat(HIP(0, 0.0, 0.02), { spine: R(-8), chest: R(-10), head: R(-26), c_footL: FL(0.1, 0.2, 0.2), c_footR: FR(-0.1, -0.1, -0.2) }, fist ? { c_handR: HR(0.45, 1.85, -0.2), c_handL: HL(0.2, 1.3, 0.3) } : AXHIT('uspec', 0, -0.2, { two: true, hip: [0, 0, 0.02] })) },
-  { t: fr(30), pose: cat({ spine: R(-10), c_footL: FL(0.0, -0.1, 0.18), c_footR: FR(-0.05, -0.15, -0.18) }, fist ? { c_handR: HR(0.2, 2.1, -0.2), c_handL: HL(0.2, 2.05, 0.2) } : axe([-0.2, 1.95, 0.1], 85, 1, { two: true })) },
-  { t: fr(39), pose: cat({ spine: R(-4), chest: R(-4), head: R(-14), c_footL: FL(0.2, 0.2, 0.18), c_footR: FR(-0.1, 0.1, -0.18) }, fist ? { c_handR: HR(0.4, 1.95, -0.24), c_handL: HL(0.35, 1.9, 0.24) } : AXHIT('uspec', 1, -0.2, { two: true })) },
-  { t: fr(47), pose: cat({ chest: R(-2), head: R(-10) }, fist ? {} : axe([-0.2, 1.92, 0.25], 60, 1, { two: true })) },
-  { t: fr(53), pose: cat({ all: R(30), spine: R(16), chest: R(10), head: R(10) }, fist ? { c_handR: HR(0.5, 1.7, -0.2), c_handL: HL(0.5, 1.7, 0.2) } : axe([-0.2, 1.5, 0.45], 10, -1, { two: true })) },
-  { t: fr(57), in: 'snap', pose: cat({ all: R(12), spine: R(20), chest: R(12), head: R(20), c_footL: FL(-0.1, 0.4, 0.18), c_footR: FR(-0.2, 0.3, -0.18) }, fist ? { c_handR: HR(0.35, 0.65, -0.18), c_handL: HL(0.35, 0.65, 0.18) } : AXHIT('uspec', 6, -0.2, { two: true })) },
-  { t: fr(60), pose: {} }]);
+/* Axe Throw (the Richter-style lob): drawn over the shoulder, carried back behind his head with the weight on the rear foot,
+   front foot forward, then slung up and through and let go on frame 30; the arm follows through and he recovers */
+C.Throw = keys([GDK(0),
+  K(fr(3), REACH), DRAW(fr(6)),
+  K(fr(10), { hp: [0, -0.07, -0.06], ch: [-4, -14], hd: [-4, 24], ax: axe([-0.36, 1.82, -0.2], 105, 1, { hip: [0, -0.07, -0.06] }) }),
+  K(fr(16), { hp: [0, -0.08, -0.12], hr: [-4, -20, 0], sp: [-10], ch: [-10, -34], hd: [-4, 40], fl: [0.32, 0, 0.21, -10], L: [0.55, 1.45, 0.14], ax: axe([-0.4, 1.75, -0.36], 150, 1, { hip: [0, -0.08, -0.12] }) }),
+  K(fr(24), { hp: [0, -0.1, -0.16], hr: [-6, -26, 0], ch: [-14, -44], ax: axe([-0.42, 1.8, -0.42], 165, 1, { hip: [0, -0.1, -0.16] }) }, 'out'),
+  K(fr(27), { hp: [0, -0.1, -0.04], hr: [0, -4, 0], ch: [-4, -20], ax: axe([-0.4, 1.95, -0.1], 150, 1, { hip: [0, -0.1, -0.04] }) }),
+  K(fr(30), { hp: [0, -0.12, 0.24], hr: [6, 18, 0], sp: [14], ch: [14, 20], hd: [-12, -14], L: [0.1, 1.15, 0.36], fr: [-0.32, 0.04, -0.25, 30], ax: axe([-0.32, 1.45, 0.62], 40, -1, { hip: [0, -0.12, 0.24] }) }, 'snap'),
+  K(fr(34), { sp: [20], ch: [18, 28], R: [0.78, 0.92, -0.2] }, 'out'),
+  K(fr(44), { hp: [0, -0.1, 0.14], sp: [10], ch: [10, 14], R: [0.5, 1.0, -0.24] }),
+  BK(fr(66))]);
+/* with the axe away: the open hand held out toward it, the fingers calling it home */
+C.Beckon = keys([GDK(0, { R: [0.3, 1.2, -0.3] }), K(fr(8), { ch: [0, -26], hd: [-6, 24], R: [0.85, 1.45, -0.3] }, 'out'), K(fr(16), { R: [0.8, 1.48, -0.3] }), K(fr(24), { R: [0.84, 1.44, -0.3] })]);
+/* Meteor Shoulder Charge: the shoulder sinks into a crouch (1 to 14), explodes forward shoulder-first with the head tucked on
+   15, the boots pounding through the travel (to 40), then the heels dig in, the shoulders recoil and he skids to a stop */
+{ const run = [[0.5, 0.16, -0.62, 0.1], [-0.2, 0.3, 0.6, 0.02]];
+  C.Meteor = keys([GDK(0),
+    K(fr(10), { hp: [0, -0.32, -0.12], hr: [12, 30, 0], sp: [24], ch: [14, 40], hd: [-22, -50], fl: [0.32, 0, 0.21], fr: [-0.44, 0, -0.27, 30], L: [0.2, 0.95, 0.3], R: [0.34, 1.05, 0.06] }),
+    K(fr(14), { hp: [0, -0.36, -0.14] }, 'out'),
+    K(fr(15), { hp: [0, -0.24, 0.24], hr: [14, 40, 0], sp: [38], ch: [16, 44], hd: [-32, -60], fl: [0.5, 0.16, 0.2, -10], fr: [-0.62, 0.12, -0.24, 50], L: [-0.36, 1.05, 0.36], R: [0.5, 1.15, 0.04] }, 'snap'),
+    ...[19, 23, 27, 31, 35].map((n, k) => K(fr(n), { hp: [0, k % 2 ? -0.2 : -0.26, 0.26], fl: k % 2 ? [0.5, 0, 0.2, -5] : [-0.2, 0.3, 0.2, 40], fr: k % 2 ? [-0.62, 0.12, -0.24, 50] : [0.5, 0.04, -0.24, -5] })),
+    K(fr(40), { hp: [0, -0.24, 0.22], fl: [0.5, 0.16, 0.2, -10], fr: [-0.6, 0.12, -0.24, 50] }),
+    K(fr(44), { hp: [0, -0.34, -0.04], hr: [6, 14, 0], sp: [12], ch: [4, 20], hd: [-8, -14], fl: [0.6, 0, 0.21, -25], fr: [-0.32, 0, -0.27, 0], L: [0.3, 1.1, 0.34], R: [0.3, 1.1, -0.3] }, 'out'),
+    K(fr(50), { hp: [0, -0.26, 0], hr: [4, 4, 0], sp: [8], ch: [4, 0], fl: [0.4, 0, 0.21] }), BK(fr(57))]); }
+/* Soaring Plunge (Chrom's rise, hang and dive), played by the game from frame 0 to 60 of the move and held there: drawn in the
+   gather (1 to 9), the rising slash and climb (10 to 38), the hang with the axe overhead (39 to 47), the turn over (48 to 53),
+   the dive head-first behind the axe */
+const upClip = fist => keys([GDK(0),
+  ...(fist ? [] : [K(fr(2), REACH), DRAW(fr(4))]),
+  K(fr(8), Object.assign({ hp: [0, -0.3, 0], hr: [10, 0, 0], sp: [18], ch: [10, -10], hd: [-14] }, fist ? { R: [0.25, 0.95, -0.25], L: [0.25, 0.95, 0.25] } : { ax: axe([-0.3, 0.7, 0.4], -20, 1, { two: true, hip: [0, -0.3, 0] }) })),
+  K(fr(10), Object.assign({ hp: [0, 0.0, 0.02], hr: [-4, 0, 0], sp: [-8], ch: [-10], hd: [-26], fl: [0.1, 0.2, 0.2, 40], fr: [-0.1, -0.1, -0.2, 45] }, fist ? { R: [0.45, 1.85, -0.2], L: [0.2, 1.3, 0.3] } : { ax: AXHIT('uspec', 0, -0.2, { two: true, hip: [0, 0, 0.02] }) }), 'snap'),
+  K(fr(30), Object.assign({ sp: [-10], fl: [0.0, -0.1, 0.18, 45], fr: [-0.05, -0.15, -0.18, 45] }, fist ? { R: [0.2, 2.1, -0.2], L: [0.2, 2.05, 0.2] } : { ax: axe([-0.2, 1.95, 0.1], 85, 1, { two: true }) })),
+  K(fr(39), Object.assign({ sp: [-4], ch: [-4], hd: [-14], fl: [0.2, 0.2, 0.18, 30], fr: [-0.1, 0.1, -0.18, 30] }, fist ? { R: [0.4, 1.95, -0.24], L: [0.35, 1.9, 0.24] } : { ax: AXHIT('uspec', 1, -0.2, { two: true }) }), 'out'),
+  K(fr(47), Object.assign({ ch: [-2], hd: [-10] }, fist ? {} : { ax: axe([-0.2, 1.92, 0.25], 60, 1, { two: true }) })),
+  K(fr(53), Object.assign({ all: [30], sp: [16], ch: [10], hd: [10] }, fist ? { R: [0.5, 1.7, -0.2], L: [0.5, 1.7, 0.2] } : { ax: axe([-0.2, 1.5, 0.45], 10, -1, { two: true }) })),
+  K(fr(57), Object.assign({ all: [12], sp: [20], ch: [12], hd: [20], fl: [-0.1, 0.4, 0.18, 40], fr: [-0.2, 0.3, -0.18, 40] }, fist ? { R: [0.35, 0.65, -0.18], L: [0.35, 0.65, 0.18] } : { ax: AXHIT('uspec', 6, -0.2, { two: true }) }), 'snap'),
+  K(fr(60), {})]);
 C.UpB = upClip(false); C.UpBE = upClip(true);
-/* the plunge's landing: the axe driven into the floor ahead, a hard compression, then up again (36) */
-C.UpLand = keys([{ t: 0, use: ['stand', 'crouch'], pose: cat(HIP(0, -0.4, 0.06), { spine: R(30), chest: R(16), head: R(-16) }, AXHIT('uspecL', 0, -0.2, { two: true, hip: [0, -0.4, 0.06] })) },
-  { t: fr(4), pose: { hips: M(0, -0.44, 0.06) } }, { t: fr(20), pose: cat(HIP(0, -0.3, 0.02), { spine: R(20) }, axe([-0.3, 0.75, 0.42], 0, -1, { two: true, hip: [0, -0.3, 0.02] })) }, { t: fr(36), ...back }]);
-C.UpLandE = keys([{ t: 0, use: ['stand', 'crouch'], pose: cat(HIP(0, -0.4, 0.06), { spine: R(30), chest: R(16), head: R(-16), c_handR: HR(0.65, 0.35, -0.18), c_handL: HL(0.65, 0.35, 0.18) }) },
-  { t: fr(4), pose: { hips: M(0, -0.44, 0.06) } }, { t: fr(36), ...back }]);
-/* Counter: weight down, forearms set behind the haft as a compact guard (window 8 to 29), then back */
-C.Counter = keys([{ t: 0, use: GD }, { t: fr(8), pose: cat(HIP(0, -0.18, -0.04), { spine: R(8), chest: R(6, -24), head: R(4, 18), c_handL: HL(0.36, 1.2, 0.0) }, axe([-0.24, 1.0, 0.36], 95, -1, { hip: [0, -0.18, -0.04], dx: 0.3 })) },
-  { t: fr(29), pose: { hips: M(0, -0.2, -0.04), chest: R(8, -24) } }, { t: fr(67), ...back }]);
-/* the counter's answer: the haft's butt snaps up under the attacker (4 and 5) */
-C.CounterHit = keys([{ t: 0, use: GD, pose: cat(HIP(0, -0.2, -0.04), { spine: R(8), chest: R(6, -24), c_handL: HL(0.36, 1.2, 0.0) }, axe([-0.24, 1.0, 0.36], 95, -1, { hip: [0, -0.2, -0.04], dx: 0.3 })) },
-  { t: fr(4), in: 'snap', pose: cat(HIP(0, 0.0, 0.1), { spine: R(-8), chest: R(-10, 10), head: R(-20), c_footR: FR(-0.1, 0.06, -0.22) }, axe([-0.2, 1.62, 0.5], -100, -1, { dx: 0.15 })) },
-  { t: fr(5), pose: {} }, { t: fr(20), pose: cat(HIP(0, -0.04, 0.04), { chest: R(-2, -6) }, axe([-0.3, 1.2, 0.4], 70, -1)) }, { t: fr(34), ...back }]);
-C.CounterHitE = keys([{ t: 0, use: GD, pose: cat(HIP(0, -0.2, -0.04), { spine: R(8), chest: R(6, -24), c_handL: HL(0.36, 1.2, 0.0), c_handR: HR(0.3, 1.2, -0.2) }) },
-  { t: fr(4), in: 'snap', pose: cat(HIP(0, 0.0, 0.1), { spine: R(-8), chest: R(-10, 10), head: R(-20), c_handR: HR(0.7, 1.75, -0.12), c_footR: FR(-0.1, 0.06, -0.22) }) }, { t: fr(5), pose: {} }, { t: fr(34), ...back }]);
-/* Berserker on or off: arms flung wide and a roar */
-C.Berserk = keys([{ t: 0, use: GD }, { t: fr(4), in: 'snap', pose: cat(HIP(0, -0.12, 0), { spine: R(-12), chest: R(-14), head: R(-20), c_handL: HL(0.1, 1.5, 0.75) }, axe([-0.75, 1.5, 0.1], 120, -1)) }, { t: fr(8), pose: {} }]);
+/* the plunge's landing: the axe driven into the floor ahead, a hard compression, then up again and the axe back over his shoulder */
+C.UpLand = keys([{ t: 0, use: ['stand', 'crouch'], pose: B({ hp: [0, -0.42, 0.06], hr: [12, 0, 0], sp: [30], ch: [16], hd: [-16], ax: AXHIT('uspecL', 0, -0.2, { two: true, hip: [0, -0.42, 0.06] }) }) },
+  K(fr(4), { hp: [0, -0.46, 0.06] }), K(fr(16), { hp: [0, -0.3, 0.02], sp: [20], ax: axe([-0.3, 0.75, 0.42], 0, -1, { two: true, hip: [0, -0.3, 0.02] }) }, 'out'),
+  K(fr(23), Object.assign({}, REACH, { hp: [0, -0.12, 0], hr: [0, 0, 0], sp: [4], L: [0.36, 1.3, 0.16], ax: axe([-0.26, 1.5, 0.0], 110, -1, { hip: [0, -0.12, 0] }) })),
+  DRAW(fr(28)), BK(fr(36))]);
+C.UpLandE = keys([{ t: 0, use: ['stand', 'crouch'], pose: B({ hp: [0, -0.42, 0.06], sp: [30], ch: [16], hd: [-16], R: [0.65, 0.35, -0.18], L: [0.65, 0.35, 0.18] }) },
+  K(fr(4), { hp: [0, -0.46, 0.06] }), BK(fr(36))]);
+/* Counter: the axe drawn and set crossways in both fists as a compact guard, weight down (window 8 to 29), then put back */
+const CTR = { hp: [0, -0.18, -0.04], hr: [6, -14, 0], sp: [8], ch: [6, -20], hd: [4, 22], ax: axe([-0.24, 1.0, 0.36], 95, -1, { two: true, hip: [0, -0.18, -0.04], dx: 0.3 }) };
+C.Counter = keys([GDK(0), K(fr(3), REACH), DRAW(fr(5)), K(fr(8), CTR, 'out'), K(fr(29), { hp: [0, -0.2, -0.04], ch: [8, -22] }),
+  K(fr(42), { hp: [0, -0.1, 0], sp: [2], ch: [2, -8], L: [0.36, 1.32, 0.16], ax: axe([-0.26, 1.5, 0.0], 110, -1, { hip: [0, -0.1, 0] }) }), K(fr(47), REACH), DRAW(fr(52)), BK(fr(67))]);
+/* the counter's answer: the haft's butt snaps up under the attacker (4 and 5), then the axe goes back over the shoulder */
+C.CounterHit = keys([GDK(0, CTR),
+  K(fr(4), { hp: [0, 0.0, 0.1], hr: [-4, 14, 0], sp: [-8], ch: [-10, 10], hd: [-20], fr: [-0.22, 0.06, -0.25, 30], ax: axe([-0.2, 1.62, 0.5], -100, -1, { dx: 0.15 }), L: [0.4, 1.2, 0.2] }, 'snap'),
+  K(fr(6), {}), K(fr(14), { hp: [0, -0.04, 0.04], hr: [0, 0, 0], ch: [-2, -6], fr: [-0.2, 0, -0.25], ax: axe([-0.3, 1.2, 0.4], 70, -1) }, 'out'),
+  K(fr(21), REACH), DRAW(fr(26)), BK(fr(34))]);
+C.CounterHitE = keys([GDK(0, { hp: [0, -0.2, -0.04], sp: [8], ch: [6, -24], L: [0.36, 1.2, 0.0], R: [0.3, 1.2, -0.2] }),
+  K(fr(4), { hp: [0, 0.0, 0.1], sp: [-8], ch: [-10, 10], hd: [-20], R: [0.7, 1.75, -0.12], fr: [-0.22, 0.06, -0.25, 30] }, 'snap'), K(fr(6), {}), BK(fr(34))]);
+/* Berserker on or off: the chest thrown open, fists flung wide and the head back in a roar */
+C.Berserk = keys([GDK(0), K(fr(3), { hp: [0, -0.14, 0], sp: [-12], ch: [-16], hd: [-24], L: [0.1, 1.55, 0.78], R: [0.1, 1.52, -0.78] }, 'snap'), K(fr(8), { hd: [-28], L: [0.08, 1.58, 0.8], R: [0.08, 1.55, -0.8] })]);
 
-/* ---- the hands: how closed each hand is (0 open, 1 a fist), [t, right, left] points eased between. The right fist holds
-   the axe through nearly everything; the left closes for punches, grabs and two-handed swings. ---- */
-const GRIP = { '*': [[0, 1, 0.75]], Grab: [[0, 1, 0.4], [fr(7), 1, 0.05], [fr(10), 1, 0.9]], GrabRun: [[0, 1, 0.4], [fr(10), 1, 0.05], [fr(13), 1, 0.9]], GrabTurn: [[0, 1, 0.4], [fr(11), 1, 0.05], [fr(14), 1, 0.9]],
-  Hold: [[0, 1, 0.85]], Pummel: [[0, 1, 0.85]], ThrowF: [[0, 1, 0.85], [fr(13), 1, 0.1]], ThrowB: [[0, 1, 0.85], [fr(14), 1, 0.1]], ThrowU: [[0, 1, 0.85], [fr(13), 1, 0.1]], ThrowD: [[0, 1, 0.85], [fr(23), 1, 0.1]],
-  Throw: [[0, 1, 0.75], [fr(30), 1, 0.75], [fr(31), 0.1, 0.75], [fr(66), 0.6, 0.75]], Beckon: [[0, 0.3, 0.75], [fr(8), 0.05, 0.75]], Ledge: [[0, 1, 0.85]],
-  FsmashE: [[0, 1, 1]], UsmashE: [[0, 1, 1]], FairE: [[0, 1, 1]], BairE: [[0, 1, 1]], UpBE: [[0, 1, 1]], UpLandE: [[0, 1, 1]], CounterHitE: [[0, 1, 1]], Berserk: [[0, 1, 0.75], [fr(4), 1, 0.05], [fr(8), 1, 0.4]],
-  Launch: [[0, 1, 0.3]], LaunchUp: [[0, 1, 0.3]], Spike: [[0, 1, 0.3]], Tumble: [[0, 1, 0.5]], Helpless: [[0, 1, 0.2]], Held: [[0, 1, 0.3]], Down: [[0, 1, 0.3]] };
-for (const k of ['Fsmash', 'Usmash', 'Dsmash', 'Fair', 'Bair', 'Uair', 'Shield', 'ShieldHit', 'UpB', 'UpLand']) GRIP[k] = [[0, 1, 1]];
+/* ---- the hands: how closed each hand is (0 open, 1 a fist), [t, right, left] points eased between. Both are loose fists
+   by default; the right takes the axe on the draw and lets it go on the stow; the left closes on the haft in two-handed swings. */
+const ARMED = {   /* clip: [draw, stow] (seconds); the hand axe is drawn between them (render3d axeShow) */
+  Fsmash: [fr(5), fr(58)], Usmash: [fr(4), fr(52)], Dsmash: [fr(4), fr(53)], Fair: [fr(5), fr(40)], Bair: [fr(4), fr(31)], Uair: [fr(4), fr(31)],
+  Throw: [fr(6), fr(31)], UpB: [fr(4), 99], UpLand: [0, fr(28)], Counter: [fr(5), fr(52)], CounterHit: [0, fr(26)] };
+const armedGrip = (nm, two) => { const [d, s] = ARMED[nm], o = [[0, nm === 'UpLand' || nm === 'CounterHit' ? 1 : 0.85, 0.8]];
+  if (d > 0) o.push([Math.max(0, d - fr(2)), 0.25, 0.8], [d, 1, 0.8]); if (two) o.push([d + fr(4), 1, 1]);
+  if (s < 50) o.push([s - fr(5), 1, two ? 0.8 : 0.8], [s, 1, 0.8], [s + fr(3), 0.85, 0.8]); return o; };
+const GRIP = { '*': [[0, 0.85, 0.8]], Grab: [[0, 0.8, 0.8], [fr(7), 0.05, 0.4], [fr(10), 0.95, 0.9]], GrabRun: [[0, 0.8, 0.8], [fr(10), 0.05, 0.4], [fr(13), 0.95, 0.9]], GrabTurn: [[0, 0.8, 0.8], [fr(11), 0.05, 0.4], [fr(14), 0.95, 0.9]],
+  Hold: [[0, 0.95, 0.9]], Pummel: [[0, 0.95, 1]], ThrowF: [[0, 0.95, 0.9], [fr(10), 0.3, 0.3], [fr(13), 0.05, 0.05]], ThrowB: [[0, 0.95, 0.9], [fr(14), 0.1, 0.1]], ThrowU: [[0, 0.95, 0.9], [fr(13), 0.1, 0.1]], ThrowD: [[0, 0.95, 0.9], [fr(20), 1, 1]],
+  Beckon: [[0, 0.3, 0.8], [fr(8), 0.05, 0.8], [fr(16), 0.6, 0.8], [fr(24), 0.05, 0.8]], Ledge: [[0, 0.5, 0.85]], Jab: [[0, 0.85, 0.8], [fr(6), 1, 0.9]], Utilt: [[0, 0.85, 0.8], [fr(6), 1, 0.9]],
+  FsmashE: [[0, 1, 1]], UsmashE: [[0, 1, 1]], FairE: [[0, 1, 1]], BairE: [[0, 1, 1]], UpBE: [[0, 1, 1]], UpLandE: [[0, 0.3, 0.3]], CounterHitE: [[0, 1, 1]], Berserk: [[0, 0.85, 0.8], [fr(3), 0.0, 0.0], [fr(8), 0.1, 0.1]],
+  Launch: [[0, 0.3, 0.3]], LaunchUp: [[0, 0.3, 0.3]], Spike: [[0, 0.3, 0.3]], Tumble: [[0, 0.5, 0.5]], Helpless: [[0, 0.2, 0.2]], Held: [[0, 0.3, 0.3]], Down: [[0, 0.3, 0.3]], Hit: [[0, 0.4, 0.4]], HitHeavy: [[0, 0.3, 0.3]],
+  Shield: [[0, 1, 1]], ShieldHit: [[0, 1, 1]], Dtilt: [[0, 0.85, 0.8], [fr(6), 0.1, 0.8]], Getup: [[0, 0.3, 0.3]], Down2: [[0, 0.3, 0.3]] };
+for (const k of ['Fsmash', 'Usmash', 'Dsmash', 'Fair', 'Bair', 'Uair', 'UpB', 'UpLand', 'Counter', 'CounterHit']) GRIP[k] = armedGrip(k, true);
+GRIP.Throw = armedGrip('Throw', false).filter(p => p[0] < fr(30)).concat([[fr(30), 1, 0.8], [fr(31), 0.1, 0.8], [fr(50), 0.6, 0.8]]);
 const deg = { f1: 78, f2: 82, tp: 0, ty: 40 };
 const hand = (c, sd) => ({ ['fing' + sd + '1']: R(0, 0, (sd === 'R' ? 1 : -1) * deg.f1 * c), ['fing' + sd + '2']: R(0, 0, (sd === 'R' ? 1 : -1) * deg.f2 * c), ['thumb' + sd]: R(deg.tp * c, (sd === 'R' ? 1 : -1) * deg.ty * c, 0) });
 const lerp = (a, b, u) => a + (b - a) * u;
@@ -357,8 +542,10 @@ if (process.argv[2] === 'test') process.exit(0);
 
 /* ---- the game's manifest entry ---- */
 const A = (clip, c0, c1, start, end) => ({ clip, start: start || 0, contact: [c0, c1], end: end || 0.9 });
-const entry = { file: 'assets/vargan/export/vargan-v1.glb', height: 16, axe: { file: 'assets/vargan/export/runebreaker.glb', bone: 'axe', len: 1.55, hold: HOLD },
-  clips: { idle: { clip: 'Idle' }, idle2: { clip: 'Idle2' }, walk: { clip: 'Walk' }, run: { clip: 'Run' }, crouch: { clip: 'Crouch', at: 0.18 }, brake: { clip: 'Land', from: 0.05, to: 0.42 }, jumpsquat: { clip: 'Squat', from: 0, to: 0.1 },
+const entry = { file: 'assets/vargan/export/vargan-v1.glb', height: 18.5,   /* 7.2 ft: sim.js VARGAN U */
+  axe: { file: 'assets/vargan/export/runebreaker.glb', bone: 'axe', len: 2.015, hold: HOLD, bal: 1.105, back: BACK, backBone: 'chest', armed: ARMED },
+  blendIn: { Idle: 8, Walk: 6, Run: 5 },
+  clips: { idle: { clip: 'Idle' }, idle2: { clip: 'Idle2' }, walk: { clip: 'Walk', stride: 16 }, run: { clip: 'Run', stride: 46 }, crouch: { clip: 'Crouch', at: 0.18 }, brake: { clip: 'Land', from: 0.05, to: 0.42 }, jumpsquat: { clip: 'Squat', from: 0, to: 0.1 },
     rise: { clip: 'Rise', from: 0, to: 0.4 }, fall: { clip: 'Fall' }, fastfall: { clip: 'FastFall' }, airjump: { clip: 'AirJump', from: 0, to: 0.48 }, helpless: { clip: 'Helpless' }, land: { clip: 'Land', from: 0, to: 0.42 }, landHard: { clip: 'LandHard', from: 0, to: 0.6 },
     shield: { clip: 'Shield', from: 0, to: 0.12 }, shieldHit: { clip: 'ShieldHit', from: 0, to: 0.3 }, hit: { clip: 'Hit', from: 0, to: 0.6 }, hitHeavy: { clip: 'HitHeavy', from: 0, to: 0.8 }, launch: { clip: 'Launch', from: 0, to: 0.5 }, launchUp: { clip: 'LaunchUp', from: 0, to: 0.6 }, spike: { clip: 'Spike', from: 0, to: 0.6 },
     tumble: { clip: 'Tumble', bounce: true }, down: { clip: 'Down', from: 0, to: 0.3 }, dizzy: { clip: 'Hit', from: 0, to: 0.6, bounce: true }, airdodge: { clip: 'AirDodge', from: 0, to: 0.66 }, dodge: { clip: 'Dodge', from: 0, to: 0.42 }, roll: { clip: 'Roll', from: 0, to: 1.05 },
@@ -377,4 +564,4 @@ const entry = { file: 'assets/vargan/export/vargan-v1.glb', height: 16, axe: { f
     nspec: AF('Throw', 30, 30, 66), nspecE: AF('Beckon', 8, 8, 24), sspec: AF('Meteor', 15, 40, 57), uspec: AF('UpB', 10, 60, 60), uspecE: AF('UpBE', 10, 60, 60), uspecL: AF('UpLand', 1, 4, 36), uspecLE: AF('UpLandE', 1, 4, 36),
     dspec: AF('Counter', 8, 29, 67), dspecHit: AF('CounterHit', 4, 5, 34), dspecHitE: AF('CounterHitE', 4, 5, 34), berserk: AF('Berserk', 4, 4, 8), '*': AF('Jab', 7, 8, 26) } };
 const mf = path.join(ROOT, 'assets', 'manifest.json'), cur = JSON.parse(fs.readFileSync(mf, 'utf8'));
-cur.Vargan = entry; fs.writeFileSync(mf, JSON.stringify(cur, null, 1) + '\n'); console.log('manifest: ' + Object.keys(cur).join(', '));
+cur.Fyrdsman = entry; fs.writeFileSync(mf, JSON.stringify(cur, null, 1) + '\n'); console.log('manifest: ' + Object.keys(cur).join(', '));

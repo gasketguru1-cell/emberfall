@@ -15,12 +15,12 @@ function animBase(f) {
   switch (s) {
     case 'idle':
       if (st.hop && f.grounded && Math.abs(f.ctl.c.lx) > 0.2) return { key: 'walk', mode: 'phase', v: hopV(st.hop.walk, f.hopT - 1) };
-      if (f.grounded && Math.abs(f.vx) > 0.25) return { key: 'walk', mode: 'cycle', v: f.x * f.face / 40 };   /* driven by distance travelled */
+      if (f.grounded && Math.abs(f.vx) > 0.25) return { key: 'walk', mode: 'cycle', v: f.x * f.face / 40, d: f.x * f.face };   /* driven by distance travelled (d: the distance itself, for a model with its own stride) */
       if (f.ctl.c.ly < CROUCH_Y) return { key: 'crouch', mode: 'phase', v: 1 };
       return { key: 'idle', mode: 'loop', v: t };
     case 'dash': case 'run':
       if (st.hop) return { key: 'run', mode: 'phase', v: s === 'dash' ? phase(f.sf, st.dashF) * 0.7 : hopV(st.hop.run, f.hopT - 1) };
-      return { key: 'run', mode: 'cycle', v: f.x * f.face / 46 };
+      return { key: 'run', mode: 'cycle', v: f.x * f.face / 46, d: f.x * f.face };
     case 'brake': return { key: 'brake', mode: 'phase', v: phase(f.sf, 12) };
     case 'jsq': return { key: 'jumpsquat', mode: 'phase', v: phase(f.sf, st.jsq) };
     case 'air': return f.vy > 0.2 ? { key: 'rise', mode: 'phase', v: 1 - phase(f.vy, st.vJump) } : { key: 'fall', mode: 'loop', v: t };
@@ -108,7 +108,7 @@ function animAlt(f, a) {
         if (f.mname === 'sspec') return f.rsGo ? { key: 'ropeSwing', mode: 'loop', v: t } : { key: 'ropeToss', mode: 'phase', v: phase(f.mf, f.rsHook || 11) };   /* hooks the rope on frame 11, then hangs from it */
         if (f.mname === 'uspec') return f.bubble ? { key: 'bubbleRide', mode: 'loop', v: t } : { key: 'bubbleBlow', mode: 'phase', v: phase(f.mf, 8) };   /* the bubble forms on frame 8 */
       }
-      if (nm === 'Vargan' && (f.mname === 'uspec' || f.mname === 'uspecE')) return { key: f.mname === 'uspec' ? 'upb' : 'upbE', mode: 'phase', v: phase(f.mf, 60) };   /* Soaring Plunge: frames 0 to 60 of the clip, then the dive is held until he lands */
+      if (nm === 'Fyrdsman' && (f.mname === 'uspec' || f.mname === 'uspecE')) return { key: f.mname === 'uspec' ? 'upb' : 'upbE', mode: 'phase', v: phase(f.mf, 60) };   /* Soaring Plunge: frames 0 to 60 of the clip, then the dive is held until he lands */
       if (f.form && f.form.cargo && f.mname === 'nspec') return { key: 'punchWind', mode: 'loop', v: t };   /* Cronky Dong winding up The Entire Gym */
       if (f.def && f.def.fowl && f.mname === 'nspec' && f.selOpen) return { key: 'selecting', mode: 'loop', v: t };
       return null;

@@ -1,4 +1,4 @@
-# Puts Vargan's axe in his right hand for the bind pose and writes both as one GLB with two mesh objects ("Body", "Axe"),
+# Puts Fyrdsman's axe in his right hand for the bind pose and writes both as one GLB with two mesh objects ("Body", "Axe"),
 # so tools/blender/rig.py can make the axe rigid on its own bone (spec "parts").
 #   blender -b --factory-startup --python tools/blender/vargan-join.py -- --body body-a.glb --axe axe.glb --out joined.glb --grip x,y,z --hold 0.22
 # --grip: the middle of the right fist in model coordinates (metres, y up, +z forward, x his left); --hold: how far up the

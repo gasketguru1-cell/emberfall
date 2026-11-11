@@ -1,4 +1,4 @@
-// Vargan the Ashbound: scripted checks against the owner's "Nordic Berserker" atlas v1.0 (its frame tables, movement and
+// Fyrdsman the Ashbound: scripted checks against the owner's "Nordic Berserker" atlas v1.0 (its frame tables, movement and
 // its own acceptance tests: the axe as one persistent object, slow fall past the ledge, the 8-frame recall, no swap mid-move,
 // the counter's homing and its distance power, no false homing, the 0.30 W meteor, Berserker's x1.5 and its 5% a second).
 // Usage: node tests/vargan.js        (exit code 1 if any check fails)
@@ -11,7 +11,7 @@ let seed = 5; Math.random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; 
 for (const f of ['hitboxes.js', 'sim.js', 'anim.js', 'movelist.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 vm.runInThisContext(`
 (function () {
-  const VI = ROSTER.findIndex(d => d.name === 'Vargan'), VF = ROSTER[VI].forms[0], mv = VF.moves, st = VF.st, W = vW(), B = DMG_1V1 * FRESH;
+  const VI = ROSTER.findIndex(d => d.name === 'Fyrdsman'), VF = ROSTER[VI].forms[0], mv = VF.moves, st = VF.st, W = vW(), B = DMG_1V1 * FRESH;
   let SCRIPT = [null, null], t = 0; const results = [], CPU0 = cpuInput;
   cpuInput = function (f) { const i = blankIn(); if (SCRIPT[f.idx]) SCRIPT[f.idx](i, t, f); return i; };
   function setup(xa, xb, other) {
@@ -24,7 +24,7 @@ vm.runInThisContext(`
   function check(name, ok, detail) { results.push([ok, name, detail || '']); }
   const near = (a, b, tol) => Math.abs(a - b) <= (tol === undefined ? 0.012 : tol);
   const axes = () => PROJ.filter(p => p.kind === 'vaxe');
-  /* Vargan starts a move directly against a Flint standing gap away; returns the first hit's frame and the damage */
+  /* Fyrdsman starts a move directly against a Flint standing gap away; returns the first hit's frame and the damage */
   function swing(name, gap, o) { o = o || {}; const [v, f] = setup(0, gap); if (o.away) { v.axeAway = true; } if (o.bz) v.berserk = true; v.startMove(name); const out = { first: 0, hits: 0, pct: 0, name: v.mname }; let p = 0;
     run(mv[v.mname].t + 20, () => { if (f.pct > p + 0.01) { out.hits++; if (!out.first) out.first = v.mf; p = f.pct; } }); out.pct = f.pct; return out; }
 
@@ -78,7 +78,7 @@ vm.runInThisContext(`
   function counterAt(D, setAxe) {
     const [v, f] = setup(0, 9); v.face = 1; f.face = -1; vThrow(v); const p = axes()[0]; v.x = 0; v.y = 0; v.grounded = true; v.plat = MAIN; v.vx = 0; v.face = 1; v.set('idle');
     f.x = 9; f.y = 0; f.pct = 0; f.set('idle'); f.vx = f.vy = 0; f.face = -1;
-    if (setAxe) setAxe(p, v); else { p.st = 'stuck'; p.x = -D; p.y = v.y + v.st.h * 0.5; p.plat = null; }
+    if (setAxe) setAxe(p, v); else { p.st = 'stuck'; p.ghost = true; p.x = -D; p.y = v.y + v.st.h * 0.5; p.plat = null; }   /* as vStick leaves it: a stuck axe hurts nobody */
     v.startMove('dspec'); run(9); f.startMove('ftilt'); let home = null, homeHit = 0, pct0 = 0;
     run(260, () => { const q = axes()[0]; if (q && q.st === 'home' && !home) { home = q.h.d; pct0 = f.pct; } if (q && home && !homeHit && f.pct > pct0 + 0.01 && q.st !== 'home') homeHit = f.pct - pct0; });
     return { home, homeHit, v, f, p: axes()[0] };
@@ -106,7 +106,7 @@ vm.runInThisContext(`
 
   /* ---- up special: rises, hangs, dives, lands with a strike ---- */
   { const [v] = setup(-30, 60); v.startMove('uspec'); let top = 0, landed = 0; run(200, () => { top = Math.max(top, v.y); if (v.mname === 'uspecL' && !landed) landed = t; });
-    check('Soaring Plunge: rises about 2.25 H, dives back and lands into its landing strike', top > 30 && top < 40 && landed > 0 && v.grounded, 'peak ' + top.toFixed(1) + ' (H ' + st.h + '), landing strike at tick ' + landed); }
+    check('Soaring Plunge: rises about 2.25 H, dives back and lands into its landing strike', top > 2.0 * st.h && top < 2.5 * st.h && landed > 0 && v.grounded, 'peak ' + top.toFixed(1) + ' (H ' + st.h + '), landing strike at tick ' + landed); }
 
   /* ---- CPU matches: nothing breaks, the axe and Berserker get used ---- */
   { let bad = 0, used = new Set(); for (let k = 0; k < 3; k++) { slots[0] = { dev: 'kb', pick: VI, ready: true }; slots[1] = { dev: 'kb', pick: [0, 7, 8][k], ready: true }; startMatch(); F[0].ctl = new Ctl('cpu'); F[1].ctl = new Ctl('cpu');
