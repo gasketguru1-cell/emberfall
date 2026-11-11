@@ -117,6 +117,9 @@ try { DBG.boxes = localStorage.getItem('emberfall.boxes') === '1'; } catch (e) {
 try { DBG.fx = localStorage.getItem('emberfall.hitfx') !== '0'; } catch (e) { /* no storage */ }
 try { DBG.arcs = localStorage.getItem('emberfall.arcs') === '1'; } catch (e) { /* no storage */ }
 function setArcs(on) { DBG.arcs = !!on; try { localStorage.setItem('emberfall.arcs', on ? '1' : '0'); } catch (e) { /* no storage */ } }
+/* The switches at the top right of the fighter select: + (Start) away from a fighter hides or shows them. Remembered. */
+let SWITCHES = true; try { SWITCHES = localStorage.getItem('emberfall.switches') !== '0'; } catch (e) { /* no storage */ }
+function setSwitches(on) { SWITCHES = !!on; try { localStorage.setItem('emberfall.switches', on ? '1' : '0'); } catch (e) { /* no storage */ } beep(on ? 700 : 420, 0.05, 'square', 0.03); }
 function setHitFx(on) { DBG.fx = !!on; try { localStorage.setItem('emberfall.hitfx', on ? '1' : '0'); } catch (e) { /* no storage */ } }
 /* Training mode: no clock, stocks never run out, and a true-combo counter. A combo is every hit landed while the target is
    still in hitstun (or held) from the one before; it ends the moment the target can act again. */
@@ -2220,13 +2223,13 @@ function stepSelect() {
       continue; }
     if (c.pressed('atk') && !CPU_TOK.drag && cpuTokOn(sl.cx, sl.cy)) { sl.tok = true; beep(600, 0.04, 'triangle', 0.03); continue; }
     /* + (Start, or the + key) while pointing at a fighter opens its move list; once everyone is ready, Start fights instead */
-    if (typeof mlOpen === 'function' && over >= 0 && dev === 'kb' && mlPlusKey()) { mlOpen(ROSTER[over], 0, c); continue; }
-    if (c.pressed('start')) { if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; } if (typeof mlOpen === 'function' && over >= 0) { mlOpen(ROSTER[over], 0, c); continue; } }
+    if (typeof mlOpen === 'function' && dev === 'kb' && mlPlusKey()) { if (over >= 0) mlOpen(ROSTER[over], 0, c); else setSwitches(!SWITCHES); continue; }
+    if (c.pressed('start')) { if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; } if (typeof mlOpen === 'function' && over >= 0) { mlOpen(ROSTER[over], 0, c); continue; } setSwitches(!SWITCHES); continue; }   /* anywhere else: hide or show the switches */
     else if (c.pressed('atk')) {
       if (DESKTOP() && inBox(ONLINE_PILL, sl.cx, sl.cy)) { if (window.openOnline) window.openOnline(); beep(600, 0.05, 'square', 0.03); continue; }
       if (DESKTOP() && inBox(QUIT_PILL, sl.cx, sl.cy)) { if (QUIT_ASK > 0) window.close(); else { QUIT_ASK = 150; beep(300, 0.08, 'square', 0.04); } continue; }   /* press twice to quit */
-      if (inBox(TRAIN_PILL, sl.cx, sl.cy)) { setTraining(!TRAINING); beep(TRAINING ? 700 : 420, 0.05, 'square', 0.03); }
-      if (inBox(ARC_PILL, sl.cx, sl.cy)) { setArcs(!DBG.arcs); beep(DBG.arcs ? 700 : 420, 0.05, 'square', 0.03); }
+      if (SWITCHES && inBox(TRAIN_PILL, sl.cx, sl.cy)) { setTraining(!TRAINING); beep(TRAINING ? 700 : 420, 0.05, 'square', 0.03); }
+      if (SWITCHES && inBox(ARC_PILL, sl.cx, sl.cy)) { setArcs(!DBG.arcs); beep(DBG.arcs ? 700 : 420, 0.05, 'square', 0.03); }
       else if (onCpu) { setCpuLevel(CPU_LEVEL + 1 > 9 ? 0 : CPU_LEVEL + 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
       else if (over >= 0) { sl.pick = over; sl.ready = true; beep(800, 0.08, 'triangle', 0.05); }
       else if (sl.ready && slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; }
