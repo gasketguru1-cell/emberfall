@@ -2112,6 +2112,9 @@ class Fighter {
       }
       case 'run': {
         const hg = s.hop ? this.hopGate(s.hop.run) : 1;
+        /* A back flick out of a full run is a turnaround skid (the run slides on, facing back), not a dash back that throws the speed away.
+           People only (cFall), so seeded CPU matches play out as before. */
+        if (c.cFall && c.dashDir === -this.face) { c.dashDir = 0; this.face = -this.face; this.vx = appr(this.vx, 0, s.trac); this.set('brake'); if (this.groundActs(false)) break; break; }
         this.vx = hg === 0 ? appr(this.vx, 0, 0.7) : this.groundMove(this.face * s.run * hg * Math.abs(i.lx), s.runAdd + s.runMul * Math.abs(i.lx)); if (this.groundActs(true)) break;
         if (!(sgn(i.lx) === this.face && Math.abs(i.lx) > 0.5)) this.set('brake');
         break;
@@ -2121,17 +2124,22 @@ class Fighter {
         /* Turning round out of a full run takes a skid first: the dash back waits until the run has bled off to 40% (about
            ten frames). Everything else (jump, attack, shield, grab) is free at once, and dash dancing inside a dash is untouched. */
         if (c.dashDir && c.dashDir * this.vx < 0 && Math.abs(this.vx) > s.run * 0.25) { c.xFired = false; c.xT = 0; c.dashDir = 0; }
+        /* A turnaround skid: holding back turns the fighter round at once while the run slides on, so a jump from here is a reverse aerial rush. */
+        if (c.cFall && Math.abs(i.lx) > 0.5 && sgn(i.lx) === -this.face && Math.abs(i.lx) >= Math.abs(i.ly)) this.face = -this.face;
         if (this.groundActs(false)) break;
         if (this.sf >= 12 || this.vx === 0) this.set('idle');
         break;
       case 'jsq':
-        this.vx = appr(this.vx, 0, s.trac * 0.5);
+        if (!(c.cFall && Math.abs(this.vx) > s.run * 0.35)) this.vx = appr(this.vx, 0, s.trac * 0.5);   /* a running jump keeps its speed through the start-up */
         if (this.sf === 1) { this.shMacro = false; this.cAir = null; }
         if (c.shdAge <= this.sf + T.wd_jumpsquat_buffer && this.tryWavedash(true)) break;
         /* Out of a jump's start-up: an up smash (flick up with attack), attack with the jump for a short-hop aerial, or the right stick for an aerial the moment the fighter leaves the ground. */
         if (c.cPress) this.cAir = [i.cx, i.cy];
+        /* Pulling back during a running jump's start-up turns the fighter round too (the run's speed is kept, see below). */
+        if (c.cFall && Math.abs(this.vx) > s.run * 0.35 && sgn(this.vx) === this.face && Math.abs(i.lx) > 0.5 && sgn(i.lx) === -this.face && Math.abs(i.lx) >= Math.abs(i.ly)) this.face = -this.face;
         if (c.buf.atk > 0) { if (i.ly > 0.5 && c.ySmash) { c.buf.atk = 0; this.startMove('usmash'); break; } this.shMacro = true; }
-        if (this.sf >= s.jsq) { this.grounded = false; this.plat = null; this.jumps = s.jumps ?? 1; this.shortHop = !i.jmp || this.shMacro || c.jmp2Age <= this.sf + T.buffer; this.effort(FAT.jump);   /* let go early, attack with the jump, or two jump buttons together */ if (this.shortHop) this.vy = s.vHop; else { this.vy = this.jrV = s.boost[0]; this.jr = 1; } this.vx = clamp(this.vx * s.jumpXMul + (Math.abs(i.lx) > 0.2 ? i.lx * s.jumpX : 0), -s.jumpXMax, s.jumpXMax); this.set('air'); beep(420, 0.05, 'sine', 0.03, 1.5); if (this.shMacro) { this.shMacro = false; if (c.take('atk')) this.startMove(this.aerial(i.lx, i.ly)); } else if (this.cAir) this.startMove(this.aerial(this.cAir[0], this.cAir[1])); this.cAir = null; }
+        if (this.sf >= s.jsq) { this.grounded = false; this.plat = null; this.jumps = s.jumps ?? 1; this.shortHop = !i.jmp || this.shMacro || c.jmp2Age <= this.sf + T.buffer; this.effort(FAT.jump);   /* let go early, attack with the jump, or two jump buttons together */ if (this.shortHop) this.vy = s.vHop; else { this.vy = this.jrV = s.boost[0]; this.jr = 1; } const rar = c.cFall && Math.abs(this.vx) > s.run * 0.35 && sgn(this.vx) === -this.face;   /* facing against the slide: a reverse aerial rush keeps the run's speed (the stick is not taken off it), ready for a back air */
+          this.vx = clamp(this.vx * s.jumpXMul + (Math.abs(i.lx) > 0.2 && !rar ? i.lx * s.jumpX : 0), -s.jumpXMax, s.jumpXMax); this.set('air'); beep(420, 0.05, 'sine', 0.03, 1.5); if (this.shMacro) { this.shMacro = false; if (c.take('atk')) this.startMove(this.aerial(i.lx, i.ly)); } else if (this.cAir) this.startMove(this.aerial(this.cAir[0], this.cAir[1])); this.cAir = null; }
         break;
       case 'wd':
         this.vx = appr(this.vx, 0, T.wd_friction);
