@@ -23,15 +23,51 @@ function drawHud() {
   drawCMenu();
   if (mode === 'over') { big(overT < 90 ? 'GAME!' : result, H * 0.42, 100); if (overT > 100) { g.font = '22px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Press Start or Attack', W / 2, H * 0.42 + 56); drawUpdateNote(H * 0.42 + 80); } }
 }
-/* Joey's INTENSITY: looks like a power gauge, is really how tired he is. Red, then orange, then hot and pulsing near the
-   top. Full, it becomes TAKE FIVE and then CATCHING BREATH, the bar emptying with the 15 seconds. Gone once he transforms. */
+/* Joey's INTENSITY: looks like a power gauge, is really how tired he is. A big bar sitting on top of his damage panel:
+   red into orange into white-hot, with moving shine, a kick when it jumps, and flames, shaking and a glow near the top.
+   Full, it turns cool blue: TAKE FIVE, then CATCHING BREATH with the 15 seconds draining. Gone once he transforms.
+   HUD_INT keeps only what the drawing needs (the last value and a flash timer), off the fighter, so the game state is untouched. */
+const HUD_INT = [{ k: 0, pop: 0 }, { k: 0, pop: 0 }];
 function drawIntensity(f, x, y) {
   if (f.tfLatch) { g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#ffd98a'; g.textAlign = 'left'; g.fillText('CRONKY DONG', x - 102, y + 64); return; }
-  const ex = f.exStart >= 0, e = ex ? frame - f.exStart : 0, k = ex ? Math.max(0, 900 - e) / 900 : f.fat / FAT.max, bx = x - 102, by = y + 54, bw = 120, bh = 9;
-  const col = ex ? '#8fb7d6' : k < 0.5 ? '#b5473f' : k < 0.8 ? '#e8892f' : (Math.sin(tick * 0.3) > 0 ? '#ffcf5a' : '#ff9a3a');
-  g.fillStyle = 'rgba(255,255,255,.12)'; rr(bx, by, bw, bh, 4); g.fill(); g.fillStyle = col; if (k > 0) { rr(bx, by, Math.max(bh, bw * k), bh, 4); g.fill(); }
-  g.textAlign = 'left'; g.font = 'bold 10px system-ui, sans-serif'; g.fillStyle = ex ? '#cfe4f5' : '#ffd0a0';
-  g.fillText(ex ? (e < 60 ? 'TAKE FIVE' : 'CATCHING BREATH  ' + ((900 - e) / 60).toFixed(1)) : 'INTENSITY', bx + bw + 6, by + 8);
+  const ex = f.exStart >= 0, e = ex ? frame - f.exStart : 0, k = ex ? Math.max(0, 900 - e) / 900 : f.fat / FAT.max, m = HUD_INT[f.idx & 1];
+  if (!ex && k > m.k + 0.004) m.pop = 1; m.k = k; m.pop = Math.max(0, m.pop - 0.06);
+  const hot = !ex && k >= 0.8, bw = 240, bh = 30, sh = hot ? (k - 0.8) * 20 : 0, bx = x - 120 + (Math.random() - 0.5) * sh, by = y - 42 + (Math.random() - 0.5) * sh, fw = bw * k;
+  g.save();
+  /* the plate */
+  g.shadowColor = ex ? 'rgba(120,180,230,.6)' : hot ? 'rgba(255,140,40,' + (0.6 + 0.4 * Math.sin(tick * 0.4)).toFixed(2) + ')' : 'rgba(0,0,0,.5)'; g.shadowBlur = hot ? 22 : 10;
+  g.fillStyle = 'rgba(14,8,18,.85)'; rr(bx - 4, by - 4, bw + 8, bh + 8, 10); g.fill(); g.shadowBlur = 0;
+  g.lineWidth = 2; g.strokeStyle = ex ? '#8fb7d6' : hot ? '#ffcf5a' : '#6a3a2a'; rr(bx - 4, by - 4, bw + 8, bh + 8, 10); g.stroke();
+  /* the fill, clipped to the bar */
+  g.save(); rr(bx, by, bw, bh, 7); g.clip();
+  g.fillStyle = 'rgba(255,255,255,.06)'; g.fillRect(bx, by, bw, bh);
+  if (fw > 0) {
+    const gr = g.createLinearGradient(bx, 0, bx + bw, 0);
+    if (ex) { gr.addColorStop(0, '#2c5a86'); gr.addColorStop(1, '#a9d6f5'); }
+    else { gr.addColorStop(0, '#7a1410'); gr.addColorStop(0.45, '#e0441e'); gr.addColorStop(0.75, '#ff9a2a'); gr.addColorStop(0.92, '#ffe27a'); gr.addColorStop(1, '#fffbe8'); }
+    g.fillStyle = gr; g.fillRect(bx, by, fw, bh);
+    /* moving diagonal shine */
+    g.save(); g.beginPath(); g.rect(bx, by, fw, bh); g.clip(); g.fillStyle = 'rgba(255,255,255,' + (ex ? 0.08 : 0.16) + ')';
+    const off = (tick * (ex ? 0.6 : 1.5 + k * 3)) % 28; for (let sx = bx - 28 + off; sx < bx + fw + 28; sx += 28) { g.beginPath(); g.moveTo(sx, by + bh); g.lineTo(sx + 12, by); g.lineTo(sx + 22, by); g.lineTo(sx + 10, by + bh); g.fill(); }
+    g.restore();
+    g.fillStyle = 'rgba(255,255,255,.28)'; g.fillRect(bx, by + 2, fw, 5);   /* top gloss */
+    if (m.pop > 0) { g.fillStyle = 'rgba(255,255,255,' + (0.55 * m.pop).toFixed(2) + ')'; g.fillRect(bx, by, fw, bh); }   /* the kick when it jumps */
+    g.fillStyle = '#fff'; g.fillRect(bx + fw - 2, by, 3, bh);   /* the leading edge */
+  }
+  g.fillStyle = 'rgba(0,0,0,.35)'; for (let q = 1; q < 10; q++) g.fillRect(bx + bw * q / 10 - 1, by + bh - 8, 2, 8);   /* tenths */
+  g.restore();
+  /* flames off the top of the fill when it runs hot */
+  if (hot && fw > 0) {
+    for (let q = 0; q < 9; q++) { const fx = bx + fw * (0.55 + 0.45 * q / 8), fl = (8 + 14 * (k - 0.8) * 5) * (0.6 + 0.4 * Math.sin(tick * 0.5 + q * 1.7)) * (0.7 + Math.random() * 0.3);
+      g.fillStyle = q % 2 ? 'rgba(255,200,70,.85)' : 'rgba(255,110,30,.8)'; g.beginPath(); g.moveTo(fx - 6, by + 2); g.quadraticCurveTo(fx - 2, by - fl * 0.5, fx + (Math.random() - 0.5) * 3, by - fl); g.quadraticCurveTo(fx + 2, by - fl * 0.5, fx + 6, by + 2); g.fill(); }
+  }
+  /* words */
+  const label = ex ? (e < 90 ? 'TAKE FIVE!' : 'CATCHING BREATH') : k >= 0.95 ? 'MAXED OUT!' : 'INTENSITY';
+  g.textAlign = 'left'; g.font = 'italic 900 ' + (17 + (ex && e < 90 ? 3 : 0)) + 'px system-ui, sans-serif'; g.lineWidth = 4; g.strokeStyle = 'rgba(20,8,10,.9)';
+  g.strokeText(label, bx + 10, by + 22); g.fillStyle = ex ? '#e8f4ff' : k >= 0.95 && Math.sin(tick * 0.6) > 0 ? '#ffe27a' : '#fff'; g.fillText(label, bx + 10, by + 22);
+  const num = ex ? ((900 - e) / 60).toFixed(1) + 's' : Math.round(k * 100) + '%', ns = 20 + m.pop * 8;
+  g.textAlign = 'right'; g.font = '900 ' + ns.toFixed(0) + 'px system-ui, sans-serif'; g.strokeText(num, bx + bw - 8, by + 23); g.fillStyle = ex ? '#cfe4f5' : hot ? '#ffe27a' : '#ffd0a0'; g.fillText(num, bx + bw - 8, by + 23);
+  g.restore();
 }
 function big(t, y, sz) { g.font = `900 ${sz}px system-ui, sans-serif`; g.textAlign = 'center'; g.lineWidth = 10; g.strokeStyle = '#1a1230'; g.strokeText(t, W / 2, y); g.fillStyle = '#ffd98a'; g.fillText(t, W / 2, y); }
 /* Between matches only: a newer finished version of the game is waiting on the server. */

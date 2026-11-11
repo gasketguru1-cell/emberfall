@@ -133,16 +133,17 @@ vm.runInThisContext(`
     SCRIPT[0] = (i, tt) => { i.atk = tt % 4 === 0; i.jmp = tt % 6 === 0; i.spc = tt % 10 === 0; i.lx = tt > 400 && tt < 500 ? 1 : 0; i.shd = tt > 600 && tt < 620; };
     let at899 = null, at900 = null; run(905, () => { if ((j.state === 'attack' || j.state === 'shield') && frame - s0 < 900) att = true; if (!j.grounded) jumped = true; const e = frame - s0; if (e === 899) at899 = j.state; if (e === 900) at900 = j.state; });
     check('exhausted from e = 0 to 899, free at e = 900; attacks, jumps, specials and shield do nothing meanwhile', at899 === 'exhaust' && at900 !== 'exhaust' && !att && !jumped && j.fat < FAT.max, 'e899 ' + at899 + ', e900 ' + at900 + ', acted ' + att + ', jumped ' + jumped);
-    const [k] = setup(0, 60); k.fat = FAT.max; k.exPend = true; run(2); SCRIPT[0] = i => { i.lx = 1; }; let vmax = 0; run(120, () => { vmax = Math.max(vmax, Math.abs(k.vx)); });
-    check('the shuffle: 0.22 a tick at most', near(vmax, 0.22, 0.001), 'top speed ' + vmax.toFixed(3)); }
+    const [k] = setup(0, 60); k.fat = FAT.max; k.exPend = true; run(2); const kx = k.x; SCRIPT[0] = i => { i.lx = 1; }; let vmax = 0; run(120, () => { vmax = Math.max(vmax, Math.abs(k.vx)); });
+    check('controls locked: the stick does not move him in the first 3 seconds', vmax === 0 && k.x === kx, 'top speed ' + vmax.toFixed(3)); }
   { const [j, fl] = setup(0, 9); j.fat = FAT.max; j.exPend = true; run(2); const s0 = j.exStart; run(198); fl.face = -1; fl.startMove('ftilt'); let hit = false; run(40, () => { if (j.state === 'hurt') hit = true; });
     let back = null; run(120, () => { if (back === null && j.state === 'exhaust') back = j.sf; });
     check('hit at e = 200: the hit lands normally, the deadline stays, the performance resumes where the clock is', hit && j.exStart === s0 && back !== null && back > 230, 'resumed at e = ' + back); }
   { const [j] = setup(0, 60); j.x = 0; j.y = 30; j.grounded = false; j.plat = null; j.set('air'); j.fat = FAT.max; j.exPend = true; let airEx = false; run(80, () => { if (!j.grounded && j.exhausted()) airEx = true; });
     check('full in the air: no lock until he has landed', !airEx && j.exhausted(), 'locked in the air ' + airEx + ', after landing ' + j.exhausted()); }
-  { const [j] = setup(0, 60); j.fat = FAT.max; j.exPend = true; run(30); const t0 = t; SCRIPT[0] = (i, tt) => { i.tf = tt === t0 + 1 || tt === t0 + 4; }; run(8); const grew = j.state === 'grow';
+  { const [j] = setup(0, 60); j.fat = FAT.max; j.exPend = true; run(30); const t0 = t; SCRIPT[0] = (i, tt) => { i.tf = tt === t0 + 1 || tt === t0 + 4; }; run(8); const grewIn = j.state === 'grow';
+    SCRIPT[0] = () => {}; run(900); const after = j.state, s1 = t; SCRIPT[0] = (i, tt) => { i.tf = tt === s1 + 1 || tt === s1 + 4; }; run(8); const grew = j.state === 'grow';
     run(200); j.startMove('fsmash'); run(60);
-    check('the transformation ends the exhaustion at once, clears INTENSITY, and Cronky Dong never tires', grew && j.fat === 0 && !j.exhausted() && !j.fatOn(), 'growing ' + grew + ', units ' + j.fat); }
+    check('no transforming during TAKE FIVE (the request is dropped); afterwards it works, and Cronky Dong never tires', !grewIn && after !== 'grow' && grew && j.fat === 0 && !j.exhausted() && !j.fatOn(), 'during ' + grewIn + ', after ' + after + ', then growing ' + grew + ', units ' + j.fat); }
   { const [j] = setup(0, 60); j.fat = 7000; j.ko(); run(60); check('a KO as the human clears INTENSITY', j.fat === 0 && !j.exPend); }
 
   let fail = 0;
