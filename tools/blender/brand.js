@@ -152,8 +152,8 @@ FAIR_TH.forEach((th, j) => { const u = th * Math.PI / 180, sx = -Math.sin(u), sy
 /* the forward smash's (sim.js FSM_ARC): 0 to 100 degrees in front of straight up */
 const FSM_TH = [0, 25, 50, 75, 100], FSM_P = [0.18, 0.68];
 FSM_TH.forEach((th, j) => { const u = th * Math.PI / 180, sx = Math.sin(u), sy = Math.cos(u); CAP['fsmash' + j] = [FSM_P[0] + sx * BAIR_R[0], FSM_P[1] + sy * BAIR_R[0], FSM_P[0] + sx * BAIR_R[1], FSM_P[1] + sy * BAIR_R[1], 0.19]; });
-/* the down air's (sim.js DAIR_ARC): 150 to 210, under her */
-const DAIR_TH = [150, 165, 180, 195, 210], DAIR_P = [0, 0.7], DAIR_R = [0.3, 0.92];
+/* the down air's (sim.js DAIR_ARC): 210 to 150, under her, front to back */
+const DAIR_TH = [210, 195, 180, 165, 150], DAIR_P = [0, 0.7], DAIR_R = [0.3, 0.92];
 DAIR_TH.forEach((th, j) => { const u = th * Math.PI / 180, sx = -Math.sin(u), sy = Math.cos(u); CAP['dair' + j] = [DAIR_P[0] + sx * DAIR_R[0], DAIR_P[1] + sy * DAIR_R[0], DAIR_P[0] + sx * DAIR_R[1], DAIR_P[1] + sy * DAIR_R[1], 0.18]; });
 const WIND = { chest: R(-4, -24), c_sword: AIM(-0.35, 0.85, -0.4) };   /* a level cut starts with the blade raised up and back, so its arc shows from the side */
 /* a level cut: drawn back on frame a0 - 3, on the capsule from a0 to a1, back to guard by t */
@@ -241,15 +241,15 @@ C.FloorSweep = sweep('getupF', 'getupR', 19, 24, 47);
 C.Arc = { fps: 60, keys: [{ t: 0, use: AIR }, { t: fr(3), pose: { c_handR: HR(0.5, 1.25, -0.26), c_sword: AIM(0, 0.3, 1) } },
   { t: fr(6), in: 'snap', pose: cat({ chest: R(-12, -6), head: HEAD(-14) }, onCap('uair', CAP.uair, [0, 0, 0])) },
   { t: fr(9), pose: onCap('uair', CAP.uair, [0, 0, 0]) }, { t: fr(13), pose: { c_sword: AIM(0, -0.2, -1), c_handR: HR(-0.05, 1.6, -0.26) } }, { t: fr(27), ...backAir }] };
-/* Blade Drop (2026-11-11): a heavy sweep under her. Knees drawn up and the blade lifted behind her (frames 4 to 10), then swung
-   down and under her on 13 to 17 (150 to 210 on the clock, one capsule a frame), carried on up in front and let settle. */
-{ const hp = j => [0, 0.12, -0.02 + 0.01 * j], tilt = [-10, -2, 6, 14, 20];
+/* Blade Drop (2026-11-11): a heavy sweep under her. Knees drawn up and the blade lifted in front of her (frames 4 to 10), then swung
+   down and under her on 13 to 17 (210 to 150 on the clock, one capsule a frame), carried on up behind her and let settle. */
+{ const hp = j => [0, 0.12, 0.02 - 0.01 * j], tilt = [-10, -2, 6, 14, 20];
   const keys = [{ t: 0, use: AIR },
-    { t: fr(4), pose: { chest: R(-6, -20), head: HEAD(8), c_handR: HR(-0.15, 1.35, -0.32), c_sword: AIM(-0.1, 0.3, -0.95), c_footL: M(0, 0.22, 0.08), c_footR: M(0, 0.22, 0.12) } },
-    { t: fr(10), pose: { hips: M(0, 0.1, 0), chest: R(-4, -34), head: HEAD(16), c_handR: HR(-0.3, 1.3, -0.34, [0, 0.1, 0]), c_sword: AIM(-0.1, -0.35, -0.95), c_handL: HL(0.3, 1.25, 0.2, [0, 0.1, 0]), c_shield: AIM(0.9, 0.3, 0.3), c_footL: M(0, 0.36, 0.1), c_footR: M(0, 0.36, 0.16) } }];
-  DAIR_TH.forEach((th, j) => keys.push({ t: fr(13 + j), in: j === 0 ? 'snap' : undefined, pose: cat({ chest: R(16 + tilt[j] * 0.3, -20 + 6 * j), head: HEAD(22), c_footL: M(0, 0.4, 0.06 - 0.06 * j), c_footR: M(0, 0.4, 0.12 - 0.06 * j), c_handL: HL(0.3, 1.25, 0.2), c_shield: AIM(0.9, 0.3, 0.3) }, onCap('dair' + j, CAP['dair' + j], hp(j))) }));
-  keys.push({ t: fr(22), pose: { hips: M(0, 0.06, 0.04), chest: R(10, 8), head: HEAD(10), c_handR: HR(0.45, 0.85, -0.3, [0, 0.06, 0.04]), c_sword: AIM(0.05, -0.2, 1), c_footL: M(0, 0.2, -0.16), c_footR: M(0, 0.24, -0.08) } });
-  keys.push({ t: fr(30), pose: { chest: R(6, -4), c_handR: HR(0.32, 0.92, -0.32), c_sword: AIM(-0.05, -0.4, 0.9) } });
+    { t: fr(4), pose: { chest: R(-6, 4), head: HEAD(8), c_handR: HR(0.3, 1.35, -0.32), c_sword: AIM(0.1, 0.3, 0.95), c_footL: M(0, 0.22, -0.08), c_footR: M(0, 0.22, -0.04) } },
+    { t: fr(10), pose: { hips: M(0, 0.1, 0), chest: R(-4, 10), head: HEAD(16), c_handR: HR(0.4, 1.3, -0.34, [0, 0.1, 0]), c_sword: AIM(0.1, -0.35, 0.95), c_handL: HL(0.3, 1.25, 0.2, [0, 0.1, 0]), c_shield: AIM(0.9, 0.3, 0.3), c_footL: M(0, 0.36, -0.14), c_footR: M(0, 0.36, -0.08) } }];
+  DAIR_TH.forEach((th, j) => keys.push({ t: fr(13 + j), in: j === 0 ? 'snap' : undefined, pose: cat({ chest: R(16 + tilt[4 - j] * 0.3, 4 - 6 * j), head: HEAD(22), c_footL: M(0, 0.4, -0.18 + 0.06 * j), c_footR: M(0, 0.4, -0.12 + 0.06 * j), c_handL: HL(0.3, 1.25, 0.2), c_shield: AIM(0.9, 0.3, 0.3) }, onCap('dair' + j, CAP['dair' + j], hp(j))) }));
+  keys.push({ t: fr(22), pose: { hips: M(0, 0.06, -0.04), chest: R(10, -32), head: HEAD(10), c_handR: HR(-0.32, 0.85, -0.36, [0, 0.06, -0.04]), c_sword: AIM(-0.1, -0.2, -1), c_footL: M(0, 0.2, 0.16), c_footR: M(0, 0.24, 0.22) } });
+  keys.push({ t: fr(30), pose: { chest: R(6, -16), c_handR: HR(-0.12, 0.88, -0.36), c_sword: AIM(-0.1, -0.6, -0.75) } });
   keys.push({ t: fr(41), ...backAir });
   C.Drop = { fps: 60, keys }; }
 /* ---- get-ups ---- */

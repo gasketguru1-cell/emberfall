@@ -245,7 +245,7 @@ const MOVE_TEXT = {
     fair: ['High Guard', 'A sweeping cut in front, from just past overhead down to a little below level, frames 7 to 11. It hits once, 10% in the middle of the arc, with 10 frames of landing lag. Space the end of the blade while drifting back.'],
     bair: ['Reverse Cut', 'A long, heavy sweep behind her, from high over her shoulder down to well below her, frames 9 to 14. It hits once: 14% in the middle of the arc behind her. Her strongest aerial: run off the stage, or turn round, to take a stock with it.'],
     uair: ['Crown Arc', 'An arc over her head from front to back. Covers the platform above.'],
-    dair: ['Blade Drop', 'Sweeps the blade under her, from behind to in front, frames 13 to 17. It hits once: an opponent in the air is sent straight down (13% in the middle of the sweep, 10% at its ends); anyone standing is popped up instead.', 'f13-17 · spike 13% (10% at the ends) / standing 9%'],
+    dair: ['Blade Drop', 'Sweeps the blade under her, from in front to behind, frames 13 to 17. It hits once: an opponent in the air is sent straight down (13% in the middle of the sweep, 10% at its ends); anyone standing is popped up instead.', 'f13-17 · spike 13% (10% at the ends) / standing 9%'],
     grab: ['Gauntlet Grab', 'The door swings aside and her shield hand reaches past it: a short reach. It threatens an opponent who waits in shield, but only close. Lunge Grab out of a dash carries her 0.33 of a body length; Turn Grab out of a run turnaround reaches furthest.'],
     pummel: ['Pommel Tap', 'Taps the held opponent with the pommel on frame 4 for 1.3%. The next pummel or a throw is ready on frame 13.'],
     f: ['Shield Shove', 'Shoves the opponent away with the stove door, out toward the ledge.'],

@@ -1335,8 +1335,8 @@ const BRAND = (() => {
   /* the back air's sweep: [degrees behind from straight up, damage, angle, base, growth] per frame; round BAIR_P, the blade from BAIR_R[0] to BAIR_R[1] (H) */
   const BAIR_ARC = [[20, 11, 130, 36, 90], [44, 12, 135, 38, 94], [68, 14, 144, 40, 98], [92, 14, 144, 40, 98], [116, 13, 150, 38, 95], [140, 10, 160, 34, 88]], BAIR_P = [-0.05, 0.75], BAIR_R = [0.3, 0.88];
   /* the forward air's: the same clock (340 is 20 degrees in front of straight up, 250 is 20 below level in front) */
-  /* the down air's: 150 (behind, below) through 180 (straight down) to 210 (in front, below); [degrees, a spiking middle step] */
-  const DAIR_ARC = [[150, 0], [165, 1], [180, 1], [195, 1], [210, 0]], DAIR_P = [0, 0.7], DAIR_R = [0.3, 0.92];
+  /* the down air's: 210 (in front, below) through 180 (straight down) to 150 (behind, below); [degrees, a spiking middle step] */
+  const DAIR_ARC = [[210, 0], [195, 1], [180, 1], [165, 1], [150, 0]], DAIR_P = [0, 0.7], DAIR_R = [0.3, 0.92];
   /* the forward smash's: degrees in front of straight up (0 overhead, 90 level, 100 just below); round her shoulder after the lunge */
   const FSM_ARC = [[0, 13, 70, 36, 92], [25, 15, 55, 38, 98], [50, 17, 42, 40, 104], [75, 17, 38, 40, 104], [100, 14, 30, 38, 96]], FSM_P = [0.18, 0.68];
   const FAIR_ARC = [[340, 8, 55, 30, 68], [318, 9, 48, 32, 70], [295, 10, 43, 33, 74], [272, 10, 40, 33, 74], [250, 8, 30, 30, 66]], FAIR_P = [0.05, 0.75];
@@ -1378,8 +1378,8 @@ const BRAND = (() => {
         bair: { t: 38, air: 1, ll: 13, ac0: 5, ac: 34, h: BAIR_ARC.map(([th, d, a, b, k], j) => { const u = th * Math.PI / 180, sx = -Math.sin(u), sy = Math.cos(u);
           return cap(9 + j, 9 + j, BAIR_P[0] + sx * BAIR_R[0], BAIR_P[1] + sy * BAIR_R[0], BAIR_P[0] + sx * BAIR_R[1], BAIR_P[1] + sy * BAIR_R[1], 0.17, d, a, b, k, { g: 1 }); }) },
         uair: { t: 27, air: 1, ll: 8, ac0: 4, ac: 24, h: [cap(6, 9, 0.36, 0.88, -0.31, 1.14, 0.18, 8, 86, 25, 62)] },
-        /* Blade Drop (the owner, 2026-11-11): a sweep under her, from 150 to 210 on that clock (from behind her, through straight
-           down, to in front), frames 13 to 17. Anyone in the air is spiked (13% in the middle three, 10% at the ends); anyone standing
+        /* Blade Drop (the owner, 2026-11-11): a sweep under her, from 210 to 150 on that clock (from in front of her, through straight
+           down, to behind; reversed the same day), frames 13 to 17. Anyone in the air is spiked (13% in the middle three, 10% at the ends); anyone standing
            is popped up. One hit. */
         dair: { t: 41, air: 1, ll: 15, ac0: 5, ac: 37, h: DAIR_ARC.flatMap(([th, mid], j) => { const u = th * Math.PI / 180, sx = -Math.sin(u), sy = Math.cos(u), c = (d, a, b, k, o) => cap(13 + j, 13 + j, DAIR_P[0] + sx * DAIR_R[0], DAIR_P[1] + sy * DAIR_R[0], DAIR_P[0] + sx * DAIR_R[1], DAIR_P[1] + sy * DAIR_R[1], 0.18, d, a, b, k, Object.assign({ g: 1 }, o));
           return mid ? [c(13, 275, 30, 94, { vAir: 1 }), c(9, 59, 35, 65, { vGnd: 1 })] : [c(10, 280, 28, 80, { vAir: 1 }), c(8, 60, 32, 60, { vGnd: 1 })]; }) },
