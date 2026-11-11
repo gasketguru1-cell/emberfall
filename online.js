@@ -83,7 +83,7 @@
       link.onMessage(m => {
         if (m.t !== 'hello') return;
         if (m.v !== VERSION) { link.send({ t: 'refuse', why: 'different game versions' }); status('Your friend has a different version of the game.'); return; }
-        link.send({ t: 'welcome', pick: +$('on-pick').value, v: VERSION }); begin(0, +$('on-pick').value, m.pick);
+        link.send({ t: 'welcome', pick: +$('on-pick').value, v: VERSION, stocks: OPT.stocks }); begin(0, +$('on-pick').value, m.pick, OPT.stocks);
       });
     } catch (e) { status('Could not host: ' + e.message); }
   };
@@ -91,20 +91,20 @@
   $('on-go').onclick = async () => {
     try {
       status('Connecting...'); link = await via().join($('on-code').value.trim());
-      link.onMessage(m => { if (m.t === 'welcome') begin(1, m.pick, +$('on-pick').value); else if (m.t === 'refuse') status('The host refused: ' + m.why); });
+      link.onMessage(m => { if (m.t === 'welcome') begin(1, m.pick, +$('on-pick').value, m.stocks); else if (m.t === 'refuse') status('The host refused: ' + m.why); });
       const hello = () => { if (!NET.session() && link) { link.send({ t: 'hello', pick: +$('on-pick').value, v: VERSION }); setTimeout(hello, 500); } }; hello();   /* repeated until answered: packets can be lost */
     } catch (e) { status('Could not join: ' + e.message); }
   };
   /* both machines: the same match, then the netcode takes over the loop (main.js calls NET.tick) */
-  function begin(me, pick0, pick1) {
+  function begin(me, pick0, pick1, stocks) {   /* stocks: the host's choice, so both ends play the same match */
     if (NET.session()) return;
     ov.style.display = 'none'; UI_MODAL = false; padNav.stop(); kb.hide();
-    TRAINING = false; slots[0] = { dev: 'kb', pick: pick0, ready: true }; slots[1] = { dev: 'kb', pick: pick1, ready: true }; startMatch();
+    TRAINING = false; slots[0] = { dev: 'kb', pick: pick0, ready: true }; slots[1] = { dev: 'kb', pick: pick1, ready: true }; startMatch(stocks);
     for (const f of F) { f.ctl = new Ctl('cpu'); f.ctl.cFall = true; }   /* people on both ends: the right stick fast-falls */
     const local = () => { const k = readKb(), pads = navigator.getGamepads ? [...navigator.getGamepads()].filter(Boolean) : [], p = pads.length ? readPad(pads[0].index) : null;
       if (!p) return k; for (const key in k) if (typeof k[key] === 'boolean') k[key] = k[key] || p[key]; if (Math.abs(p.lx) > Math.abs(k.lx)) k.lx = p.lx; if (Math.abs(p.ly) > Math.abs(k.ly)) k.ly = p.ly; if (Math.abs(p.cx) > Math.abs(k.cx)) k.cx = p.cx; if (Math.abs(p.cy) > Math.abs(k.cy)) k.cy = p.cy; return k; };
     NET.start(me, link, { local });
-    link.onMessage(m => { if (m.t === 'hello' && me === 0) link.send({ t: 'welcome', pick: pick0, v: VERSION }); });   /* a late repeat of hello: answer again, harmless */
+    link.onMessage(m => { if (m.t === 'hello' && me === 0) link.send({ t: 'welcome', pick: pick0, v: VERSION, stocks }); });   /* a late repeat of hello: answer again, harmless */
   }
   /* connection quality, shown in the corner during an online match */
   const line = document.createElement('div'); line.style.cssText = 'position:fixed;left:12px;bottom:8px;z-index:20;font:12px ui-monospace,monospace;color:#9aa3d6;pointer-events:none'; document.body.appendChild(line);

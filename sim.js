@@ -21,7 +21,7 @@ const MOVE = { dashKeep: 1, boost: [0.31, 0.27, 0.23, 0.19], launchBrake: 0.03 }
 function jumpV(h, g) { let lo = 0, hi = 20; for (let k = 0; k < 40; k++) { const v = (lo + hi) / 2; let y = 0; for (let s = v; s > 0; s -= g) y += s; if (y < h) lo = v; else hi = v; } return (lo + hi) / 2; }
 
 /* ---------- Rules and feel (movement numbers follow the player's own platforms.ini) ---------- */
-const STOCKS = 3, MATCH_FRAMES = 8 * 60 * 60;
+let STOCKS = 3; const MATCH_FRAMES = 8 * 60 * 60;
 const T = {
   drop_stick_y: -0.60, drop_flick_frames: 6, landing_drop_buffer: 8,
   shield_drop_stick_y: -0.55, air_pass_stick_y: -0.70, air_pass_max_x: 0.40,
@@ -131,6 +131,11 @@ function setArcs(on) { DBG.arcs = !!on; try { localStorage.setItem('emberfall.ar
 /* The switches at the top right of the fighter select: + (Start) away from a fighter hides or shows them. Remembered. */
 let SWITCHES = true; try { SWITCHES = localStorage.getItem('emberfall.switches') !== '0'; } catch (e) { /* no storage */ }
 function setSwitches(on) { SWITCHES = !!on; try { localStorage.setItem('emberfall.switches', on ? '1' : '0'); } catch (e) { /* no storage */ } beep(on ? 700 : 420, 0.05, 'square', 0.03); }
+/* Options (the button at the top left of the fighter select): how many stocks a match is played with, and the stage. Remembered. */
+const STAGES = [{ id: 'forge', name: 'The Forge Isle' }];   /* only one stage for now */
+const OPT = { stocks: 3, stage: 0 };
+try { const o = JSON.parse(localStorage.getItem('emberfall.options') || '{}'); if (o.stocks >= 1 && o.stocks <= 99) OPT.stocks = o.stocks | 0; if (o.stage >= 0 && o.stage < STAGES.length) OPT.stage = o.stage | 0; } catch (e) { /* no storage */ }
+function saveOpt() { try { localStorage.setItem('emberfall.options', JSON.stringify(OPT)); } catch (e) { /* no storage */ } }
 function setHitFx(on) { DBG.fx = !!on; try { localStorage.setItem('emberfall.hitfx', on ? '1' : '0'); } catch (e) { /* no storage */ } }
 /* Training mode: no clock, stocks never run out, and a true-combo counter. A combo is every hit landed while the target is
    still in hitstun (or held) from the one before; it ends the moment the target can act again. */
@@ -2790,7 +2795,8 @@ let slots = [null, null], DEVS = {};
 const cam = { x: 0, y: 30, s: 3.4 };
 function devCtl(dev) { return DEVS[dev] || (DEVS[dev] = new Ctl(dev)); }
 function allDevs() { const d = ['kb']; const gp = navigator.getGamepads ? navigator.getGamepads() : []; for (let n = 0; n < gp.length && n < 4; n++) if (gp[n]) d.push('pad' + n); return d; }
-function startMatch() {
+function startMatch(stocks) {   /* stocks: an online match plays with the host's count; otherwise the options' */
+  STOCKS = stocks >= 1 ? stocks | 0 : OPT.stocks;
   const s0 = slots[0], s1 = slots[1] || { dev: 'cpu', pick: CPU_PICK >= 0 ? CPU_PICK : Math.random() * ROSTER.length | 0 };   /* the CPU's token, or random */
   const c0 = devCtl(s0.dev), c1 = s1.dev === 'cpu' ? new Ctl('cpu') : devCtl(s1.dev);
   for (const c of [c0, c1]) { c.tfAge = 99; c.tfReq = false; }
@@ -2819,6 +2825,37 @@ function rosterTile(k) { const n = ROSTER.length, tw = Math.min(168, (W - 120) /
 const CPU_CARD = [W - 44 - 460, 446, 460, 158], TRAIN_PILL = [W - 44 - 214, 100, 214, 34], ARC_PILL = [W - 44 - 214, 140, 214, 34];
 /* Desktop app only (window.desktop): Online and Quit, under the switches, so a controller can reach them too. */
 const ONLINE_PILL = [W - 44 - 214, 180, 214, 34], QUIT_PILL = [W - 44 - 214, 220, 214, 34];
+/* The Options button, and the Options panel it opens (drawn by hud.js from the same boxes). Rows: Stocks, Stage, Done. */
+const OPT_PILL = [44, 20, 214, 34], OPT_UI = { open: false, row: 0, esc: false };
+function optLayout() { const P = [W / 2 - 300, 140, 600, 400], rows = [0, 1].map(k => { const y = P[1] + 96 + k * 84; return { box: [P[0] + 30, y, 540, 68], l: [P[0] + 290, y + 14, 40, 40], r: [P[0] + 510, y + 14, 40, 40] }; });
+  return { P, rows, done: [W / 2 - 90, P[1] + P[3] - 104, 180, 46] }; }
+function optOpen() { OPT_UI.open = true; OPT_UI.row = 0; OPT_UI.esc = true; for (const c of Object.values(DEVS)) { c.oh = c.ov = 0; c.orep = 0; } beep(700, 0.05, 'square', 0.03); }
+function optClose() { OPT_UI.open = false; saveOpt(); beep(420, 0.05, 'square', 0.03); }
+function optChange(row, d) {
+  if (row === 0) { const n = clamp(OPT.stocks + d, 1, 99); if (n === OPT.stocks) { beep(220, 0.04, 'square', 0.02); return; } OPT.stocks = n; beep(420 + Math.min(n, 12) * 30, 0.04, 'square', 0.03); }
+  else if (row === 1) { const n = STAGES.length; if (n < 2) { beep(220, 0.04, 'square', 0.02); return; } OPT.stage = (OPT.stage + d + n) % n; beep(600, 0.04, 'square', 0.03); }
+  saveOpt();
+}
+/* a controller or the keyboard on the panel: up / down picks a row, left / right changes it (held to repeat), A changes it or
+   presses Done, B / Start / Esc closes */
+function optInput(c) {
+  const esc = c.dev === 'kb' && !!keys.Escape;
+  if (c.pressed('spc') || c.pressed('start') || c.pressed('sel') || (esc && !OPT_UI.esc)) { OPT_UI.esc = esc; optClose(); return; }
+  if (c.dev === 'kb') OPT_UI.esc = esc;
+  const lx = c.c.lx, ly = c.c.ly, hx = lx > 0.6 ? 1 : lx < -0.6 ? -1 : 0, vy = Math.abs(ly) > 0.6 && Math.abs(ly) > Math.abs(lx) ? sgn(ly) : 0;
+  if (vy && vy !== c.ov) { OPT_UI.row = (OPT_UI.row - vy + 3) % 3; beep(440, 0.03, 'square', 0.02); } c.ov = vy;
+  if (OPT_UI.row < 2) { if (hx && hx === c.oh) { if (++c.orep > 20 && c.orep % 4 === 0) optChange(OPT_UI.row, hx); } else if (hx) { c.orep = 0; optChange(OPT_UI.row, hx); } } c.oh = hx;
+  if (c.pressed('atk')) { if (OPT_UI.row === 2) optClose(); else if (OPT_UI.row === 0 && OPT.stocks >= 99) { OPT.stocks = 1; saveOpt(); beep(450, 0.04, 'square', 0.03); }   /* A past 99 goes round to 1 */ else optChange(OPT_UI.row, 1); }
+}
+/* the mouse (or a finger): the Options button opens the panel; on it, the arrows change a row, Done or anywhere outside closes it */
+function optClick(x, y) {
+  if (mode !== 'select' || UI_MODAL || CMENU || (typeof ML !== 'undefined' && ML.open)) return false;
+  if (!OPT_UI.open) { if (!inBox(OPT_PILL, x, y)) return false; optOpen(); return true; }
+  const L = optLayout();
+  for (let k = 0; k < L.rows.length; k++) { const r = L.rows[k]; if (inBox(r.l, x, y)) { OPT_UI.row = k; optChange(k, -1); return true; } if (inBox(r.r, x, y)) { OPT_UI.row = k; optChange(k, 1); return true; } if (inBox(r.box, x, y)) { OPT_UI.row = k; return true; } }
+  if (inBox(L.done, x, y) || !inBox(L.P, x, y)) optClose();
+  return true;
+}
 const DESKTOP = () => typeof window !== 'undefined' && !!window.desktop;
 let UI_MODAL = false, QUIT_ASK = 0;   /* UI_MODAL: a screen drawn over the game (the online menu) has the controllers; QUIT_ASK: frames left to confirm quitting */
 const inBox = (b, x, y) => x >= b[0] && x <= b[0] + b[2] && y >= b[1] && y <= b[1] + b[3];
@@ -2837,7 +2874,8 @@ function stepSelect() {
   for (const dev of allDevs()) {
     const c = devCtl(dev); c.poll(readDev(dev));
     if (UI_MODAL) continue;   /* the online menu is open: it reads the controllers itself */
-    if (typeof ML !== 'undefined' && ML.open) { if (dev === ML.dev) mlInput(c); continue; }   /* a move list is open (movelist.js): only its player turns the pages */
+    if (typeof ML !== 'undefined' && ML.open) { if (dev === ML.dev) mlInput(c); continue; }
+    if (OPT_UI.open) { optInput(c); continue; }   /* the Options panel: any controller or the keyboard works it */   /* a move list is open (movelist.js): only its player turns the pages */
     if (c.pressed('sel')) { openCMenu(dev); return; }   /* Backspace, or - on a controller: the controls screen for that device */
     if (c.pressed('jmp')) { setBoxes(!DBG.boxes); beep(DBG.boxes ? 700 : 420, 0.05, 'square', 0.03); }   /* jump button: show or hide hitboxes */
     if (c.pressed('shd')) { setHitFx(!DBG.fx); beep(DBG.fx ? 700 : 420, 0.05, 'square', 0.03); }   /* shield button: hit sparks and flash on or off */
@@ -2859,6 +2897,7 @@ function stepSelect() {
     if (typeof mlOpen === 'function' && dev === 'kb' && mlPlusKey()) { if (over >= 0) mlOpen(ROSTER[over], 0, c, 0, true); else setSwitches(!SWITCHES); continue; }
     if (c.pressed('start')) { if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; } if (typeof mlOpen === 'function' && over >= 0) { mlOpen(ROSTER[over], 0, c, 0, true); continue; } setSwitches(!SWITCHES); continue; }   /* anywhere else: hide or show the switches */
     else if (c.pressed('atk')) {
+      if (inBox(OPT_PILL, sl.cx, sl.cy)) { optOpen(); continue; }
       if (SWITCHES && DESKTOP() && inBox(ONLINE_PILL, sl.cx, sl.cy)) { if (window.openOnline) window.openOnline(); beep(600, 0.05, 'square', 0.03); continue; }
       if (SWITCHES && DESKTOP() && inBox(QUIT_PILL, sl.cx, sl.cy)) { if (QUIT_ASK > 0) window.close(); else { QUIT_ASK = 150; beep(300, 0.08, 'square', 0.04); } continue; }   /* press twice to quit */
       if (SWITCHES && inBox(TRAIN_PILL, sl.cx, sl.cy)) { setTraining(!TRAINING); beep(TRAINING ? 700 : 420, 0.05, 'square', 0.03); }

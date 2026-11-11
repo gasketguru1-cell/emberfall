@@ -9,7 +9,8 @@ function drawHud() {
     const x = W * (f.idx ? 0.68 : 0.32), y = H - 86, pc = f.idx ? '#6cb4ff' : '#ff7b6c';
     g.fillStyle = 'rgba(10,10,20,.6)'; rr(x - 120, y, 240, 74, 12); g.fill(); g.fillStyle = pc; rr(x - 120, y, 8, 74, 4); g.fill();
     g.textAlign = 'left'; g.font = 'bold 16px system-ui, sans-serif'; g.fillStyle = pc; g.fillText((f.ctl.dev === 'cpu' ? 'CPU ' + (f.ctl.ai.lv || CPU_LEVEL) : 'P' + (f.idx + 1)) + '  ' + f.def.name, x - 102, y + 22);
-    for (let k = 0; k < f.stocks; k++) { g.fillStyle = '#ffd98a'; g.beginPath(); g.arc(x - 96 + k * 18, y + 40, 6, 0, TAU); g.fill(); }
+    if (f.stocks <= 5) for (let k = 0; k < f.stocks; k++) { g.fillStyle = '#ffd98a'; g.beginPath(); g.arc(x - 96 + k * 18, y + 40, 6, 0, TAU); g.fill(); }
+    else { g.fillStyle = '#ffd98a'; g.beginPath(); g.arc(x - 96, y + 40, 6, 0, TAU); g.fill(); g.font = 'bold 14px system-ui, sans-serif'; g.fillText('× ' + f.stocks, x - 84, y + 45); }   /* many stocks: one dot and the count */
     if (f.def.transform) drawIntensity(f, x, y);
     else if (f.def.forms.length > 1) f.def.forms.slice(0, f.def.cycle || 99).forEach((fm, k) => { g.fillStyle = k === f.fi % (f.def.cycle || 99) ? '#fff' : 'rgba(255,255,255,.35)'; g.font = (k === f.fi % (f.def.cycle || 99) ? 'bold ' : '') + '12px system-ui, sans-serif'; g.fillText(fm.label || fm.name, x - 102 + k * 42, y + 64); });
     g.textAlign = 'right'; g.font = 'bold 44px system-ui, sans-serif'; g.fillStyle = pctCol(f.pct); const jx = f.flash > 0 ? (Math.random() - 0.5) * 6 : 0; g.fillText(Math.round(f.pct) + '%', x + 106 + jx, y + 52);
@@ -179,7 +180,7 @@ function drawSelect(three) {
   g.save(); g.shadowColor = 'rgba(255,130,40,.65)'; g.shadowBlur = 34 + Math.sin(t * 0.05) * 8;
   q = g.createLinearGradient(0, 40, 0, 112); q.addColorStop(0, '#fff6dc'); q.addColorStop(0.5, '#ffc56a'); q.addColorStop(1, '#f0702c');
   g.lineWidth = 7; g.strokeStyle = '#2a1410'; g.lineJoin = 'round'; g.strokeText('EMBERFALL', W / 2 + 6, 104); g.fillStyle = q; g.fillText('EMBERFALL', W / 2 + 6, 104); g.restore();
-  g.font = 'bold 14px system-ui, sans-serif'; spaced(4); g.fillStyle = '#f3dfb6'; g.fillText('3 STOCKS   ·   8 MINUTES   ·   THE FORGE ISLE', W / 2 + 2, 138); spaced(0);
+  g.font = 'bold 14px system-ui, sans-serif'; spaced(4); g.fillStyle = '#f3dfb6'; g.fillText(OPT.stocks + (OPT.stocks === 1 ? ' STOCK' : ' STOCKS') + '   ·   8 MINUTES   ·   ' + STAGES[OPT.stage].name.toUpperCase(), W / 2 + 2, 138); spaced(0);
   for (const dir of [-1, 1]) { q = g.createLinearGradient(W / 2 + dir * 250, 0, W / 2 + dir * 430, 0); q.addColorStop(0, 'rgba(255,170,90,.85)'); q.addColorStop(1, 'rgba(255,170,90,0)'); g.fillStyle = q; g.fillRect(dir > 0 ? W / 2 + 250 : W / 2 - 430, 132, 180, 2); }
 
   /* ---- the roster: one portrait tile for each fighter, with each player's marker on the one they are on ---- */
@@ -297,8 +298,38 @@ function drawSelect(three) {
     g.beginPath(); g.arc(x + 24, y + 24 - lift, 18, 0, TAU); g.fill(); g.restore();
     g.strokeStyle = hov ? '#ffd98a' : '#fff'; g.lineWidth = 2.5; g.beginPath(); g.arc(x + 24, y + 24 - lift, 18, 0, TAU); g.stroke();
     g.textAlign = 'center'; g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#16121f'; g.fillText('CPU', x + 24, y + 28 - lift); }
+  drawOptButton();
   g.textAlign = 'center'; drawUpdateNote(14);
+  drawOptions();
   drawCMenu();
+}
+/* the Options button at the top left of the fighter select (sim.js: OPT_PILL), lit while a cursor or the mouse is on it */
+function drawOptButton() {
+  const [x, y, w, h] = OPT_PILL, hot = OPT_UI.open || slots.some(q => q && q.cx !== undefined && inBox(OPT_PILL, q.cx, q.cy)) || (MOUSE && inBox(OPT_PILL, MOUSE.x, MOUSE.y));
+  g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, h, 17); g.fill(); g.strokeStyle = hot ? '#ffd166' : 'rgba(255,255,255,.16)'; g.lineWidth = hot ? 2 : 1; g.stroke();
+  const cx = x + 20, cy = y + 17; g.fillStyle = '#ffd166'; g.beginPath(); for (let k = 0; k < 16; k++) { const a = k * Math.PI / 8, r = k % 2 ? 6 : 9; g.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); } g.closePath(); g.fill();   /* a little cog */
+  g.fillStyle = '#2a1208'; g.beginPath(); g.arc(cx, cy, 3, 0, TAU); g.fill();
+  g.textAlign = 'left'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = '#ffe2a8'; g.fillText('Options', x + 38, y + 22);
+  g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('stocks, stage', x + 108, y + 22);
+}
+/* the Options panel: Stocks and Stage, each with arrows, and Done */
+function drawOptions() {
+  if (!OPT_UI.open) return; const L = optLayout(), [px, py, pw, ph] = L.P;
+  g.fillStyle = 'rgba(6,5,12,.62)'; g.fillRect(0, 0, W, H);
+  g.save(); g.shadowColor = 'rgba(0,0,0,.6)'; g.shadowBlur = 30; g.fillStyle = 'rgba(22,18,38,.97)'; rr(px, py, pw, ph, 18); g.fill(); g.restore();
+  g.strokeStyle = 'rgba(255,209,102,.45)'; g.lineWidth = 2; rr(px, py, pw, ph, 18); g.stroke();
+  g.textAlign = 'center'; g.font = '900 30px system-ui, sans-serif'; spaced(6); g.fillStyle = '#ffd98a'; g.fillText('OPTIONS', W / 2 + 3, py + 56); spaced(0);
+  const vals = [[OPT.stocks + (OPT.stocks === 1 ? ' stock' : ' stocks'), 'per player, 1 to 99', OPT.stocks > 1, OPT.stocks < 99], [STAGES[OPT.stage].name, STAGES.length > 1 ? (OPT.stage + 1) + ' of ' + STAGES.length : 'the only stage, for now', STAGES.length > 1, STAGES.length > 1]];
+  L.rows.forEach((r, k) => { const [bx, by, bw, bh] = r.box, sel = OPT_UI.row === k, [val, sub, canL, canR] = vals[k];
+    g.fillStyle = sel ? 'rgba(255,209,102,.13)' : 'rgba(255,255,255,.04)'; rr(bx, by, bw, bh, 12); g.fill(); if (sel) { g.strokeStyle = '#ffd166'; g.lineWidth = 2; rr(bx, by, bw, bh, 12); g.stroke(); }
+    g.textAlign = 'left'; g.font = 'bold 20px system-ui, sans-serif'; g.fillStyle = sel ? '#fff' : '#d9d3ee'; g.fillText(k ? 'Stage' : 'Stocks', bx + 24, by + 42);
+    for (const [b, d, on] of [[r.l, -1, canL], [r.r, 1, canR]]) { const [ax, ay, aw, ah] = b, mx = ax + aw / 2, my = ay + ah / 2;
+      g.fillStyle = on ? (sel ? '#ffd166' : 'rgba(255,209,102,.55)') : 'rgba(255,255,255,.12)'; g.beginPath(); g.moveTo(mx + d * 9, my); g.lineTo(mx - d * 7, my - 11); g.lineTo(mx - d * 7, my + 11); g.closePath(); g.fill(); }
+    const vx = (r.l[0] + r.l[2] + r.r[0]) / 2; g.textAlign = 'center'; g.font = 'bold 22px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(val, vx, by + 36);
+    g.font = '12px system-ui, sans-serif'; g.fillStyle = '#9d96b8'; g.fillText(sub, vx, by + 56); });
+  { const [dx, dy, dw, dh] = L.done, sel = OPT_UI.row === 2; g.fillStyle = sel ? '#ffd166' : 'rgba(255,209,102,.18)'; rr(dx, dy, dw, dh, 23); g.fill();
+    g.textAlign = 'center'; g.font = 'bold 18px system-ui, sans-serif'; g.fillStyle = sel ? '#2a1208' : '#ffe2a8'; g.fillText('Done', dx + dw / 2, dy + 30); }
+  g.font = '12px system-ui, sans-serif'; g.fillStyle = '#9d96b8'; g.fillText('Stick or arrows: up / down picks, left / right changes   ·   A: change or Done   ·   B or Start: close', W / 2, py + ph - 22);
 }
 /* Training: the true-combo counter at the top right, one panel per player who is landing hits. */
 function drawCombo() {
