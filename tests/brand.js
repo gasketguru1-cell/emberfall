@@ -84,6 +84,8 @@ vm.runInThisContext(`
     check('up smash: the scoop lifts the target a set distance into the cleave, at 0% and at 120%', us.hits === 2 && near(us.pct, 15 * B, 0.3) && high === 2, 'at 0%: ' + us.hits + ' hits, ' + pct(us.pct) + ' (15% before the bonus); at 120%: ' + high + ' hits');
     const na = swing('nair', 5, { air: 20, tAir: 20 }), naHigh = (() => { const [b, f] = setup(BR, FL, 0, 5); airborne(b, 0, 20); airborne(f, 5, 20); f.pct = 120; b.startMove('nair'); let n = 0, p = 120; run(40, () => { if (f.pct > p + 0.01) { n++; p = f.pct; } }); return n; })();
     check('neutral air: hilt then blade both hit a close target, at 0% and at 120%', na.hits === 2 && near(na.pct, 11 * B, 0.3) && naHigh === 2, 'at 0%: ' + na.hits + ' hits, ' + pct(na.pct) + ' (11% before the bonus); at 120%: ' + naHigh + ' hits');
+    { let tot = 0, both = 0; for (const bvy of [2, 0, -2]) for (const gap of [-4, 2, 6]) for (const dy of [-4, 0, 5]) { const [b, f] = setup(BR, FL, 0, gap); airborne(b, 0, 30); airborne(f, gap, 30 + dy); b.vy = bvy; b.startMove('nair'); let n = 0, p = 0; run(30, () => { b.vx = 1; if (f.pct > p + 0.01) { n++; p = f.pct; } }); if (n) { tot++; if (n === 2) both++; } }
+      check('neutral air: whenever the hilt lands the blade follows, with Brand rising, falling or drifting', tot >= 10 && both === tot, both + ' of ' + tot + ' hilt hits carried into the blade'); }
   }
 
   /* ---- air: spacing, the down air's point, landing ---- */
