@@ -11,8 +11,10 @@ B="${BLENDER:-/c/Program Files/Blender Foundation/Blender 5.2/blender.exe}"
 which=${1:-both}; dir=assets/joey; T=$dir/work/titan
 
 if [ "$which" = prep ]; then
-  : "${SCULPTS:?set SCULPTS to the folder holding 'human form.blend' and 'idle animation.blend'}"
-  "$B" -b "$SCULPTS/human form.blend" --python tools/blender/titan-prep.py -- --out "$T/human-raw.glb" --faces 60000 --cracks 0.3 --stick "$dir/source/stick-legs.json" | grep prep:
+  : "${SCULPTS:?set SCULPTS to the folder holding the red-cap sculpt and 'idle animation.blend'}"
+  # the human form: the owner's red-cap sculpt (it ends at the shorts), lifted onto stick-figure legs. The earlier muscled
+  # "human form" sculpt was:  --cracks 0.3 --stick "$dir/source/stick-legs.json" from "$SCULPTS/human form.blend"
+  "$B" -b "$SCULPTS/Meshy_AI_Red_Cap_Reflection_20261111_texture.blend" --python tools/blender/titan-prep.py -- --out "$T/human-raw.glb" --faces 60000 --lift 0.8 --stick "$dir/source/stick-legs-redcap.json" | grep prep:
   "$B" -b "$SCULPTS/idle animation.blend" --python tools/blender/titan-prep.py -- --out "$T/big-raw.glb" --faces 60000 | grep prep:
   exit 0
 fi

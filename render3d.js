@@ -117,8 +117,7 @@ function build() {
     return g;
   }
   function dress(v, f) {
-    /* on the fighter select a form may show a model of its own ('Joey (select)': the regular Joey, no hint of the change) */
-    const fm = f.form, col = f.alt ? fm.alt : fm.col, st = fm.st, SM = mode === 'select' && MODELS[fm.name + ' (select)'], M = SM && SM.ready ? SM : MODELS[fm.name], useModel = !!(M && M.ready), k = fm.name + (f.alt ? '*' : '') + (useModel ? '#model' : '') + (M === SM ? '@select' : '');
+    const fm = f.form, col = f.alt ? fm.alt : fm.col, st = fm.st, M = MODELS[fm.name], useModel = !!(M && M.ready), k = fm.name + (f.alt ? '*' : '') + (useModel ? '#model' : '');
     if (v.key === k) return; const prevKey = v.key; v.key = k;
     while (v.pivot.children.length) { const c = v.pivot.children.pop(); if (c.geometry) c.geometry.dispose(); }
     if (v.mixer) v.mixer.stopAllAction();

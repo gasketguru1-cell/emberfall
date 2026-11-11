@@ -1,0 +1,9 @@
+{
+ "note": "Joey's human form (from 2026-11-11, later): the owner's red-cap sculpt, which ends at the shorts, lifted 0.8 m (titan-prep.py --lift 0.8) and stood on stick-figure legs coming out of the shorts. Model coordinates after that: metres, y up, +z forward, x his left.",
+ "cut": -1,
+ "r": 0.03,
+ "legs": [
+  [[-0.15, 0.8, -0.14], [-0.17, 0.45, -0.1], [-0.18, 0.06, -0.15], [-0.18, 0.03, 0.05]],
+  [[0.15, 0.8, -0.14], [0.17, 0.45, -0.1], [0.18, 0.06, -0.15], [0.18, 0.03, 0.05]]
+ ]
+}

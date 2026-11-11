@@ -9,6 +9,7 @@
 #   "ik":    [ { "name": control bone, "bone": lower leg bone, "chain": 2, "paw": paw bone } ]   leg reach: the lower bone's tip follows the control
 #   "copyrot": [ { "bone": name, "from": control bone } ]   the bone points the way its control points, whatever its parents do (a held tool aimed directly)
 #   "rigid": [ { "bone": name, "box": [[x,y,z],[x,y,z]] } ]   every vertex inside the box follows that bone alone (a tool that must not bend)
+#            "skipDark": lum / "skipGrey": saturation leave out vertices painted darker / greyer than that (later entries win)
 #            or { "bone", "capsule": [[x,y,z],[x,y,z]], "r": radius }   within r of the line between two points (a blade at any angle)
 #            or { "bone", "disc": [x,y,z], "n": [x,y,z], "r": radius, "t": [near, far] }   a round slab: centre, facing, radius, and how far along the facing it runs
 #   "poses": { "<name>": { "<bone>": {...} } }   named poses a key can start from with "use"
@@ -88,6 +89,18 @@ def vertex_dark(target):
         for lp in target.data.loops:
             u, v = uv[lp.index].uv; c = px[min(h - 1, max(0, int((v % 1) * h))), min(w - 1, max(0, int((u % 1) * w)))]
             out[lp.vertex_index] = min(out[lp.vertex_index], float(c[0] * 0.3 + c[1] * 0.6 + c[2] * 0.1))
+        return out
+    except Exception as e:
+        print('rig: no base colour to read (%s)' % e); return None
+def vertex_sat(target):
+    # how coloured the base colour texture is at each vertex (0 grey .. 1 pure colour; the least over its corners), or None
+    try:
+        import numpy as np
+        img = next(n.image for m in target.data.materials for n in m.node_tree.nodes if n.type == 'TEX_IMAGE' and n.image and any(l.to_socket.name == 'Base Color' for l in n.outputs[0].links))
+        w, h = img.size; px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, -1); uv = target.data.uv_layers.active.data; out = [1.0] * len(target.data.vertices)
+        for lp in target.data.loops:
+            u, v = uv[lp.index].uv; c = px[min(h - 1, max(0, int((v % 1) * h))), min(w - 1, max(0, int((u % 1) * w)))]
+            mx, mn = max(c[:3]), min(c[:3]); out[lp.vertex_index] = min(out[lp.vertex_index], float((mx - mn) / mx) if mx > 1e-4 else 0.0)
         return out
     except Exception as e:
         print('rig: no base colour to read (%s)' % e); return None
@@ -199,6 +212,9 @@ for rg in spec.get('rigid', []):
     if 'skipDark' in rg:   # leave out vertices painted darker than this (a black boot touching a copper tool)
         lum = globals().get('lum_cache') or vertex_dark(mesh); globals()['lum_cache'] = lum
         if lum: n0 = len(idx); idx = [i for i in idx if lum[i] >= rg['skipDark']]; print('rig: %d dark vertices left out of %s' % (n0 - len(idx), rg['bone']))
+    if 'skipGrey' in rg:   # leave out vertices painted greyer than this (black and grey cloth touching a skin-coloured hand)
+        sat = globals().get('sat_cache') or vertex_sat(mesh); globals()['sat_cache'] = sat
+        if sat: n0 = len(idx); idx = [i for i in idx if sat[i] >= rg['skipGrey']]; print('rig: %d grey vertices left out of %s' % (n0 - len(idx), rg['bone']))
     for vg in mesh.vertex_groups: vg.remove(idx)
     mesh.vertex_groups[rg['bone']].add(idx, 1.0, 'REPLACE')
     print('rig: %d vertices rigid on %s' % (len(idx), rg['bone']))

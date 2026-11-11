@@ -436,7 +436,7 @@ function rebaser(ref, o) {
     const out = {};
     for (const [bn, tr] of Object.entries(pose)) {
       const r = ref[bn] || {}, n = Object.assign({}, tr);
-      if (CTRL[bn]) { n.move = mul(sub(tr.move, r.move), CTRL[bn]); }
+      if (CTRL[bn]) { n.move = mul(sub(tr.move, r.move), CTRL[bn]); if (o.off && o.off[bn]) n.move = n.move.map((v, i) => v + o.off[bn][i]); }
       else if (bn === 'hips') { n.move = mul(sub(tr.move, r.move), o.hips); n.rot = sub(tr.rot, r.rot); }
       else if (TORSO[bn]) { n.rot = sub(tr.rot, r.rot).map(v => v * (bn.startsWith('foot') ? 1 : o.torso || 1)); if (tr.move || r.move) n.move = sub(tr.move, r.move); }
       for (const k of ['rot', 'move']) if (n[k] && n[k].every(v => Math.abs(v) < 1e-9)) delete n[k];
@@ -591,9 +591,34 @@ humanT.clips.Idle = bake(2.4, 1 / 15, p => {
     c_footR: th.F(R_, -0.68, 0.05 + Math.max(0, sh) * 0.12 * (p < 0.8 ? 1 : 0), -0.2 + sh * 0.03), c_footL: th.F(L_, 0.62, 0.05 + Math.max(0, sh) * 0.12 * (p >= 0.8 ? 1 : 0), -0.36 - sh * 0.03) };
 });
 
+/* =====================================================================================================================
+   Joey's human form from 2026-11-11 (later): the owner's red-cap sculpt, an ordinary upright man holding a phone in his
+   left hand, cut off at the shorts. titan-prep.py lifts it 0.8 m and stands it on stick-figure legs coming out of the
+   shorts (assets/joey/source/stick-legs-redcap.json). He stands upright, so the original upright Joey's clips (above)
+   are rebased onto him as they are, scaled to his longer arms and body; his left hand rests up at his face with the
+   phone, so its targets are measured from where it would hang by his side (off), and the phone moves with the hand.
+   ===================================================================================================================== */
+const TN = { note: 'Joey (human form): the owner\'s red-cap sculpt on stick legs. Metres, feet on y = 0, facing +Z, his right is -X.',
+  pelvis: [0, 1.12, -0.14], waist: [0, 1.4, -0.14], ribs: [0, 1.72, -0.14], neck: [0, 2.18, -0.1], top: [0, 2.72, -0.05],
+  sho: [[-0.35, 2.03, -0.15], [0.35, 2.03, -0.15]], elb: [[-0.45, 1.45, -0.15], [0.47, 1.63, 0.12]], wri: [[-0.43, 1.03, -0.12], [0.18, 2.0, 0.33]], fist: [[-0.42, 0.88, -0.1], [-0.02, 2.12, 0.36]],
+  hip: [[-0.15, 0.8, -0.14], [0.15, 0.8, -0.14]], knee: [[-0.17, 0.45, -0.1], [0.17, 0.45, -0.1]], ankle: [[-0.18, 0.06, -0.15], [0.18, 0.06, -0.15]], toe: [[-0.18, 0.03, 0.05], [0.18, 0.03, 0.05]],
+  headBox: [[-0.2, 2.2, -0.32], [0.22, 2.76, 0.24]] };
+const humanN = rebased(human, TN, Object.assign({}, human.poses.stand, human.poses.rest), { hand: [1.7, 1.7, 1.7], foot: [1.15, 1.15, 1.15], hips: [1.15, 1.15, 1.15],
+  off: { c_handL: [0.43 - 0.18, 1.03 - 2.0, -0.12 - 0.33] } });
+humanN.rigid.push({ bone: 'handL', box: [[-0.15, 1.9, 0.24], [0.3, 2.4, 0.45]] });   /* the phone and the hand round it */
+/* the shorts move with the hips alone, and each stick-leg stroke with its own bone alone, so the legs swing out of the
+   shorts' openings without dragging the cloth (the strokes are rigid anyway: they bend only at the round joints) */
+humanN.rigid.push({ bone: 'hips', box: [[-0.4, 0.78, -0.5], [0.4, 1.34, 0.2]] });   /* down to the hem (0.8) */
+/* his right arm hangs against his side and the shorts, and the sculpt is one welded surface there: cut them apart */
+humanN.rigid.push({ bone: 'handR', box: [[-0.62, 0.8, -0.4], [-0.3, 1.1, 0.2]], skipGrey: 0.25, skipDark: 0.15, detach: [0.78, 1.06] });   /* the skin, not the cloth */
+humanN.rigid.push({ bone: 'foreR', box: [[-0.64, 1.1, -0.4], [-0.37, 1.5, 0.2]], detach: [1.1, 1.46] });   /* and the forearm from his side */
+for (const [s, x0, x1] of [['R', -0.32, -0.02], ['L', 0.02, 0.32]])
+  humanN.rigid.push({ bone: 'thigh' + s, box: [[x0, 0.45, -0.3], [x1, 0.779, 0.1]], only: true }, { bone: 'shin' + s, box: [[x0, 0.075, -0.3], [x1, 0.449, 0.1]], only: true },
+    { bone: 'foot' + s, box: [[x0, -0.1, -0.3], [x1, 0.074, 0.15]], only: true });
+
 /* ---- write ---- */
 fs.mkdirSync(OUT, { recursive: true });
-for (const [n, s] of [['human', humanT], ['big', bigT]]) {
+for (const [n, s] of [['human', humanN], ['big', bigT]]) {   /* humanT (the muscled 'human form' sculpt) is kept above but no longer built */
   const pack = s.pack; delete s.pack;
   fs.writeFileSync(path.join(OUT, 'rig-' + n + '.json'), JSON.stringify(s, null, 1));
   fs.writeFileSync(path.join(OUT, 'pack-' + n + '.json'), JSON.stringify(pack, null, 1) + '\n');
@@ -630,7 +655,5 @@ cur['Cronky Dong'] = { file: 'assets/joey/export/cronky-v1.glb', height: 27, fee
     grab: A('Grab', 0.27, 0.33, 0, 1.25), dgrab: A('Grab', 0.27, 0.33, 0, 1.25), pgrab: A('Grab', 0.27, 0.33, 0, 1.25), ledgeatk: A('Backhand', 0.23, 0.3, 0, 1.15), getup: A('Hammer', 0.37, 0.47, 0, 1.85),
     nspec: A('Wind', 0, 0.5, 0, 0.5), nspecR: A('Punch', 0.63, 0.7, 0, 2.05), nspecF: A('Punch', 0.63, 0.7, 0, 2.05), sspec: A('Headbutt', 0.67, 0.73, 0, 2.1), uspec: A('SpinG', 0.63, 2.1, 0, 3.5), uspecA: A('SpinA', 0.13, 1.43, 0, 2.3),
     dspec: A('Slap', 0.4, 0.77, 0, 1.55), dspecA: A('SlapAir', 0.63, 0.93, 0, 1.65), '*': A('Check', 0.17, 0.2, 0, 0.8) } };
-/* the fighter select shows the regular Joey (the first, photo-faced model, kept as joey-regular.glb from commit 793eebf),
-   so nothing there hints at what he becomes; render3d.js uses an entry named '<form> (select)' while players choose */
-cur['Joey (select)'] = { file: 'assets/joey/export/joey-regular.glb', height: 13.5, feel: 1, clips: common(0.15), strikers: [], springs: [], attacks: {} };
+delete cur['Joey (select)'];   /* the red-cap form is the regular Joey, so the select screen needs no model of its own */
 fs.writeFileSync(mf, JSON.stringify(cur, null, 1) + '\n'); console.log('manifest: ' + Object.keys(cur).join(', '));
