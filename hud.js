@@ -226,9 +226,8 @@ function drawSelect(three) {
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Attack arcs', x + 12, y + 22);
     g.fillStyle = on ? '#8fd3ff' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
     g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point + A  or  G key', x + 128, y + 22); }
-  g.textAlign = 'right'; g.font = '11px system-ui, sans-serif'; g.fillStyle = '#9d96bb'; g.fillText('+ away from a fighter: hide these', W - 44, DESKTOP() ? 270 : 190);
   }
-  if (DESKTOP()) for (const [box, label, hint, col, hot] of [[ONLINE_PILL, 'Online', 'point + A: host or join', '#ffb35c', false], [QUIT_PILL, QUIT_ASK > 0 ? 'Quit?' : 'Quit', QUIT_ASK > 0 ? 'press A again to quit' : 'point + A, twice', '#ff6a6a', QUIT_ASK > 0]]) {   /* desktop app: reachable with a controller's cursor */
+  if (SWITCHES && DESKTOP()) for (const [box, label, hint, col, hot] of [[ONLINE_PILL, 'Online', 'point + A: host or join', '#ffb35c', false], [QUIT_PILL, QUIT_ASK > 0 ? 'Quit?' : 'Quit', QUIT_ASK > 0 ? 'press A again to quit' : 'point + A, twice', '#ff6a6a', QUIT_ASK > 0]]) {   /* desktop app: reachable with a controller's cursor */
     const [x, y, w] = box; g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = hot ? col : 'rgba(255,255,255,.16)'; g.lineWidth = hot ? 2 : 1; g.stroke();
     g.textAlign = 'left'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = col; g.fillText(label, x + 12, y + 22);
     g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(hint, x + 80, y + 22); }
