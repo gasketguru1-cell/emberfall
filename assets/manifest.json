@@ -7641,7 +7641,7 @@
     "end": 0.8
    },
    "jab2": {
-    "clip": "Hook",
+    "clip": "Uppercut",
     "start": 0,
     "contact": [
      0.13,
@@ -7785,7 +7785,7 @@
     "end": 1.25
    },
    "ledgeatk": {
-    "clip": "Backhand",
+    "clip": "LedgeAtk",
     "start": 0,
     "contact": [
      0.23,
@@ -7794,7 +7794,7 @@
     "end": 1.15
    },
    "getup": {
-    "clip": "Hammer",
+    "clip": "GetupAtk",
     "start": 0,
     "contact": [
      0.37,

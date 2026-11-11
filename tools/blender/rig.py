@@ -14,6 +14,7 @@
 #   "poses": { "<name>": { "<bone>": {...} } }   named poses a key can start from with "use"
 #   "bones": [ { "name", "head": [x,y,z], "tail": [x,y,z], "parent": name or null, "connect": bool, "deform": bool } ]
 #   "clips": { "<name>": { "fps": 30, "loop": bool, "keys": [ { "t": seconds, "pose": { "<bone>": { "rot": [pitch, yaw, roll], "move": [x,y,z] } } } ] } }
+# "spin": degrees in a pose turns the bone about its own rest line (palm over), before "rot".
 # "aim": [x,y,z] in a pose turns the bone from the way it points at rest to point that way (the short way round), with "twist"
 # degrees about that line after; "rot" is then applied on top. For a held tool: say where it points, not how to get there.
 # --shots out.json --shotdir dir renders the clips and times listed in out.json (side view, her front to the right) for checking poses.
@@ -289,6 +290,8 @@ for name, clip in spec.get('clips', {}).items():
                 tgt = conv(tr['aim']).normalized(); A = restdir[bname].rotation_difference(tgt).to_matrix()
                 if tr.get('twist'): A = Quaternion(tgt, math.radians(tr['twist'])).to_matrix() @ A
                 D = D @ A
+            if tr.get('spin'):   # "spin": degrees about the bone's own rest line (a forearm or wrist turning the palm over)
+                D = D @ Quaternion(restdir[bname], math.radians(tr['spin'])).to_matrix()
             q = (R.inverted() @ D @ R).to_quaternion()
             if bname in lastq and lastq[bname].dot(q) < 0: q.negate()   # keep to the near side of the last key, so a turn goes the short way round
             lastq[bname] = q.copy(); pb.rotation_quaternion = q

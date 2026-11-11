@@ -387,24 +387,28 @@ K.Toss = keys([{ t: 0, use: GB, pose: CARRY }, { t: 0.5, in: 'snap', pose: { spi
 big.pack = { base: 'work/joey-big-rigged.glb', texture: 2048, out: 'export/cronky-v1.glb' };
 
 /* =====================================================================================================================
-   The owner's own sculpts (2026-11-11): both forms are now built on the owner's Meshy models ("human form": the
-   top-heavy body on stick-figure legs drawn in below the shorts; "idle animation": Cronky Dong), prepared by
-   tools/blender/titan-prep.py. Both stand at rest in a knuckle stance, fists on the floor, torso pitched well forward.
-   Every clip above is kept and rebased onto them: a key's rotations and the hips' move are taken relative to the
-   stance it was written around (Joey's relaxed "rest", Cronky Dong's knuckle stance KS) and the hand and foot targets
-   become moves from where the new body's own fists and feet rest, scaled to its longer arms.
+   The owner's A-pose models (2026-11-11, latest): "Red Cap Stance" (Joey, an ordinary man) and "Red Cap Titan" (Cronky
+   Dong), both standing straight with the arms out and the hands open, so they rig cleanly and the hands can open and
+   close (finger bones: the four fingers move together, the thumb on its own). Prepared by tools/blender/titan-prep.py,
+   skin given a farmer's tan by tools/blender/farmtan.py.
+   The clips above were written for upright generated bodies of the same height, so they carry over: the hand and foot
+   targets are re-placed for these bodies' longer arms and wider stance (retarget below), rotations are kept. Cronky
+   Dong's moves were then checked against the owner's animation atlas (Donkey Kong in Super Smash Bros. Ultimate as the
+   motion reference; original poses) and the ones that read differently are remade here, before the retarget.
    ===================================================================================================================== */
-function titan(T) {
-  const leg = (s, k) => [
+function apose(T) {
+  const side = (s, k) => [
+    { name: 'arm' + s, head: T.sho[k], tail: T.elb[k], parent: 'chest' },
+    { name: 'fore' + s, head: T.elb[k], tail: T.wri[k], parent: 'arm' + s, connect: true },
+    { name: 'hand' + s, head: T.wri[k], tail: T.knu[k], parent: 'fore' + s, connect: true },
+    { name: 'fing' + s + '1', head: T.knu[k], tail: T.mid[k], parent: 'hand' + s, connect: true },
+    { name: 'fing' + s + '2', head: T.mid[k], tail: T.tip[k], parent: 'fing' + s + '1', connect: true },
+    { name: 'thumb' + s, head: T.thb[k], tail: T.tht[k], parent: 'hand' + s },
+    { name: 'c_hand' + s, head: T.wri[k], tail: add(T.wri[k], [0, 0, 0.12]), parent: 'all', deform: false },
     { name: 'thigh' + s, head: T.hip[k], tail: T.knee[k], parent: 'hips' },
     { name: 'shin' + s, head: T.knee[k], tail: T.ankle[k], parent: 'thigh' + s, connect: true },
     { name: 'foot' + s, head: T.ankle[k], tail: T.toe[k], parent: 'shin' + s },
     { name: 'c_foot' + s, head: T.ankle[k], tail: add(T.ankle[k], [0, 0, 0.12]), parent: 'all', deform: false }];
-  const arm = (s, k) => [
-    { name: 'arm' + s, head: T.sho[k], tail: T.elb[k], parent: 'chest' },
-    { name: 'fore' + s, head: T.elb[k], tail: T.wri[k], parent: 'arm' + s, connect: true },
-    { name: 'hand' + s, head: T.wri[k], tail: T.fist[k], parent: 'fore' + s, connect: true },
-    { name: 'c_hand' + s, head: T.wri[k], tail: add(T.wri[k], [0, 0, 0.12]), parent: 'all', deform: false }];
   return { note: T.note, prep: { yaw: 0, translate: [0, 0, 0] },
     bones: [
       { name: 'all', head: [0, 0, 0], tail: [0, 0.15, 0], parent: null, deform: false },
@@ -412,188 +416,151 @@ function titan(T) {
       { name: 'spine', head: T.waist, tail: T.ribs, parent: 'hips', connect: true },
       { name: 'chest', head: T.ribs, tail: T.neck, parent: 'spine', connect: true },
       { name: 'head', head: T.neck, tail: T.top, parent: 'chest' },
-      ...arm('R', 0), ...arm('L', 1), ...leg('R', 0), ...leg('L', 1)],
+      ...side('R', 0), ...side('L', 1)],
     ik: [{ name: 'c_handL', bone: 'foreL', chain: 2 }, { name: 'c_handR', bone: 'foreR', chain: 2 }, { name: 'c_footL', bone: 'shinL', chain: 2 }, { name: 'c_footR', bone: 'shinR', chain: 2 }],
     rigid: [{ bone: 'head', box: T.headBox }], poses: {}, clips: {} };
 }
-/* Joint places read off gridded views of the prepared meshes (tools/blender/gridview.py). The sculpts are not quite
-   symmetric: the head sits a little to his left and the left fist is planted further out than the right. */
-const TH = { note: 'Joey (human form): the owner\'s sculpt on stick legs. Metres, feet on y = 0, facing +Z, his right is -X.',
-  pelvis: [0, 0.98, -0.5], waist: [0, 1.15, -0.25], ribs: [0.05, 1.3, 0.05], neck: [0.15, 1.35, 0.42], top: [0.2, 1.68, 0.62],
-  sho: [[-0.45, 1.25, 0.35], [0.5, 1.25, 0.32]], elb: [[-0.42, 0.74, 0.6], [0.6, 0.72, 0.5]], wri: [[-0.3, 0.28, 0.62], [0.45, 0.28, 0.54]], fist: [[-0.3, 0.05, 0.66], [0.45, 0.05, 0.58]],
-  hip: [[-0.62, 0.8, -0.22], [0.52, 0.8, -0.34]], knee: [[-0.67, 0.42, -0.08], [0.59, 0.42, -0.2]], ankle: [[-0.68, 0.05, -0.2], [0.62, 0.05, -0.36]], toe: [[-0.68, 0.03, 0.0], [0.62, 0.03, -0.16]],
-  headBox: [[0.03, 1.3, 0.43], [0.37, 1.74, 0.82]] };
-const TB = { note: 'Cronky Dong: the owner\'s sculpt. Metres, feet on y = 0, facing +Z, his right is -X.',
-  pelvis: [0, 0.92, -0.5], waist: [0, 1.12, -0.25], ribs: [0.05, 1.3, 0.05], neck: [0.17, 1.38, 0.44], top: [0.25, 1.7, 0.62],
-  sho: [[-0.48, 1.22, 0.32], [0.58, 1.22, 0.28]], elb: [[-0.42, 0.68, 0.78], [0.68, 0.72, 0.28]], wri: [[-0.2, 0.28, 0.78], [0.58, 0.28, 0.45]], fist: [[-0.17, 0.06, 0.8], [0.6, 0.06, 0.45]],
-  hip: [[-0.32, 0.85, -0.3], [0.32, 0.85, -0.45]], knee: [[-0.6, 0.58, 0.12], [0.42, 0.56, -0.55]], ankle: [[-0.66, 0.13, -0.08], [0.45, 0.13, -0.8]], toe: [[-0.65, 0.03, 0.3], [0.47, 0.03, -0.5]],
-  headBox: [[0.06, 1.3, 0.46], [0.42, 1.76, 0.86]] };
-/* rebase one pose (bone -> {rot, move, ...}) from the old body onto a titan body */
-function rebaser(ref, o) {
-  const sub = (a, b) => [0, 1, 2].map(i => (a ? a[i] : 0) - (b ? b[i] : 0)), mul = (a, s) => a.map((v, i) => v * s[i]);
-  const CTRL = { c_handR: o.hand, c_handL: o.hand, c_footR: o.foot, c_footL: o.foot }, TORSO = { spine: 1, chest: 1, head: 1, footR: 1, footL: 1 };
-  return pose => {
-    const out = {};
+const lerp = (a, b, u) => a + (b - a) * u, sm = x => x * x * (3 - 2 * x);
+/* both sides from the right side's points (the models are near enough symmetric) */
+const both = o => { const T = {}; for (const [k, v] of Object.entries(o)) T[k] = Array.isArray(v) && Array.isArray(v[0]) && k !== 'headBox' ? [v[0], mir(v[0])] : v; return T; };
+/* Joint places read off gridded views and the hand's own vertices (tools/blender/gridview.py). knu: the knuckles,
+   mid: the middle of the fingers, tip: the fingertips, thb/tht: the thumb's root and tip. */
+const THA = both({ note: 'Joey (human form): the owner\'s A-pose model. Metres, feet on y = 0, facing +Z, his right is -X.',
+  pelvis: [0, 0.95, -0.02], waist: [0, 1.1, -0.02], ribs: [0, 1.3, -0.02], neck: [0, 1.56, -0.02], top: [0, 1.9, 0],
+  sho: [[-0.19, 1.47, -0.05]], elb: [[-0.4, 1.2, -0.07]], wri: [[-0.55, 0.97, 0.04]], knu: [[-0.59, 0.885, 0.07]], mid: [[-0.605, 0.84, 0.08]], tip: [[-0.616, 0.795, 0.095]],
+  thb: [[-0.54, 0.95, 0.07]], tht: [[-0.525, 0.905, 0.155]],
+  hip: [[-0.1, 0.92, -0.02]], knee: [[-0.17, 0.5, 0.01]], ankle: [[-0.21, 0.08, -0.08]], toe: [[-0.24, 0.02, 0.12]],
+  headBox: [[-0.12, 1.6, -0.15], [0.12, 1.93, 0.2]] });
+const TBA = both({ note: 'Cronky Dong: the owner\'s A-pose model. Metres, feet on y = 0, facing +Z, his right is -X.',
+  pelvis: [0, 0.92, -0.12], waist: [0, 1.08, -0.12], ribs: [0, 1.3, -0.1], neck: [0, 1.6, -0.08], top: [0, 1.9, -0.06],
+  sho: [[-0.42, 1.44, -0.11]], elb: [[-0.59, 1.13, -0.03]], wri: [[-0.72, 0.83, 0.12]], knu: [[-0.82, 0.65, 0.24]], mid: [[-0.845, 0.575, 0.275]], tip: [[-0.835, 0.51, 0.29]],
+  thb: [[-0.68, 0.79, 0.15]], tht: [[-0.62, 0.66, 0.3]],
+  hip: [[-0.17, 0.86, -0.14]], knee: [[-0.24, 0.37, -0.13]], ankle: [[-0.29, 0.08, -0.17]], toe: [[-0.33, 0.02, 0.06]],
+  headBox: [[-0.13, 1.64, -0.26], [0.13, 1.95, 0.14]] });
+/* re-place an old clip's hand and foot targets on a new body. A hand target below the shoulder keeps its height (plus
+   `lift` near the floor: a bigger fist stands taller on its knuckles), above it scales with the arm; sideways, reach out
+   to the old shoulder's width becomes the new shoulder's width, past it scales with the arm; forward scales with the arm.
+   Feet keep their stride (scaled with the leg) from the new hips' width. The hips' move scales with the leg. */
+function retarget(old, J, T, o) {
+  const s = apose(T), k = o.arm, kl = o.leg, ox = Math.abs(J.sho[0][0]), nx = Math.abs(T.sho[0][0]);
+  const hand = (i, mv) => { const sd = i ? 1 : -1, a = add(J.wri[i], mv || [0, 0, 0]), u = a[0] * sd;
+    const x = sd * (u <= 0 ? u : u < ox ? u * nx / ox : nx + (u - ox) * k);
+    const y = a[1] > J.sho[i][1] ? T.sho[i][1] + (a[1] - J.sho[i][1]) * k : a[1] + o.lift * Math.max(0, 1 - a[1] / J.sho[i][1]);
+    return [x - T.wri[i][0], y - T.wri[i][1], a[2] * k - T.wri[i][2]]; };
+  const foot = (i, mv) => { const sd = i ? 1 : -1, a = add(J.ankle[i], mv || [0, 0, 0]);
+    return [a[0] + sd * (Math.abs(T.ankle[i][0]) - Math.abs(J.ankle[i][0])) - T.ankle[i][0], a[1] - J.ankle[i][1], (a[2] - J.ankle[i][2]) * kl]; };
+  const f = pose => { const out = {};
     for (const [bn, tr] of Object.entries(pose)) {
-      const r = ref[bn] || {}, n = Object.assign({}, tr);
-      if (CTRL[bn]) { n.move = mul(sub(tr.move, r.move), CTRL[bn]); }
-      else if (bn === 'hips') { n.move = mul(sub(tr.move, r.move), o.hips); n.rot = sub(tr.rot, r.rot); }
-      else if (TORSO[bn]) { n.rot = sub(tr.rot, r.rot).map(v => v * (bn.startsWith('foot') ? 1 : o.torso || 1)); if (tr.move || r.move) n.move = sub(tr.move, r.move); }
-      for (const k of ['rot', 'move']) if (n[k] && n[k].every(v => Math.abs(v) < 1e-9)) delete n[k];
-      out[bn] = n;
-    }
+      const n = Object.assign({}, tr);
+      if (bn === 'c_handR' || bn === 'c_handL') n.move = hand(bn === 'c_handL' ? 1 : 0, tr.move);
+      else if (bn === 'c_footR' || bn === 'c_footL') n.move = foot(bn === 'c_footL' ? 1 : 0, tr.move);
+      else if (bn === 'hips' && tr.move) n.move = tr.move.map(v => v * kl);
+      out[bn] = n; }
     return out; };
-}
-function rebased(old, T, ref, o) {
-  const s = titan(T), f = rebaser(ref, o);
-  for (const [k, p] of Object.entries(old.poses)) s.poses[k] = f(p);
-  for (const [k, c] of Object.entries(old.clips)) s.clips[k] = Object.assign({}, c, { keys: c.keys.map(key => key.pose ? Object.assign({}, key, { pose: f(key.pose) }) : key) });
+  for (const [nm, p] of Object.entries(old.poses)) s.poses[nm] = f(p);
+  for (const [nm, c] of Object.entries(old.clips)) s.clips[nm] = Object.assign({}, c, { keys: c.keys.map(key => key.pose ? Object.assign({}, key, { pose: f(key.pose) }) : key) });
   s.pack = old.pack; return s;
 }
-const humanT = rebased(human, TH, Object.assign({}, human.poses.stand, human.poses.rest), { hand: [1.4, 1.1, 1.4], foot: [1, 1, 1], hips: [1, 1, 1] });
-/* Cronky Dong's torso only comes 60% of the way up out of the hunch in poses written for an upright body (air, carry):
-   this sculpt is built bent, and straightening it fully would tear the waist */
-const bigT = rebased(big, TB, Object.assign({}, big.poses.stand, KS), { hand: [1.4, 1.2, 1.4], foot: [1.2, 1.2, 1.2], hips: [1, 0.6, 1], torso: 0.6 });
 
-/* ---- remade on the new bodies: the runs, Joey's walk and idle. Targets here are absolute places in the model (x his
-   left, y up, z forward) for the wrist or ankle, turned into moves from where the sculpt's own wrist or ankle rests. ---- */
-const at = T => ({
-  H: (k, x, y, z) => M(x - T.wri[k][0], y - T.wri[k][1], z - T.wri[k][2]),
-  F: (k, x, y, z) => M(x - T.ankle[k][0], y - T.ankle[k][1], z - T.ankle[k][2]) });
-const tb = at(TB), th = at(TH), R_ = 0, L_ = 1;
-const bake = (dur, step, fn) => { const ks = []; for (let t = 0; t <= dur + 1e-9; t += step) ks.push({ t: +t.toFixed(3), pose: fn(t / dur) }); ks[0].reset = true; return keys(ks); };
-const sm = x => x * x * (3 - 2 * x), lerp = (a, b, u) => a + (b - a) * u;
-/* a value that follows keyframes [phase, value] round a loop, eased between them */
-const loopv = (pts, p) => { p = ((p % 1) + 1) % 1; pts = pts.slice().sort((a, b) => a[0] - b[0]); for (let i = 0; i < pts.length; i++) { const [p0, v0] = pts[i], [p1, v1] = pts[(i + 1) % pts.length]; const e1 = p1 <= p0 ? p1 + 1 : p1, q = p < p0 ? p + 1 : p; if (q >= p0 && q <= e1) return Array.isArray(v0) ? v0.map((v, j) => lerp(v, v1[j], sm((q - p0) / (e1 - p0)))) : lerp(v0, v1, sm((q - p0) / (e1 - p0))); } return pts[0][1]; };
+/* ---- Cronky Dong's moves remade from the atlas (written on the old body's targets, like the rest, then re-placed) ---- */
+/* jab 2: a rising uppercut, the left fist driving up from low in front, chest and legs lifting into it */
+K.Uppercut = keys([{ t: 0, use: GB, pose: { chest: R(10, -14), c_handR: b.HR(0.9, 1.0, -0.2) } },
+  { t: 0.07, pose: { hips: HP(0, -0.05, 0), spine: R(34), chest: R(26, 16, 6), head: R(-54), c_handR: b.HR(0.6, 0.85, -0.3), c_handL: b.HL(0.45, 0.4, 0.22) } },
+  { t: 0.13, in: 'snap', pose: { hips: HP(0, 0.22, 0.06), spine: R(6), chest: R(-8, -18, -6), head: R(-18), c_handL: b.HL(0.55, 1.8, 0.06), c_handR: b.HR(0.2, 0.85, -0.5) } },
+  { t: 0.2, pose: { c_handL: b.HL(0.5, 1.88, 0.04) } }, { t: 0.55, in: 'quad', pose: { hips: HP(0, 0.06, 0.02), spine: R(20), chest: R(12, -4), head: R(-38), c_handL: b.HL(0.45, 0.8, 0.3), c_handR: b.HR(0.36, 0.3, -0.38) } }, { t: 1.05, ...backB }]);
+/* ftilt: an open-hand swat, the right arm swinging out from across the chest into a broad slap in front, carried past */
+K.Backhand = keys([{ t: 0, use: GB }, { t: 0.15, pose: { hips: HP(0, 0.06, -0.06), spine: R(22), chest: R(14, 26, 4), head: R(-40, -10), c_handR: b.HR(0.45, 1.15, 0.2) } },
+  { t: 0.23, in: 'snap', pose: Object.assign(SW(0.14), { spine: R(26), chest: R(14, -10), head: R(-44, 6), c_handR: b.HR(1.2, 0.9, -0.2) }) },
+  { t: 0.3, pose: { chest: R(14, -22), c_handR: b.HR(1.0, 0.85, -0.65) } }, { t: 0.7, in: 'quad', pose: { hips: HP(0, 0.04, 0.04), chest: R(20, -8), c_handR: b.HR(0.55, 0.4, -0.55) } }, { t: 1.15, ...backB }]);
+/* grab: one open hand shoots out and closes */
+K.Grab = keys([{ t: 0, use: GB }, { t: 0.17, pose: { hips: HP(0, 0.05, -0.04), chest: R(18, 10), c_handR: b.HR(0.35, 0.95, -0.3) } },
+  { t: 0.27, in: 'snap', pose: Object.assign(SW(0.12), { spine: R(22), chest: R(14, -12), head: R(-40), c_handR: b.HR(1.05, 0.9, -0.12) }) }, { t: 0.33, pose: {} },
+  { t: 0.8, in: 'quad', pose: { hips: HP(0, 0.04, 0), chest: R(20, 0), c_handR: b.HR(0.5, 0.5, -0.35) } }, { t: 1.25, ...backB }]);
+/* pummel: the free left hand slaps the held opponent, the holding hand stays put */
+K.Pummel = keys([{ t: 0, use: GB, pose: HOLDK }, { t: 0.06, pose: { chest: R(8, -10), c_handL: b.HL(0.45, 1.25, 0.35) } },
+  { t: 0.12, in: 'snap', pose: { chest: R(4, 10), c_handL: b.HL(0.7, 1.0, 0.05) } }, { t: 0.23, pose: { chest: R(6, 0), c_handL: b.HL(0.4, 0.13, 0.38) } }]);
+/* up throw: one arm heaves the opponent straight up, the other side low for balance */
+K.ThrowU = keys([{ t: 0, use: GB, pose: HOLDK }, { t: 0.22, pose: { hips: HP(0, -0.04, 0), spine: R(30), chest: R(22, 6), head: R(-48), c_handR: b.HR(0.5, 0.45, -0.3) } },
+  { t: 0.42, in: 'snap', pose: { hips: M(0, -0.12, 0), spine: R(4), chest: R(-10, -6, -8), head: R(-10), c_handR: b.HR(0.15, 2.35, -0.3), c_handL: b.HL(0.3, 0.6, 0.55), c_footR: b.FR(-0.06, 0, -0.26), c_footL: b.FL(-0.1, 0, 0.26) } },
+  { t: 0.55, pose: { c_handR: b.HR(0.12, 2.4, -0.32) } }, { t: 0.95, ...backB }]);
+/* down throw: one arm drives the opponent into the floor, the body folding forward over it */
+K.ThrowD = keys([{ t: 0, use: GB, pose: HOLDK }, { t: 0.25, pose: { hips: HP(0, 0.18, -0.06), spine: R(8), chest: R(-4, 10), head: R(-16), c_handR: b.HR(0.45, 1.6, -0.3), c_handL: b.HL(0.3, 0.7, 0.5) } },
+  { t: 0.42, in: 'snap', pose: kn({ hips: HP(0, -0.1, 0.12), spine: R(46), chest: R(28, -8), head: R(-62), c_handR: b.HR(0.95, 0.15, -0.2), c_handL: b.HL(0.4, 0.13, 0.42) }) },
+  { t: 0.55, pose: { hips: HP(0, -0.12, 0.12) } }, { t: 0.95, ...backB }]);
+/* cargo up throw: both arms heave the opponent overhead and finish high and apart */
+K.ThrowCU = keys([{ t: 0, use: 'stand', pose: CARRY }, { t: 0.2, pose: { hips: M(0, -0.2, 0), spine: R(10), c_handR: b.HR(0.05, 1.8, -0.22), c_handL: b.HL(0.05, 1.8, 0.22) } },
+  { t: 0.42, in: 'snap', pose: { hips: M(0, 0.02, 0), spine: R(-6), chest: R(-8), head: R(-24), c_handR: b.HR(0.0, 2.4, -0.55), c_handL: b.HL(0.0, 2.4, 0.55), c_footR: b.FR(0.0, 0.06), c_footL: b.FL(-0.04, 0.06) } },
+  { t: 0.55, pose: { c_handR: b.HR(-0.02, 2.35, -0.62), c_handL: b.HL(-0.02, 2.35, 0.62) } }, { t: 0.95, ...backB }]);
+/* cargo down throw: a bear hug, the opponent pulled down into his arms and squeezed against his chest, then let go */
+K.ThrowCD = keys([{ t: 0, use: 'stand', pose: CARRY }, { t: 0.18, pose: { hips: M(0, -0.08, 0), spine: R(8), chest: R(2), c_handR: b.HR(0.55, 1.4, -0.45), c_handL: b.HL(0.55, 1.4, 0.45) } },
+  { t: 0.32, in: 'snap', pose: { hips: M(0, -0.16, -0.04), spine: R(14), chest: Object.assign(R(10), { scale: [0.94, 1, 1.04] }), head: R(-14), c_handR: b.HR(0.5, 1.15, 0.08), c_handL: b.HL(0.5, 1.15, -0.08) } },
+  { t: 0.42, pose: { chest: Object.assign(R(12), { scale: [0.92, 1, 1.05] }), c_handR: b.HR(0.48, 1.12, 0.1), c_handL: b.HL(0.48, 1.12, -0.1) } },
+  { t: 0.55, in: 'out', pose: { chest: Object.assign(R(4), { scale: [1, 1, 1] }), c_handR: b.HR(0.5, 1.2, -0.7), c_handL: b.HL(0.5, 1.2, 0.7) } }, { t: 0.95, ...backB }]);
+/* The Entire Gym, charging: the right fist windmills round the shoulder (behind, below, in front, above), the torso
+   rocking against it; the punch starts from the behind point */
+{ const P = [[-0.45, 1.4, -0.65], [0.15, 0.7, -0.6], [0.55, 1.35, -0.5], [0.0, 2.0, -0.5]], ch = [R(10, 34), R(18, 22), R(14, 4), R(4, 22)], hp = [0, -0.05, 0, 0.04];
+  K.Wind = keys([0, 1, 2, 3, 0].map((j, n) => ({ t: n * 0.125, in: n ? 'lin' : undefined, reset: n === 0 || undefined, use: n === 0 ? GB : undefined, pose: { hips: HP(0, hp[j], -0.04), chest: ch[j], head: R(-46, -ch[j].rot[1] * 0.5), c_handR: b.HR(P[j][0], P[j][1], P[j][2]) } }))); }
+/* down air: one foot stamps straight down, the other knee drawn up, arms flung up and out */
+K.Stomp = keys([{ t: 0, use: AB }, { t: 0.33, pose: { spine: R(4), chest: R(-4), head: R(-8), c_footR: b.FR(0.15, 0.5), c_footL: b.FL(0.15, 0.55), c_handR: b.HR(0.0, 1.45, -0.7), c_handL: b.HL(0.0, 1.45, 0.7) } },
+  { t: 0.47, in: 'snap', pose: { hips: M(0, 0.04, 0), spine: R(-2), head: R(0), c_footR: b.FR(0.02, -0.28), c_footL: b.FL(0.25, 0.6), c_handR: b.HR(-0.1, 1.75, -0.75), c_handL: b.HL(-0.1, 1.75, 0.75) } },
+  { t: 0.56, pose: { c_footR: b.FR(0.02, -0.26) } }, { t: 1.0, in: 'quad', pose: { c_footR: b.FR(0.1, 0.2), c_footL: b.FL(0.0, 0.15) } }, { t: 1.8, ...backBA }]);
+/* get-up attack from flat on his back: rolls up onto his knees with the arms sweeping round, a clap in front, then one
+   behind, and back into the stance */
+{ const LIE = { all: { rot: [-90, 0, 0], move: [0, 0.3, 0.95] }, head: R(20), c_handL: b.HL(-0.1, 1.0, 0.7), c_handR: b.HR(0.1, 0.95, -0.7) };
+  K.GetupAtk = keys([{ t: 0, use: 'stand', pose: LIE }, { t: 0.18, pose: { all: { rot: [-40, 0, 0], move: [0, 0.1, 0.4] }, spine: R(30), chest: R(18), c_handR: b.HR(0.2, 1.2, -1.0), c_handL: b.HL(0.2, 1.2, 1.0) } },
+    { t: 0.37, in: 'snap', reset: true, use: GB, pose: kn({ hips: HP(0, 0.06, 0.04), spine: R(30), chest: R(16), head: R(-46), c_handR: b.HR(1.15, 0.6, -0.08), c_handL: b.HL(1.15, 0.6, 0.08) }) },
+    { t: 0.47, in: 'snap', pose: { chest: R(4, 0), c_handR: b.HR(-0.75, 0.6, -0.1), c_handL: b.HL(-0.75, 0.6, 0.1) } },
+    { t: 1.1, in: 'quad', pose: kn({ hips: HP(0, 0.02, 0) }) }, { t: 1.85, ...backB }]); }
+/* ledge attack: hauls himself up over the edge and clubs his right forearm down across the space in front */
+K.LedgeAtk = keys([{ t: 0, use: GB, pose: kn({ hips: HP(0, -0.12, -0.3), spine: R(40), chest: R(26), head: R(-60), c_handR: b.HR(0.55, 0.15, -0.4), c_handL: b.HL(0.55, 0.15, 0.4), c_footR: b.FR(-0.4, 0, -0.24), c_footL: b.FL(-0.45, 0, 0.24) }) },
+  { t: 0.14, pose: { hips: HP(0, 0.12, -0.05), spine: R(16), chest: R(4, 24), head: R(-30), c_handR: b.HR(0.0, 1.85, -0.2), c_footR: b.FR(-0.06, 0, -0.24), c_footL: b.FL(-0.1, 0, 0.24) } },
+  { t: 0.23, in: 'snap', pose: Object.assign(SW(0.12), { spine: R(34), chest: R(20, -16), head: R(-50), c_handR: b.HR(1.05, 0.5, 0.05) }) },
+  { t: 0.3, pose: { c_handR: b.HR(0.95, 0.35, 0.15) } }, { t: 0.75, in: 'quad', pose: kn({ hips: HP(0, 0.02, 0.04) }) }, { t: 1.15, ...backB }]);
+/* the second idle: sits back, thumps his right fist into his open left palm, twice, then rolls the right shoulder */
+K.Idle2 = keys([{ t: 0, use: GB, pose: kn({}) },
+  { t: 0.4, pose: { hips: HP(0, 0.14, -0.08), spine: R(12), chest: R(6), head: R(-24), c_handR: b.HR(0.5, 1.2, -0.4), c_handL: b.HL(0.5, 1.05, 0.12) } },
+  { t: 0.62, in: 'snap', pose: { chest: R(8, 6), c_handR: b.HR(0.52, 1.08, 0.06) } }, { t: 0.85, pose: { chest: R(6), c_handR: b.HR(0.5, 1.25, -0.4) } },
+  { t: 1.05, in: 'snap', pose: { chest: R(8, 6), c_handR: b.HR(0.52, 1.08, 0.06) } }, { t: 1.3, pose: { chest: R(6, -4), head: R(-20, 10), c_handR: b.HR(0.2, 1.05, -0.6), c_handL: b.HL(0.4, 0.13, 0.38) } },
+  { t: 1.6, pose: { chest: R(2, -10, 8), c_handR: b.HR(-0.1, 1.7, -0.75) } }, { t: 1.9, pose: { chest: R(4, -6, 10), c_handR: b.HR(-0.45, 1.25, -0.7) } },
+  { t: 2.2, pose: { chest: R(8, 0, 4), head: R(-30, 4), c_handR: b.HR(0.3, 0.8, -0.65) } }, { t: 2.65, pose: kn({ hips: HP(0, -0.03) }) }, { t: 3.0, pose: kn({}) }]);
 
-/* Cronky Dong's run, built round the owner's running sculpt: the gallop's landing, both fists planted far ahead (the
-   left further), the torso flat and low, both legs stretched back from the push. Then the body vaults over the fists,
-   the feet swing through and land ahead, drive back, and he flies into the next reach. In place: planted limbs slide
-   back at running speed. 0.5 s a stride. */
-bigT.clips.Run = bake(0.5, 1 / 30, p => {
-  const hy = loopv([[0, 0.1], [0.12, -0.14], [0.32, 0.02], [0.52, -0.12], [0.72, 0.1]], p), hz = loopv([[0, 0.12], [0.12, 0.06], [0.32, 0.16], [0.52, 0.04], [0.72, 0.12]], p);
-  const sp = loopv([[0, 10], [0.12, 16], [0.32, -6], [0.52, 4], [0.72, 12]], p), ch = loopv([[0, 4], [0.12, 8], [0.32, 2], [0.52, 6], [0.72, 4]], p);
-  const yaw = loopv([[0, 0], [0.12, 7], [0.2, -5], [0.4, 0]], p);
-  /* fists: left lands at 0.1, right at 0.16; both on the floor, sliding back, until 0.4; then swing forward through the air */
-  const fist = (k, land, x, zf) => { const up = (land + 0.3) % 1; const z = loopv([[land, zf], [up, zf - 1.0], [(up + 0.25) % 1, zf - 0.2], [(land - 0.04 + 1) % 1, zf + 0.12]], p);
-    const y = loopv([[land, 0.28], [up, 0.28], [(up + 0.12) % 1, 0.62], [(land - 0.06 + 1) % 1, 0.44]], p); return tb.H(k, x, y, z); };
-  /* feet: both swing under him while he vaults, land ahead at 0.5 and 0.54, drive back until 0.8, trail stretched behind */
-  const foot = (k, land, x, zf) => { const off = (land + 0.28) % 1; const z = loopv([[land, zf], [off, zf - 0.85], [(off + 0.22) % 1, zf - 1.0], [(land - 0.18 + 1) % 1, zf - 0.4]], p);
-    const y = loopv([[land, 0.13], [off, 0.16], [(off + 0.14) % 1, 0.42], [(off + 0.3) % 1, 0.3], [(land - 0.06 + 1) % 1, 0.22]], p); return tb.F(k, x, y, z); };
-  return { hips: M(0, hy, hz), spine: R(sp, yaw * 0.5), chest: R(ch, yaw, -yaw * 0.6), head: R(-(sp + ch) * 0.9, -yaw * 1.2, yaw * 0.5),
-    c_handL: fist(L_, 0.1, 0.56, 1.18), c_handR: fist(R_, 0.16, -0.3, 1.0), c_footR: foot(R_, 0.5, -0.6, 0.38), c_footL: foot(L_, 0.54, 0.48, 0.22),
-    footR: R(loopv([[0.5, 0], [0.75, 0], [0.82, 35], [0.95, 20], [0.2, 0]], p)), footL: R(loopv([[0.54, 0], [0.79, 0], [0.86, 35], [0.99, 20], [0.24, 0]], p)) };
-});
+const humanA = retarget(human, JH, THA, { arm: 1.05, leg: 1, lift: 0 });
+const bigA = retarget(big, JB, TBA, { arm: 1.18, leg: 0.92, lift: 0.09 });
 
-/* Cronky Dong in the air: still hunched (this body is built bent), the long arms flung wide like a leaping ape's, the legs
-   drawn up under him; falling, the arms paddle slowly and the legs hang. */
-{ const AIR = { hips: M(0, 0.04, 0), spine: R(-8), chest: R(-6), head: R(12), c_handR: tb.H(R_, -1.0, 0.8, 0.55), c_handL: tb.H(L_, 1.0, 0.85, 0.45), c_footR: tb.F(R_, -0.5, 0.36, 0.05), c_footL: tb.F(L_, 0.42, 0.32, -0.3) };
-  bigT.clips.Rise = keys([{ t: 0, reset: true, pose: Object.assign({}, AIR, { hips: M(0, -0.04, 0.05), spine: R(-14), chest: R(-8), head: R(18), c_handR: tb.H(R_, -0.55, 1.45, 0.9), c_handL: tb.H(L_, 0.65, 1.5, 0.8), c_footR: tb.F(R_, -0.62, 0.13, -0.1), c_footL: tb.F(L_, 0.45, 0.16, -0.75) }) },
-    { t: 0.2, pose: { spine: R(-10), chest: R(-6), head: R(14), c_handR: tb.H(R_, -0.9, 1.15, 0.75), c_handL: tb.H(L_, 0.95, 1.2, 0.65), c_footR: tb.F(R_, -0.55, 0.25, -0.05), c_footL: tb.F(L_, 0.44, 0.26, -0.5) } }, { t: 0.45, pose: AIR }]);
-  bigT.clips.Fall = keys([{ t: 0, reset: true, pose: AIR }, { t: 0.4, pose: { chest: R(-4, 4), c_handR: tb.H(R_, -1.02, 0.95, 0.5), c_handL: tb.H(L_, 0.98, 0.72, 0.5), c_footR: tb.F(R_, -0.52, 0.22, 0.1), c_footL: tb.F(L_, 0.42, 0.26, -0.22) } },
-    { t: 0.8, pose: { chest: R(-4, -4), c_handR: tb.H(R_, -0.98, 0.72, 0.6), c_handL: tb.H(L_, 1.02, 0.98, 0.4), c_footR: tb.F(R_, -0.5, 0.28, 0.0), c_footL: tb.F(L_, 0.44, 0.2, -0.34) } }, { t: 1.2, pose: AIR }]);
-  bigT.clips.FastFall = keys([{ t: 0, reset: true, pose: Object.assign({}, AIR, { spine: R(4), chest: R(2), head: R(0), c_handR: tb.H(R_, -0.6, 1.4, 0.55), c_handL: tb.H(L_, 0.7, 1.45, 0.45), c_footR: tb.F(R_, -0.58, 0.1, -0.05), c_footL: tb.F(L_, 0.44, 0.1, -0.4) }) },
-    { t: 0.2, pose: { c_handR: tb.H(R_, -0.62, 1.46, 0.55), c_handL: tb.H(L_, 0.68, 1.4, 0.45) } }, { t: 0.4, pose: { c_handR: tb.H(R_, -0.6, 1.4, 0.55), c_handL: tb.H(L_, 0.7, 1.45, 0.45) } }]); }
-/* Cronky Dong's attacks, remade on the sculpt: each strike aims the fist (or foot, or head) at the middle of its hitbox
-   (game units / 10.4 = metres on this model; forward is +z), with a real wind-up before it, a snap into the hit, a hold
-   through the active frames and a heavy settle back into the stance. Contact times are unchanged. */
-{ const ATK = (list, endT, air) => keys([{ t: 0, reset: true, pose: air ? AIRK : {} }, ...list, { t: endT, reset: true, pose: air ? AIRK : {} }]);
-  const AIRK = { hips: M(0, 0.04, 0), spine: R(-8), chest: R(-6), head: R(12), c_handR: tb.H(R_, -1.0, 0.8, 0.55), c_handL: tb.H(L_, 1.0, 0.85, 0.45), c_footR: tb.F(R_, -0.5, 0.36, 0.05), c_footL: tb.F(L_, 0.42, 0.32, -0.3) };
-  const K2 = bigT.clips, hR = (x, y, z) => tb.H(R_, x, y, z), hL = (x, y, z) => tb.H(L_, x, y, z), fR = (x, y, z) => tb.F(R_, x, y, z), fL = (x, y, z) => tb.F(L_, x, y, z);
-  /* jab: a shoving right check, then a looping left hook */
-  K2.Check = ATK([{ t: 0.1, pose: { hips: M(0, 0.04, -0.06), chest: R(0, 14), c_handR: hR(-0.35, 0.75, 0.35) } },
-    { t: 0.17, in: 'snap', pose: { hips: M(0, 0.08, 0.16), spine: R(-6), chest: R(-4, -12), head: R(8), c_handR: hR(-0.12, 1.0, 1.02) } },
-    { t: 0.26, pose: { c_handR: hR(-0.12, 0.98, 0.98) } }, { t: 0.5, in: 'quad', pose: { hips: M(0, 0.03, 0.06), chest: R(-2, -4), head: R(3), c_handR: hR(-0.2, 0.6, 0.85) } }], 0.8);
-  K2.Hook = ATK([{ t: 0.07, pose: { hips: M(0, 0.04, 0), chest: R(0, -18), c_handL: hL(0.85, 0.85, 0.25) } },
-    { t: 0.15, in: 'snap', pose: { hips: M(0, 0.07, 0.13), spine: R(-6), chest: R(-4, 22), head: R(6, -8), c_handL: hL(0.08, 1.3, 0.9) } },
-    { t: 0.3, in: 'out', pose: { chest: R(-2, 32), c_handL: hL(-0.25, 1.2, 0.68) } }, { t: 0.65, in: 'quad', pose: { hips: M(0, 0.02, 0.05), chest: R(0, 8), c_handL: hL(0.45, 0.55, 0.6) } }], 1.05);
-  /* ftilt: a long right backhand swung across, with a big step of the hips into it */
-  K2.Backhand = ATK([{ t: 0.15, pose: { hips: M(0, 0.04, -0.08), chest: R(4, -26), c_handR: hR(0.35, 0.95, 0.4) } },
-    { t: 0.23, in: 'snap', pose: { hips: M(0, 0.06, 0.32), spine: R(8), chest: R(0, 22), head: R(-6, -10), c_handR: hR(-0.3, 0.88, 1.5), c_footR: fR(-0.62, 0.13, 0.25) } },
-    { t: 0.34, in: 'out', pose: { chest: R(0, 30), c_handR: hR(-0.65, 0.95, 1.2) } }, { t: 0.75, in: 'quad', pose: { hips: M(0, 0.02, 0.1), chest: R(0, 8), c_handR: hR(-0.35, 0.45, 0.95), c_footR: fR(-0.64, 0.13, 0.0) } }], 1.15);
-  /* utilt: the right arm sweeps up from in front, over his head and back */
-  K2.ArmSweep = ATK([{ t: 0.08, pose: { hips: M(0, -0.03, 0), spine: R(6), c_handR: hR(-0.4, 0.4, 0.95) } },
-    { t: 0.13, in: 'snap', pose: { hips: M(0, 0.08, 0), spine: R(-10), head: R(14), c_handR: hR(-0.35, 1.45, 0.8) } },
-    { t: 0.25, pose: { spine: R(-18), chest: R(-10), head: R(24), c_handR: hR(-0.3, 2.2, 0.3) } }, { t: 0.37, pose: { spine: R(-12), chest: R(-6), c_handR: hR(-0.42, 1.6, -0.4) } },
-    { t: 0.75, in: 'quad', pose: { hips: M(0, 0.02, 0), spine: R(-2), chest: R(0), head: R(4), c_handR: hR(-0.4, 0.8, 0.2) } }], 1.3);
-  /* dtilt: a quick low slap along the floor */
-  K2.LowSlap = ATK([{ t: 0.1, pose: { hips: M(0, 0.02, -0.04), c_handR: hR(-0.32, 0.65, 0.55) } },
-    { t: 0.17, in: 'snap', pose: { hips: M(0, -0.04, 0.16), spine: R(8), head: R(-6), c_handR: hR(-0.2, 0.26, 1.46) } }, { t: 0.25, pose: { c_handR: hR(-0.22, 0.26, 1.4) } }, { t: 0.55, in: 'quad', pose: { hips: M(0, 0, 0.05), c_handR: hR(-0.22, 0.28, 0.95) } }], 0.83);
-  /* fsmash: rears up with both arms flung wide and back, then lunges and claps them together far out in front */
-  K2.Clap = ATK([{ t: 0.45, pose: { hips: M(0, 0.14, -0.16), spine: R(-16), chest: R(-12), head: R(22), c_handR: hR(-1.05, 1.15, 0.2), c_handL: hL(1.05, 1.2, 0.15) } },
-    { t: 0.73, in: 'snap', pose: { hips: M(0, -0.06, 0.5), spine: R(16), chest: R(8), head: R(-16), c_handR: hR(-0.06, 0.66, 1.98), c_handL: hL(0.1, 0.66, 1.96), c_footR: fR(-0.62, 0.13, 0.32) } },
-    { t: 0.85, pose: { c_handR: hR(-0.05, 0.62, 1.95), c_handL: hL(0.09, 0.62, 1.93) } }, { t: 1.3, in: 'quad', pose: { hips: M(0, -0.02, 0.2), spine: R(6), chest: R(2), head: R(-4), c_handR: hR(-0.2, 0.28, 1.3), c_handL: hL(0.4, 0.28, 1.2), c_footR: fR(-0.64, 0.13, 0.05) } }], 1.85);
-  /* usmash: sinks with the arms low and wide, then springs up and claps them together high over his head */
-  K2.OverClap = ATK([{ t: 0.2, pose: { hips: M(0, -0.1, 0), spine: R(8), head: R(-6), c_handR: hR(-0.95, 0.55, 0.5), c_handL: hL(1.0, 0.55, 0.4) } },
-    { t: 0.47, in: 'snap', pose: { hips: M(0, 0.32, 0.05), spine: R(-30), chest: R(-16), head: R(28), c_handR: hR(-0.04, 2.45, 0.42), c_handL: hL(0.12, 2.45, 0.38), c_footR: fR(-0.62, 0.16, -0.08), c_footL: fL(0.45, 0.18, -0.78) } },
-    { t: 0.56, pose: { c_handR: hR(-0.04, 2.42, 0.44), c_handL: hL(0.12, 2.42, 0.4) } }, { t: 1.1, in: 'quad', pose: { hips: M(0, 0.04, 0), spine: R(-6), chest: R(-2), head: R(6), c_handR: hR(-0.35, 0.8, 0.7), c_handL: hL(0.55, 0.8, 0.5), c_footR: fR(-0.66, 0.13, -0.08), c_footL: fL(0.45, 0.13, -0.8) } }], 1.65);
-  /* dsmash: both fists raised high, then hammered into the floor, one in front and one behind */
-  K2.Hammer = ATK([{ t: 0.2, pose: { hips: M(0, 0.16, 0), spine: R(-16), chest: R(-6), head: R(18), c_handR: hR(-0.4, 1.75, 0.5), c_handL: hL(0.5, 1.75, 0.25) } },
-    { t: 0.37, in: 'snap', pose: { hips: M(0, -0.12, 0), spine: R(10), chest: R(4), head: R(-12), c_handR: hR(-0.4, 0.28, 1.15), c_handL: hL(0.5, 0.28, -1.05) } },
-    { t: 0.5, pose: { hips: M(0, -0.1, 0) } }, { t: 1.2, in: 'quad', pose: { hips: M(0, -0.02, 0), spine: R(2), chest: R(0), head: R(0), c_handR: hR(-0.3, 0.28, 0.9), c_handL: hL(0.55, 0.28, 0.1) } }], 1.85);
-  /* The Entire Gym: the right arm cocked far back while it charges, then a lunging straight punch */
-  const COCK = { hips: M(0, 0.05, -0.08), spine: R(-4), chest: R(0, 32), head: R(6, -14), c_handR: hR(-0.75, 1.2, -0.45) };
-  K2.Wind = keys([{ t: 0, reset: true, pose: COCK }, { t: 0.25, pose: { chest: R(0, 38), c_handR: hR(-0.82, 1.3, -0.58), hips: M(0, 0.06, -0.1) } }, { t: 0.5, pose: COCK }]);
-  K2.Punch = keys([{ t: 0, reset: true, pose: COCK }, { t: 0.5, pose: { hips: M(0, 0.07, -0.12), chest: R(0, 42), c_handR: hR(-0.85, 1.3, -0.65) } },
-    { t: 0.63, in: 'snap', pose: { hips: M(0, 0.02, 0.42), spine: R(10), chest: R(2, -26), head: R(-10, 12), c_handR: hR(-0.12, 0.92, 1.52), c_footR: fR(-0.62, 0.13, 0.3) } },
-    { t: 0.8, pose: { c_handR: hR(-0.12, 0.9, 1.48) } }, { t: 1.5, in: 'quad', pose: { hips: M(0, 0, 0.15), spine: R(4), chest: R(0, -6), head: R(-2, 2), c_handR: hR(-0.25, 0.28, 1.1), c_footR: fR(-0.64, 0.13, 0.05) } }, { t: 2.05, reset: true, pose: {} }]);
-  /* Cap Check: rears back, then drives the capped head forward and down, fists planted either side */
-  K2.Headbutt = ATK([{ t: 0.4, pose: { hips: M(0, 0.16, -0.22), spine: R(-22), chest: R(-12), head: R(18), c_handR: hR(-0.5, 0.9, 0.6), c_handL: hL(0.75, 0.9, 0.45) } },
-    { t: 0.67, in: 'snap', pose: { hips: M(0, -0.06, 0.52), spine: R(24), chest: R(16), head: R(14), c_handR: hR(-0.32, 0.28, 1.25), c_handL: hL(0.62, 0.28, 1.05) } },
-    { t: 0.8, pose: { hips: M(0, -0.07, 0.5) } }, { t: 1.5, in: 'quad', pose: { hips: M(0, 0, 0.15), spine: R(6), chest: R(4), head: R(0), c_handR: hR(-0.25, 0.28, 0.95), c_handL: hL(0.6, 0.28, 0.7) } }], 2.1);
-  /* Floor Is Leg Day: right fist up and slammed flat on the floor ahead, then the left */
-  K2.Slap = ATK([{ t: 0.22, pose: { hips: M(0, 0.06, 0), spine: R(-8), head: R(10), c_handR: hR(-0.3, 1.55, 0.65) } },
-    { t: 0.4, in: 'snap', pose: { hips: M(0, -0.06, 0.08), spine: R(8), head: R(-6), c_handR: hR(-0.25, 0.27, 1.3) } },
-    { t: 0.6, pose: { hips: M(0, 0.05, 0.04), spine: R(-6), head: R(8), c_handL: hL(0.62, 1.55, 0.5) } },
-    { t: 0.77, in: 'snap', pose: { hips: M(0, -0.06, 0.1), spine: R(8), head: R(-6), c_handL: hL(0.5, 0.27, 1.25) } }, { t: 1.15, in: 'quad', pose: { hips: M(0, 0, 0.04), spine: R(2), head: R(0), c_handR: hR(-0.22, 0.28, 1.0), c_handL: hL(0.55, 0.28, 0.8) } }], 1.55);
-  /* grab: both arms shoot out and close */
-  K2.Grab = ATK([{ t: 0.17, pose: { hips: M(0, 0.04, 0), c_handR: hR(-0.35, 0.85, 0.8), c_handL: hL(0.55, 0.85, 0.7) } },
-    { t: 0.27, in: 'snap', pose: { hips: M(0, 0.05, 0.22), spine: R(4), c_handR: hR(-0.12, 0.7, 1.36), c_handL: hL(0.3, 0.7, 1.36) } }, { t: 0.36, pose: { c_handR: hR(-0.1, 0.7, 1.32), c_handL: hL(0.28, 0.7, 1.32) } },
-    { t: 0.85, in: 'quad', pose: { hips: M(0, 0.02, 0.06), c_handR: hR(-0.25, 0.4, 0.9), c_handL: hL(0.5, 0.4, 0.7) } }], 1.25);
-  /* aerials, from the air pose */
-  K2.FistDrop = ATK([{ t: 0.45, pose: { spine: R(-16), chest: R(-8), head: R(18), c_handR: hR(-0.2, 2.0, 0.0), c_handL: hL(0.32, 2.0, -0.05) } },
-    { t: 0.6, in: 'snap', pose: { spine: R(4), chest: R(2), head: R(4), c_handR: hR(-0.1, 1.25, 1.15), c_handL: hL(0.2, 1.25, 1.1) } },
-    { t: 0.72, pose: { spine: R(18), chest: R(8), head: R(-8), c_handR: hR(-0.1, 0.42, 1.2), c_handL: hL(0.2, 0.42, 1.15) } }, { t: 1.3, in: 'quad', pose: AIRK }], 1.85, true);
-  K2.BackKick = ATK([{ t: 0.13, pose: { spine: R(4), c_footR: fR(-0.42, 0.62, 0.25) } }, { t: 0.23, in: 'snap', pose: { spine: R(16), chest: R(6), head: R(-6, 14), c_footR: fR(-0.45, 0.6, -1.36) } },
-    { t: 0.5, pose: { c_footR: fR(-0.45, 0.6, -1.3) } }, { t: 0.8, in: 'quad', pose: AIRK }], 1.05, true);
-  K2.Bump = ATK([{ t: 0.12, pose: { spine: R(10), chest: R(6), head: R(-6), c_handR: hR(-0.7, 0.6, 0.5), c_handL: hL(0.8, 0.6, 0.4) } },
-    { t: 0.2, in: 'snap', pose: { spine: R(-26), chest: R(-16), head: R(32), c_handR: hR(-0.5, 1.95, 0.3), c_handL: hL(0.62, 1.95, 0.25) } }, { t: 0.36, pose: { c_handR: hR(-0.55, 1.9, 0.3), c_handL: hL(0.66, 1.9, 0.25) } }, { t: 0.85, in: 'quad', pose: AIRK }], 1.25, true);
-  K2.Stomp = ATK([{ t: 0.33, pose: { spine: R(-4), c_footR: fR(-0.42, 0.62, 0.22), c_footL: fL(0.4, 0.62, 0.0), c_handR: hR(-0.85, 1.4, 0.3), c_handL: hL(0.9, 1.4, 0.3) } },
-    { t: 0.47, in: 'snap', pose: { hips: M(0, -0.04, 0), spine: R(6), head: R(-6), c_footR: fR(-0.3, -0.45, 0.0), c_footL: fL(0.3, -0.45, -0.1) } }, { t: 0.56, pose: {} }, { t: 1.2, in: 'quad', pose: AIRK }], 1.8, true); }
-/* Joey on stick legs. He is all torso: the stick legs do a lot of very quick small work under him.
-   Walk: a knuckle-waddle, fists rolling forward one at a time, the stick legs pattering four steps to each fist, the
-   whole torso rocking side to side over them. 1.12 s a cycle. */
-humanT.clips.Walk = bake(1.12, 1 / 30, p => {
-  const legs = (k, ph, x, z0) => { const q = ((p * 2 + ph) % 1 + 1) % 1, plant = q < 0.55; const u = plant ? q / 0.55 : (q - 0.55) / 0.45;
-    return th.F(k, x, plant ? 0.05 : 0.05 + Math.sin(u * Math.PI) * 0.16, plant ? z0 + 0.14 - u * 0.28 : z0 - 0.14 + sm(u) * 0.28); };
-  const fist = (k, ph, x, z0) => { const q = ((p + ph) % 1 + 1) % 1, plant = q < 0.6; const u = plant ? q / 0.6 : (q - 0.6) / 0.4;
-    return th.H(k, x, plant ? 0.28 : 0.28 + Math.sin(u * Math.PI) * 0.22, plant ? z0 + 0.2 - u * 0.4 : z0 - 0.2 + sm(u) * 0.4); };
-  const s = Math.sin(p * Math.PI * 2), bob = Math.abs(Math.sin(p * Math.PI * 4));
-  return { hips: M(s * 0.04, -0.02 + bob * 0.03, 0), spine: R(2, s * 4, -s * 5), chest: R(2 + bob * 2, s * 7, -s * 6), head: R(-3, -s * 8, s * 7),
-    c_footR: legs(R_, 0, -0.68, -0.2), c_footL: legs(L_, 0.5, 0.62, -0.36), c_handR: fist(R_, 0, -0.3, 0.62), c_handL: fist(L_, 0.5, 0.45, 0.54) };
-});
-/* Run: the cartoon scurry. The legs whirl through six quick steps a cycle while the torso barrels forward on them, low and
-   leaning, the huge arms pumping (one swing each way a cycle) and the head bobbing on every step. 0.6 s a cycle. */
-humanT.clips.Run = bake(0.6, 1 / 60, p => {
-  const legs = (k, ph, x, z0) => { const a = (p * 3 + ph) * Math.PI * 2;   /* each foot goes round a flat loop: down and back on the floor, up and forward in the air */
-    return th.F(k, x, 0.05 + Math.max(0, Math.sin(a)) * 0.24, z0 + Math.cos(a) * 0.32 + 0.06); };
-  const sw = Math.sin(p * Math.PI * 2), bob = Math.abs(Math.sin(p * Math.PI * 6));
-  return { hips: M(0, 0.05 + bob * 0.05, 0.08), spine: R(10 + bob * 2, sw * 6), chest: R(8, sw * 10, -sw * 4), head: R(-16 - bob * 3, -sw * 9, sw * 3),
-    c_footR: legs(R_, 0, -0.66, -0.22), c_footL: legs(L_, 0.5, 0.6, -0.36),
-    c_handR: th.H(R_, -0.4, 0.55 + sw * 0.18, 0.62 + sw * 0.45), c_handL: th.H(L_, 0.55, 0.55 - sw * 0.18, 0.54 - sw * 0.45) };
-});
-/* Idle: the weight of it all. He breathes heavily through his shoulders, the knuckles shift on the floor, and every so
-   often the stick legs re-plant themselves under him with a little nervous shuffle. 2.4 s. */
-humanT.clips.Idle = bake(2.4, 1 / 15, p => {
-  const br = Math.sin(p * Math.PI * 4), sh = p > 0.7 && p < 0.9 ? Math.sin((p - 0.7) / 0.2 * Math.PI) : 0;
-  return { hips: M(0, br * 0.012 - 0.01, 0), spine: R(br * 1.5), chest: Object.assign(R(br * 2.5), { scale: [1 + br * 0.012, 1 + br * 0.008, 1 + br * 0.015] }), head: R(-br * 2.5, Math.sin(p * Math.PI * 2) * 4),
-    c_handR: th.H(R_, -0.3, 0.28 + Math.max(0, Math.sin(p * Math.PI * 2 - 1)) * 0.02, 0.62), c_handL: th.H(L_, 0.45, 0.28, 0.54),
-    c_footR: th.F(R_, -0.68, 0.05 + Math.max(0, sh) * 0.12 * (p < 0.8 ? 1 : 0), -0.2 + sh * 0.03), c_footL: th.F(L_, 0.62, 0.05 + Math.max(0, sh) * 0.12 * (p >= 0.8 ? 1 : 0), -0.36 - sh * 0.03) };
-});
+/* ---- the hands: how closed each hand is (0 open, 1 a fist) through every clip, added to each key ----
+   Cronky Dong walks on his knuckles, so his hands are fists on the ground unless a move slaps, claps or grabs; in the air
+   they hang half open. Joey's hang loosely curled. [t, right, left] points, eased between; one value is both hands. */
+const GRIPB = { '*': [[0, 1, 1]], Rise: [[0, 0.35]], Fall: [[0, 0.3]], FastFall: [[0, 0.3]], Helpless: [[0, 0.2]], AirJump: [[0, 0.7]], AirDodge: [[0, 0.8]],
+  Hit: [[0, 0.3], [0.6, 1]], HitHeavy: [[0, 0.2], [0.55, 1]], Launch: [[0, 0.2]], LaunchUp: [[0, 0.2]], Spike: [[0, 0.2]], Tumble: [[0, 0.6]], Down: [[0, 0.3]], Held: [[0, 0.3]], Buried: [[0, 0.3]],
+  Ledge: [[0, 0.8]], Respawn: [[0, 0.5]], Carry: [[0, 0.75]], CarryWalk: [[0, 0.75]], Toss: [[0, 0.75], [0.45, 0.75], [0.55, 0.1], [1.2, 0.9]],
+  Hold: [[0, 0.8, 1]], Pummel: [[0, 0.8, 1], [0.06, 0.8, 0.1], [0.18, 0.8, 0.1], [0.23, 0.8, 1]], Grab: [[0, 1], [0.15, 0.1, 1], [0.27, 0.1, 1], [0.33, 0.85, 1], [1.1, 1, 1]],
+  ThrowB: [[0, 0.8, 1], [0.4, 0.8, 0.3], [0.45, 0.1, 0.3], [0.9, 1]], ThrowU: [[0, 0.8, 1], [0.4, 0.8, 0.6], [0.45, 0.1, 0.6], [0.95, 1]], ThrowD: [[0, 0.8, 1], [0.4, 0.8, 1], [0.45, 0.2, 1], [0.95, 1]],
+  ThrowCB: [[0, 0.75], [0.4, 0.75], [0.45, 0.1], [0.95, 1]], ThrowCU: [[0, 0.75], [0.4, 0.75], [0.45, 0.05], [0.95, 1]], ThrowCD: [[0, 0.75], [0.18, 0.4], [0.42, 0.5], [0.55, 0.05], [0.95, 1]],
+  Backhand: [[0, 1], [0.12, 0.1, 1], [0.6, 0.15, 1], [1.15, 1]], ArmSweep: [[0, 1], [0.1, 0.1, 1], [0.8, 0.2, 1], [1.3, 1]], LowSlap: [[0, 1], [0.08, 0.1, 1], [0.55, 0.2, 1], [0.83, 1]],
+  Clap: [[0, 1], [0.3, 0.1], [1.4, 0.2], [1.85, 1]], OverClap: [[0, 1], [0.15, 0.1], [1.2, 0.2], [1.65, 1]], Slap: [[0, 1], [0.15, 0.1], [1.2, 0.15], [1.55, 1]], SlapAir: [[0, 0.3], [0.3, 0.05], [1.65, 0.3]],
+  Spin: [[0, 0.3], [0.25, 0.05], [1.0, 0.2], [1.27, 0.3]], SpinG: [[0, 1], [0.12, 0.05], [3.1, 0.1], [3.5, 1]], SpinA: [[0, 0.3], [0.1, 0.05], [2.3, 0.3]],
+  GetupAtk: [[0, 0.3], [0.25, 0.05], [1.0, 0.2], [1.6, 1]], Idle2: [[0, 1], [0.35, 1, 0.05], [1.2, 1, 0.05], [1.4, 0.4, 1], [2.3, 0.4, 1], [2.65, 1]],
+  Stomp: [[0, 0.3]], Bump: [[0, 0.3], [0.15, 0.6], [1.25, 0.3]], BackKick: [[0, 0.3]], FistDrop: [[0, 0.3], [0.4, 0.9], [1.4, 0.9], [1.85, 0.3]],
+  Roll: [[0, 0.8], [0.9, 0.8], [1.15, 1]], Headbutt: [[0, 1]], Respawn2: [[0, 0.5]] };
+const GRIPH = { '*': [[0, 0.3]], Palm: [[0, 0.3], [0.15, 0.05], [0.5, 0.05], [0.7, 0.3]], Reach: [[0, 0.3], [0.25, 0.05], [0.4, 0.8], [1.3, 0.8]], Hold: [[0, 0.8, 0.3]], Pummel: [[0, 0.8, 0.3]],
+  Down: [[0, 0.2]], Tumble: [[0, 0.5]], Ball: [[0, 0.7]], Ledge: [[0, 0.8]] };
+/* air clips of Cronky Dong that use no table entry hang half open, like the air pose */
+const AIRCLIPS = ['Ball', 'Tumble'];
+function grip(spec, table, deg) {
+  const at = (pts, t) => { const v = i => [pts[i][1], pts[i].length > 2 ? pts[i][2] : pts[i][1]];
+    if (t <= pts[0][0]) return v(0); for (let i = 1; i < pts.length; i++) if (t <= pts[i][0]) { const u = (t - pts[i - 1][0]) / (pts[i][0] - pts[i - 1][0]), a = v(i - 1), c = v(i); return [lerp(a[0], c[0], u), lerp(a[1], c[1], u)]; } return v(pts.length - 1); };
+  const hand = (c, sd) => ({ ['fing' + sd + '1']: R(0, 0, (sd === 'R' ? 1 : -1) * deg.f1 * c), ['fing' + sd + '2']: R(0, 0, (sd === 'R' ? 1 : -1) * deg.f2 * c), ['thumb' + sd]: R(deg.tp * c, (sd === 'R' ? 1 : -1) * deg.ty * c, 0) });
+  for (const [nm, clip] of Object.entries(spec.clips)) {
+    const pts = table[nm] || (AIRCLIPS.includes(nm) ? [[0, 0.6]] : table['*']);
+    for (const key of clip.keys) { const [r, l] = at(pts, key.t); key.pose = Object.assign({}, key.pose || {}, hand(r, 'R'), hand(l, 'L')); }
+  }
+}
+
+grip(humanA, GRIPH, { f1: 45, f2: 50, tp: 0, ty: 30 }); grip(bigA, GRIPB, { f1: 80, f2: 85, tp: 0, ty: 45 });
 
 /* ---- write ---- */
 fs.mkdirSync(OUT, { recursive: true });
-for (const [n, s] of [['human', humanT], ['big', bigT]]) {
+for (const [n, s] of [['human', humanA], ['big', bigA]]) {
   const pack = s.pack; delete s.pack;
   fs.writeFileSync(path.join(OUT, 'rig-' + n + '.json'), JSON.stringify(s, null, 1));
   fs.writeFileSync(path.join(OUT, 'pack-' + n + '.json'), JSON.stringify(pack, null, 1) + '\n');
@@ -625,9 +592,9 @@ cur['Cronky Dong'] = { file: 'assets/joey/export/cronky-v1.glb', height: 27, fee
     throw_b: { clip: 'ThrowB', from: 0, to: 0.9 }, throw_u: { clip: 'ThrowU', from: 0, to: 0.95 }, throw_d: { clip: 'ThrowD', from: 0, to: 0.95 },
     throw_cf: { clip: 'Toss', from: 0, to: 1.4 }, throw_cb: { clip: 'ThrowCB', from: 0, to: 0.95 }, throw_cu: { clip: 'ThrowCU', from: 0, to: 0.95 }, throw_cd: { clip: 'ThrowCD', from: 0, to: 0.95 } }),
   strikers: [{ bone: 'handR', ext: 1.4 }, { bone: 'handL', ext: 1.4 }, { bone: 'footR', ext: 1.6 }, { bone: 'head', ext: 1.6 }], springs: [],
-  attacks: { jab: A('Check', 0.17, 0.2, 0, 0.8), jab2: A('Hook', 0.13, 0.2, 0, 1.05), ftilt: A('Backhand', 0.23, 0.3, 0, 1.15), utilt: A('ArmSweep', 0.13, 0.37, 0, 1.3), dtilt: A('LowSlap', 0.17, 0.23, 0, 0.83), dash: A('Roll', 0.27, 0.6, 0, 1.15),
+  attacks: { jab: A('Check', 0.17, 0.2, 0, 0.8), jab2: A('Uppercut', 0.13, 0.2, 0, 1.05), ftilt: A('Backhand', 0.23, 0.3, 0, 1.15), utilt: A('ArmSweep', 0.13, 0.37, 0, 1.3), dtilt: A('LowSlap', 0.17, 0.23, 0, 0.83), dash: A('Roll', 0.27, 0.6, 0, 1.15),
     fsmash: A('Clap', 0.73, 0.8, 0, 1.85), usmash: A('OverClap', 0.47, 0.53, 0, 1.65), dsmash: A('Hammer', 0.37, 0.47, 0, 1.85), nair: A('Spin', 0.33, 0.87, 0, 1.27), fair: A('FistDrop', 0.6, 0.77, 0, 1.85), bair: A('BackKick', 0.23, 0.53, 0, 1.05), uair: A('Bump', 0.2, 0.33, 0, 1.25), dair: A('Stomp', 0.47, 0.53, 0, 1.8),
-    grab: A('Grab', 0.27, 0.33, 0, 1.25), dgrab: A('Grab', 0.27, 0.33, 0, 1.25), pgrab: A('Grab', 0.27, 0.33, 0, 1.25), ledgeatk: A('Backhand', 0.23, 0.3, 0, 1.15), getup: A('Hammer', 0.37, 0.47, 0, 1.85),
+    grab: A('Grab', 0.27, 0.33, 0, 1.25), dgrab: A('Grab', 0.27, 0.33, 0, 1.25), pgrab: A('Grab', 0.27, 0.33, 0, 1.25), ledgeatk: A('LedgeAtk', 0.23, 0.3, 0, 1.15), getup: A('GetupAtk', 0.37, 0.47, 0, 1.85),
     nspec: A('Wind', 0, 0.5, 0, 0.5), nspecR: A('Punch', 0.63, 0.7, 0, 2.05), nspecF: A('Punch', 0.63, 0.7, 0, 2.05), sspec: A('Headbutt', 0.67, 0.73, 0, 2.1), uspec: A('SpinG', 0.63, 2.1, 0, 3.5), uspecA: A('SpinA', 0.13, 1.43, 0, 2.3),
     dspec: A('Slap', 0.4, 0.77, 0, 1.55), dspecA: A('SlapAir', 0.63, 0.93, 0, 1.65), '*': A('Check', 0.17, 0.2, 0, 0.8) } };
 fs.writeFileSync(mf, JSON.stringify(cur, null, 1) + '\n'); console.log('manifest: ' + Object.keys(cur).join(', '));

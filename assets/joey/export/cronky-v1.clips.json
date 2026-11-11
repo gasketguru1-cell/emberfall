@@ -120,31 +120,31 @@
   "seconds": 0.4
  },
  "Check": {
-  "seconds": 0.7
+  "seconds": 0.8
  },
  "Hook": {
-  "seconds": 1
+  "seconds": 1.067
  },
  "Backhand": {
-  "seconds": 1
+  "seconds": 1.133
  },
  "ArmSweep": {
-  "seconds": 1.233
+  "seconds": 1.3
  },
  "LowSlap": {
-  "seconds": 0.733
+  "seconds": 0.833
  },
  "Roll": {
   "seconds": 1.133
  },
  "Clap": {
-  "seconds": 1.4
+  "seconds": 1.867
  },
  "OverClap": {
-  "seconds": 1.467
+  "seconds": 1.667
  },
  "Hammer": {
-  "seconds": 1.667
+  "seconds": 1.867
  },
  "Spin": {
   "seconds": 1.267
@@ -162,7 +162,7 @@
   "seconds": 1.8
  },
  "Grab": {
-  "seconds": 1.1
+  "seconds": 1.267
  },
  "Wind": {
   "seconds": 0.5
@@ -171,7 +171,7 @@
   "seconds": 2.033
  },
  "Headbutt": {
-  "seconds": 1.7
+  "seconds": 2.1
  },
  "SpinG": {
   "seconds": 3.5
@@ -180,12 +180,21 @@
   "seconds": 2.3
  },
  "Slap": {
-  "seconds": 1.3
+  "seconds": 1.533
  },
  "SlapAir": {
   "seconds": 1.667
  },
  "Toss": {
   "seconds": 1.4
+ },
+ "Uppercut": {
+  "seconds": 1.067
+ },
+ "GetupAtk": {
+  "seconds": 1.867
+ },
+ "LedgeAtk": {
+  "seconds": 1.133
  }
 }
