@@ -326,6 +326,7 @@ const TUNE = {
   /* Furious Fowls: the owner asked for 55 to 65% (2026-11-10) */
   Rusty: { kb: 0.92 }, Bolt: { kb: 0.86, lag: 1.15 }, Cinder: { kb: 0.92 }, Pip: { kb: 1.18 }, Pearl: { kb: 1.0 },
   'Chomp Chomp': { kb: 0.84, lag: 1.35 },   /* CPU-vs-CPU 84% wins untuned (2026-11-10): toned toward the 55 to 65% band */
+  Brand: { kb: 0.72 },   /* CPU-vs-CPU 75% wins untuned (2026-11-10); 0.75 gave 54 to 58%, 0.7 gave 46 to 53% */
 };
 const NORMALS = ['jab', 'jab2', 'jab3', 'dash', 'ftilt', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash', 'nair', 'fair', 'bair', 'uair', 'dair'];
 function applyTune(fm) {
@@ -1110,7 +1111,81 @@ const CHOMP = {
   }],
 };
 
-const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE, FOWLS, CHOMP];
+/* ---------- Brand (original; frames, damage, launch, shapes and movement from the owner's document for fighter 03) ----------
+   The captain of the forge town's night watch: a quilted coat, a kettle hat, a round shield made from a cast-iron stove
+   door and a broad sword whose edge glows like iron fresh from the forge. A sword-and-shield duelist: she stands where
+   the blade reaches and the other fighter's swing falls short. The blade hits the same along its whole length. Stove Door
+   Bash guards one light strike from the front before it hits; About-Face Cut and Forge Cleave take the stock. Average
+   bursts of speed and a narrow, mostly vertical recovery; an empty bash is easy to punish.
+   Shapes are the document's, in units of Flint's height H = 14, from her feet: circ is a circle, cap a capsule from its
+   inner end to its tip (drawn and tested as a run of overlapping circles). Frame 1 is the frame the input is taken. */
+const BRAND = (() => {
+  const U = 14, q = v => Math.round(v * U * 100) / 100;
+  const cap = (f0, f1, x1, y1, x2, y2, r, d, a, b, k, o) => Object.assign({ f0, f1, x: q(x2), y: q(y2), r: q(r), in: [q(x1), q(y1)], n: Math.max(3, Math.ceil(Math.hypot(x2 - x1, y2 - y1) / r) + 1), d, a, b, k }, o);
+  const circ = (f0, f1, x, y, r, d, a, b, k, o) => Object.assign({ f0, f1, x: q(x), y: q(y), r: q(r), in: [q(x), q(y)], n: 1, d, a, b, k }, o);
+  const grab = (f0, f1, x1, y1, x2, y2, r) => ({ f0, f1, x: q(x2), y: q(y2), r: q(r), in: [q(x1), q(y1)], n: 4, grab: 1, d: 0 });
+  const rise = () => (f, n) => { if (n === 1) f.invuln = Math.max(f.invuln, f.pct >= 100 ? 12 : 18); };   /* the shared protection of a get-up */
+  const UP = 2.05 * U, UPV = UP / 11;   /* Watchfire Rise: 2.05 H over frames 5 to 25, fastest at the start */
+  return {
+    name: 'Brand', sub: 'the night-watch captain', forms: [{
+      name: 'Brand', col: ['#4a5d7e', '#c9a24a', '#ff8a3c'], alt: ['#6e4a4a', '#b9b4ac', '#7fe0ff'],
+      /* against Flint's 100: weight 108, walk 106, run 95, dash 102, air drift 96, ground push 102, air push 94, gravity and
+         fast fall 102, short hop 100, full hop 98, air jump 97. Standing 1.03 x 0.56 H, crouching 0.72 x 0.62 H. */
+      st: { weight: 99, walk: 1.19, walkMul: 0.143, walkAdd: 0.102, trac: 0.105, dash: 1.96, runMul: 0.112, runAdd: 0.045, run: 1.65,
+        jumpX: 0.95, jumpXMul: 0.8, jumpXMax: 1.3, airJumpX: 0.9, jumpH: 33.3, jumpInit: 18.3, hopH: 16.5, airJumpH: 33.5, upH: UP,
+        airMul: 0.061, airAdd: 0.0094, airSpeed: 1.056, airBrake: 0.01, grav: 0.0918, fall: 1.58, ffall: 2.53, jsq: 3, w: 7.84, h: 14.42, jf: 3, jb: 1.4,
+        crouch: [0.72 / 1.03, 0.62 / 0.56], pummel: 1.3, jumps: 1, dashF: 12, roll: [28, 1.35, 13], spot: [22, 15] },
+      aiBash: 1,
+      moves: mk(1, 1, 1, 1, {
+        /* ---- ground ---- */
+        jab: { t: 16, next: 'jab2', chain: 7, chainEnd: 13, h: [circ(4, 5, 0.33, 0.53, 0.17, 2.5, 60, 15, 25)] },
+        jab2: { t: 19, next: 'jab3', chain: 8, chainEnd: 15, h: [cap(5, 6, 0.29, 0.52, 0.59, 0.58, 0.14, 2.5, 66, 17, 27)] },
+        jab3: { t: 26, h: [cap(7, 9, 0.29, 0.55, 0.72, 0.63, 0.15, 4.5, 42, 34, 59)] },
+        dash: { t: 33, h: [circ(9, 12, 0.48, 0.53, 0.27, 10, 54, 34, 67)], on(f, n) { if (n <= 10) f.vx = f.face * 0.39 * U / 10; } },   /* a shoulder behind the stove door: 0.39 H by frame 10 */
+        ftilt: { t: 24, tilt: 1, h: [cap(7, 9, 0.31, 0.53, 0.90, 0.59, 0.14, 9, 36, 34, 67)] },
+        utilt: { t: 25, tilt: 1, h: [cap(7, 8, 0.45, 0.69, 0.28, 1.07, 0.16, 8, 83, 27, 61), cap(9, 10, 0.26, 1.14, -0.44, 0.87, 0.16, 8, 96, 27, 61)] },   /* up in front, then over the hat brim and behind: one hit between them */
+        dtilt: { t: 23, tilt: 1, h: [cap(6, 8, 0.29, 0.24, 0.83, 0.19, 0.13, 7, 69, 24, 51)] },
+        fsmash: { t: 47, chg: 8, h: [cap(16, 19, 0.34, 0.55, 1.04, 0.64, 0.19, 17, 38, 40, 104)] },
+        /* the shield's rim scoops the target up a set 0.14 H, then the blade cleaves upward */
+        usmash: { t: 46, chg: 6, h: [circ(13, 14, 0.38, 0.42, 0.22, 3, 83, 0, 0, { g: 1, link: [0.03 * U, 0.14 * U, 5] }), cap(15, 17, 0.31, 0.68, 0.06, 1.20, 0.22, 12, 87, 37, 97)] },
+        dsmash: { t: 42, chg: 5, h: [cap(12, 13, 0.35, 0.20, 0.84, 0.19, 0.16, 13, 30, 40, 86), cap(17, 18, -0.31, 0.20, -0.78, 0.20, 0.16, 12, 149, 38, 84)] },
+        /* ---- air: landing lag, and the frames that land without it (ac0 and earlier, after ac) ---- */
+        nair: { t: 36, air: 1, ll: 10, ac0: 4, ac: 31, h: [cap(6, 7, -0.15, 0.47, 0.41, 0.51, 0.20, 4, 70, 0, 0, { g: 1, link: [0.04 * U, 0.08 * U, 9] }), cap(13, 15, -0.49, 0.51, 0.66, 0.57, 0.18, 7, 48, 31, 64)] },
+        fair: { t: 30, air: 1, ll: 9, ac0: 4, ac: 25, h: [cap(7, 10, 0.31, 0.57, 0.91, 0.62, 0.16, 9, 43, 32, 70)] },
+        bair: { t: 34, air: 1, ll: 12, ac0: 5, ac: 30, h: [cap(8, 10, -0.32, 0.58, -0.93, 0.63, 0.17, 13, 144, 39, 95)] },
+        uair: { t: 27, air: 1, ll: 8, ac0: 4, ac: 24, h: [cap(6, 9, 0.36, 0.88, -0.31, 1.14, 0.18, 8, 86, 25, 62)] },
+        /* the point sends someone in the air straight down; anyone standing, or caught by the blade above the point, is popped up */
+        dair: { t: 41, air: 1, ll: 15, ac0: 5, ac: 37, h: [circ(13, 15, 0.13, -0.23, 0.19, 13, 275, 30, 94, { vAir: 1 }), cap(13, 15, 0.10, 0.32, 0.12, -0.03, 0.17, 9, 59, 35, 65), circ(13, 15, 0.13, -0.23, 0.19, 9, 59, 35, 65, { vGnd: 1 }), circ(16, 16, 0.10, 0.04, 0.17, 7, 55, 30, 58)] },
+        /* ---- grabs and get-ups ---- */
+        grab: { t: 30, h: [grab(7, 8, 0.21, 0.54, 0.57, 0.56, 0.13)] },
+        dgrab: { t: 38, h: [grab(10, 11, 0.23, 0.52, 0.60, 0.54, 0.13)], on(f, n) { if (n <= 11) f.vx = f.face * 0.33 * U / 11; } },
+        pgrab: { t: 36, h: [grab(11, 12, 0.23, 0.54, 0.67, 0.55, 0.13)] },
+        getup: { t: 47, h: [cap(19, 20, 0.27, 0.24, 0.65, 0.23, 0.17, 7, 43, 45, 56), cap(24, 25, -0.28, 0.23, -0.61, 0.23, 0.17, 7, 137, 45, 56)], on: rise() },
+        ledgeatk: { t: 46, h: [cap(20, 22, 0.26, 0.33, 0.73, 0.38, 0.16, 8, 39, 42, 59)], on: rise() },
+        /* ---- specials ---- */
+        /* Hot Iron Thrust: let go of special before frame 9 for the quick thrust (frames 14 to 16, 11%); keep it held through
+           frame 9 and she draws the arm back for the long one (frames 24 to 26, 15%, a third further). */
+        nspec: { t: 38, ll: 16, h: [cap(14, 16, 0.32, 0.56, 0.96, 0.57, 0.14, 11, 40, 36, 72)], on(f, n, i) { if (n === 9 && i.spc) { f.startMove('nspecH'); f.mf = 9; } } },
+        nspecH: { t: 52, ll: 20, h: [cap(24, 26, 0.35, 0.56, 1.26, 0.59, 0.15, 15, 37, 40, 88)] },
+        /* Stove Door Bash: the door comes up on frames 5 to 8 (on the ground) and stops one strike of 8% or less from the
+           front; then a short step and a bash on frames 12 to 14. 24 frames after it, hit or miss. */
+        sspec: { t: 38, ll: 17, guard: [5, 8], guardMax: 8, guardC: [q(0.32), q(0.52), q(0.26)],
+          h: [circ(12, 14, 0.52, 0.53, 0.25, 10, 53, 35, 70, { gndOnly: 1 }), circ(12, 14, 0.44, 0.51, 0.23, 8, 48, 32, 62, { airOnly: 1 })],
+          on(f, n) { if (n === 1) f.guarded = false; if (n >= 9 && n <= 14) f.vx = f.face * (f.grounded ? 0.32 : 0.18) * U / 6; else if (n === 15) f.vx = 0; } },
+        /* Watchfire Rise: a rising cut on frames 7 to 9, then straight up 2.05 H by frame 25 with a little steering (0.46 H at
+           most). The ledge can be taken from frame 11. Special fall after; 20 frames on landing. */
+        uspec: { t: 25, helpless: 1, ledge: 1, snap: 11, nodrift: 1, ll: 20, hll: 20, rise: UP, h: [cap(7, 9, 0.19, 0.56, 0.33, 0.97, 0.17, 8, 76, 35, 62)],
+          on(f, n, i) { if (n < 5) { hang(f); return; } if (n === 5) lift(f, 0); f.vy = UPV * (1 - (n - 5) / 21); f.vx = clamp(i.lx, -1, 1) * 0.46 * U / 21; } },
+        /* Night Step: on the ground she steps back 0.28 H on frames 4 to 8 (never off an edge), comes back in 0.16 H on frames
+           12 to 15 and cuts low on frames 15 to 17. In the air there is no step, only the cut. */
+        dspec: { t: 39, ll: 16, h: [cap(15, 17, 0.32, 0.22, 0.95, 0.25, 0.15, 11, 41, 37, 72)],
+          on(f, n) { if (!f.grounded) return; let v = n >= 4 && n <= 8 ? -f.face * 0.28 * U / 5 : n >= 12 && n <= 15 ? f.face * 0.16 * U / 4 : 0; const p = f.plat; if (p && (f.x + v < p.x0 || f.x + v > p.x1)) v = 0; f.vx = v; } },
+      }, { jabs: 3, throws: { f: { d: 8, a: 40, b: 43, k: 68, f: 10, t: 29 }, b: { d: 8, a: 143, b: 43, k: 68, f: 13, t: 33 }, u: { d: 7, a: 88, b: 44, k: 68, f: 14, t: 34 }, d: { d: 6, a: 71, b: 33, k: 51, f: 16, t: 33 } } }),
+    }],
+  };
+})();
+
+const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE, FOWLS, CHOMP, BRAND];
 /* Hitbox positions measured from the animations (hitboxes.js, written with tools/measure.html). Timing, damage and launch stay as defined above. */
 if (typeof HITBOXES !== 'undefined') for (const def of ROSTER) for (const fm of def.forms) {
   const set = HITBOXES[fm.name]; if (!set) continue;
@@ -1182,7 +1257,7 @@ class Fighter {
     this.move = null; this.mf = 0; this.charge = 0; this.hitG = new Set(); this.parriedBy = null; this.victim = null; this.lag = 0; this.flash = 0;
     this.stale = []; this.staled = false; this.staleM = 1; this.shortHop = false; this.moveSH = false; this.shMacro = false; this.grabImm = 0; this.ledgeGrabs = 0;
     this.dodgeStale = 0; this.dodgeT = 0; this.ds = 0; this.tumble = false; this.techT = 0; this.techLock = 0; this.pumT = 0; this.wdHold = false;
-    this.chargeT = 0; this.stalled = false; this.stallOk = false; this.cAir = null; this.hopT = 0; this.airUse = {}; this.flying = false; this.selOpen = false; this.sling = null; this.dairUsed = false; this.upC = 0; this.upGo = 0; this.flyV = null; this.flyB = false; this.dove = false; this.burstKind = ''; this.burstX = 0; this.burstDown = false; this.burstUsed = false; this.blastUsed = false; this.swapLock = 0; this.slingUsed = false; this.thermal = false; this.recoil = false; this.bigStone = false; this.armorLeft = 99; this.castHit = false;
+    this.chargeT = 0; this.stalled = false; this.stallOk = false; this.cAir = null; this.hopT = 0; this.airUse = {}; this.flying = false; this.selOpen = false; this.sling = null; this.dairUsed = false; this.upC = 0; this.upGo = 0; this.flyV = null; this.flyB = false; this.dove = false; this.burstKind = ''; this.burstX = 0; this.burstDown = false; this.burstUsed = false; this.blastUsed = false; this.swapLock = 0; this.slingUsed = false; this.thermal = false; this.recoil = false; this.bigStone = false; this.armorLeft = 99; this.castHit = false; this.linkT = 0; this.helpLag = 0; this.guarded = false;
   }
   /* Dodges used back to back protect for less time and leave more lag. */
   dodge() { this.ds = this.dodgeStale; this.dodgeStale = Math.min(5, this.dodgeStale + 1); this.dodgeT = 0; }
@@ -1198,7 +1273,7 @@ class Fighter {
   endMove() {
     const m = this.move, i = this.ctl.c; this.move = null;
     if (this.grounded) { this.set('idle'); if (m.tilt && Math.abs(i.lx) > T.dash_stick_x) { this.face = sgn(i.lx); this.set('dash'); } }
-    else this.set(m.helpless ? 'helpless' : 'air');
+    else { this.helpLag = m.helpless ? m.hll || 0 : 0; this.set(m.helpless ? 'helpless' : 'air'); }
   }
   /* Recoil from a clank: the attack is cut off and the fighter is pushed back for a moment. */
   rebound(d) { this.move = null; this.charge = 0; this.lag = Math.round(12 + d * 0.7); this.vx = -this.face * 0.7; this.set('rebound'); }
@@ -1324,7 +1399,7 @@ class Fighter {
     if (st === 'attack' && this.move.burst) {   /* a tumble never falls over: a dive that reaches the floor carries on as a slide, anything else lands ready to act */
       if (this.burstKind === 'dive') { this.burstKind = 'slide'; spark(this.x, this.y, '#ddd', 8, 1.2); } else { this.move = null; this.set('idle'); }
     }
-    else if (st === 'attack') { const m = this.move; if (m.onLand) m.onLand(this, this.mf); this.lag = m.air ? (this.mf < (m.h[0] ? m.h[0].f0 : 99) - 1 || this.mf > m.ac ? (hard ? 4 : 2) : m.ll) : (m.ll || 8); if (m.llf) this.lag = m.llf(this); this.move = null; this.set('land'); }
+    else if (st === 'attack') { const m = this.move; if (m.onLand) m.onLand(this, this.mf); this.lag = m.air ? ((m.ac0 !== undefined ? this.mf <= m.ac0 : this.mf < (m.h[0] ? m.h[0].f0 : 99) - 1) || this.mf > m.ac ? (hard ? 4 : 2) : m.ll) : (m.ll || 8); if (m.llf) this.lag = m.llf(this); this.move = null; this.set('land'); }
     else if (st === 'airdodge') { if (Math.abs(this.vx) > 0.5) { this.vx = clamp(this.vx, -T.wd_max_speed, T.wd_max_speed); this.set('wd'); } else { this.lag = 10; this.set('land'); } }
     else if (st === 'hurt') {
       /* Launched hard enough to tumble: shield just before touching down to tech (in place or rolling), else lie there. */
@@ -1336,7 +1411,7 @@ class Fighter {
         } else { this.vx *= 0.5; spark(this.x, this.y, '#ddd', 8, 1.2); beep(130, 0.08, 'square', 0.05); this.set('down'); }
       } else { this.lag = 4; this.set('land'); }
     }
-    else if (st === 'helpless') { this.lag = 12; this.set('land'); }
+    else if (st === 'helpless') { this.lag = this.helpLag || 12; this.helpLag = 0; this.set('land'); }
     else if (st === 'broken') { /* stays dizzy */ }
     else { this.lag = hard ? 4 : 2; this.set('land'); }
   }
@@ -1350,7 +1425,7 @@ class Fighter {
   breakShield() { this.shieldHp = SHIELD.hp * 0.75;   /* Ultimate: a broken shield comes back at 75% */ this.grounded = false; this.plat = null; this.vy = 3.2; this.vx = 0; this.set('broken'); spark(this.x, this.y + 8, '#9cf', 30, 2.4); beep(200, 0.4, 'sawtooth', 0.08, 0.3); shake = 10; }
   launch(kb, ang, dir, lsi) {
     this.freeVictim(); this.selOpen = false; const sp = kb * 0.03 * (lsi || 1); this.sdi = 0; this.tumble = kb >= TUMBLE_KB; this.ledgeGrabs = 0; this.shortHop = false; this.vx = Math.cos(ang) * sp * dir; this.vy = Math.sin(ang) * sp;
-    this.hitstun = Math.max(4, Math.floor(kb * HITSTUN * COMBO_EASE) - 1); this.move = null; this.ff = false;   /* Ultimate: 0.4 x knockback, one frame less, at least 4; then Emberfall's combo ease */
+    this.hitstun = Math.max(4, Math.floor(kb * HITSTUN * COMBO_EASE) - 1); this.move = null; this.ff = false; this.linkT = 0;   /* Ultimate: 0.4 x knockback, one frame less, at least 4; then Emberfall's combo ease */
     if (this.grounded) { if (this.vy < 0) this.vy = -this.vy * 0.8; if (kb < 30 || this.vy < 0.05) this.vy = 0; else { this.grounded = false; this.plat = null; } }
     this.set('hurt');
   }
@@ -1450,7 +1525,7 @@ class Fighter {
         /* jab chain: attack again once the jab allows it and the next hit comes out */
         /* rapid jab: loops while attack is held (three at least, fourteen at most), then the finisher */
         if (this.state === 'attack' && m.rapid && this.mf >= m.t) { const n = this.rapidN + 1; if ((i.atk || n < 3) && n < 14 && this.grounded) { this.startMove(this.mname); this.rapidN = n; } else if (this.grounded) this.startMove(m.next); else this.endMove(); break; }
-        if (this.state === 'attack' && m.next && this.grounded && this.mf >= m.chain && (c.take('atk') || (i.atk && this.mf >= m.chain + 2))) { this.startMove(m.next); break; }
+        if (this.state === 'attack' && m.next && this.grounded && this.mf >= m.chain && (!m.chainEnd || this.mf <= m.chainEnd) && (c.take('atk') || (i.atk && this.mf >= m.chain + 2))) { this.startMove(m.next); break; }
         if (this.state === 'attack' && this.mf >= m.t) this.endMove();
         break;
       }
@@ -1482,6 +1557,7 @@ class Fighter {
           /* Long hitstun can be cut short: an air dodge from frame 40, an attack or jump from frame 45. */
           if (this.sf >= 45 && (c.buf.atk > 0 || c.cPress || c.buf.spc > 0 || (c.buf.jmp > 0 && this.jumps > 0))) { this.set('air'); this.airActs(); break; }
           if (this.sf >= 40 && c.buf.shd > 0 && !this.airdodged) { c.buf.shd = 0; this.airdodge(); break; }
+          if (this.linkT > 0) { this.linkT--; if (this.sf >= this.hitstun) this.set('air'); break; }   /* held by a linking hit: carried at a fixed speed, no gravity, until it lets go */
           const sp = Math.hypot(this.vx, this.vy); if (sp > 0.051) { const k = (sp - 0.051) / sp; this.vx *= k; this.vy *= k; }
           this.vy -= s.grav; if (this.sf % 3 === 0 && sp > 2) PART.push({ x: this.x, y: this.y + s.h / 2, vx: 0, vy: 0, life: 16, col: 'rgba(255,255,255,.7)', r: 1.6 });
           if (this.sf >= this.hitstun) this.set('air');
@@ -1522,13 +1598,14 @@ class Fighter {
       case 'throw': {
         const v = this.victim;
         if (v && v.state === 'held') { v.x = this.x + this.face * (this.throwK === 'b' ? -6 : 8) * Math.min(1, this.sf / 8); v.y = this.y + (this.throwK === 'u' ? this.sf : 0); }
-        if (this.sf === 10 && v) {
-          const h = this.form.moves.throws[this.throwK], id = this.form.name + ':throw' + this.throwK, d = h.d * staleMul(this, id) * DMG_1V1; pushStale(this, id);
+        const tw = this.form.moves.throws[this.throwK] || {};
+        if (this.sf === (tw.f || 10) && v) {
+          const h = tw, id = this.form.name + ':throw' + this.throwK, d = h.d * staleMul(this, id) * DMG_1V1; pushStale(this, id);
           this.victim = null; v.grounded = false; v.plat = null; v.pct = Math.min(999, v.pct + d); v.grabImm = 60;
           comboHit(this, v, d, true); v.launch(knock(v, d, h.b, h.k) * rage(this), h.a * Math.PI / 180, this.face); v.hitlag = 6; this.hitlag = 6; spark(v.x, v.y + 8, '#fff', 12, 1.6); thwack(90);
         }
         if (!this.grounded) this.vy = 0;   /* a catch in the air hangs there for the fling */
-        if (this.sf >= 26) this.set(this.grounded ? 'idle' : 'air');
+        if (this.sf >= (tw.t || 26)) this.set(this.grounded ? 'idle' : 'air');
         break;
       }
       case 'ledge': {
@@ -1538,7 +1615,7 @@ class Fighter {
           const toward = -side * i.lx, slow = this.pct >= 100;   /* worn down: every way up is slower and less protected */
           if (c.take('jmp')) { this.vy = s.vJump * 1.05; this.vx = -side * 0.7; this.ledgeCd = 30; this.set('air'); }
           else if (i.shd) { this.x = side * (EDGE - 22); this.touchDown(MAIN, true); this.lag = slow ? 26 : 18; this.invuln = slow ? 20 : 18; this.set('land'); }
-          else if (c.take('atk')) { this.x = side * (EDGE - 6); this.touchDown(MAIN, true); this.startMove('getup'); if (slow) this.mf = -8; }
+          else if (c.take('atk')) { this.x = side * (EDGE - 6); this.touchDown(MAIN, true); this.startMove(this.form.moves.ledgeatk ? 'ledgeatk' : 'getup'); if (slow) this.mf = -8; }
           else if (toward > 0.5 || i.ly > 0.5) { this.x = side * (EDGE - 5); this.touchDown(MAIN, true); this.lag = slow ? 22 : 14; this.invuln = slow ? 16 : 14; this.set('land'); }
           else if (toward < -0.5 || i.ly < -0.5 || this.sf > LEDGE_HANG) { this.ledgeCd = 30; this.vy = -0.5; this.x += side * 2; this.set('air'); }
         }
@@ -1595,7 +1672,7 @@ class Fighter {
       }
     }
     /* Ledges. */
-    const snap = st === 'attack' && this.move && this.move.ledge && this.mf > (this.move.h[0] ? this.move.h[0].f1 : 8);   /* an up special past its hit takes the ledge on the way up too */
+    const snap = st === 'attack' && this.move && this.move.ledge && this.mf > (this.move.snap ? this.move.snap - 1 : this.move.h[0] ? this.move.h[0].f1 : 8);   /* an up special past its hit takes the ledge on the way up too */
     if (!s.noLedge && (this.vy < 0 || snap) && this.ledgeCd === 0 && i.ly > -0.5 && (st === 'air' || st === 'helpless' || (st === 'attack' && this.move && this.move.ledge))) {
       const side = sgn(this.x), out = Math.abs(this.x) - EDGE, hand = this.y + s.h, o = F[1 - this.idx];
       if (side && out > -1 && out < 13 && hand > -9 && hand < 9 && this.ledgeGrabs < 6) {
@@ -1618,8 +1695,10 @@ function hitY(a, h) { return a.y + h.y + (a.aim || 0) * AIM_Y; }
 function hitCircles(a, h, back) {
   if (h.at) return h.at(a, back || 0);   /* a shape worked out from the move itself, such as both ends of a spinning rig */
   const ox = a.x - (back ? (a.x - a.px) * back : 0), oy = a.y - (back ? (a.y - a.py) * back : 0) + (a.aim || 0) * AIM_Y, tx = ox + h.x * a.face, ty = oy + h.y;
-  if (!h.in) return [[tx, ty, h.r]];
-  const ix = ox + h.in[0] * a.face, iy = oy + h.in[1]; return [[ix, iy, h.r], [(ix + tx) / 2, (iy + ty) / 2, h.r], [tx, ty, h.r]];
+  if (!h.in || h.n === 1) return [[tx, ty, h.r]];
+  const ix = ox + h.in[0] * a.face, iy = oy + h.in[1];
+  if (h.n > 3) { const out = []; for (let k = 0; k < h.n; k++) { const q = k / (h.n - 1); out.push([ix + (tx - ix) * q, iy + (ty - iy) * q, h.r]); } return out; }   /* a long blade: enough circles to leave no gaps */
+  return [[ix, iy, h.r], [(ix + tx) / 2, (iy + ty) / 2, h.r], [tx, ty, h.r]];
 }
 /* Does this hitbox touch that body? Checked where both are now and, if they closed more than a hitbox's width since the
    last frame, at the halfway point too, so nothing fast passes through between frames. */
@@ -1633,7 +1712,7 @@ function circRect(cx, cy, r, x0, y0, x1, y1) { const dx = cx - clamp(cx, x0, x1)
 /* The body's hittable box. It shrinks when crouching or lying down, which is how a crouch slips under high attacks. */
 function hurtRect(v) {
   const st = v.st; let w = st.w, h = st.h;
-  if (v.grounded && v.state === 'idle' && v.ctl.c.ly < CROUCH_Y) h *= 0.62;
+  if (v.grounded && v.state === 'idle' && v.ctl.c.ly < CROUCH_Y) { h *= st.crouch ? st.crouch[0] : 0.62; if (st.crouch) w *= st.crouch[1]; }
   else if (v.state === 'down') { h *= 0.42; w *= 1.4; }
   else if (v.state === 'ledge') return [v.x - w / 2, v.y, v.x + w / 2, v.y + h + 3];   /* head and hands show above the lip */
   else if (v.state === 'jsq' || v.state === 'land') h *= 0.86;
@@ -1665,8 +1744,8 @@ function wouldKO(v) {
 }
 let slowT = 0, focus = null;   /* slow motion and camera focus after a hit that will take the last stock */
 function canBeHit(v) { return v.invuln === 0 && v.state !== 'dead' && v.state !== 'respawn' && v.state !== 'held'; }
-function applyHit(a, v, h, face, srcX, proj, poke) { sparkOff = !DBG.fx; try { applyHitRaw(a, v, h, face, srcX, proj, poke); } finally { sparkOff = false; } }
-function applyHitRaw(a, v, h, face, srcX, proj, poke) {
+function applyHit(a, v, h, face, srcX, proj, poke, at) { sparkOff = !DBG.fx; try { applyHitRaw(a, v, h, face, srcX, proj, poke, at); } finally { sparkOff = false; } }
+function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   if (h.dyn) h = Object.assign({}, h, h.dyn(a));   /* a hit whose numbers depend on the moment (the Cyclone's light hits, then its finisher) */
   const hx = v.x, hy = v.y + v.st.h / 2;
   if (h.grab) {
@@ -1693,6 +1772,18 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke) {
   if (!proj && !h.grab && v.state === 'attack' && v.move && v.move.counter && v.mf >= v.move.counter[0] && v.mf <= v.move.counter[1] && sgn(a.x - v.x) === v.face) {
     if (h.d <= v.move.counterMax) { a.hitlag = 12; v.hitlag = 6; v.startMove('dcounter'); spark(hx, hy, '#ffd98a', 16, 1.8); pop(hx, hy + 12, 'BRACE', '#ffd98a'); beep(880, 0.08, 'triangle', 0.05, 0.6); return; }
     d *= 0.5;   /* a strong hit overpowers the brace, for half its damage */
+  }
+  /* A guard window (Brand's Stove Door Bash): on the ground it stops one light strike that comes in from the front, for the
+     usual shield cost and freeze, and the move carries on. Too strong, from behind or above, a grab or a projectile: no guard. */
+  if (!proj && v.state === 'attack' && v.move && v.move.guard && v.grounded && !v.guarded && v.mf >= v.move.guard[0] && v.mf <= v.move.guard[1] && h.d * (1 + a.charge / 60 * 0.4) <= v.move.guardMax) {
+    const gc = v.move.guardC, gx = v.x + gc[0] * v.face, gy = v.y + gc[1], c = at || [a.x + h.x * a.face, hitY(a, h), h.r];
+    let fx = (c[0] - v.x) * v.face; const fy = c[1] - gy; if (Math.abs(fx) < 1) fx = (a.x - v.x) * v.face;
+    if (fx > 0 && Math.abs(Math.atan2(fy, fx)) <= 55 * Math.PI / 180 && Math.hypot(c[0] - gx, c[1] - gy) <= c[2] + gc[2]) {
+      v.guarded = true; v.shieldHp -= d * SHIELD.dmg;
+      if (v.shieldHp <= 0) { v.move = null; v.breakShield(); return; }
+      const hl = Math.min(20, Math.floor((d * 0.65 + 6) * 0.67)); v.hitlag = hl; a.hitlag = hl;
+      spark(gx, gy, '#ffb060', 12, 1.6); pop(gx, gy + 10, 'GUARD', '#ffb060'); beep(520, 0.06, 'triangle', 0.05, 0.8); return;
+    }
   }
   if (poke) pop(hx, hy + 12, 'POKE', '#9cf');   /* the hit found a part of the body the shield no longer covers */
   if ((v.state === 'shield' || v.state === 'shieldstun') && !poke) {
@@ -1722,7 +1813,8 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke) {
   /* Holding up or down stretches or shortens the launch, except for near-vertical ones. */
   const nd = ((ang * 180 / Math.PI) % 360 + 360) % 360, vertical = (nd > 65 && nd < 115) || (nd > 245 && nd < 295);
   const lsi = vertical ? 1 : i.ly > 0.5 ? 1.095 : i.ly < -0.5 ? 0.92 : 1;
-  v.launch(kb, ang, dir, lsi); if (h.drag) { v.vx += a.vx; v.vy += a.vy; v.dragBy = a.idx; } else if (h.carry && !proj) { const cx = a.x + a.face * 2 - v.x, cy = a.y + a.st.h / 2 - (v.y + v.st.h / 2); v.grounded = false; v.plat = null; v.vx = a.vx + clamp(cx * 0.3, -2, 2); v.vy = a.vy + clamp(cy * 0.3, -2, 2) + 0.2; v.dragBy = a.idx; } else v.dragBy = -1;   /* carry: caught and taken along (sackCarry) */   /* carried along with a travelling rig (see fowlCarry) */ v.hitlag = hl; if (!proj) a.hitlag = hl; rumble(v.ctl, 60 + kb, Math.min(1, 0.25 + kb / 150)); rumble(a.ctl, 50, 0.25);
+  v.launch(kb, ang, dir, lsi); if (h.drag) { v.vx += a.vx; v.vy += a.vy; v.dragBy = a.idx; } else if (h.carry && !proj) { const cx = a.x + a.face * 2 - v.x, cy = a.y + a.st.h / 2 - (v.y + v.st.h / 2); v.grounded = false; v.plat = null; v.vx = a.vx + clamp(cx * 0.3, -2, 2); v.vy = a.vy + clamp(cy * 0.3, -2, 2) + 0.2; v.dragBy = a.idx; } else v.dragBy = -1;
+  if (h.link) { v.tumble = false; v.grounded = false; v.plat = null; v.hitstun = v.linkT = h.link[2]; v.vx = face * h.link[0] / h.link[2]; v.vy = h.link[1] / h.link[2]; }   /* a linking hit: the target is moved a set distance over a set time, whatever its damage, so the next hit of the move connects */   /* carry: caught and taken along (sackCarry) */   /* carried along with a travelling rig (see fowlCarry) */ v.hitlag = hl; if (!proj) a.hitlag = hl; rumble(v.ctl, 60 + kb, Math.min(1, 0.25 + kb / 150)); rumble(a.ctl, 50, 0.25);
   if (wouldKO(v)) {   /* a hit that will KO lands harder: longer freeze, a bigger burst, and slow motion if it takes the last stock */
     v.hitlag += 8; if (!proj) a.hitlag += 8; shake = Math.max(shake, 14); rumble(v.ctl, 300, 1);
     spark(hx, hy, '#ff5a4d', 40, 4.2); spark(hx, hy, '#ffe9a8', 24, 2.6); beep(70, 0.5, 'sawtooth', 0.11, 0.5);
@@ -1760,8 +1852,8 @@ function resolveHits() {
       for (const h of (a.move.hp || a.move.h)) {   /* hp: the same hitboxes with the parts near the body first */
         if (a.mf < h.f0 || a.mf > h.f1 || (h.when && !h.when(a))) continue; const gid = h.g || 0; if (a.hitG.has(gid)) continue;
         if (h.grab && ((!a.grounded && !h.cmd) || v.grabImm > 0 || (h.floor && !(a.grounded && v.grounded)))) continue;
-        if ((h.airOnly && a.grounded) || (h.gndOnly && !a.grounded)) continue;   /* a hit that only exists in the air, or only on the floor */   /* ordinary grabs are for the ground; a leaping grab catches in the air; a floor grab needs both standing */
-        const at = hitTouches(a, h, v); if (at) { ev.push([a, v, h, a.face, a.x, false, !h.grab && pokes(v, at[0], at[1])]); a.hitG.add(gid); break; }
+        if ((h.airOnly && a.grounded) || (h.gndOnly && !a.grounded) || (h.vAir && v.grounded) || (h.vGnd && !v.grounded)) continue;   /* a hit that only exists in the air, or only on the floor */   /* ordinary grabs are for the ground; a leaping grab catches in the air; a floor grab needs both standing */
+        const at = hitTouches(a, h, v); if (at) { ev.push([a, v, h, a.face, a.x, false, !h.grab && pokes(v, at[0], at[1]), at]); a.hitG.add(gid); break; }
       }
     }
   }
@@ -1873,6 +1965,7 @@ function cpuBrain(f, o, m, L) {
     return i;
   }
   if (o.state === 'dead' || o.state === 'respawn') { if (Math.abs(f.x) > 20) i.lx = -sgn(f.x) * 0.5; return i; }
+  if (f.grounded && f.form.aiBash && m.cd === 0 && NAP_STATES[f.state] && o.state === 'attack' && o.grounded && o.mf <= 3 && ad < 15 && Math.abs(dy) < 6 && Math.random() < L.punish * 0.5) { i.lx = dir; i.spc = true; m.cd = 45; return i; }   /* a swing just starting in front of her: the guarded bash */
   if (f.grounded && o.state === 'attack' && ad < 24 && Math.abs(dy) < 20) { if (m.def == null) m.def = Math.random() < L.guard; if (m.def) { i.shd = true; return i; } } else m.def = null;
   if (f.grounded) {
     /* The opponent is off stage: hold the ledge instead of following them out, and swing as they come back. */

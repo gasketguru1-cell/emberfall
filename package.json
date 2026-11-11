@@ -2,7 +2,7 @@
   "name": "emberfall",
   "version": "1.0.1",
   "scripts": {
-    "test": "node tests/headless.js && node tests/rules.js && node tests/fuzz.js 20 && node tests/net.js && node tests/chomp.js",
+    "test": "node tests/headless.js && node tests/rules.js && node tests/fuzz.js 20 && node tests/net.js && node tests/chomp.js && node tests/brand.js",
     "start": "node serve.js",
     "desktop": "electron .",
     "dist": "node tools/stage-desktop.js && electron-builder --win nsis",

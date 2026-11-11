@@ -176,6 +176,41 @@ const ART = {
     g.beginPath(); g.ellipse(1.3 + lb, 12.9 + bob, 1.3, 0.55, 0.35, 0, TAU); ink(c[1], 0.25); g.beginPath(); g.ellipse(-0.8 + lb * 0.6, 12.6 + bob, 1, 0.45, -0.4, 0, TAU); ink(tint(c[1], -0.15), 0.25);
     if (f && f.bubble) { g.beginPath(); g.arc(0, 5.5, 7.5, 0, TAU); g.fillStyle = 'rgba(190,225,255,.22)'; g.fill(); g.strokeStyle = 'rgba(220,240,255,.85)'; g.lineWidth = 0.35; g.stroke(); }
   },
+  /* Brand: the night-watch captain. Tall boots, a long quilted slate coat with brass buttons, a kettle hat, a dark braid,
+     a round stove-door shield on the leading arm and a broad sword with a forge-hot edge. The blade is drawn to where the
+     attack's own shape is, so the picture and the hit agree. Faces +x. */
+  Brand(c, t, f) {
+    const sw = gait(f) * 1.3, bob = Math.sin(t * 0.07) * 0.14, iron = '#55585f', skin = '#d9a383', hair = '#2a2024', boot = '#3a2f2a';
+    limb(-1.3, 4, -1.3 - sw, 0.8, 1.5, '#23232b'); limb(1.3, 4, 1.3 + sw, 0.8, 1.5, '#23232b');
+    for (const s of [-1, 1]) { g.beginPath(); g.rect(s * 1.3 + s * sw - 1, 0.2, 2.1, 3.1); ink(boot, 0.28); g.beginPath(); g.ellipse(s * 1.3 + s * sw + 0.5, 0.5, 1.6, 0.7, 0, 0, TAU); ink(boot, 0.28); }
+    g.beginPath(); g.moveTo(-3.3, 3.3); g.quadraticCurveTo(0, 2.6, 3.4, 3.3); g.lineTo(2.3, 11.3 + bob); g.quadraticCurveTo(0, 12 + bob, -2.3, 11.3 + bob); g.closePath(); ink(vgrad(c[0], 3, 12));   /* coat */
+    g.strokeStyle = tint(c[0], -0.35); g.lineWidth = 0.16; g.beginPath(); for (let k = -2; k <= 2; k++) { g.moveTo(k * 1.1 - 1.4, 3.4); g.lineTo(k * 1.1 + 1.2, 11); g.moveTo(k * 1.1 + 1.4, 3.4); g.lineTo(k * 1.1 - 1.2, 11); } g.stroke();   /* quilting */
+    g.fillStyle = c[1]; for (const y of [8.2, 9.4, 10.5]) { g.beginPath(); g.arc(0.5, y + bob, 0.26, 0, TAU); g.fill(); }
+    g.beginPath(); g.rect(-2.9, 6.6, 5.8, 0.9); ink('#6b4630', 0.22); g.beginPath(); g.rect(0.1, 6.5, 1, 1.1); ink('#9a9aa2', 0.18);   /* belt */
+    /* the sword arm */
+    let tx = 4.6, ty = 2.2, hx = 2.6, hy = 6.6;
+    if (f && f.state === 'attack' && f.move && f.move.h) { const m = f.move, h = m.h.find(q => !q.grab && f.mf >= q.f0 && f.mf <= q.f1) || m.h.find(q => !q.grab && f.mf < q.f0) || m.h.filter(q => !q.grab).pop();
+      if (h && h.in) { const p = f.mf < h.f0 ? f.mf / h.f0 : f.mf <= h.f1 ? 1 : Math.max(0, 1 - (f.mf - h.f1) / Math.max(1, m.t - h.f1)), e = p * p * (3 - 2 * p), wind = f.mf < h.f0 ? Math.sin(p * Math.PI) * 2 : 0;
+        const ex = h.x + (h.x >= h.in[0] ? h.r : -h.r) * 0.8, ey = h.y; tx += (ex - tx) * e - wind * 1.5; ty += (ey - ty) * e + wind; hx += (h.in[0] * 0.8 - hx) * e; hy += (h.in[1] - hy) * e; } }
+    limb(0.6, 10 + bob, hx, hy, 1.2, tint(c[0], -0.12));
+    { const dx = tx - hx, dy = ty - hy, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+      g.lineCap = 'round'; g.beginPath(); g.moveTo(hx, hy); g.lineTo(tx, ty); g.strokeStyle = OL; g.lineWidth = 1.5; g.stroke(); g.strokeStyle = iron; g.lineWidth = 0.95; g.stroke();
+      const q = g.createLinearGradient(hx, hy, tx, ty); q.addColorStop(0, 'rgba(255,138,60,0)'); q.addColorStop(0.35, c[2]); q.addColorStop(1, '#ffd98a'); g.beginPath(); g.moveTo(hx + ux * L * 0.25 - uy * 0.25, hy + uy * L * 0.25 + ux * 0.25); g.lineTo(tx - uy * 0.2, ty + ux * 0.2); g.strokeStyle = q; g.lineWidth = 0.42; g.stroke();
+      g.beginPath(); g.moveTo(hx + ux * 0.9 - uy * 1.1, hy + uy * 0.9 + ux * 1.1); g.lineTo(hx + ux * 0.9 + uy * 1.1, hy + uy * 0.9 - ux * 1.1); g.strokeStyle = OL; g.lineWidth = 0.75; g.stroke(); g.strokeStyle = '#33353c'; g.lineWidth = 0.4; g.stroke();   /* crossguard */
+      g.beginPath(); g.arc(hx, hy, 0.75, 0, TAU); ink(skin, 0.22); }
+    /* head, braid and kettle hat */
+    g.strokeStyle = OL; g.lineWidth = 1.5; g.beginPath(); g.moveTo(-1.2, 13 + bob); g.quadraticCurveTo(-2.4, 11.4 + bob, -1.9, 8.8 + bob); g.stroke(); g.strokeStyle = hair; g.lineWidth = 0.9; g.stroke();
+    g.beginPath(); g.arc(0.3, 13 + bob, 1.75, 0, TAU); ink(skin, 0.28);
+    g.fillStyle = OL; g.beginPath(); g.arc(1.25, 13.1 + bob, 0.18, 0, TAU); g.fill();
+    g.beginPath(); g.moveTo(-2.9, 13.7 + bob); g.lineTo(3.4, 13.7 + bob); g.lineTo(1.7, 14.4 + bob); g.quadraticCurveTo(0.3, 16.4 + bob, -1.2, 14.4 + bob); g.closePath(); ink(vgrad('#6a6d75', 13.6, 16));
+    /* the stove-door shield on the leading arm: raised and pushed forward while the bash guards or strikes */
+    const up = f && f.state === 'attack' && f.mname === 'sspec' ? (f.mf >= 5 && f.mf <= 14 ? 1 : 0.4) : f && (f.state === 'shield' || f.state === 'shieldstun') ? 0.8 : f && f.state === 'attack' && f.mname === 'dash' ? 0.9 : 0;
+    const sx = 2.7 + up * 2.6, sy = 6.9 + bob + up * 0.5, sr = 2.5 + up * 0.5;
+    g.beginPath(); g.ellipse(sx, sy, sr * 0.62, sr, 0, 0, TAU); ink(vgrad('#4a4c53', sy - sr, sy + sr), 0.36);
+    g.beginPath(); g.ellipse(sx + 0.1, sy, sr * 0.4, sr * 0.68, 0, 0, TAU); g.strokeStyle = '#2c2d33'; g.lineWidth = 0.2; g.stroke();
+    g.fillStyle = c[1]; g.fillRect(sx - sr * 0.6, sy - 0.25, sr * 0.55, 0.5);   /* brass hinge strap */
+    g.fillStyle = c[2]; g.beginPath(); g.ellipse(sx + 0.25, sy, 0.32, 0.6, 0, 0, TAU); g.fill();   /* the glowing grille */
+  },
   Sprocket(c, t, f) {
     const sw = gait(f) * 1.4, a = swing(f), bob = Math.sin(t * 0.08) * 0.15, skin = '#e0a98a', iron = '#5b5f6b', copper = '#b87333';
     for (const s of [-1, 1]) { g.beginPath(); g.rect(s * 1.9 - 1.1 + s * sw * 0.5, 1.2, 2.2, 3.6); ink('#3a3a40', 0.3); g.beginPath(); g.ellipse(s * 1.9 + s * sw + 0.5, 0.8, 1.9, 0.9, 0, 0, TAU); ink(iron, 0.3); }   /* legs and steel-capped boots */
