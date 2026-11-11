@@ -15,6 +15,10 @@ vm.runInThisContext(`
     if (miss.length) { console.log('FAIL ' + def.name + ': not documented: ' + miss.join(', ')); bad++; }
     else console.log('ok   ' + def.name + ': ' + secs.reduce((n, s) => n + s.pages.length, 0) + ' pages');
   }
+  /* the fighter select keeps Joey's other form a surprise: his move list there names no part of it */
+  for (const def of ROSTER) if (def.transform) { const words = JSON.stringify(mlSelSections(def).map(s => [s.label, s.pages.map(p => [p.title, p.sub, p.entries.map(e => [e.inp, e.name, e.desc])])]));
+    const bigName = def.forms.slice(1).map(fm => fm.name).join('|'), leak = words.match(new RegExp('.{0,40}(' + bigName + '|transform|inject|grow|gorilla).{0,40}', 'i'));
+    if (leak) { console.log('FAIL ' + def.name + ': the select-screen move list gives away his other form: ' + leak[0]); bad++; } else console.log('ok   ' + def.name + ' on the fighter select: ' + mlSelSections(def)[0].pages.length + ' pages, nothing of ' + bigName); }
   console.log(pages + ' pages, ' + moves + ' entries' + (bad ? ', ' + bad + ' problems' : ', all documented'));
   if (bad) process.exitCode = 1;
 })();
