@@ -527,6 +527,10 @@ vm.runInThisContext(`
       const [s2, o2] = setup(SACK, FL, 0, 5); o2.ctl = new Ctl('none'); SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = 1; i.spc = true; } }; run(60);
       check('Potato Sack: an opponent in the potato’s way sets it off early, sending both flying with the same burst', at > 4 && at < 12 && o.pct > 10 && o.state === 'hurt' && s.state === 'hurt' && s.pct - p0 === 12 && Math.abs(o.pct - o2.pct) < 0.01,
         'burst on frame ' + at + '; opponent ' + o.pct.toFixed(1) + '% (a neighbour on the ground takes ' + o2.pct.toFixed(1) + '%), sack ' + s.state + ' +' + (s.pct - p0) + '%'); }
+    /* his body carries the burst from frame 3: a neighbour is hit then, once; he is launched only when the potato lands on him */
+    { const [s, o] = setup(SACK, FL, 0, 5); o.ctl = new Ctl('none'); s.startMove('uspec'); let hitAt = -1, hits = 0, was = o.pct, launchedAt = -1, stateAtHit = '';
+      run(60, () => { if (o.pct > was + 0.01) { hits++; was = o.pct; if (hitAt < 0) { hitAt = s.mf; stateAtHit = s.state; } } if (launchedAt < 0 && s.state === 'hurt') launchedAt = s.mf; });
+      check('Potato Sack: Hot Potato’s body burst hits from frame 3, once, and he flies only when the potato lands', hitAt === 3 && hits === 1 && stateAtHit === 'attack' && launchedAt >= 16, 'hit on frame ' + hitAt + ' (' + hits + ' hit), launched on frame ' + launchedAt); }
     /* tumble with down held goes through a soft platform; without it he lands as before */
     { const thru = down => { const [s] = setup(SACK, FL, 0, 60); airborne(s, -42, 36); SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = -1; i.spc = true; } else if (tt >= 4 && tt < 9) { i.lx = 1; } if (down && tt >= 9) i.ly = -1; }; let onPlat = false; run(60, () => { if (s.plat && s.plat.soft) onPlat = true; }); return onPlat; };
       const held = thru(true), plain = thru(false);

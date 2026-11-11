@@ -465,7 +465,7 @@ const TUNE = {
 const NORMALS = ['jab', 'jab2', 'jab3', 'dash', 'ftilt', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash', 'nair', 'fair', 'bair', 'uair', 'dair'];
 function applyTune(fm) {
   const T = TUNE[fm.name], mv = fm.moves; if (!T) return;
-  if (T.kb) { for (const k in mv) { const m = mv[k]; if (m && Array.isArray(m.h)) for (const h of m.h) if (h.k) h.k = Math.round(h.k * T.kb); } for (const k in mv.throws) mv.throws[k].k = Math.round(mv.throws[k].k * T.kb); }
+  if (T.kb) { for (const k in mv) { const m = mv[k]; if (m && Array.isArray(m.h)) for (const h of m.h) if (h.k && !h.untuned) h.k = Math.round(h.k * T.kb); }   /* untuned: a hit that must match a projectile's numbers exactly (Hot Potato's body) */ for (const k in mv.throws) mv.throws[k].k = Math.round(mv.throws[k].k * T.kb); }
   if (T.lag) for (const k of ['dash', 'fsmash', 'usmash', 'dsmash']) {   /* committal moves only: tilts, jabs and aerials keep their recovery, so hits lead to follow-ups */ const m = mv[k]; if (!m || !m.h || !m.h[0]) continue; const last = Math.max(...m.h.map(x => x.f1)); m.t = last + Math.max(6, Math.round((m.t - last) * T.lag)); }
 }
 
@@ -592,10 +592,10 @@ const WREN = {
    70% and the edge (sour) from about 100 to 125%, both from the victim's own damage; the sweet spot hits about half again
    as hard as the burst throws the sack itself at the same damage. One hit per target: the middle is tried first. */
 const SACK_BLAST = { sweet: { r: 6, d: 15, a: 75, b: 50, k: 112 }, sour: { r: 12, d: 10, a: 70, b: 35, k: 100 } };   /* measured with no DI at centre stage: sweet KOs at 55-90% (most near 70), sour at 105-130% (heavies later) */
-function sackBlast(f, i, at) {   /* at: where the burst is centred (the hot potato's spot when it goes off early), else his middle */
+function sackBlast(f, i, at) {   /* at: where the burst is centred (the hot potato's spot when it goes off early), else his middle; no burst hit on someone his body already caught this move */
   const bx = at ? at[0] : f.x, by = at ? at[1] : f.y + 4;
   spark(bx, by, '#ffb347', 30, 2.6); spark(bx, by, '#ff5a1a', 18, 1.8); beep(120, 0.3, 'sawtooth', 0.08, 0.4); shake = Math.max(shake, 6);
-  for (const part of ['sweet', 'sour']) { const q = SACK_BLAST[part]; shoot(f, { kind: 'blast', grp: 'hotpotato', vx: 0, r: q.r, life: 4, h: { d: q.d, a: q.a, b: q.b, k: q.k, norage: 1 } }); const b = PROJ[PROJ.length - 1]; b.x = bx; b.y = by; }   /* norage: the sack's own damage does not add to it */
+  if (!(f.hitG && f.hitG.has(1))) for (const part of ['sweet', 'sour']) { const q = SACK_BLAST[part]; shoot(f, { kind: 'blast', grp: 'hotpotato', vx: 0, r: q.r, life: 4, h: { d: q.d, a: q.a, b: q.b, k: q.k, norage: 1 } }); const b = PROJ[PROJ.length - 1]; b.x = bx; b.y = by; }   /* norage: the sack's own damage does not add to it */
   const d = 12; f.pct = Math.min(999, f.pct + d); f.flash = 6; f.blastUsed = !f.grounded || true;
   f.launch(knock(f, d, 100, 70), (90 - clamp(i.lx, -1, 1) * 28) * Math.PI / 180, 1); f.hitlag = 4;
 }
@@ -635,7 +635,9 @@ const SACK = {
       /* Hot Potato (owner's request, 2026-11-11): on frame 4 he tosses a flaming potato straight up over his head; it drops back
          onto him and bursts (sackBlast: the same burst on others and the same launch for him as before). He hangs in the air
          while he waits. If the potato touches the opponent first it bursts there and then, launching them both. */
-      uspec: { t: 60, rise: 40, blast: 1, h: [], on(f, n, i) {
+      /* (owner's request, 2026-11-11) from frame 3 his body carries the burst's own hitbox, sweet middle then sour edge, until the
+         potato lands: one hit per opponent between the body and the burst. He is only launched when the potato hits him. */
+      uspec: { t: 60, rise: 40, blast: 1, h: ['sweet', 'sour'].map(k => { const q = SACK_BLAST[k]; return { f0: 3, f1: 58, x: 0, y: 4, r: q.r, d: q.d, a: q.a, b: q.b, k: q.k, norage: 1, untuned: 1, g: 1 }; }), on(f, n, i) {
         if (n === 1) f.spudOut = false;
         if (!f.spudOut && !f.grounded) f.vy = Math.max(f.vy, -0.5);
         if (n === 4) { f.spudOut = false; PROJ = PROJ.filter(p => !(p.owner === f.idx && p.kind === 'hotspud'));
