@@ -119,7 +119,7 @@ const MOVE_TEXT = {
     dsmash: ['Spill Sweep', 'Sweeps in front, then behind. The rear hit comes later and sends back and up.'],
     nair: ['Sack Shake', 'Three light hits that catch the opponent and carry them along, then a finisher that sends them away. Only 15 frames long, so two fit in one short hop. Only the first one each time in the air carries; later ones still hit but let go.'],
     fair: ['Lumpy Swing', 'A forward swing that sends diagonally out.'],
-    bair: ['Back Bump', 'A heavy bump behind him with a strong backward launch. His best aerial finisher.'],
+    bair: ['Spud Drill', 'He turns into a drill pointing backward and bores through the air behind him for almost half a second, dragging whoever it catches along, then pops them up behind him. 8% in all. Chains into itself: from 0% three drills in a row connect, and the third sends them off.'],
     uair: ['Tuft Flick', 'Flicks the tuft upward to keep an opponent above him.'],
     dair: ['Sack Drop', 'Drops the bottom of the sack. Sends an airborne opponent straight down: a spike off the stage.'],
     grab: ['Sack Snatch', 'Catches the opponent against the sack. Further reach out of a dash or a run turnaround, with more recovery.'],

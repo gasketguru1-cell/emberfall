@@ -1579,15 +1579,21 @@ for (const def of ROSTER) for (const fm of def.forms) {
   nair.on = (f, n) => { if (n === 1) { f.nairDrag = !f.airUse.nairDrag; f.airUse.nairDrag = 1; } if (n >= 3 && n <= 9 && f.nairDrag) sackCarry(f); }; }
 /* Potato Sack's back air, the Spud Drill (owner's request, 2026-11-11): he turns into a drill pointing backward and bores
    through the air behind him for 0.45 s (frames 6 to 32, 27 frames). Six light hits drag whoever they catch along with him
-   (sackCarry, held behind his back), then a seventh sends them off up and behind, close enough to drill them again: three
-   in a row from 0%. 0.9% x 6 + 2.6% = 8%. While it bores he pushes backward and his fall slows, once per trip into the air. */
-const OVD = typeof OVDRILL !== "undefined" ? OVDRILL : {};
+   (sackCarry, held behind his back), then a seventh pops them up behind him with 20 frames of extra hitstun, so the next
+   drill can catch them: 0.9% x 6 + 2.6% = 8%. Drills in a row on a target that has not recovered are counted (drillN); the
+   third one's last hit is a real launch instead, so from 0% exactly three connect (short hop, land and short hop, double
+   jump). The pop has no growth, so at higher percents the chain only gets shorter. While it bores he pushes backward and
+   his fall slows, for the first three drills of each trip into the air. */
 { const bair = SACK.forms[0].moves.bair, body = { x: -7, y: 6, r: 6.5 };
-  bair.t = 42; bair.ll = 9; bair.ac = 38; bair.drill = 1;
+  bair.t = 36; bair.ll = 9; bair.ac = 34; bair.drill = 1;
+  const link = { a: 120, b: 40, k: 0, hs: 20 }, send = { a: 135, b: 40, k: 70, hs: 0 };
   bair.h = [6, 10, 14, 18, 22, 26].map((f0, k) => Object.assign({ f0, f1: f0 + 1, g: k + 1, d: 0.9, a: 80, b: 16, k: 0, carry: 1, carryX: -9 }, body))
-    .concat([Object.assign({ f0: 30, f1: 32, g: 50, d: 2.6, a: 135, b: 30, k: 60 }, body)]);
-  bair.on = (f, n) => { if (n === 1) { f.drillPush = (f.airUse.drill || 0) < (OVD.push || 1); f.airUse.drill = (f.airUse.drill || 0) + 1; }
+    .concat([Object.assign({ f0: 30, f1: 32, g: 50, d: 2.6, dyn: a => (a.drillN || 1) >= 3 ? send : link }, link, body)]);
+  bair.on = (f, n) => { const o = opp(f);
+    if (n === 1) { f.drillN = o && o.state === 'hurt' && o.drillBy === f.idx && frame <= (o.drillUntil || 0) ? (f.drillN || 1) + 1 : 1; f.drillMk = false;
+      f.drillPush = (f.airUse.drill || 0) < 3; f.airUse.drill = (f.airUse.drill || 0) + 1; }
     if (n >= 6 && n <= 32) { if (f.drillPush && !f.grounded) { f.vx = appr(f.vx, -f.face * 1.1, 0.12); f.vy = Math.max(f.vy, -0.6); } sackCarry(f, -9); }
+    if (!f.drillMk && f.hitG.has(50) && o) { f.drillMk = true; o.drillBy = f.idx; o.drillUntil = frame + Math.max(0, o.hitstun - o.sf); }
     if (n >= 6 && n <= 32 && n % 4 === 2) spark(f.x - f.face * 9, f.y + 6, '#e6d3a6', 3, 0.8); }; }
 /* Keeps an opponent caught by Potato Sack's neutral air moving with him: their speed eases toward his and they are pulled
    toward the middle of his body, so the hits that follow connect wherever he is drifting or falling. */

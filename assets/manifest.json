@@ -1769,13 +1769,13 @@
     "end": 0.9
    },
    "bair": {
-    "clip": "BackKick",
+    "clip": "Fall",
     "start": 0,
     "contact": [
-     0.39,
-     0.52
+     0.17,
+     0.89
     ],
-    "end": 0.9
+    "end": 1
    },
    "uair": {
     "clip": "Juggle",
