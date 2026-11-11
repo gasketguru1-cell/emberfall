@@ -69,7 +69,7 @@
   "seconds": 0.383
  },
  "Cleave": {
-  "seconds": 0.783
+  "seconds": 0.8
  },
  "Lift": {
   "seconds": 0.767
@@ -84,10 +84,10 @@
   "seconds": 0.4
  },
  "Ward": {
-  "seconds": 0.5
+  "seconds": 0.55
  },
  "About": {
-  "seconds": 0.567
+  "seconds": 0.633
  },
  "Arc": {
   "seconds": 0.45

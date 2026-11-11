@@ -40,19 +40,19 @@ vm.runInThisContext(`
   {
     const h = k => mv[k].h[0], rows = [
       ['jab', 4, 5, 2.5, 60, 15, 25, 17], ['jab2', 5, 6, 2.5, 66, 17, 27, 20], ['jab3', 7, 9, 4.5, 42, 34, 59, 27], ['dash', 9, 12, 10, 54, 34, 67, 34], ['ftilt', 7, 9, 9, 36, 34, 67, 25],
-      ['utilt', 7, 8, 8, 83, 27, 61, 26], ['dtilt', 6, 8, 7, 69, 24, 51, 24], ['fsmash', 16, 19, 17, 38, 40, 104, 48], ['dsmash', 12, 13, 13, 30, 40, 86, 43],
-      ['fair', 7, 10, 9, 43, 32, 70, 31], ['bair', 8, 10, 13, 144, 39, 95, 35], ['uair', 6, 9, 8, 86, 25, 62, 28], ['nspec', 14, 16, 11, 40, 36, 72, 39], ['nspecH', 24, 26, 15, 37, 40, 88, 53],
+      ['utilt', 7, 8, 8, 83, 27, 61, 26], ['dtilt', 6, 8, 7, 69, 24, 51, 24], ['dsmash', 12, 13, 13, 30, 40, 86, 43],
+      ['uair', 6, 9, 8, 86, 25, 62, 28], ['nspec', 14, 16, 11, 40, 36, 72, 39], ['nspecH', 24, 26, 15, 37, 40, 88, 53],
       ['sspec', 12, 14, 10, 53, 35, 70, 39], ['uspec', 7, 9, 8, 76, 35, 62, 26], ['dspec', 15, 17, 11, 41, 37, 72, 40], ['ledgeatk', 20, 22, 8, 39, 42, 59, 47], ['getup', 19, 20, 7, 43, 45, 56, 48]];
     const bad = rows.filter(r => { const x = h(r[0]); return !(x.f0 === r[1] && x.f1 === r[2] && x.d === r[3] && x.a === r[4] && x.b === r[5] && x.k === r[6] && mv[r[0]].t + 1 === r[7]); }).map(r => r[0]);
     check('document: active frames, damage, angle, launch and first free frame of ' + rows.length + ' moves', !bad.length, bad.length ? 'differs: ' + bad.join(', ') : 'all as listed, with no balance setting (' + !TUNE.Brand + ')');
     const u = mv.usmash.h, n = mv.nair.h, d = mv.dair.h, ds = mv.dsmash.h[1], ut = mv.utilt.h[1];
-    check('document: two-part moves', u[0].f0 === 13 && u[0].d === 3 && u[1].f0 === 15 && u[1].f1 === 17 && u[1].d === 12 && n[0].f0 === 6 && n[0].d === 4 && n[1].f0 === 13 && n[1].d === 7 && d[0].d === 13 && d[0].a === 275 && d[1].d === 9 && d[3].f0 === 16 && d[3].d === 7 && ds.f0 === 17 && ds.d === 12 && ds.a === 149 && ut.f0 === 9 && ut.a === 96,
-      'up smash 3% then 12%, neutral air 4% then 7%, down air 13% point / 9% blade / 7% late, down smash rear f17 12%, up tilt arc f9');
+    check('document: two-part moves', u[0].f0 === 13 && u[0].d === 3 && u[1].f0 === 15 && u[1].f1 === 17 && u[1].d === 12 && n[0].f0 === 6 && n[0].d === 4 && n[1].f0 === 13 && n[1].d === 7 && d[0].d === 10 && d[0].vAir && d[2].d === 13 && d[2].a === 275 && d[2].vAir && d[3].d === 9 && d[3].vGnd && d[d.length - 1].f0 === 17 && ds.f0 === 17 && ds.d === 12 && ds.a === 149 && ut.f0 === 9 && ut.a === 96,
+      'up smash 3% then 12%, neutral air 4% then 7%, down air spikes 10% at the ends, 13% in the middle, pops up standing ones, down smash rear f17 12%, up tilt arc f9');
     const g = mv.grab.h[0], dg = mv.dgrab.h[0], pg = mv.pgrab.h[0], T = mv.throws;
     check('document: grabs, pummel and throws', g.f0 === 7 && mv.grab.t === 30 && dg.f0 === 10 && mv.dgrab.t === 38 && pg.f0 === 11 && mv.pgrab.t === 36 && st.pummel === 1.3 && T.f.d === 8 && T.f.a === 40 && T.f.f === 10 && T.b.d === 8 && T.b.a === 143 && T.b.f === 13 && T.u.d === 7 && T.u.f === 14 && T.d.d === 6 && T.d.a === 71 && T.d.f === 16,
       'grab f7, dash grab f10, turnaround f11; throws 8 / 8 / 7 / 6% released on f10 / 13 / 14 / 16');
     const ft = mv.ftilt.h[0], fs2 = mv.fsmash.h[0];
-    check('document: shapes are in units of Flint\\u2019s height', near(ft.x / H, 0.90, 0.001) && near(ft.y / H, 0.59, 0.001) && near(ft.r / H, 0.14, 0.001) && near(ft.in[0] / H, 0.31, 0.001) && near(fs2.x / H, 1.04, 0.001) && near(fs2.r / H, 0.19, 0.001),
+    check('document: shapes are in units of Flint\\u2019s height', near(ft.x / H, 0.90, 0.001) && near(ft.y / H, 0.59, 0.001) && near(ft.r / H, 0.14, 0.001) && near(ft.in[0] / H, 0.31, 0.001) && near(fs2.r / H, 0.19, 0.001),
       'forward tilt S(' + (ft.in[0] / H).toFixed(2) + ',' + (ft.in[1] / H).toFixed(2) + ' > ' + (ft.x / H).toFixed(2) + ',' + (ft.y / H).toFixed(2) + ' / ' + (ft.r / H).toFixed(2) + ')');
     check('document: weight and movement against Flint', near(st.weight / fl.weight, 1.08) && near(st.walk / fl.walk, 1.06) && near(st.run / fl.run, 0.95) && near(st.dash / fl.dash, 1.02) && near(st.airSpeed / fl.airSpeed, 0.96) && near(st.grav / fl.grav, 1.02) && near(st.ffall / fl.ffall, 1.02) && near(st.hopH / fl.hopH, 1) && near(st.jumpH / fl.jumpH, 0.98) && near(st.airJumpH / fl.airJumpH, 0.97) && near(st.airMul / fl.airMul, 0.94) && near(st.runMul / fl.runMul, 1.02) && st.jsq === fl.jsq && st.jumps === 1,
       'weight ' + (st.weight / fl.weight * 100).toFixed(0) + ', walk ' + (st.walk / fl.walk * 100).toFixed(0) + ', run ' + (st.run / fl.run * 100).toFixed(0) + ', dash ' + (st.dash / fl.dash * 100).toFixed(0) + ', air drift ' + (st.airSpeed / fl.airSpeed * 100).toFixed(0) + ', gravity ' + (st.grav / fl.grav * 100).toFixed(0) + ', full hop ' + (st.jumpH / fl.jumpH * 100).toFixed(0) + ', air jump ' + (st.airJumpH / fl.airJumpH * 100).toFixed(0));
@@ -63,7 +63,7 @@ vm.runInThisContext(`
 
   /* ---- every attack connects where its shape says, on its first active frame, for its damage ---- */
   {
-    const fw = fl.w / 2, list = [['jab', 6], ['jab2', 9], ['jab3', 10], ['ftilt', 13], ['dtilt', 12], ['fsmash', 15], ['dash', 8], ['nspec', 14], ['nspecH', 18], ['dspec', 12], ['sspec', 9]], bad = [];
+    const fw = fl.w / 2, list = [['jab', 6], ['jab2', 9], ['jab3', 10], ['ftilt', 13], ['dtilt', 12], ['dash', 8], ['nspec', 14], ['nspecH', 18], ['dspec', 12], ['sspec', 9]], bad = [];
     for (const [k, gap] of list) { const r = swing(k, gap), h = mv[k].h[0]; if (!(r.hits === 1 && near(r.pct, h.d * B, 0.05) && r.first === h.f0)) bad.push(k + ' (' + r.hits + ' hits, ' + pct(r.pct) + ', frame ' + r.first + ')'); }
     check('ground attacks and specials hit once, on their first active frame, for their damage', !bad.length, bad.length ? bad.join('; ') : list.map(q => q[0]).join(', '));
     /* sword spacing: the blade's end reaches a Flint whose own forward tilt cannot reach back */
@@ -89,14 +89,21 @@ vm.runInThisContext(`
   /* ---- air: spacing, the down air's point, landing ---- */
   {
     const fa = swing('fair', 13, { air: 12, tAir: 12 }), ba = swing('bair', 13, { air: 12, tAir: 12, back: 1 }), ua = swing('uair', 0, { air: 4, tAir: 20 });
-    check('forward, back and up air hit for 9%, 13% and 8%', fa.hits === 1 && near(fa.pct, 9 * B, 0.1) && ba.hits === 1 && near(ba.pct, 13 * B, 0.1) && ba.vx > 0 && ua.hits === 1 && near(ua.pct, 8 * B, 0.1), 'forward ' + pct(fa.pct) + ', back ' + pct(ba.pct) + ' (sent behind her), up ' + pct(ua.pct));
+    check('forward, back and up air: the middle of the sweeps hits for 10% and 14% (once), up air 8%', fa.hits === 1 && near(fa.pct, 10 * B, 0.1) && ba.hits === 1 && near(ba.pct, 14 * B, 0.1) && ba.vx > 0 && ua.hits === 1 && near(ua.pct, 8 * B, 0.1), 'forward ' + pct(fa.pct) + ', back ' + pct(ba.pct) + ' (sent behind her), up ' + pct(ua.pct));
+    /* the sweeps (the owner, 2026-11-11): one capsule a frame round her shoulder, back air 20 to 140 degrees from straight up behind her, forward air 340 to 250 */
+    const clock = h => { const dx = h.x - h.in[0], dy = h.y - h.in[1]; return Math.round((Math.atan2(-dx, dy) * 180 / Math.PI + 360) % 360); };
+    const arc = k => mv[k].h.map(h => clock(h) + '@' + h.f0), bA = mv.bair.h.map(clock), dA = mv.dair.h.map(clock), sA = mv.fsmash.h.map(h => (360 - clock(h)) % 360), fA = mv.fair.h.map(clock);
+    check('back air sweeps behind her from 20 to 140 degrees, forward air in front from 340 to 250, down air under her from 150 to 210, forward smash from straight up to 100 in front, one frame a step, one hit each',
+      bA[0] === 20 && bA[bA.length - 1] === 140 && bA.every((a, j) => !j || a > bA[j - 1]) && fA[0] === 340 && fA[fA.length - 1] === 250 && fA.every((a, j) => !j || a < fA[j - 1]) && mv.bair.h.every((h, j) => h.f0 === 9 + j && h.g === 1) && mv.fair.h.every((h, j) => h.f0 === 7 + j && h.g === 1) && mv.bair.t + 1 === 39 && mv.fair.t + 1 === 34 && sA.join() === '0,25,50,75,100' && mv.fsmash.h.every((h, j) => h.f0 === 16 + j && h.g === 1) && dA[0] === 150 && dA[dA.length - 1] === 210 && mv.dair.h.every((h, j) => !j || clock(h) >= clock(mv.dair.h[j - 1])),
+      'back air ' + arc('bair').join(' ') + '; forward air ' + arc('fair').join(' ') + '; down air ' + arc('dair').join(' ') + '; forward smash ' + mv.fsmash.h.map(h => (360 - clock(h)) % 360 + '@' + h.f0).join(' '));
+    { const r = swing('fsmash', 15); check('forward smash: the level part of the sweep hits a Flint in front once, for 17%', r.hits === 1 && near(r.pct, 17 * B, 0.1), r.hits + ' hit, ' + pct(r.pct) + ' on frame ' + r.first); }
     const sp = swing('dair', 1.5, { air: 30, tAir: 24.5 }), gnd = swing('dair', 1.5, { air: 20 });
-    check('down air: the point sends an airborne target down; a standing one is popped up', sp.hits === 1 && near(sp.pct, 13 * B, 0.1) && sp.vy < -0.5 && gnd.hits === 1 && near(gnd.pct, 9 * B, 0.1) && gnd.vy > 0, 'in the air: ' + pct(sp.pct) + ', sent ' + (sp.vy < 0 ? 'down' : 'up') + '; standing: ' + pct(gnd.pct) + ', sent ' + (gnd.vy > 0 ? 'up' : 'down'));
+    check('down air: the sweep spikes an airborne target; a standing one is popped up', sp.hits === 1 && sp.pct > 9.9 * B && sp.pct < 13.1 * B && sp.vy < -0.5 && gnd.hits === 1 && gnd.pct > 7.9 * B && gnd.pct < 9.1 * B && gnd.vy > 0, 'in the air: ' + pct(sp.pct) + ', sent ' + (sp.vy < 0 ? 'down' : 'up') + '; standing: ' + pct(gnd.pct) + ', sent ' + (gnd.vy > 0 ? 'up' : 'down'));
     /* landing lag: Brand is dropped onto the floor at a chosen frame of each aerial */
     const lagAt = (name, mf) => { const [b] = setup(BR, FL, 0, 60); airborne(b, 0, 0.6); b.startMove(name); b.mf = mf - 1; b.vy = -1; let lag = -1; run(3, () => { if (b.state === 'land' && lag < 0) lag = b.lag; }); return lag; };
-    const rows = [['nair', 10, 4, 32], ['fair', 9, 4, 26], ['bair', 12, 5, 31], ['uair', 8, 4, 25], ['dair', 15, 5, 38]], bad = [];
+    const rows = [['nair', 10, 4, 32], ['fair', 10, 4, 29], ['bair', 13, 5, 35], ['uair', 8, 4, 25], ['dair', 15, 5, 38]], bad = [];
     for (const [k, ll, a0, a1] of rows) { const e = lagAt(k, a0), m1 = lagAt(k, a0 + 1), m2 = lagAt(k, a1 - 1), l = lagAt(k, a1); if (!(e <= 4 && m1 === ll && m2 === ll && l <= 4)) bad.push(k + ': f' + a0 + ' ' + e + ', f' + (a0 + 1) + ' ' + m1 + ', f' + (a1 - 1) + ' ' + m2 + ', f' + a1 + ' ' + l); }
-    check('landing lag and auto-cancel windows of the five aerials', !bad.length, bad.length ? bad.join('; ') : 'neutral 10 (free 1-4, 32+), forward 9 (1-4, 26+), back 12 (1-5, 31+), up 8 (1-4, 25+), down 15 (1-5, 38+)');
+    check('landing lag and auto-cancel windows of the five aerials', !bad.length, bad.length ? bad.join('; ') : 'neutral 10 (free 1-4, 32+), forward 10 (1-4, 29+), back 13 (1-5, 35+), up 8 (1-4, 25+), down 15 (1-5, 38+)');
   }
 
   /* ---- Vorpal Thrust ---- */

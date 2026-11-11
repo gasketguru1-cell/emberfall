@@ -1339,6 +1339,14 @@ const BRAND = (() => {
   const circ = (f0, f1, x, y, r, d, a, b, k, o) => Object.assign({ f0, f1, x: q(x), y: q(y), r: q(r), in: [q(x), q(y)], n: 1, d, a, b, k }, o);
   const grab = (f0, f1, x1, y1, x2, y2, r) => ({ f0, f1, x: q(x2), y: q(y2), r: q(r), in: [q(x1), q(y1)], n: 4, grab: 1, d: 0 });
   const rise = () => (f, n) => { if (n === 1) f.invuln = Math.max(f.invuln, f.pct >= 100 ? 12 : 18); };   /* the shared protection of a get-up */
+  /* the back air's sweep: [degrees behind from straight up, damage, angle, base, growth] per frame; round BAIR_P, the blade from BAIR_R[0] to BAIR_R[1] (H) */
+  const BAIR_ARC = [[20, 11, 130, 36, 90], [44, 12, 135, 38, 94], [68, 14, 144, 40, 98], [92, 14, 144, 40, 98], [116, 13, 150, 38, 95], [140, 10, 160, 34, 88]], BAIR_P = [-0.05, 0.75], BAIR_R = [0.3, 0.88];
+  /* the forward air's: the same clock (340 is 20 degrees in front of straight up, 250 is 20 below level in front) */
+  /* the down air's: 150 (behind, below) through 180 (straight down) to 210 (in front, below); [degrees, a spiking middle step] */
+  const DAIR_ARC = [[150, 0], [165, 1], [180, 1], [195, 1], [210, 0]], DAIR_P = [0, 0.7], DAIR_R = [0.3, 0.92];
+  /* the forward smash's: degrees in front of straight up (0 overhead, 90 level, 100 just below); round her shoulder after the lunge */
+  const FSM_ARC = [[0, 13, 70, 36, 92], [25, 15, 55, 38, 98], [50, 17, 42, 40, 104], [75, 17, 38, 40, 104], [100, 14, 30, 38, 96]], FSM_P = [0.18, 0.68];
+  const FAIR_ARC = [[340, 8, 55, 30, 68], [318, 9, 48, 32, 70], [295, 10, 43, 33, 74], [272, 10, 40, 33, 74], [250, 8, 30, 30, 66]], FAIR_P = [0.05, 0.75];
   const UP = 2.05 * U, UPV = UP / 11;   /* Ember Rise: 2.05 H over frames 5 to 25, fastest at the start */
   return {
     name: 'Brand', sub: 'the night-watch captain', forms: [{
@@ -1359,17 +1367,29 @@ const BRAND = (() => {
         ftilt: { t: 24, tilt: 1, h: [cap(7, 9, 0.31, 0.53, 0.90, 0.59, 0.14, 9, 36, 34, 67)] },
         utilt: { t: 25, tilt: 1, h: [cap(7, 8, 0.45, 0.69, 0.28, 1.07, 0.16, 8, 83, 27, 61), cap(9, 10, 0.26, 1.14, -0.44, 0.87, 0.16, 8, 96, 27, 61)] },   /* up in front, then over the hat brim and behind: one hit between them */
         dtilt: { t: 23, tilt: 1, h: [cap(6, 8, 0.29, 0.24, 0.83, 0.19, 0.13, 7, 69, 24, 51)] },
-        fsmash: { t: 47, chg: 8, h: [cap(16, 19, 0.34, 0.55, 1.04, 0.64, 0.19, 17, 38, 40, 104)] },
+        /* Vorpal Cleave (the owner, 2026-11-11): the same kind of sweep, from straight up over her head down in front to 10 degrees
+           below level (0 to 100 in front), frames 16 to 20. One hit; the full 17% is the level part of the arc. */
+        fsmash: { t: 48, chg: 8, h: FSM_ARC.map(([th, d, a, b, k], j) => { const u = th * Math.PI / 180, sx = Math.sin(u), sy = Math.cos(u);
+          return cap(16 + j, 16 + j, FSM_P[0] + sx * BAIR_R[0], FSM_P[1] + sy * BAIR_R[0], FSM_P[0] + sx * BAIR_R[1], FSM_P[1] + sy * BAIR_R[1], 0.19, d, a, b, k, { g: 1 }); }) },
         /* the shield's rim scoops the target up a set 0.14 H, then the blade cleaves upward */
         usmash: { t: 46, chg: 6, h: [circ(13, 14, 0.38, 0.42, 0.22, 3, 83, 0, 0, { g: 1, nb: 1, link: [0.03 * U, 0.14 * U, 5] }), cap(15, 17, 0.31, 0.68, 0.06, 1.20, 0.22, 12, 87, 37, 97)] },
         dsmash: { t: 42, chg: 5, h: [cap(12, 13, 0.35, 0.20, 0.84, 0.19, 0.16, 13, 30, 40, 86), cap(17, 18, -0.31, 0.20, -0.78, 0.20, 0.16, 12, 149, 38, 84)] },
         /* ---- air: Guard Wheel, High Guard, Reverse Cut, Crown Arc, Blade Drop. Landing lag, and the frames that land without it (ac0 and earlier, after ac) ---- */
         nair: { t: 36, air: 1, ll: 10, ac0: 4, ac: 31, h: [cap(6, 7, -0.15, 0.47, 0.41, 0.51, 0.20, 4, 70, 0, 0, { g: 1, nb: 1, link: [0.04 * U, 0.08 * U, 9] }), cap(13, 15, -0.49, 0.51, 0.66, 0.57, 0.18, 7, 48, 31, 64)] },
-        fair: { t: 30, air: 1, ll: 9, ac0: 4, ac: 25, h: [cap(7, 10, 0.31, 0.57, 0.91, 0.62, 0.16, 9, 43, 32, 70)] },
-        bair: { t: 34, air: 1, ll: 12, ac0: 5, ac: 30, h: [cap(8, 10, -0.32, 0.58, -0.93, 0.63, 0.17, 13, 144, 39, 95)] },
+        /* High Guard (the owner, 2026-11-11): the same kind of sweep in front, from 340 down to 250 on that clock (20 degrees
+           past straight up to 20 below level), frames 7 to 11. One hit: the middle of the arc is the strong part. */
+        fair: { t: 33, air: 1, ll: 10, ac0: 4, ac: 28, h: FAIR_ARC.map(([th, d, a, b, k], j) => { const u = th * Math.PI / 180, sx = -Math.sin(u), sy = Math.cos(u);
+          return cap(7 + j, 7 + j, FAIR_P[0] + sx * BAIR_R[0], FAIR_P[1] + sy * BAIR_R[0], FAIR_P[0] + sx * BAIR_R[1], FAIR_P[1] + sy * BAIR_R[1], 0.16, d, a, b, k, { g: 1 }); }) },
+        /* Reverse Cut (the owner, 2026-11-11): one long sweep behind her, from 20 degrees past straight up down to 140, round her
+           sword shoulder, one frame per step (9 to 14). One hit: lighter high, the full 14% behind her, a flatter send low. */
+        bair: { t: 38, air: 1, ll: 13, ac0: 5, ac: 34, h: BAIR_ARC.map(([th, d, a, b, k], j) => { const u = th * Math.PI / 180, sx = -Math.sin(u), sy = Math.cos(u);
+          return cap(9 + j, 9 + j, BAIR_P[0] + sx * BAIR_R[0], BAIR_P[1] + sy * BAIR_R[0], BAIR_P[0] + sx * BAIR_R[1], BAIR_P[1] + sy * BAIR_R[1], 0.17, d, a, b, k, { g: 1 }); }) },
         uair: { t: 27, air: 1, ll: 8, ac0: 4, ac: 24, h: [cap(6, 9, 0.36, 0.88, -0.31, 1.14, 0.18, 8, 86, 25, 62)] },
-        /* the point sends someone in the air straight down; anyone standing, or caught by the blade above the point, is popped up */
-        dair: { t: 41, air: 1, ll: 15, ac0: 5, ac: 37, h: [circ(13, 15, 0.13, -0.23, 0.19, 13, 275, 30, 94, { vAir: 1 }), cap(13, 15, 0.10, 0.32, 0.12, -0.03, 0.17, 9, 59, 35, 65), circ(13, 15, 0.13, -0.23, 0.19, 9, 59, 35, 65, { vGnd: 1 }), circ(16, 16, 0.10, 0.04, 0.17, 7, 55, 30, 58)] },
+        /* Blade Drop (the owner, 2026-11-11): a sweep under her, from 150 to 210 on that clock (from behind her, through straight
+           down, to in front), frames 13 to 17. Anyone in the air is spiked (13% in the middle three, 10% at the ends); anyone standing
+           is popped up. One hit. */
+        dair: { t: 41, air: 1, ll: 15, ac0: 5, ac: 37, h: DAIR_ARC.flatMap(([th, mid], j) => { const u = th * Math.PI / 180, sx = -Math.sin(u), sy = Math.cos(u), c = (d, a, b, k, o) => cap(13 + j, 13 + j, DAIR_P[0] + sx * DAIR_R[0], DAIR_P[1] + sy * DAIR_R[0], DAIR_P[0] + sx * DAIR_R[1], DAIR_P[1] + sy * DAIR_R[1], 0.18, d, a, b, k, Object.assign({ g: 1 }, o));
+          return mid ? [c(13, 275, 30, 94, { vAir: 1 }), c(9, 59, 35, 65, { vGnd: 1 })] : [c(10, 280, 28, 80, { vAir: 1 }), c(8, 60, 32, 60, { vGnd: 1 })]; }) },
         /* ---- grabs (Gauntlet Grab, Lunge Grab, Turn Grab) and get-ups (Guard Sweep, Rising Cut) ---- */
         grab: { t: 30, h: [grab(7, 8, 0.21, 0.54, 0.57, 0.56, 0.13)] },
         dgrab: { t: 38, h: [grab(10, 11, 0.23, 0.52, 0.60, 0.54, 0.13)], on(f, n) { if (n <= 11) f.vx = f.face * 0.33 * U / 11; } },
