@@ -592,11 +592,23 @@ const WREN = {
    70% and the edge (sour) from about 100 to 125%, both from the victim's own damage; the sweet spot hits about half again
    as hard as the burst throws the sack itself at the same damage. One hit per target: the middle is tried first. */
 const SACK_BLAST = { sweet: { r: 6, d: 15, a: 75, b: 50, k: 112 }, sour: { r: 12, d: 10, a: 70, b: 35, k: 100 } };   /* measured with no DI at centre stage: sweet KOs at 55-90% (most near 70), sour at 105-130% (heavies later) */
-function sackBlast(f, i) {
-  spark(f.x, f.y + 4, '#ffb347', 30, 2.6); beep(120, 0.3, 'sawtooth', 0.08, 0.4); shake = Math.max(shake, 6);
-  for (const part of ['sweet', 'sour']) { const q = SACK_BLAST[part]; shoot(f, { kind: 'blast', grp: 'hotpotato', ox: 0.01, oy: 4, vx: 0, r: q.r, life: 4, h: { d: q.d, a: q.a, b: q.b, k: q.k, norage: 1 } }); }   /* norage: the sack's own damage does not add to it */
+function sackBlast(f, i, at) {   /* at: where the burst is centred (the hot potato's spot when it goes off early), else his middle */
+  const bx = at ? at[0] : f.x, by = at ? at[1] : f.y + 4;
+  spark(bx, by, '#ffb347', 30, 2.6); spark(bx, by, '#ff5a1a', 18, 1.8); beep(120, 0.3, 'sawtooth', 0.08, 0.4); shake = Math.max(shake, 6);
+  for (const part of ['sweet', 'sour']) { const q = SACK_BLAST[part]; shoot(f, { kind: 'blast', grp: 'hotpotato', vx: 0, r: q.r, life: 4, h: { d: q.d, a: q.a, b: q.b, k: q.k, norage: 1 } }); const b = PROJ[PROJ.length - 1]; b.x = bx; b.y = by; }   /* norage: the sack's own damage does not add to it */
   const d = 12; f.pct = Math.min(999, f.pct + d); f.flash = 6; f.blastUsed = !f.grounded || true;
   f.launch(knock(f, d, 100, 70), (90 - clamp(i.lx, -1, 1) * 28) * Math.PI / 180, 1); f.hitlag = 4;
+}
+/* The hot potato itself: thrown straight up from his head, it stays over him (it follows him sideways) and falls back on him.
+   Up and back down to his head in 16 frames. A burst only while he is still doing the up special; otherwise it fizzles. */
+const SPUD = { vy: 1.75, grav: 0.22, r: 2.4 };
+function spudStep(p) {
+  const f = F[p.owner], v = F[1 - p.owner], live = f && f.state === 'attack' && f.mname === 'uspec';
+  if (!live) { spark(p.x, p.y, '#ffb347', 6, 0.8); p.life = 0; return; }
+  p.vy -= p.grav; p.y += p.vy; p.x = f.x; p.rot = (p.rot || 0) + 0.25 * f.face;
+  const head = f.y + f.st.h + 0.5;
+  const touch = v && canBeHit(v) && circRect(p.x, p.y, p.r, ...hurtRect(v));
+  if (touch || (p.vy < 0 && p.y <= head) || p.life <= 0) { p.life = 0; f.spudOut = true; sackBlast(f, f.ctl.c, touch ? [p.x, p.y] : null); }
 }
 const SACK = {
   name: 'Potato Sack', sub: 'a sack of forge-town spuds', forms: [{
@@ -620,7 +632,16 @@ const SACK = {
           spark(f.x, f.y + 5, '#ffb347', Math.min(80, 20 + c / 4 | 0), 2 + Math.min(6, c / 60)); beep(90, 0.35, 'sawtooth', 0.09, 0.4); shake = Math.max(shake, Math.min(20, 6 + c / 30)); }
         if (f.mf >= f.scRel + 24) { if (glow) glow.life = 0; f.mf = f.move.t; } } },
       sspec: { t: 50, once: 1, nodrift: 1, ll: 14, h: [{ f0: 10, f1: 22, x: 7, y: 6, r: 6, grab: 1, cmd: 's', d: 0 }], on(f, n) { if (n === 8) { lift(f, 1.6); f.vx = f.face * 2.3; } } },
-      uspec: { t: 29, rise: 40, blast: 1, h: [], on(f, n, i) { if (n < 5 && !f.grounded) f.vy = Math.max(f.vy, -0.5); if (n === 5) sackBlast(f, i); } },   /* bursts on frame 5 (owner's request, 2026-11-10) */
+      /* Hot Potato (owner's request, 2026-11-11): on frame 4 he tosses a flaming potato straight up over his head; it drops back
+         onto him and bursts (sackBlast: the same burst on others and the same launch for him as before). He hangs in the air
+         while he waits. If the potato touches the opponent first it bursts there and then, launching them both. */
+      uspec: { t: 60, rise: 40, blast: 1, h: [], on(f, n, i) {
+        if (n === 1) f.spudOut = false;
+        if (!f.spudOut && !f.grounded) f.vy = Math.max(f.vy, -0.5);
+        if (n === 4) { f.spudOut = false; PROJ = PROJ.filter(p => !(p.owner === f.idx && p.kind === 'hotspud'));
+          PROJ.push({ x: f.x, y: f.y + f.st.h + 2, vx: 0, vy: SPUD.vy, grav: SPUD.grav, life: 90, owner: f.idx, face: f.face, r: SPUD.r, ground: 'pass', plat: null, kind: 'hotspud', ghost: 1, h: { d: 0, a: 0, b: 0, k: 0 }, step: spudStep });
+          beep(330, 0.08, 'triangle', 0.05, 1.6); }
+        if (n === 59 && !f.spudOut && PROJ.some(p => p.owner === f.idx && p.kind === 'hotspud')) f.mf = 58;   /* waits for the potato: the move ends only by the burst */ } },
       dspec: { t: 38, burst: 1, cancel: 7, nodrift: 1, h: [], on(f, n, i) {
         if (n === 1) { f.burstKind = ''; if (!f.grounded) f.burstUsed = true; }
         if (n < 6 && !f.grounded) { f.vy = Math.max(f.vy, -0.3); f.vx *= 0.9; }
