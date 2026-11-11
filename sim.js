@@ -69,10 +69,10 @@ const CROUCH_Y = -0.4;
 const LANDL = f => f.st.land || [2, 4];   /* a form's ordinary landing: [soft, hard] frames */
 const CHG_K = a => a.move && a.move.chgK !== undefined ? a.move.chgK : 0.4;   /* how much a full smash charge adds (Joey the human: a fifth) */
 /* the states from which Joey can start his transformation; a request made at any other time waits for one */
-const TF_READY = { idle: 1, dash: 1, run: 1, brake: 1, air: 1, shield: 1, wd: 1, shieldoff: 1, exhaust: 1 };
+const TF_READY = { idle: 1, dash: 1, run: 1, brake: 1, air: 1, shield: 1, wd: 1, shieldoff: 1 };   /* not during TAKE FIVE: the 15 seconds lock him out of everything */
 /* INTENSITY (Joey's addendum, v1.0): human Joey's fatigue, in integer units, 10000 = full. What each committed action costs
    (one displayed point = 100 units). Running costs 8 a tick; resting drains 8 a tick standing, 3 walking, after 60 ticks of rest.
-   Full: once he is next free on the ground, 900 ticks (15 seconds) of catching his breath, only shuffling or transforming. */
+   Full: once he is next free on the ground, 900 ticks (15 seconds) of catching his breath with the controls locked (no transforming either). */
 const FAT = { max: 10000, run: 8, restDelay: 60, drainIdle: 8, drainWalk: 3, jump: 1000, roll: 500, spot: 400, airdodge: 600, pummel: 200, throwPick: 800, rep: 400, exhaust: 900,
   move: { jab: 300, jab2: 400, jab3: 500, ftilt: 600, utilt: 600, dtilt: 600, dash: 1000, fsmash: 1500, usmash: 1500, dsmash: 1500, nair: 700, fair: 700, bair: 700, uair: 700, dair: 700,
     grab: 500, dgrab: 700, pgrab: 600, nspec: 800, sspec: 1000, uspec: 800, dspec: 1200 } };
@@ -1634,7 +1634,7 @@ class Fighter {
      match, never to a stock: a KO does not undo it, and a respawn before it finishes picks the growth up where it is. e is
      gameplay ticks since it began: no control while e < 180, the big form from e = 180, protection while e < 300. */
   tfStep() {
-    const c = this.ctl; if (c.tfReq) { c.tfReq = false; if (!this.tfLatch) this.tfPend = true; }
+    const c = this.ctl; if (c.tfReq) { c.tfReq = false; if (!this.tfLatch && this.exStart < 0) this.tfPend = true; }   /* a request during TAKE FIVE is dropped, not saved for later */
     if (this.tfPend && !this.tfLatch && this.hitlag === 0 && TF_READY[this.state]) {
       this.tfLatch = true; this.tfPend = false; this.tfStart = frame; this.fat = 0; this.exPend = false; this.exStart = -1; this.restT = 0; this.freeVictim(); this.move = null; this.charge = 0; PROJ = PROJ.filter(p => p.owner !== this.idx);
       if (this.grounded) this.vx = 0; this.set('grow'); beep(330, 0.12, 'triangle', 0.05, 1.3);
@@ -2026,11 +2026,10 @@ class Fighter {
         if (this.sf >= (tw.t || 26)) this.set(this.grounded ? 'idle' : 'air');
         break;
       }
-      case 'exhaust': {   /* TAKE FIVE: 900 ticks. Nothing but a slow shuffle (and the transformation, in tfStep); between 3 and 9 s he paces on his own */
+      case 'exhaust': {   /* TAKE FIVE: 900 ticks with the controls locked, the transformation too; between 3 and 9 s he paces on his own */
         for (const k in c.buf) c.buf[k] = 0; c.downBuf = 0;
         const e = frame - this.exStart; let tv = 0;
-        if (Math.abs(i.lx) > 0.2) { tv = clamp(i.lx, -1, 1) * 0.22; this.paceX = null; }
-        else if (e >= 180 && e < 540) { if (this.paceX === null) this.paceX = this.x; if (Math.abs(this.x - this.paceX) >= 0.25 * s.h) this.paceDir = -sgn(this.x - this.paceX); tv = this.paceDir * 0.16; }
+        if (e >= 180 && e < 540) { if (this.paceX === null) this.paceX = this.x; if (Math.abs(this.x - this.paceX) >= 0.25 * s.h) this.paceDir = -sgn(this.x - this.paceX); tv = this.paceDir * 0.16; }
         this.vx = appr(this.vx, tv, 0.04);
         const p = this.plat; if (p && (this.x + this.vx < p.x0 + 1 || this.x + this.vx > p.x1 - 1)) { this.vx = 0; this.paceDir = -this.paceDir; }   /* never walks himself off anything */
         if (Math.abs(this.vx) > 0.02) this.face = sgn(this.vx);
