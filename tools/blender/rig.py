@@ -9,9 +9,14 @@
 #   "ik":    [ { "name": control bone, "bone": lower leg bone, "chain": 2, "paw": paw bone } ]   leg reach: the lower bone's tip follows the control
 #   "copyrot": [ { "bone": name, "from": control bone } ]   the bone points the way its control points, whatever its parents do (a held tool aimed directly)
 #   "rigid": [ { "bone": name, "box": [[x,y,z],[x,y,z]] } ]   every vertex inside the box follows that bone alone (a tool that must not bend)
+#            or { "bone", "capsule": [[x,y,z],[x,y,z]], "r": radius }   within r of the line between two points (a blade at any angle)
+#            or { "bone", "disc": [x,y,z], "n": [x,y,z], "r": radius, "t": [near, far] }   a round slab: centre, facing, radius, and how far along the facing it runs
 #   "poses": { "<name>": { "<bone>": {...} } }   named poses a key can start from with "use"
 #   "bones": [ { "name", "head": [x,y,z], "tail": [x,y,z], "parent": name or null, "connect": bool, "deform": bool } ]
 #   "clips": { "<name>": { "fps": 30, "loop": bool, "keys": [ { "t": seconds, "pose": { "<bone>": { "rot": [pitch, yaw, roll], "move": [x,y,z] } } } ] } }
+# "aim": [x,y,z] in a pose turns the bone from the way it points at rest to point that way (the short way round), with "twist"
+# degrees about that line after; "rot" is then applied on top. For a held tool: say where it points, not how to get there.
+# --shots out.json --shotdir dir renders the clips and times listed in out.json (side view, her front to the right) for checking poses.
 # "rot" is in degrees about the model's own axes (pitch = about the right axis, yaw = about up, roll = about forward),
 # so a pose reads the same whichever way a bone happens to point. Bones not named in a key keep their previous value.
 import bpy, sys, json, math
@@ -143,6 +148,20 @@ if not spec.get('weights') and missing > len(mesh.data.vertices) * 0.01:
     bpy.ops.object.select_all(action='DESELECT'); mesh.select_set(True); rig.select_set(True); bpy.context.view_layer.objects.active = rig
     bpy.ops.object.parent_set(type='ARMATURE')
     missing = sum(1 for v in mesh.data.vertices if not any(g.weight > 1e-4 for g in v.groups)); method = 'voxel proxy (proxy gaps %d)' % pm
+# vertices the weighting missed would stay behind when the skeleton moves: give each the weights of the nearest vertex that has some
+if missing:
+    from mathutils import kdtree
+    has = [v.index for v in mesh.data.vertices if any(g.weight > 1e-4 for g in v.groups)]
+    kd = kdtree.KDTree(len(has))
+    for i in has: kd.insert(mesh.data.vertices[i].co, i)
+    kd.balance(); fixed = 0
+    for v in mesh.data.vertices:
+        if any(g.weight > 1e-4 for g in v.groups): continue
+        _, src, _ = kd.find(v.co)
+        for g in mesh.data.vertices[src].groups:
+            if g.weight > 1e-4: mesh.vertex_groups[g.group].add([v.index], g.weight, 'REPLACE')
+        fixed += 1
+    print('rig: %d missed vertices given their nearest neighbour\'s weights' % fixed)
 # glTF allows four bones per vertex
 bpy.ops.object.select_all(action='DESELECT'); mesh.select_set(True); bpy.context.view_layer.objects.active = mesh
 bpy.ops.object.vertex_group_limit_total(group_select_mode='ALL', limit=4); bpy.ops.object.vertex_group_normalize_all(group_select_mode='ALL', lock_active=False)
@@ -151,8 +170,15 @@ print('rig: weights by %s; %d bones, %d groups, %d vertices unweighted' % (metho
 # ---- rigid parts: vertices inside a box follow one bone only ----
 bpy.ops.object.mode_set(mode='OBJECT')
 for rg in spec.get('rigid', []):
-    a, b = conv(rg['box'][0]), conv(rg['box'][1]); mn = [min(a[i], b[i]) for i in range(3)]; mx = [max(a[i], b[i]) for i in range(3)]
-    idx = [v.index for v in mesh.data.vertices if all(mn[i] <= v.co[i] <= mx[i] for i in range(3))]
+    if 'capsule' in rg:
+        a, b = conv(rg['capsule'][0]), conv(rg['capsule'][1]); ab = b - a; L2 = ab.length_squared; r2 = rg['r'] ** 2
+        idx = [v.index for v in mesh.data.vertices if (v.co - (a + ab * max(0.0, min(1.0, (v.co - a).dot(ab) / L2)))).length_squared <= r2]
+    elif 'disc' in rg:
+        c, n = conv(rg['disc']), conv(rg['n']).normalized(); t0, t1 = rg['t']; r2 = rg['r'] ** 2
+        idx = [v.index for v in mesh.data.vertices if t0 <= (v.co - c).dot(n) <= t1 and ((v.co - c) - n * (v.co - c).dot(n)).length_squared <= r2]
+    else:
+        a, b = conv(rg['box'][0]), conv(rg['box'][1]); mn = [min(a[i], b[i]) for i in range(3)]; mx = [max(a[i], b[i]) for i in range(3)]
+        idx = [v.index for v in mesh.data.vertices if all(mn[i] <= v.co[i] <= mx[i] for i in range(3))]
     for vg in mesh.vertex_groups: vg.remove(idx)
     mesh.vertex_groups[rg['bone']].add(idx, 1.0, 'REPLACE')
     print('rig: %d vertices rigid on %s' % (len(idx), rg['bone']))
@@ -197,6 +223,7 @@ def fcurves_of(act):
     return out
 
 rest = {b.name: b.matrix_local.to_3x3() for b in arm.bones}
+restdir = {b.name: (b.tail_local - b.head_local).normalized() for b in arm.bones}
 ad = rig.animation_data_create(); scene = bpy.context.scene; last = 1
 for name, clip in spec.get('clips', {}).items():
     fps = clip.get('fps', 30); scene.render.fps = fps
@@ -211,7 +238,12 @@ for name, clip in spec.get('clips', {}).items():
         state.update(key.get('pose', {}))
         for bname, tr in state.items():
             pb = rig.pose.bones[bname]; R = rest[bname]
-            q = (R.inverted() @ delta(tr.get('rot', [0, 0, 0])) @ R).to_quaternion()
+            D = delta(tr.get('rot', [0, 0, 0]))
+            if tr.get('aim'):
+                tgt = conv(tr['aim']).normalized(); A = restdir[bname].rotation_difference(tgt).to_matrix()
+                if tr.get('twist'): A = Quaternion(tgt, math.radians(tr['twist'])).to_matrix() @ A
+                D = D @ A
+            q = (R.inverted() @ D @ R).to_quaternion()
             if bname in lastq and lastq[bname].dot(q) < 0: q.negate()   # keep to the near side of the last key, so a turn goes the short way round
             lastq[bname] = q.copy(); pb.rotation_quaternion = q
             pb.location = R.inverted() @ conv(tr.get('move', [0, 0, 0]))
@@ -231,6 +263,27 @@ for name, clip in spec.get('clips', {}).items():
 for pb in rig.pose.bones: pb.rotation_quaternion = Quaternion(); pb.location = Vector(); pb.scale = Vector((1, 1, 1))
 scene.frame_start = 1; scene.frame_end = last
 
+if opt.get('shots'):   # pictures of chosen clips at chosen times, from her right side with her front to the right of the picture
+    import os
+    shots = json.load(open(opt['shots'], encoding='utf-8')); sdir = opt.get('shotdir', '.'); os.makedirs(sdir, exist_ok=True)
+    view = shots.get('view', 'side'); span = shots.get('span', 3.4); cy = shots.get('cy', 1.0); cz = shots.get('cz', 0.3)
+    cam = bpy.data.cameras.new('cam'); cam.type = 'ORTHO'; cam.ortho_scale = span; co = bpy.data.objects.new('cam', cam); bpy.context.collection.objects.link(co)
+    if view == 'front': co.location = conv([0, cy, 20]); co.rotation_euler = (math.radians(90), 0, 0)
+    elif view == 'top': co.location = conv([0, 20, cz]); co.rotation_euler = (0, 0, math.radians(90))
+    else: co.location = conv([-20, cy, cz]); co.rotation_euler = (math.radians(90), 0, math.radians(-90))
+    cam.clip_end = 100; scene.camera = co; scene.render.engine = 'BLENDER_WORKBENCH'; scene.render.resolution_x = scene.render.resolution_y = shots.get('size', 360); scene.render.film_transparent = False
+    sh = scene.display.shading; sh.light = 'FLAT'; sh.color_type = 'TEXTURE'; sh.show_object_outline = True
+    if scene.world is None: scene.world = bpy.data.worlds.new('w')
+    scene.world.color = (0.9, 0.9, 0.9)
+    st = int(opt.get('start', 1))
+    for cname, times in shots['clips'].items():
+        for tr in ad.nla_tracks: tr.mute = tr.name != cname
+        fps = spec['clips'][cname].get('fps', 30)
+        for n, tsec in enumerate(times):
+            scene.frame_set(st + round(tsec * fps)); scene.render.filepath = os.path.join(sdir, '%s_%02d.png' % (cname, n)); bpy.ops.render.render(write_still=True)
+    for tr in ad.nla_tracks: tr.mute = False
+    bpy.data.objects.remove(co, do_unlink=True)
+    print('rig: shots in ' + sdir)
 if opt.get('blend'):   # also keep the rigged, animated scene as a .blend, for opening and editing in Blender
     bpy.ops.wm.save_as_mainfile(filepath=opt['blend'])
     print('rig: saved ' + opt['blend'])

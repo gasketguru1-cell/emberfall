@@ -1,0 +1,5 @@
+{
+ "base": "work/brand-rigged.glb",
+ "texture": 1024,
+ "out": "export/brand-v1.glb"
+}

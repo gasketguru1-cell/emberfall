@@ -5,7 +5,7 @@
   "perDayMax": 150,
   "maxModelAttemptsPerCharacter": 3,
   "keepBalanceAbove": 1000,
-  "note": "tools/meshy.js refuses any task that would break one of these. ceiling = total credits for this phase; perTaskMax = most a single task may cost; perDayMax = most in one calendar day; maxModelAttemptsPerCharacter = 3D generations per character before asking; keepBalanceAbove = never let the account balance fall below this. perDayOverride = a higher daily limit for one named date only, set when the owner asks. 2026-11-10: the owner allowed 150 more credits that day for the Furious Fowls fighter (day limit 300). Later on 2026-11-10 the owner gave a 40-credit spend for Chomp Chomp's model and animation (day limit 338 for that date only).",
+  "note": "tools/meshy.js refuses any task that would break one of these. ceiling = total credits for this phase; perTaskMax = most a single task may cost; perDayMax = most in one calendar day; maxModelAttemptsPerCharacter = 3D generations per character before asking; keepBalanceAbove = never let the account balance fall below this. perDayOverride = a higher daily limit for one named date only, set when the owner asks. 2026-11-10: the owner allowed 150 more credits that day for the Furious Fowls fighter (day limit 300). Later on 2026-11-10 the owner gave a 40-credit spend for Chomp Chomp's model and animation (day limit 338 for that date only). The same day, in another session, the owner allowed 30 for the Brand model (\"yeah spend the 30 credits\"); the two sessions did not see each other's spend, so the day's real total is 362 (298 + 30 Brand + 34 Chomp Chomp) and this limit is left at 338.",
   "perDayOverride": {
     "2026-11-09": 240,
     "2026-11-10": 338
