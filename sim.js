@@ -1507,7 +1507,7 @@ const JOEY = (() => {
       cd: { d: 11, a: 46, b: 70, k: 45, f: 17, t: 44, at: over } } }),
   };
   delete big.moves.jab3;   /* two jabs only */
-  return { name: 'Joey', sub: 'fairly jacked guy', transform: 1, forms: [human, big] };
+  return { name: 'Joey', sub: 'just a regular guy', transform: 1, forms: [human, big] };
 })();
 
 const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE, FOWLS, CHOMP, BRAND, JOEY];
