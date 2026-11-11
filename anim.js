@@ -68,7 +68,11 @@ function animAlt(f, a) {
     case 'idle':
       if (a.key === 'idle' && f.sf > 300) { const k = (f.sf - 300) % 480; if (k < 200) return { key: 'idle2', mode: 'once', v: k / 60 }; }   /* now and then, after standing still five seconds */
       return null;
-    case 'air': if (f.ff && f.vy < 0) return { key: 'fastfall', mode: 'loop', v: t }; return null;
+    case 'air': if (f.ff && f.vy < 0) return { key: 'fastfall', mode: 'loop', v: t };
+      if (f.vy > 0.2 && f.jumps < (f.st.jumps || 1) && f.st.vAir) return { key: 'airjump', mode: 'phase', v: 1 - phase(f.vy, f.st.vAir) };   /* the second jump has its own move */
+      return null;
+    case 'helpless': return { key: 'helpless', mode: 'loop', v: t };
+    case 'hold': return f.pumT > 0 ? { key: 'pummel', mode: 'phase', v: 1 - phase(f.pumT, 14) } : null;   /* a pummel: 14 frames from the press */
     case 'land': return f.lag >= 9 ? { key: 'landHard', mode: 'phase', v: a.v } : null;
     case 'shieldstun': return { key: 'shieldHit', mode: 'phase', v: phase(f.sf, 10) };
     case 'respawn': return { key: 'respawn', mode: 'loop', v: t };
@@ -88,6 +92,16 @@ function animAlt(f, a) {
       if (nm === 'Potato Sack' && f.mname === 'dspec') {
         if (f.mf < 6 || !f.burstKind) return { key: 'tumble_prep', mode: 'phase', v: phase(f.mf, 6) };
         return { key: 'tumble_' + (f.burstKind === 'slide' && !f.grounded ? 'drop' : f.burstKind), mode: 'phase', v: phase(f.mf - 6, m.t - 6) };   /* a slide that leaves the ground has dropped through a platform or off an edge */
+      }
+      if (nm === 'Chomp Chomp') {
+        if (f.mname === 'nspec') {   /* what B did this time (sim.js chompNspec): toss the coal, relay it, call the ant, or nothing */
+          if (f.ccAct === 'relay') return { key: 'coalFlick', mode: 'phase', v: phase(f.mf - (m.t - 8), 8) };
+          if (f.ccAct === 'ant') return { key: 'antCall', mode: 'phase', v: f.mf <= 10 ? phase(f.mf, 10) * 0.55 : 0.55 + phase(f.mf - (m.t - 8), 8) * 0.45 };
+          if (f.ccAct === 'none') return { key: 'coalNone', mode: 'phase', v: phase(f.mf - (m.t - 6), 6) };
+          return { key: 'coalToss', mode: 'phase', v: phase(f.mf, m.t) };
+        }
+        if (f.mname === 'sspec') return f.rsGo ? { key: 'ropeSwing', mode: 'loop', v: t } : { key: 'ropeToss', mode: 'phase', v: phase(f.mf, 11) };   /* hooks the rope on frame 11, then hangs from it */
+        if (f.mname === 'uspec') return f.bubble ? { key: 'bubbleRide', mode: 'loop', v: t } : { key: 'bubbleBlow', mode: 'phase', v: phase(f.mf, 8) };   /* the bubble forms on frame 8 */
       }
       if (f.def && f.def.fowl && f.mname === 'nspec' && f.selOpen) return { key: 'selecting', mode: 'loop', v: t };
       return null;

@@ -252,6 +252,18 @@ vm.runInThisContext(`
       SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < (hold ? 30 : 4)) i.jmp = true; if (withAttack && tt >= 2 && tt < 4) i.atk = true; };
       run(60, () => { top = Math.max(top, f.y); if (f.state === 'attack' && sh === null) sh = f.mname + (f.moveSH ? ' (short-hop, weaker)' : '') + (f.grounded ? ' on the ground' : ' in the air'); }); return { top: +top.toFixed(1), sh }; };
     const full = hop(true), short = hop(false), macro = hop(false, true);
+    /* two jump buttons held together (jmp2) give a short hop however long they are held; one after the other during the jump's start-up too */
+    const two = late => { const [f] = setup(FL, FL, 0, 60); let top = 0; SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 30) i.jmp = true; if (tt >= 2 + late && tt < 30) i.jmp2 = true; }; run(60, () => { top = Math.max(top, f.y); }); return +top.toFixed(1); };
+    const both = two(0), oneThenOther = two(2);
+    check('jump: two jump buttons together give a short hop, even held', both === short.top && oneThenOther === short.top, 'heights ' + both + ' and ' + oneThenOther + ' (short hop ' + short.top + ', full ' + full.top + ')');
+    /* the right stick flicked down while falling: a fast fall (with its glint), on its own as a down air or in the middle of another aerial */
+    const cff = (mode) => { const [f] = setup(FL, FL, 0, 60); f.ctl.cFall = true; airborne(f, 0, 40); f.vy = -0.1; let ff = false, mv = null, glint = 0;
+      SCRIPT[0] = (i, tt) => { if (mode === 'mid' && tt >= 1 && tt < 3) i.atk = true; if (tt >= (mode === 'mid' ? 6 : 1) && tt < 12) { i.cy = -1; if (mode === 'side') { i.cy = 0; i.cx = 1; } } };
+      run(14, () => { if (f.ff) ff = true; if (f.state === 'attack' && !mv) mv = f.mname; glint = Math.max(glint, PART.filter(p => p.col === '#fff3b0').length); }); return { ff, mv, glint }; };
+    const dn = cff('down'), mid = cff('mid'), side = cff('side');
+    check('right stick down while falling: a fast-falling down air', dn.ff && dn.mv === 'dair' && dn.glint === 4, dn.mv + ', fast fall ' + dn.ff + ', glint sparks ' + dn.glint);
+    check('right stick down in the middle of an aerial: fast fall, same aerial', mid.ff && mid.mv === 'nair', mid.mv + ', fast fall ' + mid.ff);
+    check('right stick sideways: no fast fall', !side.ff && side.mv === 'fair', side.mv + ', fast fall ' + side.ff);
     check('jump: tap for a short hop, hold for a full one', short.top > 8 && short.top < full.top * 0.6, 'heights ' + short.top + ' and ' + full.top);
     check('jump + attack together: a short-hop aerial', macro.sh === 'nair (short-hop, weaker) in the air', String(macro.sh));
   }

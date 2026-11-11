@@ -1,0 +1,8 @@
+{
+ "ai_model": "nano-banana-2-1",
+ "prompt": "Turn this flat drawing of an original cartoon critter into a clean 3D character reference for modelling, keeping the design exactly: a squat, perfectly round, glossy blue ball of a creature. One short green stem on top of his head with two bright green leaves. Two small, round, solid black beady eyes with a tiny white glint, set close together high on the face, and two short dark eyebrow marks. A huge mouth that fills the lower half of the face, held wide open in a happy silly grin: a deep, clearly hollow dark maroon mouth cavity, a row of big white triangular teeth along the top, a few white triangular teeth along the bottom, and a round pink tongue inside. Two small blue triangular fins sticking straight out from his sides, well clear of the body. Two stubby rounded blue feet set apart under him. No arms, no neck, no tail. Thick smooth toy-like shapes, stylised 3D game character, soft matte-plastic shading, the same saturated blue as the drawing. Front view turned very slightly to one side, standing upright, whole body in frame. Only the critter: no coal, no ant, no rope. Plain light grey background, soft even studio lighting, no text, no logo, no ground, no cast shadows.",
+ "reference_image_urls": [
+  "file:assets/chomp/source/concept.png"
+ ],
+ "aspect_ratio": "1:1"
+}

@@ -21,6 +21,7 @@ The roster: Flint, Wren's three companions Nib, Loom and Hod, and (added 2026-11
 | Potato Sack | in WORKQUEUE.md | concept A approved (an original design) | v1: 30,898 triangles, 1K textures, 3.0 MB | custom 13-bone skeleton | 24 hand-keyed clips; tuft follows through; hops tied to the rules | **in game** |
 | Sprocket | the owner's moveset document | concept A (an original design) | v1: 30,732 triangles, 1K textures, 2.9 MB | custom 24-bone skeleton: hand and foot targets, a rigid wrench aimed directly | 34 hand-keyed clips | **in game** |
 | Scuttle | the owner's document for fighter 01 (numbers only) | concept A (an original design) | v1: 31,029 triangles, 1K textures, 2.4 MB | custom 11-bone skeleton, rigid tongs | 25 hand-keyed clips | **in game** |
+| Chomp Chomp | the owner's design v2 | concept A from the owner's drawing | v1: 30,695 triangles, 1K textures, 2.3 MB | custom 17-bone skeleton with placed weights: hinged jaw and head top, tongue, eyes, brows, fins, feet, sprout and leaves | 62 hand-keyed clips: every attack, special, throw and state has its own; leaves follow through | **in game** |
 
 ## Meshy credits
 
@@ -42,6 +43,7 @@ All Meshy calls go through `tools/meshy.js`. Limits are in `assets/meshy-budget.
 | 2026-11-10 | Potato Sack | 3D model from the concept (30k triangles, PBR 2K) | 30 |
 | 2026-11-10 | Sprocket, Brand, Tilt, Scuttle | Concept pictures (4 each) | 16 |
 | 2026-11-10 | Sprocket, Scuttle | 3D models from the concepts (30 each), after the owner said to carry on | 60 |
+| 2026-11-10 | Chomp Chomp | Concept picture from the owner's drawing (4) and 3D model (30), inside the owner's 40-credit spend | 34 |
 
 Spent so far: 535 credits (Flint 135, companions 102, stage 38, Potato Sack 34, Sprocket 34, Scuttle 34, concept pictures for Brand and Tilt 8, five Furious Fowls birds 150). On 2026-11-10 the owner allowed 150 more that day (day limit 300; 298 used). The owner cleared up to 400 for the Potato Sack project on 2026-11-10; the 150-a-day limit is unchanged (148 used that day, so Brand's and Tilt's models wait for another day). The daily limit was raised to 240 for 2026-11-09 only, at the owner's request; it is 150 on other days. No credits were spent in the unattended session on the evening of 2026-11-09.
 

@@ -44,8 +44,9 @@ function build() {
   const deck = new THREE.Mesh(new THREE.BoxGeometry(EDGE * 2 + 4, 3, 48), new THREE.MeshStandardMaterial({ color: 0xffffff, map: planks, roughness: 0.82 })); deck.position.set(0, -1.5, 0); deck.castShadow = deck.receiveShadow = true; plain.add(deck);
   /* floating slabs: weathered stone with a copper band and a glowing ember line along the top edge */
   const slab = new THREE.MeshStandardMaterial({ color: 0x8a8079, roughness: 0.9, flatShading: true }), copper = new THREE.MeshStandardMaterial({ color: 0xa8623a, roughness: 0.45, metalness: 0.7 }), emberLine = new THREE.MeshStandardMaterial({ color: 0xffb060, emissive: 0xff8a30, emissiveIntensity: 2.4, roughness: 0.5 });
+  const slabs = [];
   for (const p of PLATS) if (p.soft) {
-    const w = p.x1 - p.x0, cx = (p.x0 + p.x1) / 2, g = new THREE.Group(); g.position.set(cx, p.y, 0); scene.add(g);
+    const w = p.x1 - p.x0, cx = (p.x0 + p.x1) / 2, g = new THREE.Group(); g.position.set(cx, p.y, 0); scene.add(g); slabs.push(g);
     const top = new THREE.Mesh(new THREE.BoxGeometry(w, 1.4, 15), slab); top.position.y = -0.7; top.castShadow = top.receiveShadow = true; g.add(top);
     const sh = new THREE.Shape([[-w / 2 + 1, 0], [w / 2 - 1, 0], [w / 2 - 4, -2.6], [-w / 2 + 4, -2.6]].map(q => new THREE.Vector2(q[0], q[1])));   /* the chamfered underside */
     const under = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 13, bevelEnabled: false }), slab); under.position.set(0, -1.4, -6.5); under.castShadow = true; g.add(under);
@@ -120,7 +121,7 @@ function build() {
     if (v.key === k) return; const prevKey = v.key; v.key = k;
     while (v.pivot.children.length) { const c = v.pivot.children.pop(); if (c.geometry) c.geometry.dispose(); }
     if (v.mixer) v.mixer.stopAllAction();
-    v.mixer = null; v.model = null; v.chomp = null; v.actions = {}; v.cur = null; v.prev = null; v.hand = null; v.springs = []; v.springTick = -1;
+    v.mixer = null; v.model = null; v.chomp = null; v.bubble = null; v.actions = {}; v.cur = null; v.prev = null; v.hand = null; v.springs = []; v.springTick = -1;
     if (v.prop) { scene.remove(v.prop); v.prop = null; }
     if (useModel) {
       /* A copy of the loaded model with its own skeleton, scaled to the fighter's height and turned so its front is +x. */
@@ -130,6 +131,7 @@ function build() {
       v.pivot.add(obj); v.model = M; v.mixer = new THREE.AnimationMixer(obj); setupSprings(v, M);
       if (M.cfg.lift) obj.position.y = M.cfg.lift;   /* a rider: the model sits this high above the fighter's feet */
       if (M.cfg.prop && M.cfg.prop.type === 'sling') { v.prop = makeSling(); v.hand = null; scene.add(v.prop); if (/ alone/.test(prevKey)) v.prop.userData.rig.k = { py: -2.2, sq: -0.14, bend: 0.15 }; }   /* the bird drops back into the pouch: the bands take its weight */
+      if (fm.name === 'Chomp Chomp') { const bubble = makeBubble(); bubble.position.y = 6; v.pivot.add(bubble); v.bubble = bubble; }   /* his Bubble Ride bubble */
       if (M.cfg.prop && M.cfg.prop.type === 'lantern') { v.hand = obj.getObjectByName(M.cfg.prop.bone) || null; if (v.hand) { v.prop = makeLantern(); scene.add(v.prop); } }
       return;
     }
@@ -234,6 +236,7 @@ function build() {
   }
   /* Chomp Chomp, built from simple shapes: a round blue body with a dark outline, a big mouth of triangular teeth on the
      front that opens when he bites, small beady eyes, stubby feet, little fins and a leaf sprout. Faces +x. */
+  const makeBubble = () => { const b = new THREE.Mesh(new THREE.SphereGeometry(7.8, 24, 16), new THREE.MeshStandardMaterial({ color: 0xcfe8ff, transparent: true, opacity: 0.22, roughness: 0.05, metalness: 0.1, depthWrite: false })); b.visible = false; return b; };
   function buildChomp(v, col) {
     const M2 = (c, o) => { const m = new THREE.MeshStandardMaterial(Object.assign({ color: new THREE.Color(c), roughness: 0.55 }, o || {})); v.mats.push(m); return m; };
     const add = (geo, mat, x, y, z, sx, sy, sz) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); if (sx) m.scale.set(sx, sy, sz); m.castShadow = true; v.pivot.add(m); return m; };
@@ -273,7 +276,8 @@ function build() {
   /* Chomp Chomp's ropes (from the simulation: chompRopes) drawn as thin cords; they never hit, so they never glow */
   const ropePool = [], ropeMat = new THREE.MeshStandardMaterial({ color: 0xb08a55, roughness: 0.9 }), hookMat = new THREE.MeshStandardMaterial({ color: 0x6b5a4a, roughness: 0.8 });
   function drawRopes() {
-    const list = typeof chompRopes === 'function' ? chompRopes() : [];
+    const list = typeof chompRopes === 'function' ? chompRopes().slice() : [];
+    for (const f of F) if (f.state === 'attack' && f.mname === 'sspec' && f.rsGo) { const cy = f.y + f.st.h / 2, dx = f.rsAx - f.x, dy = f.rsAy - cy, d = Math.hypot(dx, dy) || 1; list.push([f.rsAx, f.rsAy, f.x + dx / d * 4.2, cy + dy / d * 4.2, 'swing']); }   /* the rope he swings on, from its hook to his teeth */
     while (ropePool.length < list.length) { const cord = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 1, 6), ropeMat), hook = new THREE.Mesh(new THREE.SphereGeometry(0.8, 8, 6), hookMat); scene.add(cord, hook); ropePool.push({ cord, hook }); }
     ropePool.forEach((q, k) => { const r = list[k]; q.cord.visible = !!r; q.hook.visible = !!r && r[4] === 'swing'; if (!r) return;
       const a = new THREE.Vector3(r[0], r[1], 0), b = new THREE.Vector3(r[2], r[3], 0), len = Math.max(0.01, a.distanceTo(b));
@@ -407,6 +411,7 @@ function build() {
     const h = f.st.h; let sx = 1, sy = 1, rot = 0, oy = 0;
     if (hasModel) {   /* a model animates itself; only whole-body spins and the swap shrink stay procedural */
       if (f.state === 'roll') return { sx, sy, rot: f.sf * 0.45 * f.rollDir * f.face, oy: h / 2 };
+      if (f.state === 'attack' && f.mname === 'sspec' && f.rsGo && f.rsTh !== undefined) return { sx, sy, rot: -f.rsTh * f.face, oy: h / 2 };   /* Chomp Chomp hanging from his rope: turned to lie along it */
       if (f.state === 'hurt' && !f.grounded && f.tumble) return { sx, sy, rot: f.sf * 0.2, oy: h / 2 };
       if (f.state === 'attack' && f.move && f.move.spin && f.move.spinAt) return { sx, sy, rot: f.move.spinAt(f, f.mf), oy: FP };   /* Sling Spin and Catapult Cyclone: end over end round the rig's middle */
       if (f.state === 'attack' && f.move && f.move.swap) { const k = 1 - Math.sin(Math.min(1, f.mf / 34) * Math.PI) * 0.7; return { sx: k, sy: k, rot, oy }; }
@@ -519,6 +524,24 @@ function build() {
     for (const g of islands) g.position.y = g.userData.y + Math.sin(tick * 0.008 + g.userData.ph) * 2.2;
   }
 
+  /* ---- the final hit (finalhit.js): while the game is frozen, the island goes, the backdrop shows the red burst filling the
+     view exactly, a red light comes from behind, and the view tilts ---- */
+  const finalCv = document.createElement('canvas'); finalCv.width = 1280; finalCv.height = 720;
+  const finalTex = new THREE.CanvasTexture(finalCv); finalTex.colorSpace = THREE.SRGBColorSpace;
+  const finalLight = new THREE.DirectionalLight(0xff3a1e, 0); finalLight.position.set(0, 60, -160); scene.add(finalLight);
+  let finalOn = false, bdMap = null, bdCol = null;
+  function finalView(s, vH, lift) {
+    const on = typeof finalT !== 'undefined' && finalT > 0 && !!FINAL && !!F[FINAL.v] && typeof finalBg === 'function';
+    const world = [plain, embers, R3.stage, ...slabs].filter(Boolean);
+    if (on && !finalOn) { bdMap = backdrop.material.map; bdCol = backdrop.material.color.getHex(); backdrop.material.map = finalTex; backdrop.material.color.set(0xffffff); backdrop.material.needsUpdate = true; world.forEach(o => { o.userData.finalWas = o.visible; o.visible = false; }); scene.fog.far = 1e6; }
+    if (!on && finalOn) { backdrop.material.map = bdMap; backdrop.material.color.setHex(bdCol); backdrop.material.needsUpdate = true; world.forEach(o => { if (o.userData.finalWas !== undefined) { o.visible = o.userData.finalWas; delete o.userData.finalWas; } }); scene.fog.far = 3600; backdrop.rotation.z = 0; finalLight.intensity = 0; }
+    finalOn = on; if (!on) return;
+    finalBg(finalCv.getContext('2d'), W, H, finalSpots()); finalTex.needsUpdate = true;
+    const bd = camera.position.z + 2600, fh = 2 * bd * Math.tan(THREE.MathUtils.degToRad(FOV / 2));
+    backdrop.scale.set(fh * 1.06 / 9, fh * 1.06 / 9, 1); backdrop.position.set(camera.position.x, camera.position.y - lift / vH * fh, -2600); backdrop.rotation.z = FINAL_ROLL;   /* turns with the camera: the picture carries its own tilt */
+    camera.rotation.z = FINAL_ROLL; finalLight.intensity = 4.5;
+  }
+
   let lastW = 0, lastH = 0;
   R3.show = on => { glc.style.visibility = on ? 'visible' : 'hidden'; };
   R3.render = () => {
@@ -532,6 +555,7 @@ function build() {
     { const bd = camera.position.z + 2600, fh = 2 * bd * Math.tan(THREE.MathUtils.degToRad(FOV / 2)), k = 1.34;
       backdrop.scale.set(fh * k / 9, fh * k / 9, 1);
       backdrop.position.set(camera.position.x - cam.x * 0.35, camera.position.y - lift / vH * fh - (cam.y - 30) * 0.3 + fh * 0.05, -2600); }
+    finalView(s, vH, lift);
     lamps.forEach((l, k) => { l.intensity = l.userData.i * (1 + Math.sin(frame * 0.31 + k * 2) * 0.07 + Math.sin(frame * 0.113 + k) * 0.05); });   /* forge and lantern flicker */
 
     F.forEach((f, idx) => {
@@ -553,11 +577,13 @@ function build() {
       v.root.position.set(f.x, f.y, 0); v.root.rotation.y = (flat ? 0.55 * v.flip : v.yaw) + (v.model && v.turned ? Math.PI : 0) - (v.model ? (v.spin || 0) * f.face : 0);
       v.pivot.position.set(p.shx !== undefined ? p.shx : f.hitlag > 0 && f.state === 'hurt' ? ((tick & 1) ? 0.35 : -0.35) : 0, p.oy + (p.shy || 0), 0); v.pivot.rotation.z = -p.rot; v.pivot.scale.set(p.sx, p.sy, p.sx);
       v.pivot.children.forEach(c => { if (c.userData.y0 === undefined) c.userData.y0 = c.position.y; c.position.y = c.userData.y0 - p.oy; });
-      const ghost = (f.invuln > 0 && (tick >> 1) % 2) || f.state === 'spot' || f.state === 'airdodge', hot = f.flash > 0 || (f.hitlag > 0 && f.state === 'hurt');
+      const ghost = (f.invuln > 0 && (tick >> 1) % 2) || f.state === 'spot' || f.state === 'airdodge', hot = (f.flash > 0 || (f.hitlag > 0 && f.state === 'hurt')) && !(typeof finalT !== 'undefined' && finalT > 0 && finalT < FINAL_FREEZE - 3);   /* the final-hit freeze shows the fighter, not a white flash */
       for (const m of v.mats) { m.transparent = ghost; m.opacity = ghost ? 0.45 : 1; m.emissive.setHex(hot ? 0xffffff : 0x000000); m.emissiveIntensity = hot ? 0.8 : 0; }
       if (v.shield.visible) { const [sx, sy, r] = shieldCircle(f); v.shield.scale.setScalar(r); v.shield.position.set(sx, sy, 0); }
       if (v.pad.visible) v.pad.position.set(f.x, f.y - 0.8, 0);
       if (v.chomp) poseChomp(v, f);
+      if (v.bubble) { const on = !!f.bubble, grow = f.state === 'attack' && f.mname === 'uspec' && !on ? clamp((f.mf - 3) / 5, 0, 1) : 0;   /* it swells from his mouth as he blows, then wobbles round him; it sits round his middle whatever the pivot is doing */
+        v.bubble.visible = on || grow > 0; v.bubble.scale.setScalar(on ? 1 + Math.sin(tick * 0.3) * 0.03 : 0.15 + 0.85 * grow); v.bubble.position.x = on ? 0 : 5 * (1 - grow); }
       if (v.springs.length) applySprings(v);
       if (v.prop && !v.hand) {   /* the living slingshot under its bird: posed by slingWant, the bird riding in its pouch */
         const spinning = f.state === 'attack' && f.move && f.move.spin && f.move.spinAt, rot = spinning ? f.move.spinAt(f, f.mf) : 0, rig = v.prop.userData.rig, step = rig.tick !== tick; rig.tick = tick;

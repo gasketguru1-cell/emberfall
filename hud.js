@@ -18,7 +18,8 @@ function drawHud() {
   g.textAlign = 'center';
   if (mode === 'countdown') { const n = countdown > 130 ? '3' : countdown > 90 ? '2' : countdown > 50 ? '1' : 'GO!'; big(n, H * 0.42, 110); }
   if (paused && typeof drawPauseMenu === 'function') { if (!ML.open) drawPauseMenu(); }   /* movelist.js: Resume, Move List, Exit */
-  else if (paused) { g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(0, 0, W, H); big('PAUSED', H * 0.42, 80); g.font = 'bold 20px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Start: resume          Special (B, or X on the keyboard): exit to fighter select', W / 2, H * 0.42 + 54); }
+  else if (paused) { g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(0, 0, W, H); big('PAUSED', H * 0.42, 80); g.font = 'bold 20px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Start: resume          Special: exit to fighter select          − or Backspace: controls', W / 2, H * 0.42 + 54); }
+  drawCMenu();
   if (mode === 'over') { big(overT < 90 ? 'GAME!' : result, H * 0.42, 100); if (overT > 100) { g.font = '22px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Press Start or Attack', W / 2, H * 0.42 + 56); drawUpdateNote(H * 0.42 + 80); } }
 }
 function big(t, y, sz) { g.font = `900 ${sz}px system-ui, sans-serif`; g.textAlign = 'center'; g.lineWidth = 10; g.strokeStyle = '#1a1230'; g.strokeText(t, W / 2, y); g.fillStyle = '#ffd98a'; g.fillText(t, W / 2, y); }
@@ -40,7 +41,9 @@ const TIPS = [
   'Jump, then shield with a direction just as you leave the ground, to wavedash.',
   'Flick down to drop through a platform. Down while shielding on one drops through too.',
   'Let go of shield just before a hit lands to parry it.',
-  'Jump + attack together gives a short-hop aerial.',
+  'Jump + attack together gives a short-hop aerial. Two jump buttons pressed together always give a short hop.',
+  'Flick down while falling to fast-fall. Flick the right stick down instead and the left stick stays free to steer.',
+  'Change your buttons or keys on the controls screen: − on a controller, Backspace on the keyboard.',
   'Hold attack to chain jabs. Nib keeps a flurry going for as long as it is held.',
   'Tilt the stick slightly up or down to angle a forward tilt.',
   'You cannot run through an opponent: roll, jump, or hit your way past.',
@@ -61,6 +64,53 @@ function keyHint(x, y, cap, action) {
   g.textAlign = 'center'; g.fillStyle = '#fff'; g.fillText(cap, x + w / 2, y + 1);
   g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#cfc8e8'; g.fillText(action, x + w + 6, y + 1);
   return x + w + 6 + g.measureText(action).width + 16;
+}
+/* The controls shown under the fighter select: whatever the keyboard's setup and the first controller's setup say right now. */
+function legendRows() {
+  const pm = setupOf(allDevs().find(d => d !== 'kb') || 'pad0').map, km = setupOf('kb').map;
+  const pb = a => PAD_ROWS.filter(r => pm[r[0]] === a).map(r => r[2]).join(' / ') || '—';
+  const kk = (...n) => n.map(x => km[x]).filter(Boolean).map(keyName).join(' / ') || '—';
+  const four = (u, l, d, r) => km[u] + km[l] + km[d] + km[r] === 'ArrowUpArrowLeftArrowDownArrowRight' ? 'Arrows' : [u, l, d, r].map(x => keyName(km[x])).join(' ');
+  return [['CONTROLLER', [['Stick', 'Move'], [pb('atk'), 'Attack'], [pb('spc'), 'Special'], [pb('jmp'), 'Jump'], [pb('shd'), 'Shield'], [pb('grb'), 'Grab'], ['R Stick', 'Tilt'], ['+', 'Start'], ['−', 'Controls']]],
+          ['KEYBOARD', [[four('up', 'left', 'down', 'right'), 'Move'], [kk('atk'), 'Attack'], [kk('spc'), 'Special'], [kk('jmp', 'jmp2'), 'Jump'], [kk('shd', 'shd2'), 'Shield'], [kk('grb', 'grb2'), 'Grab'], [four('cu', 'cl', 'cd', 'cr'), 'Tilt'], [kk('walk'), 'Walk'], ['Enter', 'Start'], ['Bksp', 'Controls']]]];
+}
+/* The controls screen (sim.js: CMENU), over the fighter select or the pause screen. */
+const ACT_COL = { '': '#6d6885', atk: '#ff7b6c', spc: '#6cb4ff', jmp: '#9be564', shd: '#7fe3e0', grb: '#d59bff' };
+function drawCMenu() {
+  if (!CMENU) return; const m = CMENU, su = setupOf(m.dev), kb = su.type === 'kb', items = cmenuItems(), list = setupsFor(m.dev), ui = 'system-ui, sans-serif';
+  g.save(); spaced(0); g.fillStyle = 'rgba(8,6,16,.8)'; g.fillRect(0, 0, W, H);
+  g.fillStyle = 'rgba(26,22,46,.98)'; rr(CM.x, CM.y, CM.w, CM.h, 18); g.fill(); g.strokeStyle = 'rgba(255,184,107,.55)'; g.lineWidth = 1.5; g.stroke();
+  g.textAlign = 'left'; g.font = '900 26px ' + ui; g.fillStyle = '#ffd98a'; g.fillText('CONTROLS', CM.x + 30, CM.y + 44);
+  const tw = g.measureText('CONTROLS').width; g.font = '16px ' + ui; g.fillStyle = '#cfc8e8'; g.fillText(devName(m.dev), CM.x + 44 + tw, CM.y + 43);
+  g.fillStyle = 'rgba(255,255,255,.1)'; rr(CM.done[0], CM.done[1], CM.done[2], CM.done[3], 17); g.fill(); g.textAlign = 'center'; g.font = 'bold 14px ' + ui; g.fillStyle = '#fff'; g.fillText('Done', CM.done[0] + CM.done[2] / 2, CM.done[1] + 22);
+  items.forEach((it, n) => {
+    const [x, y, w, h] = it.box, on = n === m.row, my = y + h / 2 + 5;
+    g.fillStyle = on ? 'rgba(255,217,138,.14)' : 'rgba(255,255,255,.05)'; rr(x, y, w, h, 8); g.fill(); if (on) { g.strokeStyle = '#ffd98a'; g.lineWidth = 2; g.stroke(); }
+    if (it.kind === 'setup') {
+      const name = su.name.replace(/\s+/g, ' ');
+      g.textAlign = 'left'; g.font = 'bold 12px ' + ui; spaced(2); g.fillStyle = '#ffb86b'; g.fillText('SETUP', x + 16, my); spaced(0);
+      g.textAlign = 'center'; g.font = 'bold 22px ' + ui; g.fillStyle = '#fff'; g.fillText(name, x + w / 2, my + 3);
+      const nw = g.measureText(name).width; g.fillStyle = '#ffd98a'; g.fillText('‹', x + w / 2 - nw / 2 - 26, my + 2); g.fillText('›', x + w / 2 + nw / 2 + 26, my + 2);
+      g.textAlign = 'right'; g.font = '13px ' + ui; g.fillStyle = '#b9b2d6'; g.fillText((su.fixed ? 'built-in' : su.touched ? 'your own' : 'your own, not changed yet') + '  ·  ' + (list.indexOf(su) + 1) + ' of ' + list.length, x + w - 16, my);
+    } else if (it.kind === 'reset') { g.textAlign = 'center'; g.font = 'bold 14px ' + ui; g.fillStyle = on ? '#fff' : '#d8d2ee'; g.fillText('Reset ' + su.name + ' to the standard layout', x + w / 2, my); }
+    else {
+      g.textAlign = 'left'; g.font = '15px ' + ui; g.fillStyle = on ? '#fff' : '#d8d2ee'; g.fillText(it.label, x + 14, my);
+      if (kb) {
+        const cap = on && m.capture, has = !!su.map[it.key], txt = cap ? 'press a key…' : keyName(su.map[it.key]); g.font = 'bold 14px ' + ui; const cw = Math.max(46, g.measureText(txt).width + 22);
+        g.fillStyle = cap ? 'rgba(255,217,138,' + (0.65 + 0.3 * Math.sin(Date.now() / 110)).toFixed(2) + ')' : has ? 'rgba(255,255,255,.15)' : 'rgba(255,255,255,.04)'; rr(x + w - cw - 8, y + 4, cw, h - 8, 6); g.fill();
+        g.textAlign = 'center'; g.fillStyle = cap ? '#1a1230' : has ? '#fff' : '#6d6885'; g.fillText(txt, x + w - cw / 2 - 8, my);
+      } else {
+        const a = su.map[it.key] || '', cx = x + w - 96; g.fillStyle = ACT_COL[a]; g.globalAlpha = a ? 0.9 : 0.35; rr(cx - 56, y + 3, 112, h - 6, (h - 6) / 2); g.fill(); g.globalAlpha = 1;
+        g.textAlign = 'center'; g.font = 'bold 14px ' + ui; g.fillStyle = a ? '#16121f' : '#e6e0f6'; g.fillText(ACT_NAME[a], cx, my);
+        if (on) { g.font = 'bold 20px ' + ui; g.fillStyle = '#ffd98a'; g.fillText('‹', cx - 72, my + 1); g.fillText('›', cx + 72, my + 1); }
+      }
+    }
+  });
+  if (m.noteT > 0) { g.globalAlpha = Math.min(1, m.noteT / 30); g.textAlign = 'center'; g.font = '14px ' + ui; g.fillStyle = '#ffd98a'; g.fillText(m.note, CM.x + CM.w / 2, CM.y + 542); g.globalAlpha = 1; }
+  g.textAlign = 'center'; g.font = '13px ' + ui; g.fillStyle = '#8f88ad'; g.fillText('Two jump buttons together: short hop   ·   Right stick down while falling: fast fall', CM.x + CM.w / 2, CM.y + 568);
+  let hx = CM.x + (kb ? 96 : 250); const hy = CM.y + CM.h - 24;
+  for (const [cap, act] of kb ? [['↑ ↓ ← →', 'choose'], ['Enter', 'change a key'], ['Delete', 'clear it'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'change'], ['Y', 'set to nothing'], ['B', 'done']]) hx = keyHint(hx, hy, cap, act) + 8;
+  g.restore();
 }
 function drawSelect(three) {
   const t = tick, PC = ['#ff7b6c', '#6cb4ff'], serif = '"Palatino Linotype", "Book Antiqua", Georgia, serif';
@@ -102,7 +152,7 @@ function drawSelect(three) {
     g.textAlign = 'left'; g.font = 'bold 13px system-ui, sans-serif'; spaced(3); g.fillStyle = pc; g.fillText(!sl && k ? 'PLAYER 2  /  CPU' : 'PLAYER ' + (k + 1), x + 24, y + 30); spaced(0);
     if (!sl) {
       const pulse = 0.6 + 0.4 * Math.sin(t * 0.07);
-      if (!k) { g.textAlign = 'center'; g.font = 'bold 26px system-ui, sans-serif'; g.fillStyle = 'rgba(255,255,255,' + pulse.toFixed(2) + ')'; g.fillText('Press Attack to join', x + cw / 2, y + 92); g.font = '14px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('A on a controller  ·  Z on the keyboard', x + cw / 2, y + 120); continue; }
+      if (!k) { g.textAlign = 'center'; g.font = 'bold 26px system-ui, sans-serif'; g.fillStyle = 'rgba(255,255,255,' + pulse.toFixed(2) + ')'; g.fillText('Press Attack to join', x + cw / 2, y + 92); g.font = '14px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('Attack on a controller  ·  ' + keyName(setupOf('kb').map.atk) + ' on the keyboard', x + cw / 2, y + 120); continue; }
       /* empty second slot: the CPU and its level */
       g.font = 'bold 34px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('CPU', x + 24, y + 78);
       g.font = '15px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(CPU_LEVEL === 0 ? 'level 0: stands still, for testing' : CPU_PICK >= 0 ? 'plays ' + ROSTER[CPU_PICK].name : 'drag its token to a fighter, or it picks at random', x + 24, y + 102);
@@ -114,7 +164,7 @@ function drawSelect(three) {
       continue;
     }
     const d = ROSTER[sl.pick], same = k && slots[0] && slots[0].pick === sl.pick;
-    g.textAlign = 'right'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(devName(sl.dev) + (sl.dev !== 'kb' ? (LAYOUT[sl.dev] === 'labels' ? '  ·  A/B swapped' : '  ·  A/B normal') : ''), x + cw - 20, y + 30);
+    g.textAlign = 'right'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(devName(sl.dev) + '  ·  ' + setupOf(sl.dev).name.replace(/\s+/g, ' '), x + cw - 20, y + 30);
     g.textAlign = 'left'; g.font = 'bold 44px ' + serif; g.fillStyle = '#fff'; g.fillText(d.name, x + 52, y + 84);
     const nw = g.measureText(d.name).width; g.font = 'bold 30px system-ui, sans-serif'; g.fillStyle = sl.ready ? 'rgba(255,255,255,.18)' : '#ffd98a'; g.fillText('‹', x + 24, y + 81); g.fillText('›', x + 62 + nw, y + 81);
     g.font = 'italic 16px ' + serif; g.fillStyle = '#f3dfb6'; g.fillText(d.sub, x + 26, y + 110);
@@ -141,8 +191,7 @@ function drawSelect(three) {
   /* ---- controls and a tip ---- */
   const px = 44, py = 620, pw = W - 88;
   g.fillStyle = 'rgba(12,10,22,.7)'; rr(px, py, pw, 88, 12); g.fill(); g.strokeStyle = 'rgba(255,255,255,.1)'; g.lineWidth = 1; g.stroke();
-  const rows = [['CONTROLLER', [['Stick', 'Move'], ['A', 'Attack'], ['B', 'Special'], ['X / Y', 'Jump'], ['ZL / ZR', 'Shield'], ['L / R', 'Grab'], ['R Stick', 'Tilt'], ['+', 'Start'], ['−', 'Swap A/B']]],
-                ['KEYBOARD', [['Arrows', 'Move'], ['Z', 'Attack'], ['X', 'Special'], ['C / V', 'Jump'], ['Q / W', 'Shield'], ['A / S', 'Grab'], ['I J K L', 'Tilt'], ['Enter', 'Start'], ['Shift', 'Walk']]]];
+  const rows = legendRows();
   rows.forEach(([label, keys], r) => {
     const y = py + 24 + r * 26; g.textAlign = 'left'; g.font = 'bold 11px system-ui, sans-serif'; spaced(2); g.fillStyle = '#ffb86b'; g.fillText(label, px + 18, y + 1); spaced(0);
     let x = px + 126; for (const [cap, action] of keys) x = keyHint(x, y, cap, action);
@@ -192,6 +241,7 @@ function drawSelect(three) {
     g.strokeStyle = hov ? '#ffd98a' : '#fff'; g.lineWidth = 2.5; g.beginPath(); g.arc(x + 24, y + 24 - lift, 18, 0, TAU); g.stroke();
     g.textAlign = 'center'; g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#16121f'; g.fillText('CPU', x + 24, y + 28 - lift); }
   g.textAlign = 'center'; drawUpdateNote(14);
+  drawCMenu();
 }
 /* Training: the true-combo counter at the top right, one panel per player who is landing hits. */
 function drawCombo() {

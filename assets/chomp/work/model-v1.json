@@ -1,0 +1,1 @@
+{"input_task_id":"01a1c884-2c3d-71a7-9a37-b43e2eaccc37","ai_model":"latest","model_type":"standard","should_texture":true,"enable_pbr":true,"texture_resolution":"2k","should_remesh":true,"topology":"triangle","target_polycount":30000,"symmetry_mode":"off","target_formats":["glb"]}

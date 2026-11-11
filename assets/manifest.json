@@ -6040,6 +6040,427 @@
    "type": "sling"
   }
  },
+ "Chomp Chomp": {
+  "file": "assets/chomp/export/chomp-v1.glb",
+  "height": 13,
+  "feel": 1,
+  "clips": {
+   "idle": {
+    "clip": "Idle"
+   },
+   "idle2": {
+    "clip": "Idle2"
+   },
+   "walk": {
+    "clip": "Waddle"
+   },
+   "run": {
+    "clip": "Scamper"
+   },
+   "crouch": {
+    "clip": "Crouch",
+    "at": 0.2
+   },
+   "brake": {
+    "clip": "Skid"
+   },
+   "jumpsquat": {
+    "clip": "Crouch",
+    "from": 0,
+    "to": 0.2
+   },
+   "rise": {
+    "clip": "Rise",
+    "from": 0,
+    "to": 0.4
+   },
+   "airjump": {
+    "clip": "AirJump"
+   },
+   "fall": {
+    "clip": "Fall"
+   },
+   "fastfall": {
+    "clip": "FastFall"
+   },
+   "helpless": {
+    "clip": "Helpless"
+   },
+   "land": {
+    "clip": "Land",
+    "from": 0,
+    "to": 0.4
+   },
+   "landHard": {
+    "clip": "LandHard"
+   },
+   "shield": {
+    "clip": "Shield",
+    "from": 0,
+    "to": 0.15
+   },
+   "shieldHit": {
+    "clip": "ShieldHit"
+   },
+   "dodge": {
+    "clip": "Dodge",
+    "from": 0,
+    "to": 0.4
+   },
+   "airdodge": {
+    "clip": "AirDodge"
+   },
+   "roll": {
+    "clip": "Ball",
+    "bounce": true
+   },
+   "hit": {
+    "clip": "Hit",
+    "from": 0,
+    "to": 0.6
+   },
+   "hitHeavy": {
+    "clip": "HitHeavy"
+   },
+   "launchUp": {
+    "clip": "LaunchUp"
+   },
+   "spike": {
+    "clip": "Spike"
+   },
+   "launch": {
+    "clip": "Launch"
+   },
+   "tumble": {
+    "clip": "Tumble"
+   },
+   "down": {
+    "clip": "Down",
+    "from": 0,
+    "to": 0.3
+   },
+   "dizzy": {
+    "clip": "Dizzy",
+    "bounce": true
+   },
+   "ledge": {
+    "clip": "Ledge"
+   },
+   "hold": {
+    "clip": "Hold"
+   },
+   "pummel": {
+    "clip": "Pummel"
+   },
+   "held": {
+    "clip": "Held"
+   },
+   "throw": {
+    "clip": "ThrowF"
+   },
+   "throw_f": {
+    "clip": "ThrowF"
+   },
+   "throw_b": {
+    "clip": "ThrowB",
+    "to": 1
+   },
+   "throw_u": {
+    "clip": "ThrowU"
+   },
+   "throw_d": {
+    "clip": "ThrowD"
+   },
+   "swap": {
+    "clip": "Ball",
+    "bounce": true
+   },
+   "respawn": {
+    "clip": "Respawn"
+   },
+   "coalToss": {
+    "clip": "CoalToss"
+   },
+   "coalFlick": {
+    "clip": "CoalFlick"
+   },
+   "antCall": {
+    "clip": "AntCall"
+   },
+   "coalNone": {
+    "clip": "CoalNone"
+   },
+   "ropeToss": {
+    "clip": "RopeToss"
+   },
+   "ropeSwing": {
+    "clip": "RopeSwing"
+   },
+   "bubbleBlow": {
+    "clip": "BubbleBlow"
+   },
+   "bubbleRide": {
+    "clip": "BubbleRide"
+   }
+  },
+  "strikers": [
+   {
+    "bone": "jaw",
+    "ext": 1.3
+   },
+   {
+    "bone": "tongue",
+    "ext": 1
+   },
+   {
+    "bone": "footL",
+    "ext": 1.2
+   },
+   {
+    "bone": "footR",
+    "ext": 1.2
+   }
+  ],
+  "springs": [
+   {
+    "bones": [
+     "sprout"
+    ],
+    "k": 0.3,
+    "d": 0.66,
+    "max": 0.6,
+    "drag": 0.14
+   },
+   {
+    "bones": [
+     "leafL"
+    ],
+    "k": 0.26,
+    "d": 0.7,
+    "max": 0.7,
+    "drag": 0.18
+   },
+   {
+    "bones": [
+     "leafR"
+    ],
+    "k": 0.26,
+    "d": 0.7,
+    "max": 0.7,
+    "drag": 0.18
+   }
+  ],
+  "attacks": {
+   "jab": {
+    "clip": "Jab1",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "jab2": {
+    "clip": "Jab2",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "jab3": {
+    "clip": "Jab3",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "ftilt": {
+    "clip": "TongueFlick",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "utilt": {
+    "clip": "SnapUp",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "dtilt": {
+    "clip": "ToeNibble",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "dash": {
+    "clip": "RollingHunger",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.52
+    ],
+    "end": 0.9
+   },
+   "fsmash": {
+    "clip": "MegaChomp",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "usmash": {
+    "clip": "SugarSnap",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "dsmash": {
+    "clip": "FloorFeast",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.52
+    ],
+    "end": 0.9,
+    "spin": 0.5
+   },
+   "nair": {
+    "clip": "HungrySpin",
+    "start": 0,
+    "contact": [
+     0.2,
+     0.6
+    ],
+    "end": 0.9
+   },
+   "fair": {
+    "clip": "FlyingChomp",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "bair": {
+    "clip": "HeelFlick",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "uair": {
+    "clip": "SkyBite",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "dair": {
+    "clip": "JawDrop",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "grab": {
+    "clip": "Grab",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "getup": {
+    "clip": "GetupSpin",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.54
+    ],
+    "end": 0.9
+   },
+   "swingBite": {
+    "clip": "SwingBite",
+    "start": 0,
+    "contact": [
+     0.02,
+     0.3
+    ],
+    "end": 0.9
+   },
+   "dspec": {
+    "clip": "AirCushion",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.44
+    ],
+    "end": 0.9
+   },
+   "nspec": {
+    "clip": "CoalToss",
+    "start": 0,
+    "contact": [
+     0.59,
+     0.6
+    ],
+    "end": 1
+   },
+   "sspec": {
+    "clip": "RopeSwing",
+    "start": 0,
+    "contact": [
+     0.1,
+     0.5
+    ],
+    "end": 0.6
+   },
+   "uspec": {
+    "clip": "BubbleRide",
+    "start": 0,
+    "contact": [
+     0.1,
+     0.5
+    ],
+    "end": 0.7
+   },
+   "*": {
+    "clip": "Jab1",
+    "start": 0,
+    "contact": [
+     0.34,
+     0.44
+    ],
+    "end": 0.9
+   }
+  }
+ },
  "Brand": {
   "file": "assets/brand/export/brand-v1.glb",
   "height": 14.42,
