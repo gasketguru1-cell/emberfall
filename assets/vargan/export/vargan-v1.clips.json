@@ -1,6 +1,6 @@
 {
  "Idle": {
-  "seconds": 1.6
+  "seconds": 1.8
  },
  "Idle2": {
   "seconds": 1.4
@@ -21,10 +21,10 @@
   "seconds": 0.2
  },
  "Fall": {
-  "seconds": 0.3
+  "seconds": 0.45
  },
  "FastFall": {
-  "seconds": 0.017
+  "seconds": 0.15
  },
  "AirJump": {
   "seconds": 0.233
@@ -50,6 +50,12 @@
  "HitHeavy": {
   "seconds": 0.4
  },
+ "HitBack": {
+  "seconds": 0.3
+ },
+ "HitHeavyBack": {
+  "seconds": 0.4
+ },
  "Launch": {
   "seconds": 0.25
  },
@@ -60,7 +66,7 @@
   "seconds": 0.3
  },
  "Tumble": {
-  "seconds": 0.3
+  "seconds": 0.433
  },
  "Down": {
   "seconds": 0.15
@@ -187,6 +193,12 @@
  },
  "UpBE": {
   "seconds": 1
+ },
+ "UpBDive": {
+  "seconds": 0.1
+ },
+ "UpBDiveE": {
+  "seconds": 0.1
  },
  "UpLand": {
   "seconds": 0.6

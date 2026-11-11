@@ -31,10 +31,10 @@ vm.runInThisContext(`
   /* ---- the atlas's frame budget ---- */
   { const rows = [['jab', 7, 8, 26, 11], ['ftilt', 10, 12, 39, 13], ['utilt', 7, 9, 31, 9], ['dtilt', 10, 12, 35, 14], ['dash', 10, 12, 37, 15], ['fsmash', 24, 27, 66, 24], ['fsmashE', 27, 29, 63, 22],
       ['usmash', 20, 21, 61, 22], ['usmashE', 19, 22, 54, 19], ['dsmash', 16, 19, 61, 12], ['dsmashE', 16, 18, 55, 12], ['nair', 7, 8, 40, 7], ['fair', 17, 18, 48, 18], ['fairE', 14, 19, 44, 17],
-      ['bair', 12, 14, 39, 19], ['bairE', 10, 12, 35, 17], ['uair', 11, 12, 39, 15], ['uairE', 8, 10, 33, 13], ['dair', 16, 18, 44, 19], ['grab', 8, 10, 38, 0], ['dgrab', 11, 13, 46, 0], ['pgrab', 12, 14, 41, 0],
+      ['bair', 12, 14, 39, 19], ['bairE', 10, 12, 35, 17], ['uair', 11, 12, 39, 15], ['uairE', 11, 12, 33, 13], ['dair', 16, 18, 44, 19], ['grab', 8, 10, 38, 0], ['dgrab', 11, 13, 46, 0], ['pgrab', 12, 14, 41, 0],
       ['sspec', 15, 24, 57, 18], ['dspecHit', 4, 5, 34, 8]];
     const bad = rows.filter(r => { const h = mv[r[0]].h[0]; return !(h.f0 === r[1] && h.f1 === r[2] && mv[r[0]].t === r[3] && h.d === r[4]); }).map(r => r[0]);
-    const late = mv.dsmash.h[1].f0 === 25 && mv.dsmash.h[1].d === 15 && mv.nair.h[2].f0 === 17 && mv.nair.h[2].d === 12 && mv.dash.h[1].f0 === 13 && mv.dash.h[1].f1 === 19 && mv.dash.h[1].d === 11 && mv.sspec.h[1].f1 === 40 && mv.sspec.h[1].d === 12;
+    const late = mv.dsmash.h[2].f0 === 25 && mv.dsmash.h[2].d === 15 && mv.nair.h[2].f0 === 17 && mv.nair.h[2].d === 12 && mv.dash.h[1].f0 === 13 && mv.dash.h[1].f1 === 19 && mv.dash.h[1].d === 11 && mv.sspec.h[1].f1 === 40 && mv.sspec.h[1].d === 12;
     const ll = mv.nair.ll === 10 && mv.fair.ll === 14 && mv.fairE.ll === 13 && mv.bair.ll === 12 && mv.bairE.ll === 11 && mv.uair.ll === 12 && mv.uairE.ll === 11 && mv.dair.ll === 16;
     const T = mv.throws, thr = T.f.d + T.f.hits[0][1] === 13 && T.f.f === 13 && T.f.t === 39 && T.b.d + T.b.hits[0][1] === 10 && T.b.f === 14 && T.b.t === 49 && T.u.d + T.u.hits[0][1] === 13 && T.u.t === 43 && T.d.d === 7 && T.d.f === 23 && T.d.t === 39 && st.pummel === 1.6;
     check('atlas: start, active, total and damage of ' + rows.length + ' moves, the second hits, landing lags and throws', !bad.length && late && ll && thr, bad.length ? 'differs: ' + bad.join(', ') : 'all as tabled (nspec releases f' + 30 + ', counter window ' + mv.dspec.vCounter.join('-') + ')');
@@ -47,7 +47,14 @@ vm.runInThisContext(`
     for (const [k, gap] of [['fsmash', 8], ['dsmash', 9]]) { const r = swing(k, gap, { away: true }), h = mv[k + 'E'].h[0]; if (!(r.name === k + 'E' && r.hits >= 1 && r.first === h.f0)) bad.push(k + ' unarmed (' + r.name + ', ' + r.hits + ' hits, frame ' + r.first + ')'); }
     check('ground attacks hit on their first active frame; with the axe away the unarmed versions are chosen', !bad.length, bad.length ? bad.join('; ') : list.map(q => q[0]).join(', ') + '; fsmashE, dsmashE');
     const fs1 = swing('fsmash', 15), fsB = swing('fsmash', 15, { bz: true });
-    check('Berserker: +50% damage', near(fsB.pct / fs1.pct, 1.5, 0.01), (fs1.pct / B).toFixed(1) + '% -> ' + (fsB.pct / B).toFixed(1) + '% (before the one-on-one bonus)'); }
+    check('Berserker: +50% damage', near(fsB.pct / fs1.pct, 1.5, 0.01), (fs1.pct / B).toFixed(1) + '% -> ' + (fsB.pct / B).toFixed(1) + '% (before the one-on-one bonus)');
+    /* (owner) every axe hit has a handle sour spot: 60% of the blade, same frames and group, listed after the blade */
+    const axeMoves = ['fsmash', 'usmash', 'dsmash', 'fair', 'bair', 'uair', 'uspec', 'uspecL'], badS = [];
+    for (const k of axeMoves) { const h = mv[k].h; for (let i = 0; i < h.length; i++) if (h[i].ax) { const s = h[i + 1];
+      if (!(s && s.haft && s.f0 === h[i].f0 && s.f1 === h[i].f1 && (s.g || 0) === (h[i].g || 0) && near(s.d, Math.max(0.5, Math.round(h[i].d * 1.2) / 2), 1e-9) && s.k <= h[i].k && s.b <= h[i].b)) badS.push(k + ' #' + i); } }
+    const close = swing('fsmash', 3), mid = swing('fsmash', 9);
+    check('axe sweet and sour spots: the handle hits for 60%, the blade wins when both touch, one hit per swing', !badS.length && near(close.pct / fs1.pct, 0.6, 0.03) && close.hits === 1 && near(mid.pct, fs1.pct, 0.01) && mid.hits === 1,
+      (badS.length ? 'no handle on ' + badS.join(', ') + '; ' : '') + 'forward smash at 3: ' + (close.pct / B).toFixed(1) + '%, at 9: ' + (mid.pct / B).toFixed(1) + '%, at 15: ' + (fs1.pct / B).toFixed(1) + '%'); }
 
   /* ---- the axe is a world object ---- */
   { const [v] = setup(-30, 40); v.startMove('nspec'); let at = 0; run(200, () => { if (!at && axes().length) at = v.mf || 30; });

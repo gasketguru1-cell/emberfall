@@ -83,7 +83,11 @@ function animAlt(f, a) {
     case 'throw': return f.throwK ? { key: 'throw_' + f.throwK, mode: 'phase', v: phase(f.sf, 26) } : null;
     case 'hurt': {
       const ax = Math.abs(f.vx);
-      if (f.grounded) return f.hitstun >= 20 ? { key: 'hitHeavy', mode: 'phase', v: phase(f.sf, Math.max(8, f.hitstun)) } : null;
+      if (f.grounded) {   /* hit from behind (driven the way he faces): a model with its own back reactions shows them, others fall back */
+        const hv = f.hitstun >= 20, pv = phase(f.sf, Math.max(8, f.hitstun)), heavy = hv ? { key: 'hitHeavy', mode: 'phase', v: pv } : null;
+        if (f.vx * f.face > 0.05) return { key: hv ? 'hitHeavyBack' : 'hitBack', mode: 'phase', v: pv, fb: heavy };
+        return heavy;
+      }
       if (f.sf < 40 && f.vy < -1 && -f.vy > ax) return { key: 'spike', mode: 'phase', v: phase(f.sf, 40) };   /* driven downward */
       if (f.sf < 40 && f.vy > 1.2 && f.vy > ax * 1.5) return { key: 'launchUp', mode: 'phase', v: phase(f.sf, 40) };
       if (f.sf < 30 && f.tumble) return { key: 'launch', mode: 'phase', v: phase(f.sf, 30) };
@@ -108,7 +112,10 @@ function animAlt(f, a) {
         if (f.mname === 'sspec') return f.rsGo ? { key: 'ropeSwing', mode: 'loop', v: t } : { key: 'ropeToss', mode: 'phase', v: phase(f.mf, f.rsHook || 11) };   /* hooks the rope on frame 11, then hangs from it */
         if (f.mname === 'uspec') return f.bubble ? { key: 'bubbleRide', mode: 'loop', v: t } : { key: 'bubbleBlow', mode: 'phase', v: phase(f.mf, 8) };   /* the bubble forms on frame 8 */
       }
-      if (nm === 'Fyrdsman' && (f.mname === 'uspec' || f.mname === 'uspecE')) return { key: f.mname === 'uspec' ? 'upb' : 'upbE', mode: 'phase', v: phase(f.mf, 60) };   /* Soaring Plunge: frames 0 to 60 of the clip, then the dive is held until he lands */
+      if (nm === 'Fyrdsman' && (f.mname === 'uspec' || f.mname === 'uspecE')) {   /* Soaring Plunge: frames 0 to 60 of the clip, then the dive loops until he lands */
+        const k = f.mname === 'uspec' ? 'upb' : 'upbE', held = { key: k, mode: 'phase', v: 1 };
+        return f.mf > 60 ? { key: f.mname === 'uspec' ? 'upbDive' : 'upbDiveE', mode: 'loop', v: (f.mf - 60) / 60, fb: held } : { key: k, mode: 'phase', v: phase(f.mf, 60) };
+      }
       if (f.form && f.form.cargo && f.mname === 'nspec') return { key: 'punchWind', mode: 'loop', v: t };   /* Cronky Dong winding up The Entire Gym */
       if (f.def && f.def.fowl && f.mname === 'nspec' && f.selOpen) return { key: 'selecting', mode: 'loop', v: t };
       return null;

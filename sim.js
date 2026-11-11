@@ -1650,9 +1650,16 @@ const VARGAN = (() => {
      the picture (0). The hit is the blade: a capsule along the haft from 0.6 m to 1.25 m out from the fist, the far end 0.18 m
      toward the edge, 0.16 H round (the axe is 2.015 m; his height H is 1.902 m in the model). tools/blender/vargan.js reads
      ax and puts the drawn axe exactly there on these frames. */
-  const AX = { in: 0.78 / 1.902, out: 1.625 / 1.902, edge: 0.234 / 1.902, r: 0.16 };
+  /* (owner, 2026-11-11) a generous sweet spot: the whole head and the top third of the haft (a capsule 0.90 to 1.45 m out
+     along the haft, 0.19 H round, so it reaches back to 0.54 m and out past the edge), and a sour spot on the rest of the handle (0.08 to 0.55 m, 0.10 H round): 60% of the damage, base knockback
+     x 0.85, growth x 0.8, a dull knock (applyHit, h.haft). The blade is listed first, so a target touching both takes the
+     blade; both share the hit's group, so a swing lands once. */
+  const AX = { in: 0.90 / 1.902, out: 1.45 / 1.902, edge: 0.25 / 1.902, r: 0.19, h0: 0.08 / 1.902, h1: 0.55 / 1.902, hr: 0.10 };   /* the blade's rounded end reaches back to 0.54 m */
+  const half = v => Math.max(0.5, Math.round(v * 2) / 2);
   const axe = (f0, f1, gx, gy, ang, es, d, a, b, k, o) => { const c = Math.cos(ang * Math.PI / 180), s = Math.sin(ang * Math.PI / 180);
-    return cap(f0, f1, gx + c * AX.in, gy + s * AX.in, gx + c * AX.out - s * es * AX.edge, gy + s * AX.out + c * es * AX.edge, AX.r, d, a, b, k, Object.assign({ ax: [gx, gy, ang, es] }, o)); };
+    const sweet = cap(f0, f1, gx + c * AX.in, gy + s * AX.in, gx + c * AX.out - s * es * AX.edge, gy + s * AX.out + c * es * AX.edge, AX.r, d, a, b, k, Object.assign({ ax: [gx, gy, ang, es] }, o));
+    const sour = cap(f0, f1, gx + c * AX.h0, gy + s * AX.h0, gx + c * AX.h1, gy + s * AX.h1, AX.hr, half(d * 0.6), a, Math.round(b * 0.85), Math.round(k * 0.8), Object.assign({ haft: 1 }, o));
+    return [sweet, sour]; };
   const NB = { nb: 1 };   /* not the blade: a fist, a boot, a shoulder (no axe arc is drawn) */
   const nb = o => Object.assign({ nb: 1 }, o);
   const rise = () => (f, n) => { if (n === 1) f.invuln = Math.max(f.invuln, f.pct >= 100 ? 12 : 18); };
@@ -1673,9 +1680,9 @@ const VARGAN = (() => {
     cap(10, 11, 0.18, 0.6, 0.3, 1.08, 0.13, 6, 90, 0, 0, nb({ g: 1, link: [q(0.05), UP * 0.85, 28] })),
     ...[39, 41, 43, 45, 47].map((n, k) => circ(n, n, 0.25, 1.05, 0.26, 1.5, 85, 0, 0, nb({ g: 2 + k, link: [0, 0.4, 3] }))),
     circ(54, 9999, 0.2, 0.3, 0.26, 6, 275, 50, 0, nb({ g: 9 }))] : [
-    axe(10, 11, 0.22, 0.7, 72, 1, 6, 90, 0, 0, { g: 1, link: [q(0.05), UP * 0.85, 28] }),
-    ...[39, 41, 43, 45, 47].map((n, k) => axe(n, n, 0.12, 1.0, 75, 1, 1.5, 85, 0, 0, { g: 2 + k, link: [0, 0.4, 3] })),
-    axe(54, 9999, 0.14, 0.36, -82, 1, 6, 275, 50, 0, { g: 9 })];
+    ...axe(10, 11, 0.22, 0.7, 72, 1, 6, 90, 0, 0, { g: 1, link: [q(0.05), UP * 0.85, 28] }),
+    ...[39, 41, 43, 45, 47].flatMap((n, k) => axe(n, n, 0.12, 1.0, 75, 1, 1.5, 85, 0, 0, { g: 2 + k, link: [0, 0.4, 3] })),
+    ...axe(54, 9999, 0.14, 0.36, -82, 1, 6, 275, 50, 0, { g: 9 })];
   const upMove = fist => ({ t: 9999, ownPhys: 1, ledge: 1, snap: 54, rise: UP, h: upHits(fist), on: plunge,
     onLand(f, n) { if (n >= 10) { f.startMove('uspecL'); return true; } } });
   /* Meteor Shoulder Charge (atlas II / SIDE SPECIAL): coil on 1-14, then from frame 15 straight ahead until exactly 0.30 W
@@ -1708,21 +1715,21 @@ const VARGAN = (() => {
         dtilt: { t: 35, tilt: 1, h: [cap(10, 12, 0.15, 0.14, 0.86, 0.1, 0.09, 14, 30, 40, 75, NB)] },
         dash: { t: 37, h: [circ(10, 12, 0.42, 0.62, 0.24, 15, 40, 60, 70, NB), circ(13, 19, 0.4, 0.6, 0.22, 11, 40, 45, 62, NB)], on(f, n) { if (n <= 14 && f.grounded) walkOn(f, f.face * f.st.run * (1 - n / 22)); } },
         /* ---- smashes: Axe Execution, Rising Axe Cleave, Ground Reaper; unarmed: haymaker, rising hammer, two-sided boot sweep ---- */
-        fsmash: { t: 66, chg: 15, h: [axe(24, 27, 0.42, 0.6, 0, -1, 24, 38, 40, 96)] },
+        fsmash: { t: 66, chg: 15, h: [...axe(24, 27, 0.42, 0.6, 0, -1, 24, 38, 40, 96)] },
         fsmashE: { t: 63, chg: 17, h: [cap(27, 29, 0.2, 0.6, 0.62, 0.6, 0.14, 22, 38, 40, 96, NB)] },
-        usmash: { t: 61, chg: 12, h: [axe(20, 21, 0.42, 0.42, 25, 1, 22, 88, 40, 90), axe(22, 23, 0.24, 0.82, 62, 1, 22, 88, 40, 90), axe(24, 24, 0.08, 1.0, 95, 1, 22, 88, 40, 90)] },
+        usmash: { t: 61, chg: 12, h: [...axe(20, 21, 0.42, 0.42, 25, 1, 22, 88, 40, 90), ...axe(22, 23, 0.24, 0.82, 62, 1, 22, 88, 40, 90), ...axe(24, 24, 0.08, 1.0, 95, 1, 22, 88, 40, 90)] },
         usmashE: { t: 54, chg: 11, h: [cap(19, 22, 0.14, 0.86, 0.14, 1.26, 0.15, 19, 88, 40, 88, NB)] },
-        dsmash: { t: 61, chg: 10, h: [axe(16, 19, 0.42, 0.3, -18, -1, 12, 30, 40, 86), axe(25, 28, -0.42, 0.3, 198, 1, 15, 150, 40, 92)] },
+        dsmash: { t: 61, chg: 10, h: [...axe(16, 19, 0.42, 0.3, -18, -1, 12, 30, 40, 86), ...axe(25, 28, -0.42, 0.3, 198, 1, 15, 150, 40, 92)] },
         dsmashE: { t: 55, chg: 10, h: [cap(16, 18, 0.12, 0.1, 0.7, 0.08, 0.1, 12, 30, 40, 86, NB), cap(25, 27, -0.12, 0.1, -0.68, 0.08, 0.1, 14, 150, 40, 90, NB)] },
         /* ---- air: the double kick and the stomp always; axe Crusher, Backhand and Skyhook, or the unarmed punch, backfist and flip kick ---- */
         nair: { t: 40, air: 1, ll: 10, ac0: 3, ac: 36, h: [cap(7, 8, 0.05, 0.4, 0.55, 0.32, 0.1, 7, 45, 30, 70, nb({ g: 1 })), cap(9, 12, 0.05, 0.4, 0.55, 0.32, 0.1, 5.25, 45, 25, 66, nb({ g: 1 })),
           cap(17, 18, 0.05, 0.45, 0.62, 0.45, 0.11, 12, 361, 30, 95, nb({ g: 2 })), cap(19, 26, 0.05, 0.45, 0.62, 0.45, 0.11, 9.5, 361, 25, 90, nb({ g: 2 }))] },
-        fair: { t: 48, air: 1, ll: 14, ac0: 4, ac: 42, h: [axe(17, 18, 0.3, 0.88, 35, -1, 18, 45, 35, 92), axe(19, 20, 0.36, 0.7, -10, -1, 18, 45, 35, 92)] },
+        fair: { t: 48, air: 1, ll: 14, ac0: 4, ac: 42, h: [...axe(17, 18, 0.3, 0.88, 35, -1, 18, 45, 35, 92), ...axe(19, 20, 0.36, 0.7, -10, -1, 18, 45, 35, 92)] },
         fairE: { t: 44, air: 1, ll: 13, ac0: 6, ac: 44, h: [cap(14, 19, 0.15, 0.62, 0.45, 0.6, 0.1, 17, 361, 30, 88, nb({ part: 'near' })), cap(14, 19, 0.45, 0.6, 0.72, 0.6, 0.11, 18, 361, 30, 90, NB)] },
-        bair: { t: 39, air: 1, ll: 12, ac0: 5, ac: 34, h: [axe(12, 14, -0.36, 0.66, 180, 1, 19, 145, 35, 95)] },
+        bair: { t: 39, air: 1, ll: 12, ac0: 5, ac: 34, h: [...axe(12, 14, -0.36, 0.66, 180, 1, 19, 145, 35, 95)] },
         bairE: { t: 35, air: 1, ll: 11, ac0: 6, ac: 21, h: [cap(10, 12, -0.1, 0.6, -0.4, 0.6, 0.1, 17, 145, 30, 90, nb({ part: 'near' })), cap(10, 12, -0.4, 0.6, -0.68, 0.62, 0.12, 18.5, 145, 30, 95, NB)] },
-        uair: { t: 39, air: 1, ll: 12, ac0: 4, ac: 34, h: [axe(11, 12, 0.22, 0.95, 45, 1, 15, 80, 35, 90), axe(13, 13, 0.04, 1.05, 92, 1, 15, 85, 35, 90), axe(14, 15, -0.16, 0.95, 140, 1, 15, 95, 35, 90)] },
-        uairE: { t: 33, air: 1, ll: 11, ac0: 4, ac: 24, h: [circ(8, 10, 0.45, 0.95, 0.15, 13, 80, 30, 92, NB), circ(11, 13, 0.06, 1.2, 0.15, 10, 85, 25, 88, NB), circ(14, 16, -0.4, 1.0, 0.14, 6, 100, 20, 80, NB)] },
+        uair: { t: 39, air: 1, ll: 12, ac0: 4, ac: 34, h: [...axe(11, 12, 0.22, 0.95, 45, 1, 15, 80, 35, 90), ...axe(13, 13, 0.04, 1.05, 92, 1, 15, 85, 35, 90), ...axe(14, 15, -0.16, 0.95, 140, 1, 15, 95, 35, 90)] },
+        uairE: { t: 33, air: 1, ll: 11, ac0: 4, ac: 26, h: [circ(11, 12, 0.39, 0.93, 0.15, 13, 80, 30, 92, NB), circ(13, 13, 0.02, 1.15, 0.15, 10, 85, 25, 88, NB), circ(14, 15, -0.39, 0.92, 0.14, 6, 100, 20, 80, NB)] },   /* (owner) a backflip kick on the axe up air's arc and frames, at his leg's reach: the boot 0.45 H from his hips, raised to 0.7 H as he flips */
         dair: { t: 44, air: 1, ll: 16, ac0: 3, ac: 40, h: [circ(16, 18, 0.04, -0.04, 0.16, 19, 270, 20, 90, nb({ vAir: 1 })), circ(16, 18, 0.04, -0.04, 0.16, 19, 80, 40, 85, nb({ vGnd: 1 })), circ(16, 18, 0.0, 0.36, 0.2, 17, 361, 30, 80, NB)] },
         /* ---- grabs, get-ups ---- */
         grab: { t: 38, h: [grab(8, 10, 0.18, 0.56, 0.6, 0.56, 0.12)] },
@@ -1737,7 +1744,7 @@ const VARGAN = (() => {
         nspecE: { t: 24, h: [] },
         sspec: { t: 57, ll: 20, once: 1, nodrift: 1, ownPhys: 1, on: meteor, h: [circ(15, 24, 0.38, 0.62, 0.3, 18, 40, 60, 85, NB), circ(25, 40, 0.36, 0.6, 0.28, 12, 40, 45, 70, NB)] },
         uspec: upMove(false), uspecE: upMove(true),
-        uspecL: { t: 36, h: [axe(1, 4, 0.3, 0.3, -22, -1, 6, 45, 70, 92)] },   /* the blade driven into the floor ahead, its edge just at the floor */
+        uspecL: { t: 36, h: [...axe(1, 4, 0.3, 0.3, -22, -1, 6, 45, 70, 92)] },   /* the blade driven into the floor ahead, its edge just at the floor */
         uspecLE: { t: 36, h: [circ(1, 4, 0.36, 0.16, 0.3, 6, 45, 70, 92, NB)] },
         /* Counter: the guard catches a strike on frames 8 to 29 (67 frames when nothing comes) */
         dspec: { t: 67, h: [], vCounter: [8, 29], on(f, n) { if (n === 1) f.vx *= 0.3; } },
@@ -2539,9 +2546,11 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
         shake = 0; rumble(v.ctl, 600, 1); if (a && a.ctl) rumble(a.ctl, 400, 0.8);
         beep(55, 0.9, 'sawtooth', 0.13, 0.4); beep(1400, 0.35, 'triangle', 0.06, 2.2); } }
   }
+  if (h.haft) { spark(hx, hy, '#c8b49a', Math.min(14, 4 + kb / 12 | 0), 0.8); thwack(kb * 0.6); beep(120, 0.07, 'triangle', 0.06, 0.7); }   /* Fyrdsman's axe handle: a dull wooden knock, no flare */
+  else {
   spark(hx, hy, kb > 110 ? '#ffd166' : '#fff', Math.min(40, 6 + kb / 6 | 0), 1 + kb / 80);
   if (kb > 110) shake = Math.max(shake, 8);
-  thwack(kb);
+  thwack(kb); }
 }
 function resolveHits() {
   for (const f of F) { if (f.px === undefined) { f.px = f.x; f.py = f.y; } }

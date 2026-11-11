@@ -306,14 +306,21 @@ for name, clip in spec.get('clips', {}).items():
     fps = clip.get('fps', 30); scene.render.fps = fps
     act = bpy.data.actions.new(name); ad.action = act
     for pb in rig.pose.bones: pb.rotation_mode = 'QUATERNION'; pb.rotation_quaternion = Quaternion(); pb.location = Vector(); pb.scale = Vector((1, 1, 1))
-    state = {}; lastq = {}; eases = []; prevf = None
+    state = {}; lastq = {}; eases = []; prevf = None; prevb = {}; beases = []
     for key in clip['keys']:
         f = round(key['t'] * fps) + 1; last = max(last, f)
         if key.get('reset'): state = {b: {} for b in state}
         if key.get('use'):
             for u in ([key['use']] if isinstance(key['use'], str) else key['use']): state.update(spec['poses'][u])
         state.update(key.get('pose', {}))
+        # "lag": { bone: frames } keys those bones that many frames later than the key's time (overlap: the hips lead, the
+        # chest, arms and tool follow); the bone's own ease from its previous key comes with it
+        lag = key.get('lag', {})
         for bname, tr in state.items():
+            fb = f + int(lag.get(bname, 0))
+            if bname in prevb and fb <= prevb[bname]: fb = prevb[bname] + 1
+            if key.get('in') and bname in prevb and bname in lag: beases.append((bname, prevb[bname], key['in']))
+            prevb[bname] = fb; last = max(last, fb)
             pb = rig.pose.bones[bname]; R = rest[bname]
             D = delta(tr.get('rot', [0, 0, 0]))
             if tr.get('aim'):
@@ -327,16 +334,21 @@ for name, clip in spec.get('clips', {}).items():
             lastq[bname] = q.copy(); pb.rotation_quaternion = q
             pb.location = R.inverted() @ conv(tr.get('move', [0, 0, 0]))
             pb.scale = bone_scale(R, tr.get('scale', [1, 1, 1]))
-            pb.keyframe_insert('rotation_quaternion', frame=f); pb.keyframe_insert('location', frame=f); pb.keyframe_insert('scale', frame=f)
+            pb.keyframe_insert('rotation_quaternion', frame=fb); pb.keyframe_insert('location', frame=fb); pb.keyframe_insert('scale', frame=fb)
         if key.get('in') and prevf is not None: eases.append((prevf, key['in']))
         prevf = f
     fcs = fcurves_of(act)
-    for fr, kind in eases:
+    def ease_at(fc, fr, kind):
         ip, ez = EASE[kind]
+        for kp in fc.keyframe_points:
+            if abs(kp.co[0] - fr) < 0.5:
+                kp.interpolation = ip; kp.easing = ez
+                if ip == 'BACK': kp.back = 1.4
+    for fr, kind in eases:
+        for fc in fcs: ease_at(fc, fr, kind)
+    for bname, fr, kind in beases:
         for fc in fcs:
-            for kp in fc.keyframe_points:
-                if abs(kp.co[0] - fr) < 0.5: kp.interpolation = ip; kp.easing = ez
-                if ip == 'BACK' and abs(kp.co[0] - fr) < 0.5: kp.back = 1.4
+            if ('"%s"' % bname) in fc.data_path: ease_at(fc, fr, kind)
     track = ad.nla_tracks.new(); track.name = name; track.strips.new(name, int(opt.get('start', 1)), act); ad.action = None
     print('rig: clip %s, %d keys%s' % (name, len(clip['keys']), (', %d eased' % len(eases)) if eases else ''))
 for pb in rig.pose.bones: pb.rotation_quaternion = Quaternion(); pb.location = Vector(); pb.scale = Vector((1, 1, 1))

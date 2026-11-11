@@ -7964,6 +7964,12 @@
    "Walk": 6,
    "Run": 5
   },
+  "chargeShake": 0.25,
+  "overlays": true,
+  "carry": {
+   "bone": "handR",
+   "drop": 0.72
+  },
   "clips": {
    "idle": {
     "clip": "Idle"
@@ -7973,7 +7979,7 @@
    },
    "walk": {
     "clip": "Walk",
-    "stride": 16
+    "stride": 18.4
    },
    "run": {
     "clip": "Run",
@@ -8042,6 +8048,16 @@
     "from": 0,
     "to": 0.8
    },
+   "hitBack": {
+    "clip": "HitBack",
+    "from": 0,
+    "to": 0.6
+   },
+   "hitHeavyBack": {
+    "clip": "HitHeavyBack",
+    "from": 0,
+    "to": 0.8
+   },
    "launch": {
     "clip": "Launch",
     "from": 0,
@@ -8058,8 +8074,7 @@
     "to": 0.6
    },
    "tumble": {
-    "clip": "Tumble",
-    "bounce": true
+    "clip": "Tumble"
    },
    "down": {
     "clip": "Down",
@@ -8138,6 +8153,12 @@
     "clip": "UpBE",
     "from": 0,
     "to": 1
+   },
+   "upbDive": {
+    "clip": "UpBDive"
+   },
+   "upbDiveE": {
+    "clip": "UpBDiveE"
    }
   },
   "blade": {
@@ -8193,7 +8214,44 @@
     "ext": 1.6
    }
   ],
-  "springs": [],
+  "springs": [
+   {
+    "bones": [
+     "hair"
+    ],
+    "k": 0.28,
+    "d": 0.72,
+    "max": 0.45,
+    "drag": 0.1
+   },
+   {
+    "bones": [
+     "fur"
+    ],
+    "k": 0.34,
+    "d": 0.66,
+    "max": 0.25,
+    "drag": 0.06
+   },
+   {
+    "bones": [
+     "flapF"
+    ],
+    "k": 0.26,
+    "d": 0.72,
+    "max": 0.5,
+    "drag": 0.12
+   },
+   {
+    "bones": [
+     "flapB"
+    ],
+    "k": 0.26,
+    "d": 0.72,
+    "max": 0.55,
+    "drag": 0.14
+   }
+  ],
   "attacks": {
    "jab": {
     "clip": "Jab",
@@ -8352,8 +8410,8 @@
     "clip": "UairE",
     "start": 0,
     "contact": [
-     0.13333333333333333,
-     0.2833333333333333
+     0.18333333333333332,
+     0.26666666666666666
     ],
     "end": 0.55
    },

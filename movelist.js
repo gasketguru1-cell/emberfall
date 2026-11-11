@@ -216,7 +216,7 @@ const MOVE_TEXT = {
     nair: ['Double Kick', 'Two alternating kicks: the first on frame 7, the second on frame 17, each strongest as it snaps out. The same with or without the axe.'],
     fair: ['Axe Crusher', 'From over the shoulder down and forward through the front, a deliberate two-handed hit with huge reach. Axe away: a long full-stretch punch, 17 to 18% on frames 14 to 19.', 'Axe f17 · 18% · punch f14 · 17 / 18%'],
     bair: ['Axe Backhand', 'Turns the blade out behind at shoulder height in a short, violent sweep; a ledge finisher. Axe away: a backfist, 18.5% at the knuckles on frames 10 to 12.', 'Axe f12 · 19% · backfist f10 · 18.5 / 17%'],
-    uair: ['Axe Skyhook', 'A full arc overhead from in front to behind, for juggling. Axe away: a flip kick, strongest early (13%) and weaker as it goes over (10%, 6%).', 'Axe f11 · 15% · kick f8 · 13 / 10 / 6%'],
+    uair: ['Axe Skyhook', 'A full arc overhead from in front to behind, for juggling. Axe away: a backflip kick on the same arc and frames at the reach of his leg, strongest in front (13%) and weaker as it goes over (10%) and behind (6%).', 'Axe f11 · 15% · kick f11 · 13 / 10 / 6%'],
     dair: ['Two-Foot Stomp', 'Both boots driven straight down: the soles send someone in the air straight down; the body hits too, less. The same with or without the axe.'],
     grab: ['Collar Grab', 'A big one-handed grab at the collar or shoulder, with a dash grab and a turnaround grab that reach further.'],
     pummel: ['Knuckle Crush', 'A short blow without letting go. 1.6% a press.'],
@@ -456,6 +456,7 @@ const MOVE_RULES = {
   Fyrdsman: [
     ['B', 'The Axe Stays Out', 'Runebreaker is a real thing in the world. Thrown, it sticks where it lands and stays there; past the ledge it falls slowly. Only one ever exists, and a lost stock puts it back in his hand.'],
     ['Hold B', 'Calling It Home', 'With the axe away, keep special held for 8 frames (let go of the press that threw it first). The axe flies back to his hand on its own path, whatever he is doing, and hits whatever is in the way once: 12% left close by, up to 21% and much harder knockback when it was left 55% of the stage away or more.'],
+    ['★', 'Blade and Handle', 'Every axe swing hits hardest with the head and the top of the haft. The rest of the handle, near his fists, is a sour spot: about 60% of the damage and much weaker knockback, with a dull wooden knock. Space so the head connects.'],
     ['★', 'Two Sets of Moves', 'While the axe is away his smashes, forward, back and up airs and up special are unarmed. His jab, tilts, dash attack, neutral and down airs and throws never use the axe. A move keeps the version it started with if the axe comes back mid-swing.'],
     ['↓ B', 'Counter, Then the Axe', 'Counter with the axe stuck in the stage and it rips itself out and homes in on the attacker, as strong as the distance it had to travel. It never homes while it is still flying.'],
     ['A + B', 'Berserker', 'Damage, knockback and speed up by half, fire on everything, and his own damage climbing 5% a second. Turn it off with A + B again before it costs too much.'],

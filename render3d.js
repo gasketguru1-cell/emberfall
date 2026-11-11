@@ -344,7 +344,8 @@ function build() {
   /* ---- animation: the simulation says which action and which frame; this only poses the model to match ---- */
   const lerp = (a, b, t) => a + (b - a) * t, frac = x => x - Math.floor(x);
   function clipTime(M, a) {
-    const alt = a.alt, as = alt && M.cfg.clips[alt.key], ac = as && M.clips[as.clip];
+    let alt = a.alt; while (alt && alt.fb && !(M.cfg.clips[alt.key] && M.clips[M.cfg.clips[alt.key].clip])) alt = alt.fb;   /* fb: what to show when this model has no clip for the variant */
+    const as = alt && M.cfg.clips[alt.key], ac = as && M.clips[as.clip];
     if (ac && !(alt.mode === 'once' && alt.v >= ac.duration)) {   /* a variant this model has a clip for (anim.js animAlt) */
       if (alt.mode === 'once') return [as.clip, (as.from || 0) + alt.v];
       return clipTime(M, alt);
@@ -417,6 +418,46 @@ function build() {
       v.axeBone.localToWorld(_v3.set(0, b, 0)); v.axeBone.localToWorld(_v4.set(0, b + 1, 0)).sub(_v3);
       v.axeHand = { x: _v3.x, y: _v3.y, rot: Math.atan2(_v4.y, _v4.x), tick };
     }
+  }
+
+  /* While a fighter whose model says so (manifest carry) throws someone, the one held is drawn hanging from his hand
+     (carry.bone, its feet carry.drop of their height below it) instead of at the game's own place; the difference eases
+     in and out, so the release hands back to the game's place smoothly. The picture only: the game's positions decide the hit. */
+  function carried(v, f, idx) {
+    let tx = 0, ty = 0; const h = F[1 - idx], hv = fighters[1 - idx];
+    if (f.state === 'held' && h && h.state === 'throw' && h.victim === f && hv && hv.model && hv.model.cfg.carry && hv.handW && tick - hv.handW.t <= 2) {
+      tx = hv.handW.x - f.x; ty = hv.handW.y - f.st.h * hv.model.cfg.carry.drop - f.y; if (Math.hypot(tx, ty) > 16) tx = ty = 0; }
+    const o = v.cOff || (v.cOff = { x: 0, y: 0 }); o.x += (tx - o.x) * 0.35; o.y += (ty - o.y) * 0.35;
+    if (Math.abs(o.x) + Math.abs(o.y) > 0.01) { v.root.position.x += o.x; v.root.position.y += o.y; }
+  }
+  /* Fyrdsman's overlays, on top of whatever clip is playing (manifest overlays): the axe's weight landing in his hand when it
+     comes home (his arm and chest dip and recover), and the Berserker roar held past the 8-frame move (head back, chest
+     heaving, arms flung wide and shaking). Like the springs, a bone the mixer left alone this frame gets its clip value back
+     before the overlay is added again. Axes are in the model's own frame (x his left, y up, z forward), degrees. */
+  const _oq = new THREE.Quaternion(), _oa = new THREE.Vector3(), _ow = new THREE.Quaternion();
+  function overlayBone(v, name, ax, ay, az, ang) {
+    const o = v.ovl[name] || (v.ovl[name] = { b: v.obj.getObjectByName(name), setQ: null, animQ: null }); if (!o.b) return;
+    if (!o.fresh) { if (o.setQ && o.b.quaternion.equals(o.setQ)) o.b.quaternion.copy(o.animQ); else o.animQ = o.b.quaternion.clone(); o.fresh = true; }
+    if (Math.abs(ang) < 0.05) return;
+    v.obj.getWorldQuaternion(_ow); _oa.set(ax, ay, az).applyQuaternion(_ow);   /* the model's axis in the world */
+    o.b.updateWorldMatrix(true, false); o.b.getWorldQuaternion(_ow); _oa.applyQuaternion(_ow.invert()).normalize();   /* and in the bone's own frame */
+    o.b.quaternion.multiply(_oq.setFromAxisAngle(_oa, ang * Math.PI / 180));
+  }
+  function fyrdOverlay(v, f) {
+    if (v.ovlObj !== v.obj) { v.ovlObj = v.obj; v.ovl = {}; v.catchT = v.roarT = -999; }
+    if (v.lastAway && !f.axeAway && f.state !== 'respawn' && f.state !== 'dead') v.catchT = tick;   /* the axe came home */
+    v.lastAway = f.axeAway;
+    if (f.state === 'attack' && f.mname === 'berserk') { if (!v.inRoar) { v.inRoar = true; v.roarT = tick - f.mf; } } else v.inRoar = false;   /* the roar began when the move did, however often frames are drawn */
+    const u = (tick - v.catchT) / 14, c = u >= 0 && u < 1 ? Math.sin(Math.PI * u) * (1 - 0.3 * u) : 0;
+    const r = tick - v.roarT, w = r < 8 ? 0 : r < 14 ? (r - 8) / 6 : r < 36 ? 1 : r < 46 ? 1 - (r - 36) / 10 : 0, rw = (f.state === 'idle' || f.state === 'attack') ? w : 0;
+    for (const n in v.ovl) v.ovl[n].fresh = false;
+    v.root.updateMatrixWorld(true);
+    overlayBone(v, 'chest', 1, 0, 0, 7 * c - (14 + 5 * Math.sin(tick * 0.45)) * rw);   /* the chest heaving open */
+    overlayBone(v, 'head', 1, 0, 0, -30 * rw);   /* the head thrown back */
+    overlayBone(v, 'armR', 1, 0, 0, 24 * c + (34 + 4 * Math.sin(tick * 1.7 + 1)) * rw); overlayBone(v, 'foreR', 1, 0, 0, 12 * c);   /* the arms flung back, shaking (seen from the side, back is what shows) */
+    overlayBone(v, 'armL', 1, 0, 0, (34 + 4 * Math.sin(tick * 1.9)) * rw);
+    overlayBone(v, 'armL', 0, 0, 1, 18 * rw); overlayBone(v, 'armR', 0, 0, 1, -18 * rw);
+    for (const n in v.ovl) { const o = v.ovl[n]; if (o.b) o.setQ = o.b.quaternion.clone(); }
   }
 
   /* ---- follow-through: tails, ears and ribbons lag behind the body and settle on their own ----
@@ -751,6 +792,9 @@ function build() {
       v.root.position.set(f.x, f.y, 0); v.root.rotation.y = (flat ? 0.55 * v.flip : v.yaw) + (v.model && v.turned ? Math.PI : 0) - (v.model ? (v.spin || 0) * f.face : 0);
       v.pivot.position.set(p.shx !== undefined ? p.shx : f.hitlag > 0 && f.state === 'hurt' ? ((tick & 1) ? 0.35 : -0.35) : 0, p.oy + (p.shy || 0), 0); v.pivot.rotation.order = 'ZYX'; v.pivot.rotation.z = -p.rot; v.pivot.rotation.y = p.drill || 0; v.pivot.scale.set(p.sx, p.sy, p.sx);   /* ZYX: a drill spins about the body's own length, then the body is tipped */
       v.pivot.children.forEach(c => { if (c.userData.y0 === undefined) c.userData.y0 = c.position.y; c.position.y = c.userData.y0 - p.oy; });
+      if (v.model && v.model.cfg.chargeShake && f.state === 'attack' && f.charge > 0) v.pivot.position.x += Math.sin(tick * 2.3) * v.model.cfg.chargeShake * Math.min(1, 0.4 + f.charge / 30);   /* a held smash trembles with the strain */
+      carried(v, f, idx);
+      if (v.model && v.model.cfg.overlays) fyrdOverlay(v, f);
       const ghost = (f.invuln > 0 && (tick >> 1) % 2) || f.state === 'spot' || f.state === 'airdodge', hot = (f.flash > 0 || (f.hitlag > 0 && f.state === 'hurt')) && !(typeof finalT !== 'undefined' && finalT > 0 && finalT < FINAL_FREEZE - 3);   /* the final-hit freeze shows the fighter, not a white flash */
       for (const m of v.mats) { m.transparent = ghost; m.opacity = ghost ? 0.45 : 1; m.emissive.setHex(hot ? 0xffffff : 0x000000); m.emissiveIntensity = hot ? 0.8 : 0; }
       if (v.shield.visible) { const [sx, sy, r] = shieldCircle(f); v.shield.scale.setScalar(r); v.shield.position.set(sx, sy, 0); }
@@ -760,6 +804,7 @@ function build() {
         v.bubble.visible = on || grow > 0; v.bubble.scale.setScalar(on ? 1 + Math.sin(tick * 0.3) * 0.03 : 0.15 + 0.85 * grow); v.bubble.position.x = on ? 0 : 5 * (1 - grow); }
       if (v.springs.length) applySprings(v);
       if (v.model && v.model.cfg.axe) axeShow(v, f);
+      if (v.model && v.model.cfg.carry) { const c = v.model.cfg.carry; if (v.carryObj !== v.obj) { v.carryObj = v.obj; v.carryB = v.obj.getObjectByName(c.bone); } if (v.carryB) { v.carryB.updateWorldMatrix(true, false); v.carryB.getWorldPosition(_v3); v.handW = { x: _v3.x, y: _v3.y, t: tick }; } }
       if (v.model && f.def.transform && !v.needleTried && PROPS.needle) { v.needleTried = true; v.needle = propOf('needle'); v.needle.visible = false; scene.add(v.needle); }   /* Joey's steroid needle, the owner's model */
       if (v.needle) {   /* in his right hand from the pocket to just after the jab */
         const sec = f.state === 'grow' && v.model === MODELS['Joey'] ? f.sf / 60 : -1, on = sec >= NEEDLE.from && sec <= NEEDLE.to;
