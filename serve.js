@@ -9,7 +9,7 @@
 // so the address works all the time. play.bat and the editor can start their own copies too: extra copies stand by.
 const http = require('http'), fs = require('fs'), path = require('path'), { execFile, execFileSync } = require('child_process');
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json', '.glb': 'model/gltf-binary', '.gltf': 'model/gltf+json', '.bin': 'application/octet-stream', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.ktx2': 'image/ktx2', '.wasm': 'application/wasm' };
-const PORT = +process.env.EMBERFALL_PORT || 8317;   /* another port only for trying the server itself */
+const PORT = +process.env.EMBERFALL_PORT || +process.env.PORT || 8317;   /* another port only for trying the server itself, or when the editor's preview hands one out (a second copy of the folder being worked on) */
 const root = __dirname, cache = new Map();   /* finished files already read: "commit:path" -> contents */
 let head = '', headAt = 0;
 function commit() {   /* the current commit, looked up at most once a second */

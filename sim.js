@@ -92,7 +92,11 @@ function thwack(kb) {
 
 /* ---------- Input ---------- */
 const keys = {};
-addEventListener('keydown', e => { keys[e.code] = true; if (/^(Arrow|Space|Enter|Backspace)/.test(e.code)) e.preventDefault(); if (!e.repeat || e.code === 'KeyO') debugKey(e.code); });
+addEventListener('keydown', e => {
+  keys[e.code] = true; if (!e.ctrlKey && !e.metaKey && !e.altKey && !/^Fd+$/.test(e.code)) e.preventDefault();   /* any key may be a game key now; browser shortcuts and the F keys still work */
+  if (CMENU) { if (CMENU.capture && !e.repeat) cmenuKey(e.code); return; }
+  if (!e.repeat || e.code === 'KeyO') debugKey(e.code);
+});
 /* Debug tools: B shows hitboxes and hurtboxes, P freezes the game, O advances one frame, M switches between the 2D and 3D renderers. */
 const DBG = { step: false, boxes: false, advance: 0, r3d: true, fx: true };   /* fx: the burst of sparks and the flash of light where a hit lands */
 /* Showing hitboxes: switched with the jump button on the start screen or B on the keyboard, and remembered. */
@@ -120,20 +124,48 @@ function debugKey(code) {
 }
 addEventListener('keyup', e => { keys[e.code] = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
-function blankIn() { return { lx: 0, ly: 0, cx: 0, cy: 0, atk: false, spc: false, jmp: false, shd: false, grb: false, start: false, sel: false, sm: false }; }   /* sm: the CPU's way of saying "this attack is a smash" (a person flicks the stick) */
+function blankIn() { return { lx: 0, ly: 0, cx: 0, cy: 0, atk: false, spc: false, jmp: false, shd: false, grb: false, start: false, sel: false, sm: false, jmp2: false }; }   /* jmp2: two jump buttons held at once. sm: the CPU's way of saying "this attack is a smash" (a person flicks the stick) */
 /* Controller settings follow the reference build's controllers.ini: no stick deadzone, full outer zone, triggers at 25%. */
 const PAD = { deadzone: 0, outer: 1, trigger: 0.25 };
-/* Per pad: 'positional' (default, by where the button sits) or 'labels' (by the letter printed on it). Kept between visits. */
-const LAYOUT = {};
-try { Object.assign(LAYOUT, JSON.parse(localStorage.getItem('emberfall.layout') || '{}')); } catch (e) { /* no storage */ }
-function toggleLayout(dev) { LAYOUT[dev] = LAYOUT[dev] === 'labels' ? 'positional' : 'labels'; try { localStorage.setItem('emberfall.layout', JSON.stringify(LAYOUT)); } catch (e) { /* no storage */ } }
 function stick(x, y) { const m = Math.hypot(x, y); if (m === 0 || m <= PAD.deadzone) return [0, 0]; const k = Math.min(1, (m - PAD.deadzone) / (PAD.outer - PAD.deadzone)) / m; return [x * k, y * k]; }
-/* Keyboard: the same keys as the reference build. Arrows are the left stick, I J K L the right stick, Shift walks. */
+/* ---------- Control setups ----------
+   A setup says which key or button does what. The keyboard and each controller use one setup each. The built-in setups
+   cannot be changed; the three Custom ones of each kind can. Which setup each device uses, and the Custom ones, are kept
+   between visits. Start, the controls screen (Backspace, or - on a controller) and the debug keys are never remapped. */
+const KB_ROWS = [['left', 'Move left'], ['right', 'Move right'], ['up', 'Move up'], ['down', 'Move down'], ['walk', 'Walk (hold)'], ['atk', 'Attack'], ['spc', 'Special'], ['jmp', 'Jump'], ['jmp2', 'Jump (second key)'],
+  ['shd', 'Shield'], ['shd2', 'Shield (second key)'], ['grb', 'Grab'], ['grb2', 'Grab (second key)'], ['cu', 'Tilt stick up'], ['cd', 'Tilt stick down'], ['cl', 'Tilt stick left'], ['cr', 'Tilt stick right']];
+const PAD_ROWS = [[0, 'A  (bottom button)', 'A'], [1, 'B  (right button)', 'B'], [2, 'X  (left button)', 'X'], [3, 'Y  (top button)', 'Y'], [4, 'L  (left bumper)', 'L'], [5, 'R  (right bumper)', 'R'], [6, 'ZL  (left trigger)', 'ZL'], [7, 'ZR  (right trigger)', 'ZR'], [10, 'Left stick click', 'L click'], [11, 'Right stick click', 'R click']];
+const PAD_ACTS = ['', 'atk', 'spc', 'jmp', 'shd', 'grb'], ACT_NAME = { '': 'Nothing', atk: 'Attack', spc: 'Special', jmp: 'Jump', shd: 'Shield', grb: 'Grab' };
+const KB_STD = { left: 'ArrowLeft', right: 'ArrowRight', up: 'ArrowUp', down: 'ArrowDown', walk: 'ShiftLeft', atk: 'KeyZ', spc: 'KeyX', jmp: 'KeyC', jmp2: 'KeyV', shd: 'KeyQ', shd2: 'KeyW', grb: 'KeyA', grb2: 'KeyS', cu: 'KeyI', cd: 'KeyK', cl: 'KeyJ', cr: 'KeyL' };
+const KB_WASD = { left: 'KeyA', right: 'KeyD', up: 'KeyW', down: 'KeyS', walk: 'ShiftLeft', atk: 'KeyJ', spc: 'KeyK', jmp: 'Space', jmp2: 'KeyL', shd: 'KeyU', shd2: '', grb: 'KeyI', grb2: '', cu: 'ArrowUp', cd: 'ArrowDown', cl: 'ArrowLeft', cr: 'ArrowRight' };
+const PAD_STD = { 0: 'atk', 1: 'spc', 2: 'jmp', 3: 'jmp', 4: 'grb', 5: 'grb', 6: 'shd', 7: 'shd', 10: '', 11: '' };   /* the bottom button attacks (owner's choice, 2026-11-10) */
+const SETUPS = [], USE = {};   /* USE: device -> the id of the setup it uses */
+(function () {
+  const add = (id, type, name, map, fixed) => SETUPS.push({ id, type, name, map: Object.assign({}, map), base: map, fixed, touched: false });
+  add('kb-std', 'kb', 'Arrows  +  Z X C', KB_STD, true); add('kb-wasd', 'kb', 'WASD  +  J K L', KB_WASD, true);
+  add('pad-std', 'pad', 'Standard', PAD_STD, true); add('pad-swap', 'pad', 'A / B swapped', Object.assign({}, PAD_STD, { 0: 'spc', 1: 'atk' }), true);
+  for (const t of ['kb', 'pad']) for (let n = 1; n <= 3; n++) add(t + '-c' + n, t, 'Custom ' + n, t === 'kb' ? KB_STD : PAD_STD, false);
+  try {
+    const old = JSON.parse(localStorage.getItem('emberfall.layout') || '{}'); for (const d in old) if (old[d] === 'labels') USE[d] = 'pad-swap';   /* the A/B switch from before there were setups */
+    const sv = JSON.parse(localStorage.getItem('emberfall.controls') || '{}');
+    for (const d in sv.use || {}) if (typeof sv.use[d] === 'string') USE[d] = sv.use[d];
+    for (const s of SETUPS) { const m = !s.fixed && sv.custom && sv.custom[s.id]; if (!m) continue; for (const k in s.map) if (typeof m[k] === 'string') s.map[k] = m[k]; s.touched = true; }
+  } catch (e) { /* no storage */ }
+})();
+function saveControls() { try { const custom = {}; for (const s of SETUPS) if (!s.fixed && s.touched) custom[s.id] = s.map; localStorage.setItem('emberfall.controls', JSON.stringify({ use: USE, custom })); } catch (e) { /* no storage */ } }
+function setupsFor(dev) { const t = dev === 'kb' ? 'kb' : 'pad'; return SETUPS.filter(s => s.type === t); }
+function setupOf(dev) { const t = dev === 'kb' ? 'kb' : 'pad', id = USE[dev]; return SETUPS.find(s => s.id === id && s.type === t) || SETUPS.find(s => s.type === t); }
+function keyName(c) {
+  if (!c) return '—'; const A = { ArrowLeft: '←', ArrowRight: '→', ArrowUp: '↑', ArrowDown: '↓', ShiftLeft: 'Shift', ShiftRight: 'Shift', Backquote: '`', Minus: '-', Equal: '=', BracketLeft: '[', BracketRight: ']', Backslash: '\\', Semicolon: ';', Quote: "'", Comma: ',', Period: '.', Slash: '/' };
+  return A[c] || c.replace(/^(Key|Digit)/, '').replace(/^Numpad/, 'Num ');
+}
+function keyHeld(code) { if (!code) return false; if (keys[code]) return true; return code === 'ShiftLeft' ? !!keys.ShiftRight : code === 'ShiftRight' ? !!keys.ShiftLeft : false; }   /* either Shift counts */
+/* Keyboard: by default the same keys as the reference build. Arrows are the left stick, I J K L the right stick, Shift walks. */
 function readKb() {
-  const i = blankIn(), m = (keys.ShiftLeft || keys.ShiftRight) ? 0.5 : 1;
-  i.lx = ((keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0)) * m; i.ly = ((keys.ArrowUp ? 1 : 0) - (keys.ArrowDown ? 1 : 0)) * m;
-  i.cx = (keys.KeyL ? 1 : 0) - (keys.KeyJ ? 1 : 0); i.cy = (keys.KeyI ? 1 : 0) - (keys.KeyK ? 1 : 0);
-  i.atk = !!keys.KeyZ; i.spc = !!keys.KeyX; i.jmp = !!(keys.KeyC || keys.KeyV); i.grb = !!(keys.KeyA || keys.KeyS); i.shd = !!(keys.KeyQ || keys.KeyW);
+  const i = blankIn(), k = setupOf('kb').map, h = n => keyHeld(k[n]), m = h('walk') ? 0.5 : 1, j = h('jmp'), j2 = h('jmp2');
+  i.lx = ((h('right') ? 1 : 0) - (h('left') ? 1 : 0)) * m; i.ly = ((h('up') ? 1 : 0) - (h('down') ? 1 : 0)) * m;
+  i.cx = (h('cr') ? 1 : 0) - (h('cl') ? 1 : 0); i.cy = (h('cu') ? 1 : 0) - (h('cd') ? 1 : 0);
+  i.atk = h('atk'); i.spc = h('spc'); i.jmp = j || j2; i.jmp2 = j && j2; i.grb = h('grb') || h('grb2'); i.shd = h('shd') || h('shd2');
   i.start = !!keys.Enter; i.sel = !!keys.Backspace;
   return i;
 }
@@ -145,10 +177,80 @@ function readPad(n) {
   [i.lx, i.ly] = stick(ax(0), -ax(1)); [i.cx, i.cy] = stick(ax(2), -ax(3));
   if (b(14)) i.lx = -1; if (b(15)) i.lx = 1; if (b(12)) i.ly = 1; if (b(13)) i.ly = -1;
   const m = Math.hypot(i.lx, i.ly); if (m > 1) { i.lx /= m; i.ly /= m; }
-  /* Positional: the right face button attacks and the bottom one is special. Labels swaps those two, for pads that report by printed letter. */
-  const swap = LAYOUT['pad' + n] !== 'labels';   /* owner asked for A and B the other way round (2026-11-10): the bottom button now attacks unless toggled */
-  i.atk = b(swap ? 0 : 1); i.spc = b(swap ? 1 : 0); i.jmp = b(2) || b(3); i.shd = b(6) || b(7); i.grb = b(4) || b(5); i.start = b(9); i.sel = b(8);
+  const map = setupOf('pad' + n).map; let jumps = 0;
+  for (const k in map) { const a = map[k]; if (a && b(+k)) { i[a] = true; if (a === 'jmp') jumps++; } }
+  i.jmp2 = jumps >= 2; i.start = b(9); i.sel = b(8);
   return i;
+}
+/* ---------- The controls screen ----------
+   Opened for one device from the fighter select or from pause. It reads that device directly (never through its setup), so a
+   bad setup can always be put right: arrows / Enter / Backspace on the keyboard, stick / A / B on a controller, or the mouse. */
+let CMENU = null;
+const CM = { x: 190, y: 50, w: 900, h: 620, done: [968, 66, 100, 34] };
+const KEY_NO = /^(Enter|Backspace|Delete|Tab|Escape|Control|Alt|Meta|OS|ContextMenu|CapsLock|NumLock|ScrollLock|PrintScreen|Pause|F\d+$|Key[BPOMHT]$)/;
+function menuRaw(dev) {
+  if (dev === 'kb') return { x: (keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0), y: (keys.ArrowDown ? 1 : 0) - (keys.ArrowUp ? 1 : 0), ok: !!(keys.Enter || keys.Space), back: !!(keys.Backspace || keys.Escape), clear: !!keys.Delete };
+  const p = navigator.getGamepads ? navigator.getGamepads()[+dev.slice(3)] : null; if (!p) return { x: 0, y: 0, ok: false, back: true, clear: false };   /* unplugged: leave */
+  const b = k => !!(p.buttons[k] && p.buttons[k].pressed), ax = k => p.axes[k] || 0;
+  return { x: b(15) || ax(0) > 0.55 ? 1 : b(14) || ax(0) < -0.55 ? -1 : 0, y: b(13) || ax(1) > 0.55 ? 1 : b(12) || ax(1) < -0.55 ? -1 : 0, ok: b(0), back: b(1) || b(8) || b(9), clear: b(3) };
+}
+function openCMenu(dev) { CMENU = { dev, row: 0, capture: false, wait: false, closing: false, note: '', noteT: 0, prev: menuRaw(dev), rep: 0 }; beep(660, 0.06, 'triangle', 0.04); }
+function cmenuNote(t) { CMENU.note = t; CMENU.noteT = 260; }
+function cmenuItems() {   /* the rows, each with the box it is drawn in (the mouse uses the same boxes) */
+  const su = setupOf(CMENU.dev), items = [{ kind: 'setup', box: [CM.x + 30, CM.y + 68, CM.w - 60, 46] }];
+  if (su.type === 'kb') { const cw = (CM.w - 80) / 2; KB_ROWS.forEach(([key, label], n) => items.push({ kind: 'bind', key, label, box: [CM.x + 30 + (n >= 9 ? cw + 20 : 0), CM.y + 134 + (n % 9) * 36, cw, 32] })); }
+  else PAD_ROWS.forEach(([key, label], n) => items.push({ kind: 'bind', key, label, box: [CM.x + 170, CM.y + 130 + n * 33, CM.w - 340, 29] }));
+  if (!su.fixed) items.push({ kind: 'reset', box: [CM.x + CM.w / 2 - 160, CM.y + 476, 320, 34] });
+  return items;
+}
+/* The setup about to be changed. Changing a built-in one copies it into a Custom setup nobody has touched yet and switches to that. */
+function cmenuEditable() {
+  const m = CMENU, su = setupOf(m.dev); if (!su.fixed) return su;
+  const free = setupsFor(m.dev).find(s => !s.fixed && !s.touched);
+  if (!free) { cmenuNote('Built-in setups cannot be changed. Switch to a Custom setup and change that one.'); beep(200, 0.08, 'square', 0.03); return null; }
+  free.map = Object.assign({}, su.map); free.touched = true; USE[m.dev] = free.id; cmenuNote('Copied "' + su.name.replace(/\s+/g, ' ') + '" into ' + free.name + ', which is yours to change.'); return free;
+}
+function cmenuCycle(d) { const m = CMENU, list = setupsFor(m.dev), n = list.indexOf(setupOf(m.dev)); USE[m.dev] = list[(n + d + list.length) % list.length].id; saveControls(); beep(520, 0.04, 'square', 0.03); }
+function cmenuOk(it, d) {
+  const m = CMENU;
+  if (it.kind === 'setup') cmenuCycle(d);
+  else if (it.kind === 'reset') { const su = setupOf(m.dev); su.map = Object.assign({}, su.base); su.touched = false; saveControls(); cmenuNote(su.name + ' is back to the standard layout.'); beep(380, 0.08, 'triangle', 0.04); }
+  else if (m.dev === 'kb') { if (cmenuEditable()) { m.capture = true; beep(700, 0.04, 'square', 0.03); } }
+  else { const su = cmenuEditable(); if (!su) return; const n = PAD_ACTS.indexOf(su.map[it.key] || ''); su.map[it.key] = PAD_ACTS[(n + d + PAD_ACTS.length) % PAD_ACTS.length]; su.touched = true; saveControls(); beep(520, 0.04, 'square', 0.03); }
+}
+function cmenuKey(code) {   /* a key pressed while a row is waiting for one */
+  const m = CMENU, it = cmenuItems()[m.row];
+  if (code === 'Escape' || !it || it.kind !== 'bind') { m.capture = false; m.wait = true; return; }
+  if (KEY_NO.test(code)) { cmenuNote(keyName(code) + ' is kept for the menus and debug tools. Press a different key, or Escape to cancel.'); beep(200, 0.08, 'square', 0.03); return; }
+  const su = setupOf(m.dev), old = su.map[it.key]; for (const k in su.map) if (k !== it.key && su.map[k] === code) { su.map[k] = old; cmenuNote(keyName(code) + ' was already in use, so the two have swapped.'); }
+  su.map[it.key] = code; su.touched = true; m.capture = false; m.wait = true; saveControls(); beep(800, 0.06, 'triangle', 0.04);
+}
+function cmenuClick(x, y) {
+  const m = CMENU; if (!m || m.closing) return;
+  if (m.capture) { m.capture = false; return; }
+  if (inBox(CM.done, x, y)) { m.closing = true; saveControls(); beep(420, 0.06, 'triangle', 0.04); return; }
+  const items = cmenuItems(), n = items.findIndex(it => inBox(it.box, x, y)); if (n < 0) return;
+  m.row = n; const it = items[n]; cmenuOk(it, x < it.box[0] + it.box[2] / 2 ? -1 : 1);
+}
+function stepCMenu() {
+  const m = CMENU, r = menuRaw(m.dev), p = m.prev; m.prev = r; if (m.noteT > 0) m.noteT--;
+  const idle = !r.x && !r.y && !r.ok && !r.back && !r.clear;
+  if (m.closing) { if (idle) CMENU = null; return; }   /* closes once everything is let go, so the press that closed it does nothing else */
+  if (m.capture) return;
+  if (m.wait) { if (idle) m.wait = false; return; }
+  const items = cmenuItems(); m.row = Math.min(m.row, items.length - 1); const it = items[m.row];
+  if (r.back && !p.back) { m.closing = true; saveControls(); beep(420, 0.06, 'triangle', 0.04); return; }
+  let dy = 0; if (r.y && r.y !== p.y) { dy = r.y; m.rep = 0; } else if (r.y && ++m.rep > 18 && m.rep % 5 === 0) dy = r.y;
+  if (dy) { m.row = (m.row + dy + items.length) % items.length; beep(440, 0.03, 'square', 0.02); return; }
+  const dx = r.x && r.x !== p.x ? r.x : 0;
+  if (dx) {
+    if (it.kind === 'setup') cmenuCycle(dx);
+    else if (it.kind === 'bind' && m.dev !== 'kb') cmenuOk(it, dx);
+    else if (it.kind === 'bind') { const n = m.row - 1, t = n >= 9 ? n - 9 : n + 9; if (t < KB_ROWS.length) { m.row = t + 1; beep(440, 0.03, 'square', 0.02); } }   /* keyboard rows sit in two columns */
+    return;
+  }
+  if (r.ok && !p.ok) cmenuOk(it, 1);
+  else if (r.clear && !p.clear && it.kind === 'bind') { const su = cmenuEditable(); if (su) { su.map[it.key] = ''; su.touched = true; saveControls(); beep(300, 0.05, 'square', 0.03); } }
 }
 function rumble(ctl, ms, strength) {
   if (!ctl || ctl.dev === 'kb' || ctl.dev === 'cpu') return;
@@ -162,7 +264,7 @@ class Ctl {
     this.dev = dev; this.c = blankIn(); this.p = blankIn(); this.ai = {};
     this.buf = { atk: 0, spc: 0, jmp: 0, shd: 0, grb: 0 };
     this.xT = 99; this.yT = 99; this.xFired = true; this.yFired = true;
-    this.dashDir = 0; this.downBuf = 0; this.downNow = false; this.upNow = false; this.cPress = false; this.shdAge = 99;
+    this.dashDir = 0; this.downBuf = 0; this.downNow = false; this.upNow = false; this.cPress = false; this.cDown = false; this.cFall = dev !== 'cpu'; this.shdAge = 99; this.jmp2Age = 99;
   }
   poll(raw) {
     this.p = this.c; this.c = raw; const c = raw, p = this.p;
@@ -180,6 +282,8 @@ class Ctl {
     }
     this.ySmash = (ay >= 0.8 && this.yT <= 5) || (c.sm && ay >= 0.5);
     this.cPress = Math.hypot(c.cx, c.cy) >= 0.5 && Math.hypot(p.cx, p.cy) < 0.5;
+    this.cDown = this.cFall && c.cy <= -0.55 && !(p.cy <= -0.55) && -c.cy >= Math.abs(c.cx);   /* the right stick flicked down: fast-falls, as a flick of the left stick does (people only: the CPU plays as it did) */
+    this.jmp2Age = c.jmp2 ? 0 : Math.min(99, this.jmp2Age + 1);   /* frames since two jump buttons were last held together */
   }
   pressed(k) { return this.c[k] && !this.p[k]; }
   take(k) { if (this.buf[k] > 0) { this.buf[k] = 0; return true; } return false; }
@@ -191,6 +295,11 @@ let sparkOff = false;   /* set while a hit is being worked out with hit effects 
 function spark(x, y, col, n, sp) {
   if (sparkOff) return;
   for (let k = 0; k < n; k++) { const a = Math.random() * TAU, s = (0.3 + Math.random()) * (sp || 1); PART.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 14 + Math.random() * 14, col, r: 0.6 + Math.random() * 1.2 }); }
+}
+/* The glint of a fast fall starting: a small four-point star. No random numbers, so it never changes how a match plays out. */
+function ffSpark(x, y) {
+  for (let k = 0; k < 4; k++) { const a = k * TAU / 4; PART.push({ x, y, vx: Math.cos(a) * 1.5, vy: Math.sin(a) * 1.5, life: 12, col: '#fff3b0', r: 0.55 }); }
+  PART.push({ x, y, vx: 0, vy: 0, life: 10, col: '#ffffff', r: 1.3 }); beep(1700, 0.035, 'sine', 0.012, 1.4);
 }
 function pop(x, y, text, col) { POPS.push({ x, y, text, col, life: 50 }); }
 
@@ -1039,7 +1148,7 @@ class Fighter {
     if (c.buf.shd > 0 && !this.airdodged) { c.buf.shd = 0; if (!this.tryWavedash(false)) this.airdodge(); return true; }
     if (c.take('spc')) { this.doSpecial(); return true; }
     if (c.take('atk')) { this.startMove(this.aerial(i.lx, i.ly)); return true; }
-    if (c.cPress) { this.startMove(this.aerial(i.cx, i.cy)); return true; }
+    if (c.cPress) { this.fastFall(); this.startMove(this.aerial(i.cx, i.cy)); return true; }
     if (c.buf.jmp > 0) {   /* footstool: a jump pressed right on top of the opponent springs off their head and costs no air jump */
       const o = F[1 - this.idx];
       if (o && canBeHit(o) && o.state !== 'ledge' && this.vy <= 0.6 && Math.abs(this.x - o.x) < o.st.w / 2 + 2.5 && this.y >= o.y + o.st.h - 3 && this.y <= o.y + o.st.h + 4.5) {
@@ -1078,8 +1187,9 @@ class Fighter {
   }
   /* Hoppers: which part of the hop this frame is. Returns the speed multiplier while moving, 0 while planted. */
   hopGate(c) { const ph = this.hopT++ % (c[0] + c[1]); return ph < c[0] ? c[2] : 0; }
-  /* A downward flick while falling: drop at full fast-fall speed at once. */
-  fastFall() { if (this.ctl.downNow && this.vy <= 0 && !this.ff) { this.ff = true; this.vy = -this.st.ffall; } }
+  /* A downward flick of either stick while falling: drop at full fast-fall speed at once, with a glint. On the right stick the
+     left one stays free to steer; flicked down out of nothing it gives a fast-falling down air. */
+  fastFall() { const c = this.ctl; if ((c.downNow || c.cDown) && this.vy <= 0 && !this.ff) { this.ff = true; this.vy = -this.st.ffall; ffSpark(this.x, this.y + this.st.h * 0.5); } }
   /* Ground speed toward a target: the fighter's own push when speeding up, the floor's grip when over the target or turning round. */
   groundMove(t, acc) { const v = this.vx; if (v * t < 0) return appr(v, t, acc + this.st.trac); return Math.abs(v) > Math.abs(t) ? appr(v, t, this.st.trac) : appr(v, t, acc); }
   airPhys(drift) {
@@ -1188,7 +1298,7 @@ class Fighter {
         /* Out of a jump's start-up: an up smash (flick up with attack), attack with the jump for a short-hop aerial, or the right stick for an aerial the moment the fighter leaves the ground. */
         if (c.cPress) this.cAir = [i.cx, i.cy];
         if (c.buf.atk > 0) { if (i.ly > 0.5 && c.ySmash) { c.buf.atk = 0; this.startMove('usmash'); break; } this.shMacro = true; }
-        if (this.sf >= s.jsq) { this.grounded = false; this.plat = null; this.jumps = s.jumps || 1; this.shortHop = !i.jmp || this.shMacro; if (this.shortHop) this.vy = s.vHop; else { this.vy = this.jrV = s.boost[0]; this.jr = 1; } this.vx = clamp(this.vx * s.jumpXMul + (Math.abs(i.lx) > 0.2 ? i.lx * s.jumpX : 0), -s.jumpXMax, s.jumpXMax); this.set('air'); beep(420, 0.05, 'sine', 0.03, 1.5); if (this.shMacro) { this.shMacro = false; if (c.take('atk')) this.startMove(this.aerial(i.lx, i.ly)); } else if (this.cAir) this.startMove(this.aerial(this.cAir[0], this.cAir[1])); this.cAir = null; }
+        if (this.sf >= s.jsq) { this.grounded = false; this.plat = null; this.jumps = s.jumps || 1; this.shortHop = !i.jmp || this.shMacro || c.jmp2Age <= this.sf + T.buffer;   /* let go early, attack with the jump, or two jump buttons together */ if (this.shortHop) this.vy = s.vHop; else { this.vy = this.jrV = s.boost[0]; this.jr = 1; } this.vx = clamp(this.vx * s.jumpXMul + (Math.abs(i.lx) > 0.2 ? i.lx * s.jumpX : 0), -s.jumpXMax, s.jumpXMax); this.set('air'); beep(420, 0.05, 'sine', 0.03, 1.5); if (this.shMacro) { this.shMacro = false; if (c.take('atk')) this.startMove(this.aerial(i.lx, i.ly)); } else if (this.cAir) this.startMove(this.aerial(this.cAir[0], this.cAir[1])); this.cAir = null; }
         break;
       case 'wd':
         this.vx = appr(this.vx, 0, T.wd_friction);
@@ -1754,7 +1864,7 @@ function stepSelect() {
   selectPreview();
   for (const dev of allDevs()) {
     const c = devCtl(dev); c.poll(readDev(dev));
-    if (c.pressed('sel') && dev !== 'kb') { toggleLayout(dev); beep(520, 0.05, 'square', 0.03); }
+    if (c.pressed('sel')) { openCMenu(dev); return; }   /* Backspace, or - on a controller: the controls screen for that device */
     if (c.pressed('jmp')) { setBoxes(!DBG.boxes); beep(DBG.boxes ? 700 : 420, 0.05, 'square', 0.03); }   /* jump button: show or hide hitboxes */
     if (c.pressed('shd')) { setHitFx(!DBG.fx); beep(DBG.fx ? 700 : 420, 0.05, 'square', 0.03); }   /* shield button: hit sparks and flash on or off */
     let sl = slots.find(s => s && s.dev === dev);
@@ -1790,6 +1900,7 @@ function resetFighters() {
 function stepPlay() {
   if (F.some(f => f.ctl.dev !== 'cpu' && f.ctl.pressed('start'))) { paused = !paused; return; }
   if (paused) {   /* paused: Special leaves the match and goes back to the fighter select */
+    const cm = F.find(f => f.ctl.dev !== 'cpu' && f.ctl.pressed('sel')); if (cm) { openCMenu(cm.ctl.dev); return; }
     if (F.some(f => f.ctl.dev !== 'cpu' && f.ctl.pressed('spc'))) { paused = false; mode = 'select'; for (const s of slots) if (s) s.ready = false; F = []; PROJ = []; PART = []; POPS = []; beep(300, 0.1, 'triangle', 0.05); }
     return;
   }
@@ -1844,6 +1955,7 @@ function stepFx() {
   cam.x += (tx - cam.x) * 0.11; cam.y += (ty - cam.y) * 0.11;
 }
 function step() {
+  if (CMENU) { stepCMenu(); if (mode === 'select') selectPreview(); return; }   /* the controls screen holds everything else still */
   if (mode === 'select') { stepSelect(); return; }
   pollMatch(); if (!paused) tick++;
   if (mode === 'countdown') { countdown--; if (countdown === 130 || countdown === 90 || countdown === 50) beep(440, 0.1, 'square', 0.05); if (countdown === 10) beep(880, 0.3, 'square', 0.06); if (countdown <= 10) mode = 'play'; }
