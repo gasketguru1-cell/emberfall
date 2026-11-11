@@ -115,5 +115,53 @@
  },
  "Exhaust": {
   "seconds": 15
+ },
+ "Squat": {
+  "seconds": 0.2
+ },
+ "FastFall": {
+  "seconds": 0.4
+ },
+ "Helpless": {
+  "seconds": 0.4
+ },
+ "LandHard": {
+  "seconds": 0.6
+ },
+ "ShieldHit": {
+  "seconds": 0.3
+ },
+ "HitHeavy": {
+  "seconds": 0.8
+ },
+ "Launch": {
+  "seconds": 0.5
+ },
+ "LaunchUp": {
+  "seconds": 0.6
+ },
+ "Spike": {
+  "seconds": 0.6
+ },
+ "AirDodge": {
+  "seconds": 0.667
+ },
+ "Ball": {
+  "seconds": 0.6
+ },
+ "Respawn": {
+  "seconds": 2.4
+ },
+ "Pummel": {
+  "seconds": 0.3
+ },
+ "ThrowF": {
+  "seconds": 1
+ },
+ "ThrowB": {
+  "seconds": 1.067
+ },
+ "ThrowD": {
+  "seconds": 1.1
  }
 }

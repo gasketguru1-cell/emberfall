@@ -12,7 +12,7 @@ node tools/blender/joey.js
 extra=(); [ -n "$2" ] && extra=(--shots "$2" --shotdir "$3")
 if [ "$which" != "human" ] && [ ! -f "$dir/work/big-headswap.glb" ]; then
   node tools/skintone.mjs "$BIG/model_url.glb" "$HUMAN/texture_urls.0.base_color.png" "$dir/work/big-tinted.glb"
-  "$B" -b --factory-startup --python tools/blender/headswap.py -- --head "$HUMAN/model_url.glb" --body "$dir/work/big-tinted.glb" --out "$dir/work/big-headswap.glb" --cut 1.6 --half 0.14 --keep 1.565 --keephalf 0.12 | grep headswap
+  "$B" -b --factory-startup --python tools/blender/headswap.py -- --head "$HUMAN/model_url.glb" --body "$dir/work/big-tinted.glb" --out "$dir/work/big-headswap.glb" --bcut 1.675 --h1 1.665 --shrink 0.72 --keep 1.55 --keephalf 0.1 --necktop 1.605 | grep headswap
 fi
 mkdir -p "$dir/export"
 for n in human big; do
