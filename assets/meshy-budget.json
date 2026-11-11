@@ -5,9 +5,9 @@
   "perDayMax": 150,
   "maxModelAttemptsPerCharacter": 3,
   "keepBalanceAbove": 1000,
-  "note": "tools/meshy.js refuses any task that would break one of these. ceiling = total credits for this phase; perTaskMax = most a single task may cost; perDayMax = most in one calendar day; maxModelAttemptsPerCharacter = 3D generations per character before asking; keepBalanceAbove = never let the account balance fall below this. perDayOverride = a higher daily limit for one named date only, set when the owner asks. 2026-11-10: the owner allowed 150 more credits that day for the Furious Fowls fighter (day limit 300).",
+  "note": "tools/meshy.js refuses any task that would break one of these. ceiling = total credits for this phase; perTaskMax = most a single task may cost; perDayMax = most in one calendar day; maxModelAttemptsPerCharacter = 3D generations per character before asking; keepBalanceAbove = never let the account balance fall below this. perDayOverride = a higher daily limit for one named date only, set when the owner asks. 2026-11-10: the owner allowed 150 more credits that day for the Furious Fowls fighter (day limit 300). Later on 2026-11-10 the owner gave a 40-credit spend for Chomp Chomp's model and animation (day limit 338 for that date only).",
   "perDayOverride": {
     "2026-11-09": 240,
-    "2026-11-10": 300
+    "2026-11-10": 338
   }
 }

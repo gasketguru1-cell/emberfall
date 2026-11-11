@@ -120,7 +120,7 @@ function build() {
     if (v.key === k) return; const prevKey = v.key; v.key = k;
     while (v.pivot.children.length) { const c = v.pivot.children.pop(); if (c.geometry) c.geometry.dispose(); }
     if (v.mixer) v.mixer.stopAllAction();
-    v.mixer = null; v.model = null; v.chomp = null; v.actions = {}; v.cur = null; v.prev = null; v.hand = null; v.springs = []; v.springTick = -1;
+    v.mixer = null; v.model = null; v.chomp = null; v.bubble = null; v.actions = {}; v.cur = null; v.prev = null; v.hand = null; v.springs = []; v.springTick = -1;
     if (v.prop) { scene.remove(v.prop); v.prop = null; }
     if (useModel) {
       /* A copy of the loaded model with its own skeleton, scaled to the fighter's height and turned so its front is +x. */
@@ -130,6 +130,7 @@ function build() {
       v.pivot.add(obj); v.model = M; v.mixer = new THREE.AnimationMixer(obj); setupSprings(v, M);
       if (M.cfg.lift) obj.position.y = M.cfg.lift;   /* a rider: the model sits this high above the fighter's feet */
       if (M.cfg.prop && M.cfg.prop.type === 'sling') { v.prop = makeSling(); v.hand = null; scene.add(v.prop); if (/ alone/.test(prevKey)) v.prop.userData.rig.k = { py: -2.2, sq: -0.14, bend: 0.15 }; }   /* the bird drops back into the pouch: the bands take its weight */
+      if (fm.name === 'Chomp Chomp') { const bubble = makeBubble(); bubble.position.y = 6; v.pivot.add(bubble); v.bubble = bubble; }   /* his Bubble Ride bubble */
       if (M.cfg.prop && M.cfg.prop.type === 'lantern') { v.hand = obj.getObjectByName(M.cfg.prop.bone) || null; if (v.hand) { v.prop = makeLantern(); scene.add(v.prop); } }
       return;
     }
@@ -234,6 +235,7 @@ function build() {
   }
   /* Chomp Chomp, built from simple shapes: a round blue body with a dark outline, a big mouth of triangular teeth on the
      front that opens when he bites, small beady eyes, stubby feet, little fins and a leaf sprout. Faces +x. */
+  const makeBubble = () => { const b = new THREE.Mesh(new THREE.SphereGeometry(7.8, 24, 16), new THREE.MeshStandardMaterial({ color: 0xcfe8ff, transparent: true, opacity: 0.22, roughness: 0.05, metalness: 0.1, depthWrite: false })); b.visible = false; return b; };
   function buildChomp(v, col) {
     const M2 = (c, o) => { const m = new THREE.MeshStandardMaterial(Object.assign({ color: new THREE.Color(c), roughness: 0.55 }, o || {})); v.mats.push(m); return m; };
     const add = (geo, mat, x, y, z, sx, sy, sz) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); if (sx) m.scale.set(sx, sy, sz); m.castShadow = true; v.pivot.add(m); return m; };
@@ -273,7 +275,8 @@ function build() {
   /* Chomp Chomp's ropes (from the simulation: chompRopes) drawn as thin cords; they never hit, so they never glow */
   const ropePool = [], ropeMat = new THREE.MeshStandardMaterial({ color: 0xb08a55, roughness: 0.9 }), hookMat = new THREE.MeshStandardMaterial({ color: 0x6b5a4a, roughness: 0.8 });
   function drawRopes() {
-    const list = typeof chompRopes === 'function' ? chompRopes() : [];
+    const list = typeof chompRopes === 'function' ? chompRopes().slice() : [];
+    for (const f of F) if (f.state === 'attack' && f.mname === 'sspec' && f.rsGo) { const cy = f.y + f.st.h / 2, dx = f.rsAx - f.x, dy = f.rsAy - cy, d = Math.hypot(dx, dy) || 1; list.push([f.rsAx, f.rsAy, f.x + dx / d * 4.2, cy + dy / d * 4.2, 'swing']); }   /* the rope he swings on, from its hook to his teeth */
     while (ropePool.length < list.length) { const cord = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 1, 6), ropeMat), hook = new THREE.Mesh(new THREE.SphereGeometry(0.8, 8, 6), hookMat); scene.add(cord, hook); ropePool.push({ cord, hook }); }
     ropePool.forEach((q, k) => { const r = list[k]; q.cord.visible = !!r; q.hook.visible = !!r && r[4] === 'swing'; if (!r) return;
       const a = new THREE.Vector3(r[0], r[1], 0), b = new THREE.Vector3(r[2], r[3], 0), len = Math.max(0.01, a.distanceTo(b));
@@ -407,6 +410,7 @@ function build() {
     const h = f.st.h; let sx = 1, sy = 1, rot = 0, oy = 0;
     if (hasModel) {   /* a model animates itself; only whole-body spins and the swap shrink stay procedural */
       if (f.state === 'roll') return { sx, sy, rot: f.sf * 0.45 * f.rollDir * f.face, oy: h / 2 };
+      if (f.state === 'attack' && f.mname === 'sspec' && f.rsGo && f.rsTh !== undefined) return { sx, sy, rot: -f.rsTh * f.face, oy: h / 2 };   /* Chomp Chomp hanging from his rope: turned to lie along it */
       if (f.state === 'hurt' && !f.grounded && f.tumble) return { sx, sy, rot: f.sf * 0.2, oy: h / 2 };
       if (f.state === 'attack' && f.move && f.move.spin && f.move.spinAt) return { sx, sy, rot: f.move.spinAt(f, f.mf), oy: FP };   /* Sling Spin and Catapult Cyclone: end over end round the rig's middle */
       if (f.state === 'attack' && f.move && f.move.swap) { const k = 1 - Math.sin(Math.min(1, f.mf / 34) * Math.PI) * 0.7; return { sx: k, sy: k, rot, oy }; }
@@ -558,6 +562,8 @@ function build() {
       if (v.shield.visible) { const [sx, sy, r] = shieldCircle(f); v.shield.scale.setScalar(r); v.shield.position.set(sx, sy, 0); }
       if (v.pad.visible) v.pad.position.set(f.x, f.y - 0.8, 0);
       if (v.chomp) poseChomp(v, f);
+      if (v.bubble) { const on = !!f.bubble, grow = f.state === 'attack' && f.mname === 'uspec' && !on ? clamp((f.mf - 3) / 5, 0, 1) : 0;   /* it swells from his mouth as he blows, then wobbles round him; it sits round his middle whatever the pivot is doing */
+        v.bubble.visible = on || grow > 0; v.bubble.scale.setScalar(on ? 1 + Math.sin(tick * 0.3) * 0.03 : 0.15 + 0.85 * grow); v.bubble.position.x = on ? 0 : 5 * (1 - grow); }
       if (v.springs.length) applySprings(v);
       if (v.prop && !v.hand) {   /* the living slingshot under its bird: posed by slingWant, the bird riding in its pouch */
         const spinning = f.state === 'attack' && f.move && f.move.spin && f.move.spinAt, rot = spinning ? f.move.spinAt(f, f.mf) : 0, rig = v.prop.userData.rig, step = rig.tick !== tick; rig.tick = tick;

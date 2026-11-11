@@ -61,8 +61,70 @@ def auto_weight(target):
     bpy.ops.object.parent_set(type='ARMATURE_AUTO')
     return sum(1 for v in target.data.vertices if not any(g.weight > 1e-4 for g in v.groups))
 
-missing = auto_weight(mesh); method = 'automatic'
-if missing > len(mesh.data.vertices) * 0.01:
+# "weights" in the spec replaces automatic weighting with weights worked out from where each vertex is: for a simple shape
+# with a mouth that must open and shut cleanly (Chomp Chomp), where heat weighting cannot tell the roof of a mouth from its
+# floor. Each entry, in order, takes a share s (0..1) of every vertex for its bone, leaving the rest to the entries before:
+#   { "bone", "all": true }                                         everything
+#   { "bone", "sphere": { "c": [x,y,z], "r0", "r1", "scale": [x,y,z] } }   1 inside r0, fading to 0 at r1 (an ellipsoid with "scale")
+#   { "bone", "halves": [ [axis 0|1|2, at, soft, dir] ] }           each: 0 below `at`, 1 above (dir 1) over a band `soft` wide; multiplied
+#   { "bone", "wedge": { "hinge": [y, z], "from": [deg, soft, softSide], "to": [deg, soft, softSide], "side": [x, width] } }
+#       the angle round a left-to-right axis through the hinge (0 forward, 90 up); softSide is the softness out past |x| = side;
+#       "fade": [x, width] lets the wedge go again further out to the sides (cheeks stay with the body)
+#   "dark": true on a sphere entry: only the dark-painted vertices (black eyes, brows) get the full sphere; the skin round them
+#       gets one 0.6 the size, so an eye can grow or shut without dragging the face with it
+# Several kinds in one entry multiply.
+def smooth(t): t = max(0.0, min(1.0, t)); return t * t * (3 - 2 * t)
+def vertex_dark(target):
+    # brightness of the base colour texture at each vertex (0..1), or None without a texture
+    try:
+        import numpy as np
+        img = next(n.image for m in target.data.materials for n in m.node_tree.nodes if n.type == 'TEX_IMAGE' and n.image and any(l.to_socket.name == 'Base Color' for l in n.outputs[0].links))
+        w, h = img.size; px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, -1); uv = target.data.uv_layers.active.data; out = [1.0] * len(target.data.vertices)
+        for lp in target.data.loops:
+            u, v = uv[lp.index].uv; c = px[min(h - 1, max(0, int((v % 1) * h))), min(w - 1, max(0, int((u % 1) * w)))]
+            out[lp.vertex_index] = min(out[lp.vertex_index], float(c[0] * 0.3 + c[1] * 0.6 + c[2] * 0.1))
+        return out
+    except Exception as e:
+        print('rig: no base colour to read (%s)' % e); return None
+def strength(op, p, lum=1.0):
+    s = 1.0
+    if 'sphere' in op:
+        q = op['sphere']; sc = q.get('scale', [1, 1, 1]); d = math.sqrt(sum(((p[i] - q['c'][i]) / sc[i]) ** 2 for i in range(3)))
+        if op.get('dark') and lum > op.get('darkBelow', 0.12): d /= 0.6
+        s *= 1 - smooth((d - q['r0']) / max(1e-6, q['r1'] - q['r0']))
+    for ax, at, soft, dr in op.get('halves', []): s *= smooth((p[ax] - at) * dr / max(1e-6, soft) + 0.5)
+    if 'wedge' in op:
+        q = op['wedge']; ang = math.degrees(math.atan2(p[1] - q['hinge'][0], p[2] - q['hinge'][1])); sd = q.get('side')
+        k = smooth((abs(p[0]) - sd[0]) / sd[1]) if sd else 0
+        f, t = q['from'], q['to']
+        if 'fade' in q: s *= 1 - smooth((abs(p[0]) - q['fade'][0]) / q['fade'][1])   # out toward the sides the wedge lets go
+        s *= smooth((ang - f[0]) / (f[1] + (f[2] - f[1]) * k if len(f) > 2 else f[1]) + 0.5) * smooth((t[0] - ang) / (t[1] + (t[2] - t[1]) * k if len(t) > 2 else t[1]) + 0.5)
+    return s
+def placed_weights(target):
+    bpy.ops.object.select_all(action='DESELECT'); target.select_set(True); rig.select_set(True); bpy.context.view_layer.objects.active = rig
+    bpy.ops.object.parent_set(type='ARMATURE')
+    W = [dict() for _ in target.data.vertices]; lum = vertex_dark(target) if any(op.get('dark') for op in spec['weights']) else None
+    for op in spec['weights']:
+        for v in target.data.vertices:
+            s = strength(op, (v.co[0], v.co[2], -v.co[1]), lum[v.index] if lum else 1.0)
+            if s <= 1e-4: continue
+            w = W[v.index]
+            for k in w: w[k] *= 1 - s
+            w[op['bone']] = w.get(op['bone'], 0) + s
+    groups = {b.name: target.vertex_groups.new(name=b.name) for b in arm.bones if b.use_deform}
+    for i, w in enumerate(W):
+        for k, x in w.items():
+            if x > 1e-4: groups[k].add([i], x, 'REPLACE')
+    if lum:
+        for op in spec['weights']:
+            if not op.get('dark'): continue
+            ix = [i for i, w in enumerate(W) if w.get(op['bone'], 0) > 0.5]
+            if ix: print('rig: %s holds %d vertices, brightness %.2f to %.2f' % (op['bone'], len(ix), min(lum[i] for i in ix), max(lum[i] for i in ix)))
+    return sum(1 for w in W if sum(w.values()) < 1e-4)
+
+if spec.get('weights'): missing = placed_weights(mesh); method = 'placed (%d rules)' % len(spec['weights'])
+else: missing = auto_weight(mesh); method = 'automatic'
+if not spec.get('weights') and missing > len(mesh.data.vertices) * 0.01:
     print('rig: automatic weights left %d vertices unweighted; using a voxel proxy' % missing)
     for vg in list(mesh.vertex_groups): mesh.vertex_groups.remove(vg)
     for m in list(mesh.modifiers): mesh.modifiers.remove(m)
