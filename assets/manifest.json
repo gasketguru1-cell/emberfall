@@ -1688,13 +1688,13 @@
     "end": 0.9
    },
    "nair": {
-    "clip": "Spin",
+    "clip": "SpinDrag",
     "start": 0,
     "contact": [
-     0.2,
-     0.55
+     0.15,
+     0.48
     ],
-    "end": 0.8
+    "end": 0.85
    },
    "fair": {
     "clip": "Axe",

@@ -173,6 +173,9 @@
  "BagIt": {
   "seconds": 0.9
  },
+ "SpinDrag": {
+  "seconds": 0.867
+ },
  "TumblePrep": {
   "seconds": 0.2
  },

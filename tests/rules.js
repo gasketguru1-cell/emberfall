@@ -464,6 +464,16 @@ vm.runInThisContext(`
     /* two neutral airs in one short hop */
     { const [s] = setup(SACK, FL, -40, 60); let nairs = 0, last = ''; SCRIPT[0] = (i, tt) => { if (tt === 2 || tt === 3) i.jmp = true; if (tt === 6 || tt === 7 || tt === 22 || tt === 23) i.atk = true; }; run(60, () => { const tag = s.state === 'attack' ? s.mname + s.mf : ''; if (s.state === 'attack' && s.mname === 'nair' && s.mf === 1) nairs++; });
       check('Potato Sack: two neutral airs fit in one short hop', nairs === 2, nairs + ' neutral airs before landing'); }
+    /* neutral air: three carrying hits and a finisher, the opponent taken along with him rising or falling */
+    { const drag = (pct, vy) => { const [s, o] = setup(SACK, FL, 0, 3); airborne(s, 0, 40); airborne(o, 3, 38); o.ctl = new Ctl('none'); o.pct = pct; s.startMove('nair'); s.vy = vy;
+        let hits = 0, was = o.pct, gapMax = 0, sy0 = s.y, oy0 = o.y, oyAt9 = 0, syAt9 = 0;
+        run(90, () => { if (o.pct > was + 0.3) { hits++; was = o.pct; } if (s.state === 'attack' && s.mname === 'nair' && s.mf >= 4 && s.mf <= 9 && o.state === 'hurt') gapMax = Math.max(gapMax, Math.hypot(s.x - o.x, s.y - o.y)); if (s.mf === 9 && !syAt9) { syAt9 = s.y; oyAt9 = o.y; } if (s.state === 'attack') s.vy = vy; });
+        return { hits, dmg: o.pct - pct, gapMax, sMove: syAt9 - sy0, oMove: oyAt9 - oy0, away: Math.hypot(o.x - s.x, o.y - s.y), pct: o.pct }; };
+      const rise = drag(30, 0.9), fall = drag(30, -1.6), late = drag(130, -1.6);
+      check('Potato Sack: neutral air hits four times (three carrying hits and a finisher)', rise.hits === 4 && fall.hits === 4 && rise.dmg > 8 && rise.dmg < 10.5, 'rising: ' + rise.hits + ' hits, ' + rise.dmg.toFixed(1) + '%; falling: ' + fall.hits + ' hits');
+      check('Potato Sack: neutral air drags the opponent with him, up or down', rise.gapMax < 9 && fall.gapMax < 9 && Math.sign(rise.oMove) === Math.sign(rise.sMove) && Math.sign(fall.oMove) === Math.sign(fall.sMove) && Math.abs(fall.oMove) > Math.abs(fall.sMove) * 0.5,
+        'rising: he moved ' + rise.sMove.toFixed(1) + ', they moved ' + rise.oMove.toFixed(1) + ', never more than ' + rise.gapMax.toFixed(1) + ' apart; falling: ' + fall.sMove.toFixed(1) + ' / ' + fall.oMove.toFixed(1) + ', at most ' + fall.gapMax.toFixed(1) + ' apart');
+      check('Potato Sack: neutral air finisher launches them away', late.away > 25, 'at 130%: ' + late.away.toFixed(1) + ' units apart 90 frames after the start'); }
     /* up special bursts on frame 5 */
     { const [s] = setup(SACK, FL, 0, 60); let at = -1; SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = 1; i.spc = true; } }; run(20, () => { if (at < 0 && PROJ.some(p => p.kind === 'blast')) at = s.mf; });
       check('Potato Sack: Hot Potato bursts on frame 5', at === 5, 'burst on frame ' + at); }

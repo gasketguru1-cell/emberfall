@@ -169,6 +169,15 @@ const sack = {
       { t: 0.4, pose: { belly: sq(-0.1) } }, { t: 0.7, reset: true, use: 'stand', pose: { belly: sq(0.08), tuft1: R(20) }, in: 'quad' }, { t: 1.0, reset: true, use: 'stand', in: 'back' }] },
     BagIt: { fps: 30, keys: [{ t: 0, use: ['stand', 'squash'], pose: { belly: sq(0.3) } }, { t: 0.18, reset: true, use: ['stand', 'stretch'], pose: { belly: sq(-0.3), all: flip(24, C), armL: R(0, 0, 70), armR: R(0, 0, -70), neck: R(-30), tuft1: R(-30) }, in: 'out' },
       { t: 0.3, pose: { all: flip(36, C), armL: R(0, -20, 80), armR: R(0, 20, -80), neck: R(-40) } }, { t: 0.44, pose: { all: flip(40, C), ...fists(100), belly: sq(0.1), neck: R(30), tuft1: R(30) }, in: 'snap' }, { t: 0.6, pose: { all: flip(30, C), ...fists(96) } }, { t: 0.9, reset: true, use: 'stand', in: 'back' }] },
+    /* neutral air (multi-hit, dragging): curls up and rolls twice; the body thumps on each carrying hit (0.15, 0.25, 0.35),
+       then the finisher at 0.45 flings the fists out wide, and he uncurls with an overshoot */
+    SpinDrag: { fps: 30, keys: [{ t: 0, use: 'stand' }, { t: 0.08, use: 'curl', pose: { all: flip(30, C), belly: sq(0.2) }, in: 'out' },
+      { t: 0.15, use: 'curl', pose: { all: flip(140, C), belly: sq(0.28) }, in: 'lin' }, { t: 0.19, pose: { all: flip(230, C), belly: sq(0.05) }, in: 'lin' },
+      { t: 0.23, pose: { all: flip(320, C), belly: sq(0.28) }, in: 'lin' }, { t: 0.27, pose: { all: flip(410, C), belly: sq(0.05) }, in: 'lin' },
+      { t: 0.31, pose: { all: flip(500, C), belly: sq(0.28) }, in: 'lin' }, { t: 0.35, pose: { all: flip(590, C), belly: sq(0.05) }, in: 'lin' },
+      { t: 0.4, reset: true, use: ['stand', 'stretch'], pose: { all: flip(670, C), belly: sq(-0.3), armL: R(0, 0, 100), armR: R(0, 0, -100), footL: M(0.15, -0.05, 0), footR: M(-0.15, -0.05, 0), tuft1: R(-40), tuft2: R(-34) }, in: 'snap' },
+      { t: 0.48, pose: { all: flip(700, C), belly: sq(-0.2) } },
+      { t: 0.85, reset: true, use: 'stand', pose: { all: flip(720, C), belly: sq(0.06) }, in: 'back' }] },
     /* Tumble (down special): a gathering squash, then a different roll for each direction it bursts */
     TumblePrep: { fps: 30, keys: [{ t: 0, use: 'stand' }, { t: 0.2, use: 'curl', pose: { belly: sq(0.3), root: M(0, -0.12, 0) }, in: 'out' }] },
     TumbleLift: { fps: 30, keys: roll('yaw', 720, 0.6, { belly: { scale: [0.8, 1.4, 0.8] } }, { belly: sq(-0.1) }, { armL: R(0, 0, 40), armR: R(0, 0, -40) }) },   /* corkscrews upward, stretched tall */
@@ -196,7 +205,7 @@ const entry = { file: 'assets/potato-sack/export/potato-sack-v1.glb', height: 13
   springs: [{ bones: ['tuft1', 'tuft2'], k: 0.3, d: 0.66, max: 0.7, drag: 0.14 }],
   attacks: { jab: L3('Jab1'), jab2: L3('Jab2'), jab3: L3('Jab3'), ftilt: L3('Ftilt'), utilt: L3('Utilt'), dtilt: L3('Dtilt'), dash: L3('Belly'),
     fsmash: L3('Fsmash'), usmash: L3('Usmash'), dsmash: L3('Dsmash'),
-    nair: A('Spin', 0.2, 0.55, 0, 0.8), fair: L3('Axe'), bair: A('BackKick', 0.39, 0.52), uair: L3('Juggle'), dair: A('Stomp', 0.39, 0.52),
+    nair: A('SpinDrag', 0.15, 0.48, 0, 0.85),   /* active frames 3 to 10: three carrying thumps, then the finisher fling */ fair: L3('Axe'), bair: A('BackKick', 0.39, 0.52), uair: L3('Juggle'), dair: A('Stomp', 0.39, 0.52),
     grab: L3('Grab'), getup: A('Sweep', 0.34, 0.52), nspec: A('SpudBurst', 0.17, 0.3, 0, 1), sspec: A('BagIt', 0.3, 0.6, 0.12, 0.9), uspec: A('HotPotato', 0.17, 0.2, 0, 1), dspec: A('TumbleSlide', 0.1, 0.5, 0, 1), '*': L3('Jab1') } };
 const mf = path.join(__dirname, '..', '..', 'assets', 'manifest.json'), current = JSON.parse(fs.readFileSync(mf, 'utf8'));
 current['Potato Sack'] = entry; fs.writeFileSync(mf, JSON.stringify(current, null, 1) + '\n'); console.log('manifest: ' + Object.keys(current).join(', '));
