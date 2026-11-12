@@ -83,5 +83,11 @@ SOCD.mode = 'neutral';
 const cs = SETUPS.find(s => s.id === 'pad-c1'); cs.map[5] = 'mod'; USE.pad0 = 'pad-c1';
 PADS = [pad('Xbox Controller (XInput STANDARD GAMEPAD)', 'standard', [5, 15], [0, 0, 0, 0])]; i = readPad(0); ok(i.lx === 0.5, 'half-stick button: D-pad right goes half way');
 delete USE.pad0; cs.map[5] = cs.base[5];
+
+// the Options panel's Controllers box: the keyboard, each controller, the adapter, then Done; A on a controller opens its controls
+PADS = [pad('Pro Controller (STANDARD GAMEPAD Vendor: 057e Product: 2009)', 'standard', [], [0, 0, 0, 0]), null, pad(DS, 'standard', [], [0, 0, 0, 0])];
+const OR = optLayout().rows.map(r => r.kind + (r.dev ? ':' + r.dev : ''));
+ok(OR.join() === 'stocks,stage,dev:kb,dev:pad0,dev:pad2,gcu,done', 'Options: ' + OR.join(' '));
+optPick(optLayout().rows[3], 'kb'); ok(CMENU && CMENU.dev === 'pad0' && CMENU.via === 'kb', 'Options: a controller row opens its controls screen, worked by the keyboard too'); CMENU = null;
 console.log(bad ? bad + ' failures' : 'all controller checks pass');
 if (bad) process.exitCode = 1;
