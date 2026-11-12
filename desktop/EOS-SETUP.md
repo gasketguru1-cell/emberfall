@@ -33,3 +33,9 @@ EMBERFALL_AUTOVIA=eos EMBERFALL_AUTOTEST=host|join EMBERFALL_AUTOFILE=<folder>
 - No server, no subscription, nothing to buy.
 - Friends need no Epic account and no Epic launcher.
 - No firewall or router changes, and no administrator rights.
+
+## When a connection fails
+
+Each copy writes `online-log.txt` in its data folder (`%APPDATA%\Emberfall` for the installed game; the previous run's is kept as `online-log-previous.txt`). It records sign-in, this network's NAT type, the code lookup, connection requests, whether the connection came up direct or through Epic's relay, why it closed, and the version check. A join that hasn't reached the host after 20 seconds gives up and says why, with the log's location, instead of waiting on "Connecting...".
+
+The menu's own self-test: `EMBERFALL_AUTOTEST=menu-host` on one copy and `menu-join` on the other (same `EMBERFALL_AUTOFILE` folder) host and join through the ONLINE menu and write what the menu showed plus the log to `<folder>/menu-*.json`.
