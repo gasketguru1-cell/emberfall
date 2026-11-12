@@ -176,27 +176,38 @@ manifest.Hod = { file: 'assets/hod/export/hod-v1.glb', height: 9.2, clips: baseC
     nair: A('Sweep', 0.34, 0.52), fair: A('BellyFlop', 0.34, 0.52), bair: A('Sweep', 0.34, 0.52), uair: A('UpStrike', 0.39, 0.48), dair: A('BellyFlop', 0.34, 0.52),
     grab: A('Swipe', 0.39, 0.48), getup: A('Sweep', 0.34, 0.52), nspec: A('Toss', 0.4, 0.46, 0, 0.95), sspec: A('Ram', 0.34, 0.52), uspec: A('Burrow', 0.34, 0.52), '*': A('Swipe', 0.39, 0.48) } };
 
-/* ---------------- Loom: kite spirit. Floats, no legs; two ribbon chains. ----------------
+/* ---------------- Loom: patchwork sprite. Floats; its two rope legs are its lashing chains. ----------------
    Loom shows its flat face to the camera, so for it "forward" is +X and the game mirrors it when it turns.
    A roll below zero tips the top toward +X (leaning forward). For a hanging ribbon, a roll above zero swings it toward +X. */
-const rib = (s, x) => {
-  const pts = [[0.32, 1.07, -0.03], [0.36, 0.87, -0.03], [0.44, 0.67, -0.04], [0.48, 0.47, -0.05], [0.46, 0.28, -0.04], [0.436, 0.1, -0.03]].map(p => [p[0] * x, p[1], p[2]]);
-  return [0, 1, 2, 3, 4].map(k => ({ name: 'rib' + s + (k + 1), head: pts[k], tail: pts[k + 1], parent: k ? 'rib' + s + k : 'body', connect: k > 0 }));
-};
+/* The owner's model (2026-11-12): a stitched patchwork ball on two braided rope legs with ember-rock feet, a leaf collar and a
+   red sash. The rope legs are the two lashing chains (ribL / ribR, foot last), measured from the model; the wings are the two
+   sides of the leaf collar. Feet hang 0.1 m above y = 0, so Loom floats as before. */
+const LEG = {
+  L: [[0.12, 0.85, -0.04], [0.16, 0.7, -0.04], [0.19, 0.55, -0.04], [0.21, 0.4, -0.04], [0.205, 0.28, -0.01], [0.2, 0.12, 0]],
+  R: [[-0.17, 0.85, -0.1], [-0.26, 0.7, -0.12], [-0.31, 0.55, -0.12], [-0.3, 0.4, -0.12], [-0.27, 0.28, -0.11], [-0.26, 0.12, -0.11]] };
+const rib = s => [0, 1, 2, 3, 4].map(k => ({ name: 'rib' + s + (k + 1), head: LEG[s][k], tail: LEG[s][k + 1], parent: k ? 'rib' + s + k : 'body', connect: k > 0 }));
 const ribs = (a, b, c, d, e) => ({ ribL1: R(0, 0, a), ribL2: R(0, 0, b), ribL3: R(0, 0, c), ribL4: R(0, 0, d), ribL5: R(0, 0, e) });
 const ribsR = (a, b, c, d, e) => ({ ribR1: R(0, 0, a), ribR2: R(0, 0, b), ribR3: R(0, 0, c), ribR4: R(0, 0, d), ribR5: R(0, 0, e) });
 const both = (a, b, c, d, e) => Object.assign(ribs(a, b, c, d, e), ribsR(a, b, c, d, e));
+/* reach: a lashing rope leg stretches half as long again (the top link grows, the foot keeps its size), for the strike keys */
+const reach = (pose, sides, k = 1.5) => { for (const s of sides) { const a = 'rib' + s + '1', b = 'rib' + s + '5'; pose[a] = Object.assign({}, pose[a], { scale: [1, k, 1] }); pose[b] = Object.assign({}, pose[b], { scale: [1, 1 / k, 1] }); } return pose; };
+const LOOM_CHAINS = ['ribL1', 'ribL2', 'ribL3', 'ribL4', 'ribL5', 'ribR1', 'ribR2', 'ribR3', 'ribR4', 'ribR5', 'sash1', 'sash2'];
 const loom = {
-  note: 'Loom: metres after prep (ribbon tips just above y = 0). It faces the camera; forward is +X.',
-  prep: { yaw: 0, translate: [0, 1.053, 0] },
+  note: 'Loom: metres after prep (feet just above y = 0). The owner model of 2026-11-12. It faces the camera; forward is +X.',
+  prep: { yaw: 0, translate: [0, 1.05, 0] }, proxy: true, heatScale: 10,
   bones: [
     { name: 'all', head: [0, 0, 0], tail: [0, 0.2, 0], parent: null, deform: false },
     { name: 'root', head: [0, 1.45, 0], tail: [0, 1.65, 0], parent: 'all', deform: false },
-    { name: 'body', head: [0, 1.2, 0], tail: [0, 1.55, 0], parent: 'root' },
-    { name: 'top', head: [0, 1.55, 0], tail: [0, 1.98, 0], parent: 'body', connect: true },
-    { name: 'wingL', head: [0.15, 1.4, 0], tail: [0.62, 1.35, 0], parent: 'body' },
-    { name: 'wingR', head: [-0.15, 1.4, 0], tail: [-0.62, 1.35, 0], parent: 'body' },
-    ...rib('L', 1), ...rib('R', -1)],
+    { name: 'body', head: [0, 0.9, 0], tail: [0, 1.43, 0], parent: 'root' },
+    { name: 'top', head: [0, 1.43, 0], tail: [0, 2.0, 0], parent: 'body', connect: true },
+    { name: 'wingL', head: [0.1, 0.94, 0], tail: [0.34, 0.88, 0], parent: 'body', noauto: true },
+    { name: 'wingR', head: [-0.1, 0.94, 0], tail: [-0.34, 0.88, 0], parent: 'body', noauto: true },
+    { name: 'sash1', head: [0.27, 0.84, -0.12], tail: [0.36, 0.63, -0.14], parent: 'body' },
+    { name: 'sash2', head: [0.36, 0.63, -0.14], tail: [0.45, 0.42, -0.17], parent: 'sash1', connect: true },
+    ...rib('L'), ...rib('R')],
+  /* each rope leg, foot and the sash follow only their nearest bone; the collar's two sides are the wings */
+  rigid: [{ nearest: LOOM_CHAINS, r: 0.15, keep: ['body', 'wingL', 'wingR'] }, { bone: 'body', box: [[-0.42, 0.84, -0.42], [0.42, 1.05, 0.42]] }],
+  soft: [{ bone: 'wingL', at: [0.24, 0.93, 0], r: 0.16, from: ['body', 'top'] }, { bone: 'wingR', at: [-0.24, 0.93, 0], r: 0.16, from: ['body', 'top'] }],
   poses: {
     stand: Object.assign({ all: {}, root: {}, body: {}, top: {}, wingL: {}, wingR: {} }, both(0, 0, 0, 0, 0)),
     lean: Object.assign({ all: R(0, 0, -14), top: R(0, 0, -5) }, both(-14, -12, -10, -8, -6)),
@@ -240,13 +251,13 @@ const loom = {
     Lash: { fps: 30, keys: [
       { t: 0, use: 'stand' },
       { t: 0.28, pose: Object.assign({ all: R(0, 0, 14), root: M(-0.06, 0.02, 0) }, ribs(-40, -30, -20, -10, -6)) },
-      { t: 0.36, pose: Object.assign({ all: R(0, 0, -16), root: M(0.1, 0, 0) }, ribs(86, 10, 4, 0, 0)) },
-      { t: 0.44, pose: Object.assign({}, ribs(92, 0, -6, -6, -4)) },
+      { t: 0.36, pose: reach(Object.assign({ all: R(0, 0, -16), root: M(0.1, 0, 0) }, ribs(86, 10, 4, 0, 0)), 'L') },
+      { t: 0.44, pose: reach(Object.assign({}, ribs(92, 0, -6, -6, -4)), 'L') },
       { t: 0.9, reset: true, use: 'stand' }] },
     UpStrike: { fps: 30, keys: [
       { t: 0, use: 'stand' }, { t: 0.28, use: 'squash' },
-      { t: 0.36, reset: true, pose: Object.assign({ root: M(0, 0.18, 0), top: R(-8), wingL: R(0, 0, -26), wingR: R(0, 0, 26) }, ribs(150, 14, 8, 0, 0), ribsR(-150, -14, -8, 0, 0)) },
-      { t: 0.46, pose: Object.assign({}, ribs(168, 6, 0, 0, 0), ribsR(-168, -6, 0, 0, 0)) },
+      { t: 0.36, reset: true, pose: reach(Object.assign({ root: M(0, 0.18, 0), top: R(-8), wingL: R(0, 0, -26), wingR: R(0, 0, 26) }, ribs(150, 14, 8, 0, 0), ribsR(-150, -14, -8, 0, 0)), 'LR') },
+      { t: 0.46, pose: reach(Object.assign({}, ribs(168, 6, 0, 0, 0), ribsR(-168, -6, 0, 0, 0)), 'LR') },
       { t: 0.9, reset: true, use: 'stand' }] },
     Spin: { fps: 30, keys: [
       { t: 0, use: 'stand' },
@@ -266,14 +277,14 @@ Object.assign(loom.clips, {
   Flick: { fps: 30, keys: [
     { t: 0, use: 'stand' },
     { t: 0.18, pose: Object.assign({ all: R(0, 0, 6) }, ribs(-28, -16, -10, 0, 0)) },
-    { t: 0.28, pose: Object.assign({ all: R(0, 0, -8), root: M(0.04, 0, 0) }, ribs(72, 18, 8, 0, 0)) },
-    { t: 0.38, pose: Object.assign({}, ribs(60, -8, -10, -4, 0)) },
+    { t: 0.28, pose: reach(Object.assign({ all: R(0, 0, -8), root: M(0.04, 0, 0) }, ribs(72, 18, 8, 0, 0)), 'L') },
+    { t: 0.38, pose: reach(Object.assign({}, ribs(60, -8, -10, -4, 0)), 'L') },
     { t: 0.7, reset: true, use: 'stand' }] },
   BackLash: { fps: 30, keys: [
     { t: 0, use: 'stand' },
     { t: 0.28, pose: Object.assign({ all: R(0, 0, -14), root: M(0.06, 0.02, 0) }, ribsR(40, 30, 20, 10, 6)) },
-    { t: 0.36, pose: Object.assign({ all: R(0, 0, 16), root: M(-0.1, 0, 0) }, ribsR(-86, -10, -4, 0, 0)) },
-    { t: 0.44, pose: Object.assign({}, ribsR(-92, 0, 6, 6, 4)) },
+    { t: 0.36, pose: reach(Object.assign({ all: R(0, 0, 16), root: M(-0.1, 0, 0) }, ribsR(-86, -10, -4, 0, 0)), 'R') },
+    { t: 0.44, pose: reach(Object.assign({}, ribsR(-92, 0, 6, 6, 4)), 'R') },
     { t: 0.9, reset: true, use: 'stand' }] },
   DownLash: { fps: 30, keys: [
     { t: 0, use: 'stand' },
@@ -308,9 +319,9 @@ Object.assign(loom.clips, {
     { t: 0.4, reset: true, use: 'stand' }] },
   /* Holding with a ribbon: the forward ribbon stays out and tugs. */
   Hold: { fps: 30, keys: [
-    { t: 0, use: 'stand', pose: Object.assign({ all: R(0, 0, -8), root: M(0.04, 0, 0) }, ribs(72, 18, 8, 0, 0)) },
-    { t: 0.3, pose: Object.assign({ all: R(0, 0, -3) }, ribs(64, 26, 10, -4, 0)) },
-    { t: 0.6, pose: Object.assign({ all: R(0, 0, -8) }, ribs(72, 18, 8, 0, 0)) }] },
+    { t: 0, use: 'stand', pose: reach(Object.assign({ all: R(0, 0, -8), root: M(0.04, 0, 0) }, ribs(72, 18, 8, 0, 0)), 'L') },
+    { t: 0.3, pose: reach(Object.assign({ all: R(0, 0, -3) }, ribs(64, 26, 10, -4, 0)), 'L') },
+    { t: 0.6, pose: reach(Object.assign({ all: R(0, 0, -8) }, ribs(72, 18, 8, 0, 0)), 'L') }] },
   /* Being held: pulled back off balance, wings and ribbons fluttering. */
   Held: { fps: 30, keys: [
     { t: 0, use: 'stand', pose: Object.assign({ all: R(0, 0, 14), top: R(0, 0, 10), wingL: R(0, 0, 18), wingR: R(0, 0, -18) }, both(22, 14, 8, 4, 2)) },
@@ -319,8 +330,9 @@ Object.assign(loom.clips, {
 });
 out('loom', loom);
 manifest.Loom = { file: 'assets/loom/export/loom-v1.glb', height: 15, faceCamera: true, clips: baseClips('Lash', 'Lash'),
-  strikers: [{ bone: 'top', ext: 3.6 }, { bone: 'ribL5', ext: 1.5 }, { bone: 'ribR5', ext: 1.5 }, { bone: 'wingL', ext: 3.8 }, { bone: 'wingR', ext: 3.8 }],
-  springs: [{ bones: ['ribL1', 'ribL2', 'ribL3', 'ribL4', 'ribL5'], k: 0.22, d: 0.74, max: 1.0, drag: 0.16 }, { bones: ['ribR1', 'ribR2', 'ribR3', 'ribR4', 'ribR5'], k: 0.22, d: 0.74, max: 1.0, drag: 0.16 }],
+  strikers: [{ bone: 'top', ext: 1.2 }, { bone: 'ribL5', ext: 1.0 }, { bone: 'ribR5', ext: 1.0 }, { bone: 'wingL', ext: 1.5 }, { bone: 'wingR', ext: 1.5 }],
+  springs: [{ bones: ['ribL1', 'ribL2', 'ribL3', 'ribL4', 'ribL5'], k: 0.22, d: 0.74, max: 1.0, drag: 0.16 }, { bones: ['ribR1', 'ribR2', 'ribR3', 'ribR4', 'ribR5'], k: 0.22, d: 0.74, max: 1.0, drag: 0.16 },
+    { bones: ['sash1', 'sash2'], k: 0.26, d: 0.72, max: 0.8, drag: 0.14 }],
   attacks: { jab: A('Flick', 0.28, 0.4, 0, 0.7), ftilt: A('Lash', 0.39, 0.48), utilt: A('UpStrike', 0.39, 0.48), dtilt: A('Spin', 0.34, 0.52), dash: A('Dive', 0.39, 0.5),
     fsmash: A('Dive', 0.39, 0.5), usmash: A('UpStrike', 0.39, 0.48), dsmash: A('Spin', 0.34, 0.52),
     nair: A('Spin', 0.34, 0.52), fair: A('Lash', 0.39, 0.48), bair: A('BackLash', 0.39, 0.48), uair: A('UpStrike', 0.39, 0.48), dair: A('DownLash', 0.39, 0.5),
