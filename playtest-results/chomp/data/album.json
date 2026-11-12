@@ -1,0 +1,391 @@
+{
+ "sections": [
+  {
+   "id": "Zero-to-Deaths",
+   "title": "Zero-to-deaths",
+   "blurb": "From 0% to a KO with the game's own combo counter never resetting. Each one is frame-perfect and true only against the DI it was found with; the list under each clip says what holds and what doesn't."
+  },
+  {
+   "id": "Kill-Confirms",
+   "title": "Kill confirms",
+   "blurb": "Short confirms from a coal hit into a kill, at the percent shown."
+  },
+  {
+   "id": "Coal-Rope-Ant",
+   "title": "Coal, rope and ant",
+   "blurb": "How the coal, the rope and the ant really behave, measured in the engine."
+  },
+  {
+   "id": "Ledgetraps",
+   "title": "Ledgetraps",
+   "blurb": "Coal tossed to the ledge, then the ant called on reaction. The opponent is scripted to pick each getup 25 frames after grabbing the ledge."
+  },
+  {
+   "id": "Edgeguards",
+   "title": "Edgeguards",
+   "blurb": "Against the game's level-9 CPU, which takes over as soon as Chomp's hit lands."
+  },
+  {
+   "id": "Movement-Tech",
+   "title": "Movement",
+   "blurb": "Rope Swing as movement."
+  },
+  {
+   "id": "Glitches",
+   "title": "Glitches",
+   "blurb": "Reported, not fixed."
+  }
+ ],
+ "clips": [
+  {
+   "sec": "Zero-to-Deaths",
+   "file": "Z07-Knell-77pct",
+   "title": "Knell, 8 hits, 77%",
+   "rank": 6,
+   "di": "no DI",
+   "route": "coalH grab_f ant sh fair ro_f w2 bite ftilt ro_f hop dair",
+   "facts": [
+    "True against: no DI only (1 of 18 test defenders)",
+    "Inputs 1 frame late: 20/30 still work; 2 frames late: 4/30",
+    "The most timing-tolerant of the zero-to-deaths",
+    "Level-9 CPU escapes it"
+   ]
+  },
+  {
+   "sec": "Zero-to-Deaths",
+   "file": "Z03-Sack-12-hit-120pct",
+   "title": "Potato Sack, 12 hits, 120%",
+   "rank": 7,
+   "di": "no DI",
+   "route": "coalH grab_f ant sh fair ro_f w4 hop fair ff w9 bair ro_b w9 hop nair fair rf12 grab_u fh uair dj dair",
+   "facts": [
+    "The longest one found: 12 hits",
+    "True against: no DI only",
+    "Frame-perfect: 0/30 with inputs 1 frame late",
+    "Level-9 CPU escapes it"
+   ]
+  },
+  {
+   "sec": "Zero-to-Deaths",
+   "file": "Z06-Knell-rope-bite-111pct",
+   "title": "Knell, 11 hits, 111%",
+   "di": "DI in",
+   "route": "coalH grab_f ant rs w4 bite rf6 utilt ftilt ro_f w3 hop w6 fair dash ro_f hop uair dj dair",
+   "facts": [
+    "True against: DI in only",
+    "Inputs 1 frame late: 2/30",
+    "Uses the ant then Rope Swing straight into the bite"
+   ]
+  },
+  {
+   "sec": "Zero-to-Deaths",
+   "file": "Z09-Sprocket-108pct",
+   "title": "Sprocket, 11 hits, 108%",
+   "di": "DI out",
+   "route": "coalH grab_f ant sh fair ro_f hop fair ff w9 bair ro_b w4 hop uair utilt fh nair ro_b hop dair",
+   "facts": [
+    "True against: DI out only",
+    "The first 3 links (6 hits, 53%) hold against 6 of 9 DIs, and 20/20 at 1 frame late",
+    "Inputs 1 frame late for the whole route: 1/30"
+   ]
+  },
+  {
+   "sec": "Zero-to-Deaths",
+   "file": "Z08-Sprocket-101pct",
+   "title": "Sprocket, 10 hits, 101%",
+   "di": "DI in",
+   "route": "coalH grab_f ant w28 ftilt ro_f w9 bite rf6 grab_u fh fair w3 dj nair ro_f hop dair",
+   "facts": [
+    "True against: DI in only",
+    "Inputs 1 frame late: 1/30"
+   ]
+  },
+  {
+   "sec": "Zero-to-Deaths",
+   "file": "Z01-Flint-dash-ant-92pct",
+   "title": "Flint, 9 hits, 92%",
+   "di": "DI out",
+   "route": "coal grab_f ant w28 dash ro_f w3 hop w6 fair fh nair ro_f w2 bite dj dair",
+   "facts": [
+    "True against: DI out only",
+    "Opens with the plain (untilted) toss",
+    "Inputs 1 frame late: 0/30"
+   ]
+  },
+  {
+   "sec": "Zero-to-Deaths",
+   "file": "Z04-Sack-double-dtilt-92pct",
+   "title": "Potato Sack, 10 hits, 92%",
+   "di": "DI in",
+   "route": "coalH grab_f ant w28 sh fair ro_f bite grab_f rf12 dtilt dtilt ro_f hop dair",
+   "facts": [
+    "True against: DI in only",
+    "Inputs 1 frame late: 7/30"
+   ]
+  },
+  {
+   "sec": "Zero-to-Deaths",
+   "file": "Z05-Sack-grab-up-89pct",
+   "title": "Potato Sack, 9 hits, 89%",
+   "di": "DI out",
+   "route": "coalH grab_f ant sh fair ro_f w2 bite grab_u fh nair ro_f hop dair",
+   "facts": [
+    "True against: DI out only",
+    "Inputs 1 frame late: 0/30 for the whole route; the first 4 links survive 10/20"
+   ]
+  },
+  {
+   "sec": "Zero-to-Deaths",
+   "file": "Z02-Flint-coal-set-fsmash-92pct",
+   "title": "Flint, 8 hits, 92% (coal already down)",
+   "rank": 3,
+   "di": "no DI",
+   "route": "ant w28 fsmash ro_f hop fair ff cush ro_f w5 bite rf6 grab_u fh nair ro_f hop dair",
+   "facts": [
+    "Starts with a coal Chomp tossed earlier lying on the floor",
+    "The opener (ant, fsmash, rope-out fair: 3 hits, 42%) is true against all 9 DIs and 20/20 at 1 frame late",
+    "The whole route: no DI only, 1/30 at 1 frame late"
+   ]
+  },
+  {
+   "sec": "Zero-to-Deaths",
+   "file": "Z10-Knell-coal-set-84pct",
+   "title": "Knell, 7 hits, 84% (coal already down)",
+   "di": "no DI",
+   "route": "ant w28 fsmash ro_f w9 bite dtilt ro_f w5 bite rf6 jab ro_f hop dair",
+   "facts": [
+    "True against: no DI and DI in (4 of 18 test defenders)",
+    "Opener ant > fsmash > rope bite: true against all 9 DIs"
+   ]
+  },
+  {
+   "sec": "Zero-to-Deaths",
+   "file": "Z12-Sprocket-coal-set-82pct",
+   "title": "Sprocket, 7 hits, 82% (coal already down)",
+   "di": "DI out",
+   "route": "ant fsmash ro_f w5 bite rf6 dtilt ro_f w5 bite wf4 ftilt ro_f hop dair",
+   "facts": [
+    "True against: DI out only",
+    "Opener ant > fsmash: true against all 9 DIs"
+   ]
+  },
+  {
+   "sec": "Zero-to-Deaths",
+   "file": "Z11-Sack-coal-set-81pct",
+   "title": "Potato Sack, 7 hits, 81% (coal already down)",
+   "di": "DI in",
+   "route": "ant fsmash ro_f w5 bite wf4 ftilt ro_f w9 hop fair ff cush ro_f hop dair",
+   "facts": [
+    "True against: DI in only",
+    "Opener ant > fsmash > rope bite: true against 7 of 9 DIs"
+   ]
+  },
+  {
+   "sec": "Kill-Confirms",
+   "file": "K05-Knell-110pct-coalH-grab-d-fsmash",
+   "title": "Knell at 110%: coal, down throw, fsmash",
+   "rank": 1,
+   "di": "no DI",
+   "route": "coalH grab_d fsmash",
+   "facts": [
+    "True against all 9 DI directions (34 of 270 defenders with SDI and escape attempts added)",
+    "Inputs 1 frame late: 30/30; 2 frames: 20/30",
+    "Also kills at 90, 100, 120 and 130%",
+    "Also works on Potato Sack"
+   ]
+  },
+  {
+   "sec": "Kill-Confirms",
+   "file": "K02-Sack-110pct-coalH-grab-d-fsmash",
+   "title": "Potato Sack at 110%: coal, down throw, fsmash",
+   "di": "no DI",
+   "route": "coalH grab_d fsmash",
+   "facts": [
+    "True against 6 of 9 DI directions",
+    "Inputs 1 frame late: 30/30; 2 frames: 22/30",
+    "Works at 100–130%"
+   ]
+  },
+  {
+   "sec": "Kill-Confirms",
+   "file": "K01-Sack-110pct-coalH-dtilt-usmash",
+   "title": "Potato Sack at 110%: coal, dtilt, usmash",
+   "di": "DI in",
+   "route": "coalH dtilt usmash",
+   "facts": [
+    "True against DI in and DI up-in",
+    "Inputs up to 2 frames late: 30/30",
+    "Also works on Sprocket"
+   ]
+  },
+  {
+   "sec": "Kill-Confirms",
+   "file": "K08-Flint-110pct-coalH-grab-u-nair-fair",
+   "title": "Flint at 110%: coal, up throw, nair, rope-hop fair",
+   "di": "DI out",
+   "route": "coalH grab_u fh w4 nair ro_f w9 hop fair",
+   "facts": [
+    "True against DI out only",
+    "Inputs 1 frame late: 30/30",
+    "Works 90–110%"
+   ]
+  },
+  {
+   "sec": "Kill-Confirms",
+   "file": "K12-Knell-80pct-coalL-dtilt-ant-dash-attack",
+   "title": "Knell at 80%: coal, dtilt, ant, dash attack",
+   "di": "DI out",
+   "route": "coalL dtilt ant w28 dash",
+   "facts": [
+    "The ant joins a kill confirm",
+    "True against DI out and down-out",
+    "Inputs 1 frame late: 20/30; 3 frames: 12/30",
+    "Works 60–80%"
+   ]
+  },
+  {
+   "sec": "Kill-Confirms",
+   "file": "K07-Flint-80pct-coalH-utilt-bair-dair",
+   "title": "Flint at 80%: coal, utilt, bair, rope-hop dair",
+   "di": "DI in",
+   "route": "coalH utilt fh w4 bair ro_b w9 hop dair",
+   "facts": [
+    "True against DI in only",
+    "Frame-tight: 3/30 at 1 frame late"
+   ]
+  },
+  {
+   "sec": "Coal-Rope-Ant",
+   "file": "T01-relay-across-the-stage",
+   "title": "Coal relay across the stage",
+   "rank": 8,
+   "route": "coalH relay relay relay",
+   "facts": [
+    "Relay window: 3 frames either side of the mark; 1 frame off or less adds speed",
+    "Plain toss lands 33 units away (7.6%); 3 perfect relays: 101 units (8.8%); high toss + 3 perfect relays: 119 units (10.5%)",
+    "Relays 2 frames off still relay but add nothing (7.6%)"
+   ]
+  },
+  {
+   "sec": "Coal-Rope-Ant",
+   "file": "T02-ant-anti-air-full-hop",
+   "title": "Ant anti-air with a full hop",
+   "rank": 9,
+   "facts": [
+    "Chomp full hops 20 frames after calling the ant: the rope swings up and the ant meets the jumping foe (8.8%)",
+    "Hopping at 26, 32 or 38 frames missed",
+    "The rope keeps the ant's progress, so moving Chomp swings the ant around the coal"
+   ]
+  },
+  {
+   "sec": "Coal-Rope-Ant",
+   "file": "T03-ant-no-hop-misses",
+   "title": "The same call without the hop",
+   "facts": [
+    "The ant runs under the jumping foe: no hit"
+   ]
+  },
+  {
+   "sec": "Coal-Rope-Ant",
+   "file": "T04-rope-is-a-ramp-not-a-hitbox",
+   "title": "The rope is a ramp, not a hitbox",
+   "rank": 10,
+   "facts": [
+    "The rope never deals damage",
+    "A foe falling onto a sloped rope is slowed from 1.55 to about 0.3 per frame and slides down it toward the coal",
+    "A flat rope on the floor never blocks walking; jumping lifts the rope over a standing foe"
+   ]
+  },
+  {
+   "sec": "Coal-Rope-Ant",
+   "file": "T05-ant-interrupts-a-grab",
+   "title": "The ant beats a grab",
+   "rank": 5,
+   "facts": [
+    "Grabs never cut the rope: a grab started on the rope line is interrupted by the ant",
+    "Same result against Flint and Knell"
+   ]
+  },
+  {
+   "sec": "Coal-Rope-Ant",
+   "file": "T06-sack-dtilt-cuts-the-rope",
+   "title": "A damaging attack cuts the rope",
+   "facts": [
+    "Any active damaging hitbox near the rope cuts it",
+    "Potato Sack's jab, ftilt and dtilt cut it when started 4–20 frames after the call; Flint's dtilt 4–24",
+    "Flint's jab and ftilt lose to the ant; Knell loses to it with everything tested"
+   ]
+  },
+  {
+   "sec": "Ledgetraps",
+   "file": "L01-reactive-ant-vs-neutral-getup",
+   "title": "Neutral getup: caught",
+   "rank": 4,
+   "facts": [
+    "Coal tossed to the ledge (lands at x 60), Chomp waits at x 20, 48 units away",
+    "Ant called 12 frames after the foe leaves the ledge",
+    "Caught every time against Flint, Sack and Knell"
+   ]
+  },
+  {
+   "sec": "Ledgetraps",
+   "file": "L02-reactive-ant-vs-roll",
+   "title": "Ledge roll: caught",
+   "facts": [
+    "Caught every time"
+   ]
+  },
+  {
+   "sec": "Ledgetraps",
+   "file": "L03-reactive-ant-vs-ledge-jump",
+   "title": "Ledge jump: caught",
+   "facts": [
+    "Caught every time; drop then double jump was caught too"
+   ]
+  },
+  {
+   "sec": "Ledgetraps",
+   "file": "L04-getup-attack-beats-the-trap",
+   "title": "Getup attack gets through",
+   "facts": [
+    "Gets through 3 times out of 4 (Flint, Sack); Knell's is caught",
+    "Standing at the ledge (x 46) with only fsmash covers the same options; the ant's gain is doing it from 48 units away"
+   ]
+  },
+  {
+   "sec": "Edgeguards",
+   "file": "E01-ledge-fsmash-vs-cpu-100pct",
+   "title": "Ledge fsmash kills at 100%",
+   "rank": 11,
+   "facts": [
+    "Kills 4/4 at 100% against Flint and Potato Sack, and at 80% against Knell, with the level-9 CPU recovering",
+    "Hanging the coal off-stage with the ant hits the recovering CPU often (6–15%) but never stopped it recovering",
+    "Off-stage rope bite, fair and cushion only add kills against Knell (40–60%)"
+   ]
+  },
+  {
+   "sec": "Movement-Tech",
+   "file": "M01-four-rope-chain-and-bite",
+   "title": "Four Rope Swings and the bite",
+   "facts": [
+    "133 units with the stick untouched; 218 holding forward, enough to carry him off the far side",
+    "Rope Swing, wait 20, hop: 76 units; 4 swings and a hop: 122"
+   ]
+  },
+  {
+   "sec": "Glitches",
+   "file": "G01-wall-swing-pop",
+   "title": "Wall-swing pop",
+   "rank": 2,
+   "facts": [
+    "Swinging while pinned against the island's side wall keeps the swing running",
+    "Once he rises past the floor he snaps to where the swing would be: up to 49.9 units in one frame, onto the stage",
+    "256 of 360 tested routes from below the ledge did it",
+    "Not fixed"
+   ]
+  }
+ ],
+ "intro": "Chomp Chomp tested in the real Emberfall engine: 51 search jobs, 6.49 million route branches and 274 million simulated frames, then every result replayed under DI, SDI, escape attempts, the level-9 CPU and late inputs. Every clip here was recorded from the game itself.",
+ "note": "No game code, balance or mechanic was changed, and no glitch was fixed. Each zero-to-death is true only against the DI shown on its card; the level-9 CPU escapes all of them. The brief arrived cut off at \"Explore thousands\", read here as exploring thousands of routes.",
+ "footer": "Testing tools: tools/chomp-lab.js, chomp-node.js, chomp-search.js, chomp-verify.js, chomp-record.js and chomp-album.js. The full report, with every table and what remains unverified, is README.md in this folder. 2026-11-12."
+}
