@@ -1,0 +1,39 @@
+{
+ "name": "pip_38hit_50pct_vs_DI-in-SDI-in-jumpaway",
+ "dir": "7_Funny_and_Spectacular_Discoveries",
+ "route": [
+  "sh_nair:4:n",
+  "ff",
+  "sh_nair:4:n",
+  "ff",
+  "sh_nair:4:n",
+  "ff",
+  "sh_nair:7",
+  "dair",
+  "sh_nair",
+  "seltap",
+  "up:0:u"
+ ],
+ "sit": {
+  "bird": 3,
+  "foe": [
+   0,
+   0
+  ],
+  "x0": -30,
+  "dist": 4,
+  "def": {
+   "di": "in",
+   "sdi": "in",
+   "esc": "jumpaway"
+  }
+ },
+ "caption": "Pip: 4 short-hop nairs with fast-falls, dair, nair, tap B, Cyclone. Defender DI in, SDI in, jumps away",
+ "hits": 38,
+ "dmg": 50.3,
+ "ko": false,
+ "chainKO": false,
+ "startPct": 0,
+ "endPct": 50.3,
+ "seconds": 10.6
+}

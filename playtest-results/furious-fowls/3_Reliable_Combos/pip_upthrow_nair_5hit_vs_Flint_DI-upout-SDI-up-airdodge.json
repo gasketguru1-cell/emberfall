@@ -1,0 +1,30 @@
+{
+ "name": "pip_upgrab_nair_8hit_vs_Flint_DI-upout-SDI-up",
+ "dir": "3_Reliable_Combos",
+ "route": [
+  "grab_u",
+  "sh_nair"
+ ],
+ "sit": {
+  "bird": 3,
+  "foe": [
+   0,
+   0
+  ],
+  "x0": 0,
+  "dist": 4,
+  "def": {
+   "di": "upout",
+   "sdi": "up",
+   "esc": "ad"
+  }
+ },
+ "caption": "Pip: up throw, short-hop nair. Defender: DI up-out, SDI up, air dodge",
+ "hits": 5,
+ "dmg": 14.4,
+ "ko": false,
+ "chainKO": false,
+ "startPct": 0,
+ "endPct": 14.4,
+ "seconds": 4.2
+}
