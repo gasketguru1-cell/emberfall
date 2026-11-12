@@ -1,0 +1,30 @@
+{
+ "name": "bolt_air-cyclone_sideways_full-charge",
+ "dir": "5_Movement_Tech",
+ "route": [
+  "up:45:t",
+  "land"
+ ],
+ "sit": {
+  "bird": 1,
+  "foe": [
+   0,
+   0
+  ],
+  "x0": -90,
+  "dist": 160,
+  "fowlY": 70,
+  "lead": 2,
+  "def": {
+   "di": "none"
+  }
+ },
+ "caption": "Bolt in the air: Cyclone held 45 frames, released sideways",
+ "hits": 0,
+ "dmg": 0,
+ "ko": false,
+ "chainKO": false,
+ "startPct": 0,
+ "endPct": 0,
+ "seconds": 4.1
+}

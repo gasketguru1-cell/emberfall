@@ -1,0 +1,37 @@
+{
+ "name": "pip_25hit_grab-relay_vs_Flint_0pct_noDI",
+ "dir": "3_Reliable_Combos",
+ "route": [
+  "sh_nair",
+  "ff",
+  "sh_bair",
+  "seltap",
+  "grab_u",
+  "fh_nair",
+  "seltap",
+  "grab_u",
+  "fh_uair",
+  "dj_uair"
+ ],
+ "sit": {
+  "bird": 3,
+  "foe": [
+   0,
+   0
+  ],
+  "x0": -30,
+  "dist": 13,
+  "pct": 0,
+  "def": {
+   "di": "none"
+  }
+ },
+ "caption": "Pip: sh nair, ff, sh bair, tap B, up grab, fh nair, tap B, up grab, fh uair, dj uair",
+ "hits": 25,
+ "dmg": 63.9,
+ "ko": false,
+ "chainKO": false,
+ "startPct": 0,
+ "endPct": 63.9,
+ "seconds": 10
+}

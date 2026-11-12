@@ -1,0 +1,31 @@
+{
+ "name": "pip_sideB-hover_then_flight",
+ "dir": "5_Movement_Tech",
+ "route": [
+  "sb:1",
+  "flyn",
+  "land"
+ ],
+ "sit": {
+  "bird": 3,
+  "foe": [
+   0,
+   0
+  ],
+  "x0": -60,
+  "dist": 120,
+  "fowlY": 50,
+  "lead": 2,
+  "def": {
+   "di": "none"
+  }
+ },
+ "caption": "Pip in the air: Side B holds height during the aim, then the bird flies aimed up",
+ "hits": 0,
+ "dmg": 0,
+ "ko": false,
+ "chainKO": false,
+ "startPct": 0,
+ "endPct": 0,
+ "seconds": 3.8
+}

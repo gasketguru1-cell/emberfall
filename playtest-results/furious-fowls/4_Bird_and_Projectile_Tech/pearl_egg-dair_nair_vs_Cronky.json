@@ -1,0 +1,28 @@
+{
+ "name": "pearl_egg-dair_nair_vs_Cronky",
+ "dir": "4_Bird_and_Projectile_Tech",
+ "route": [
+  "fh_dair:16:n",
+  "nair"
+ ],
+ "sit": {
+  "bird": 4,
+  "foe": [
+   8,
+   1
+  ],
+  "x0": 0,
+  "dist": 4,
+  "def": {
+   "di": "none"
+  }
+ },
+ "caption": "Pearl vs Cronky: full-hop dair (egg drop), nair",
+ "hits": 6,
+ "dmg": 18.9,
+ "ko": false,
+ "chainKO": false,
+ "startPct": 0,
+ "endPct": 18.9,
+ "seconds": 4.4
+}

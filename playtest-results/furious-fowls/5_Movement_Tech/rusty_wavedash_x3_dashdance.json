@@ -1,0 +1,31 @@
+{
+ "name": "rusty_wavedash_x3_dashdance",
+ "dir": "5_Movement_Tech",
+ "route": [
+  "wd:l",
+  "wd:l",
+  "wd:s",
+  "wait:10",
+  "dd"
+ ],
+ "sit": {
+  "bird": 0,
+  "foe": [
+   0,
+   0
+  ],
+  "x0": -60,
+  "dist": 120,
+  "def": {
+   "di": "none"
+  }
+ },
+ "caption": "Rusty: long wavedash x2, short wavedash, dash dance",
+ "hits": 0,
+ "dmg": 0,
+ "ko": false,
+ "chainKO": false,
+ "startPct": 0,
+ "endPct": 0,
+ "seconds": 4.5
+}

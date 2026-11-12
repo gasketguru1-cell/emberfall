@@ -1,0 +1,30 @@
+{
+ "name": "rusty_dummy-dair_fsmash_KO_50pct_noDI",
+ "dir": "4_Bird_and_Projectile_Tech",
+ "route": [
+  "sh_dair",
+  "fsmash",
+  "fh_nair:16"
+ ],
+ "sit": {
+  "bird": 0,
+  "foe": [
+   0,
+   0
+  ],
+  "x0": 30,
+  "dist": 13,
+  "pct": 50,
+  "def": {
+   "di": "none"
+  }
+ },
+ "caption": "Rusty at 50%: short-hop dair drops the dummy, forward smash (no DI)",
+ "hits": 2,
+ "dmg": 37.8,
+ "ko": true,
+ "chainKO": true,
+ "startPct": 50,
+ "endPct": 0,
+ "seconds": 5.6
+}

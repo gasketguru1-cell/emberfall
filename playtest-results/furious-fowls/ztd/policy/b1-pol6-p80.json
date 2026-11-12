@@ -1,0 +1,28 @@
+[
+ {
+  "bird": 1,
+  "foe": [
+   0,
+   0
+  ],
+  "pct": 80,
+  "policy": {
+   "di": "downin",
+   "sdi": "down",
+   "esc": "jumpaway"
+  },
+  "x0": -30,
+  "sims": 20538,
+  "sec": 33.769,
+  "ztd": [],
+  "best": {
+   "route": [
+    "@4",
+    "dsmash",
+    "wait:6"
+   ],
+   "hits": 1,
+   "pct": 93.9
+  }
+ }
+]

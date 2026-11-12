@@ -33,19 +33,41 @@ function drawThread(f, x, y) {
 }
 /* Joey's INTENSITY: looks like a power gauge, is really how tired he is. A big bar sitting on top of his damage panel:
    red into orange into white-hot, with moving shine, a kick when it jumps, and flames, shaking and a glow near the top.
-   Full, it turns cool blue: TAKE FIVE, then CATCHING BREATH with the 15 seconds draining. Gone once he transforms.
-   HUD_INT keeps only what the drawing needs (the last value and a flash timer), off the fighter, so the game state is untouched. */
-const HUD_INT = [{ k: 0, pop: 0 }, { k: 0, pop: 0 }];
+   It starts a size up from the panel and swells as it fills (growing up and out from the panel's top edge), and gets
+   louder as it goes: a pulsing aura from 40%, a flaring leading edge, flames, boiling fill and rising embers from 50%,
+   heat shake and crackling arcs near the top, a shock ring each time it jumps. Full, it turns cool blue: TAKE FIVE,
+   then CATCHING BREATH with the 15 seconds draining. Gone once he transforms.
+   HUD_INT keeps only what the drawing needs (the last value, a flash timer, the eased size, the embers), off the fighter,
+   so the game state is untouched. */
+const HUD_INT = [{ k: 0, pop: 0, s: 1.3, ring: 0, em: [] }, { k: 0, pop: 0, s: 1.3, ring: 0, em: [] }];
+const INT_SIZE = [1.3, 1.85];   /* the bar's scale empty and full (1 = the panel's width); 1.85 keeps two Joeys' bars apart */
 function drawIntensity(f, x, y) {
   if (f.tfLatch) { g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#ffd98a'; g.textAlign = 'left'; g.fillText('CRONKY DONG', x - 102, y + 64); return; }
   const ex = f.exStart >= 0, e = ex ? frame - f.exStart : 0, k = ex ? Math.max(0, 900 - e) / 900 : f.fat / FAT.max, m = HUD_INT[f.idx & 1];
-  if (!ex && k > m.k + 0.004) m.pop = 1; m.k = k; m.pop = Math.max(0, m.pop - 0.06);
-  const hot = !ex && k >= 0.8, bw = 240, bh = 30, sh = hot ? (k - 0.8) * 20 : 0, bx = x - 120 + (Math.random() - 0.5) * sh, by = y - 42 + (Math.random() - 0.5) * sh, fw = bw * k;
+  if (!ex && k > m.k + 0.004) { m.pop = 1; m.ring = 1; } m.k = k; m.pop = Math.max(0, m.pop - 0.06); m.ring = Math.max(0, m.ring - 0.045);
+  /* size: eased toward its target, with a little overshoot kick when it jumps */
+  const heat = ex ? 0 : k, target = INT_SIZE[0] + (INT_SIZE[1] - INT_SIZE[0]) * (ex ? 0.35 : Math.pow(k, 0.85)) + m.pop * 0.06 * (0.5 + k);
+  m.s += (target - m.s) * 0.18;
+  const hot = !ex && k >= 0.8, bw = 240, bh = 30, sh = (hot ? (k - 0.8) * 20 : 0) + (!ex && k > 0.6 ? (k - 0.6) * 4 : 0), ax = x, ay = y - 8;
+  const bx = x - 120 + (Math.random() - 0.5) * sh, by = y - 42 + (Math.random() - 0.5) * sh, fw = bw * k;
   g.save();
+  g.translate(ax, ay); g.scale(m.s, m.s); g.translate(-ax, -ay);   /* grows from the middle of the panel's top edge */
+  /* the aura: a soft pulsing glow behind the bar from 40%, wider and hotter as it climbs */
+  if (heat > 0.4) {
+    const a = (heat - 0.4) / 0.6, pul = 0.75 + 0.25 * Math.sin(tick * (0.15 + a * 0.35)), cx = bx + Math.max(fw, 40) * 0.6, cy = by + bh / 2, rad = 70 + 110 * a * pul;
+    const ag = g.createRadialGradient(cx, cy, 4, cx, cy, rad); ag.addColorStop(0, 'rgba(255,' + (150 + 90 * a | 0) + ',60,' + (0.55 * a * pul).toFixed(2) + ')'); ag.addColorStop(0.5, 'rgba(255,90,20,' + (0.25 * a * pul).toFixed(2) + ')'); ag.addColorStop(1, 'rgba(255,60,0,0)');
+    g.fillStyle = ag; g.fillRect(cx - rad, cy - rad, rad * 2, rad * 2);
+  }
+  /* the shock ring when it jumps */
+  if (m.ring > 0 && fw > 0) { const r = (1 - m.ring) * (40 + 60 * heat); g.strokeStyle = 'rgba(255,230,150,' + (m.ring * 0.8).toFixed(2) + ')'; g.lineWidth = 3 * m.ring + 1; g.beginPath(); g.ellipse(bx + fw, by + bh / 2, r + 6, (r + 6) * 0.55, 0, 0, TAU); g.stroke(); }
   /* the plate */
-  g.shadowColor = ex ? 'rgba(120,180,230,.6)' : hot ? 'rgba(255,140,40,' + (0.6 + 0.4 * Math.sin(tick * 0.4)).toFixed(2) + ')' : 'rgba(0,0,0,.5)'; g.shadowBlur = hot ? 22 : 10;
+  g.shadowColor = ex ? 'rgba(120,180,230,.6)' : heat > 0.5 ? 'rgba(255,140,40,' + (0.5 + 0.5 * Math.sin(tick * (0.2 + heat * 0.3))).toFixed(2) + ')' : 'rgba(0,0,0,.5)'; g.shadowBlur = 10 + (ex ? 0 : 26 * Math.max(0, heat - 0.3));
   g.fillStyle = 'rgba(14,8,18,.85)'; rr(bx - 4, by - 4, bw + 8, bh + 8, 10); g.fill(); g.shadowBlur = 0;
-  g.lineWidth = 2; g.strokeStyle = ex ? '#8fb7d6' : hot ? '#ffcf5a' : '#6a3a2a'; rr(bx - 4, by - 4, bw + 8, bh + 8, 10); g.stroke();
+  /* the rim: dull copper, warming to molten gold with a glint running round it */
+  if (ex) g.strokeStyle = '#8fb7d6';
+  else { const rg = g.createLinearGradient(bx - 4, 0, bx + bw + 4, 0), t = 0.1 + 0.8 * ((tick * 0.02) % 1), c0 = heat > 0.5 ? '#ffcf5a' : heat > 0.25 ? '#8a4a2c' : '#6a3a2a', c1 = heat > 0.5 ? '#fff6c8' : '#c87a4a';
+    rg.addColorStop(0, c0); rg.addColorStop(t - 0.1, c0); rg.addColorStop(t, c1); rg.addColorStop(t + 0.1, c0); rg.addColorStop(1, c0); g.strokeStyle = rg; }
+  g.lineWidth = 2 + (ex ? 0 : heat * 1.5); rr(bx - 4, by - 4, bw + 8, bh + 8, 10); g.stroke();
   /* the fill, clipped to the bar */
   g.save(); rr(bx, by, bw, bh, 7); g.clip();
   g.fillStyle = 'rgba(255,255,255,.06)'; g.fillRect(bx, by, bw, bh);
@@ -57,6 +79,9 @@ function drawIntensity(f, x, y) {
     /* moving diagonal shine */
     g.save(); g.beginPath(); g.rect(bx, by, fw, bh); g.clip(); g.fillStyle = 'rgba(255,255,255,' + (ex ? 0.08 : 0.16) + ')';
     const off = (tick * (ex ? 0.6 : 1.5 + k * 3)) % 28; for (let sx = bx - 28 + off; sx < bx + fw + 28; sx += 28) { g.beginPath(); g.moveTo(sx, by + bh); g.lineTo(sx + 12, by); g.lineTo(sx + 22, by); g.lineTo(sx + 10, by + bh); g.fill(); }
+    /* past halfway the fill boils: bright blobs drifting through it */
+    if (heat > 0.5) for (let q = 0; q < 6; q++) { const px = bx + ((q * 47 + tick * (1.2 + q * 0.3)) % Math.max(1, fw)), py = by + bh * (0.5 + 0.3 * Math.sin(tick * 0.07 + q * 2)), r = 8 + 4 * Math.sin(tick * 0.11 + q);
+      const bg = g.createRadialGradient(px, py, 0, px, py, r); bg.addColorStop(0, 'rgba(255,250,210,' + ((heat - 0.5) * 1.1).toFixed(2) + ')'); bg.addColorStop(1, 'rgba(255,200,80,0)'); g.fillStyle = bg; g.fillRect(px - r, py - r, r * 2, r * 2); }
     g.restore();
     g.fillStyle = 'rgba(255,255,255,.28)'; g.fillRect(bx, by + 2, fw, 5);   /* top gloss */
     if (m.pop > 0) { g.fillStyle = 'rgba(255,255,255,' + (0.55 * m.pop).toFixed(2) + ')'; g.fillRect(bx, by, fw, bh); }   /* the kick when it jumps */
@@ -64,14 +89,29 @@ function drawIntensity(f, x, y) {
   }
   g.fillStyle = 'rgba(0,0,0,.35)'; for (let q = 1; q < 10; q++) g.fillRect(bx + bw * q / 10 - 1, by + bh - 8, 2, 8);   /* tenths */
   g.restore();
-  /* flames off the top of the fill when it runs hot */
-  if (hot && fw > 0) {
-    for (let q = 0; q < 9; q++) { const fx = bx + fw * (0.55 + 0.45 * q / 8), fl = (8 + 14 * (k - 0.8) * 5) * (0.6 + 0.4 * Math.sin(tick * 0.5 + q * 1.7)) * (0.7 + Math.random() * 0.3);
-      g.fillStyle = q % 2 ? 'rgba(255,200,70,.85)' : 'rgba(255,110,30,.8)'; g.beginPath(); g.moveTo(fx - 6, by + 2); g.quadraticCurveTo(fx - 2, by - fl * 0.5, fx + (Math.random() - 0.5) * 3, by - fl); g.quadraticCurveTo(fx + 2, by - fl * 0.5, fx + 6, by + 2); g.fill(); }
+  /* the leading edge flares: a white-hot star where the fill ends, bigger as it climbs */
+  if (!ex && fw > 0 && heat > 0.3) { const sx = bx + fw, sy = by + bh / 2, r = (10 + 26 * heat) * (0.85 + 0.15 * Math.sin(tick * 0.5));
+    const sg = g.createRadialGradient(sx, sy, 0, sx, sy, r); sg.addColorStop(0, 'rgba(255,255,240,.95)'); sg.addColorStop(0.3, 'rgba(255,220,120,.6)'); sg.addColorStop(1, 'rgba(255,140,40,0)'); g.fillStyle = sg; g.fillRect(sx - r, sy - r, r * 2, r * 2);
+    g.strokeStyle = 'rgba(255,250,220,' + (0.5 * heat).toFixed(2) + ')'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(sx - r * 1.3, sy); g.lineTo(sx + r * 1.3, sy); g.moveTo(sx, sy - r); g.lineTo(sx, sy + r); g.stroke(); }
+  /* flames off the top of the fill: from halfway, taller and spread wider as it climbs */
+  if (!ex && heat >= 0.5 && fw > 0) {
+    const a = (heat - 0.5) / 0.5, n = 6 + (a * 10 | 0);
+    for (let q = 0; q < n; q++) { const fx = bx + fw * (1 - (0.7 * a + 0.2) * q / Math.max(1, n - 1)), fl = (6 + 34 * a) * (0.6 + 0.4 * Math.sin(tick * 0.5 + q * 1.7)) * (0.7 + Math.random() * 0.3), wd = 5 + 3 * a;
+      g.fillStyle = q % 3 === 0 ? 'rgba(255,245,200,.85)' : q % 2 ? 'rgba(255,200,70,.85)' : 'rgba(255,110,30,.8)'; g.beginPath(); g.moveTo(fx - wd, by + 2); g.quadraticCurveTo(fx - 2, by - fl * 0.5, fx + (Math.random() - 0.5) * 4, by - fl); g.quadraticCurveTo(fx + 2, by - fl * 0.5, fx + wd, by + 2); g.fill(); }
   }
+  /* embers rising off the bar from halfway, more and faster the higher it is */
+  if (!ex && heat > 0.5 && fw > 0 && m.em.length < 60 && Math.random() < (heat - 0.5) * 2.4) for (let q = 0; q < 1 + (heat > 0.85 ? 2 : 0); q++) m.em.push({ x: bx + Math.random() * fw, y: by, vx: (Math.random() - 0.5) * 1.2, vy: -(1 + Math.random() * 2.5 * heat), life: 1, r: 1 + Math.random() * 2 });
+  for (let q = m.em.length - 1; q >= 0; q--) { const p = m.em[q]; p.x += p.vx + Math.sin(tick * 0.2 + q) * 0.3; p.y += p.vy; p.life -= 0.025; if (p.life <= 0 || ex) { m.em.splice(q, 1); continue; }
+    g.fillStyle = 'rgba(255,' + (160 + 90 * p.life | 0) + ',' + (60 * p.life | 0) + ',' + p.life.toFixed(2) + ')'; g.beginPath(); g.arc(p.x, p.y, p.r * (0.5 + p.life * 0.5), 0, TAU); g.fill(); }
+  /* crackling arcs jumping off the plate near the top */
+  if (hot && Math.random() < (k - 0.8) * 4) { g.strokeStyle = 'rgba(255,250,210,.9)'; g.lineWidth = 1.5; g.shadowColor = '#ffd27a'; g.shadowBlur = 8;
+    for (let q = 0; q < 2; q++) { let px = bx + Math.random() * bw, py = Math.random() < 0.5 ? by - 4 : by + bh + 4; const dir = py < by ? -1 : 1; g.beginPath(); g.moveTo(px, py);
+      for (let j = 0; j < 4; j++) { px += (Math.random() - 0.5) * 14; py += dir * (4 + Math.random() * 6); g.lineTo(px, py); } g.stroke(); }
+    g.shadowBlur = 0; }
   /* words */
-  const label = ex ? (e < 90 ? 'TAKE FIVE!' : 'CATCHING BREATH') : k >= 0.95 ? 'MAXED OUT!' : 'INTENSITY';
-  g.textAlign = 'left'; g.font = 'italic 900 ' + (17 + (ex && e < 90 ? 3 : 0)) + 'px system-ui, sans-serif'; g.lineWidth = 4; g.strokeStyle = 'rgba(20,8,10,.9)';
+  const label = ex ? (e < 90 ? 'TAKE FIVE!' : 'CATCHING BREATH') : k >= 0.95 ? 'MAXED OUT!' : heat >= 0.8 ? 'RED HOT!' : heat >= 0.5 ? 'HEATING UP!' : 'INTENSITY';
+  const ls = 17 + (ex && e < 90 ? 3 : 0) + (heat >= 0.8 ? 2 * (1 + Math.sin(tick * 0.4)) : 0);
+  g.textAlign = 'left'; g.font = 'italic 900 ' + ls.toFixed(0) + 'px system-ui, sans-serif'; g.lineWidth = 4; g.strokeStyle = 'rgba(20,8,10,.9)';
   g.strokeText(label, bx + 10, by + 22); g.fillStyle = ex ? '#e8f4ff' : k >= 0.95 && Math.sin(tick * 0.6) > 0 ? '#ffe27a' : '#fff'; g.fillText(label, bx + 10, by + 22);
   const num = ex ? ((900 - e) / 60).toFixed(1) + 's' : Math.round(k * 100) + '%', ns = 20 + m.pop * 8;
   g.textAlign = 'right'; g.font = '900 ' + ns.toFixed(0) + 'px system-ui, sans-serif'; g.strokeText(num, bx + bw - 8, by + 23); g.fillStyle = ex ? '#cfe4f5' : hot ? '#ffe27a' : '#ffd0a0'; g.fillText(num, bx + bw - 8, by + 23);

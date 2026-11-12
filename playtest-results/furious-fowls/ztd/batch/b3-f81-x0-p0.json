@@ -1,0 +1,30 @@
+[
+ {
+  "bird": 3,
+  "foe": [
+   8,
+   1
+  ],
+  "pct": 0,
+  "policy": {
+   "di": "none"
+  },
+  "x0": 0,
+  "sims": 23630,
+  "sec": 29.701,
+  "ztd": [],
+  "best": {
+   "route": [
+    "@7",
+    "grab_u",
+    "sh_nair",
+    "ff",
+    "sh_nair:4:n",
+    "ff",
+    "sh_nair:4:n"
+   ],
+   "hits": 21,
+   "pct": 37.1
+  }
+ }
+]

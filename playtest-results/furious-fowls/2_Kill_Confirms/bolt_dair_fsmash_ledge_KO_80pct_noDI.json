@@ -1,0 +1,30 @@
+{
+ "name": "bolt_dair_fsmash_ledge_KO_80pct_noDI",
+ "dir": "2_Kill_Confirms",
+ "route": [
+  "sh_dair:4:n",
+  "fsmash",
+  "sh_nair:11"
+ ],
+ "sit": {
+  "bird": 1,
+  "foe": [
+   0,
+   0
+  ],
+  "x0": 30,
+  "dist": 13,
+  "pct": 80,
+  "def": {
+   "di": "none"
+  }
+ },
+ "caption": "Bolt at 80% near the ledge: short-hop dair, forward smash (no DI)",
+ "hits": 2,
+ "dmg": 26.2,
+ "ko": true,
+ "chainKO": true,
+ "startPct": 80,
+ "endPct": 0,
+ "seconds": 4.6
+}
