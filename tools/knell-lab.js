@@ -21,7 +21,7 @@
   const FREE = { idle: 1, air: 1, run: 1, dash: 1, brake: 1, wd: 1 };
   const free = f => !!FREE[f.state];
   /* after a Hinge, Knell may attack from frame 5 (9 after a shielded hit) */
-  const hingeReady = f => f.state === 'attack' && (f.mname === 'hinge' ? f.mf >= 4 : f.mname === 'hingeS' ? f.mf >= 8 : false);
+  const hingeReady = f => f.state === 'attack' && (f.mname === 'hinge' ? f.mf >= 4 : f.mname === 'hingeS' ? f.mf >= 8 : !!(f.move && f.move.cancel && f.mf >= f.move.cancel));   /* also any move that may be cut short from its cancel frame (Potato Sack's Tumble) */
   /* the Hinge itself: contact made, hitlag over (a press during hitlag runs out of buffer), inside the window, a Thread to spend */
   const hingeable = f => f.state === 'attack' && f.hitlag <= 0 && f.move && f.move.hinge && f.knC && f.mf + 1 >= f.move.hinge[0] && f.mf + 1 <= f.move.hinge[1] && f.thread > 0;
   const jabNext = (f, nm) => f.state === 'attack' && f.mname === nm && f.hitlag <= 0 && f.move.chain && f.mf + 1 >= f.move.chain && f.mf + 1 <= (f.move.chainEnd || 99);
@@ -66,8 +66,8 @@
   for (const [nm, dx] of [['wd_f', 1], ['wd_b', -1]]) A[nm] = { ok: f => f.grounded && free(f), inp(i, k, f) { if (k === 0) i.jmp = true; if (k >= 3) { i.shd = k === 3; i.lx = dx * f.face; i.ly = -0.6; } }, done: (k, f) => (k >= 6 && f.grounded) || k > 30 };
   KL.A = A;
   const WAIT = {};
-  const tok = t => { if (/^w\d+$/.test(t)) { if (!WAIT[t]) { const n = +t.slice(1); WAIT[t] = { ok: () => true, inp() {}, done: k => k >= n, wait: 1 }; } return WAIT[t]; } return A[t]; };
-  KL.tok = tok;
+  const tok = t => KL.tok(t);   /* through KL.tok, so a fighter's lab file can add tokens */
+  KL.tok = t => { if (/^w\d+$/.test(t)) { if (!WAIT[t]) { const n = +t.slice(1); WAIT[t] = { ok: () => true, inp() {}, done: k => k >= n, wait: 1 }; } return WAIT[t]; } return A[t]; };
 
   /* ---- the executor: where Knell is in his route. A plain object, so a search can copy it with a game snapshot. ---- */
   KL.exec = (toks, o) => ({ toks: toks.slice(), idx: 0, cur: null, k: -1, wait: 0, holdT: 0, drift: 1, failed: -1, late: o && o.late, patience: (o && o.patience) || 120, a0: 0, a1: 0, p: 0 });
@@ -84,6 +84,7 @@
   KL.input = function (e, f, o) {
     const i = blankIn();
     if (e.drift && !f.grounded) { const dx = o.x - f.x; i.lx = Math.abs(dx) > 2 ? sgn(dx) * e.drift : 0; }
+    if (f.state === 'attack' && f.move && f.move.burst) { i.lx = f.burstX || 0; i.ly = f.burstDown ? -1 : 0; }   /* in a tumble the stick stays where it went off (a new push would end it) */
     if (e.cur === null && e.idx < e.toks.length) nextTok(e);
     if (e.cur !== null) {
       const a = tok(e.cur);
@@ -140,9 +141,9 @@
      thread (Knell's Thread to start with; 0 unless said), stage, plat 'foe' (the opponent on the left platform) */
   KL.setup = function (o) {
     KL.install(); TRAINING = true; if (o.stage !== undefined && typeof OPT !== 'undefined') OPT.stage = o.stage;
-    slots[0] = { dev: 'kb', pick: KI(), ready: true }; slots[1] = { dev: 'kb', pick: o.foe ? o.foe[0] : 0, ready: true }; startMatch();
+    slots[0] = { dev: 'kb', pick: o.me !== undefined ? o.me : KI(), ready: true }; slots[1] = { dev: 'kb', pick: o.foe ? o.foe[0] : 0, ready: true }; startMatch();
     mode = 'play'; countdown = 0;
-    const f = F[0], v = F[1]; f.ctl = new Ctl('cpu'); v.ctl = new Ctl('cpu'); if (o.foe && o.foe[1]) v.fi = o.foe[1]; v.noSwap = true;
+    const f = F[0], v = F[1]; f.ctl = new Ctl('cpu'); v.ctl = new Ctl('cpu'); if (o.foe && o.foe[1]) v.fi = o.foe[1]; v.noSwap = true; if (o.meForm) f.fi = o.meForm;
     f.x = o.x0 !== undefined ? o.x0 : -20; v.x = f.x + (o.dist !== undefined ? o.dist : 9);
     if (o.plat === 'foe') { const q = PLATS[1]; v.x = (q.x0 + q.x1) / 2; v.y = q.y; v.plat = q; v.grounded = true; f.x = v.x - (o.dist || 9); }
     if (o.foeAir) { v.y = o.foeAir; v.grounded = false; v.plat = null; v.set('air'); }

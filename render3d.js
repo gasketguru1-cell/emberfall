@@ -900,8 +900,11 @@ function build() {
 
   /* ---- the final hit (finalhit.js): while the game is frozen, the island goes, the backdrop shows the red burst filling the
      view exactly, a red light comes from behind, and the view tilts ---- */
-  const finalCv = document.createElement('canvas'); finalCv.width = 1280; finalCv.height = 720;
-  const finalTex = new THREE.CanvasTexture(finalCv); finalTex.colorSpace = THREE.SRGBColorSpace;
+  /* the burst is soft (gradients and wide rays), so it is painted at half size, and without mipmaps (they were rebuilt on every
+     upload); the texture is sent to the GPU once now, so the first frozen frame doesn't stall on it */
+  const finalCv = document.createElement('canvas'); finalCv.width = 640; finalCv.height = 360;
+  const finalTex = new THREE.CanvasTexture(finalCv); finalTex.colorSpace = THREE.SRGBColorSpace; finalTex.generateMipmaps = false; finalTex.minFilter = THREE.LinearFilter;
+  try { renderer.initTexture(finalTex); } catch (e) { /* older three.js: uploaded on first use instead */ }
   const finalLight = new THREE.DirectionalLight(0xff3a1e, 0); finalLight.position.set(0, 60, -160); scene.add(finalLight);
   let finalOn = false, bdMap = null, bdCol = null;
   function finalView(s, vH, lift) {
