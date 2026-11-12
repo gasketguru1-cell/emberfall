@@ -667,7 +667,7 @@ function mlInput(c) {
   /* shoulders: L / ZL back, R / ZR on (Q and W on the keyboard) */
   let sh = [false, false];
   if (kb) sh = [!!keys.KeyQ, !!keys.KeyW];
-  else { const p = navigator.getGamepads ? navigator.getGamepads()[+c.dev.slice(3)] : null; const b = k => !!(p && p.buttons[k] && p.buttons[k].pressed); sh = [b(4) || b(6), b(5) || b(7)]; }
+  else { const r = padGet(+c.dev.slice(3)); const b = k => !!(r && r.b(k)); sh = [b(4) || b(6), b(5) || b(7)]; }
   if (sh[0] && !ML.sh[0]) mlTurn(-1); if (sh[1] && !ML.sh[1]) mlTurn(1); ML.sh = sh;
   /* the stick (or arrows): left / right pages, up / down forms, held to repeat */
   const lx = c.c.lx, ly = c.c.ly, hx = lx > 0.6 ? 1 : lx < -0.6 ? -1 : 0, vy = Math.abs(ly) > 0.6 && Math.abs(ly) > Math.abs(lx) ? sgn(ly) : 0;
@@ -700,7 +700,7 @@ function drawPauseMenu() {
     else { g.fillStyle = 'rgba(20,17,36,.86)'; rr(x, y, bw, bh, 23); g.fill(); g.strokeStyle = 'rgba(255,255,255,.16)'; g.lineWidth = 1; g.stroke(); }
     g.font = (on ? '900 ' : 'bold ') + '19px system-ui, sans-serif'; spaced(on ? 2 : 1); g.fillStyle = on ? '#2a1208' : '#e6e0f6'; g.fillText(t.toUpperCase(), W / 2, y + 30); spaced(0); });
   let hx = W / 2 - 300; const hy = H * 0.3 + 64 + PAUSE_ITEMS.length * (bh + 12) + 26;
-  for (const [cap, a] of [['↑ ↓', 'Choose'], ['A / Z', 'Select'], ['Start / Enter', 'Resume'], ['B / X', 'Exit to fighter select'], ['+', 'Move list']]) hx = keyHint(hx, hy, cap, a);
+  for (const [cap, a] of [['↑ ↓', 'Choose'], [padCap('A') + ' / Z', 'Select'], [(anyPS() ? 'Options' : 'Start') + ' / Enter', 'Resume'], [padCap('B') + ' / X', 'Exit to fighter select'], [padCap('+'), 'Move list']]) hx = keyHint(hx, hy, cap, a);
 }
 
 /* ---------- Drawing ---------- */

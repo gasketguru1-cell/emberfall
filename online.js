@@ -30,7 +30,7 @@
     <div class="small" style="margin:8px 0">You each pick a fighter on the fighter select. Whoever is ready first warms up against the CPU; the match starts when you are both ready. After a match you are both back on the fighter select, still connected. <span id="on-rules"></span></div>
     <div class="small" id="on-net">Controller: up / down to move, left / right to change, A to choose, B to go back.</div></div>`;
   const $ = id => document.getElementById(id), status = s => { $('on-st').textContent = s; };
-  const open = () => { $('on-via').innerHTML = D.getTransports().map(t => `<option value="${t.id}">${t.label}</option>`).join(''); refresh(); ov.style.display = 'flex'; UI_MODAL = true; padNav.start(); setTimeout(() => (L ? $('on-close') : $('on-host')).focus(), 0); };
+  const open = () => { $('on-net').textContent = `Controller: up / down to move, left / right to change, ${padCap('A')} to choose, ${padCap('B')} to go back.`; $('on-via').innerHTML = D.getTransports().map(t => `<option value="${t.id}">${t.label}</option>`).join(''); refresh(); ov.style.display = 'flex'; UI_MODAL = true; padNav.start(); setTimeout(() => (L ? $('on-close') : $('on-host')).focus(), 0); };
   const close = () => { ov.style.display = 'none'; UI_MODAL = false; padNav.stop(); kb.hide(); };   /* closing keeps the link: Leave ends it */
   btn.onclick = open; window.openOnline = open;   /* the start screen's Online pill (sim.js) calls this, so a controller can open it */
   $('on-close').onclick = close;
