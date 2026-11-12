@@ -71,6 +71,9 @@ for b in spec['bones']:
 bpy.ops.object.mode_set(mode='OBJECT')
 for b in spec['bones']: arm.bones[b['name']].use_deform = b.get('deform', True)
 print('rig: skeleton %d bones (%d deform)' % (len(arm.bones), sum(1 for b in arm.bones if b.use_deform)))
+# "noauto": true on a bone leaves it out of the automatic weighting; its weights come only from "soft" rules (below)
+NOAUTO = [b['name'] for b in spec['bones'] if b.get('noauto')]
+for n in NOAUTO: arm.bones[n].use_deform = False
 
 # ---- weights: automatic (heat) on the mesh itself; if that leaves gaps, weight a clean voxel copy and transfer ----
 def auto_weight(target):
@@ -153,7 +156,8 @@ def placed_weights(target):
 
 if spec.get('weights'): missing = placed_weights(mesh); method = 'placed (%d rules)' % len(spec['weights'])
 else: missing = auto_weight(mesh); method = 'automatic'
-if not spec.get('weights') and missing > len(mesh.data.vertices) * 0.01:
+# "proxy": true in the spec always weights through the voxel copy (a mesh whose own heat weighting succeeds but comes out ragged)
+if not spec.get('weights') and (missing > len(mesh.data.vertices) * 0.01 or spec.get('proxy')):
     print('rig: automatic weights left %d vertices unweighted; using a voxel proxy' % missing)
     for vg in list(mesh.vertex_groups): mesh.vertex_groups.remove(vg)
     for m in list(mesh.modifiers): mesh.modifiers.remove(m)
@@ -278,6 +282,88 @@ for rg in spec.get('rigid', []):
     bmesh.ops.delete(bm, geom=gone, context='FACES_ONLY'); bm.to_mesh(mesh.data); bm.free(); mesh.data.update()
     print('rig: detached %s from the body between heights %.2f and %.2f (%d faces)' % (rg['bone'], y0, y1, len(gone)))
 
+# ---- "soft": weights by place, for small bones that heat weighting can't place (a face, a belly). Each rule gives its bone
+# a share w of a vertex's weight, taken from the bones listed in "from" in proportion to what they hold there:
+#   "at": [x,y,z] and "r": a sphere, w = s * smooth(1 - distance / r);  "surf": [x, y, "front"|"back"] puts that sphere's
+#   centre on the skin, at the frontmost / backmost vertex near x, y;  "half": [[point, normal], ...] half-spaces, each
+#   faded over "soft" metres (alone, or cutting a sphere down)
+if spec.get('soft'):
+    import numpy as np
+    W = mesh.matrix_world; P = np.array([(lambda w: (w.x, w.z, -w.y))(W @ v.co) for v in mesh.data.vertices])
+    def smooth_np(x): x = np.clip(x, 0, 1); return x * x * (3 - 2 * x)
+    G = {g.name: g for g in mesh.vertex_groups}
+    def group(n): return G[n] if n in G else G.setdefault(n, mesh.vertex_groups.new(name=n))
+    nv = len(P)
+    def weights_of(n):
+        out = np.zeros(nv)
+        if n not in G: return out
+        gi = G[n].index
+        for v in mesh.data.vertices:
+            for g in v.groups:
+                if g.group == gi: out[v.index] = g.weight
+        return out
+    cache = {}
+    def wt(n):
+        if n not in cache: cache[n] = weights_of(n)
+        return cache[n]
+    for rule in spec['soft']:
+        w = np.ones(nv) * rule.get('s', 1.0)
+        if rule.get('surf'):
+            x0, y0, side = rule['surf']; near = (np.abs(P[:, 0] - x0) < 0.03) & (np.abs(P[:, 1] - y0) < 0.03)
+            zs = P[near, 2]; z0 = zs.max() if side == 'front' else zs.min()
+            rule = dict(rule, at=[x0, y0, z0 - (0.4 if side == 'front' else -0.4) * rule['r']])
+        if rule.get('at'):
+            d = np.linalg.norm(P - np.array(rule['at']), axis=1); w *= smooth_np(1 - d / rule['r'])
+        for pt, nrm in rule.get('half', []):
+            nrm = np.array(nrm, float); nrm /= np.linalg.norm(nrm); w *= smooth_np((P - np.array(pt)) @ nrm / rule.get('soft', 0.01) + 0.5)
+        src = [n for n in rule['from'] if n in G]
+        tot = sum(wt(n) for n in src) if src else np.zeros(nv)
+        w = np.minimum(w, 1.0) * np.minimum(tot, 1.0)
+        idx = np.nonzero(w > 1e-3)[0]
+        if not len(idx): print('rig: soft %s took nothing' % rule['bone']); continue
+        for n in src:
+            cur = wt(n); share = np.where(tot > 1e-6, cur / np.maximum(tot, 1e-6), 0)
+            new = cur - w * share; cache[n] = new; g = group(n)
+            for i in idx: g.add([int(i)], float(max(0.0, new[i])), 'REPLACE')
+        mine = wt(rule['bone']) + w; cache[rule['bone']] = mine; g = group(rule['bone'])
+        for i in idx: g.add([int(i)], float(min(1.0, mine[i])), 'REPLACE')
+        print('rig: soft %s: %d vertices' % (rule['bone'], len(idx)))
+for n in NOAUTO: arm.bones[n].use_deform = True
+
+# ---- "fingersplit": [ { "chains": [[bone, bone, bone], ...] } ]   heat (or voxel) weighting lets fingers that lie close
+# together share each other's skin. Each vertex's weight on any of these chains, summed, is handed to the chains by how near
+# the vertex is to each chain's bone lines (the nearest takes it, blended over "blend" metres where two are about as near,
+# at the webs between fingers); inside a chain it goes to the nearest bone, shared between the two over "joint" metres
+# about a knuckle. The weight on everything else stays as it was.
+for fs_ in spec.get('fingersplit', []):
+    import numpy as np
+    chains = fs_['chains']; blend = fs_.get('blend', 0.003); G = {g.name: g for g in mesh.vertex_groups}
+    for ch in chains:
+        for n in ch:
+            if n not in G: G[n] = mesh.vertex_groups.new(name=n)
+    seg = [[(np.array((rig.matrix_world @ arm.bones[n].head_local)[:]), np.array((rig.matrix_world @ arm.bones[n].tail_local)[:])) for n in ch] for ch in chains]
+    gi = {G[n].index: (c, j) for c, ch in enumerate(chains) for j, n in enumerate(ch)}
+    W = mesh.matrix_world; moved = 0
+    for v in mesh.data.vertices:
+        tot = sum(g.weight for g in v.groups if g.group in gi)
+        if tot < 1e-4: continue
+        p = np.array((W @ v.co)[:]); best = []
+        for c, ss in enumerate(seg):
+            ds = []
+            for a, b in ss:
+                u = b - a; t = min(1.0, max(0.0, (p - a) @ u / max(1e-12, u @ u))); ds.append(np.linalg.norm(p - (a + u * t)))
+            ds = np.array(ds); js = np.exp(-(ds - ds.min()) / fs_.get('joint', 0.004)); js[js < 0.02] = 0
+            best.append((ds.min(), js / js.sum()))   # across a knuckle the two bones share the skin
+        dmin = min(d for d, _ in best); share = np.array([np.exp(-(d - dmin) / blend) for d, _ in best]); share[share < 0.02] = 0; share /= share.sum()
+        for g in list(v.groups):
+            if g.group in gi: g.weight = 0.0
+        for c, s_ in enumerate(share):
+            if s_ <= 0: continue
+            for j, sj in enumerate(best[c][1]):
+                if sj > 0: G[chains[c][j]].add([v.index], float(tot * s_ * sj), 'ADD')
+        moved += 1
+    print('rig: fingersplit: %d vertices over %d chains' % (moved, len(chains)))
+
 # ---- leg reach (IK): the lower leg's tip follows a control bone; the exporter bakes the result into plain rotations ----
 bpy.context.view_layer.objects.active = rig
 for ik in spec.get('ik', []):
@@ -337,6 +423,10 @@ AUTO_CLAV = spec.get('clavicles', [])
 # "toes": [ { "bone", "foot": foot bone, "floor": rest height of the tip above the floor, "near": height } ]   while the ball of
 #          the foot is within "near" of the floor, the toes bend up just enough to keep their tip on or above it (push-off, landing)
 AUTO_TOE = spec.get('toes', [])
+# "feet": [{ "bone": "footR", "side": -1, "out": 6 }]: after the legs are posed, each foot is turned about the floor's upright
+# so its toes point "out" degrees away from straight ahead (toward its own "side", -1 his right), keeping its pitch and
+# roll; a foot pointing mostly up or down turns less (a model whose feet are sculpted splayed stands toe-out otherwise)
+AUTO_FEET = spec.get('feet', [])
 lastq = {}
 def turn_of(bname, tr):
     D = delta(tr.get('rot', [0, 0, 0]))
@@ -369,8 +459,10 @@ def palm_normal(bone, sg):
     palm and fingers together), turned toward the body (at rest, in the A-pose, the palms face the thighs)"""
     if bone in _palm: return _palm[bone]
     import numpy as np
-    me = mesh; gi = me.vertex_groups[bone].index; Mi = arm.bones[bone].matrix_local.inverted(); W = me.matrix_world
-    pts = [Mi @ (W @ v.co) for v in me.data.vertices if any(g.group == gi and g.weight > 0.5 for g in v.groups)]
+    me = mesh; sd = bone[-1]; Mi = arm.bones[bone].matrix_local.inverted(); W = me.matrix_world
+    # the palm with its four fingers (not the thumb): the hand's own flat slab
+    gis = {g.index for g in me.vertex_groups if g.name == bone or (g.name[:-1].endswith(sd) and g.name.startswith(('fing', 'index', 'middle', 'ring', 'pinky')))}
+    pts = [Mi @ (W @ v.co) for v in me.data.vertices if sum(g.weight for g in v.groups if g.group in gis) > 0.5]
     P = np.array([p[:] for p in pts]); P -= P.mean(0); ev, evec = np.linalg.eigh(P.T @ P); n = Vector(evec[:, 0])
     inward = arm.bones[bone].matrix_local.to_3x3().inverted() @ (RIGHT * sg)
     if n.dot(inward) < 0: n = -n
@@ -391,7 +483,9 @@ def palms(c, f, t):
         if w <= 0: pb.rotation_quaternion = Quaternion(); pb.keyframe_insert('rotation_quaternion', frame=f); continue
         n = palm_normal(pb.name, sg); yl = Vector((0, 1, 0)); n = (n - yl * n.dot(yl)).normalized()
         Bl = Matrix((n, yl, n.cross(yl))).transposed()                       # palm, finger line, side: in the bone's own axes
-        tn = RIGHT * sg; Bt = Matrix((tn, FWD, tn.cross(FWD))).transposed()   # where they should point: palm in, fingers ahead
+        toe = math.radians(c.get('toein', 0)) * sg   # fingers angled in a little, so the palms close from heel to fingertip
+        fw = (FWD * math.cos(toe) + RIGHT * math.sin(toe)).normalized(); tn = (RIGHT * sg - fw * (RIGHT * sg).dot(fw)).normalized()
+        Bt = Matrix((tn, fw, tn.cross(fw))).transposed()   # where they should point: palm in, fingers ahead
         Wd = (Bt @ Bl.transposed()).to_quaternion()
         cur = pb.matrix.to_quaternion(); want = cur.slerp(Wd, w)
         M4 = want.to_matrix().to_4x4(); M4.translation = pb.matrix.translation; pb.matrix = M4
@@ -412,6 +506,25 @@ def automatic(state, f, cname=None, t=0.0):
         put(c['bone'], Dc, {}, f)
     if mc and AUTO_CLAV:   # the collarbones moved the arms: turn the hands again from where the forearms now are
         bpy.context.scene.frame_set(f); palms(mc, f, t)
+    if AUTO_FEET:
+        Ma = rig.pose.bones['all'].matrix @ arm.bones['all'].matrix_local.inverted(); n = (Ma.to_3x3() @ UP).normalized()
+        fw = (Ma.to_3x3() @ FWD); fw = (fw - n * fw.dot(n)).normalized()
+        for c in AUTO_FEET:
+            fb_ = c['bone']; ab = arm.bones[fb_]
+            # measured across the foot (the line from its outer to inner edge), which stays level whether the toes point
+            # forward, down or up
+            a0 = (ab.tail_local - ab.head_local).cross(UP); a = frame_delta(fb_) @ a0; ah = a - n * a.dot(n)
+            if ah.length < 1e-4: continue
+            side = (Ma.to_3x3() @ RIGHT) * c.get('side', 1); o_ = math.radians(c.get('out', 6))
+            want = (fw * math.cos(o_) + side.normalized() * math.sin(o_)); want = (want - n * want.dot(n)).normalized()
+            wa = want.cross(n).normalized(); hn = ah.normalized()
+            ang = math.atan2(hn.cross(wa).dot(n), hn.dot(wa))
+            ang *= min(1.0, ah.length / a.length / 0.5)   # a foot rolled onto its edge: turn less
+            par = arm.bones[fb_].parent.name; P = frame_delta(par).to_matrix()
+            Dcur = P.inverted() @ frame_delta(fb_).to_matrix()
+            D = P.inverted() @ Quaternion(n, ang).to_matrix() @ P @ Dcur
+            put(fb_, D, state.get(fb_, {}), f)
+        bpy.context.scene.frame_set(f)
     for c in AUTO_TOE:
         if c['bone'] in state: continue
         ft = c['foot']; X = frame_delta(ft); Xi = X.inverted()
@@ -455,7 +568,7 @@ for name, clip in spec.get('clips', {}).items():
                     put(tb, Quaternion().slerp(Dq, fr).to_matrix(), tr if tb == bname else {}, fb)
                 continue
             put(bname, turn_of(bname, tr), tr, fb)
-        if AUTO_CLAV or AUTO_TOE or name in MEET: automatic(state, f, name, key['t'])
+        if AUTO_CLAV or AUTO_TOE or AUTO_FEET or name in MEET: automatic(state, f, name, key['t'])
         if key.get('in') and prevf is not None: eases.append((prevf, key['in']))
         prevf = f
     fcs = fcurves_of(act)
@@ -496,6 +609,75 @@ if opt.get('shots'):   # pictures of chosen clips at chosen times, from her righ
     for tr in ad.nla_tracks: tr.mute = False
     bpy.data.objects.remove(co, do_unlink=True)
     print('rig: shots in ' + sdir)
+# ---- "legcut": { "R": [bones], "L": [bones] }: the bare legs below the shorts become their own mesh, "legs" (the game draws
+# stick legs in their place, tools/blender/joey.js stickLegs). A face goes to the legs when its vertices hang mostly from
+# that side's leg bones and its texture there is skin. The openings left in the shorts are capped, each by a fan of
+# triangles from the cut to its middle, coloured from the shorts beside it (the mesh is split along its texture seams, so
+# the cut is not one closed loop).
+if spec.get('legcut'):
+    import bmesh
+    import numpy as np
+    lc = spec['legcut']; me = mesh.data
+    img = next(n for n in me.materials[0].node_tree.nodes if n.type == 'TEX_IMAGE' and any(l.to_socket.name == 'Base Color' for l in n.outputs[0].links)).image
+    IW, IH = img.size; PX = np.array(img.pixels[:], dtype=np.float32).reshape(IH, IW, -1)[:, :, :3]
+    def skin_at(u, v):
+        r, g, b = PX[min(IH - 1, max(0, int(v * IH))), int(u * IW) % IW]; mx = max(r, g, b); mn = min(r, g, b)
+        if mx < 0.12 or (mx - mn) / mx < 0.16 or (mx - mn) / mx > 0.8: return False
+        hue = (((g - b) / (mx - mn)) * 60) % 360 if mx == r else (2 + (b - r) / (mx - mn)) * 60 if mx == g else (4 + (r - g) / (mx - mn)) * 60
+        return 5 <= hue <= 55
+    gi = {g.name: g.index for g in mesh.vertex_groups}
+    legw = {s: np.zeros(len(me.vertices)) for s in lc}
+    for v in me.vertices:
+        for g in v.groups:
+            for s, names in lc.items():
+                if mesh.vertex_groups[g.group].name in names: legw[s][v.index] += g.weight
+    uvl = me.uv_layers.active.data
+    side_of = {}
+    for p in me.polygons:
+        for s in lc:
+            if np.mean([legw[s][i] for i in p.vertices]) < 0.5: continue
+            uvs = [uvl[li].uv for li in p.loop_indices]; cu = sum((Vector(u) for u in uvs), Vector((0, 0))) / len(uvs)
+            hits = sum(skin_at(u.x, u.y) for u in uvs) + 2 * skin_at(cu.x, cu.y)
+            if hits * 2 > len(uvs) + 2: side_of[p.index] = s
+    print('rig: legcut %s' % ', '.join('%s %d faces' % (s, sum(1 for v in side_of.values() if v == s)) for s in lc))
+    legs = mesh.copy(); legs.data = me.copy(); legs.name = legs.data.name = 'legs'; bpy.context.collection.objects.link(legs)
+    # body: drop the leg faces, then cap the cut
+    bm = bmesh.new(); bm.from_mesh(me); bm.faces.ensure_lookup_table(); uvb = bm.loops.layers.uv.active; dl = bm.verts.layers.deform.verify()
+    cuts = {s: [] for s in lc}
+    for e in bm.edges:
+        fs = e.link_faces; sides = {side_of.get(f.index) for f in fs}
+        body = [f for f in fs if f.index not in side_of]
+        if body and len(sides - {None}) == 1 and len(fs) == 2:
+            f0 = body[0]; uv = sum((l[uvb].uv for l in f0.loops), Vector((0, 0))) / len(f0.loops)
+            cuts[(sides - {None}).pop()].append((e.verts[0].co.copy(), e.verts[1].co.copy(), e.verts[0], e.verts[1], uv.copy(), f0.normal.copy()))
+    legctr = {s: sum((me.vertices[i].co for p in me.polygons if side_of.get(p.index) == s for i in p.vertices), Vector()) for s in lc}
+    for s in lc:
+        n = sum(len(me.polygons[k].vertices) for k, v in side_of.items() if v == s); legctr[s] = legctr[s] / max(1, n)
+    bmesh.ops.delete(bm, geom=[bm.faces[k] for k in side_of], context='FACES_ONLY')
+    for s, ed in cuts.items():
+        if not ed: continue
+        vs = {v for c in ed for v in c[2:4]}; ctr = sum((v.co for v in vs), Vector()) / len(vs)
+        mid = bm.verts.new(ctr); w = {}
+        for v in vs:
+            for k, x in v[dl].items(): w[k] = w.get(k, 0) + x / len(vs)
+        for k, x in w.items(): mid[dl][k] = x
+        out = (legctr[s] - ctr).normalized()
+        for a, b, va, vb, uv, _ in ed:
+            try: f = bm.faces.new((va, vb, mid))
+            except ValueError: continue
+            f.normal_update()
+            if f.normal.dot(out) < 0: f.normal_flip()
+            for l in f.loops: l[uvb].uv = uv
+            f.smooth = True
+        print('rig: legcut cap %s: %d triangles' % (s, len(ed)))
+    bmesh.ops.delete(bm, geom=[e for e in bm.edges if not e.link_faces], context='EDGES')
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context='VERTS')
+    bm.to_mesh(me); bm.free()
+    # legs: only the leg faces
+    bm = bmesh.new(); bm.from_mesh(legs.data); bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.index not in side_of], context='FACES')
+    bm.to_mesh(legs.data); bm.free()
+    print('rig: legcut: body %d faces, legs %d faces' % (len(me.polygons), len(legs.data.polygons)))
 if opt.get('blend'):   # also keep the rigged, animated scene as a .blend, for opening and editing in Blender
     bpy.ops.wm.save_as_mainfile(filepath=opt['blend'])
     print('rig: saved ' + opt['blend'])

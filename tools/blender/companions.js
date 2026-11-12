@@ -1,6 +1,9 @@
 // Writes the skeleton and animation specs for Hod and Loom (assets/<name>/work/rig.json), which tools/blender/rig.py turns
 // into rigged, animated models. Kept as code because the two sides of each body are mirrored and many poses share values.
 //   node tools/blender/companions.js
+// It rewrites the Hod, Loom and Nib manifest entries; after it (and after any rebuild of their GLBs) run
+//   node tools/addbones.mjs nib && node tools/addbones.mjs hod && node tools/addbones.mjs loom
+// to put the added bones (tools/bones/<name>.mjs) back on top: the -b GLBs the game loads, and their springs.
 const fs = require('fs'), path = require('path');
 const out = (name, spec) => { const f = path.join(__dirname, '..', '..', 'assets', name, 'work', 'rig.json'); fs.writeFileSync(f, JSON.stringify(spec, null, 1) + '\n'); console.log(name + ': ' + spec.bones.length + ' bones, ' + Object.keys(spec.clips).length + ' clips'); };
 const R = (p, y, r) => ({ rot: [p, y || 0, r || 0] }), M = (x, y, z) => ({ move: [x, y, z] });

@@ -11,8 +11,13 @@
   #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   #gl { visibility: hidden; }
 </style>
-<script type="importmap">
-{ "imports": { "three": "./node_modules/three/build/three.module.js", "three/addons/": "./node_modules/three/examples/jsm/" } }
+<script>
+/* three.js comes from node_modules when the game is served locally or packed in the desktop app. GitHub Pages has no
+   node_modules, so there it loads the same version (0.187.0, as in package-lock) from jsDelivr. */
+(function () {
+  var base = /\.github\.io$/.test(location.hostname) ? 'https://cdn.jsdelivr.net/npm/three@0.187.0/' : './node_modules/three/';
+  document.write('<script type="importmap">' + JSON.stringify({ imports: { three: base + 'build/three.module.js', 'three/addons/': base + 'examples/jsm/' } }) + '<\/script>');
+})();
 </script>
 </head>
 <body>

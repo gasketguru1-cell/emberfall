@@ -11,7 +11,7 @@ const glc = document.getElementById('gl');
 const R3 = window.R3 = { ready: false, gpu: '', three: THREE.REVISION, show() {}, render() {}, info: null, models: {} };
 const MODELS = R3.models;
 let renderer = null;
-try { renderer = new THREE.WebGLRenderer({ canvas: glc, antialias: true, powerPreference: 'high-performance' }); }
+try { renderer = new THREE.WebGLRenderer({ canvas: glc, antialias: true, stencil: true, powerPreference: 'high-performance' }); }
 catch (e) { console.warn('3D renderer unavailable; staying in 2D.', e); }
 if (renderer) build();
 
@@ -156,14 +156,15 @@ function build() {
     if (v.key === k) return; const prevKey = v.key; v.key = k;
     while (v.pivot.children.length) { const c = v.pivot.children.pop(); if (c.geometry) c.geometry.dispose(); }
     if (v.mixer) v.mixer.stopAllAction();
-    v.mixer = null; v.model = null; v.chomp = null; v.bubble = null; v.actions = {}; v.cur = null; v.prev = null; v.hand = null; v.springs = []; v.springTick = -1;
+    v.mixer = null; v.model = null; v.chomp = null; v.bubble = null; v.actions = {}; v.cur = null; v.prev = null; v.hand = null; v.springs = []; v.springTick = -1; v.jiggle = [];
+    if (v.stick) { scene.remove(v.stick.grp); v.stick = null; }
     if (v.prop) { scene.remove(v.prop); v.prop = null; }
     if (useModel) {
       /* A copy of the loaded model with its own skeleton, scaled to the fighter's height and turned so its front is +x. */
       const obj = cloneSkinned(M.scene); obj.scale.setScalar(M.cfg.height / M.height); obj.rotation.y = M.cfg.faceCamera ? 0 : Math.PI / 2; v.mats = [];
       v.obj = obj; v.unit = M.cfg.height / M.height; v.flip = f.face;
       obj.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; o.frustumCulled = false; o.material = o.material.clone(); if (f.alt) o.material.color.setRGB(0.78, 0.9, 1.25); v.mats.push(o.material); } });
-      v.pivot.add(obj); v.model = M; v.mixer = new THREE.AnimationMixer(obj); setupSprings(v, M);
+      v.pivot.add(obj); v.model = M; v.mixer = new THREE.AnimationMixer(obj); setupSprings(v, M); if (M.cfg.stickLegs) setupStickLegs(v, M);
       if (M.cfg.lift) obj.position.y = M.cfg.lift;   /* a rider: the model sits this high above the fighter's feet */
       if (M.cfg.prop && M.cfg.prop.type === 'sling') { v.prop = makeSling(); v.hand = null; scene.add(v.prop); if (/ alone/.test(prevKey)) v.prop.userData.rig.k = { py: -2.2, sq: -0.14, bend: 0.15 }; }   /* the bird drops back into the pouch: the bands take its weight */
       if (fm.name === 'Chomp Chomp') { const bubble = makeBubble(); bubble.position.y = 6; v.pivot.add(bubble); v.bubble = bubble; }   /* his Bubble Ride bubble */
@@ -513,15 +514,104 @@ function build() {
     for (const n in v.ovl) { const o = v.ovl[n]; if (o.b) o.setQ = o.b.quaternion.clone(); }
   }
 
+  /* ---- stick legs (manifest stickLegs): below the shorts the model's legs are a mesh of their own ("legs", cut by
+     tools/blender/rig.py legcut). It is not drawn; one dark line per leg is, from the middle of the shorts' hem through the
+     knee and ankle to the toes. During the moves listed (the kicks and stomps) the line gives way to an outline of the
+     real legs: the leg mesh marks its shape in the stencil buffer without drawing, and a copy pushed out along its normals,
+     drawn dark from behind, shows only where it is outside that shape. Picture only. */
+  const _sa = new THREE.Vector3(), _sb = new THREE.Vector3(), _sy = new THREE.Vector3(0, 1, 0);
+  function stickPoints(M, legs) {   /* once per model: where the hem's middle sits on each thigh, and the toes' tip on each toe */
+    if (M.stick) return M.stick;
+    const g = legs.geometry, P = g.attributes.position, SI = g.attributes.skinIndex, SW = g.attributes.skinWeight, idx = g.index, B = legs.skeleton.bones, out = {};
+    const K = new Array(P.count); for (let i = 0; i < P.count; i++) K[i] = Math.round(P.getX(i) * 1e4) + ',' + Math.round(P.getY(i) * 1e4) + ',' + Math.round(P.getZ(i) * 1e4);
+    const side = i => { let best = 0, bi = 0; for (let c = 0; c < 4; c++) { const w = SW.getComponent(i, c); if (w > best) { best = w; bi = SI.getComponent(i, c); } } return B[bi].name.endsWith('L') ? 'L' : 'R'; };
+    /* the open edge of the leg mesh (welded across the texture seams): edges used by one triangle only */
+    const uses = new Map();
+    for (let t = 0; t < idx.count; t += 3) for (let e = 0; e < 3; e++) { const a = K[idx.getX(t + e)], b = K[idx.getX(t + (e + 1) % 3)], k = a < b ? a + '|' + b : b + '|' + a; uses.set(k, (uses.get(k) || 0) + 1); }
+    const rim = new Set(); for (const [k, n] of uses) if (n === 1) { const [a, b] = k.split('|'); rim.add(a); rim.add(b); }
+    const local = (name, p) => { const i = B.findIndex(b => b.name === name); return { bone: i, p: p.clone().applyMatrix4(legs.bindMatrix).applyMatrix4(legs.skeleton.boneInverses[i]) }; };
+    for (const s of ['R', 'L']) {
+      const tip = new THREE.Vector3(); let zt = -1e9; const seen = new Set();
+      for (let i = 0; i < P.count; i++) { if (side(i) !== s) continue;
+        if (rim.has(K[i])) seen.add(K[i]);
+        if (P.getZ(i) > zt) { zt = P.getZ(i); tip.set(P.getX(i), P.getY(i), P.getZ(i)); } }
+      /* the hem is the top of that edge: its highest third (anything open lower down, between the toes, is left out) */
+      const pts = [...seen].map(k => k.split(',').map(x => +x / 1e4)).sort((a, b) => b[1] - a[1]), top = pts.slice(0, Math.max(1, Math.ceil(pts.length / 3)));
+      const hem = new THREE.Vector3(); for (const [x, y, z] of top) hem.add(_sa.set(x, y, z)); hem.divideScalar(top.length);
+      out[s] = { hem: local('thigh' + s, hem), knee: B.findIndex(b => b.name === 'shin' + s), ankle: B.findIndex(b => b.name === 'foot' + s), tip: local('toe' + s, tip) };
+    }
+    return (M.stick = out);
+  }
+  function setupStickLegs(v, M) {
+    let legs = null; v.obj.traverse(o => { if (o.isSkinnedMesh && /^legs/.test(o.name)) legs = o; }); if (!legs) return;
+    const c = M.cfg.stickLegs, col = new THREE.Color(c.color || '#161616'), mat = new THREE.MeshStandardMaterial({ color: col, roughness: 1 }); v.mats.push(mat);
+    const grp = new THREE.Group(), seg = () => { const m = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 8), mat); m.castShadow = true; grp.add(m); return m; }, dot = () => { const m = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), mat); m.castShadow = true; grp.add(m); return m; };
+    scene.add(grp);
+    const thick = { value: 0 }, hullMat = new THREE.MeshStandardMaterial({ color: col, roughness: 1, side: THREE.BackSide, stencilWrite: true, stencilRef: 1, stencilFunc: THREE.NotEqualStencilFunc });
+    hullMat.onBeforeCompile = sh => { sh.uniforms.outlineW = thick; sh.vertexShader = 'uniform float outlineW;\n' + sh.vertexShader.replace('#include <skinning_vertex>', '#include <skinning_vertex>\n  transformed += normalize( objectNormal ) * outlineW;'); };
+    v.mats.push(hullMat);
+    const fillMat = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, stencilWrite: true, stencilRef: 1, stencilFunc: THREE.AlwaysStencilFunc, stencilZPass: THREE.ReplaceStencilOp });
+    const hull = new THREE.SkinnedMesh(legs.geometry, hullMat); hull.bind(legs.skeleton, legs.bindMatrix); hull.position.copy(legs.position); hull.quaternion.copy(legs.quaternion); hull.scale.copy(legs.scale);
+    hull.frustumCulled = false; hull.renderOrder = 11; legs.renderOrder = 10; legs.castShadow = false; legs.parent.add(hull);
+    const i = v.mats.indexOf(legs.material); if (i >= 0) v.mats.splice(i, 1);
+    legs.material = fillMat;
+    v.stick = { grp, legs, hull, thick, pts: stickPoints(M, legs), sides: ['R', 'L'].map(() => ({ segs: [seg(), seg(), seg()], dots: [dot(), dot(), dot(), dot()] })) };
+  }
+  function stickLegs(v, f) {
+    const st = v.stick, c = v.model.cfg.stickLegs, outline = f.state === 'attack' && (c.moves || []).includes(f.mname);
+    st.legs.visible = outline; st.hull.visible = outline; st.grp.visible = !outline;
+    v.root.updateMatrixWorld(true);
+    if (outline) { st.legs.getWorldScale(_sa); st.thick.value = (c.outline || 0.22) / Math.max(1e-6, _sa.x); return; }
+    const B = st.legs.skeleton.bones, r = c.line || 0.3;
+    st.sides.forEach((L, k) => { const p = st.pts[k ? 'L' : 'R'];
+      const at = [p.hem.p.clone().applyMatrix4(B[p.hem.bone].matrixWorld), B[p.knee].getWorldPosition(new THREE.Vector3()), B[p.ankle].getWorldPosition(new THREE.Vector3()), p.tip.p.clone().applyMatrix4(B[p.tip.bone].matrixWorld)];
+      L.dots.forEach((d, i) => { d.position.copy(at[i]); d.scale.setScalar(r); });
+      L.segs.forEach((m, i) => { _sa.copy(at[i]); _sb.copy(at[i + 1]); const len = _sa.distanceTo(_sb); m.position.copy(_sa).add(_sb).multiplyScalar(0.5); m.scale.set(r, Math.max(1e-3, len), r);
+        m.quaternion.setFromUnitVectors(_sy, _sb.sub(_sa).normalize()); }); });
+  }
+
   /* ---- follow-through: tails, ears and ribbons lag behind the body and settle on their own ----
      Each listed bone keeps a simulated tip in world space that is pulled toward where the animation puts it. The bone is
      then turned to point at that tip. It is stepped once per game step, so freezing the game freezes it too. */
   const _inv = new THREE.Matrix4(), _m = new THREE.Matrix4(), _p = new THREE.Vector3(), _s = new THREE.Vector3(), _q = new THREE.Quaternion(), _pq = new THREE.Quaternion(), _qd = new THREE.Quaternion();
   function setupSprings(v, M) {
-    v.springs = (M.cfg.springs || []).map(c => ({ k: c.k || 0.3, d: c.d || 0.7, max: c.max || 1.0, drag: c.drag === undefined ? 0.12 : c.drag,
+    /* "tip": where the last bone ends, in its own axes (tools/addbones.mjs writes it); without it the last bone is taken to
+       be as long as the one before it */
+    v.springs = (M.cfg.springs || []).map(c => ({ k: c.k || 0.3, d: c.d || 0.7, max: c.max || 1.0, drag: c.drag === undefined ? 0.12 : c.drag, tip: c.tip,
       links: c.bones.map(n => v.obj.getObjectByName(n)).filter(Boolean).map(b => ({ bone: b, dir: null, dv: new THREE.Vector3(), lastHead: null, tipLocal: null, animQ: null, setQ: null })) }));
-    for (const ch of v.springs) ch.links.forEach((l, i) => { const next = ch.links[i + 1]; l.tipLocal = next ? next.bone.position.clone() : (i > 0 ? ch.links[i - 1].tipLocal.clone() : new THREE.Vector3(0, 0.2, 0)); });
+    for (const ch of v.springs) ch.links.forEach((l, i) => { const next = ch.links[i + 1]; l.tipLocal = next ? next.bone.position.clone() : ch.tip ? new THREE.Vector3(...ch.tip) : (i > 0 ? ch.links[i - 1].tipLocal.clone() : new THREE.Vector3(0, 0.2, 0)); });
     v.springTick = -1;
+    /* jiggle (manifest "jiggle"): soft flesh that slides behind the bone the animation moves it with */
+    v.jiggle = (M.cfg.jiggle || []).map(c => ({ b: v.obj.getObjectByName(c.bone), k: c.k || 0.2, d: c.d || 0.8, max: c.max || 0.05, g: c.g === undefined ? 1 : c.g,
+      off: new THREE.Vector3(), vel: new THREE.Vector3(), tv: new THREE.Vector3(), last: null, animP: null, setP: null })).filter(j => j.b);
+  }
+  /* Each jiggle bone keeps an offset from where the animation puts it, in world space. When the anchor moves (the
+     fighter running, landing, being hit, or the clip itself throwing the body about) the flesh is left behind by that much
+     and springs back, overshooting and wobbling until it settles. The offset is eased off toward its limit so it never
+     tears away. Stepped once per game step, like the springs. */
+  const _jw = new THREE.Vector3(), _jd = new THREE.Vector3();
+  function applyJiggle(v) {
+    const step = tick !== v.jiggleTick; v.jiggleTick = tick;
+    for (const j of v.jiggle) { if (j.setP && j.b.position.equals(j.setP)) j.b.position.copy(j.animP); else j.animP = j.b.position.clone(); }
+    v.root.updateMatrixWorld(true);
+    const scale = new THREE.Vector3().setFromMatrixScale(v.obj.matrixWorld), u = (Math.abs(scale.x) + scale.y + scale.z) / 3;
+    for (const j of v.jiggle) {
+      j.b.updateWorldMatrix(true, false); _jw.setFromMatrixPosition(j.b.matrixWorld);
+      if (!j.last || j.last.distanceToSquared(_jw) > 400) { j.last = _jw.clone(); j.off.set(0, 0, 0); j.vel.set(0, 0, 0); j.tv.set(0, 0, 0); }
+      const lim = j.max * u;
+      if (step) {
+        _jd.copy(_jw).sub(j.last); j.last.copy(_jw);
+        const acc = _jd.clone().sub(j.tv); j.tv.copy(_jd); if (acc.lengthSq() > 16) acc.setLength(4);   /* the anchor speeding up or stopping, not steady travel */
+        j.vel.addScaledVector(acc, -j.g).addScaledVector(j.off, -j.k).multiplyScalar(j.d); j.off.add(j.vel);
+        if (j.off.length() > lim * 2.5) { j.off.setLength(lim * 2.5); j.vel.multiplyScalar(0.5); }
+      }
+      const n = j.off.length();
+      if (n > 1e-5) {
+        _jd.copy(j.off).multiplyScalar(lim * Math.tanh(n / lim) / n).add(_jw);
+        j.b.parent.worldToLocal(_jd); j.b.position.copy(_jd); j.b.updateMatrixWorld(true);
+      }
+      j.setP = j.b.position.clone();
+    }
   }
   /* Each bone keeps the direction it is pointing, in world space. That direction is pulled toward where the animation
      points the bone, carries a little momentum, and is dragged back by how fast the bone's base is travelling, so a tail
@@ -832,6 +922,7 @@ function build() {
       fxFighter(f, idx, st, alive, v);
       if (v.prop && !alive) v.prop.visible = false;
       v.root.visible = alive; v.shield.visible = alive && (f.state === 'shield' || f.state === 'shieldstun'); v.pad.visible = f.state === 'respawn';
+      if (v.stick) v.stick.grp.visible = alive;
       if (!alive) { hideArc(idx); return; }
       dress(v, f);
       if (v.model) applyAnim(v, f);
@@ -857,7 +948,9 @@ function build() {
       if (v.chomp) poseChomp(v, f);
       if (v.bubble) { const on = !!f.bubble, grow = f.state === 'attack' && f.mname === 'uspec' && !on ? clamp((f.mf - 3) / 5, 0, 1) : 0;   /* it swells from his mouth as he blows, then wobbles round him; it sits round his middle whatever the pivot is doing */
         v.bubble.visible = on || grow > 0; v.bubble.scale.setScalar(on ? 1 + Math.sin(tick * 0.3) * 0.03 : 0.15 + 0.85 * grow); v.bubble.position.x = on ? 0 : 5 * (1 - grow); }
+      if (v.jiggle && v.jiggle.length) applyJiggle(v);
       if (v.springs.length) applySprings(v);
+      if (v.stick) stickLegs(v, f);
       if (v.model && v.model.cfg.axe) axeShow(v, f);
       if (v.model && v.model.cfg.carry) { const c = v.model.cfg.carry; if (v.carryObj !== v.obj) { v.carryObj = v.obj; v.carryB = v.obj.getObjectByName(c.bone); } if (v.carryB) { v.carryB.updateWorldMatrix(true, false); v.carryB.getWorldPosition(_v3); v.handW = { x: _v3.x, y: _v3.y, t: tick }; } }
       if (v.model && f.def.transform && !v.needleTried && PROPS.needle) { v.needleTried = true; v.needle = propOf('needle'); v.needle.visible = false; scene.add(v.needle); }   /* Joey's steroid needle, the owner's model */
