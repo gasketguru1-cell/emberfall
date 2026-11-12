@@ -111,6 +111,30 @@ function autotest(role) {
       await fsP.writeFile(path.join(dir, 'probe.json'), JSON.stringify(r)); app.quit(); })();
     return;
   }
+  if (role === 'menu-host' || role === 'menu-join') {   /* the ONLINE menu itself, as a player uses it: host shows a code, join types it;
+       reports whether the two linked and every status the menu showed on the way (a failed join must say why within 20 s) */
+    (async () => {
+      await new Promise(r => setTimeout(r, 5000));
+      let code = '';
+      if (role === 'menu-join') { for (let k = 0; k < 300 && !fs.existsSync(path.join(dir, 'code.txt')); k++) await new Promise(r => setTimeout(r, 200)); code = (await fsP.readFile(path.join(dir, 'code.txt'), 'utf8')).trim(); }
+      const via = JSON.stringify(process.env.EMBERFALL_AUTOVIA || 'eos');
+      await win.webContents.executeJavaScript(`(() => { openOnline(); const v = document.getElementById('on-via'); v.value = ${via};
+        if (${JSON.stringify(role)} === 'menu-host') document.getElementById('on-host').click();
+        else { document.getElementById('on-join').click(); document.getElementById('on-code').value = ${JSON.stringify(code)}; document.getElementById('on-go').click(); } })()`);
+      const seen = [], t0 = Date.now(); let linked = false;
+      while (Date.now() - t0 < (role === 'menu-host' ? 90000 : 45000)) {
+        const s = await win.webContents.executeJavaScript(`({ st: document.getElementById('on-st').textContent, code: document.getElementById('on-codev').textContent, line: window.__online.line(), linked: !!(window.__online.state() && window.__online.state().linked) })`);
+        if (role === 'menu-host' && s.code && !fs.existsSync(path.join(dir, 'code.txt'))) await fsP.writeFile(path.join(dir, 'code.txt'), s.code);
+        for (const t of [s.st, s.line]) if (t && seen[seen.length - 1] !== t && !seen.includes(t)) seen.push(((Date.now() - t0) / 1000).toFixed(1) + 's ' + t);
+        if (s.linked) { linked = true; await new Promise(r => setTimeout(r, 1500)); break; }
+        if (role === 'menu-join' && !s.line.startsWith('Online') && seen.length > 1 && /Could not/.test(s.st)) break;
+        await new Promise(r => setTimeout(r, 250));
+      }
+      let log = ''; try { log = fs.readFileSync(eos && eos.logPath, 'utf8'); } catch (e) { /* none */ }
+      await fsP.writeFile(path.join(dir, role + '.json'), JSON.stringify({ role, linked, seen, log }, null, 1)); app.quit();
+    })();
+    return;
+  }
   const js = `(async () => {
     const seed = ${me === 0 ? 1000 : 2000}; let s = seed >>> 0; const rnd = () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
     const sc = []; let cur = [0, 0, 0, 0, 0], left = 0;

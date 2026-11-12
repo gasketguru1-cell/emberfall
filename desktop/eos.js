@@ -34,6 +34,30 @@ exports.available = () => {
   try { require('koffi'); return true; } catch (e) { return false; }
 };
 
+/* ---------- the connection log: online-log.txt in the game's data folder, so a connection that failed on a friend's
+   computer can be looked at afterwards. Each start of the game begins a new one (the last one is kept as
+   online-log-previous.txt); repeats of one line are counted, not written, and it stops at 2 MB. ---------- */
+const LOG_PATH = process.env.EMBERFALL_ONLINE_LOG || path.join(app ? app.getPath('userData') : require('os').tmpdir(), 'online-log.txt');
+const logState = { open: false, bytes: 0, last: '', reps: 0 };
+function logLine(s) { const d = new Date(), l = d.toTimeString().slice(0, 8) + '.' + String(d.getMilliseconds()).padStart(3, '0') + '  ' + s + '\n'; logState.bytes += l.length; fs.appendFileSync(LOG_PATH, l); }
+function note(s) {
+  try {
+    if (!logState.open) {
+      logState.open = true; try { fs.renameSync(LOG_PATH, LOG_PATH.replace(/\.txt$/, '-previous.txt')); } catch (e) { /* first run */ }
+      fs.writeFileSync(LOG_PATH, `Emberfall ${(app && app.getVersion()) || 'dev'} online log, started ${new Date().toString()}\n`);
+    }
+    if (s === logState.last) { logState.reps++; return; }
+    if (logState.reps) logLine(`(the line above ${logState.reps} more time${logState.reps > 1 ? 's' : ''})`);
+    logState.last = s; logState.reps = 0;
+    if (logState.bytes < 2e6) logLine(s);
+  } catch (e) { /* a log that can't be written must not stop the game */ }
+}
+exports.logPath = LOG_PATH;
+const short = id => id ? id.slice(0, 4) + '..' + id.slice(-4) : '?';   /* player ids in the log: enough to tell two apart */
+const NET_TYPE = ['no connection', 'direct', 'through Epic\'s relay'], NAT_TYPE = ['unknown', 'open', 'moderate', 'strict'];
+const CLOSED = ['unknown', 'closed here', 'closed by the friend', 'timed out', 'too many connections', 'bad message', 'bad data',
+  'could not reach the friend\'s computer', 'the friend went away', 'could not negotiate the connection', 'internal error', 'ignored'];
+
 /* ---------- the binding ---------- */
 let E = null;   /* the loaded functions and types */
 function bind() {
@@ -107,6 +131,14 @@ function bind() {
   koffi.struct('EOS_P2P_SetRelayControlOptions', { ApiVersion: 'int32_t', RelayControl: 'int32_t' });
   koffi.struct('EOS_P2P_CloseConnectionsOptions', { ApiVersion: 'int32_t', LocalUserId: 'EOS_ProductUserId', SocketId: 'EOS_P2P_SocketId *' });
   koffi.proto('void EOS_P2P_OnIncomingConnectionRequestCallback(void *Data)');
+  /* connection events and the NAT check, for the connection log (eos_p2p_types.h) */
+  for (const n of ['Established', 'Interrupted', 'Closed']) koffi.struct('EOS_P2P_AddNotifyPeerConnection' + n + 'Options', { ApiVersion: 'int32_t', LocalUserId: 'EOS_ProductUserId', SocketId: 'EOS_P2P_SocketId *' });
+  koffi.struct('EOS_P2P_OnPeerConnectionEstablishedInfo', { ClientData: 'void *', LocalUserId: 'EOS_ProductUserId', RemoteUserId: 'EOS_ProductUserId', SocketId: 'void *', ConnectionType: 'int32_t', NetworkType: 'int32_t' });
+  koffi.struct('EOS_P2P_OnPeerConnectionInterruptedInfo', { ClientData: 'void *', LocalUserId: 'EOS_ProductUserId', RemoteUserId: 'EOS_ProductUserId', SocketId: 'void *' });
+  koffi.struct('EOS_P2P_OnRemoteConnectionClosedInfo', { ClientData: 'void *', LocalUserId: 'EOS_ProductUserId', RemoteUserId: 'EOS_ProductUserId', SocketId: 'void *', Reason: 'int32_t' });
+  koffi.struct('EOS_P2P_QueryNATTypeOptions', { ApiVersion: 'int32_t' });
+  koffi.struct('EOS_P2P_OnQueryNATTypeCompleteInfo', { ResultCode: 'EOS_EResult', ClientData: 'void *', NATType: 'int32_t' });
+  for (const n of ['EOS_P2P_OnPeerConnectionEstablishedCallback', 'EOS_P2P_OnPeerConnectionInterruptedCallback', 'EOS_P2P_OnRemoteConnectionClosedCallback', 'EOS_P2P_OnQueryNATTypeCompleteCallback']) koffi.proto('void ' + n + '(void *Data)');
   const F = s => lib.func(s);
   E = { koffi, T,
     Initialize: F('EOS_EResult EOS_Initialize(const EOS_InitializeOptions *Options)'),
@@ -147,6 +179,10 @@ function bind() {
     NotifyRequest: F('EOS_NotificationId EOS_P2P_AddNotifyPeerConnectionRequest(EOS_HP2P Handle, const EOS_P2P_AddNotifyPeerConnectionRequestOptions *Options, void *ClientData, EOS_P2P_OnIncomingConnectionRequestCallback *ConnectionRequestHandler)'),
     SetRelay: F('EOS_EResult EOS_P2P_SetRelayControl(EOS_HP2P Handle, const EOS_P2P_SetRelayControlOptions *Options)'),
     CloseConnections: F('EOS_EResult EOS_P2P_CloseConnections(EOS_HP2P Handle, const EOS_P2P_CloseConnectionsOptions *Options)'),
+    NotifyEstablished: F('EOS_NotificationId EOS_P2P_AddNotifyPeerConnectionEstablished(EOS_HP2P Handle, const EOS_P2P_AddNotifyPeerConnectionEstablishedOptions *Options, void *ClientData, EOS_P2P_OnPeerConnectionEstablishedCallback *Handler)'),
+    NotifyInterrupted: F('EOS_NotificationId EOS_P2P_AddNotifyPeerConnectionInterrupted(EOS_HP2P Handle, const EOS_P2P_AddNotifyPeerConnectionInterruptedOptions *Options, void *ClientData, EOS_P2P_OnPeerConnectionInterruptedCallback *Handler)'),
+    NotifyClosed: F('EOS_NotificationId EOS_P2P_AddNotifyPeerConnectionClosed(EOS_HP2P Handle, const EOS_P2P_AddNotifyPeerConnectionClosedOptions *Options, void *ClientData, EOS_P2P_OnRemoteConnectionClosedCallback *Handler)'),
+    QueryNAT: F('void EOS_P2P_QueryNATType(EOS_HP2P Handle, const EOS_P2P_QueryNATTypeOptions *Options, void *ClientData, EOS_P2P_OnQueryNATTypeCompleteCallback *CompletionDelegate)'),
   };
   return E;
 }
@@ -185,7 +221,8 @@ function start() {
     const verbose = !!process.env.EMBERFALL_EOS_LOG;
     let r = E.Initialize({ ApiVersion: 5, ProductName: 'Emberfall', ProductVersion: (app && app.getVersion()) || 'dev' });
     if (r !== R.Success && r !== 15 /* EOS_AlreadyConfigured */) throw err('Epic Online Services did not start', r);
-    cbs.log = E.koffi.register(ptr => { try { const m = E.koffi.decode(ptr, 'EOS_LogMessage'); console.log('[eos] ' + m.Category + ': ' + m.Message); } catch (e) { /* ignore */ } }, E.koffi.pointer(E.koffi.type('EOS_LogMessageFunc')));
+    cbs.log = E.koffi.register(ptr => { try { const m = E.koffi.decode(ptr, 'EOS_LogMessage'); console.log('[eos] ' + m.Category + ': ' + m.Message); note('epic: ' + m.Category + ': ' + m.Message); } catch (e) { /* ignore */ } }, E.koffi.pointer(E.koffi.type('EOS_LogMessageFunc')));
+    note('starting Epic Online Services');
     E.LogSet(cbs.log); E.LogLevel(LC_ALL_CATEGORIES, verbose ? LOG_VERBOSE : LOG_WARNING);
     const cache = process.env.EMBERFALL_EOS_CACHE || path.join(app ? app.getPath('userData') : require('os').tmpdir(), 'eos-cache');   /* a second copy on one computer, for testing, keeps its own */ fs.mkdirSync(cache, { recursive: true });
     const platform = E.PlatformCreate({ ApiVersion: 15, ProductId: c.productId, SandboxId: c.sandboxId, DeploymentId: c.deploymentId,
@@ -208,17 +245,43 @@ function start() {
     }
     if (li.ResultCode !== R.Success) throw err('Could not sign in to Epic Online Services', li.ResultCode);
     P.user = li.LocalUserId; P.userStr = puidStr(P.user);
-    E.SetRelay(P.p2p, { ApiVersion: 1, RelayControl: RC_ALLOWRELAYS });
+    note('signed in as player ' + short(P.userStr));
+    note('relays allowed: ' + result(E.SetRelay(P.p2p, { ApiVersion: 1, RelayControl: RC_ALLOWRELAYS })));
+    watchConnections();
     /* connection requests from a friend on our socket: accepted when this machine is hosting and has no friend yet */
     E.NotifyRequest(P.p2p, { ApiVersion: 1, LocalUserId: P.user, SocketId: SOCKET }, 0n, cbs.req = E.koffi.register(ptr => {
       try { const d = E.koffi.decode(ptr, 'EOS_P2P_OnIncomingConnectionRequestInfo'), from = puidStr(d.RemoteUserId);
-        for (const k of links.values()) if (k.host && (!k.peerStr || k.peerStr === from)) { k.peer = E.PuidFromStr(from); k.peerStr = from; E.AcceptConnection(P.p2p, { ApiVersion: 1, LocalUserId: P.user, RemoteUserId: k.peer, SocketId: SOCKET }); return; }
+        for (const k of links.values()) if (k.host && (!k.peerStr || k.peerStr === from)) { k.peer = E.PuidFromStr(from); k.peerStr = from; note('host: player ' + short(from) + ' asks to connect; accepting: ' + result(E.AcceptConnection(P.p2p, { ApiVersion: 1, LocalUserId: P.user, RemoteUserId: k.peer, SocketId: SOCKET }))); return; }
+        note('connection request from player ' + short(from) + ' ignored (not hosting, or already has a friend)');
       } catch (e) { console.error('[eos] request', e); }
     }, E.koffi.pointer(E.koffi.type('EOS_P2P_OnIncomingConnectionRequestCallback'))));
     return P;
   })();
-  starting.catch(() => { starting = null; });   /* a failed start (no internet, say) may be tried again */
+  starting.catch(e => { note('could not start or sign in: ' + e.message); starting = null; });   /* a failed start (no internet, say) may be tried again */
   return starting;
+}
+/* what happens to each connection, for the log and the ONLINE menu: up (direct or relayed), interrupted, closed (and why).
+   The page gets {t:'__net', state, why} on the link, so a join that can't reach the host says so instead of waiting. */
+function watchConnections() {
+  const o = { ApiVersion: 1, LocalUserId: P.user, SocketId: SOCKET };
+  const on = (fn, proto, info, handle) => { const c = E.koffi.register(ptr => { try { handle(E.koffi.decode(ptr, info)); } catch (e) { console.error('[eos] event', e); } }, E.koffi.pointer(E.koffi.type(proto))); cbs[proto] = c; fn(P.p2p, o, 0n, c); };
+  const linkOf = id => { const s = puidStr(id); for (const k of links.values()) if (k.peerStr === s) return [k, s]; return [null, s]; };
+  on(E.NotifyEstablished, 'EOS_P2P_OnPeerConnectionEstablishedCallback', 'EOS_P2P_OnPeerConnectionEstablishedInfo', d => {
+    const [k, s] = linkOf(d.RemoteUserId), how = NET_TYPE[d.NetworkType] || 'type ' + d.NetworkType;
+    note('connected to player ' + short(s) + ' ' + how + (d.ConnectionType === 1 ? ' (reconnected)' : ''));
+    if (k) deliver(k, { t: '__net', state: 'up', how });
+  });
+  on(E.NotifyInterrupted, 'EOS_P2P_OnPeerConnectionInterruptedCallback', 'EOS_P2P_OnPeerConnectionInterruptedInfo', d => {
+    const [k, s] = linkOf(d.RemoteUserId); note('connection to player ' + short(s) + ' interrupted; Epic is trying to restore it');
+    if (k) deliver(k, { t: '__net', state: 'interrupted' });
+  });
+  on(E.NotifyClosed, 'EOS_P2P_OnRemoteConnectionClosedCallback', 'EOS_P2P_OnRemoteConnectionClosedInfo', d => {
+    const [k, s] = linkOf(d.RemoteUserId), why = CLOSED[d.Reason] || 'reason ' + d.Reason;
+    note('connection to player ' + short(s) + ' closed: ' + why);
+    if (k) deliver(k, { t: '__net', state: 'closed', why });
+  });
+  call(E.QueryNAT, P.p2p, { ApiVersion: 1 }, 'EOS_P2P_OnQueryNATTypeCompleteCallback', 'EOS_P2P_OnQueryNATTypeCompleteInfo')
+    .then(r => note('this network\'s NAT type: ' + (r.ResultCode === R.Success ? NAT_TYPE[r.NATType] || r.NATType : 'not known (' + result(r.ResultCode) + ')')));
 }
 
 /* ---------- links: one per host or join, like the direct connection's sockets ---------- */
@@ -233,7 +296,7 @@ function sendRaw(k, obj) {
 /* both copies must be the same version: each sends {__ev: version} until the other's has arrived (as main.js does for UDP) */
 function onPacket(k, msg) {
   if (msg && msg.__ev !== undefined) {
-    if (k.theirs === null) { k.theirs = String(msg.__ev); clearTimeout(k.oldTimer); sendRaw(k, { __ev: VERSION }); if (k.theirs !== VERSION) mismatch(k.theirs); }
+    if (k.theirs === null) { k.theirs = String(msg.__ev); clearTimeout(k.oldTimer); sendRaw(k, { __ev: VERSION }); note('first message from player ' + short(k.peerStr) + ': version ' + k.theirs + (k.theirs === VERSION ? ' (same as ours)' : ', ours is ' + VERSION)); if (k.theirs !== VERSION) mismatch(k.theirs); }
     return;
   }
   if (k.theirs === null) { sendRaw(k, { __ev: VERSION }); if (!k.oldTimer) k.oldTimer = setTimeout(() => { if (k.theirs === null) mismatch('an older version'); }, 4000); return; }
@@ -275,6 +338,7 @@ async function host() {
   E.ModRelease(mod[0]);
   if (up.ResultCode !== R.Success) throw err('Could not set the match code', up.ResultCode);
   const id = nextLink++; links.set(id, { id, host: true, lobbyId, peer: null, peerStr: '', theirs: null, oldTimer: null });
+  note('hosting: code ' + show(code) + ', waiting for a friend');
   return { id, code: show(code) };
 }
 async function join(typed) {
@@ -287,6 +351,7 @@ async function join(typed) {
     r = E.SearchSetParam(search[0], { ApiVersion: 1, Parameter: { ApiVersion: 1, Key: 'CODE', Value: { AsUtf8: code }, ValueType: AT_STRING }, ComparisonOp: CO_EQUAL });
     if (r !== R.Success) throw err('Could not look for the match', r);
     const f = await call(E.SearchFind, search[0], { ApiVersion: 1, LocalUserId: P.user }, 'EOS_LobbySearch_OnFindCallback', 'EOS_LobbySearch_FindCallbackInfo');
+    note('join: looking up code ' + show(code) + ': ' + result(f.ResultCode) + ', ' + (f.ResultCode === R.Success ? E.SearchCount(search[0], { ApiVersion: 1 }) : 0) + ' found');
     if (f.ResultCode === R.NotFound || (f.ResultCode === R.Success && E.SearchCount(search[0], { ApiVersion: 1 }) === 0)) throw new Error('no match has that code (check it, or ask your friend to host again)');
     if (f.ResultCode !== R.Success) throw err('Could not look for the match', f.ResultCode);
     const det = [null]; r = E.SearchCopy(search[0], { ApiVersion: 1, LobbyIndex: 0 }, det);
@@ -296,13 +361,13 @@ async function join(typed) {
     if (owner === P.userStr) throw new Error('that is your own match');
     const peer = E.PuidFromStr(owner), id = nextLink++, k = { id, host: false, peer, peerStr: owner, theirs: null, oldTimer: null };
     links.set(id, k);
-    E.AcceptConnection(P.p2p, { ApiVersion: 1, LocalUserId: P.user, RemoteUserId: peer, SocketId: SOCKET });
+    note('join: the host is player ' + short(owner) + '; connecting: ' + result(E.AcceptConnection(P.p2p, { ApiVersion: 1, LocalUserId: P.user, RemoteUserId: peer, SocketId: SOCKET })));
     sendRaw(k, { __ev: VERSION });
     return { id, code: show(code) };
   } finally { E.SearchRelease(search[0]); }
 }
 function close(id) {
-  const k = links.get(id); if (!k) return; links.delete(id); clearTimeout(k.oldTimer);
+  const k = links.get(id); if (!k) return; links.delete(id); clearTimeout(k.oldTimer); note((k.host ? 'stopped hosting' : 'left the match') + (k.peerStr ? ' (friend: player ' + short(k.peerStr) + ')' : ''));
   if (!P) return;
   if (k.lobbyId) call(E.DestroyLobby, P.lobby, { ApiVersion: 1, LocalUserId: P.user, LobbyId: k.lobbyId }, 'EOS_Lobby_OnDestroyLobbyCallback', 'EOS_Lobby_DestroyLobbyCallbackInfo').catch(() => {});
   if (![...links.values()].length) E.CloseConnections(P.p2p, { ApiVersion: 1, LocalUserId: P.user, SocketId: SOCKET });
@@ -311,8 +376,10 @@ function close(id) {
 /* main.js hands over ipcMain and the window; the page reaches this through preload.js */
 exports.wire = (ipcMain, win, version) => {
   getWin = win; VERSION = version || (app && app.getVersion()) || '0';
-  ipcMain.handle('eos-host', () => host());
-  ipcMain.handle('eos-join', (e, code) => join(code));
+  ipcMain.handle('eos-host', () => host().catch(err => { note('host failed: ' + err.message); throw err; }));
+  ipcMain.handle('eos-join', (e, code) => join(code).catch(err => { note('join failed: ' + err.message); throw err; }));
+  ipcMain.handle('eos-log-path', () => LOG_PATH);
+  ipcMain.on('eos-note', (e, s) => note('game: ' + String(s).slice(0, 300)));
   ipcMain.on('eos-send', (e, id, msg) => { const k = links.get(id); if (!k || !k.peer) return; if (k.theirs === null) sendRaw(k, { __ev: VERSION }); sendRaw(k, msg); });
   ipcMain.on('eos-close', (e, id) => close(id));
   start().catch(e => console.warn('[eos] not signed in yet:', e.message));   /* sign in early, so hosting is quick */

@@ -82,7 +82,8 @@
   /* ---- the link to the friend. It outlives a match: after one ends, both are back on the fighter select, still linked. ----
      L.n (host): the number of the last match started. L.last (joiner): the last match it began. L.cur: the match being played. */
   let L = null, note = '', noteT = 0;
-  const say = s => { note = s; noteT = Date.now(); status(s); };
+  const say = (s, ms) => { note = s; noteT = Date.now() + (ms || 0); status(s); };   /* ms: how much longer than usual it stays in the corner */
+  const JOIN_WAIT = 20000;   /* a join that hasn't reached the host by then gives up and says why */
   function via() { const ts = D.getTransports(); return ts.find(t => t.id === $('on-via').value) || ts[0]; }
   function refresh() {   /* what the menu offers: host or join when alone, the code while waiting, leaving once linked */
     $('on-setup').style.display = L ? 'none' : 'block'; $('on-leave').style.display = L ? 'inline-block' : 'none';
@@ -90,19 +91,22 @@
     $('on-rules').textContent = L && !L.host ? 'The host picks the stocks and the stage.' : 'Your stocks and stage (Options, on the fighter select) are used when you host.';
   }
   function connect(link, host) {
-    L = { link, host, linked: false, n: 0, last: 0, cur: 0, ready: false, pick: 0, peer: null, heard: Date.now(), handler: null, slot: null, wait: 0, startMsg: null, training: TRAINING };
+    L = { link, host, since: Date.now(), net: '', linked: false, n: 0, last: 0, cur: 0, ready: false, pick: 0, peer: null, heard: Date.now(), handler: null, slot: null, wait: 0, startMsg: null, training: TRAINING };
     link.onMessage(onLink); LOBBY = api; refresh();
   }
-  function drop(why) {   /* the link is over: tell the friend, stop a match in progress, back to the fighter select */
+  function drop(why, ms) {   /* the link is over: tell the friend, stop a match in progress, back to the fighter select */
     if (!L) return; const l = L; L = null; LOBBY = null;
+    if (why && l.link.note) l.link.note(why);
     try { for (let k = 0; k < 3; k++) l.link.send({ t: 'bye' }); l.link.close(); } catch (e) { /* already gone */ }
     if (NET.session()) { NET.stop(); mode = 'select'; F = []; PROJ = []; PART = []; POPS = []; restore(l); }
-    say(why || ''); refresh();
+    say(why || '', ms); refresh();
   }
   function restore(l) { TRAINING = l.training; slots[0] = l.slot ? Object.assign(l.slot, { ready: false }) : null; slots[1] = null; l.handler = null; }
-  function linkedNow() { L.linked = true; L.heard = Date.now(); sfx('confirm'); refresh(); if (ov.style.display !== 'none') close(); }   /* connected: on to the fighter select */
+  function linkedNow() { if (L.link.note) L.link.note('linked with the friend: on to the fighter select'); L.linked = true; L.heard = Date.now(); sfx('confirm'); refresh(); if (ov.style.display !== 'none') close(); }   /* connected: on to the fighter select */
   function onLink(m) {
-    if (!L || !m) return; L.heard = Date.now();
+    if (!L || !m) return;
+    if (m.t === '__net') { netEvent(m); return; }   /* from the Epic connection itself, not from the friend */
+    L.heard = Date.now();
     if (m.g !== undefined) { if (NET.session() && m.g === L.cur && L.handler) L.handler(m); return; }   /* a match's own packets, only for the match being played */
     if (m.t === 'hello') { if (!L.host) return;
       if (m.v !== VERSION) { L.link.send({ t: 'refuse', why: 'different game versions' }); status('Your friend has a different version of the game.'); return; }
@@ -115,6 +119,17 @@
       if (!STAGES[m.stage | 0]) { say('The host chose a stage this copy of the game does not have. Update the game.'); return; }
       L.last = m.n; play(1, m.p0, m.p1, m.stocks, m.stage | 0, m.n); }
   }
+  /* the Epic connection's own news: up (direct or through the relay), interrupted, closed. A join whose connection closes
+     before the host has answered gives up at once, with the reason, instead of waiting */
+  function netEvent(m) {
+    if (m.state === 'up') { L.net = m.how; if (!L.linked && !L.host) status("Reached your friend's computer (" + m.how + "). Waiting for their game to answer..."); }
+    else if (m.state === 'interrupted') { if (!L.linked) status('The connection to your friend dropped; Epic is trying again...'); }
+    else if (m.state === 'closed') { if (!L.linked && !L.host) drop(failMsg(m.why), 60000); else if (L.linked) drop('Lost the connection to your friend (' + m.why + ').'); }
+  }
+  function failMsg(why) {
+    const lp = L && L.link.logPath;
+    return "Could not reach your friend's computer (" + why + "). Check that Windows Firewall allows Emberfall on both computers, then have your friend host again and send a new code." + (lp ? ' Details are saved in ' + lp : '');
+  }
   /* host: both ready on the fighter select (or warming up) starts the match; a start the friend never got is sent again */
   function maybeStart() {
     const p = L.peer; if (!p) return;
@@ -126,7 +141,10 @@
   const lobbyMsg = () => ({ t: 'lobby', ready: L.ready, pick: L.pick, last: L.host ? L.n : L.last, inMatch: !!NET.session(), stocks: OPT.stocks, stage: OPT.stage });
   function lobbyTick() {
     if (!L) return;
-    if (!L.linked) { if (!L.host) L.link.send({ t: 'hello', v: VERSION }); return; }   /* repeated until answered: packets can be lost */
+    if (!L.linked) {
+      if (!L.host && Date.now() - L.since > JOIN_WAIT) { drop(failMsg(L.net ? 'connected ' + L.net + ', but their game never answered' : 'no connection formed in ' + JOIN_WAIT / 1000 + ' seconds'), 60000); return; }
+      if (!L.host) L.link.send({ t: 'hello', v: VERSION }); return;   /* repeated until answered: packets can be lost */
+    }
     if (Date.now() - L.heard > 6000) { drop('Lost the connection to your friend.'); return; }
     if (L.ready && !NET.session() && mode === 'select') {
       if (L.wait && Date.now() - L.wait < 1500) { /* the friend was ready too: the host's start is on its way */ }
@@ -184,7 +202,7 @@
   function lineText() {
     const s = NET.session();
     if (s) { const t = s.stats; return [`online · ping ${t.lastRtt} ms · rollbacks ${t.rollbacks} (deepest ${t.maxDepth}) · waits ${t.waits}` + (s.desync ? ' · DESYNC at frame ' + s.desync.frame : ''), false]; }
-    if (!L) return [note && Date.now() - noteT < 6000 ? note : '', true];
+    if (!L) return [note && Date.now() - noteT < 6000 ? note : '', true];   /* (noteT can be in the future: a failure stays up longer) */
     if (!L.linked) return [L.host ? 'Online · code ' + L.link.code + ' · waiting for your friend to connect' + (mode !== 'select' ? ' · warm-up against the CPU' : '') : 'Online · connecting...', true];
     const p = L.peer, rules = p && !L.host && STAGES[p.stage | 0] ? ' · host: ' + p.stocks + (p.stocks === 1 ? ' stock, ' : ' stocks, ') + STAGES[p.stage | 0].name : '';
     if (mode !== 'select') return ['Online · warm-up against the CPU · the match starts when your friend is ready', true];
