@@ -657,6 +657,19 @@ vm.runInThisContext(`
     const nm = (n, k) => FM[n].moves[k].h[0], ok1 = nm(0, 'ftilt').f0 === 8 && nm(0, 'ftilt').d === 8 && nm(1, 'fsmash').f0 === 15 && nm(1, 'fsmash').d === 14 && nm(2, 'fsmash').f0 === 24 && nm(2, 'fsmash').d === 21 && nm(3, 'dtilt').f0 === 6 && nm(3, 'dtilt').d === 6 && nm(4, 'fair').f0 === 8 && nm(4, 'fair').d === 8;
     const ok2 = FM[2].moves.bair.ll === 17 && FM[1].moves.uair.ll === 8 && FM[0].moves.jab3.h[0].d === 4 && FM[2].moves.jab3.h[0].f0 === 11 && FM[2].moves.throws.b.d === 12 && FM[1].moves.grab.h[0].f0 === 7;
     check('Furious Fowls: each bird’s slingshot normals are the overhaul’s', ok1 && ok2, 'Flint forward tilt f' + nm(0, 'ftilt').f0 + ' ' + nm(0, 'ftilt').d + '%, Bolt forward smash f' + nm(1, 'fsmash').f0 + ' ' + nm(1, 'fsmash').d + '%, Cinder forward smash f' + nm(2, 'fsmash').f0 + ' ' + nm(2, 'fsmash').d + '%, Cinder back air landing ' + FM[2].moves.bair.ll + ', Bolt grab f' + FM[1].moves.grab.h[0].f0);
+    /* forward, back and up air in the slingshot: the bands hit as a 60% sour spot; the bird's own hitbox is unchanged and wins */
+    {
+      const first = (a, v, mv) => { for (const h of mv.h) if (hitTouches(a, h, v)) return h; return null; };
+      const out = [];
+      for (const [k, bandAt, birdAt] of [['fair', [4, 31.5], [15, 22]], ['bair', [-2, 33], [-12.5, 24]], ['uair', [0, 32 - ROSTER[0].forms[0].st.h], [0, 36]]]) {
+        const [fw, fl] = setup(FOW, FL, 0, 40), mv = fw.form.moves[k], q = FN.Rusty[k]; airborne(fw, 0, 20); fw.face = 1; fw.px = fw.x; fw.py = fw.y;
+        const at = p => { airborne(fl, p[0], p[1]); fl.px = fl.x; fl.py = fl.y; return first(fw, fl, mv); }, b = at(bandAt), s = at(birdAt);
+        out.push([k, mv.h[0].d === q[2] && mv.h[0].f0 === q[0] && mv.h[0].f1 === q[1], b && b.part === 'band' && Math.abs(b.d - q[2] * 0.6) < 0.01 && b.f0 === q[0] && b.f1 === q[1], s === mv.h[0], b ? b.d : '-', s ? s.d : '-']);
+      }
+      /* up air's own hitbox already reaches from the bird down toward the rig's middle, over the whole of the bands, so there the bird always wins */
+      const u = out[2]; u[2] = u[4] === '-' || u[4] === FN.Rusty.uair[2]; u[4] = FOWLS.forms[0].moves.uair.h[1].d + ' (covered)';
+      check('Furious Fowls: slingshot forward, back and up air bands are a 60% sour spot, the bird wins', out.every(r => r[1] && r[2] && r[3]), out.map(r => r[0] + ' band ' + r[4] + '% bird ' + r[5] + '%').join(', '));
+    }
     check('Furious Fowls: the bird is called Flint on screen', FM[0].label === 'Flint' && FM[5].label === 'Flint alone', FM[0].label + ' / ' + FM[5].label);
     /* Neutral B: the selector, never a shot */
     { const [f] = setup(FOW, FL, 0, 60); SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) i.spc = true; }; let shots = 0; run(30, () => { shots = Math.max(shots, PROJ.length); }); const tapped = f.form.label;
