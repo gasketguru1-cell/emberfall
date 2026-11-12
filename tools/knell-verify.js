@@ -10,8 +10,9 @@ global.document = { getElementById: () => ({ getContext: () => ctx }) }; global.
 global.localStorage = { getItem() { return null; }, setItem() {} };
 Object.defineProperty(global, 'navigator', { value: { getGamepads: () => [] }, configurable: true });
 let seed = 4242; Math.random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
-for (const f of ['hitboxes.js', 'sim.js', 'net.js', 'tools/knell-lab.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 global.JOB = JSON.parse(fs.readFileSync(process.argv[2], 'utf8')); global.FS = fs;
+/* JOB.labs: more lab files loaded after knell-lab.js (e.g. tools/sack-lab.js for Potato Sack, with sit.me his roster index) */
+for (const f of ['hitboxes.js', 'sim.js', 'net.js', 'tools/knell-lab.js'].concat(JOB.labs || [])) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 vm.runInThisContext(`
 (function () {
   const J = JOB, K = KLAB, out = [];

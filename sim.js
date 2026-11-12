@@ -567,7 +567,7 @@ function brevPuff(x, y) {
   for (let k = 0; k < 6; k++) { const a = k * TAU / 6; PART.push({ x: x + Math.cos(a) * 2, y: y + Math.sin(a) * 2, vx: -Math.sin(a) * 1.2, vy: Math.cos(a) * 1.2, life: 11, col: '#a8e0ff', r: 0.5 }); }
   beep(1250, 0.04, 'triangle', 0.012, 0.8);
 }
-function pop(x, y, text, col) { POPS.push({ x, y, text, col, life: 50 }); }
+function pop(x, y, text, col, sz) { POPS.push({ x, y, text, col, life: 50, sz }); }
 
 /* ---------- Moves ---------- */
 let PROJ = [];
@@ -2079,7 +2079,7 @@ const VARGAN = (() => {
         /* ---- specials ---- */
         /* Axe Throw: a high lobbed arc, the axe leaving his hand on frame 30 (66 in all). With the axe away, neutral special
            is a beckoning hand, and keeping special held 8 frames calls the axe home (Fighter.varganTick). */
-        nspec: { t: 66, h: [], on(f, n) { if (n === 30) vThrow(f); } },
+        nspec: { t: 66, h: [], sarm: [1, 34], sarmText: 1, on(f, n) { if (n === 30) vThrow(f); }, onLand() { return true; } },   /* the throw: super armour from the wind-up through the release; begun in the air, it carries on through a landing and the axe still flies */
         nspecE: { t: 24, h: [] },
         sspec: { t: 57, ll: 20, once: 1, nodrift: 1, ownPhys: 1, on: meteor, h: [circ(15, 24, 0.38, 0.62, 0.3, 18, 40, 60, 85, NB), circ(25, 40, 0.36, 0.6, 0.28, 12, 40, 45, 70, NB)] },
         uspec: upMove(false), uspecE: upMove(true),
@@ -3161,7 +3161,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   /* Armour: a move either shrugs off anything short of a hard launch, or (armorMax) takes one strike of that base damage or less, on the ground only. */
   const am = v.state === 'attack' && v.move && v.move.armor && v.mf >= v.move.armor[0] && v.mf <= v.move.armor[1] ? v.move : null;
   const sa = v.state === 'attack' && v.move && (v.grounded ? v.move.sarm : (v.move.sarmAir || v.move.sarm));   /* super armour: no flinch at all for those frames (the damage is still taken) */
-  if (sa && v.mf >= sa[0] && v.mf <= sa[1]) { v.hitlag = hl; if (!proj) a.hitlag = hl; spark(hx, hy, '#ffcf8a', 10, 1.2); sfx('armor_clang', hx); return; }
+  if (sa && v.mf >= sa[0] && v.mf <= sa[1]) { v.hitlag = hl; if (!proj) a.hitlag = hl; spark(hx, hy, '#ffcf8a', 10, 1.2); sfx('armor_clang', hx); if (v.move.sarmText) pop(hx, hy, 'SUPER ARMOR', '#ffcf8a', 14); return; }
   if (h.bury && v.grounded) {   /* buried: stuck in the floor for a time that grows with the launch it would have had */
     v.freeVictim(); v.move = null; v.vx = v.vy = 0; v.buryT = Math.min(180, Math.round(kb * 0.6) + 12); v.set('buried'); v.hitlag = hl; if (!proj) a.hitlag = hl;
     spark(hx, v.y, '#c9a27a', 18, 1.6); pop(hx, hy + 10, 'BURIED', '#e0b98a'); thwack(kb, hx); shake = Math.max(shake, 6); return; }
@@ -3267,7 +3267,7 @@ function updateProj() {
 }
 
 /* ---------- CPU opponent ---------- */
-/* CPU level, 1 (easiest) to 10. Level 7 is the CPU exactly as it played before levels existed, and the one every test uses.
+/* CPU level, 1 (easiest) to 10. Level 10 is everything at its sharpest; for Knell it adds the combo planner of knellcpu.js, and for Furious Fowls the one in cpu10.js. Level 7 is the CPU exactly as it played before levels existed, and the one every test uses.
    tempo: how long it waits between attacks (x its usual wait)   guard: chance it shields an attack it sees coming
    tech: chance it techs a hard landing   punish: chance it grabs a shield   air: chance it takes an opening in the air
    nap: chance each second that it stops attacking for napLen frames and only walks
@@ -3282,8 +3282,6 @@ const CPU_LV = [null,
   { tempo: 1, guard: 0.45, tech: 0.55, punish: 0.6, air: 1, nap: 0, napLen: 0, mash: 8 },
   { tempo: 0.8, guard: 0.62, tech: 0.76, punish: 0.78, air: 1, nap: 0, napLen: 0, mash: 7 },
   { tempo: 0.62, guard: 0.8, tech: 0.94, punish: 0.92, air: 1, nap: 0, napLen: 0, mash: 6 },
-  /* 10: everything at its sharpest. As Furious Fowls it also plans its combos (cpu10.js): it plays each option it has out
-     ahead of time in a copy of the match and takes the one that keeps the combo going whichever way the opponent DIs */
   { tempo: 0.5, guard: 0.9, tech: 1, punish: 1, air: 1, nap: 0, napLen: 0, mash: 4 }];
 const CPU_MAX = CPU_LV.length - 1;
 let PRO_SIM = null;   /* set by cpu10.js only while it plays options out ahead of time: then it supplies every fighter's input */
@@ -3293,14 +3291,18 @@ function setCpuLevel(v) { CPU_LEVEL = clamp(Math.round(v), 0, CPU_MAX); try { lo
 const NAP_STATES = { idle: 1, dash: 1, run: 1, brake: 1, land: 1, wd: 1 };
 function cpuInput(f, o, m) {
   if (!m.lv && CPU_LEVEL === 0) return blankIn();   /* level 0: a target that does nothing at all, for testing moves on */
-  if ((m.lv || CPU_LEVEL) === 10 && typeof cpuPro === 'function') { const r = cpuPro(f, o, m); if (r) return r; }   /* level 10's planner (cpu10.js), when it has something to do */
-  const L = CPU_LV[m.lv || CPU_LEVEL], before = m.cd > 0 ? m.cd - 1 : 0, i = cpuBrain(f, o, m, L);
+  const lv = m.lv || CPU_LEVEL;
+  if (lv === 10 && typeof cpuPro === 'function') { const r = cpuPro(f, o, m); if (r) return r; }   /* Furious Fowls at level 10: its planner (cpu10.js), when it has something to do */
+  const kp = lv === 10 && f.def.name === 'Knell' && typeof KCPU !== 'undefined' && KCPU ? KCPU : null;
+  if (kp) { const k = kp.input(f, o, m); if (k) return k; }   /* Knell at level 10: a follow-up it has planned (knellcpu.js) */
+  const L = CPU_LV[lv], before = m.cd > 0 ? m.cd - 1 : 0; let i = cpuBrain(f, o, m, L);
   if (m.cd > before && L.tempo !== 1) m.cd = Math.max(1, Math.round(m.cd * L.tempo));   /* a wait it has just set itself */
   if (L.nap > 0) {
     if (m.nap > 0) m.nap--; else if (m.t % 60 === 0 && Math.random() < L.nap) m.nap = L.napLen;
     /* napping: standing safely on the stage it throws nothing out, and only ambles */
     if (m.nap > 0 && f.grounded && NAP_STATES[f.state] && Math.abs(f.x) < EDGE - 8) { i.atk = i.spc = i.grb = i.jmp = i.sm = false; i.cx = i.cy = 0; i.lx *= 0.45; if (i.ly > 0) i.ly = 0; }
   }
+  if (kp) i = kp.opener(f, o, m, i);   /* the brain chose to attack: the planner picks which opener */
   return i;
 }
 /* Fyrdsman as the CPU: calls his axe home a little while after it lands (holding special 12 frames), turns Berserker on now
@@ -3464,13 +3466,56 @@ function selectPreview() {
 /* The fighter select screen: where each roster tile and the CPU card are (the HUD draws them from the same numbers), and
    which one a player's cursor is over. */
 function rosterTile(k) { const n = ROSTER.length, tw = Math.min(168, (W - 120) / n - 12), gap = 12, x0 = (W - (n * tw + (n - 1) * gap)) / 2; return [x0 + k * (tw + gap), 158, tw, 124]; }
-const CPU_CARD = [W - 44 - 460, 446, 460, 158], TRAIN_PILL = [W - 44 - 214, 100, 214, 34], ARC_PILL = [W - 44 - 214, 140, 214, 34];
-/* Desktop app only (window.desktop): Online and Quit, under the switches, so a controller can reach them too. */
-const ONLINE_PILL = [W - 44 - 214, 180, 214, 34], QUIT_PILL = [W - 44 - 214, 220, 214, 34];
+const CPU_CARD = [W - 44 - 460, 446, 460, 158];
+/* the CPU card's level buttons, and the spot its token rests on while the CPU picks at random (hud.js draws them from these) */
+const CPU_MINUS = [CPU_CARD[0] + 286, CPU_CARD[1] + 46, 40, 40], CPU_PLUS = [CPU_CARD[0] + 398, CPU_CARD[1] + 46, 40, 40], CPU_DOCK = [CPU_CARD[0] + 232, CPU_CARD[1] + 78];
+function cpuStep(d, wrap) { const m = CPU_LV.length - 1, v = CPU_LEVEL + d; if (!wrap && (v < 0 || v > m)) { beep(220, 0.04, 'square', 0.02); return; } setCpuLevel(v > m ? 0 : v < 0 ? m : v); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
+/* everyone in is ready: the READY TO FIGHT banner across the middle (pointed at with A, or clicked, it starts the match) */
+const FIGHT_BAR = [0, 362, W, 64];
+function selReady() { return !!(slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)); }
+/* The bar along the top of the fighter select: Options and Training at the left; the display switches, then Online and Quit
+   (desktop app) at the right. + (Start) away from a fighter hides all but Options. Each chip says where it is, what it
+   says, whether it is on, a hint shown while it is pointed at, and what pressing it does; hud.js draws them from this list. */
+function selChips() {
+  const left = [], right = [];
+  if (SWITCHES) {
+    left.push({ id: 'train', label: 'Training', on: TRAINING, col: '#9be564', w: 136, tip: 'No clock, endless stocks, a combo counter  ·  T key', act: () => { setTraining(!TRAINING); sfx('toggle'); selToast(TRAINING ? 'Training on' : 'Training off', '#9be564'); } });
+    right.push({ id: 'boxes', label: 'Hitboxes', on: DBG.boxes, col: '#ff6a6a', w: 136, tip: 'Also the Jump button  ·  B key', act: () => { setBoxes(!DBG.boxes); sfx('toggle'); selToast(DBG.boxes ? 'Hitboxes shown' : 'Hitboxes hidden', '#ff6a6a'); } });
+    right.push({ id: 'fx', label: 'Hit sparks', on: DBG.fx, col: '#ffd166', w: 136, tip: 'Also the Shield button  ·  H key', act: () => { setHitFx(!DBG.fx); sfx('toggle'); selToast(DBG.fx ? 'Hit sparks on' : 'Hit sparks off', '#ffd166'); } });
+    right.push({ id: 'arcs', label: 'Attack arcs', on: DBG.arcs, col: '#8fd3ff', w: 136, tip: 'The sweep of an attack while it can hit  ·  G key', act: () => { setArcs(!DBG.arcs); sfx('toggle'); selToast(DBG.arcs ? 'Attack arcs on' : 'Attack arcs off', '#8fd3ff'); } });
+    if (DESKTOP()) {
+      right.push({ id: 'online', label: 'Online', col: '#ffb35c', w: 88, tip: 'Host a match or join a friend', act: () => { if (window.openOnline) window.openOnline(); beep(600, 0.05, 'square', 0.03); } });
+      right.push({ id: 'quit', label: QUIT_ASK > 0 ? 'Quit?' : 'Quit', col: '#ff6a6a', w: 80, hot: QUIT_ASK > 0, tip: QUIT_ASK > 0 ? 'Press again to quit' : 'Press twice to quit', act: () => { if (QUIT_ASK > 0) window.close(); else { QUIT_ASK = 150; beep(300, 0.08, 'square', 0.04); } } });
+    }
+  } else right.push({ id: 'show', label: '+  Show switches', col: '#ffd166', w: 156, tip: '+ or Start away from a fighter', act: () => setSwitches(true) });
+  let x = OPT_PILL[0] + OPT_PILL[2] + 8; for (const c of left) { c.box = [x, OPT_PILL[1], c.w, OPT_PILL[3]]; x += c.w + 8; }
+  x = W - 44; for (let k = right.length - 1; k >= 0; k--) { const c = right[k]; x -= c.w; c.box = [x, OPT_PILL[1], c.w, OPT_PILL[3]]; x -= 8; }
+  return left.concat(right);
+}
+function chipAt(x, y) { return selChips().find(c => inBox(c.box, x, y)) || null; }
+/* a short note in the middle of the screen when something is switched (it is easy to switch one by accident) */
+let SEL_TOAST = null; function selToast(text, col) { SEL_TOAST = { text, col: col || '#ffd98a', t: 0 }; }
+/* The mouse (or a finger) on the fighter select: the chips and the CPU's level buttons work; a fighter clicked is picked for the
+   keyboard's player (who joins if not in yet); a ready keyboard player's own card takes the pick back; the banner fights. */
+function selClick(x, y) {
+  if (mode !== 'select' || UI_MODAL || CMENU || OPT_UI.open || (typeof ML !== 'undefined' && ML.open)) return false;
+  const chip = chipAt(x, y); if (chip) { chip.act(); return true; }
+  if (!slots[1] && inBox(CPU_MINUS, x, y)) { cpuStep(-1); return true; }
+  if (!slots[1] && inBox(CPU_PLUS, x, y)) { cpuStep(1); return true; }
+  const k = tileUnder(x, y);
+  if (k >= 0) { let sl = slots.find(q => q && q.dev === 'kb');
+    if (!sl) { const n = slots[0] ? (slots[1] ? -1 : 1) : 0; if (n < 0) return false; sl = slots[n] = { dev: 'kb', pick: k, ready: false }; }
+    const tb = rosterTile(k); sl.pick = k; sl.ready = true; sl.tok = false; sl.cx = tb[0] + tb[2] / 2; sl.cy = tb[1] + tb[3] + 46; sfx('ready'); return true; }
+  if (selReady() && inBox(FIGHT_BAR, x, y)) { selectGo(); return true; }
+  for (let n = 0; n < 2; n++) { const sl = slots[n]; if (sl && sl.dev === 'kb' && sl.ready && inBox([n ? W - 44 - 460 : 44, 446, 460, 158], x, y)) { sl.ready = false; sfx('cancel'); return true; } }
+  return false;
+}
+/* what the mouse can press here, for the pointer shape */
+function selHot(x, y) { if (mode !== 'select' || UI_MODAL || CMENU || (typeof ML !== 'undefined' && ML.open)) return false; if (OPT_UI.open) return true; return inBox(OPT_PILL, x, y) || !!chipAt(x, y) || tileUnder(x, y) >= 0 || (!slots[1] && (inBox(CPU_MINUS, x, y) || inBox(CPU_PLUS, x, y))) || (selReady() && inBox(FIGHT_BAR, x, y)); }
 /* The Options button, and the Options panel it opens (drawn by hud.js from the same boxes). Rows: Stocks, Stage, then the
    Controllers box (the keyboard and every controller plugged in, each opening its controls screen, and Nintendo's GameCube
    adapter), then Done. */
-const OPT_PILL = [44, 20, 214, 34], OPT_UI = { open: false, row: 0, esc: false };
+const OPT_PILL = [44, 14, 120, 32], OPT_UI = { open: false, row: 0, esc: false };
 function optLayout() {
   const list = allDevs().map(dev => ({ kind: 'dev', dev })).concat([{ kind: 'gcu' }]), ph = Math.min(660, 236 + list.length * 46 + 112);   /* as tall as what is plugged in needs */
   const P = [W / 2 - 320, (H - ph) / 2, 640, ph], rows = [0, 1].map(k => { const y = P[1] + 74 + k * 64; return { kind: k ? 'stage' : 'stocks', box: [P[0] + 30, y, 580, 56], l: [P[0] + 300, y + 8, 40, 40], r: [P[0] + 550, y + 8, 40, 40] }; });
@@ -3524,22 +3569,22 @@ function tileUnder(x, y) { for (let k = 0; k < ROSTER.length; k++) if (inBox(ros
 /* The CPU's token: dragged with the mouse (or a finger) onto a fighter's tile to choose the CPU's fighter. Dropped anywhere
    else, the CPU picks at random again. CPU_PICK is -1 for random. Only while the second player slot is empty. */
 let CPU_PICK = -1; const CPU_TOK = { x: 0, y: 0, drag: false, dx: 0, dy: 0 };
-function cpuTokHome() { if (CPU_PICK >= 0) { const b = rosterTile(CPU_PICK); CPU_TOK.x = b[0] + b[2] - 44; CPU_TOK.y = b[1] + b[3] - 60; } else { CPU_TOK.x = CPU_CARD[0] + 236; CPU_TOK.y = CPU_CARD[1] + 40; } }
+function cpuTokHome() { if (CPU_PICK >= 0) { const b = rosterTile(CPU_PICK); CPU_TOK.x = b[0] + b[2] - 44; CPU_TOK.y = b[1] + b[3] - 60; } else { CPU_TOK.x = CPU_DOCK[0] - 24; CPU_TOK.y = CPU_DOCK[1] - 24; } }
 cpuTokHome();
 function cpuTokOn(x, y) { return mode === 'select' && !slots[1] && Math.hypot(x - (CPU_TOK.x + 24), y - (CPU_TOK.y + 24)) < 24; }
 function cpuGrab(x, y) { if (!cpuTokOn(x, y)) return false; CPU_TOK.drag = true; CPU_TOK.dx = CPU_TOK.x - x; CPU_TOK.dy = CPU_TOK.y - y; sfx('fighter_select'); return true; }
 function cpuDrag(x, y) { if (!CPU_TOK.drag) return; CPU_TOK.x = clamp(x + CPU_TOK.dx, 0, W - 48); CPU_TOK.y = clamp(y + CPU_TOK.dy, 0, H - 48); const k = tileUnder(CPU_TOK.x, CPU_TOK.y); if (k >= 0 && k !== CPU_PICK) { CPU_PICK = k; sfx('menu_move'); } }
 function cpuDrop(x, y) { if (!CPU_TOK.drag) return; cpuDrag(x, y); CPU_TOK.drag = false; CPU_PICK = tileUnder(CPU_TOK.x, CPU_TOK.y); cpuTokHome(); sfx(CPU_PICK >= 0 ? 'ready' : 'cancel'); }
 function stepSelect() {
-  selectPreview(); if (QUIT_ASK > 0) QUIT_ASK--;
+  selectPreview(); if (QUIT_ASK > 0) QUIT_ASK--; if (SEL_TOAST && ++SEL_TOAST.t > 100) SEL_TOAST = null;
   for (const dev of allDevs()) {
     const c = devCtl(dev); c.poll(readDev(dev));
     if (UI_MODAL) continue;   /* the online menu is open: it reads the controllers itself */
     if (typeof ML !== 'undefined' && ML.open) { if (dev === ML.dev) mlInput(c); continue; }
     if (OPT_UI.open) { optInput(c); continue; }   /* the Options panel: any controller or the keyboard works it */   /* a move list is open (movelist.js): only its player turns the pages */
     if (c.pressed('sel')) { openCMenu(dev); return; }   /* Backspace, or - on a controller: the controls screen for that device */
-    if (c.pressed('jmp')) { setBoxes(!DBG.boxes); sfx('toggle'); }   /* jump button: show or hide hitboxes */
-    if (c.pressed('shd')) { setHitFx(!DBG.fx); sfx('toggle'); }   /* shield button: hit sparks and flash on or off */
+    if (c.pressed('jmp')) { setBoxes(!DBG.boxes); sfx('toggle'); selToast(DBG.boxes ? 'Hitboxes shown' : 'Hitboxes hidden', '#ff6a6a'); }   /* jump button: show or hide hitboxes */
+    if (c.pressed('shd')) { setHitFx(!DBG.fx); sfx('toggle'); selToast(DBG.fx ? 'Hit sparks on' : 'Hit sparks off', '#ffd166'); }   /* shield button: hit sparks and flash on or off */
     let sl = slots.find(s => s && s.dev === dev);
     if (!sl) { if (c.pressed('atk') || c.pressed('start')) { const k = slots[0] ? (slots[1] ? -1 : 1) : 0; if (k >= 0) { const tb = rosterTile(k); slots[k] = { dev, pick: k, ready: false, cx: tb[0] + tb[2] / 2, cy: tb[1] + tb[3] + 46 }; sfx('fighter_select'); } } continue; }
     /* Each player has a cursor moved with the stick (or the arrow keys). Pointing at a fighter shows it; Attack there picks it.
@@ -3559,15 +3604,14 @@ function stepSelect() {
     if (c.pressed('start')) { if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { selectGo(); return; } if (typeof mlOpen === 'function' && over >= 0) { mlOpen(ROSTER[over], 0, c, 0, true); continue; } setSwitches(!SWITCHES); continue; }   /* anywhere else: hide or show the switches */
     else if (c.pressed('atk')) {
       if (inBox(OPT_PILL, sl.cx, sl.cy)) { optOpen(); continue; }
-      if (SWITCHES && DESKTOP() && inBox(ONLINE_PILL, sl.cx, sl.cy)) { if (window.openOnline) window.openOnline(); beep(600, 0.05, 'square', 0.03); continue; }
-      if (SWITCHES && DESKTOP() && inBox(QUIT_PILL, sl.cx, sl.cy)) { if (QUIT_ASK > 0) window.close(); else { QUIT_ASK = 150; beep(300, 0.08, 'square', 0.04); } continue; }   /* press twice to quit */
-      if (SWITCHES && inBox(TRAIN_PILL, sl.cx, sl.cy)) { setTraining(!TRAINING); sfx('toggle'); }
-      if (SWITCHES && inBox(ARC_PILL, sl.cx, sl.cy)) { setArcs(!DBG.arcs); beep(DBG.arcs ? 700 : 420, 0.05, 'square', 0.03); }
-      else if (onCpu) { setCpuLevel(CPU_LEVEL + 1 > CPU_MAX ? 0 : CPU_LEVEL + 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
+      const chip = chipAt(sl.cx, sl.cy); if (chip) { chip.act(); continue; }   /* the bar along the top */
+      if (!slots[1] && inBox(CPU_MINUS, sl.cx, sl.cy)) { cpuStep(-1); continue; }
+      if (!slots[1] && inBox(CPU_PLUS, sl.cx, sl.cy)) { cpuStep(1); continue; }
+      if (onCpu) cpuStep(1, true);   /* anywhere else on the CPU card: A raises the level, B lowers it (both go round) */
       else if (over >= 0) { sl.pick = over; sl.ready = true; sfx('ready'); }
-      else if (sl.ready && slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { selectGo(); return; }
+      else if (sl.ready && selReady()) { selectGo(); return; }   /* ready, pointing at nothing (the banner, say): fight */
     } else if (c.pressed('spc')) {
-      if (onCpu) { setCpuLevel(CPU_LEVEL - 1 < 0 ? CPU_MAX : CPU_LEVEL - 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
+      if (onCpu) cpuStep(-1, true);
       else if (sl.ready) { sl.ready = false; sfx('cancel'); }
       else { sfx('cancel'); slots[slots.indexOf(sl)] = null; if (!slots[0] && slots[1]) { slots[0] = slots[1]; slots[1] = null; } }
     }

@@ -1,0 +1,243 @@
+[
+ {
+  "name": "Z2 Flint coal-set fsmash 92%",
+  "route": "ant w28 fsmash ro_f hop fair ff cush ro_f w5 bite rf6 grab_u fh nair ro_f hop dair",
+  "sit": {
+   "foe": [
+    0
+   ],
+   "pct": 0,
+   "x0": -20,
+   "dist": 10,
+   "toss": {
+    "x": -22.5,
+    "route": "coalL"
+   }
+  },
+  "base": {
+   "hits": 8,
+   "dmg": 92,
+   "ko": true,
+   "resets": 1,
+   "firstReset": 344,
+   "endPct": 92,
+   "failedAt": -1,
+   "ant": 1,
+   "coal": 0
+  },
+  "di": {
+   "n/all": {
+    "hits": 5,
+    "dmg": 56.7,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 194,
+    "endPct": 56.7,
+    "failedAt": -1,
+    "ant": 1,
+    "coal": 0
+   },
+   "in": {
+    "hits": 3,
+    "dmg": 41.6,
+    "ko": false,
+    "resets": 2,
+    "firstReset": 128,
+    "endPct": 56.7,
+    "failedAt": -1,
+    "ant": 1,
+    "coal": 0
+   },
+   "in/all": {
+    "hits": 3,
+    "dmg": 41.6,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 119,
+    "endPct": 41.6,
+    "failedAt": 8,
+    "ant": 1,
+    "coal": 0
+   },
+   "out": {
+    "hits": 5,
+    "dmg": 56.7,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 194,
+    "endPct": 56.7,
+    "failedAt": -1,
+    "ant": 1,
+    "coal": 0
+   },
+   "out/all": {
+    "hits": 5,
+    "dmg": 56.7,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 194,
+    "endPct": 56.7,
+    "failedAt": -1,
+    "ant": 1,
+    "coal": 0
+   },
+   "up": {
+    "hits": 3,
+    "dmg": 41.6,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 126,
+    "endPct": 41.6,
+    "failedAt": 8,
+    "ant": 1,
+    "coal": 0
+   },
+   "up/all": {
+    "hits": 5,
+    "dmg": 56.7,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 194,
+    "endPct": 56.7,
+    "failedAt": -1,
+    "ant": 1,
+    "coal": 0
+   },
+   "down": {
+    "hits": 3,
+    "dmg": 41.6,
+    "ko": false,
+    "resets": 2,
+    "firstReset": 126,
+    "endPct": 45.4,
+    "failedAt": -1,
+    "ant": 1,
+    "coal": 0
+   },
+   "down/all": {
+    "hits": 3,
+    "dmg": 41.6,
+    "ko": false,
+    "resets": 2,
+    "firstReset": 126,
+    "endPct": 45.4,
+    "failedAt": -1,
+    "ant": 1,
+    "coal": 0
+   },
+   "ui": {
+    "hits": 3,
+    "dmg": 41.6,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 125,
+    "endPct": 41.6,
+    "failedAt": 8,
+    "ant": 1,
+    "coal": 0
+   },
+   "ui/all": {
+    "hits": 5,
+    "dmg": 56.7,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 194,
+    "endPct": 56.7,
+    "failedAt": -1,
+    "ant": 1,
+    "coal": 0
+   },
+   "uo": {
+    "hits": 3,
+    "dmg": 41.6,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 117,
+    "endPct": 41.6,
+    "failedAt": 8,
+    "ant": 1,
+    "coal": 0
+   },
+   "uo/all": {
+    "hits": 5,
+    "dmg": 56.7,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 194,
+    "endPct": 56.7,
+    "failedAt": -1,
+    "ant": 1,
+    "coal": 0
+   },
+   "di": {
+    "hits": 4,
+    "dmg": 45.4,
+    "ko": false,
+    "resets": 2,
+    "firstReset": 147,
+    "endPct": 80.6,
+    "failedAt": -1,
+    "ant": 1,
+    "coal": 0
+   },
+   "di/all": {
+    "hits": 4,
+    "dmg": 45.4,
+    "ko": false,
+    "resets": 2,
+    "firstReset": 148,
+    "endPct": 80.6,
+    "failedAt": -1,
+    "ant": 1,
+    "coal": 0
+   },
+   "do": {
+    "hits": 3,
+    "dmg": 41.6,
+    "ko": false,
+    "resets": 2,
+    "firstReset": 124,
+    "endPct": 45.4,
+    "failedAt": -1,
+    "ant": 1,
+    "coal": 0
+   },
+   "do/all": {
+    "hits": 3,
+    "dmg": 41.6,
+    "ko": false,
+    "resets": 2,
+    "firstReset": 124,
+    "endPct": 45.4,
+    "failedAt": -1,
+    "ant": 1,
+    "coal": 0
+   }
+  },
+  "diOK": [
+   "n"
+  ],
+  "cpu9": {
+   "hits": 1,
+   "dmg": 3.8,
+   "ko": false,
+   "resets": 1,
+   "firstReset": 418,
+   "endPct": 3.8,
+   "failedAt": 4,
+   "ant": 0,
+   "coal": 1,
+   "ok": false
+  },
+  "foes": {},
+  "pcts": {},
+  "late": {
+   "1": "1/30",
+   "2": "0/30",
+   "3": "0/30",
+   "4": "0/30",
+   "6": "0/30"
+  },
+  "defPass": "1/18"
+ }
+]

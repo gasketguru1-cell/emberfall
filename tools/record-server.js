@@ -25,6 +25,14 @@ http.createServer((req, res) => {
       const od = path.join(root, 'playtest-results', 'knell', safe(u.searchParams.get('dir'))); fs.mkdirSync(od, { recursive: true }); const out = path.join(od, clip + '.webm');
       fs.writeFileSync(out, raw); res.writeHead(200, cors); return res.end('wrote ' + out + ' (' + raw.length + ' bytes)');
     }
+    if (u.pathname === '/cfile') {   /* a Chomp Chomp playtest clip (tools/chomp-record.js): playtest-results/chomp/<dir>/<clip>.webm */
+      const od = path.join(root, 'playtest-results', 'chomp', safe(u.searchParams.get('dir'))); fs.mkdirSync(od, { recursive: true }); const out = path.join(od, clip + '.webm');
+      fs.writeFileSync(out, raw); res.writeHead(200, cors); return res.end('wrote ' + out + ' (' + raw.length + ' bytes)');
+    }
+    if (u.pathname === '/cpng') {   /* a still taken from a Chomp Chomp clip (the Discovery Album): playtest-results/chomp/<dir>/stills/<clip>.png */
+      const od = path.join(root, 'playtest-results', 'chomp', safe(u.searchParams.get('dir')), 'stills'); fs.mkdirSync(od, { recursive: true }); const out = path.join(od, clip + '.png');
+      fs.writeFileSync(out, Buffer.from(body.slice(body.indexOf(',') + 1), 'base64')); res.writeHead(200, cors); return res.end('wrote ' + out);
+    }
     if (u.pathname === '/png') {   /* a still from the running game: playtest-results/<dir>/<clip>.png */
       const od = path.join(root, 'playtest-results', safe(u.searchParams.get('dir'))); fs.mkdirSync(od, { recursive: true }); const out = path.join(od, clip + '.png');
       fs.writeFileSync(out, Buffer.from(body.slice(body.indexOf(',') + 1), 'base64')); res.writeHead(200, cors); return res.end('wrote ' + out);

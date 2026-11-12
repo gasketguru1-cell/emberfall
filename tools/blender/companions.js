@@ -338,16 +338,57 @@ manifest.Loom = { file: 'assets/loom/export/loom-v1.glb', height: 15, faceCamera
     nair: A('Spin', 0.34, 0.52), fair: A('Lash', 0.39, 0.48), bair: A('BackLash', 0.39, 0.48), uair: A('UpStrike', 0.39, 0.48), dair: A('DownLash', 0.39, 0.5),
     grab: A('Flick', 0.28, 0.4, 0, 0.7), getup: A('Spin', 0.34, 0.52), nspec: A('Gust', 0.4, 0.46, 0.1, 1.0), sspec: A('Lash', 0.39, 0.48), uspec: A('Thermal', 0.2, 0.75), '*': A('Lash', 0.39, 0.48) } };
 
-/* ---------------- Nib: wind-up fox. Its skeleton and first clips were measured and keyed by hand in rig.base.json. ---------------- */
+/* ---------------- Nib: crimson hound with a crescent horn and a short white mane. Its clips were first keyed by hand in
+   rig.base.json for the old wind-up fox; the skeleton here is measured from the owner's model of 2026-11-12, which is turned
+   square and trimmed first (tools/blender/trim-fur.py shortens the mane). One blade tail, no ears or key: nibBones renames the
+   fox's tailL chain to tail and drops the bones this model has not. ---------------- */
 const nib = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'assets', 'nib', 'work', 'rig.base.json'), 'utf8'));
+const nibLeg = (f, s, top, mid, ankle, toe, parent) => [
+  { name: f + s + '_upper', head: top, tail: mid, parent },
+  { name: f + s + '_lower', head: mid, tail: ankle, parent: f + s + '_upper', connect: true },
+  { name: 'ik_' + f + s, head: ankle, tail: [ankle[0], ankle[1], ankle[2] + 0.12], parent: 'all', deform: false },
+  { name: f + s + '_paw', head: ankle, tail: toe, parent: 'ik_' + f + s }];
+Object.assign(nib, {
+  note: 'Nib: metres (feet on y = 0, facing +Z). Measured from the owner model (2026-11-12) after it was turned square (yaw 36.6) and its mane trimmed and its head turned square (tools/blender/turn-head.py, -79 degrees about the neck); that mesh is already prepped.',
+  prep: { yaw: 0, translate: [0, 0, 0] }, proxy: true, heatScale: 10,
+  bones: [
+    { name: 'all', head: [0, 0, 0], tail: [0, 0.15, 0], parent: null, deform: false },
+    { name: 'root', head: [0, 0.74, -0.1], tail: [0, 0.94, -0.1], parent: 'all', deform: false },
+    { name: 'hips', head: [0, 0.74, -0.5], tail: [0, 0.74, -0.2], parent: 'root' },
+    { name: 'spine', head: [0, 0.74, -0.2], tail: [0, 0.76, 0.05], parent: 'hips', connect: true },
+    { name: 'chest', head: [0, 0.76, 0.05], tail: [0, 0.82, 0.28], parent: 'spine', connect: true },
+    { name: 'neck', head: [0, 0.82, 0.28], tail: [0.08, 1.2, 0.3], parent: 'chest', connect: true },
+    { name: 'head', head: [0.08, 1.2, 0.3], tail: [0.07, 1.18, 0.68], parent: 'neck', connect: true },
+    { name: 'tail1', head: [0.03, 0.72, -0.52], tail: [0.06, 0.8, -0.74], parent: 'hips' },
+    { name: 'tail2', head: [0.06, 0.8, -0.74], tail: [0.08, 0.98, -0.81], parent: 'tail1', connect: true },
+    { name: 'tail3', head: [0.08, 0.98, -0.81], tail: [0.09, 1.14, -0.73], parent: 'tail2', connect: true },
+    { name: 'tail4', head: [0.09, 1.14, -0.73], tail: [0.08, 1.22, -0.54], parent: 'tail3', connect: true },
+    ...nibLeg('f', 'l', [0.17, 0.72, 0.2], [0.17, 0.42, 0.19], [0.21, 0.15, 0.27], [0.25, 0, 0.48], 'chest'),
+    ...nibLeg('f', 'r', [-0.17, 0.72, 0.2], [-0.18, 0.42, 0.2], [-0.21, 0.15, 0.3], [-0.23, 0, 0.52], 'chest'),
+    ...nibLeg('r', 'l', [0.15, 0.72, -0.42], [0.17, 0.42, -0.3], [0.2, 0.18, -0.53], [0.27, 0, -0.32], 'hips'),
+    ...nibLeg('r', 'r', [-0.15, 0.72, -0.38], [-0.17, 0.42, -0.22], [-0.2, 0.18, -0.42], [-0.25, 0, -0.2], 'hips')],
+  /* the crescent horn rides on the head whole */
+  rigid: [{ bone: 'head', box: [[-0.45, 1.45, 0.0], [0.6, 2.0, 0.8]] }] });
+/* rename the fox's bones for this model: tailL* -> tail*, and drop the second tail, the ears and the key */
+const nibBones = pose => { if (!pose) return pose; const o = {};
+  for (const [b, v] of Object.entries(pose)) { if (/^(tailR\d|ear[LR]\d|key)$/.test(b)) continue; o[b.replace(/^tailL(\d)$/, 'tail$1')] = v; } return o; };
 const NIB_C = [0.62, -0.05];
 Object.assign(nib.clips, {
   Swat: { fps: 30, keys: [
     { t: 0, use: 'stand' },
     { t: 0.18, pose: { root: M(0, -0.02, -0.04), chest: R(-4, -8, 0), ik_fl: M(0, 0.24, -0.05), earL1: R(0, 0, -14) } },
-    { t: 0.28, pose: { root: M(0, -0.02, 0.06), chest: R(4, 8, 0), ik_fl: M(-0.06, 0.32, 0.3) } },
-    { t: 0.38, pose: { ik_fl: M(-0.06, 0.14, 0.34) } },
+    { t: 0.28, pose: { root: M(0, -0.02, 0.06), chest: R(4, 8, 0), ik_fl: M(-0.06, 0.44, 0.42) } },
+    { t: 0.38, pose: { ik_fl: M(-0.06, 0.32, 0.46) } },
     { t: 0.7, reset: true, use: 'stand' }] },
+  /* the down smash's spin: this model's tail curls up short, so it is thrown straight out behind for the spin */
+  Sweep: { fps: 30, keys: [
+    { t: 0, use: 'stand' },
+    { t: 0.28, pose: { all: R(0, -35), root: M(0, -0.08, 0), tail1: R(10, -25) } },
+    { t: 0.33, pose: { all: R(0, 90), tail1: R(-40, 30), tail2: R(-50), tail3: R(-55), tail4: R(-30) } },
+    { t: 0.38, pose: { all: R(0, 180) } },
+    { t: 0.43, pose: { all: R(0, 270) } },
+    { t: 0.55, pose: { all: R(0, 360), root: M(0, -0.04, 0), tail1: R(0), tail2: R(0), tail3: R(0), tail4: R(0) } },
+    { t: 0.9, pose: { root: M(0, 0, 0) } }] },
   TailWhip: { fps: 30, keys: [
     { t: 0, use: 'stand' },
     { t: 0.28, pose: { all: R(0, -25), root: M(0, -0.05, 0), tailL1: R(10, -25), tailR1: R(10, -25) } },
@@ -409,11 +450,12 @@ Object.assign(nib.clips, {
     { t: 0.22, pose: { ik_fl: M(0, 0.04, 0), ik_fr: M(0, 0.14, 0.08), ik_rl: M(0, 0.12, 0), ik_rr: M(0, 0.04, 0.06), tailL1: R(-30, 12), tailR1: R(-30, -12) } },
     { t: 0.44, pose: { ik_fl: M(0, 0.14, 0.08), ik_fr: M(0, 0.04, 0), ik_rl: M(0, 0.04, 0.06), ik_rr: M(0, 0.12, 0), tailL1: R(-30, 0), tailR1: R(-30, 0) } }] },
 });
+for (const k of Object.keys(nib.poses)) nib.poses[k] = nibBones(nib.poses[k]);
+for (const c of Object.values(nib.clips)) for (const key of c.keys) if (key.pose) key.pose = nibBones(key.pose);
 out('nib', nib);
 manifest.Nib = { file: 'assets/nib/export/nib-v1.glb', height: 10.5, clips: baseClips('Bite', 'Bite'),
-  strikers: [{ bone: 'head', ext: 3.2 }, { bone: 'fl_paw', ext: 0.9 }, { bone: 'fr_paw', ext: 0.9 }, { bone: 'rl_paw', ext: 0.9 }, { bone: 'rr_paw', ext: 0.9 }, { bone: 'tailL4', ext: 1.8 }, { bone: 'tailR4', ext: 1.8 }],
-  springs: [{ bones: ['tailL1', 'tailL2', 'tailL3', 'tailL4'], k: 0.26, d: 0.72, max: 0.8, drag: 0.13 }, { bones: ['tailR1', 'tailR2', 'tailR3', 'tailR4'], k: 0.26, d: 0.72, max: 0.8, drag: 0.13 },
-    { bones: ['earL1', 'earL2'], k: 0.4, d: 0.62, max: 0.5, drag: 0.1 }, { bones: ['earR1', 'earR2'], k: 0.4, d: 0.62, max: 0.5, drag: 0.1 }],
+  strikers: [{ bone: 'head', ext: 3.2 }, { bone: 'fl_paw', ext: 0.9 }, { bone: 'fr_paw', ext: 0.9 }, { bone: 'rl_paw', ext: 0.9 }, { bone: 'rr_paw', ext: 0.9 }, { bone: 'tail4', ext: 1.8 }],
+  springs: [{ bones: ['tail1', 'tail2', 'tail3', 'tail4'], k: 0.3, d: 0.72, max: 0.5, drag: 0.1 }],
   attacks: { jab: A('Swat', 0.28, 0.4, 0, 0.7), jab3: A('Bite', 0.39, 0.46), ftilt: A('Bite', 0.39, 0.46), utilt: A('UpStrike', 0.39, 0.48), dtilt: A('TailWhip', 0.34, 0.52), dash: A('Pounce', 0.39, 0.48),
     fsmash: A('Headbutt', 0.39, 0.5), usmash: A('UpStrike', 0.39, 0.48), dsmash: A('Sweep', 0.34, 0.52),
     nair: A('Flip', 0.31, 0.5), fair: A('Headbutt', 0.39, 0.5), bair: A('BackKick', 0.39, 0.5), uair: A('UpStrike', 0.39, 0.48), dair: A('Pounce', 0.39, 0.48),

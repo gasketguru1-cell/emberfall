@@ -111,6 +111,14 @@ vm.runInThisContext(`
     check('mode drain: 5% at 60 frames, 50% at 600, in shield too', p60 === 5 && p600 === 50 && pSh === 5, '60 frames ' + p60 + '%, 600 frames ' + p600 + '%, 60 frames shielding ' + pSh + '%');
     v.ko(); run(60); check('a lost stock ends Berserker and puts the axe back in his hand', !v.berserk && !v.axeAway, 'after the KO: Berserker ' + v.berserk + ', axe away ' + v.axeAway); }
 
+  /* ---- (owner, 2026-11-12) the axe throw: begun in the air it carries on through a landing; super armour with a SUPER ARMOR pop ---- */
+  { const [v] = setup(-30, 40); v.y = 6; v.vy = 0; v.grounded = false; v.plat = null; v.set('air'); v.startMove('nspec'); let landAt = 0, thrown = 0;
+    run(80, () => { if (!landAt && v.grounded) landAt = v.mf; if (!thrown && axes().length) thrown = v.mf || -1; if (v.state !== 'attack') return false; });
+    check('air axe throw: landing mid-wind-up does not cancel it, the axe still flies', landAt > 0 && landAt < 30 && thrown === 30 && axes().length === 1, 'landed on frame ' + landAt + ', axe out on frame ' + thrown);
+    const [w, f] = setup(0, 8); w.startMove('nspec'); run(12); POPS.length = 0; const p0 = w.pct; f.face = -1; f.startMove('ftilt'); let st2 = '', popped = '';
+    run(30, () => { if (w.pct > p0 && !st2) { st2 = w.state + '/' + w.mname; } for (const q of POPS) if (q.text === 'SUPER ARMOR') popped = q.text; });
+    check('axe throw has super armour: a hit lands for damage, he keeps throwing, SUPER ARMOR pops up', w.pct > p0 && st2 === 'attack/nspec' && popped === 'SUPER ARMOR', 'took ' + ((w.pct - p0) / B).toFixed(1) + '%, then ' + st2 + ', pop ' + (popped || 'none')); }
+
   /* ---- up special: rises, hangs, dives, lands with a strike ---- */
   { const [v] = setup(-30, 60); v.startMove('uspec'); let top = 0, landed = 0; run(200, () => { top = Math.max(top, v.y); if (v.mname === 'uspecL' && !landed) landed = t; });
     check('Soaring Plunge: rises about 2.25 H, dives back and lands into its landing strike', top > 2.0 * st.h && top < 2.5 * st.h && landed > 0 && v.grounded, 'peak ' + top.toFixed(1) + ' (H ' + st.h + '), landing strike at tick ' + landed); }

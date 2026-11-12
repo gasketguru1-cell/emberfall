@@ -496,7 +496,7 @@ function drawFx(three) {
     else { g.fillStyle = p.col; g.beginPath(); g.arc(x, y, p.r * cam.s, 0, TAU); g.fill(); }
   }
   g.globalAlpha = 1; g.textAlign = 'center'; g.font = 'bold 22px system-ui, sans-serif';
-  for (const p of POPS) { g.globalAlpha = Math.min(1, p.life / 20); g.fillStyle = p.col; g.fillText(p.text, SX(p.x), SY(p.y)); } g.globalAlpha = 1;
+  for (const p of POPS) { g.globalAlpha = Math.min(1, p.life / 20); g.fillStyle = p.col; g.font = 'bold ' + (p.sz || 22) + 'px system-ui, sans-serif'; g.fillText(p.text, SX(p.x), SY(p.y)); } g.globalAlpha = 1;
 }
 function movePhase(f) {
   const m = f.move; if (f.state !== 'attack' || !m) return '';

@@ -1,0 +1,93 @@
+Z1 Flint dash-ant 92%
+  1 3h 22.8% DI 0/9 [] late1 0/20  + coal grab_f
+  2 5h 43% DI 2/9 [n out] late1 8/20  + ant w28 dash
+  3 6h 55.6% DI 1/9 [out] late1 1/20  + ro_f w3 hop w6 fair
+  4 7h 65.7% DI 1/9 [out] late1 0/20  + fh nair
+  5 8h 77% DI 1/9 [out] late1 0/20  + ro_f w2 bite
+  6 9h 92.1% DI 1/9 [out] late1 0/20  + dj dair
+Z2 Flint coal-set fsmash 92%
+  1 2h 29% DI 9/9 [n in out up down ui uo di do] late1 20/20  + ant w28 fsmash
+  2 3h 41.6% DI 9/9 [n in out up down ui uo di do] late1 20/20  + ro_f hop fair
+  3 4h 45.4% DI 3/9 [n out di] late1 7/20  + ff cush
+  4 5h 56.7% DI 2/9 [n out] late1 7/20  + ro_f w5 bite
+  5 6h 66.8% DI 1/9 [n] late1 1/20  + rf6 grab_u
+  6 7h 76.9% DI 1/9 [n] late1 1/20  + fh nair
+  7 8h 92% DI 1/9 [n] late1 1/20  + ro_f hop dair
+Z3 Sack 12-hit 120%
+  1 3h 24.3% DI 3/9 [n in ui] late1 20/20  + coalH grab_f
+  2 5h 43.9% DI 6/9 [n in out up ui uo] late1 20/20  + ant sh fair
+  3 6h 53.1% DI 3/9 [n in uo] late1 16/20  + ro_f w4 hop fair
+  4 7h 64.5% DI 1/9 [n] late1 2/20  + ff w9 bair
+  5 8h 74.6% DI 1/9 [n] late1 2/20  + ro_b w9 hop nair
+  6 9h 84.8% DI 1/9 [n] late1 0/20  + fair
+  7 10h 94.9% DI 1/9 [n] late1 0/20  + rf12 grab_u
+  8 11h 105% DI 1/9 [n] late1 0/20  + fh uair
+  9 12h 120.1% DI 1/9 [n] late1 0/20  + dj dair
+Z4 Sack double dtilt 92%
+  1 3h 24.3% DI 3/9 [n in ui] late1 20/20  + coalH grab_f
+  2 5h 43.9% DI 6/9 [n in out up ui uo] late1 14/20  + ant w28 sh fair
+  3 6h 53.5% DI 3/9 [n in ui] late1 14/20  + ro_f bite
+  4 7h 62.5% DI 1/9 [in] late1 7/20  + grab_f
+  5 8h 70.1% DI 1/9 [in] late1 7/20  + rf12 dtilt
+  6 9h 76.6% DI 1/9 [in] late1 7/20  + dtilt
+  7 10h 91.8% DI 1/9 [in] late1 5/20  + ro_f hop dair
+Z5 Sack grab-up 89%
+  1 3h 24.3% DI 3/9 [n in ui] late1 0/20  + coalH grab_f
+  2 5h 43.9% DI 6/9 [n in out up ui uo] late1 20/20  + ant sh fair
+  3 6h 53.5% DI 2/9 [in out] late1 19/20  + ro_f w2 bite
+  4 7h 63.6% DI 1/9 [out] late1 10/20  + grab_u
+  5 8h 73.7% DI 1/9 [out] late1 10/20  + fh nair
+  6 9h 88.8% DI 1/9 [out] late1 0/20  + ro_f hop dair
+Z6 Knell rope-bite 111%
+  1 3h 24.3% DI 4/9 [n in up ui] late1 20/20  + coalH grab_f
+  2 5h 44.5% DI 6/9 [n in out up ui uo] late1 20/20  + ant rs w4 bite
+  3 6h 53.3% DI 3/9 [in up ui] late1 14/20  + rf6 utilt
+  4 7h 62.1% DI 1/9 [in] late1 14/20  + ftilt
+  5 8h 74.7% DI 1/9 [in] late1 2/20  + ro_f w3 hop w6 fair
+  6 9h 86.1% DI 1/9 [in] late1 2/20  + dash
+  7 10h 96.2% DI 1/9 [in] late1 2/20  + ro_f hop uair
+  8 11h 111.3% DI 1/9 [in] late1 2/20  + dj dair
+Z7 Knell 77%
+  1 3h 24.3% DI 4/9 [n in up ui] late1 20/20  + coalH grab_f
+  2 5h 43.9% DI 5/9 [n in up ui uo] late1 20/20  + ant sh fair
+  3 6h 53.5% DI 2/9 [n in] late1 20/20  + ro_f w2 bite
+  4 7h 62.3% DI 1/9 [n] late1 15/20  + ftilt
+  5 8h 77.4% DI 1/9 [n] late1 14/20  + ro_f hop dair
+Z8 Sprocket 101%
+  1 3h 24.3% DI 3/9 [n in ui] late1 20/20  + coalH grab_f
+  2 5h 42% DI 1/9 [in] late1 20/20  + ant w28 ftilt
+  3 6h 53.3% DI 1/9 [in] late1 20/20  + ro_f w9 bite
+  4 7h 63.4% DI 1/9 [in] late1 1/20  + rf6 grab_u
+  5 8h 76% DI 1/9 [in] late1 1/20  + fh fair
+  6 9h 86.1% DI 1/9 [in] late1 1/20  + w3 dj nair
+  7 10h 101.2% DI 1/9 [in] late1 1/20  + ro_f hop dair
+Z9 Sprocket 108%
+  1 3h 24.3% DI 3/9 [n in ui] late1 0/20  + coalH grab_f
+  2 5h 43.9% DI 6/9 [n in out up ui uo] late1 20/20  + ant sh fair
+  3 6h 53.1% DI 6/9 [n in out up ui uo] late1 20/20  + ro_f hop fair
+  4 7h 64.5% DI 1/9 [out] late1 8/20  + ff w9 bair
+  5 8h 74.6% DI 1/9 [out] late1 1/20  + ro_b w4 hop uair
+  6 9h 83.4% DI 1/9 [out] late1 1/20  + utilt
+  7 10h 93.5% DI 1/9 [out] late1 1/20  + fh nair
+  8 11h 108.6% DI 1/9 [out] late1 1/20  + ro_b hop dair
+Z10 Knell coal-set 84%
+  1 2h 29% DI 9/9 [n in out up down ui uo di do] late1 20/20  + ant w28 fsmash
+  2 3h 40.3% DI 9/9 [n in out up down ui uo di do] late1 20/20  + ro_f w9 bite
+  3 4h 47.9% DI 2/9 [n in] late1 4/20  + dtilt
+  4 5h 57.8% DI 2/9 [n in] late1 4/20  + ro_f w5 bite
+  5 6h 69.1% DI 2/9 [n in] late1 1/20  + rf6 jab
+  6 7h 84.2% DI 2/9 [n in] late1 1/20  + ro_f hop dair
+Z11 Sack coal-set 81%
+  1 2h 29% DI 9/9 [n in out up down ui uo di do] late1 20/20  + ant fsmash
+  2 3h 40.3% DI 7/9 [n in out down uo di do] late1 20/20  + ro_f w5 bite
+  3 4h 49.1% DI 3/9 [n in di] late1 9/20  + wf4 ftilt
+  4 5h 61.7% DI 1/9 [in] late1 7/20  + ro_f w9 hop fair
+  5 6h 65.5% DI 1/9 [in] late1 7/20  + ff cush
+  6 7h 80.6% DI 1/9 [in] late1 4/20  + ro_f hop dair
+Z12 Sprocket coal-set 82%
+  1 2h 29% DI 9/9 [n in out up down ui uo di do] late1 20/20  + ant fsmash
+  2 3h 40.3% DI 6/9 [n in out down di do] late1 20/20  + ro_f w5 bite
+  3 4h 47.9% DI 3/9 [n out di] late1 9/20  + rf6 dtilt
+  4 5h 57.8% DI 1/9 [out] late1 6/20  + ro_f w5 bite
+  5 6h 66.6% DI 1/9 [out] late1 3/20  + wf4 ftilt
+  6 7h 81.7% DI 1/9 [out] late1 2/20  + ro_f hop dair

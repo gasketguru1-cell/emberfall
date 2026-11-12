@@ -1,0 +1,791 @@
+[
+ {
+  "name": "Z1 Flint dash-ant 92%",
+  "rows": [
+   {
+    "n": 1,
+    "hits": 3,
+    "dmg": 22.8,
+    "dis": 0,
+    "disL": "",
+    "late1": "0/20",
+    "seg": "coal grab_f"
+   },
+   {
+    "n": 2,
+    "hits": 5,
+    "dmg": 43,
+    "dis": 2,
+    "disL": "n out",
+    "late1": "8/20",
+    "seg": "ant w28 dash"
+   },
+   {
+    "n": 3,
+    "hits": 6,
+    "dmg": 55.6,
+    "dis": 1,
+    "disL": "out",
+    "late1": "1/20",
+    "seg": "ro_f w3 hop w6 fair"
+   },
+   {
+    "n": 4,
+    "hits": 7,
+    "dmg": 65.7,
+    "dis": 1,
+    "disL": "out",
+    "late1": "0/20",
+    "seg": "fh nair"
+   },
+   {
+    "n": 5,
+    "hits": 8,
+    "dmg": 77,
+    "dis": 1,
+    "disL": "out",
+    "late1": "0/20",
+    "seg": "ro_f w2 bite"
+   },
+   {
+    "n": 6,
+    "hits": 9,
+    "dmg": 92.1,
+    "dis": 1,
+    "disL": "out",
+    "late1": "0/20",
+    "seg": "dj dair"
+   }
+  ]
+ },
+ {
+  "name": "Z2 Flint coal-set fsmash 92%",
+  "rows": [
+   {
+    "n": 1,
+    "hits": 2,
+    "dmg": 29,
+    "dis": 9,
+    "disL": "n in out up down ui uo di do",
+    "late1": "20/20",
+    "seg": "ant w28 fsmash"
+   },
+   {
+    "n": 2,
+    "hits": 3,
+    "dmg": 41.6,
+    "dis": 9,
+    "disL": "n in out up down ui uo di do",
+    "late1": "20/20",
+    "seg": "ro_f hop fair"
+   },
+   {
+    "n": 3,
+    "hits": 4,
+    "dmg": 45.4,
+    "dis": 3,
+    "disL": "n out di",
+    "late1": "7/20",
+    "seg": "ff cush"
+   },
+   {
+    "n": 4,
+    "hits": 5,
+    "dmg": 56.7,
+    "dis": 2,
+    "disL": "n out",
+    "late1": "7/20",
+    "seg": "ro_f w5 bite"
+   },
+   {
+    "n": 5,
+    "hits": 6,
+    "dmg": 66.8,
+    "dis": 1,
+    "disL": "n",
+    "late1": "1/20",
+    "seg": "rf6 grab_u"
+   },
+   {
+    "n": 6,
+    "hits": 7,
+    "dmg": 76.9,
+    "dis": 1,
+    "disL": "n",
+    "late1": "1/20",
+    "seg": "fh nair"
+   },
+   {
+    "n": 7,
+    "hits": 8,
+    "dmg": 92,
+    "dis": 1,
+    "disL": "n",
+    "late1": "1/20",
+    "seg": "ro_f hop dair"
+   }
+  ]
+ },
+ {
+  "name": "Z3 Sack 12-hit 120%",
+  "rows": [
+   {
+    "n": 1,
+    "hits": 3,
+    "dmg": 24.3,
+    "dis": 3,
+    "disL": "n in ui",
+    "late1": "20/20",
+    "seg": "coalH grab_f"
+   },
+   {
+    "n": 2,
+    "hits": 5,
+    "dmg": 43.9,
+    "dis": 6,
+    "disL": "n in out up ui uo",
+    "late1": "20/20",
+    "seg": "ant sh fair"
+   },
+   {
+    "n": 3,
+    "hits": 6,
+    "dmg": 53.1,
+    "dis": 3,
+    "disL": "n in uo",
+    "late1": "16/20",
+    "seg": "ro_f w4 hop fair"
+   },
+   {
+    "n": 4,
+    "hits": 7,
+    "dmg": 64.5,
+    "dis": 1,
+    "disL": "n",
+    "late1": "2/20",
+    "seg": "ff w9 bair"
+   },
+   {
+    "n": 5,
+    "hits": 8,
+    "dmg": 74.6,
+    "dis": 1,
+    "disL": "n",
+    "late1": "2/20",
+    "seg": "ro_b w9 hop nair"
+   },
+   {
+    "n": 6,
+    "hits": 9,
+    "dmg": 84.8,
+    "dis": 1,
+    "disL": "n",
+    "late1": "0/20",
+    "seg": "fair"
+   },
+   {
+    "n": 7,
+    "hits": 10,
+    "dmg": 94.9,
+    "dis": 1,
+    "disL": "n",
+    "late1": "0/20",
+    "seg": "rf12 grab_u"
+   },
+   {
+    "n": 8,
+    "hits": 11,
+    "dmg": 105,
+    "dis": 1,
+    "disL": "n",
+    "late1": "0/20",
+    "seg": "fh uair"
+   },
+   {
+    "n": 9,
+    "hits": 12,
+    "dmg": 120.1,
+    "dis": 1,
+    "disL": "n",
+    "late1": "0/20",
+    "seg": "dj dair"
+   }
+  ]
+ },
+ {
+  "name": "Z4 Sack double dtilt 92%",
+  "rows": [
+   {
+    "n": 1,
+    "hits": 3,
+    "dmg": 24.3,
+    "dis": 3,
+    "disL": "n in ui",
+    "late1": "20/20",
+    "seg": "coalH grab_f"
+   },
+   {
+    "n": 2,
+    "hits": 5,
+    "dmg": 43.9,
+    "dis": 6,
+    "disL": "n in out up ui uo",
+    "late1": "14/20",
+    "seg": "ant w28 sh fair"
+   },
+   {
+    "n": 3,
+    "hits": 6,
+    "dmg": 53.5,
+    "dis": 3,
+    "disL": "n in ui",
+    "late1": "14/20",
+    "seg": "ro_f bite"
+   },
+   {
+    "n": 4,
+    "hits": 7,
+    "dmg": 62.5,
+    "dis": 1,
+    "disL": "in",
+    "late1": "7/20",
+    "seg": "grab_f"
+   },
+   {
+    "n": 5,
+    "hits": 8,
+    "dmg": 70.1,
+    "dis": 1,
+    "disL": "in",
+    "late1": "7/20",
+    "seg": "rf12 dtilt"
+   },
+   {
+    "n": 6,
+    "hits": 9,
+    "dmg": 76.6,
+    "dis": 1,
+    "disL": "in",
+    "late1": "7/20",
+    "seg": "dtilt"
+   },
+   {
+    "n": 7,
+    "hits": 10,
+    "dmg": 91.8,
+    "dis": 1,
+    "disL": "in",
+    "late1": "5/20",
+    "seg": "ro_f hop dair"
+   }
+  ]
+ },
+ {
+  "name": "Z5 Sack grab-up 89%",
+  "rows": [
+   {
+    "n": 1,
+    "hits": 3,
+    "dmg": 24.3,
+    "dis": 3,
+    "disL": "n in ui",
+    "late1": "0/20",
+    "seg": "coalH grab_f"
+   },
+   {
+    "n": 2,
+    "hits": 5,
+    "dmg": 43.9,
+    "dis": 6,
+    "disL": "n in out up ui uo",
+    "late1": "20/20",
+    "seg": "ant sh fair"
+   },
+   {
+    "n": 3,
+    "hits": 6,
+    "dmg": 53.5,
+    "dis": 2,
+    "disL": "in out",
+    "late1": "19/20",
+    "seg": "ro_f w2 bite"
+   },
+   {
+    "n": 4,
+    "hits": 7,
+    "dmg": 63.6,
+    "dis": 1,
+    "disL": "out",
+    "late1": "10/20",
+    "seg": "grab_u"
+   },
+   {
+    "n": 5,
+    "hits": 8,
+    "dmg": 73.7,
+    "dis": 1,
+    "disL": "out",
+    "late1": "10/20",
+    "seg": "fh nair"
+   },
+   {
+    "n": 6,
+    "hits": 9,
+    "dmg": 88.8,
+    "dis": 1,
+    "disL": "out",
+    "late1": "0/20",
+    "seg": "ro_f hop dair"
+   }
+  ]
+ },
+ {
+  "name": "Z6 Knell rope-bite 111%",
+  "rows": [
+   {
+    "n": 1,
+    "hits": 3,
+    "dmg": 24.3,
+    "dis": 4,
+    "disL": "n in up ui",
+    "late1": "20/20",
+    "seg": "coalH grab_f"
+   },
+   {
+    "n": 2,
+    "hits": 5,
+    "dmg": 44.5,
+    "dis": 6,
+    "disL": "n in out up ui uo",
+    "late1": "20/20",
+    "seg": "ant rs w4 bite"
+   },
+   {
+    "n": 3,
+    "hits": 6,
+    "dmg": 53.3,
+    "dis": 3,
+    "disL": "in up ui",
+    "late1": "14/20",
+    "seg": "rf6 utilt"
+   },
+   {
+    "n": 4,
+    "hits": 7,
+    "dmg": 62.1,
+    "dis": 1,
+    "disL": "in",
+    "late1": "14/20",
+    "seg": "ftilt"
+   },
+   {
+    "n": 5,
+    "hits": 8,
+    "dmg": 74.7,
+    "dis": 1,
+    "disL": "in",
+    "late1": "2/20",
+    "seg": "ro_f w3 hop w6 fair"
+   },
+   {
+    "n": 6,
+    "hits": 9,
+    "dmg": 86.1,
+    "dis": 1,
+    "disL": "in",
+    "late1": "2/20",
+    "seg": "dash"
+   },
+   {
+    "n": 7,
+    "hits": 10,
+    "dmg": 96.2,
+    "dis": 1,
+    "disL": "in",
+    "late1": "2/20",
+    "seg": "ro_f hop uair"
+   },
+   {
+    "n": 8,
+    "hits": 11,
+    "dmg": 111.3,
+    "dis": 1,
+    "disL": "in",
+    "late1": "2/20",
+    "seg": "dj dair"
+   }
+  ]
+ },
+ {
+  "name": "Z7 Knell 77%",
+  "rows": [
+   {
+    "n": 1,
+    "hits": 3,
+    "dmg": 24.3,
+    "dis": 4,
+    "disL": "n in up ui",
+    "late1": "20/20",
+    "seg": "coalH grab_f"
+   },
+   {
+    "n": 2,
+    "hits": 5,
+    "dmg": 43.9,
+    "dis": 5,
+    "disL": "n in up ui uo",
+    "late1": "20/20",
+    "seg": "ant sh fair"
+   },
+   {
+    "n": 3,
+    "hits": 6,
+    "dmg": 53.5,
+    "dis": 2,
+    "disL": "n in",
+    "late1": "20/20",
+    "seg": "ro_f w2 bite"
+   },
+   {
+    "n": 4,
+    "hits": 7,
+    "dmg": 62.3,
+    "dis": 1,
+    "disL": "n",
+    "late1": "15/20",
+    "seg": "ftilt"
+   },
+   {
+    "n": 5,
+    "hits": 8,
+    "dmg": 77.4,
+    "dis": 1,
+    "disL": "n",
+    "late1": "14/20",
+    "seg": "ro_f hop dair"
+   }
+  ]
+ },
+ {
+  "name": "Z8 Sprocket 101%",
+  "rows": [
+   {
+    "n": 1,
+    "hits": 3,
+    "dmg": 24.3,
+    "dis": 3,
+    "disL": "n in ui",
+    "late1": "20/20",
+    "seg": "coalH grab_f"
+   },
+   {
+    "n": 2,
+    "hits": 5,
+    "dmg": 42,
+    "dis": 1,
+    "disL": "in",
+    "late1": "20/20",
+    "seg": "ant w28 ftilt"
+   },
+   {
+    "n": 3,
+    "hits": 6,
+    "dmg": 53.3,
+    "dis": 1,
+    "disL": "in",
+    "late1": "20/20",
+    "seg": "ro_f w9 bite"
+   },
+   {
+    "n": 4,
+    "hits": 7,
+    "dmg": 63.4,
+    "dis": 1,
+    "disL": "in",
+    "late1": "1/20",
+    "seg": "rf6 grab_u"
+   },
+   {
+    "n": 5,
+    "hits": 8,
+    "dmg": 76,
+    "dis": 1,
+    "disL": "in",
+    "late1": "1/20",
+    "seg": "fh fair"
+   },
+   {
+    "n": 6,
+    "hits": 9,
+    "dmg": 86.1,
+    "dis": 1,
+    "disL": "in",
+    "late1": "1/20",
+    "seg": "w3 dj nair"
+   },
+   {
+    "n": 7,
+    "hits": 10,
+    "dmg": 101.2,
+    "dis": 1,
+    "disL": "in",
+    "late1": "1/20",
+    "seg": "ro_f hop dair"
+   }
+  ]
+ },
+ {
+  "name": "Z9 Sprocket 108%",
+  "rows": [
+   {
+    "n": 1,
+    "hits": 3,
+    "dmg": 24.3,
+    "dis": 3,
+    "disL": "n in ui",
+    "late1": "0/20",
+    "seg": "coalH grab_f"
+   },
+   {
+    "n": 2,
+    "hits": 5,
+    "dmg": 43.9,
+    "dis": 6,
+    "disL": "n in out up ui uo",
+    "late1": "20/20",
+    "seg": "ant sh fair"
+   },
+   {
+    "n": 3,
+    "hits": 6,
+    "dmg": 53.1,
+    "dis": 6,
+    "disL": "n in out up ui uo",
+    "late1": "20/20",
+    "seg": "ro_f hop fair"
+   },
+   {
+    "n": 4,
+    "hits": 7,
+    "dmg": 64.5,
+    "dis": 1,
+    "disL": "out",
+    "late1": "8/20",
+    "seg": "ff w9 bair"
+   },
+   {
+    "n": 5,
+    "hits": 8,
+    "dmg": 74.6,
+    "dis": 1,
+    "disL": "out",
+    "late1": "1/20",
+    "seg": "ro_b w4 hop uair"
+   },
+   {
+    "n": 6,
+    "hits": 9,
+    "dmg": 83.4,
+    "dis": 1,
+    "disL": "out",
+    "late1": "1/20",
+    "seg": "utilt"
+   },
+   {
+    "n": 7,
+    "hits": 10,
+    "dmg": 93.5,
+    "dis": 1,
+    "disL": "out",
+    "late1": "1/20",
+    "seg": "fh nair"
+   },
+   {
+    "n": 8,
+    "hits": 11,
+    "dmg": 108.6,
+    "dis": 1,
+    "disL": "out",
+    "late1": "1/20",
+    "seg": "ro_b hop dair"
+   }
+  ]
+ },
+ {
+  "name": "Z10 Knell coal-set 84%",
+  "rows": [
+   {
+    "n": 1,
+    "hits": 2,
+    "dmg": 29,
+    "dis": 9,
+    "disL": "n in out up down ui uo di do",
+    "late1": "20/20",
+    "seg": "ant w28 fsmash"
+   },
+   {
+    "n": 2,
+    "hits": 3,
+    "dmg": 40.3,
+    "dis": 9,
+    "disL": "n in out up down ui uo di do",
+    "late1": "20/20",
+    "seg": "ro_f w9 bite"
+   },
+   {
+    "n": 3,
+    "hits": 4,
+    "dmg": 47.9,
+    "dis": 2,
+    "disL": "n in",
+    "late1": "4/20",
+    "seg": "dtilt"
+   },
+   {
+    "n": 4,
+    "hits": 5,
+    "dmg": 57.8,
+    "dis": 2,
+    "disL": "n in",
+    "late1": "4/20",
+    "seg": "ro_f w5 bite"
+   },
+   {
+    "n": 5,
+    "hits": 6,
+    "dmg": 69.1,
+    "dis": 2,
+    "disL": "n in",
+    "late1": "1/20",
+    "seg": "rf6 jab"
+   },
+   {
+    "n": 6,
+    "hits": 7,
+    "dmg": 84.2,
+    "dis": 2,
+    "disL": "n in",
+    "late1": "1/20",
+    "seg": "ro_f hop dair"
+   }
+  ]
+ },
+ {
+  "name": "Z11 Sack coal-set 81%",
+  "rows": [
+   {
+    "n": 1,
+    "hits": 2,
+    "dmg": 29,
+    "dis": 9,
+    "disL": "n in out up down ui uo di do",
+    "late1": "20/20",
+    "seg": "ant fsmash"
+   },
+   {
+    "n": 2,
+    "hits": 3,
+    "dmg": 40.3,
+    "dis": 7,
+    "disL": "n in out down uo di do",
+    "late1": "20/20",
+    "seg": "ro_f w5 bite"
+   },
+   {
+    "n": 3,
+    "hits": 4,
+    "dmg": 49.1,
+    "dis": 3,
+    "disL": "n in di",
+    "late1": "9/20",
+    "seg": "wf4 ftilt"
+   },
+   {
+    "n": 4,
+    "hits": 5,
+    "dmg": 61.7,
+    "dis": 1,
+    "disL": "in",
+    "late1": "7/20",
+    "seg": "ro_f w9 hop fair"
+   },
+   {
+    "n": 5,
+    "hits": 6,
+    "dmg": 65.5,
+    "dis": 1,
+    "disL": "in",
+    "late1": "7/20",
+    "seg": "ff cush"
+   },
+   {
+    "n": 6,
+    "hits": 7,
+    "dmg": 80.6,
+    "dis": 1,
+    "disL": "in",
+    "late1": "4/20",
+    "seg": "ro_f hop dair"
+   }
+  ]
+ },
+ {
+  "name": "Z12 Sprocket coal-set 82%",
+  "rows": [
+   {
+    "n": 1,
+    "hits": 2,
+    "dmg": 29,
+    "dis": 9,
+    "disL": "n in out up down ui uo di do",
+    "late1": "20/20",
+    "seg": "ant fsmash"
+   },
+   {
+    "n": 2,
+    "hits": 3,
+    "dmg": 40.3,
+    "dis": 6,
+    "disL": "n in out down di do",
+    "late1": "20/20",
+    "seg": "ro_f w5 bite"
+   },
+   {
+    "n": 3,
+    "hits": 4,
+    "dmg": 47.9,
+    "dis": 3,
+    "disL": "n out di",
+    "late1": "9/20",
+    "seg": "rf6 dtilt"
+   },
+   {
+    "n": 4,
+    "hits": 5,
+    "dmg": 57.8,
+    "dis": 1,
+    "disL": "out",
+    "late1": "6/20",
+    "seg": "ro_f w5 bite"
+   },
+   {
+    "n": 5,
+    "hits": 6,
+    "dmg": 66.6,
+    "dis": 1,
+    "disL": "out",
+    "late1": "3/20",
+    "seg": "wf4 ftilt"
+   },
+   {
+    "n": 6,
+    "hits": 7,
+    "dmg": 81.7,
+    "dis": 1,
+    "disL": "out",
+    "late1": "2/20",
+    "seg": "ro_f hop dair"
+   }
+  ]
+ }
+]
