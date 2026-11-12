@@ -73,7 +73,7 @@ function build() {
     const S = SHOWN[k]; if (S.asked) return; S.asked = true;
     fetch(STAGES[k].cfg).then(r => r.ok ? r.json() : null).then(cfg => {
       if (!cfg) return; S.cfg = cfg; shownStage = -1;
-      new THREE.TextureLoader().load(cfg.backdrop || 'assets/stage/export/backdrop.jpg', t => { t.colorSpace = THREE.SRGBColorSpace; S.back = t; shownStage = -1; });
+      new THREE.TextureLoader().load(cfg.backdrop || 'assets/stage/export/backdrop.jpg', t => { t.colorSpace = THREE.SRGBColorSpace; S.back = t; S.lum = imageLum(t.image); shownStage = -1; });
       new GLTFLoader().load(cfg.file, g => {
         const m = g.scene; m.scale.set(cfg.scale[0], cfg.scale[1], cfg.scale[2]); m.position.set(cfg.offset[0], cfg.offset[1], cfg.offset[2]); m.rotation.y = (cfg.yaw || 0) * Math.PI / 180;
         m.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = true; o.frustumCulled = false; if (o.material) { o.material.envMapIntensity = 0.25;   /* takes the fighters' shadows; casts none itself, to keep the frame cheap */
@@ -82,12 +82,20 @@ function build() {
       }, undefined, e => console.warn('stage model failed to load; the plain stage stays', e));
     }).catch(() => {});
   }
+  /* how bright a stage's backdrop is, 0..1 (sRGB luma, averaged over a small copy); Cronky's stick legs go white on dark stages, black on light ones */
+  function imageLum(img) {
+    try { const w = 32, h = 18, cv = document.createElement('canvas'); cv.width = w; cv.height = h; const g = cv.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0, w, h);
+      const d = g.getImageData(0, 0, w, h).data; let t = 0; for (let i = 0; i < d.length; i += 4) t += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]; return t / (255 * w * h); } catch (e) { return null; }
+  }
+  const colourLum = c => { const q = new THREE.Color(c); q.convertLinearToSRGB(); return 0.2126 * q.r + 0.7152 * q.g + 0.0722 * q.b; };
+  R3.stageDark = false;
   function applyStage() {
     const k = STAGE_ON, S = SHOWN[k]; loadStage(k); shownStage = k;
     const L = Object.assign({}, LOOK0, S.cfg && S.cfg.look);
     SHOWN.forEach(q => { if (q.model) q.model.visible = q === S; }); plain.visible = !S.model; R3.stage = S.model;
     backdrop.material.map = S.back; backdrop.material.color.set(S.back ? '#ffffff' : L.sky); backdrop.material.needsUpdate = true;
     scene.background.set(L.sky); scene.fog.color.set(L.fog);
+    R3.stageDark = L.dark != null ? !!L.dark : (S.back && S.lum != null ? S.lum : colourLum(L.sky)) < 0.4;   /* a stage's look can say dark: true/false outright */
     hemi.color.set(L.hemi[0]); hemi.groundColor.set(L.hemi[1]); hemi.intensity = L.hemi[2];
     key.color.set(L.key[0]); key.intensity = L.key[1]; rim.color.set(L.rim[0]); rim.intensity = L.rim[1]; fill.color.set(L.fill[0]); fill.intensity = L.fill[1];
     slab.color.set(L.slab); copper.color.set(L.band); emberLine.color.set(L.line[0]); emberLine.emissive.set(L.line[1]); embers.material.color.set(L.ember);
@@ -560,11 +568,14 @@ function build() {
     hull.frustumCulled = false; hull.renderOrder = 11; legs.renderOrder = 10; legs.castShadow = false; legs.parent.add(hull);
     const i = v.mats.indexOf(legs.material); if (i >= 0) v.mats.splice(i, 1);
     legs.material = fillMat;
-    v.stick = { grp, legs, hull, thick, pts: stickPoints(M, legs), sides: ['R', 'L'].map(() => ({ segs: [seg(), seg(), seg()], dots: [dot(), dot(), dot(), dot()] })) };
+    v.stick = { grp, legs, hull, thick, mat, hullMat, dark: null, pts: stickPoints(M, legs), sides: ['R', 'L'].map(() => ({ segs: [seg(), seg(), seg()], dots: [dot(), dot(), dot(), dot()] })) };
   }
   function stickLegs(v, f) {
     const st = v.stick, c = v.model.cfg.stickLegs, outline = f.state === 'attack' && (c.moves || []).includes(f.mname);
     st.legs.visible = outline; st.hull.visible = outline; st.grp.visible = !outline;
+    if (st.dark !== R3.stageDark) { st.dark = R3.stageDark;   /* white on a dark stage, black on a light one */
+      const on = st.dark ? (c.onDark || '#f2f2f2') : (c.color || '#161616'), glow = st.dark ? 0.55 : 0;
+      for (const m of [st.mat, st.hullMat]) { m.color.set(on); m.emissive.set(on).multiplyScalar(glow); } }
     v.root.updateMatrixWorld(true);
     if (outline) { st.legs.getWorldScale(_sa); st.thick.value = (c.outline || 0.22) / Math.max(1e-6, _sa.x); return; }
     const B = st.legs.skeleton.bones, r = c.line || 0.3;
