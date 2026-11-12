@@ -51,7 +51,7 @@ try {
   if (info && info.dev) {
     const badge = () => {
       const b = document.createElement('div');
-      b.textContent = `DEV COPY · live from project${info.branch ? ' · ' + info.branch : ''} · v${info.version}`;
+      b.textContent = `DEV COPY · live from project${info.branch ? ' · ' + info.branch : ''} · v${info.version} · F5 reloads`;
       b.style.cssText = 'position:fixed;left:10px;top:8px;z-index:99998;pointer-events:none;padding:3px 9px;border-radius:6px;' +
         'background:rgba(255,138,61,0.88);color:#0b0d16;font:800 12px/1.3 system-ui,sans-serif;letter-spacing:0.04em;opacity:0.85';
       document.body.appendChild(b);

@@ -76,8 +76,12 @@ app.whenReady().then(() => {
     if (input.type === 'keyDown' && input.key === 'F11' && !input.isAutoRepeat) { win.setFullScreen(!win.isFullScreen()); e.preventDefault(); }
   });
   /* The DEV copy (started from the project, not installed): its title and a badge say so, so it is never mistaken for
-     the installed game. It plays the project's files as they are saved. */
+     the installed game. It plays the project's files as they are saved, read when the game loads, so F5 reloads it to
+     pick up new work without closing the window (the installed game ignores F5). */
   if (!app.isPackaged) {
+    win.webContents.on('before-input-event', (e, input) => {
+      if (input.type === 'keyDown' && input.key === 'F5' && !input.isAutoRepeat) { win.webContents.reloadIgnoringCache(); e.preventDefault(); }
+    });
     let branch = ''; try { branch = require('child_process').execSync('git branch --show-current', { cwd: path.join(__dirname, '..'), stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch (e) { /* no git */ }
     const title = `Emberfall DEV - live from your project${branch ? ' (' + branch + ')' : ''}`;
     win.setTitle(title);
