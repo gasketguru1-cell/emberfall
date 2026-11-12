@@ -1,0 +1,5 @@
+{
+ "base": "work/knell-rigged.glb",
+ "texture": 1024,
+ "out": "export/knell-v1.glb"
+}

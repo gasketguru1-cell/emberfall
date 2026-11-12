@@ -12,6 +12,8 @@
 #            "skipDark": lum / "skipGrey": saturation leave out vertices painted darker / greyer than that (later entries win)
 #            or { "bone", "capsule": [[x,y,z],[x,y,z]], "r": radius }   within r of the line between two points (a blade at any angle)
 #            or { "bone", "disc": [x,y,z], "n": [x,y,z], "r": radius, "t": [near, far] }   a round slab: centre, facing, radius, and how far along the facing it runs
+#            or { "nearest": [bones], "keep": [bones], "r": distance }   each vertex within r of those bones follows the nearest alone (the
+#            plates of a gauntlet's fingers); one nearer a "keep" bone keeps its weights; separate parts are never taken
 #   "poses": { "<name>": { "<bone>": {...} } }   named poses a key can start from with "use"
 #   "bones": [ { "name", "head": [x,y,z], "tail": [x,y,z], "parent": name or null, "connect": bool, "deform": bool } ]
 #   "clips": { "<name>": { "fps": 30, "loop": bool, "keys": [ { "t": seconds, "pose": { "<bone>": { "rot": [pitch, yaw, roll], "move": [x,y,z] } } } ] } }
@@ -215,7 +217,23 @@ bpy.ops.object.mode_set(mode='OBJECT')
 part_vals = None
 if spec.get('parts') and 'part_id' in mesh.data.attributes:
     part_vals = [0] * len(mesh.data.vertices); mesh.data.attributes['part_id'].data.foreach_get('value', part_vals)
+SPEC_BONE = {b['name']: b for b in spec['bones']}
+def seg_dist(co, name):
+    a, b = conv(SPEC_BONE[name]['head']), conv(SPEC_BONE[name]['tail']); ab = b - a
+    return (co - (a + ab * max(0.0, min(1.0, (co - a).dot(ab) / max(ab.length_squared, 1e-12))))).length
 for rg in spec.get('rigid', []):
+    if 'nearest' in rg:   # each vertex within r of these bones follows the nearest one alone; one nearer a "keep" bone is left as it is
+        own = {}
+        for v in mesh.data.vertices:
+            if part_vals and part_vals[v.index]: continue   # never a separate part (a held tool)
+            d, nm = min((seg_dist(v.co, n), n) for n in rg['nearest'] + rg.get('keep', []))
+            if d <= rg['r'] and nm in rg['nearest']: own.setdefault(nm, []).append(v.index)
+        for nm, idx in own.items():
+            for vg in mesh.vertex_groups: vg.remove(idx)
+            mesh.vertex_groups[nm].add(idx, 1.0, 'REPLACE')
+            globals().setdefault('rigid_sets', {}).setdefault(nm, set()).update(idx)
+        print('rig: nearest of %d bones: %s' % (len(rg['nearest']), ' '.join('%s %d' % (n, len(own.get(n, []))) for n in rg['nearest'])))
+        continue
     if 'part' in rg:
         k = 1 + [pt['object'] for pt in spec['parts']].index(rg['part'])
         idx = [i for i, v in enumerate(part_vals or []) if v == k]
@@ -355,6 +373,7 @@ for cr in spec.get('copyrot', []):
     c = rig.pose.bones[cr['bone']].constraints.new('COPY_ROTATION'); c.target = rig; c.subtarget = cr['from']
     c.target_space = c.owner_space = cr.get('space', 'WORLD'); c.mix_mode = cr.get('mix', 'REPLACE'); c.influence = cr.get('influence', 1.0)
     if cr.get('axes'): c.use_x, c.use_y, c.use_z = ('X' in cr['axes'], 'Y' in cr['axes'], 'Z' in cr['axes'])
+    if cr.get('invert'): c.invert_x, c.invert_y, c.invert_z = ('X' in cr['invert'], 'Y' in cr['invert'], 'Z' in cr['invert'])   # turn the other way (a twist helper undoing part of its limb's roll)
 if spec.get('copyrot'): print('rig: %d aimed bones' % len(spec['copyrot']))
 # "track": [ { "bone", "target": bone, "headtail": 0..1 } ]   the bone points at a point on another bone, turning the short way
 # from its parent (an upper-arm twist helper that follows the arm's swing but not its twist)

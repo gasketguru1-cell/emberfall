@@ -1796,7 +1796,268 @@ const VARGAN = (() => {
 })();
 delete VARGAN.forms[0].moves.jab2; delete VARGAN.forms[0].moves.jab3;   /* one jab only */
 
-const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE, FOWLS, CHOMP, BRAND, JOEY, VARGAN];
+/* ---------- Knell, the Angle Thief (the owner's design bible v1.0 for him, 2026-11-11) ----------
+   A compact skeletal automaton with a short recurved dagger in his right hand and a buckler on his left forearm. Close-range
+   pressure that changes the angle of every cut: the buckler opens a lane, the dagger goes through it.
+   Every number here is the document's: frames (frame 1 is the frame the input is taken; a move's length t is its FAF - 1),
+   damage, blade path, launch angle, Hinge windows, movement. Where it leaves a number out (base knockback and growth, throw
+   release frames) the values are mine, kept weak in raw KO power as it asks.
+   Units. The document measures hitboxes in torso widths ("1 unit, about Knell's torso width"): KU, 0.27 of his height. Read
+   the same way its jumps (3.15 / 1.55) and recovery (2.6) would be a third of anyone else's, so travel and movement
+   distances are read as metres on his model instead (MPU game units a metre): full hop 3.15 m, Turnkey Ascent 2.6 m,
+   Rimskip 3.0 / 2.0 m, the Hinge steps 0.8 / 0.65 / 0.45 m. Speeds (walk, run, air, gravity, falls) are the engine's units
+   as given. Shapes are in H (his height, 13) from his feet, x forward, like Brand's.
+   The dagger: dag() is a capsule from the wrist along the blade's direction (0 forward, 90 up, 180 behind), 0.92 KU long,
+   the radius the document gives in KU. Its attack class (Crossline) comes from that direction: HIGH +25 to +100 degrees,
+   MID within 24 of level, LOW below -25. Mechanics: Fighter.knellTick, knellContact, knellCatch, knellDeflect and the
+   Hinge check in the attack step. */
+/* Thread holds up to 5 (the document's 2, raised by the owner 2026-11-12). slow/slowRate: a Hinge Cancel spent after a clean hit
+   (not a shielded one) slows the opponent to a quarter speed for 30 frames, half a second. */
+const KN = { mem: 90, memShield: 45, max: 5, slow: 30, slowRate: 0.25, neutral: 12, clink: 60, clinkDmg: 1.5, clinkStun: 2, dbMax: 12, dbArc: 55, deflect: 0.75 };
+const KN_NEUTRAL = { idle: 1, dash: 1, run: 1, brake: 1, air: 1, jsq: 1, wd: 1 };
+const KNELL = (() => {
+  const U = 13, MPU = U / 1.85, KU = 0.27, LB = 0.92 * KU, D2R = Math.PI / 180;
+  /* the owner asked for more generous hitboxes on every move (2026-11-12): every capsule and circle 1.35 x as thick, the dagger's
+     reach 1.15 x as long, grabs 1.2 x */
+  const GR = 1.35, GL = 1.15, GG = 1.2;
+  const q = v => Math.round(v * U * 100) / 100;
+  const clOf = ang => { const e = ang > 90 && ang < 270 ? 180 - ang : ang > 180 ? ang - 360 : ang; return e >= 25 ? 'H' : e <= -25 ? 'L' : 'M'; };
+  /* the dagger: wrist (wx, wy) in H, the blade's direction in degrees, its length (len, H) and radius (ru, torso widths) */
+  const dag = (f0, f1, wx, wy, ang, d, a, b, k, o) => {
+    const { len, ru, ...rest } = o || {}, L = (len || LB) * GL, r = (ru || 0.14) * KU * GR, x2 = wx + Math.cos(ang * D2R) * L, y2 = wy + Math.sin(ang * D2R) * L;
+    return Object.assign({ f0, f1, x: q(x2), y: q(y2), r: q(r), in: [q(wx), q(wy)], n: Math.max(3, Math.ceil(L / r) + 1), d, a, b, k, cl: clOf(ang), pa: ang }, rest);
+  };
+  /* a part of a capsule, from fraction s0 to s1 of the way out from the wrist */
+  const seg = (h, s0, s1, o) => { const [ix, iy] = h.in, dx = h.x - ix, dy = h.y - iy, r2 = v => Math.round(v * 100) / 100;
+    return Object.assign({}, h, { in: [r2(ix + dx * s0), r2(iy + dy * s0)], x: r2(ix + dx * s1), y: r2(iy + dy * s1), n: Math.max(3, Math.ceil(Math.hypot(dx, dy) * (s1 - s0) / h.r) + 1) }, o); };
+  /* the jab and down tilt family: the outer third does 0.7% more on the first active frame only */
+  const tipped = h => [seg(h, 0.66, 1, { f1: h.f0, d: Math.round((h.d + 0.7) * 10) / 10 }), h];
+  const circ = (f0, f1, x, y, r, d, a, b, k, o) => Object.assign({ f0, f1, x: q(x), y: q(y), r: q(r * GR), in: [q(x), q(y)], n: 1, d, a, b, k }, o);
+  const grab = (f0, f1, x1, y1, x2, y2, r) => ({ f0, f1, x: q(x2), y: q(y2), r: q(r * GG), in: [q(x1), q(y1)], n: 4, grab: 1, d: 0 });
+  const rise = () => (f, n) => { if (n === 1) f.invuln = Math.max(f.invuln, f.pct >= 100 ? 12 : 18); };
+  const walkOn = (f, v) => { const p = f.plat; if (p && (f.x + v < p.x0 + 0.5 || f.x + v > p.x1 - 0.5)) v = 0; f.vx = v; };
+  /* Blade clock (forward tilt, forward air, Needlewheel): the stick on frames 1 and 2 picks LOW, MID or HIGH (down-forward,
+     forward, up-forward; for Needlewheel down, level or up). Startup and damage are the same; the track and launch are not. */
+  const aimOn = base => (f, n, i) => { if (n > 2) return; f.aim = 0; const y = Math.abs(i.cy) > 0.25 ? i.cy : i.ly, v = base + (y > 0.25 ? 'H' : y < -0.25 ? 'L' : '');
+    if (v !== f.mname && f.form.moves[v]) { f.move = f.form.moves[v]; f.mname = v; } };
+  /* Hinge Cancel: the shield rim set against his body, a pivot 0.8 m forward, 0.65 m back or 0.45 m up over frames 2 to 4.
+     He can attack from frame 5 (9 after a shielded hit: the 4 extra frames) and do anything once it ends on frame 7 (11). */
+  const HINGE = { f: [0.8, 0], b: [-0.65, 0], u: [0, 0.45] };
+  const hingeOn = (f, n, i) => {
+    const dd = HINGE[f.hingeDir] || HINGE.f;
+    if (n === 1) { f.vx = 0; if (!f.grounded) f.vy = 0; }
+    if (n >= 2 && n <= 4) { let vx = f.face * dd[0] * MPU / 3; const p = f.plat; if (f.grounded && p && (f.x + vx < p.x0 + 0.5 || f.x + vx > p.x1 - 0.5)) vx = 0; f.vx = vx;
+      if (dd[1]) { if (f.grounded) lift(f, 0); f.vy = dd[1] * MPU / 3; } else if (!f.grounded) f.vy = 0; }
+    else if (n >= 5) { f.vx = 0; if (!f.grounded) f.vy = Math.max(f.vy - f.st.grav, -f.st.fall); }   /* set: the pivot is exactly its distance */
+    if (n >= (f.mname === 'hingeS' ? 9 : 5)) { const c = f.ctl; if (c.take('atk')) { if (f.grounded) f.groundAttack(false); else f.startMove(f.aerial(i.lx, i.ly)); } else if (c.cPress && !f.grounded) f.startMove(f.aerial(i.cx, i.cy)); }
+  };
+  /* Rimskip: the buckler hooked on the floor ahead and vaulted over, frames 10 to 20: 3.0 m on the ground, 2.0 m in the air
+     with a 0.5 m hop. It stops at fighters and at the end of the floor. In the air the stage wall turns it into a rebound,
+     55 degrees up and away with a little steering, once a trip (sspecW, no special fall); a shield sends him back 0.8 m with
+     20 frames of lockout (sspecB). No special fall after it (the owner, 2026-11-12). */
+  /* the owner's better recovery (2026-11-12): in the air it carries 4.2 m (was 2.0) with a little more lift, and leaves him free
+     (no special fall: Turnkey and his jump are still there after it) */
+  const RIMG = 3.0 * MPU, RIMA = 4.2 * MPU, R0 = 10, R1 = 20;
+  const rimOn = (f, n, i) => {
+    if (n === 1) { f.rimBlk = false; f.vx *= 0.4; }
+    if (n < R0) { if (f.grounded) f.vx = appr(f.vx, 0, f.st.trac); else { f.vx = appr(f.vx, 0, 0.05); f.vy = Math.max(f.vy - f.st.grav * 0.5, -0.8); } return; }
+    if (f.hitG.size && blocked(f) && !f.rimBlk) { f.rimBlk = true; f.startMove('sspecB'); return; }
+    if (!f.grounded && f.wallT >= 7 && n <= R1 + 4) { const side = f.wall || -f.face; f.startMove('sspecW'); f.face = side;
+      f.vx = side * Math.cos(55 * D2R) * 1.7 + clamp(i.lx, -1, 1) * 0.35; f.vy = Math.sin(55 * D2R) * 1.7 + clamp(i.ly, -1, 1) * 0.35;
+      spark(f.x - side * 3, f.y + f.st.h * 0.5, '#ffd27a', 12, 1.4); beep(880, 0.05, 'square', 0.04, 0.6); return; }
+    if (n <= R1) {
+      let v = f.face * (f.grounded ? RIMG : RIMA) / (R1 - R0 + 1); const o = opp(f);
+      if (o && canBeHit(o) && Math.abs(o.y - f.y) < Math.max(f.st.h, o.st.h) * 0.8) { const gap = (o.x - f.x) * f.face - (f.st.w + o.st.w) / 2; if (gap >= -1 && gap < Math.abs(v)) v = f.face * Math.max(0, gap); }
+      if (f.grounded) { const p = f.plat; if (p && (f.x + v < p.x0 + 0.5 || f.x + v > p.x1 - 0.5)) v = 0; }
+      f.vx = v; if (!f.grounded) f.vy = n <= 14 ? 0.8 : n <= 17 ? 0.3 : 0.05;
+    } else if (f.grounded) f.vx = 0;   /* the skid after the vault is only drawn: the travel is exactly its distance */
+    else { f.vx = n === R1 + 1 ? f.vx * 0.2 : appr(f.vx, 0, 0.04); f.vy = Math.max(f.vy - f.st.grav, -f.st.fall); }
+  };
+  /* Turnkey Ascent: two lifts, frames 7 to 12 and 14 to 20, 2.6 m in all, steered up to 0.75 m; the ledge from frame 18 */
+  /* Read in metres the document's jumps and Turnkey were the cast's lowest (air jump 22, Turnkey 18) and he could not get back from
+     where every other fighter does; on 2026-11-12 the owner had them raised to the cast's usual size: hops x 1.4, Turnkey x 1.5,
+     and later that day a way better recovery: Turnkey x 2.1 (5.5 m) */
+  const HOPX = 1.4, UPX = 2.1;
+  const UPK = 2.6 * MPU * UPX, UPS = UPK / 18.5;
+  const upOn = (f, n, i) => {
+    if (n < 7) { hang(f); f.vx *= 0.85; return; }
+    if (n === 7) lift(f, 0);
+    if (n <= 20) { f.vy = UPS * (n <= 12 ? 2.4 - 0.25 * (n - 7) : n === 13 ? 0.3 : 1.6 - 0.2 * (n - 14)); f.vx = clamp(i.lx, -1, 1) * 0.75 * MPU / 14; }
+  };
+  const ARC = (frames, len, ru, d, a, b, k, o) => frames.map(([n, wx, wy, ang]) => dag(n, n, wx, wy, ang, d, a, b, k, Object.assign({ len, ru }, o)));
+  /* the forward smash: eyebrow height down in a hook, +70 to -50 over frames 16 to 18; the outer three quarters 17% on 16 and
+     17 (15% on 18), the quarter by the grip 12% */
+  const FSM = [[16, 0.30, 0.70, 70], [17, 0.34, 0.62, 10], [18, 0.36, 0.52, -50]];
+  const USM = [[12, 0.22, 0.6, -20], [13, 0.2, 0.7, 25], [14, 0.15, 0.8, 70], [15, 0.08, 0.88, 115]];
+  /* the acrobatic airs (the owner, 2026-11-12): how far his body has turned, in degrees, on each of 20 frames of a flip, from
+     Mixamo's Big Front Flip (slow off the mark, fast through the middle, easing out). The dagger is held out from a hub at
+     his middle and goes round with him: ring(n, f0, phi0, dir, hub) is the wrist and blade angle on frame n of a flip begun
+     on f0, the blade at phi0 before he turns (dir 1 back flip, -1 front flip, seen facing right) */
+  const FLIP = [0, 11, 23, 44, 75, 112, 148, 175, 200, 224, 243, 263, 277, 293, 306, 318, 329, 340, 351, 360];
+  const flipAt = (n, f0) => FLIP[Math.max(0, Math.min(FLIP.length - 1, n - f0))];
+  const ring = (n, f0, phi0, dir, hub) => { const th = (((phi0 + dir * flipAt(n, f0)) % 360) + 360) % 360;
+    return [hub[0] + Math.cos(th * D2R) * hub[2], hub[1] + Math.sin(th * D2R) * hub[2], th]; };
+  const NHUB = [0.02, 0.45, 0.22], UHUB = [0.02, 0.55, 0.3];
+  const span = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
+  /* Pendulum, a full front flip: three stinging passes (in front, under, behind: the blade and the whole sweep round him), then
+     the finisher over the top and down in front. */
+  const NAIR = [[5, 7, 0], [8, 10, 1], [11, 14, 2], [15, 20, 3]].flatMap(([a, b, j]) => span(a, b).flatMap(n => {
+    const [wx, wy, th] = ring(n, 3, 20, -1, NHUB);
+    if (j === 3) return [dag(n, n, wx, wy, th, 5.5, 55, 32, 72, { g: 3 }), circ(n, n, NHUB[0], NHUB[1], 0.2, 4, 60, 30, 60, { g: 3, nb: 1, cl: clOf(th) })];
+    const L = { link: [q(0.02), q(0.03), 4], linkAt: [q(0.12), q(0.36), q(0.45)] };
+    return [dag(n, n, wx, wy, th, 1.4, 70, 0, 0, Object.assign({ g: j }, L)), circ(n, n, NHUB[0], NHUB[1], 0.33, 1.4, 70, 0, 0, Object.assign({ g: j, nb: 1, cl: clOf(th) }, L))];
+  }));
+  /* Bell Needle, a back flip: the dagger rakes over his head from in front to behind */
+  const UAIR = span(5, 8).map(n => { const [wx, wy, th] = ring(n, 2, -10, 1, UHUB); return dag(n, n, wx, wy, th, 6.3, 88, 28, 76, { len: 0.87 * KU, ru: 0.13 }); });
+  /* Slipstitch (dash attack), the owner's Mixamo "Big Jump" (2026-11-12): out of the run he leaps into a diving forward roll,
+     the dagger slashing round him the whole way, and comes up on his feet with the target popped up in front for Keyturn (up
+     tilt). DROLL is the roll's turn on frames 4 to 28 and DLIFT his middle's rise and drop (metres), both from the capture
+     (its frames 15 to 57). Stings on 6 to 24 carry the target along with him; the finisher on 25 to 28 lifts them gently */
+  const DROLL = [0, 12, 20, 34, 47, 62, 77, 91, 106, 118, 129, 139, 149, 160, 172, 184, 206, 238, 266, 290, 311, 327, 342, 353, 360];
+  const DLIFT = [0.01, 0.12, 0.22, 0.29, 0.35, 0.39, 0.41, 0.41, 0.39, 0.34, 0.27, 0.19, 0.1, -0.01, -0.13, -0.24, -0.36, -0.46, -0.49, -0.48, -0.47, -0.46, -0.43, -0.36, -0.32];
+  const DHUB = [0.06, 0.45, 0.24];
+  const droll = n => { const i = Math.max(0, Math.min(DROLL.length - 1, n - 4)), th = (((60 - DROLL[i]) % 360) + 360) % 360, hy = DHUB[1] + DLIFT[i] / 1.85;
+    return [DHUB[0] + Math.cos(th * D2R) * DHUB[2], Math.max(0.2, hy) + Math.sin(th * D2R) * DHUB[2], th, Math.max(0.2, hy)]; };
+  const DASH = [[6, 10, 0], [11, 15, 1], [16, 20, 2], [21, 24, 3], [25, 28, 4]].flatMap(([a, b, j]) => span(a, b).flatMap(n => {
+    const [wx, wy, th, hy] = droll(n);
+    if (j === 4) return [dag(n, n, wx, wy, th, 4.5, 85, 50, 8, { g: 4 }), circ(n, n, DHUB[0] + 0.1, hy, 0.3, 4.5, 85, 50, 8, { g: 4, nb: 1, cl: clOf(th) })];
+    const L = { link: [q(0.03), q(0.03), 5], linkAt: [q(0.22), q(0.42), q(0.5)] };
+    return [dag(n, n, wx, wy, th, 1.5, 70, 0, 0, Object.assign({ g: j }, L)), circ(n, n, DHUB[0] + 0.1, hy, 0.33, 1.5, 70, 0, 0, Object.assign({ g: j, nb: 1, cl: clOf(th) }, L))];
+  }));
+  const dashOn = (f, n) => { if (!f.grounded) return; f.vx = 0; walkOn(f, f.face * (n <= 4 ? f.st.run * (1 - n / 16) : n <= 26 ? 0.6 : n <= 28 ? 0.25 : 0)); };
+  /* Needlewheel: three clock ticks on each line */
+  const NW = { L: [-60, -20, 25], M: [-30, 20, 70], H: [10, 65, 105] }, NWY = { L: 0.4, M: 0.52, H: 0.6 };
+  const wheel = line => ({ t: 43, ll: 14, h: [[9, 11, 2.2, 70, 22, 12], [16, 18, 2.2, 60, 22, 12], [23, 25, 5.3, 45, 40, 72]].map(([f0, f1, d, a, b, k], j) => dag(f0, f1, 0.24, NWY[line], NW[line][j], d, a, b, k, Object.assign({ len: 0.79 * KU, ru: 0.13, g: j }, j < 2 ? { link: [q(0.02), q(0.02), 8], linkAt: [q(0.3), q(0.42), NWY[line] * U] } : {}))),   /* the light ticks hold the target in front for the next */
+    on(f, n, i) { aimOn('nspec')(f, n, i); if (!f.grounded && n <= 5) f.vx = 0; } });
+  const RIPOSTE = [[6, 0.26, 0.74, 120], [7, 0.3, 0.72, 75], [8, 0.32, 0.66, 30]];
+  return {
+    name: 'Knell', sub: 'the Angle Thief', forms: [{
+      name: 'Knell', col: ['#3b3f4a', '#c99a3e', '#ff7a2a'], alt: ['#5a4636', '#d8d2c4', '#7fd4ff'], knell: 1,
+      /* Section 4: weight 89, walk 0.78, run 1.88, a 10-frame dash covering 3.2 m, traction 0.112, air acceleration 0.075,
+         air speed 1.05, gravity 0.112, fall 1.70 and fast fall 2.15, a 3-frame squat, hops of 3.15 and 1.55 m (x HOPX), one air jump,
+         a shield 0.9 the usual size. Standing 0.5 x 1 H. */
+      st: { weight: 89, walk: 0.78, walkMul: 0.1, walkAdd: 0.08, trac: 0.112, dash: 2.25, runMul: 0.12, runAdd: 0.05, run: 1.88,
+        jumpX: 0.9, jumpXMul: 0.8, jumpXMax: 1.25, airJumpX: 0.9, jumpH: 3.15 * MPU * HOPX, jumpInit: 1.75 * MPU * HOPX, hopH: 1.55 * MPU * HOPX, airJumpH: 3.15 * MPU * HOPX, upH: UPK,
+        airMul: 0.065, airAdd: 0.01, airSpeed: 1.05, airBrake: 0.01, grav: 0.112, fall: 1.70, ffall: 2.15, jsq: 3, w: 0.5 * U, h: U, jf: 3, jb: 1.4,
+        crouch: [0.68, 1.1], pummel: 1.1, pumAt: 4, pumT: 17, pumLock: 1, jumps: 1, dashF: 10, roll: [28, 1.35, 13], spot: [22, 15], shieldR: 0.9 },
+      moves: mk(1, 1, 1, 1, {
+        /* ---- ground: Needle, Reversal, Buckle; Dial Cut (three tracks), Keyturn, Ankle Tick; Slipstitch ---- */
+        jab: { t: 14, next: 'jab2', chain: 6, chainEnd: 14, hinge: [8, 11], h: tipped(dag(3, 4, 0.24, 0.54, 10, 2.3, 45, 20, 25)) },
+        jab2: { t: 16, next: 'jab3', chain: 7, chainEnd: 16, hinge: [9, 12], h: tipped(dag(4, 5, 0.25, 0.44, -35, 2.4, 72, 22, 25)) },
+        /* the buckler's rim clips the hip first (a 2% sting that holds them in front), then the dagger rakes up for 4.5% */
+        jab3: { t: 27, h: [circ(6, 6, 0.27, 0.46, 0.09, 2, 70, 0, 0, { nb: 1, link: [q(0.03), q(0.04), 3], linkAt: [q(0.3), q(0.42), q(0.5)] }), dag(6, 8, 0.22, 0.5, 65, 4.5, 55, 40, 62, { g: 1 })] },
+        ftilt: { t: 24, tilt: 1, hinge: [10, 13], on: aimOn('ftilt'), h: [dag(6, 8, 0.28, 0.52, 0, 7, 42, 32, 70, { ru: 0.15 })] },
+        ftiltL: { t: 24, tilt: 1, hinge: [10, 13], on: aimOn('ftilt'), h: [dag(6, 8, 0.26, 0.36, -55, 7, 28, 32, 70, { ru: 0.15 })] },
+        ftiltH: { t: 24, tilt: 1, hinge: [10, 13], on: aimOn('ftilt'), h: [dag(6, 8, 0.24, 0.66, 55, 7, 75, 32, 70, { ru: 0.15 })] },
+        /* Keyturn: the forearm spun up over the helm, two hits: a 2.5% sting rising in front of him on 5 and 6 that draws them
+           overhead, then 4.5% overhead on 7 to 9 (the sting was behind him; the owner wants down tilt and the dash attack to lead
+           into it, 2026-11-12) */
+        utilt: { t: 25, tilt: 1, hinge: [11, 14], h: [dag(5, 6, 0.2, 0.62, 55, 2.5, 90, 0, 0, { len: 0.87 * KU, ru: 0.16, link: [q(0.02), q(0.16), 4], linkAt: [q(0.05), q(0.2), q(1.05)] }), dag(7, 9, 0.03, 0.97, 80, 4.5, 98, 32, 80, { len: 0.87 * KU, ru: 0.13, g: 1 })] },
+        dtilt: { t: 20, tilt: 1, hinge: [8, 11], h: tipped(dag(4, 6, 0.34, 0.3, -72, 5.1, 82, 24, 42)) },
+        dash: { t: 36, h: DASH, on: dashOn },
+        /* ---- smashes: Guillotine Arc, Clockstrike, Split Seconds ---- */
+        fsmash: { t: 45, chg: 10, chgK: 0.35, h: FSM.flatMap(([n, wx, wy, ang]) => { const c = dag(n, n, wx, wy, ang, 15, 38, 32, 94, { ru: 0.18 });
+          return [seg(c, 0, 0.25, { part: 'near', d: 12, k: 86 }), seg(c, 0.25, 1, { d: n < 18 ? 17 : 15, k: n < 18 ? 98 : 94 })]; }), on(f, n) { if (n >= 13 && n <= 17 && f.grounded) walkOn(f, f.face * 0.5); } },
+        /* Clockstrike: the sweep up from in front stings twice (2% on 12 and 13, drawing them up the arc), then the overhead
+           finishes on 14 and 15 (11% near the grip, 13% at the point) */
+        usmash: { t: 43, chg: 8, chgK: 0.35, h: USM.flatMap(([n, wx, wy, ang], j) => { const c = dag(n, n, wx, wy, ang, 13, 86, 34, 96, { ru: 0.18 });
+          if (j < 2) return [Object.assign(c, { d: 2, a: 90, b: 0, k: 0, g: j, link: [q(0.02), q(0.14), 3], linkAt: [q(0.05), q(0.3), q(0.9)] })];
+          return [seg(c, 0, 0.6, { part: 'near', d: 11, g: 2 }), seg(c, 0.6, 1, { d: 13, k: 100, g: 2 })]; }) },
+        dsmash: { t: 45, chg: 6, chgK: 0.35, h: [dag(10, 11, 0.3, 0.27, -80, 6, 32, 35, 70, { ru: 0.18 }), dag(17, 18, -0.3, 0.27, 260, 8, 145, 38, 88, { ru: 0.18, g: 1 })] },
+        /* ---- air: Pendulum, Prismatic Fang (three tracks), Backhand Ratchet, Bell Needle, Deadfall ---- */
+        nair: { t: 34, air: 1, ll: 9, ac0: 3, ac: 29, hinge: [21, 24], h: NAIR,
+          on(f, n) { if (n === 1) f.knNair2 = false; if (n < 21) f.knC = f.knC && n >= 15; } },   /* the Hinge only after the finisher: contact counts from frame 15 */
+        fair: { t: 31, air: 1, ll: 10, ac0: 4, ac: 26, hinge: [10, 13], on: aimOn('fair'), h: [dag(6, 8, 0.28, 0.54, 0, 7.2, 48, 30, 72, { ru: 0.15 })] },
+        fairL: { t: 31, air: 1, ll: 10, ac0: 4, ac: 26, hinge: [10, 13], on: aimOn('fair'), h: [dag(6, 8, 0.26, 0.4, -55, 7.2, 32, 30, 72, { ru: 0.15 })] },
+        fairH: { t: 31, air: 1, ll: 10, ac0: 4, ac: 26, hinge: [10, 13], on: aimOn('fair'), h: [dag(6, 8, 0.24, 0.66, 55, 7.2, 78, 30, 72, { ru: 0.15 })] },
+        /* the backhand turns only his shoulder and wrist: strongest near the hilt (10.5%), weakest at the tip (8.5%) */
+        bair: { t: 35, air: 1, ll: 12, ac0: 5, ac: 30, h: (c => [seg(c, 0, 0.45, { part: 'near', d: 10.5, k: 96 }), seg(c, 0.45, 1, { d: 8.5, k: 88 })])(dag(8, 10, -0.22, 0.56, 205, 9.5, 144, 36, 92, { len: 0.96 * KU, ru: 0.16 })) },
+        uair: { t: 28, air: 1, ll: 8, ac0: 3, ac: 23, h: UAIR },
+        /* a straight drop of the dagger: the curved tip spikes on 10 and 11, the rest sends away at 65; a hit stops his fall 3 frames */
+        dair: { t: 41, air: 1, ll: 15, ac0: 6, ac: 36, llf: f => f.hitG.size ? 15 : 24,
+          h: (c => [seg(c, 0.6, 1, { f1: 11, a: 270, b: 30, k: 80 }), seg(c, 0, 1, { a: 65, b: 30, k: 70 })])(dag(10, 12, 0.02, 0.24, -95, 10.5, 270, 30, 80, { len: 0.91 * KU })),
+          on(f, n) { if (n === 1) f.knFz = -1; if (f.hitG.size && f.knFz === -1) f.knFz = 3; if (f.knFz > 0) { f.knFz--; f.vy = 0; } } },
+        /* ---- grabs: a short arm-hook (0.87 of the usual reach), Knuckle Ping; get-ups ---- */
+        grab: { t: 31, h: [grab(6, 7, 0.18, 0.52, 0.5, 0.52, 0.1)] },
+        dgrab: { t: 41, h: [grab(9, 10, 0.2, 0.52, 0.55, 0.52, 0.1)], on(f, n) { if (n <= 10 && f.grounded) walkOn(f, f.face * 0.45 * KU * U / 10 + f.vx * 0.5); } },
+        pgrab: { t: 40, h: [grab(10, 11, 0.2, 0.52, 0.58, 0.52, 0.1)] },
+        getup: { t: 47, h: [dag(19, 20, 0.26, 0.2, -8, 7, 43, 45, 56, { cl: '' }), dag(24, 25, -0.26, 0.2, 188, 7, 137, 45, 56, { cl: '', g: 1 })], on: rise() },
+        getupB: { t: 47, h: [dag(19, 20, -0.26, 0.2, 188, 7, 137, 45, 56, { cl: '' }), dag(24, 25, 0.26, 0.2, -8, 7, 43, 45, 56, { cl: '', g: 1 })], on: rise() },
+        ledgeatk: { t: 46, h: [dag(20, 22, 0.24, 0.32, 5, 8, 39, 42, 59, { cl: '' })], on: rise() },
+        /* ---- specials ---- */
+        nspec: wheel('M'), nspecL: wheel('L'), nspecH: wheel('H'),
+        sspec: { t: 39, once: 1, nodrift: 1, ownPhys: 1, ll: 16, on: rimOn, h: [dag(12, 15, 0.22, 0.38, 12, 9.2, 40, 42, 72, { len: 0.86 * KU, ru: 0.16 })] },
+        sspecW: { t: 18, h: [] },
+        sspecB: { t: 20, h: [], helpless: 1, hll: 16, nodrift: 1, ownPhys: 1, on(f, n) { if (n <= 8) { let v = -f.face * 0.8 * MPU / 8; const p = f.plat; if (f.grounded && p && (f.x + v < p.x0 + 0.5 || f.x + v > p.x1 - 0.5)) v = 0; f.vx = v; } else f.vx = appr(f.vx, 0, f.st.trac);
+          if (!f.grounded) f.vy = Math.max(f.vy - f.st.grav, -f.st.fall); } },
+        uspec: { t: 33, helpless: 1, ledge: 1, snap: 18, nodrift: 1, ll: 18, hll: 18, rise: UPK, on: upOn,
+          h: [dag(7, 10, 0.16, 0.78, 80, 4.5, 76, 30, 0, { link: [q(-0.04), q(0.3), 9], linkAt: [q(0.12), q(0.3), q(0.95)] }), dag(14, 16, 0.1, 0.98, 70, 4, 60, 45, 72, { g: 1 })] },   /* the first pulls in and carries the target up with him for the second */
+        /* Deadbolt: a frontal shield catch on frames 5 to 14 (110 degrees across), one strike or projectile of 12% or less */
+        dspec: { t: 42, ll: 14, h: [], deadbolt: [5, 14], airOnce: 'dbolt', on(f, n) { if (n === 1 && f.grounded) f.vx *= 0.3; } },
+        dspecR: { t: 32, ll: 14, h: RIPOSTE.map(([n, wx, wy, ang]) => dag(n, n, wx, wy, ang, 7, 68, 40, 75, { len: 0.9 * KU, ru: 0.15 })) },
+        hinge: { t: 7, ll: 3, h: [], ownPhys: 1, nodrift: 1, on: hingeOn }, hingeS: { t: 11, ll: 3, h: [], ownPhys: 1, nodrift: 1, on: hingeOn },
+      }, { jabs: 3, throws: {
+        /* Slip Knot, Rewind, Open Clock, Set the Tooth (release frames mine) */
+        f: { d: 6.5, a: 42, b: 50, k: 62, f: 11, t: 35 }, b: { d: 8.2, a: 142, b: 50, k: 72, f: 13, t: 42 },
+        u: { d: 5.8, a: 88, b: 60, k: 56, f: 12, t: 37 }, d: { d: 5, a: 77, b: 58, k: 32, f: 12, t: 34 } } }),
+    }],
+  };
+})();
+/* Thread (the owner's rework, 2026-11-12): any two linked moves with different directional inputs earn one. A move's input is
+   knDir: n (jab, neutral air, neutral special), f (forward tilt, smash, air and special, the dash attack), u, d and b, with the
+   aimed tracks (H, L) their own inputs. Any contact (hit or shield) keeps that input for 90 frames (45 after a shield); a contact
+   by a move of another input inside that time earns a Thread (at most KN.max, 5, one per move). Down tilt into up tilt, dash
+   attack into up tilt, forward air into back air: each a Thread. Any contact at all opens the move's Hinge window. */
+const knDir = n => { if (!n) return ''; const b = /^(jab|nair|nspec)/.test(n) ? 'n' : /^(ftilt|fsmash|fair|sspec|dash)/.test(n) ? 'f' : /^(utilt|usmash|uair|uspec)/.test(n) ? 'u'
+  : /^(dtilt|dsmash|dair|dspec)/.test(n) ? 'd' : /^bair/.test(n) ? 'b' : ''; return b && /[a-z](H|L)$/.test(n) ? b + n[n.length - 1] : b; };
+/* a Hinge Cancel after a clean hit: the opponent runs at a quarter speed for half a second (stepPlay skips three updates in four) */
+function knellSlow(a) {
+  const o = opp(a); if (!o || o.state === 'dead' || o.state === 'respawn') return;
+  o.slowT = KN.slow; o.slowAc = 0; spark(o.x, o.y + o.st.h * 0.5, '#9fd8ff', 14, 1.4); beep(420, 0.18, 'sine', 0.05, 0.5);
+}
+function knellContact(a, h, onShield) {
+  a.knC = true; if (onShield) a.knCS = true;
+  const dir = a.move ? knDir(a.mname) : ''; if (!dir) return;
+  if (a.thrGot !== a.knAct && a.knLast && dir !== a.knLast && frame <= a.knExp && a.thread < KN.max) {
+    a.thread++; a.thrGot = a.knAct; beep(a.thread === 1 ? 1320 : 1760, 0.09, 'sine', 0.05, 1.05); spark(a.x, a.y + 1, '#ffd166', 8, 0.9);
+  }
+  a.knLast = dir; a.knExp = frame + (onShield ? KN.memShield : KN.mem);
+}
+/* The CPU's way back for Knell. He drifts little and Turnkey steers only 0.75 m, so he closes the gap first (drift, then the air
+   jump), vaults into the stage wall with Rimskip once it is in reach below the lip (no special fall after it, rebound or not, so
+   it also serves as plain distance and leaves Turnkey free), and keeps Turnkey for when the ledge is inside its steer and snap, or for a last try as the fall runs out. */
+function knellBack(f, i, side, far) {
+  const hw = f.st.w / 2, gap = far - hw, roof = BLAST.t - 28, half = stageHalf(Math.min(f.y - 5 + f.st.h, 0)), wall = Math.abs(f.x) - hw - half;   /* the rim or rock where Rimskip would meet it, after its slow start */
+  if (f.vy > 0.2) return i;
+  if (f.jumps > 0) { if (((f.vy < -f.st.fall + 0.1 && (f.y < 10 || gap > 40)) || f.y < -24) && f.y + f.form.aiHop < roof) i.jmp = true; return i; }   /* the jump resets the fall, so it buys most once he falls at full speed */
+  if (!f.sideUsed && f.y < 30 && ((half >= 0 && wall > 0 && wall < 13) || (gap > 18 && f.y > -30))) { i.lx = -side; i.ly = 0; i.spc = true; return i; }   /* no special fall after it now (2026-11-12): also just for distance (18 units, about 2.6 m) */
+  if ((far < 30 && f.y < 0 && f.y > -50) || f.y < -56) { i.lx = -side * 0.35; i.ly = 1; i.spc = true; }
+  return i;
+}
+/* Deadbolt's catch: a strike from in front of the buckler (within 55 degrees of level, either way) of 12% or less, not a
+   grab. The striker is frozen, Knell ripostes, and a Thread is his if he had none. Grabs, hits from behind, anything
+   stronger, and later hits of a multi-hit get through. */
+function knellCatch(a, v, h, at) {
+  if ((h.dd ? h.dd(a) : h.d) > KN.dbMax) return false;
+  const c = at || [a.x + h.x * a.face, hitY(a, h)], cx = v.x + v.face * v.st.h * 0.3, cy = v.y + v.st.h * 0.55;
+  let fx = (c[0] - cx) * v.face; if (fx <= 0) fx = (a.x - v.x) * v.face;
+  if (fx <= 0 || Math.abs(Math.atan2(c[1] - cy, fx)) > KN.dbArc * Math.PI / 180) return false;
+  a.hitlag = 18; v.hitlag = 4; v.startMove('dspecR'); if (v.thread === 0) v.thread = 1;   /* the striker stays frozen through the riposte's cut */
+  spark(cx, cy, '#ffd166', 16, 1.8); pop(cx, cy + 10, 'CLINK', '#ffd166'); beep(180, 0.16, 'triangle', 0.07, 0.7); beep(1500, 0.05, 'square', 0.03, 1);
+  return true;
+}
+/* Deadbolt against a projectile: turned aside at 0.75 of its speed, on along its way, harmless; Knell ripostes. No Thread. */
+function knellDeflect(v, p) {
+  const m = v.move; if (v.state !== 'attack' || !m || !m.deadbolt || v.mf < m.deadbolt[0] || v.mf > m.deadbolt[1] || !p.h || p.h.d > KN.dbMax) return false;
+  const cx = v.x + v.face * v.st.h * 0.3, cy = v.y + v.st.h * 0.55, fx = (p.x - cx) * v.face;
+  if (fx <= -2 || Math.abs(Math.atan2(p.y - cy, Math.max(fx, 0.01))) > KN.dbArc * Math.PI / 180) return false;
+  if (p.onHit) p.onHit(p, F[p.owner], v);
+  p.ghost = true; if (!p.step && !p.track) { p.vx *= KN.deflect; p.vy = Math.abs(p.vx) * 0.9 + 0.4; p.life = Math.min(p.life, 40); }
+  v.startMove('dspecR'); spark(cx, cy, '#ffd166', 12, 1.4); pop(cx, cy + 10, 'CLINK', '#ffd166'); beep(180, 0.14, 'triangle', 0.06, 0.7);
+  return true;
+}
+
+const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE, FOWLS, CHOMP, BRAND, JOEY, VARGAN, KNELL];
 /* Hitbox positions measured from the animations (hitboxes.js, written with tools/measure.html). Timing, damage and launch stay as defined above. */
 if (typeof HITBOXES !== 'undefined') for (const def of ROSTER) for (const fm of def.forms) {
   const set = HITBOXES[fm.name]; if (!set) continue;
@@ -1885,7 +2146,7 @@ class Fighter {
     this.grounded = !!first; this.plat = first ? MAIN : null; this.state = first ? 'idle' : 'respawn'; this.sf = 0;
     this.jumps = this.st.jumps ?? 1; this.airdodged = false; this.sideUsed = false; this.ff = false;
     this.wall = 0; this.wallT = 0; this.wallJumps = 0; this.sdi = 0; this.airT = 0; this.jr = 0; this.jrV = 0; this.rapidN = 0; this.aim = 0;
-    this.pct = 0; this.shieldHp = 50; this.invuln = 0; this.hitlag = 0; this.hitstun = 0; this.ledgeCd = 0; this.dropT = 0; this.dropPlat = null;
+    this.pct = 0; this.slowT = 0; this.slowAc = 0; this.shieldHp = 50; this.invuln = 0; this.hitlag = 0; this.hitstun = 0; this.ledgeCd = 0; this.dropT = 0; this.dropPlat = null;
     this.move = null; this.mf = 0; this.charge = 0; this.hitG = new Set(); this.parriedBy = null; this.victim = null; this.lag = 0; this.flash = 0;
     this.stale = []; this.staled = false; this.staleM = 1; this.shortHop = false; this.moveSH = false; this.shMacro = false; this.grabImm = 0; this.ledgeGrabs = 0;
     this.dodgeStale = 0; this.dodgeT = 0; this.ds = 0; this.tumble = false; this.techT = 0; this.techLock = 0; this.pumT = 0; this.pumHit = 0; this.downBack = false; this.wdHold = false;
@@ -1893,6 +2154,7 @@ class Fighter {
     this.fat = 0; this.fatGain = false; this.restT = 0; this.exPend = false; this.exStart = -1; this.paceX = null; this.paceDir = 1;   /* INTENSITY: per stock */
     this.punchC = 0; this.punchUse = 0; this.buryT = 0; this.slapMore = false; this.tether = null; this.adFaf = 0; this.spinVx = 0;   /* per stock: a stored punch charge goes with the stock */
     this.berserk = false; this.bzAcc = 0; this.axe = null; this.axeAway = false; this.recallArm = true; this.recallN = 0; this.metX = 0;   /* Fyrdsman: per stock (a KO puts the axe back in his hand and ends Berserker) */
+    this.thread = 0; this.knLast = ''; this.knExp = 0; this.knAct = 0; this.thrGot = -1; this.knC = false; this.knCS = false; this.hingeUsed = false; this.knNeu = 0; this.hingeDir = 'f'; this.clinkUntil = 0; this.knFz = 0; this.rimBlk = false;   /* Knell: per stock (Thread, the Hinge, Clink) */
   }
   /* Fyrdsman, every tick (hitlag included, never while paused): Berserker's cost, 1% every 12 ticks (5% a second, counted in
      whole ticks so it never rounds away); and the recall, special held 8 ticks in a row while the axe is away and lying or
@@ -1919,6 +2181,8 @@ class Fighter {
     else if (e < 180 && this.state !== 'grow' && this.state !== 'dead' && this.state !== 'respawn') { this.move = null; this.set('grow'); this.sf = e; }
     if (e === 180 + 1 || e === 300) beep(e === 300 ? 520 : 990, 0.08, 'sine', 0.04, e === 300 ? 0.8 : 1.2);   /* the protected moment starts, and ends */
   }
+  /* Knell, every tick: the Hinge is his again once he has spent 12 frames in a row free to act (idle, moving, in the air) */
+  knellTick() { if (KN_NEUTRAL[this.state]) { if (++this.knNeu >= KN.neutral) this.hingeUsed = false; } else this.knNeu = 0; }
   tfProtected() { return this.tfLatch && frame - this.tfStart < 300; }
   /* INTENSITY: only human Joey, only until the transformation latch is set */
   fatOn() { return !!this.def.transform && this.fi === 0 && !this.tfLatch; }
@@ -1935,6 +2199,8 @@ class Fighter {
     this.selOpen = false;   /* a bird wheel left open by an interrupted Neutral B never outlives it */
     if (!m.rapid) this.rapidN = 0; this.hitG = new Set(); this.parriedBy = null; this.staled = false; this.moveSH = !!(m.air && this.shortHop); this.set('attack');
     if (m.once && !this.grounded) this.sideUsed = true;
+    if (m.airOnce && !this.grounded) this.airUse[m.airOnce] = 1;   /* Knell's Deadbolt: once until he lands or is hit */
+    if (this.form.knell) { this.knAct++; this.knC = this.knCS = false; }   /* Knell: each move is its own activation for Thread and the Hinge */
   }
   endMove() {
     const m = this.move, i = this.ctl.c; this.move = null;
@@ -1958,7 +2224,8 @@ class Fighter {
     /* Turnaround special: holding back turns the fighter round first; in the air a neutral special also reverses its drift. */
     const dir = n; let turned = false, mv = this.form.moves[n]; if (mv.pick) { n = mv.pick(this) || n; mv = this.form.moves[n]; }   /* a special with a ground and an air form, or a stored charge */
     if (!this.grounded && ((mv.burst && this.burstUsed) || (mv.blast && this.blastUsed))) return;
-    if (mv.swap && this.swapLock > 0) return;   /* too soon after the last swap */   /* spent until it lands */
+    if (mv.swap && this.swapLock > 0) return;
+    if (mv.airOnce && !this.grounded && this.airUse[mv.airOnce]) return;   /* too soon after the last swap */   /* spent until it lands */
     if (n !== 'sspec' && Math.abs(i.lx) > 0.35 && sgn(i.lx) !== this.face) { this.face = sgn(i.lx); if (n === 'nspec' && !this.grounded) { this.vx = -this.vx * 0.9; turned = true; } }
     this.startMove(n); this.bRevV = !turned;   /* the drift already turned round with the fighter: a B-reverse after it only turns them back (a wavebounce) */
     if (dir !== 'uspec' && !mv.swap && this.ctl.cFall) this.bRev = B_REV;   /* people only (cFall, as for the right-stick fast fall), so seeded CPU matches play out as before */
@@ -2102,7 +2369,7 @@ class Fighter {
   }
   /* Being hit always gives the up special back: the once-per-trip ones (Potato Sack's blast, the Fowls' cyclone, Joey's Spot Me!)
      are ready again, and a launch out of helpless is an ordinary tumble. The other once-per-trip specials are left as they are. */
-  upBack() { const u = this.form.moves.uspec; if (u && u.blast) this.blastUsed = false; if (u && u.burst) this.burstUsed = false; if (this.airUse) delete this.airUse.spot; this.helpLag = 0; }
+  upBack() { const u = this.form.moves.uspec; if (u && u.blast) this.blastUsed = false; if (u && u.burst) this.burstUsed = false; if (this.airUse) { delete this.airUse.spot; delete this.airUse.dbolt; } this.helpLag = 0; }
   breakShield() { this.shieldHp = SHIELD.hp * 0.75;   /* Ultimate: a broken shield comes back at 75% */ this.grounded = false; this.plat = null; this.vy = 3.2; this.vx = 0; this.set('broken'); spark(this.x, this.y + 8, '#9cf', 30, 2.4); sfx('shield_break', this.x); shake = 10; }
   launch(kb, ang, dir, lsi) {
     this.freeVictim(); this.selOpen = false; const sp = kb * 0.03 * (lsi || 1); this.sdi = 0; this.tumble = kb >= TUMBLE_KB; this.ledgeGrabs = 0; this.shortHop = false; this.vx = Math.cos(ang) * sp * dir; this.vy = Math.sin(ang) * sp;
@@ -2117,12 +2384,13 @@ class Fighter {
     sfx('blastzone_ko', clamp(this.x, -160, 160)); sfx('stock_lost'); shake = 16; rumble(this.ctl, 400, 1); this.stale = [];
     const o = F[1 - this.idx]; if (o.victim === this) o.victim = null; this.freeVictim();
     if (this.def.fowl) { this.sling = null; if (this.fi >= 5) this.fi -= 5; }   /* a lost stock puts the bird back in the pouch */
-    this.stocks--; if (TRAINING) this.stocks = STOCKS; F[1 - this.idx].kos++;   /* training: stocks never run out */ this.move = null; this.vx = this.vy = 0; this.grounded = false; this.plat = null; this.set('dead'); PROJ = PROJ.filter(p => p.owner !== this.idx);
+    this.slowT = 0; this.stocks--; if (TRAINING) this.stocks = STOCKS; F[1 - this.idx].kos++;   /* training: stocks never run out */ this.move = null; this.vx = this.vy = 0; this.grounded = false; this.plat = null; this.set('dead'); PROJ = PROJ.filter(p => p.owner !== this.idx);
   }
   update() {
     const c = this.ctl, i = c.c;
     if (this.def.transform) this.tfStep();
     if (this.form.varg) this.varganTick();
+    if (this.form.knell) this.knellTick();
     if (this.exStart >= 0 && frame - this.exStart >= FAT.exhaust) { this.exStart = -1; this.fat = 0; this.exPend = false; this.restT = 0; if (this.state === 'exhaust') this.set('idle'); }   /* e = 900: free, with no extra lag */
     if (this.invuln > 0) this.invuln--; if (this.swapLock > 0) this.swapLock--; if (this.ledgeCd > 0) this.ledgeCd--; if (this.dropT > 0) this.dropT--; if (this.flash > 0) this.flash--;
     if (!i.shd) this.wdHold = false;   /* the shield press that made a wavedash does not turn into a shield while still held */
@@ -2220,6 +2488,12 @@ class Fighter {
         if (this.form.ropeOut && this.state === 'attack' && this.move === m && this.hitG.size && !blocked(this) && this.mname !== 'sspec' && this.mname !== 'swingBite' && !(m.h[0] && m.h[0].grab)
           && c.buf.spc > 0 && Math.abs(i.lx) > 0.5 && Math.abs(i.lx) >= Math.abs(i.ly) && (this.grounded || !this.airUse.rope)) {
           c.buf.spc = 0; this.face = sgn(i.lx); this.startMove('sspec'); this.rsQuick = frame; break;
+        }
+        /* Knell's Hinge Cancel: after the move made contact, inside its window, special with a direction (not holding shield) spends a Thread */
+        if (this.form.knell && this.state === 'attack' && this.move === m && m.hinge && this.knC && this.mf >= m.hinge[0] && this.mf <= m.hinge[1] && this.thread > 0 && c.buf.spc > 0 && !i.shd) {
+          const fw = i.lx * this.face, dir = i.ly > 0.5 && i.ly >= Math.abs(i.lx) ? 'u' : fw > 0.5 ? 'f' : fw < -0.5 ? 'b' : '';
+          if (dir) { c.buf.spc = 0; this.thread--; this.hingeUsed = true; const sh = this.knCS; if (!sh) knellSlow(this); this.startMove(sh ? 'hingeS' : 'hinge'); this.hingeDir = dir;
+            spark(this.x, this.y + 1, '#ffd166', 6, 0.7); beep(260, 0.06, 'sawtooth', 0.04, 1.6); break; }
         }
         if (this.state === 'attack' && this.move === m && m.cancel && this.mf >= m.cancel) {   /* cut short into any action, keeping the speed */
           if (this.grounded) { if (this.groundActs(false)) break; }
@@ -2479,7 +2753,7 @@ function hurtRect(v) {
 /* The shield bubble shrinks as the shield wears down and can be shifted a little with the stick, so a worn shield leaves
    the head or feet uncovered unless it is tilted to cover them. */
 const SHIELD_TILT = 3;
-function shieldCircle(v) { const i = v.ctl.c; return [v.x + clamp(i.lx, -1, 1) * SHIELD_TILT, v.y + v.st.h / 2 + clamp(i.ly, -1, 1) * SHIELD_TILT, 4 + v.shieldHp / SHIELD.hp * 6]; }
+function shieldCircle(v) { const i = v.ctl.c; return [v.x + clamp(i.lx, -1, 1) * SHIELD_TILT, v.y + v.st.h / 2 + clamp(i.ly, -1, 1) * SHIELD_TILT, (4 + v.shieldHp / SHIELD.hp * 6) * (v.st.shieldR || 1)]; }   /* shieldR: Knell's is 0.9 the usual size */
 /* Does an attack centred at (hx, hy) reach a part of a shielding fighter's body that the bubble does not cover? */
 function pokes(v, hx, hy) {
   if (v.state !== 'shield' && v.state !== 'shieldstun') return false;
@@ -2529,7 +2803,9 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   else { if (!a.staled) { a.staleM = staleMul(a, id); pushStale(a, id, onShield); a.staled = true; } d *= a.staleM * (1 + a.charge / 60 * CHG_K(a)) * (a.moveSH ? SHORT_HOP_MUL : 1); }
   const bz = a && a.berserk ? 1.5 : 1; d *= bz;   /* Fyrdsman's Berserker: +50% damage on everything he hits with, the axe included (knockback below) */
   if (!proj && !h.grab && v.state === 'attack' && v.move && v.move.vCounter && v.mf >= v.move.vCounter[0] && v.mf <= v.move.vCounter[1]) { vCounter(v, a, hx, hy); return; }   /* Fyrdsman's counter takes any strike, from either side */
+  if (!proj && !h.grab && v.state === 'attack' && v.move && v.move.deadbolt && v.mf >= v.move.deadbolt[0] && v.mf <= v.move.deadbolt[1] && knellCatch(a, v, h, at)) return;   /* Knell's Deadbolt */
   if (v.state === 'shieldoff' && v.sf <= SHIELD.parry) {
+    if (v.form.knell) v.clinkUntil = frame + KN.clink;   /* Knell's Clink: his next grounded dagger hit within 60 frames is stronger */
     v.set('idle'); v.invuln = 4; if (!proj) { a.hitlag = 16; a.parriedBy = v; }
     spark(hx, hy, '#fff', 20, 2); pop(hx, hy + 12, 'PARRY', '#fff'); sfx('parry', hx); return;
   }
@@ -2553,11 +2829,16 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   if ((v.state === 'shield' || v.state === 'shieldstun') && !poke) {
     v.shieldHp -= (d + (h.sd || 0)) * SHIELD.dmg;   /* sd: extra shield damage */
     const sm = proj ? SHIELD.stun.proj : a.move && a.move.air ? SHIELD.stun.air : a.move && a.move.chg ? SHIELD.stun.smash : SHIELD.stun.ground;
-    if (v.shieldHp <= 0) v.breakShield(); else { v.stunT = Math.floor(d * sm) + 2; v.set('shieldstun'); v.vx = (sgn(v.x - srcX) || face) * Math.min(1.3, (v.stunT + 1) * 0.09); }   /* pushback as in Ultimate: (shieldstun + 1) x 0.09, at most 1.3 */
+    if (!proj && a.form.knell) knellContact(a, h, true);
+    /* Knell's shield tilted toward the hit (shield + forward or back) is pushed less, tilted away more */
+    const tilt = v.form.knell ? v.ctl.c.lx * (sgn(srcX - v.x) || -face) : 0, push = tilt > 0.5 ? 0.7 : tilt < -0.5 ? 1.25 : 1;
+    if (v.shieldHp <= 0) v.breakShield(); else { v.stunT = Math.floor(d * sm) + 2; v.set('shieldstun'); v.vx = (sgn(v.x - srcX) || face) * Math.min(1.3, (v.stunT + 1) * 0.09) * push; }   /* pushback as in Ultimate: (shieldstun + 1) x 0.09, at most 1.3 */
     const hl = Math.min(20, Math.floor((d * 0.65 + 6) * 0.67)); v.hitlag = hl; if (!proj) a.hitlag = hl;
     spark(hx, hy, '#9cf', 6, 1); sfx('shield_hit', hx); return;
   }
   const chained = v.state === 'hurt' || v.state === 'held' || v.hitlag > 0;
+  let clink = false; if (!proj && a.form.knell) { knellContact(a, h, false); if (h.cl && a.grounded && frame <= a.clinkUntil) { clink = true; a.clinkUntil = 0; d += KN.clinkDmg; } }   /* Clink: +1.5% and 2 frames' more hitstun, once */
+  if (v.form.knell) v.clinkUntil = 0;   /* taking damage loses it */
   v.pct = Math.min(999, v.pct + d); v.flash = 6; v.upBack(); if (!proj && a.move && a.move.cast) a.castHit = true; comboHit(a, v, d, chained);
   const crouch = v.grounded && v.state === 'idle' && v.ctl.c.ly < CROUCH_Y, charging = v.state === 'attack' && v.charge > 0;
   const kb = (h.fkv ? knockSet(v, h.fkv, h.b, h.k) : knock(v, d / bz, h.b, h.k) * (h.norage ? 1 : rage(a))) * (crouch ? CROUCH_MUL : 1) * (charging ? CHARGING_MUL : 1) * bz * (h.kbMul || 1);   /* fkv: set knockback, the same at any damage. Berserker: x 1.5 on the knockback the unboosted damage gives (so it is not raised twice); kbMul: the recalled axe's distance power */
@@ -2582,7 +2863,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   /* Holding up or down stretches or shortens the launch, except for near-vertical ones. */
   const nd = ((ang * 180 / Math.PI) % 360 + 360) % 360, vertical = (nd > 65 && nd < 115) || (nd > 245 && nd < 295);
   const lsi = vertical ? 1 : i.ly > 0.5 ? 1.095 : i.ly < -0.5 ? 0.92 : 1;
-  v.launch(kb, ang, dir, lsi); if (h.hs) v.hitstun += h.hs; if (h.drag) { v.vx += a.vx; v.vy += a.vy; v.dragBy = a.idx; } else if (h.carry && !proj) { const cx = a.x + a.face * (h.carryX !== undefined ? h.carryX : 2) - v.x, cy = a.y + a.st.h / 2 - (v.y + v.st.h / 2); v.grounded = false; v.plat = null; v.vx = a.vx + clamp(cx * 0.3, -2, 2); v.vy = a.vy + clamp(cy * 0.3, -2, 2) + 0.2; v.dragBy = a.idx; } else v.dragBy = -1;
+  v.launch(kb, ang, dir, lsi); if (h.hs) v.hitstun += h.hs; if (clink) v.hitstun += KN.clinkStun; if (h.drag) { v.vx += a.vx; v.vy += a.vy; v.dragBy = a.idx; } else if (h.carry && !proj) { const cx = a.x + a.face * (h.carryX !== undefined ? h.carryX : 2) - v.x, cy = a.y + a.st.h / 2 - (v.y + v.st.h / 2); v.grounded = false; v.plat = null; v.vx = a.vx + clamp(cx * 0.3, -2, 2); v.vy = a.vy + clamp(cy * 0.3, -2, 2) + 0.2; v.dragBy = a.idx; } else v.dragBy = -1;
   if (h.link) { v.tumble = false; v.grounded = false; v.plat = null; v.hitstun = v.linkT = h.link[2]; v.vx = face * h.link[0] / h.link[2]; v.vy = h.link[1] / h.link[2];
     /* linkAt [nearest, farthest, height] (units, in front of the attacker, from her feet): the target is steered to that spot beside the attacker and kept there as she moves, so the next hit lands even when she drifts or falls */
     if (h.linkAt && !proj) { const rx = (v.x - a.x) * a.face; v.linkBy = a.idx; v.linkAt = [a.face * Math.min(Math.max(rx, h.linkAt[0]), h.linkAt[1]), h.linkAt[2] - v.st.h / 2]; } }   /* a linking hit: the target is moved a set distance over a set time, whatever its damage, so the next hit of the move connects */   /* carry: caught and taken along (sackCarry) */   /* carried along with a travelling rig (see fowlCarry) */ v.hitlag = hl; if (!proj) a.hitlag = hl; rumble(v.ctl, 60 + kb, Math.min(1, 0.25 + kb / 150)); rumble(a.ctl, 50, 0.25);
@@ -2637,7 +2918,7 @@ function resolveHits() {
   }
   for (const p of PROJ) {
     const v = F[1 - p.owner];
-    if (p.life > 0 && !p.ghost && !(p.cool > 0) && canBeHit(v) && (circRect(p.x, p.y, p.r, ...hurtRect(v)) || (Math.hypot(p.vx, p.vy) > p.r && circRect(p.x - p.vx / 2, p.y - p.vy / 2, p.r, ...hurtRect(v))))) {   /* and halfway back along a fast shot's path */ ev.push([F[p.owner], v, p.h, p.face, p.x, true, pokes(v, p.x, p.y)]); if (p.onHit) p.onHit(p, F[p.owner], v); if (p.hits > 1) { p.hits--; p.cool = p.rehit || 6; } else { p.life = 0; p.spent = true; } if (p.grp && p.life <= 0) for (const q of PROJ) if (q.grp === p.grp && q.owner === p.owner) q.life = 0; }   /* grp: parts of one burst, one hit between them */
+    if (p.life > 0 && !p.ghost && !(p.cool > 0) && canBeHit(v) && (circRect(p.x, p.y, p.r, ...hurtRect(v)) || (Math.hypot(p.vx, p.vy) > p.r && circRect(p.x - p.vx / 2, p.y - p.vy / 2, p.r, ...hurtRect(v))))) {   /* and halfway back along a fast shot's path */ if (v.form.knell && knellDeflect(v, p)) continue; ev.push([F[p.owner], v, p.h, p.face, p.x, true, pokes(v, p.x, p.y)]); if (p.onHit) p.onHit(p, F[p.owner], v); if (p.hits > 1) { p.hits--; p.cool = p.rehit || 6; } else { p.life = 0; p.spent = true; } if (p.grp && p.life <= 0) for (const q of PROJ) if (q.grp === p.grp && q.owner === p.owner) q.life = 0; }   /* grp: parts of one burst, one hit between them */
   }
   for (const e of ev) applyHit(...e);
 }
@@ -2750,7 +3031,8 @@ function cpuBrain(f, o, m, L) {
     const side = sgn(f.x) || 1, edge = EDGE + f.st.w / 2 + 2, under = false, far = Math.abs(f.x) - EDGE;   /* the island's underside slopes, so rising from beneath it just slides out to the ledge */
     i.lx = under ? side : (f.y > -3 || Math.abs(f.x) > edge + 1) ? -side : 0;   /* beside the wall and below the lip: stay off it and let the ledge or a jump do the work */
     if (f.state !== 'air' || m.t % 5 !== 0) return i;
-    if (!f.sideUsed && f.form.moves.sspec.once && (f.form.st.airSpeed < 0.9 ?   /* the form's own drift: Fyrdsman's Berserker speed does not make him a fast drifter */ far > 30 && f.y > 32 - f.form.aiRise - (f.jumps > 0 ? f.form.aiHop : 0) : far > 36 && f.y > 14)) { i.lx = -side; i.spc = true; return i; }   /* a slow drifter needs its side special for distance, but only while the jump and up special it has left can pay back the drop */
+    if (f.form.knell) return knellBack(f, i, side, far);
+    if (!f.sideUsed && f.form.moves.sspec.once && !f.form.moves.sspec.helpless && (f.form.st.airSpeed < 0.9 ?   /* the form's own drift: Fyrdsman's Berserker speed does not make him a fast drifter */ far > 30 && f.y > 32 - f.form.aiRise - (f.jumps > 0 ? f.form.aiHop : 0) : far > 36 && f.y > 14)) { i.lx = -side; i.spc = true; return i; }   /* a slow drifter needs its side special for distance, but only while the jump and up special it has left can pay back the drop (never one that leaves it helpless: Knell's Rimskip would cost him Turnkey) */
     if (f.st.noLedge && !f.burstUsed && f.vy < 0 && (f.y < 4 || far > 45) && f.y + 30 < BLAST.t - 28) { i.lx = 0; i.ly = -1; i.spc = true; return i; }   /* no ledge to hold: the tumble's free lift comes before the jump and the blast */
     if (f.vy < 0 && !under) {
       const roof = BLAST.t - 28;   /* when launched high, fall first: rising from up there would go out through the top */
@@ -2976,7 +3258,7 @@ function stepPlay() {
   if (slowT > 0) { slowT--; if (slowT % 3) return; }   /* one step in three while the finishing hit plays out */
   frame++;
   for (const f of F) { f.px = f.x; f.py = f.y; }   /* where each was before this frame, for sweeping hits */
-  for (const f of F) f.update();
+  for (const f of F) { if (f.slowT > 0) { f.slowT--; f.slowAc += KN.slowRate; if (f.slowAc < 1) continue; f.slowAc -= 1; } f.update(); }   /* slowed by Knell's Hinge: one update in four */
   fowlSlings();
   jostle();
   updateProj(); resolveHits();

@@ -1,0 +1,215 @@
+{
+ "Idle": {
+  "seconds": 1.067
+ },
+ "Idle2": {
+  "seconds": 2.333
+ },
+ "Walk": {
+  "seconds": 0.667
+ },
+ "Run": {
+  "seconds": 0.4
+ },
+ "Brake": {
+  "seconds": 0.4
+ },
+ "Squat": {
+  "seconds": 0.1
+ },
+ "Rise": {
+  "seconds": 0.4
+ },
+ "Fall": {
+  "seconds": 0.667
+ },
+ "FastFall": {
+  "seconds": 0.333
+ },
+ "AirJump": {
+  "seconds": 0.833
+ },
+ "Helpless": {
+  "seconds": 0.6
+ },
+ "Land": {
+  "seconds": 0.4
+ },
+ "LandHard": {
+  "seconds": 0.8
+ },
+ "Crouch": {
+  "seconds": 1.167
+ },
+ "Shield": {
+  "seconds": 0.117
+ },
+ "ShieldHit": {
+  "seconds": 0.3
+ },
+ "Hit": {
+  "seconds": 0.6
+ },
+ "HitHeavy": {
+  "seconds": 0.8
+ },
+ "HitBack": {
+  "seconds": 0.6
+ },
+ "HitHeavyBack": {
+  "seconds": 0.8
+ },
+ "Launch": {
+  "seconds": 0.5
+ },
+ "LaunchUp": {
+  "seconds": 0.667
+ },
+ "Spike": {
+  "seconds": 0.667
+ },
+ "Tumble": {
+  "seconds": 0.5
+ },
+ "Down": {
+  "seconds": 0.3
+ },
+ "Dodge": {
+  "seconds": 0.417
+ },
+ "Roll": {
+  "seconds": 0.467
+ },
+ "AirDodge": {
+  "seconds": 0.667
+ },
+ "Ledge": {
+  "seconds": 1.333
+ },
+ "Hold": {
+  "seconds": 1
+ },
+ "Pummel": {
+  "seconds": 0.3
+ },
+ "Held": {
+  "seconds": 0.5
+ },
+ "Respawn": {
+  "seconds": 1
+ },
+ "ThrowF": {
+  "seconds": 0.433
+ },
+ "ThrowB": {
+  "seconds": 0.433
+ },
+ "ThrowU": {
+  "seconds": 0.433
+ },
+ "ThrowD": {
+  "seconds": 0.433
+ },
+ "Jab": {
+  "seconds": 0.233
+ },
+ "Cut2": {
+  "seconds": 0.267
+ },
+ "Cut3": {
+  "seconds": 0.45
+ },
+ "Dial": {
+  "seconds": 0.4
+ },
+ "DialLow": {
+  "seconds": 0.4
+ },
+ "DialHigh": {
+  "seconds": 0.4
+ },
+ "Keyturn": {
+  "seconds": 0.417
+ },
+ "AnkleTick": {
+  "seconds": 0.333
+ },
+ "Guillotine": {
+  "seconds": 0.75
+ },
+ "Clockstrike": {
+  "seconds": 0.717
+ },
+ "SplitSeconds": {
+  "seconds": 0.75
+ },
+ "Pendulum": {
+  "seconds": 0.567
+ },
+ "Fang": {
+  "seconds": 0.517
+ },
+ "FangLow": {
+  "seconds": 0.517
+ },
+ "FangHigh": {
+  "seconds": 0.517
+ },
+ "Backhand": {
+  "seconds": 0.583
+ },
+ "BellNeedle": {
+  "seconds": 0.467
+ },
+ "Deadfall": {
+  "seconds": 0.683
+ },
+ "Slipstitch": {
+  "seconds": 0.6
+ },
+ "Grab": {
+  "seconds": 0.517
+ },
+ "GrabDash": {
+  "seconds": 0.683
+ },
+ "GrabPivot": {
+  "seconds": 0.667
+ },
+ "FloorTick": {
+  "seconds": 0.783
+ },
+ "LipCut": {
+  "seconds": 0.767
+ },
+ "Needlewheel": {
+  "seconds": 0.717
+ },
+ "NeedlewheelLow": {
+  "seconds": 0.717
+ },
+ "NeedlewheelHigh": {
+  "seconds": 0.717
+ },
+ "Rimskip": {
+  "seconds": 0.65
+ },
+ "RimskipWall": {
+  "seconds": 0.3
+ },
+ "RimskipBlocked": {
+  "seconds": 0.333
+ },
+ "Turnkey": {
+  "seconds": 0.55
+ },
+ "Deadbolt": {
+  "seconds": 0.7
+ },
+ "Riposte": {
+  "seconds": 0.533
+ },
+ "Hinge": {
+  "seconds": 0.117
+ }
+}
