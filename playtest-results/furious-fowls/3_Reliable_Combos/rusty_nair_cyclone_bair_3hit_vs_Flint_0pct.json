@@ -1,0 +1,29 @@
+{
+ "name": "rusty_nair_cyclone_bair_7hit_0pct",
+ "dir": "3_Reliable_Combos",
+ "route": [
+  "sh_nair:11",
+  "up:15:tu",
+  "dj_bair"
+ ],
+ "sit": {
+  "bird": 0,
+  "foe": [
+   0,
+   0
+  ],
+  "x0": -30,
+  "dist": 13,
+  "def": {
+   "di": "none"
+  }
+ },
+ "caption": "Rusty: late short-hop nair, Cyclone (15f charge, up-forward), double-jump bair",
+ "hits": 3,
+ "dmg": 7.5,
+ "ko": false,
+ "chainKO": false,
+ "startPct": 0,
+ "endPct": 13.2,
+ "seconds": 5.7
+}

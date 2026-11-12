@@ -1,0 +1,1356 @@
+{
+ "Rusty": {
+  "wavedash_long": {
+   "dist": 23.2,
+   "frames": 27,
+   "states": [
+    "jsq",
+    "air",
+    "wd",
+    "idle"
+   ]
+  },
+  "wavedash_short": {
+   "dist": 7.3,
+   "frames": 17,
+   "states": [
+    "jsq",
+    "air",
+    "wd",
+    "idle"
+   ]
+  },
+  "dashdance": {
+   "span": 16.8,
+   "drift": -9.1
+  },
+  "flight_flat": {
+   "dist": 81.6,
+   "peak": 14.5,
+   "frames": 34,
+   "endState": "land",
+   "form": 5
+  },
+  "flight_up": {
+   "dist": 68.8,
+   "peak": 37,
+   "frames": 46,
+   "endState": "land",
+   "form": 5
+  },
+  "flight_down": {
+   "dist": 27.4,
+   "peak": 5.8,
+   "frames": 9,
+   "endState": "land",
+   "form": 5
+  },
+  "flight_up_steer": {
+   "dist": 148.6,
+   "peak": 37,
+   "frames": 59
+  },
+  "cyclone_gnd_0_up": {
+   "dx": 0,
+   "dy": 11.4,
+   "rise": 11.3,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_gnd_0_diag": {
+   "dx": 8.1,
+   "dy": 8,
+   "rise": 8,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_gnd_0_side": {
+   "dx": 3.5,
+   "dy": 0,
+   "rise": 0,
+   "endState": "land",
+   "frames": 13
+  },
+  "cyclone_gnd_15_up": {
+   "dx": 0,
+   "dy": 27.6,
+   "rise": 27.6,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_gnd_15_diag": {
+   "dx": 19.5,
+   "dy": 19.5,
+   "rise": 19.5,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_gnd_15_side": {
+   "dx": 5.8,
+   "dy": 0,
+   "rise": 0,
+   "endState": "land",
+   "frames": 28
+  },
+  "cyclone_gnd_30_up": {
+   "dx": 0,
+   "dy": 49.1,
+   "rise": 49.1,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_gnd_30_diag": {
+   "dx": 34.7,
+   "dy": 34.7,
+   "rise": 34.7,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_gnd_30_side": {
+   "dx": 8.1,
+   "dy": 0,
+   "rise": 0,
+   "endState": "land",
+   "frames": 43
+  },
+  "cyclone_gnd_45_up": {
+   "dx": 0,
+   "dy": 78.8,
+   "rise": 78.8,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_gnd_45_diag": {
+   "dx": 55.7,
+   "dy": 55.7,
+   "rise": 55.7,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_gnd_45_side": {
+   "dx": 10.4,
+   "dy": 0,
+   "rise": 0,
+   "endState": "land",
+   "frames": 58
+  },
+  "cyclone_air_0_up": {
+   "dx": 0,
+   "dy": 11.4,
+   "rise": 11.4,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_0_diag": {
+   "dx": 9.6,
+   "dy": 8,
+   "rise": 8,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_0_side": {
+   "dx": 13.5,
+   "dy": 0,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_0_down": {
+   "dx": 9.6,
+   "dy": -8.1,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_15_up": {
+   "dx": 0,
+   "dy": 20.3,
+   "rise": 20.3,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_15_diag": {
+   "dx": 27.8,
+   "dy": 12.2,
+   "rise": 12.2,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_15_side": {
+   "dx": 38.8,
+   "dy": -7.3,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_15_down": {
+   "dx": 27.8,
+   "dy": -26.9,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_30_up": {
+   "dx": 0,
+   "dy": 32.8,
+   "rise": 32.8,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_30_diag": {
+   "dx": 50.3,
+   "dy": 18.4,
+   "rise": 18.4,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_30_side": {
+   "dx": 70.2,
+   "dy": -16.3,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_30_down": {
+   "dx": 50.3,
+   "dy": -51.1,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_45_up": {
+   "dx": 0,
+   "dy": 40.7,
+   "rise": 40.7,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_air_45_diag": {
+   "dx": 78.7,
+   "dy": 30.4,
+   "rise": 30.4,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_air_45_side": {
+   "dx": 109.9,
+   "dy": -25.3,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_air_45_down": {
+   "dx": 68.3,
+   "dy": -69.9,
+   "rise": 0,
+   "endState": "land",
+   "frames": 84
+  },
+  "cyclone_charge_float": {
+   "sink70": 36.1,
+   "plainFall70": 97.4,
+   "maxHoldFrames": 248
+  },
+  "wheel_hold_air": {
+   "fell60": 81.9,
+   "plainFall60": 81.9,
+   "state": "attack/nspec"
+  },
+  "spin_airtime": {
+   "nair": 41,
+   "plainHop": 41,
+   "peakNair": 16.5,
+   "peakHop": 16.5
+  },
+  "flight_then_flutters": {
+   "dx": 71.8,
+   "frames": 300,
+   "form": 0
+  }
+ },
+ "Bolt": {
+  "wavedash_long": {
+   "dist": 23.2,
+   "frames": 27,
+   "states": [
+    "jsq",
+    "air",
+    "wd",
+    "idle"
+   ]
+  },
+  "wavedash_short": {
+   "dist": 7.3,
+   "frames": 17,
+   "states": [
+    "jsq",
+    "air",
+    "wd",
+    "idle"
+   ]
+  },
+  "dashdance": {
+   "span": 16.9,
+   "drift": -8.3
+  },
+  "flight_flat": {
+   "dist": 92.7,
+   "peak": 26.1,
+   "frames": 29,
+   "endState": "land",
+   "form": 6
+  },
+  "flight_up": {
+   "dist": 115.5,
+   "peak": 80.4,
+   "frames": 59,
+   "endState": "air",
+   "form": 6
+  },
+  "flight_down": {
+   "dist": 39.4,
+   "peak": 5.7,
+   "frames": 10,
+   "endState": "land",
+   "form": 6
+  },
+  "flight_up_steer": {
+   "dist": 170.4,
+   "peak": 80.4,
+   "frames": 59
+  },
+  "cyclone_gnd_0_up": {
+   "dx": 0,
+   "dy": 13.4,
+   "rise": 13.4,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_gnd_0_diag": {
+   "dx": 10.7,
+   "dy": 9.5,
+   "rise": 9.5,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_gnd_0_side": {
+   "dx": 5.2,
+   "dy": 0,
+   "rise": 0,
+   "endState": "land",
+   "frames": 13
+  },
+  "cyclone_gnd_15_up": {
+   "dx": 0,
+   "dy": 32.6,
+   "rise": 32.6,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_gnd_15_diag": {
+   "dx": 25.8,
+   "dy": 23,
+   "rise": 23,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_gnd_15_side": {
+   "dx": 8.2,
+   "dy": 0,
+   "rise": 0,
+   "endState": "land",
+   "frames": 28
+  },
+  "cyclone_gnd_30_up": {
+   "dx": 0,
+   "dy": 58,
+   "rise": 58,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_gnd_30_diag": {
+   "dx": 45.9,
+   "dy": 41,
+   "rise": 41,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_gnd_30_side": {
+   "dx": 11.2,
+   "dy": 0,
+   "rise": 0,
+   "endState": "land",
+   "frames": 43
+  },
+  "cyclone_gnd_45_up": {
+   "dx": 0,
+   "dy": 92.9,
+   "rise": 93,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_gnd_45_diag": {
+   "dx": 73.6,
+   "dy": 65.7,
+   "rise": 65.7,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_gnd_45_side": {
+   "dx": 14.3,
+   "dy": 0,
+   "rise": 0,
+   "endState": "land",
+   "frames": 58
+  },
+  "cyclone_air_0_up": {
+   "dx": 0,
+   "dy": 13.4,
+   "rise": 13.4,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_0_diag": {
+   "dx": 12.2,
+   "dy": 9.5,
+   "rise": 9.5,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_0_side": {
+   "dx": 17.2,
+   "dy": 0,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_0_down": {
+   "dx": 12.2,
+   "dy": -9.5,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_15_up": {
+   "dx": 0,
+   "dy": 25.2,
+   "rise": 25.2,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_15_diag": {
+   "dx": 34.1,
+   "dy": 15.6,
+   "rise": 15.6,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_15_side": {
+   "dx": 47.7,
+   "dy": -7.4,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_15_down": {
+   "dx": 34.1,
+   "dy": -30.5,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_30_up": {
+   "dx": 0,
+   "dy": 41.6,
+   "rise": 41.6,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_30_diag": {
+   "dx": 61.5,
+   "dy": 24.6,
+   "rise": 24.6,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_30_side": {
+   "dx": 86,
+   "dy": -16.4,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_30_down": {
+   "dx": 47.3,
+   "dy": -43.9,
+   "rise": 0,
+   "endState": "land",
+   "frames": 58
+  },
+  "cyclone_air_45_up": {
+   "dx": 0,
+   "dy": 40.7,
+   "rise": 40.7,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_air_45_diag": {
+   "dx": 96.7,
+   "dy": 40.3,
+   "rise": 40.3,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_air_45_side": {
+   "dx": 135.3,
+   "dy": -25.4,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_air_45_down": {
+   "dx": 45.5,
+   "dy": -43.9,
+   "rise": 0,
+   "endState": "land",
+   "frames": 64
+  },
+  "cyclone_charge_float": {
+   "sink70": 36.2,
+   "plainFall70": 99.9,
+   "maxHoldFrames": 248
+  },
+  "wheel_hold_air": {
+   "fell60": 85.1,
+   "plainFall60": 85.1,
+   "state": "attack/nspec"
+  },
+  "spin_airtime": {
+   "nair": 40,
+   "plainHop": 40,
+   "peakNair": 16.5,
+   "peakHop": 16.5
+  },
+  "flight_then_flutters": {
+   "dx": 166.9,
+   "frames": 300,
+   "form": 1
+  },
+  "skitter": {
+   "dist": 31.2,
+   "frames": 30
+  },
+  "skitter_jc": {
+   "dist": 62.8,
+   "frames": 47,
+   "peak": 12.7
+  }
+ },
+ "Cinder": {
+  "wavedash_long": {
+   "dist": 23.2,
+   "frames": 27,
+   "states": [
+    "jsq",
+    "air",
+    "wd",
+    "idle"
+   ]
+  },
+  "wavedash_short": {
+   "dist": 7.3,
+   "frames": 17,
+   "states": [
+    "jsq",
+    "air",
+    "wd",
+    "idle"
+   ]
+  },
+  "dashdance": {
+   "span": 13.1,
+   "drift": -6.1
+  },
+  "flight_flat": {
+   "dist": 43.5,
+   "peak": 10,
+   "frames": 22,
+   "endState": "land",
+   "form": 7
+  },
+  "flight_up": {
+   "dist": 43.6,
+   "peak": 20.3,
+   "frames": 36,
+   "endState": "land",
+   "form": 7
+  },
+  "flight_down": {
+   "dist": 19.9,
+   "peak": 5.8,
+   "frames": 8,
+   "endState": "land",
+   "form": 7
+  },
+  "flight_up_steer": {
+   "dist": 56.4,
+   "peak": 20.3,
+   "frames": 36
+  },
+  "cyclone_gnd_0_up": {
+   "dx": 0,
+   "dy": 10,
+   "rise": 10,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_gnd_0_diag": {
+   "dx": 7.1,
+   "dy": 7,
+   "rise": 7,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_gnd_0_side": {
+   "dx": 2.9,
+   "dy": 0,
+   "rise": 0,
+   "endState": "land",
+   "frames": 13
+  },
+  "cyclone_gnd_15_up": {
+   "dx": 0,
+   "dy": 24.3,
+   "rise": 24.3,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_gnd_15_diag": {
+   "dx": 17.2,
+   "dy": 17.2,
+   "rise": 17.1,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_gnd_15_side": {
+   "dx": 4.9,
+   "dy": 0,
+   "rise": 0,
+   "endState": "land",
+   "frames": 28
+  },
+  "cyclone_gnd_30_up": {
+   "dx": 0,
+   "dy": 43.2,
+   "rise": 43.2,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_gnd_30_diag": {
+   "dx": 30.6,
+   "dy": 30.5,
+   "rise": 30.5,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_gnd_30_side": {
+   "dx": 7,
+   "dy": 0,
+   "rise": 0,
+   "endState": "land",
+   "frames": 43
+  },
+  "cyclone_gnd_45_up": {
+   "dx": 0,
+   "dy": 69.3,
+   "rise": 69.3,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_gnd_45_diag": {
+   "dx": 49,
+   "dy": 49,
+   "rise": 49,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_gnd_45_side": {
+   "dx": 9,
+   "dy": 0,
+   "rise": 0,
+   "endState": "land",
+   "frames": 58
+  },
+  "cyclone_air_0_up": {
+   "dx": 0,
+   "dy": 10,
+   "rise": 10,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_0_diag": {
+   "dx": 8.7,
+   "dy": 7.1,
+   "rise": 7.1,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_0_side": {
+   "dx": 12.2,
+   "dy": 0,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_0_down": {
+   "dx": 8.7,
+   "dy": -7.1,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_15_up": {
+   "dx": 0,
+   "dy": 16.8,
+   "rise": 16.8,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_15_diag": {
+   "dx": 25.4,
+   "dy": 9.7,
+   "rise": 9.7,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_15_side": {
+   "dx": 35.5,
+   "dy": -7.5,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_15_down": {
+   "dx": 25.4,
+   "dy": -24.7,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_30_up": {
+   "dx": 0,
+   "dy": 26.8,
+   "rise": 26.8,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_30_diag": {
+   "dx": 46.2,
+   "dy": 14.1,
+   "rise": 14.1,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_30_side": {
+   "dx": 64.3,
+   "dy": -16.5,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_30_down": {
+   "dx": 46.2,
+   "dy": -47.1,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_45_up": {
+   "dx": 0,
+   "dy": 41.4,
+   "rise": 41.4,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_air_45_diag": {
+   "dx": 72.1,
+   "dy": 23.6,
+   "rise": 23.6,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_air_45_side": {
+   "dx": 100.5,
+   "dy": -25.5,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_air_45_down": {
+   "dx": 67.8,
+   "dy": -69.9,
+   "rise": 0,
+   "endState": "land",
+   "frames": 88
+  },
+  "cyclone_charge_float": {
+   "sink70": 36.2,
+   "plainFall70": 99.9,
+   "maxHoldFrames": 248
+  },
+  "wheel_hold_air": {
+   "fell60": 88.2,
+   "plainFall60": 88.2,
+   "state": "attack/nspec"
+  },
+  "spin_airtime": {
+   "nair": 39,
+   "plainHop": 39,
+   "peakNair": 16.5,
+   "peakHop": 16.5
+  },
+  "flight_then_flutters": {
+   "dx": 71.4,
+   "frames": 64,
+   "form": 7
+  }
+ },
+ "Pip": {
+  "wavedash_long": {
+   "dist": 23.2,
+   "frames": 27,
+   "states": [
+    "jsq",
+    "air",
+    "wd",
+    "idle"
+   ]
+  },
+  "wavedash_short": {
+   "dist": 7.3,
+   "frames": 17,
+   "states": [
+    "jsq",
+    "air",
+    "wd",
+    "idle"
+   ]
+  },
+  "dashdance": {
+   "span": 16.9,
+   "drift": -8.7
+  },
+  "flight_flat": {
+   "dist": 76.1,
+   "peak": 13.9,
+   "frames": 33,
+   "endState": "land",
+   "form": 8
+  },
+  "flight_up": {
+   "dist": 84,
+   "peak": 34.6,
+   "frames": 59,
+   "endState": "land",
+   "form": 8
+  },
+  "flight_down": {
+   "dist": 26.3,
+   "peak": 5.8,
+   "frames": 9,
+   "endState": "land",
+   "form": 8
+  },
+  "flight_up_steer": {
+   "dist": 142.6,
+   "peak": 34.6,
+   "frames": 59
+  },
+  "cyclone_gnd_0_up": {
+   "dx": 0,
+   "dy": 11.4,
+   "rise": 11.4,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_gnd_0_diag": {
+   "dx": 8.1,
+   "dy": 8,
+   "rise": 8,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_gnd_0_side": {
+   "dx": 3.5,
+   "dy": 0,
+   "rise": 0,
+   "endState": "land",
+   "frames": 13
+  },
+  "cyclone_gnd_15_up": {
+   "dx": 0,
+   "dy": 27.6,
+   "rise": 27.6,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_gnd_15_diag": {
+   "dx": 19.5,
+   "dy": 19.5,
+   "rise": 19.5,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_gnd_15_side": {
+   "dx": 5.8,
+   "dy": 0,
+   "rise": 0,
+   "endState": "land",
+   "frames": 28
+  },
+  "cyclone_gnd_30_up": {
+   "dx": 0,
+   "dy": 49.1,
+   "rise": 49.1,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_gnd_30_diag": {
+   "dx": 34.7,
+   "dy": 34.7,
+   "rise": 34.7,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_gnd_30_side": {
+   "dx": 8.1,
+   "dy": 0,
+   "rise": 0,
+   "endState": "land",
+   "frames": 43
+  },
+  "cyclone_gnd_45_up": {
+   "dx": 0,
+   "dy": 78.8,
+   "rise": 78.8,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_gnd_45_diag": {
+   "dx": 55.7,
+   "dy": 55.7,
+   "rise": 55.7,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_gnd_45_side": {
+   "dx": 10.4,
+   "dy": 0,
+   "rise": 0,
+   "endState": "land",
+   "frames": 58
+  },
+  "cyclone_air_0_up": {
+   "dx": 0,
+   "dy": 11.4,
+   "rise": 11.4,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_0_diag": {
+   "dx": 9.6,
+   "dy": 8,
+   "rise": 8,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_0_side": {
+   "dx": 13.5,
+   "dy": 0,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_0_down": {
+   "dx": 9.6,
+   "dy": -8.1,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_15_up": {
+   "dx": 0,
+   "dy": 20.4,
+   "rise": 20.4,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_15_diag": {
+   "dx": 27.8,
+   "dy": 12.3,
+   "rise": 12.3,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_15_side": {
+   "dx": 38.8,
+   "dy": -7.3,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_15_down": {
+   "dx": 27.8,
+   "dy": -26.8,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_30_up": {
+   "dx": 0,
+   "dy": 32.9,
+   "rise": 32.9,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_30_diag": {
+   "dx": 50.3,
+   "dy": 18.5,
+   "rise": 18.5,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_30_side": {
+   "dx": 70.2,
+   "dy": -16.3,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_30_down": {
+   "dx": 50.3,
+   "dy": -51,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_45_up": {
+   "dx": 0,
+   "dy": 40.7,
+   "rise": 40.8,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_air_45_diag": {
+   "dx": 78.7,
+   "dy": 30.5,
+   "rise": 30.5,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_air_45_side": {
+   "dx": 109.9,
+   "dy": -25.3,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_air_45_down": {
+   "dx": 68.3,
+   "dy": -69.9,
+   "rise": 0,
+   "endState": "land",
+   "frames": 84
+  },
+  "cyclone_charge_float": {
+   "sink70": 36,
+   "plainFall70": 94.2,
+   "maxHoldFrames": 248
+  },
+  "wheel_hold_air": {
+   "fell60": 79.2,
+   "plainFall60": 79.2,
+   "state": "attack/nspec"
+  },
+  "spin_airtime": {
+   "nair": 42,
+   "plainHop": 42,
+   "peakNair": 16.5,
+   "peakHop": 16.5
+  },
+  "flight_then_flutters": {
+   "dx": 91.6,
+   "frames": 300,
+   "form": 3
+  }
+ },
+ "Pearl": {
+  "wavedash_long": {
+   "dist": 23.2,
+   "frames": 27,
+   "states": [
+    "jsq",
+    "air",
+    "wd",
+    "idle"
+   ]
+  },
+  "wavedash_short": {
+   "dist": 7.3,
+   "frames": 17,
+   "states": [
+    "jsq",
+    "air",
+    "wd",
+    "idle"
+   ]
+  },
+  "dashdance": {
+   "span": 16.1,
+   "drift": -8.5
+  },
+  "flight_flat": {
+   "dist": 109.6,
+   "peak": 21.6,
+   "frames": 53,
+   "endState": "land",
+   "form": 9
+  },
+  "flight_up": {
+   "dist": 77,
+   "peak": 52.1,
+   "frames": 59,
+   "endState": "air",
+   "form": 9
+  },
+  "flight_down": {
+   "dist": 35.1,
+   "peak": 5.8,
+   "frames": 14,
+   "endState": "land",
+   "form": 9
+  },
+  "flight_up_steer": {
+   "dist": 138.9,
+   "peak": 42,
+   "frames": 59
+  },
+  "cyclone_gnd_0_up": {
+   "dx": 0,
+   "dy": 13.8,
+   "rise": 13.8,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_gnd_0_diag": {
+   "dx": 7.4,
+   "dy": 10.7,
+   "rise": 10.7,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_gnd_0_side": {
+   "dx": 10.5,
+   "dy": 3.3,
+   "rise": 3.3,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_gnd_15_up": {
+   "dx": 0,
+   "dy": 31,
+   "rise": 31,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_gnd_15_diag": {
+   "dx": 18,
+   "dy": 23.5,
+   "rise": 23.5,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_gnd_15_side": {
+   "dx": 25.4,
+   "dy": 5.6,
+   "rise": 5.6,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_gnd_30_up": {
+   "dx": 0,
+   "dy": 52.8,
+   "rise": 52.8,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_gnd_30_diag": {
+   "dx": 32,
+   "dy": 39.5,
+   "rise": 39.5,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_gnd_30_side": {
+   "dx": 45.2,
+   "dy": 7.6,
+   "rise": 7.6,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_gnd_45_up": {
+   "dx": 0,
+   "dy": 82.3,
+   "rise": 82.3,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_gnd_45_diag": {
+   "dx": 51.3,
+   "dy": 61.1,
+   "rise": 61.1,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_gnd_45_side": {
+   "dx": 72.5,
+   "dy": 9.8,
+   "rise": 9.8,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_air_0_up": {
+   "dx": 0,
+   "dy": 13.8,
+   "rise": 13.8,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_0_diag": {
+   "dx": 9,
+   "dy": 10.7,
+   "rise": 10.8,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_0_side": {
+   "dx": 12.6,
+   "dy": 3.3,
+   "rise": 3.3,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_0_down": {
+   "dx": 9,
+   "dy": -4.1,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 21
+  },
+  "cyclone_air_15_up": {
+   "dx": 0,
+   "dy": 24,
+   "rise": 24,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_15_diag": {
+   "dx": 26.2,
+   "dy": 16.6,
+   "rise": 16.6,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_15_side": {
+   "dx": 36.6,
+   "dy": -1.4,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_15_down": {
+   "dx": 26.2,
+   "dy": -19.4,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 45
+  },
+  "cyclone_air_30_up": {
+   "dx": 0,
+   "dy": 36.8,
+   "rise": 36.8,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_30_diag": {
+   "dx": 47.6,
+   "dy": 23.6,
+   "rise": 23.6,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_30_side": {
+   "dx": 66.3,
+   "dy": -8.4,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_30_down": {
+   "dx": 47.6,
+   "dy": -40.4,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 68
+  },
+  "cyclone_air_45_up": {
+   "dx": 0,
+   "dy": 41.9,
+   "rise": 41.9,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_air_45_diag": {
+   "dx": 74.3,
+   "dy": 36.1,
+   "rise": 36.1,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_air_45_side": {
+   "dx": 103.6,
+   "dy": -15.2,
+   "rise": 0,
+   "endState": "attack",
+   "frames": 92
+  },
+  "cyclone_air_45_down": {
+   "dx": 47.8,
+   "dy": -43.9,
+   "rise": 0,
+   "endState": "land",
+   "frames": 71
+  },
+  "cyclone_charge_float": {
+   "sink70": 35.8,
+   "plainFall70": 84.8,
+   "maxHoldFrames": 248
+  },
+  "wheel_hold_air": {
+   "fell60": 71.3,
+   "plainFall60": 71.3,
+   "state": "attack/nspec"
+  },
+  "spin_airtime": {
+   "nair": 54,
+   "plainHop": 44,
+   "peakNair": 17.4,
+   "peakHop": 16.5
+  },
+  "flight_then_flutters": {
+   "dx": 96.2,
+   "frames": 300,
+   "form": 4
+  }
+ }
+}

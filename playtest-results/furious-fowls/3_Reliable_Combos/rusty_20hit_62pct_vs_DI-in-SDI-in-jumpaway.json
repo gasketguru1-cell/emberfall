@@ -1,0 +1,36 @@
+{
+ "name": "rusty_20hit_62pct_vs_DI-in-SDI-in-jumpaway",
+ "dir": "3_Reliable_Combos",
+ "route": [
+  "sh_nair:11:n",
+  "sh_nair",
+  "land",
+  "grab_u",
+  "sh_nair:4:g",
+  "sh_nair:8:f",
+  "sh_fair:11",
+  "uair"
+ ],
+ "sit": {
+  "bird": 0,
+  "foe": [
+   0,
+   0
+  ],
+  "x0": -30,
+  "dist": 13,
+  "def": {
+   "di": "in",
+   "sdi": "in",
+   "esc": "jumpaway"
+  }
+ },
+ "caption": "Rusty: sh nair x2, up throw, sh nair x2, sh fair, uair. Defender DI in, SDI in, jumps away",
+ "hits": 20,
+ "dmg": 62,
+ "ko": false,
+ "chainKO": false,
+ "startPct": 0,
+ "endPct": 62,
+ "seconds": 9.4
+}

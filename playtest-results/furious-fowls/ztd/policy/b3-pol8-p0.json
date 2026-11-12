@@ -1,0 +1,37 @@
+[
+ {
+  "bird": 3,
+  "foe": [
+   0,
+   0
+  ],
+  "pct": 0,
+  "policy": {
+   "di": "in",
+   "sdi": "in",
+   "esc": "jumpaway"
+  },
+  "x0": -30,
+  "sims": 39145,
+  "sec": 86.751,
+  "ztd": [],
+  "best": {
+   "route": [
+    "@4",
+    "sh_nair:4:n",
+    "ff",
+    "sh_nair:4:n",
+    "ff",
+    "sh_nair:4:n",
+    "ff",
+    "sh_nair:7",
+    "dair",
+    "sh_nair",
+    "seltap",
+    "up:0:u"
+   ],
+   "hits": 38,
+   "pct": 50.3
+  }
+ }
+]

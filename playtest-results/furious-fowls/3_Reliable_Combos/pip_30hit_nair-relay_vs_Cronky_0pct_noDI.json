@@ -1,0 +1,36 @@
+{
+ "name": "pip_30hit_nair-relay_vs_Cronky_0pct_noDI",
+ "dir": "3_Reliable_Combos",
+ "route": [
+  "sh_nair",
+  "seltap",
+  "grab_u",
+  "sh_nair",
+  "ff",
+  "sh_bair:4:n",
+  "ff",
+  "sh_nair:4:n",
+  "ff",
+  "fh_uair"
+ ],
+ "sit": {
+  "bird": 3,
+  "foe": [
+   8,
+   1
+  ],
+  "x0": -30,
+  "dist": 13,
+  "def": {
+   "di": "none"
+  }
+ },
+ "caption": "Pip vs Cronky: sh nair, tap B, up grab, sh nair, ff, sh bair, ff, sh nair, ff, fh uair",
+ "hits": 30,
+ "dmg": 53.3,
+ "ko": false,
+ "chainKO": false,
+ "startPct": 0,
+ "endPct": 53.3,
+ "seconds": 9.6
+}

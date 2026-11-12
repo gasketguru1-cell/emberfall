@@ -1,0 +1,45 @@
+[
+ {
+  "bird": 3,
+  "foe": [
+   0,
+   0
+  ],
+  "pct": 80,
+  "policy": {
+   "di": "upout",
+   "sdi": "up",
+   "esc": "ad"
+  },
+  "x0": -30,
+  "sims": 18637,
+  "sec": 30.231,
+  "ztd": [
+   {
+    "route": [
+     "@4",
+     "usmash"
+    ],
+    "hits": 0,
+    "pct": 97.6
+   },
+   {
+    "route": [
+     "@7",
+     "usmash"
+    ],
+    "hits": 0,
+    "pct": 97.6
+   }
+  ],
+  "best": {
+   "route": [
+    "@13",
+    "fsmash",
+    "wait:13"
+   ],
+   "hits": 1,
+   "pct": 98.9
+  }
+ }
+]
