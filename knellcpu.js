@@ -1,6 +1,6 @@
 'use strict';
-/* Knell as the CPU at level 10. Everywhere else level 10 plays as level 9 (sim.js: CPU_LV[10]); for Knell it adds a planner on
-   top of the level-9 brain. It only ever chooses inputs, the same buttons and stick a player has: nothing about Knell, his moves
+/* Knell as the CPU at level 10. Level 10 is the sharpest set of numbers (sim.js: CPU_LV[10]); for Knell it adds a planner on
+   top of that brain. It only ever chooses inputs, the same buttons and stick a player has: nothing about Knell, his moves
    or the rules is changed, and it reads nothing a player could not see on screen.
 
    How it chooses: the moment one of his moves connects cleanly, it saves the game (net.js's rollback snapshot), plays every

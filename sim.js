@@ -3267,7 +3267,7 @@ function updateProj() {
 }
 
 /* ---------- CPU opponent ---------- */
-/* CPU level, 1 (easiest) to 10. Level 10 is level 9's numbers; for Knell it adds the combo planner of knellcpu.js. Level 7 is the CPU exactly as it played before levels existed, and the one every test uses.
+/* CPU level, 1 (easiest) to 10. Level 10 is everything at its sharpest; for Knell it adds the combo planner of knellcpu.js, and for Furious Fowls the one in cpu10.js. Level 7 is the CPU exactly as it played before levels existed, and the one every test uses.
    tempo: how long it waits between attacks (x its usual wait)   guard: chance it shields an attack it sees coming
    tech: chance it techs a hard landing   punish: chance it grabs a shield   air: chance it takes an opening in the air
    nap: chance each second that it stops attacking for napLen frames and only walks
@@ -3282,14 +3282,18 @@ const CPU_LV = [null,
   { tempo: 1, guard: 0.45, tech: 0.55, punish: 0.6, air: 1, nap: 0, napLen: 0, mash: 8 },
   { tempo: 0.8, guard: 0.62, tech: 0.76, punish: 0.78, air: 1, nap: 0, napLen: 0, mash: 7 },
   { tempo: 0.62, guard: 0.8, tech: 0.94, punish: 0.92, air: 1, nap: 0, napLen: 0, mash: 6 },
-  { tempo: 0.62, guard: 0.8, tech: 0.94, punish: 0.92, air: 1, nap: 0, napLen: 0, mash: 6 }];
+  { tempo: 0.5, guard: 0.9, tech: 1, punish: 1, air: 1, nap: 0, napLen: 0, mash: 4 }];
+const CPU_MAX = CPU_LV.length - 1;
+let PRO_SIM = null;   /* set by cpu10.js only while it plays options out ahead of time: then it supplies every fighter's input */
 let CPU_LEVEL = 7;
-try { const raw = localStorage.getItem('emberfall.cpulevel'), v = +raw; if (raw !== null && raw !== '' && v >= 0 && v <= 10) CPU_LEVEL = Math.round(v); } catch (e) { /* no storage */ }   /* level 0 is for testing: the CPU stands still */
-function setCpuLevel(v) { CPU_LEVEL = clamp(Math.round(v), 0, 10); try { localStorage.setItem('emberfall.cpulevel', String(CPU_LEVEL)); } catch (e) { /* no storage */ } }
+try { const raw = localStorage.getItem('emberfall.cpulevel'), v = +raw; if (raw !== null && raw !== '' && v >= 0 && v <= CPU_MAX) CPU_LEVEL = Math.round(v); } catch (e) { /* no storage */ }   /* level 0 is for testing: the CPU stands still */
+function setCpuLevel(v) { CPU_LEVEL = clamp(Math.round(v), 0, CPU_MAX); try { localStorage.setItem('emberfall.cpulevel', String(CPU_LEVEL)); } catch (e) { /* no storage */ } }
 const NAP_STATES = { idle: 1, dash: 1, run: 1, brake: 1, land: 1, wd: 1 };
 function cpuInput(f, o, m) {
   if (!m.lv && CPU_LEVEL === 0) return blankIn();   /* level 0: a target that does nothing at all, for testing moves on */
-  const lv = m.lv || CPU_LEVEL, kp = lv === 10 && f.def.name === 'Knell' && typeof KCPU !== 'undefined' && KCPU ? KCPU : null;
+  const lv = m.lv || CPU_LEVEL;
+  if (lv === 10 && typeof cpuPro === 'function') { const r = cpuPro(f, o, m); if (r) return r; }   /* Furious Fowls at level 10: its planner (cpu10.js), when it has something to do */
+  const kp = lv === 10 && f.def.name === 'Knell' && typeof KCPU !== 'undefined' && KCPU ? KCPU : null;
   if (kp) { const k = kp.input(f, o, m); if (k) return k; }   /* Knell at level 10: a follow-up it has planned (knellcpu.js) */
   const L = CPU_LV[lv], before = m.cd > 0 ? m.cd - 1 : 0; let i = cpuBrain(f, o, m, L);
   if (m.cd > before && L.tempo !== 1) m.cd = Math.max(1, Math.round(m.cd * L.tempo));   /* a wait it has just set itself */
@@ -3614,7 +3618,7 @@ function stepSelect() {
   }
 }
 function pollMatch() {
-  for (const f of F) f.ctl.poll(f.ctl.dev === 'cpu' ? (mode === 'play' ? cpuInput(f, F[1 - f.idx], f.ctl.ai) : blankIn()) : readDev(f.ctl.dev));
+  for (const f of F) f.ctl.poll(PRO_SIM ? PRO_SIM(f) : f.ctl.dev === 'cpu' ? (mode === 'play' ? cpuInput(f, F[1 - f.idx], f.ctl.ai) : blankIn()) : readDev(f.ctl.dev));
 }
 function finish(text) { result = text; mode = 'over'; overT = 0; }   /* the victory sound plays as the mode changes (audio.js) */
 function resetFighters() {
