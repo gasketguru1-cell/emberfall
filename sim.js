@@ -3310,6 +3310,16 @@ function vargBrain(f, o, m, L, i, ad) {
   if (f.axeAway && p && (p.st === 'stuck' || p.st === 'fly')) { m.axeT = (m.axeT || 0) + 1; if (m.axeT > 70 && free && Math.random() < 0.05) { m.call = 12; m.axeT = 0; i.spc = true; return i; } } else m.axeT = 0;
   if (f.state === 'idle' && m.cd === 0 && ((!f.berserk && f.pct < 60 && Math.random() < 0.004) || (f.berserk && f.pct > 90 && Math.random() < 0.05))) { i.atk = i.spc = true; m.cd = 20; return i; }
   if (f.grounded && free && m.cd === 0 && o.state === 'attack' && o.mf <= 4 && ad < 20 && Math.random() < L.punish * 0.25) { i.ly = -1; i.spc = true; m.cd = 50; return i; }
+  /* On the stage, the shoulder charge is a mid-range opener (its 0.30 W of travel reaches them), never a point-blank swing that
+     its 15-frame coil hands to the opponent; up close he picks from the jab, the tilts, the smashes and the grab instead. */
+  const dir = sgn(o.x - f.x) || 1, dy = o.y - f.y, rng = f.form.aiRange || 14, W3 = 0.3 * vW();
+  if (f.grounded && free && m.cd === 0 && f.face === dir && Math.abs(dy) < 6 && o.grounded && ad > rng + 2 && ad < W3 - 4 && o.state !== 'shield' && Math.abs(f.x + dir * W3) < EDGE + 2 && Math.random() < 0.03) { i.lx = dir; i.spc = true; m.cd = 60; return i; }
+  if (f.grounded && free && m.cd === 0 && f.face === dir && ad <= rng && dy <= 8 && o.state !== 'shield' && o.state !== 'shieldstun') {
+    const r = Math.random(); m.cd = Math.round((22 + (Math.random() * 30 | 0)) * (f.form.aiTempo || 1));
+    if (r < 0.3) i.atk = true; else if (r < 0.55) { i.lx = dir * 0.5; i.atk = true; } else if (r < 0.7) { i.lx = dir; i.atk = i.sm = true; }
+    else if (r < 0.82) { i.ly = -0.9; i.atk = true; if (r >= 0.78) i.sm = true; } else if (r < 0.92) i.grb = true; else i.jmp = true;
+    return i;
+  }
   return null;
 }
 function cpuBrain(f, o, m, L) {
