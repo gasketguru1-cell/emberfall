@@ -114,6 +114,7 @@ function build() {
         M.scene = g.scene; M.clips = Object.fromEntries(g.animations.map(c => [c.name, c]));
         const box = new THREE.Box3().setFromObject(g.scene); M.height = box.max.y - box.min.y; M.ready = true;
       }, undefined, e => { M.error = String((e && e.message) || e); console.warn('model failed to load: ' + name, e); });
+      if (typeof cfg.cloth === 'string') { const file = cfg.cloth; cfg.cloth = null; fetch(file).then(r => r.json()).then(s => { cfg.cloth = s; }).catch(e => console.warn('cloth failed to load: ' + name, e)); }   /* a cape spec kept in its own file (Kestrel's) */
       if (cfg.axe) new GLTFLoader().load(cfg.axe.file, g => { M.axe = g.scene; }, undefined, e => console.warn('axe failed to load: ' + name, e));   /* Fyrdsman's axe on its own, drawn while it is thrown */
     }
   }).catch(e => console.warn('no model manifest', e));
@@ -156,7 +157,7 @@ function build() {
     if (v.key === k) return; const prevKey = v.key; v.key = k;
     while (v.pivot.children.length) { const c = v.pivot.children.pop(); if (c.geometry) c.geometry.dispose(); }
     if (v.mixer) v.mixer.stopAllAction();
-    v.mixer = null; v.model = null; v.chomp = null; v.bubble = null; v.actions = {}; v.cur = null; v.prev = null; v.hand = null; v.springs = []; v.springTick = -1; v.jiggle = [];
+    v.mixer = null; v.model = null; v.chomp = null; v.bubble = null; v.actions = {}; v.cur = null; v.prev = null; v.hand = null; v.springs = []; v.springTick = -1; v.jiggle = []; v.cloth = null;
     if (v.stick) { scene.remove(v.stick.grp); v.stick = null; }
     if (v.prop) { scene.remove(v.prop); v.prop = null; }
     if (useModel) {
@@ -165,6 +166,10 @@ function build() {
       v.obj = obj; v.unit = M.cfg.height / M.height; v.flip = f.face;
       obj.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; o.frustumCulled = false; o.material = o.material.clone(); if (f.alt) o.material.color.setRGB(0.78, 0.9, 1.25); v.mats.push(o.material); } });
       v.pivot.add(obj); v.model = M; v.mixer = new THREE.AnimationMixer(obj); setupSprings(v, M); if (M.cfg.stickLegs) setupStickLegs(v, M);
+      /* points a model was exported without (manifest "points": {name: [parent bone, [x, y, z] in its frame]}): Kestrel's sword point, a bone Blender left out as it bends no mesh */
+      for (const n in M.cfg.points || {}) { const [pn, at] = M.cfg.points[n], par = obj.getObjectByName(pn); if (par && !obj.getObjectByName(n)) { const p = new THREE.Object3D(); p.name = n; p.position.fromArray(at); par.add(p); } }
+      /* cloth (manifest "cloth": a capesim.js spec, e.g. Brand's cape from assets/brand/work/brand2-cape.json): simulated, stepped once per game step */
+      v.cloth = M.cfg.cloth && typeof CapeSim !== 'undefined' ? CapeSim.three(THREE, obj, M.cfg.cloth) : null; v.clothTick = -1;
       if (M.cfg.lift) obj.position.y = M.cfg.lift;   /* a rider: the model sits this high above the fighter's feet */
       if (M.cfg.prop && M.cfg.prop.type === 'sling') { v.prop = makeSling(); v.hand = null; scene.add(v.prop); if (/ alone/.test(prevKey)) v.prop.userData.rig.k = { py: -2.2, sq: -0.14, bend: 0.15 }; }   /* the bird drops back into the pouch: the bands take its weight */
       if (fm.name === 'Chomp Chomp') { const bubble = makeBubble(); bubble.position.y = 6; v.pivot.add(bubble); v.bubble = bubble; }   /* his Bubble Ride bubble */
@@ -950,6 +955,7 @@ function build() {
         v.bubble.visible = on || grow > 0; v.bubble.scale.setScalar(on ? 1 + Math.sin(tick * 0.3) * 0.03 : 0.15 + 0.85 * grow); v.bubble.position.x = on ? 0 : 5 * (1 - grow); }
       if (v.jiggle && v.jiggle.length) applyJiggle(v);
       if (v.springs.length) applySprings(v);
+      if (v.cloth) { const st = tick !== v.clothTick; v.clothTick = tick; v.cloth.update(st, 1 / 60); }
       if (v.stick) stickLegs(v, f);
       if (v.model && v.model.cfg.axe) axeShow(v, f);
       if (v.model && v.model.cfg.carry) { const c = v.model.cfg.carry; if (v.carryObj !== v.obj) { v.carryObj = v.obj; v.carryB = v.obj.getObjectByName(c.bone); } if (v.carryB) { v.carryB.updateWorldMatrix(true, false); v.carryB.getWorldPosition(_v3); v.handW = { x: _v3.x, y: _v3.y, t: tick }; } }

@@ -254,6 +254,33 @@ const MOVE_TEXT = {
     d: ['Kneel Break', 'Forces the opponent down and pops them up in front, into a rising Crown Arc or High Guard at low damage.'],
     getup: ['Guard Sweep / Rising Cut', 'From the floor, sweeps low in front on frame 19 and behind on frame 24 (lying on her back: behind first, then in front). From the ledge, a rising cut onto the stage on frames 20 to 22 for 8%. Briefly intangible as she rises (less above 100%).'],
   },
+  /* Kestrel, the wandering blade (2026-11-12) */
+  Kestrel: {
+    nspec: ['Sundering Edge', 'Draws the blade back and thrusts straight ahead. Let go of special before frame 12 for the plain thrust on frames 16 to 21. Keep holding and he draws back further, up to half a second; the thrust comes 5 frames after letting go and hits much harder the longer it was held, and it cuts deep into a shield.'],
+    sspec: ['Wind Dance', 'Up to four cuts in a row: press special again after each cut lands or whiffs to go on. Hold up or nothing for the second; up, nothing or down for the third and fourth. Level ends in a hard sideways send, up ends high, and down ends in five quick low cuts. In the air the first cut gives a small lift, once per jump.'],
+    uspec: ['Kestrel Rise', 'A rising cut that climbs about two of his heights by frame 22, drifting a little forward, with some steering. He cannot be hit on frame 5, the strongest part of the cut. He can take the ledge from frame 15, and falls helpless after; 34 frames of landing if he misses.'],
+    dspec: ['Still Water', 'He settles into a guard. Any strike that reaches him from either side on frames 5 to 29 is caught: he turns to face it and cuts back on the answer\'s frames 3 to 9. A grab or a projectile is not caught, and a missed guard is slow to leave.'],
+    jab: ['Quick Draw, Return Cut', 'A fast rising cut on frame 4, then a return cut the other way. Press again from frame 8 for the second. The point of the blade does more than the edge.'],
+    dash: ['Low Wind', 'A running cut that carries him forward low and sweeps up through the opponent on frames 12 to 15.'],
+    ftilt: ['Crescent', 'A rising crescent cut in front of him on frames 7 to 10. Spaced so the point lands, it is one of his best ways to push someone off the stage.'],
+    utilt: ['Skyward Arc', 'The blade sweeps from in front of him, over his head and down behind, frames 6 to 12. Catches a jump-in and starts juggles at low damage.'],
+    dtilt: ['Ankle Cut', 'A fast low poke from a crouch on frames 7 to 9 that pops the opponent up. He can act again from frame 20.'],
+    fsmash: ['Gale Thrust', 'A long lunging overhead cut down in front on frames 10 to 13. With the point it is one of the strongest hits he has.'],
+    usmash: ['Highwind', 'A tall cut straight up over his head on frames 13 to 16. Punishes a landing or someone on the platform above.'],
+    dsmash: ['Whirl Cut', 'A wide stance and a low cut in front on frame 5, then he turns and cuts low behind on frame 20, harder. Catches rolls to either side.'],
+    nair: ['Wheel', 'Two turns of the blade round him: a light cut on frames 6 and 7, then a full turn on frames 15 to 21. Cancels cleanly on landing if the second turn is done.'],
+    fair: ['Swallow Cut', 'A fast arcing cut from above his head down in front of him on frames 4 to 7. Quick to land out of; chains into itself at low damage.'],
+    bair: ['Turn Cut', 'A sweeping cut behind him on frames 7 to 11, hard to see coming. His strongest aerial off the side of the stage.'],
+    uair: ['Rising Moon', 'A crescent over his head from front to back on frames 5 to 8. For juggles and the platform above.'],
+    dair: ['Talon Drop', 'A downward crescent under him on frames 6 to 9. The point sends an airborne opponent straight down; standing opponents and the edge send up and out. 32 frames of landing lag: do not throw it out near the floor.'],
+    grab: ['Reaching Grip', 'A quick grab with the free hand. Out of a dash it carries him forward; out of a run turnaround he reaches round behind himself.'],
+    pummel: ['Pommel Strike', 'Strikes the held opponent with the pommel on frame 7.'],
+    f: ['Shove', 'Shoves the opponent straight out, toward the ledge.'],
+    b: ['Turn Toss', 'Turns and lets go behind him on frame 7.'],
+    u: ['Sky Toss', 'Throws the opponent straight up, into an up air or Rising Moon.'],
+    d: ['Floor Toss', 'Puts them down at his feet and pops them up in front at a set height, for a follow-up at low damage.'],
+    getup: ['Floor Cut / Ledge Cut', 'From the floor, cuts low in front on frame 22 and behind on frame 27. From the ledge, a rising cut onto the stage on frames 24 to 27. Briefly untouchable as he rises.'],
+  },
   /* Knell: the owner's design bible v1.0 (2026-11-11) */
   Knell: {
     nspec: ['Needlewheel', 'Spins the buckler rim across his palm while the dagger ticks three times, on frames 9, 16 and 23. Tilt the stick down or up on the first frames for the LOW or HIGH line; level is MID. The two light ticks hold, the third (5.3%) sends away at 45 degrees, but it can be shaken out of. Very unsafe on shield. In the air it stops his drift for 5 frames. No Hinge.', 'f9 / f16 / f23 · 2.2 + 2.2 + 5.3%'],
@@ -503,6 +530,12 @@ const MOVE_RULES = {
     ['B', 'Tap or Hold', 'Vorpal Thrust is chosen by frame 9: let go for the quick thrust, keep holding for the long, late one.'],
     ['↑ B', 'A Narrow Way Home', 'Ember Rise goes almost straight up and she is helpless after it. Get under the ledge before using it.'],
   ],
+  Kestrel: [
+    ['★', 'The Point Hits Hardest', 'Every sword cut is strongest at the very point of the blade. A close hit takes the weaker edge; spacing a cut so only the point reaches is what makes his hits finish.'],
+    ['→ B', 'Press for the Next Cut', 'Wind Dance goes on only on a fresh press after each cut, with the stick choosing the next one. Stop early on a shield to keep him safe.'],
+    ['B', 'Tap or Hold', 'Sundering Edge decides on frame 12: let go for the plain thrust, keep holding to charge. It hurts shields badly when charged.'],
+    ['↓ B', 'Still Water', 'The guard catches any strike from either side for 25 frames. A grab beats it.'],
+  ],
   'Furious Fowls': [
     ['B', 'Choosing a Bird', 'In the slingshot, tap special for the next bird. Hold it 8 frames to open the wheel, point with the stick and let go: clockwise from the top, Flint, Bolt, Cinder, Pip, Pearl. Each bird changes the slingshot\'s weight, speed and every attack.'],
     ['→ B', 'Firing the Bird', 'Side special fires the bird itself, and you play the bird alone. The empty slingshot stays where it was, falls to the floor, and comes back near the ledge if it is lost.'],
@@ -519,7 +552,7 @@ const ML_INPUT = { hinge: 'B + dir', berserk: 'A + B', nspec: 'B', sspec: '→ B
   nair: 'Air A', fair: 'Air → A', bair: 'Air ← A', uair: 'Air ↑ A', dair: 'Air ↓ A', grab: 'Grab', pummel: 'Grab A', f: 'Grab →', b: 'Grab ←', u: 'Grab ↑', d: 'Grab ↓', getup: 'Get-up A', launch: 'In flight' };
 const ML_GROUND = ['jab', 'dash', 'ftilt', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash'], ML_AIR = ['nair', 'fair', 'bair', 'uair', 'dair'], ML_SPEC = ['nspec', 'sspec', 'uspec', 'dspec'];
 /* every move a form has, and the entry that documents it (the move keys that are part of another move) */
-const ML_PART_OF = { ftiltL: 'ftilt', ftiltH: 'ftilt', fairL: 'fair', fairH: 'fair', nspecL: 'nspec', sspecW: 'sspec', sspecB: 'sspec', dspecR: 'dspec', hingeS: 'hinge', nspecE: 'nspec', fsmashE: 'fsmash', usmashE: 'usmash', dsmashE: 'dsmash', fairE: 'fair', bairE: 'bair', uairE: 'uair', uspecE: 'uspec', uspecL: 'uspec', uspecLE: 'uspec', dspecHit: 'dspec', dspecHitE: 'dspec', nspecR: 'nspec', nspecF: 'nspec', uspecA: 'uspec', dspecA: 'dspec', jab2: 'jab', jab3: 'jab', jabr: 'jab', dgrab: 'grab', pgrab: 'grab', sbrake: 'sspec', dsnap: 'dspec', dcounter: 'dspec', flyStop: 'launch', swingBite: 'sspec', throws: 'grab', nspecH: 'nspec', ledgeatk: 'getup', getupB: 'getup' };
+const ML_PART_OF = { ftiltL: 'ftilt', ftiltH: 'ftilt', fairL: 'fair', fairH: 'fair', nspecL: 'nspec', sspecW: 'sspec', sspecB: 'sspec', dspecR: 'dspec', hingeS: 'hinge', nspecE: 'nspec', fsmashE: 'fsmash', usmashE: 'usmash', dsmashE: 'dsmash', fairE: 'fair', bairE: 'bair', uairE: 'uair', uspecE: 'uspec', uspecL: 'uspec', uspecLE: 'uspec', dspecHit: 'dspec', dspecHitE: 'dspec', nspecR: 'nspec', nspecF: 'nspec', uspecA: 'uspec', dspecA: 'dspec', jab2: 'jab', jab3: 'jab', jabr: 'jab', dgrab: 'grab', pgrab: 'grab', sbrake: 'sspec', dsnap: 'dspec', dcounter: 'dspec', flyStop: 'launch', swingBite: 'sspec', throws: 'grab', nspecH: 'nspec', ledgeatk: 'getup', getupB: 'getup', nspecC: 'nspec', sspec2u: 'sspec', sspec2s: 'sspec', sspec3u: 'sspec', sspec3s: 'sspec', sspec3d: 'sspec', sspec4u: 'sspec', sspec4s: 'sspec', sspec4d: 'sspec' };
 const pc = v => +(+v).toFixed(1) + '%';
 function mlFd(fm, key) {
   const mv = fm.moves;

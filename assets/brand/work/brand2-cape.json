@@ -1,0 +1,1098 @@
+{
+ "note": "Brand's cape cloth for capesim.js (see its header). Model space: metres, y up, z forward, x his left. Particles ride the named bone (rest = bind-pose position); bones aim from their head particle at their tail particle, parents first.",
+ "fps": 60,
+ "substeps": 4,
+ "iterations": 2,
+ "gravity": [
+  0,
+  -9.81,
+  0
+ ],
+ "gravityScale": 1,
+ "damping": 1.4,
+ "friction": 0.35,
+ "maxSpeed": 30,
+ "air": {
+  "normal": 3,
+  "tangent": 0.08
+ },
+ "inertia": {
+  "move": 0.9,
+  "snapAngle": 100,
+  "teleport": 2.5
+ },
+ "frame": {
+  "left": 0,
+  "right": 10,
+  "top": 5,
+  "below": 7
+ },
+ "particles": [
+  {
+   "name": "capeL0",
+   "bone": "capeL1",
+   "rest": [
+    0.18,
+    1.42,
+    -0.15
+   ],
+   "row": 0,
+   "chain": "L",
+   "pinned": true,
+   "radius": 0.04,
+   "parent": -1
+  },
+  {
+   "name": "capeL1",
+   "bone": "capeL1",
+   "rest": [
+    0.235,
+    1.13,
+    -0.2
+   ],
+   "row": 1,
+   "chain": "L",
+   "mass": 0.07,
+   "radius": 0.045,
+   "follow": 0.12,
+   "maxDev": 0.25,
+   "cone": 60,
+   "parent": 0
+  },
+  {
+   "name": "capeL2",
+   "bone": "capeL2",
+   "rest": [
+    0.29000000000000004,
+    0.85,
+    -0.24
+   ],
+   "row": 2,
+   "chain": "L",
+   "mass": 0.07,
+   "radius": 0.05,
+   "follow": 0.07,
+   "maxDev": 0.45,
+   "cone": 75,
+   "parent": 1
+  },
+  {
+   "name": "capeL3",
+   "bone": "capeL3",
+   "rest": [
+    0.34500000000000003,
+    0.57,
+    -0.27
+   ],
+   "row": 3,
+   "chain": "L",
+   "mass": 0.075,
+   "radius": 0.05,
+   "follow": 0.04,
+   "maxDev": 0.6,
+   "cone": 90,
+   "parent": 2
+  },
+  {
+   "name": "capeL4",
+   "bone": "capeL4",
+   "rest": [
+    0.4,
+    0.3,
+    -0.3
+   ],
+   "row": 4,
+   "chain": "L",
+   "mass": 0.1,
+   "radius": 0.05,
+   "follow": 0.025,
+   "maxDev": 0.75,
+   "cone": 105,
+   "parent": 3
+  },
+  {
+   "name": "capeC0",
+   "bone": "capeC1",
+   "rest": [
+    0,
+    1.42,
+    -0.15
+   ],
+   "row": 0,
+   "chain": "C",
+   "pinned": true,
+   "radius": 0.04,
+   "parent": -1
+  },
+  {
+   "name": "capeC1",
+   "bone": "capeC1",
+   "rest": [
+    0,
+    1.13,
+    -0.2
+   ],
+   "row": 1,
+   "chain": "C",
+   "mass": 0.07,
+   "radius": 0.045,
+   "follow": 0.12,
+   "maxDev": 0.25,
+   "cone": 60,
+   "parent": 5
+  },
+  {
+   "name": "capeC2",
+   "bone": "capeC2",
+   "rest": [
+    0,
+    0.85,
+    -0.24
+   ],
+   "row": 2,
+   "chain": "C",
+   "mass": 0.07,
+   "radius": 0.05,
+   "follow": 0.07,
+   "maxDev": 0.45,
+   "cone": 75,
+   "parent": 6
+  },
+  {
+   "name": "capeC3",
+   "bone": "capeC3",
+   "rest": [
+    0,
+    0.57,
+    -0.27
+   ],
+   "row": 3,
+   "chain": "C",
+   "mass": 0.075,
+   "radius": 0.05,
+   "follow": 0.04,
+   "maxDev": 0.6,
+   "cone": 90,
+   "parent": 7
+  },
+  {
+   "name": "capeC4",
+   "bone": "capeC4",
+   "rest": [
+    0,
+    0.3,
+    -0.3
+   ],
+   "row": 4,
+   "chain": "C",
+   "mass": 0.1,
+   "radius": 0.05,
+   "follow": 0.025,
+   "maxDev": 0.75,
+   "cone": 105,
+   "parent": 8
+  },
+  {
+   "name": "capeR0",
+   "bone": "capeR1",
+   "rest": [
+    -0.18,
+    1.42,
+    -0.15
+   ],
+   "row": 0,
+   "chain": "R",
+   "pinned": true,
+   "radius": 0.04,
+   "parent": -1
+  },
+  {
+   "name": "capeR1",
+   "bone": "capeR1",
+   "rest": [
+    -0.235,
+    1.13,
+    -0.2
+   ],
+   "row": 1,
+   "chain": "R",
+   "mass": 0.07,
+   "radius": 0.045,
+   "follow": 0.12,
+   "maxDev": 0.25,
+   "cone": 60,
+   "parent": 10
+  },
+  {
+   "name": "capeR2",
+   "bone": "capeR2",
+   "rest": [
+    -0.29000000000000004,
+    0.85,
+    -0.24
+   ],
+   "row": 2,
+   "chain": "R",
+   "mass": 0.07,
+   "radius": 0.05,
+   "follow": 0.07,
+   "maxDev": 0.45,
+   "cone": 75,
+   "parent": 11
+  },
+  {
+   "name": "capeR3",
+   "bone": "capeR3",
+   "rest": [
+    -0.34500000000000003,
+    0.57,
+    -0.27
+   ],
+   "row": 3,
+   "chain": "R",
+   "mass": 0.075,
+   "radius": 0.05,
+   "follow": 0.04,
+   "maxDev": 0.6,
+   "cone": 90,
+   "parent": 12
+  },
+  {
+   "name": "capeR4",
+   "bone": "capeR4",
+   "rest": [
+    -0.4,
+    0.3,
+    -0.3
+   ],
+   "row": 4,
+   "chain": "R",
+   "mass": 0.1,
+   "radius": 0.05,
+   "follow": 0.025,
+   "maxDev": 0.75,
+   "cone": 105,
+   "parent": 13
+  }
+ ],
+ "links": [
+  {
+   "a": 0,
+   "b": 1,
+   "kind": "stretch",
+   "rest": 0.2994,
+   "compliance": 0,
+   "min": 0.98,
+   "max": 1
+  },
+  {
+   "a": 1,
+   "b": 2,
+   "kind": "stretch",
+   "rest": 0.2881,
+   "compliance": 0,
+   "min": 0.98,
+   "max": 1
+  },
+  {
+   "a": 2,
+   "b": 3,
+   "kind": "stretch",
+   "rest": 0.2869,
+   "compliance": 0,
+   "min": 0.98,
+   "max": 1
+  },
+  {
+   "a": 3,
+   "b": 4,
+   "kind": "stretch",
+   "rest": 0.2772,
+   "compliance": 0,
+   "min": 0.98,
+   "max": 1
+  },
+  {
+   "a": 5,
+   "b": 6,
+   "kind": "stretch",
+   "rest": 0.2943,
+   "compliance": 0,
+   "min": 0.98,
+   "max": 1
+  },
+  {
+   "a": 6,
+   "b": 7,
+   "kind": "stretch",
+   "rest": 0.2828,
+   "compliance": 0,
+   "min": 0.98,
+   "max": 1
+  },
+  {
+   "a": 7,
+   "b": 8,
+   "kind": "stretch",
+   "rest": 0.2816,
+   "compliance": 0,
+   "min": 0.98,
+   "max": 1
+  },
+  {
+   "a": 8,
+   "b": 9,
+   "kind": "stretch",
+   "rest": 0.2717,
+   "compliance": 0,
+   "min": 0.98,
+   "max": 1
+  },
+  {
+   "a": 10,
+   "b": 11,
+   "kind": "stretch",
+   "rest": 0.2994,
+   "compliance": 0,
+   "min": 0.98,
+   "max": 1
+  },
+  {
+   "a": 11,
+   "b": 12,
+   "kind": "stretch",
+   "rest": 0.2881,
+   "compliance": 0,
+   "min": 0.98,
+   "max": 1
+  },
+  {
+   "a": 12,
+   "b": 13,
+   "kind": "stretch",
+   "rest": 0.2869,
+   "compliance": 0,
+   "min": 0.98,
+   "max": 1
+  },
+  {
+   "a": 13,
+   "b": 14,
+   "kind": "stretch",
+   "rest": 0.2772,
+   "compliance": 0,
+   "min": 0.98,
+   "max": 1
+  },
+  {
+   "a": 0,
+   "b": 2,
+   "kind": "bend",
+   "rest": 0.5875,
+   "compliance": 0.0002,
+   "min": 0.7,
+   "max": 1
+  },
+  {
+   "a": 1,
+   "b": 3,
+   "kind": "bend",
+   "rest": 0.575,
+   "compliance": 0.0004,
+   "min": 0.7,
+   "max": 1
+  },
+  {
+   "a": 2,
+   "b": 4,
+   "kind": "bend",
+   "rest": 0.5641,
+   "compliance": 0.0006000000000000001,
+   "min": 0.7,
+   "max": 1
+  },
+  {
+   "a": 5,
+   "b": 7,
+   "kind": "bend",
+   "rest": 0.5771,
+   "compliance": 0.0002,
+   "min": 0.7,
+   "max": 1
+  },
+  {
+   "a": 6,
+   "b": 8,
+   "kind": "bend",
+   "rest": 0.5644,
+   "compliance": 0.0004,
+   "min": 0.7,
+   "max": 1
+  },
+  {
+   "a": 7,
+   "b": 9,
+   "kind": "bend",
+   "rest": 0.5533,
+   "compliance": 0.0006000000000000001,
+   "min": 0.7,
+   "max": 1
+  },
+  {
+   "a": 10,
+   "b": 12,
+   "kind": "bend",
+   "rest": 0.5875,
+   "compliance": 0.0002,
+   "min": 0.7,
+   "max": 1
+  },
+  {
+   "a": 11,
+   "b": 13,
+   "kind": "bend",
+   "rest": 0.575,
+   "compliance": 0.0004,
+   "min": 0.7,
+   "max": 1
+  },
+  {
+   "a": 12,
+   "b": 14,
+   "kind": "bend",
+   "rest": 0.5641,
+   "compliance": 0.0006000000000000001,
+   "min": 0.7,
+   "max": 1
+  },
+  {
+   "a": 1,
+   "b": 6,
+   "kind": "across",
+   "rest": 0.235,
+   "compliance": 0.00001,
+   "min": 0.55,
+   "max": 1.08
+  },
+  {
+   "a": 6,
+   "b": 11,
+   "kind": "across",
+   "rest": 0.235,
+   "compliance": 0.00001,
+   "min": 0.55,
+   "max": 1.08
+  },
+  {
+   "a": 1,
+   "b": 11,
+   "kind": "bendAcross",
+   "rest": 0.47,
+   "compliance": 0.001,
+   "min": 0.3,
+   "max": 1.05
+  },
+  {
+   "a": 2,
+   "b": 7,
+   "kind": "across",
+   "rest": 0.29,
+   "compliance": 0.00001,
+   "min": 0.55,
+   "max": 1.08
+  },
+  {
+   "a": 7,
+   "b": 12,
+   "kind": "across",
+   "rest": 0.29,
+   "compliance": 0.00001,
+   "min": 0.55,
+   "max": 1.08
+  },
+  {
+   "a": 2,
+   "b": 12,
+   "kind": "bendAcross",
+   "rest": 0.58,
+   "compliance": 0.001,
+   "min": 0.3,
+   "max": 1.05
+  },
+  {
+   "a": 3,
+   "b": 8,
+   "kind": "across",
+   "rest": 0.345,
+   "compliance": 0.00001,
+   "min": 0.55,
+   "max": 1.08
+  },
+  {
+   "a": 8,
+   "b": 13,
+   "kind": "across",
+   "rest": 0.345,
+   "compliance": 0.00001,
+   "min": 0.55,
+   "max": 1.08
+  },
+  {
+   "a": 3,
+   "b": 13,
+   "kind": "bendAcross",
+   "rest": 0.69,
+   "compliance": 0.001,
+   "min": 0.3,
+   "max": 1.05
+  },
+  {
+   "a": 4,
+   "b": 9,
+   "kind": "across",
+   "rest": 0.4,
+   "compliance": 0.00001,
+   "min": 0.55,
+   "max": 1.08
+  },
+  {
+   "a": 9,
+   "b": 14,
+   "kind": "across",
+   "rest": 0.4,
+   "compliance": 0.00001,
+   "min": 0.55,
+   "max": 1.08
+  },
+  {
+   "a": 4,
+   "b": 14,
+   "kind": "bendAcross",
+   "rest": 0.8,
+   "compliance": 0.001,
+   "min": 0.3,
+   "max": 1.05
+  },
+  {
+   "a": 0,
+   "b": 6,
+   "kind": "shear",
+   "rest": 0.345,
+   "compliance": 0.0004,
+   "min": 0.6,
+   "max": 1.1
+  },
+  {
+   "a": 5,
+   "b": 1,
+   "kind": "shear",
+   "rest": 0.3766,
+   "compliance": 0.0004,
+   "min": 0.6,
+   "max": 1.1
+  },
+  {
+   "a": 5,
+   "b": 11,
+   "kind": "shear",
+   "rest": 0.3766,
+   "compliance": 0.0004,
+   "min": 0.6,
+   "max": 1.1
+  },
+  {
+   "a": 10,
+   "b": 6,
+   "kind": "shear",
+   "rest": 0.345,
+   "compliance": 0.0004,
+   "min": 0.6,
+   "max": 1.1
+  },
+  {
+   "a": 1,
+   "b": 7,
+   "kind": "shear",
+   "rest": 0.3677,
+   "compliance": 0.0004,
+   "min": 0.6,
+   "max": 1.1
+  },
+  {
+   "a": 6,
+   "b": 2,
+   "kind": "shear",
+   "rest": 0.4051,
+   "compliance": 0.0004,
+   "min": 0.6,
+   "max": 1.1
+  },
+  {
+   "a": 6,
+   "b": 12,
+   "kind": "shear",
+   "rest": 0.4051,
+   "compliance": 0.0004,
+   "min": 0.6,
+   "max": 1.1
+  },
+  {
+   "a": 11,
+   "b": 7,
+   "kind": "shear",
+   "rest": 0.3677,
+   "compliance": 0.0004,
+   "min": 0.6,
+   "max": 1.1
+  },
+  {
+   "a": 2,
+   "b": 8,
+   "kind": "shear",
+   "rest": 0.4042,
+   "compliance": 0.0004,
+   "min": 0.6,
+   "max": 1.1
+  },
+  {
+   "a": 7,
+   "b": 3,
+   "kind": "shear",
+   "rest": 0.4453,
+   "compliance": 0.0004,
+   "min": 0.6,
+   "max": 1.1
+  },
+  {
+   "a": 7,
+   "b": 13,
+   "kind": "shear",
+   "rest": 0.4453,
+   "compliance": 0.0004,
+   "min": 0.6,
+   "max": 1.1
+  },
+  {
+   "a": 12,
+   "b": 8,
+   "kind": "shear",
+   "rest": 0.4042,
+   "compliance": 0.0004,
+   "min": 0.6,
+   "max": 1.1
+  },
+  {
+   "a": 3,
+   "b": 9,
+   "kind": "shear",
+   "rest": 0.4391,
+   "compliance": 0.0004,
+   "min": 0.6,
+   "max": 1.1
+  },
+  {
+   "a": 8,
+   "b": 4,
+   "kind": "shear",
+   "rest": 0.4835,
+   "compliance": 0.0004,
+   "min": 0.6,
+   "max": 1.1
+  },
+  {
+   "a": 8,
+   "b": 14,
+   "kind": "shear",
+   "rest": 0.4835,
+   "compliance": 0.0004,
+   "min": 0.6,
+   "max": 1.1
+  },
+  {
+   "a": 13,
+   "b": 9,
+   "kind": "shear",
+   "rest": 0.4391,
+   "compliance": 0.0004,
+   "min": 0.6,
+   "max": 1.1
+  },
+  {
+   "a": 0,
+   "b": 2,
+   "kind": "tether",
+   "rest": 0.5875,
+   "compliance": 0,
+   "min": 0,
+   "max": 1.01
+  },
+  {
+   "a": 0,
+   "b": 3,
+   "kind": "tether",
+   "rest": 0.8744,
+   "compliance": 0,
+   "min": 0,
+   "max": 1.01
+  },
+  {
+   "a": 0,
+   "b": 4,
+   "kind": "tether",
+   "rest": 1.1516,
+   "compliance": 0,
+   "min": 0,
+   "max": 1.01
+  },
+  {
+   "a": 5,
+   "b": 7,
+   "kind": "tether",
+   "rest": 0.5771,
+   "compliance": 0,
+   "min": 0,
+   "max": 1.01
+  },
+  {
+   "a": 5,
+   "b": 8,
+   "kind": "tether",
+   "rest": 0.8587,
+   "compliance": 0,
+   "min": 0,
+   "max": 1.01
+  },
+  {
+   "a": 5,
+   "b": 9,
+   "kind": "tether",
+   "rest": 1.1304,
+   "compliance": 0,
+   "min": 0,
+   "max": 1.01
+  },
+  {
+   "a": 10,
+   "b": 12,
+   "kind": "tether",
+   "rest": 0.5875,
+   "compliance": 0,
+   "min": 0,
+   "max": 1.01
+  },
+  {
+   "a": 10,
+   "b": 13,
+   "kind": "tether",
+   "rest": 0.8744,
+   "compliance": 0,
+   "min": 0,
+   "max": 1.01
+  },
+  {
+   "a": 10,
+   "b": 14,
+   "kind": "tether",
+   "rest": 1.1516,
+   "compliance": 0,
+   "min": 0,
+   "max": 1.01
+  }
+ ],
+ "triangles": [
+  [
+   0,
+   5,
+   6
+  ],
+  [
+   0,
+   6,
+   1
+  ],
+  [
+   5,
+   10,
+   11
+  ],
+  [
+   5,
+   11,
+   6
+  ],
+  [
+   1,
+   6,
+   7
+  ],
+  [
+   1,
+   7,
+   2
+  ],
+  [
+   6,
+   11,
+   12
+  ],
+  [
+   6,
+   12,
+   7
+  ],
+  [
+   2,
+   7,
+   8
+  ],
+  [
+   2,
+   8,
+   3
+  ],
+  [
+   7,
+   12,
+   13
+  ],
+  [
+   7,
+   13,
+   8
+  ],
+  [
+   3,
+   8,
+   9
+  ],
+  [
+   3,
+   9,
+   4
+  ],
+  [
+   8,
+   13,
+   14
+  ],
+  [
+   8,
+   14,
+   9
+  ]
+ ],
+ "colliders": [
+  {
+   "name": "upperBack",
+   "bone": "chest2",
+   "a": [
+    -0.12,
+    1.38,
+    -0.02
+   ],
+   "b": [
+    0.12,
+    1.38,
+    -0.02
+   ],
+   "r": 0.12
+  },
+  {
+   "name": "back",
+   "bone": "chest",
+   "a": [
+    0,
+    1.34,
+    -0.01
+   ],
+   "b": [
+    0,
+    1.18,
+    -0.01
+   ],
+   "r": 0.13
+  },
+  {
+   "name": "waist",
+   "bone": "spine",
+   "a": [
+    0,
+    1.17,
+    -0.01
+   ],
+   "b": [
+    0,
+    1,
+    -0.01
+   ],
+   "r": 0.12
+  },
+  {
+   "name": "seat",
+   "bone": "hips",
+   "a": [
+    -0.1,
+    0.9,
+    -0.03
+   ],
+   "b": [
+    0.1,
+    0.9,
+    -0.03
+   ],
+   "r": 0.13
+  },
+  {
+   "name": "thighR",
+   "bone": "thighR",
+   "a": [
+    -0.11,
+    0.88,
+    0
+   ],
+   "b": [
+    -0.2,
+    0.5,
+    0.02
+   ],
+   "r": 0.15
+  },
+  {
+   "name": "thighL",
+   "bone": "thighL",
+   "a": [
+    0.11,
+    0.88,
+    0
+   ],
+   "b": [
+    0.2,
+    0.5,
+    0.02
+   ],
+   "r": 0.15
+  },
+  {
+   "name": "shinR",
+   "bone": "shinR",
+   "a": [
+    -0.2,
+    0.5,
+    0.02
+   ],
+   "b": [
+    -0.235,
+    0.12,
+    -0.02
+   ],
+   "r": 0.08
+  },
+  {
+   "name": "shinL",
+   "bone": "shinL",
+   "a": [
+    0.2,
+    0.5,
+    0.02
+   ],
+   "b": [
+    0.25,
+    0.12,
+    -0.02
+   ],
+   "r": 0.08
+  },
+  {
+   "name": "armR",
+   "bone": "armR",
+   "a": [
+    -0.2,
+    1.44,
+    0.02
+   ],
+   "b": [
+    -0.4,
+    1.29,
+    0.03
+   ],
+   "r": 0.07
+  },
+  {
+   "name": "armL",
+   "bone": "armL",
+   "a": [
+    0.2,
+    1.44,
+    0.02
+   ],
+   "b": [
+    0.4,
+    1.29,
+    0.03
+   ],
+   "r": 0.07
+  }
+ ],
+ "bones": [
+  {
+   "name": "capeL1",
+   "head": 0,
+   "tail": 1
+  },
+  {
+   "name": "capeL2",
+   "head": 1,
+   "tail": 2
+  },
+  {
+   "name": "capeL3",
+   "head": 2,
+   "tail": 3
+  },
+  {
+   "name": "capeL4",
+   "head": 3,
+   "tail": 4
+  },
+  {
+   "name": "capeC1",
+   "head": 5,
+   "tail": 6
+  },
+  {
+   "name": "capeC2",
+   "head": 6,
+   "tail": 7
+  },
+  {
+   "name": "capeC3",
+   "head": 7,
+   "tail": 8
+  },
+  {
+   "name": "capeC4",
+   "head": 8,
+   "tail": 9
+  },
+  {
+   "name": "capeR1",
+   "head": 10,
+   "tail": 11
+  },
+  {
+   "name": "capeR2",
+   "head": 11,
+   "tail": 12
+  },
+  {
+   "name": "capeR3",
+   "head": 12,
+   "tail": 13
+  },
+  {
+   "name": "capeR4",
+   "head": 13,
+   "tail": 14
+  }
+ ]
+}

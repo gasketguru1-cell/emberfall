@@ -470,6 +470,7 @@ const TUNE = {
   /* Furious Fowls: the owner asked for 55 to 65% (2026-11-10) */
   Rusty: { kb: 0.92 }, Bolt: { kb: 0.86, lag: 1.15 }, Cinder: { kb: 0.92 }, Pip: { kb: 1.18 }, Pearl: { kb: 1.0 },
   'Chomp Chomp': { kb: 0.84, lag: 1.35 },   /* CPU-vs-CPU 84% wins untuned (2026-11-10): toned toward the 55 to 65% band */
+  Kestrel: { kb: 0.8, lag: 1.3 },   /* CPU-vs-CPU 82% wins untuned (2026-11-12): toned toward the 55 to 65% band */
   /* Brand: none. The owner asked (2026-11-11) for every number in the fighter 03 document as written; the 0.72 launch
      setting of 2026-11-10 (CPU-vs-CPU 75% wins without it) was taken out. */
 };
@@ -1430,6 +1431,93 @@ const BRAND = (() => {
   };
 })();
 
+/* Kestrel, the wandering blade: the owner's Crimson Gearblade model with its own hand-keyed swordsman clips
+   (tools/blender/brand2-moves.js; asked for as a new fighter on 2026-11-12). Timing follows the swordsman benchmark in
+   assets/brand/reference/framedata.json; hitboxes are measured from the clips themselves (KESTREL_BLADE: for every active
+   frame [frame, blade x, y, point x, y, point a frame before x, y], in game units, x forward and y up from his feet; written
+   from the rigged .blend). The point of the blade is the strong part and is tried first: a well-spaced hit takes the point. */
+const KESTREL_BLADE = {"Jab1":[[4,4.7,7.2,10.3,6.2,-11,12.1],[5,5.4,9.3,10.9,11.1,10.3,6.2],[6,4.8,11.2,8.9,15.2,10.9,11.1],[7,3.8,12.3,6.2,17.5,8.9,15.2]],"Jab2":[[5,5.3,11.6,10.4,14.1,2.7,19.4],[6,5.7,8.5,11,7.7,10.4,14.1],[7,4.4,6.6,8,3.5,11,7.7],[8,2.8,6.1,4,2,8,3.5],[9,2.8,6.1,3.9,1.9,4,2]],"TiltF":[[7,5.8,6.2,11.2,4.5,-1.8,-0.3],[8,6.6,9,12.1,10.4,11.2,4.5],[9,5.6,11.9,9.5,16,12.1,10.4],[10,3.8,13.6,5.2,19.2,9.5,16]],"TiltU":[[6,4.2,11.9,8.1,16,10.9,9.2],[7,1.8,14.5,2.5,20.2,8.1,16],[8,-0.8,14.7,-4.3,19.3,2.5,20.2],[9,-2.4,13.5,-7.5,16,-4.3,19.3],[10,-3,12,-8.7,12.3,-7.5,16],[11,-3,10.3,-8.2,7.9,-8.7,12.3],[12,-3,10.2,-8.2,7.8,-8.2,7.9]],"TiltD":[[7,8,1.9,13.8,1.7,10,2],[8,8.2,2,13.9,1.7,13.8,1.7],[9,8.2,2,13.9,1.7,13.9,1.7]],"DashAttack":[[12,6.5,6.3,12.2,5.7,7.4,-1.3],[13,5.9,10.1,10.5,13.5,12.2,5.7],[14,4.1,12.9,6.2,18.3,10.5,13.5],[15,2.6,13.2,2,18.9,6.2,18.3]],"SmashF":[[10,9.2,13.1,13.2,17.2,1.8,19.6],[11,13,7.3,18.6,6.2,13.2,17.2],[12,13.3,2.6,18.3,-0.3,18.6,6.2],[13,13.2,1.2,18.9,0.6,18.3,-0.3]],"SmashU":[[13,1.3,14.6,1.6,20.4,3,13.9],[14,1.1,16.2,1.3,21.9,1.6,20.4],[15,1.1,16.5,1.2,22.3,1.3,21.9],[16,1.1,16.5,1.2,22.3,1.2,22.3]],"SmashD":[[5,5.3,3.8,10.4,1.2,2.6,2.4],[6,4.3,4.3,7.7,1.7,10.4,1.2],[7,2.2,4.8,2.7,2.2,7.7,1.7],[20,-5.2,3.7,-10.1,1.1,-1,2.3],[21,-4.9,4,-8.9,1.4,-10.1,1.1],[22,-3,4.6,-4.4,2,-8.9,1.4]],"AirN":[[6,5.8,7.3,11.5,6.7,5,7.1],[7,4.3,7.7,7.1,7.2,11.5,6.7],[15,5.6,8.1,11.1,7.6,6.5,7.8],[16,3.7,8.1,8.6,7.6,11.1,7.6],[17,-0.2,8.1,1.2,7.6,8.6,7.6],[18,-4.2,8.1,-7.1,7.6,1.2,7.6],[19,-5.6,8.1,-11.1,7.6,-7.1,7.6],[20,-3.9,8.1,-8.9,7.6,-11.1,7.6],[21,-0.8,8.1,-3.1,7.6,-8.9,7.6]],"AirF":[[4,3.3,15.9,6.6,20.6,-5.3,19],[5,6.6,11.9,12.3,12.2,6.6,20.6],[6,5.4,7.1,9.1,2.8,12.3,12.2],[7,2.9,5.3,2.6,-0.4,9.1,2.8]],"AirB":[[7,-3.9,13.4,-8.5,16.8,-3.2,20.3],[8,-5.2,10.6,-10.9,10.9,-8.5,16.8],[9,-4.6,8.1,-9.6,5.3,-10.9,10.9],[10,-3.2,6.7,-6.2,1.8,-9.6,5.3],[11,-3.2,6.7,-6.1,1.8,-6.2,1.8]],"AirU":[[5,3.9,12.9,7.7,17.2,10.4,7.2],[6,1.6,15.9,2,21.6,7.7,17.2],[7,-1.3,15.9,-5,20.2,2,21.6],[8,-3,13.7,-8.6,14.9,-5,20.2]],"AirD":[[6,5.4,11.6,10.9,13.3,4.3,20.8],[7,5.5,6.8,10.3,3.6,10.9,13.3],[8,3.9,4,5.6,-1.5,10.3,3.6],[9,2.3,4.1,1.3,-1.5,5.6,-1.5]],"GetUpAttack":[[22,5.3,3.5,10.4,0.9,2.9,1.4],[23,4.3,3.5,7.4,0.9,10.4,0.9],[27,-3.3,4.1,-8.4,1.5,-3.6,2],[28,-3.2,3.8,-6.8,1.2,-8.4,1.5]],"LedgeAttack":[[24,5.8,5,11.4,3.8,3.9,3.4],[25,4.8,5.1,8.2,4,11.4,3.8],[26,2.7,5.6,3.4,4.4,8.2,4],[27,2.6,5.6,3.2,4.4,3.4,4.4]],"SpecN":[[16,7.1,8.8,12.8,8.8,7.2,8.8],[17,7.2,8.8,12.9,8.8,12.8,8.8],[18,7.2,8.8,13,8.8,12.9,8.8],[19,7.3,8.8,13,8.8,13,8.8],[20,7.3,8.8,13,8.8,13,8.8],[21,7.3,8.8,13,8.8,13,8.8]],"SpecNRelease":[[6,7.6,8.8,13.3,8.8,7,8.8],[7,7.7,8.8,13.4,8.8,13.3,8.8],[8,7.7,8.8,13.4,8.8,13.4,8.8],[9,7.7,8.8,13.5,8.8,13.4,8.8],[10,7.7,8.8,13.5,8.8,13.5,8.8]],"SpecS1":[[6,5.8,8.7,11.5,8.8,4.3,9.2],[7,4.5,8.7,8.1,8.8,11.5,8.8],[8,2.6,8.7,3.1,8.8,8.1,8.8]],"SpecS2U":[[12,5.5,8.8,11,10.2,9.4,2.5],[13,4.3,12.2,7.7,16.8,11,10.2],[14,2.6,13.8,3.3,19.5,7.7,16.8],[15,2.6,13.8,3.1,19.5,3.3,19.5]],"SpecS2S":[[14,5.8,8.7,11.5,8.8,5.3,9.2],[15,3.8,8.7,6.7,8.8,11.5,8.8],[16,1.6,8.7,1.6,8.8,6.7,8.8]],"SpecS3U":[[13,5.2,10,10.3,12.6,10,2.6],[14,3.1,14,5.3,19.3,10.3,12.6],[15,0.7,16,-0.4,21.6,5.3,19.3],[16,-0.3,16.2,-2.7,21.4,-0.4,21.6],[17,-0.3,16.2,-2.8,21.4,-2.7,21.4]],"SpecS3S":[[11,6.9,9,12.7,9,7.1,9],[12,7.2,9,12.9,9,12.7,9],[13,7.3,9,13,9,12.9,9],[14,7.3,9,13,9,13,9]],"SpecS3D":[[15,5.4,4.1,10.5,1.5,3.8,3.5],[16,4.4,4.2,7.6,1.6,10.5,1.5],[17,2.5,4.5,3.1,1.9,7.6,1.6],[18,2.4,4.6,2.9,1.9,3.1,1.9]],"SpecS4U":[[20,3.4,16.2,5.9,21.3,-5.6,19.2],[21,5.9,12.3,11.5,13.7,5.9,21.3],[22,5.7,7.7,10.7,4.8,11.5,13.7],[23,3.9,4.3,6,-1,10.7,4.8],[24,3.7,4,5.5,-1.4,6,-1],[25,3.7,4,5.4,-1.5,5.5,-1.4]],"SpecS4S":[[23,7.9,8.8,13.6,8.8,6.8,9.1],[24,8.2,8.8,13.9,8.8,13.6,8.8],[25,8.2,8.8,13.9,8.8,13.9,8.8],[26,8.2,8.8,13.9,8.8,13.9,8.8]],"SpecS4D":[[13,6.4,3.9,12,2.5,9.2,2.9],[14,6.4,3.8,12,2.4,12,2.5],[15,6.2,3.8,11.7,2.4,12,2.4],[16,5.3,3.9,10.9,2.5,11.7,2.4],[17,4.1,4.1,9.7,2.8,10.9,2.5],[18,3.5,4.2,9.1,2.9,9.7,2.8],[19,6.6,3.9,12.1,2.5,9.1,2.9],[20,6.5,3.8,12.1,2.4,12.1,2.5],[21,6.3,3.8,11.8,2.4,12.1,2.4],[22,5.4,3.9,11,2.5,11.8,2.4],[23,4.4,4,9.9,2.7,11,2.5],[24,3.8,4.1,9.4,2.8,9.9,2.7],[25,6.4,3.9,11.9,2.5,9.4,2.8],[26,6.3,3.8,11.9,2.4,11.9,2.5],[27,6.1,3.8,11.7,2.4,11.9,2.4],[28,5.2,3.9,10.8,2.5,11.7,2.4],[29,4.1,4.1,9.6,2.8,10.8,2.5],[30,3.5,4.2,9.1,2.9,9.6,2.8],[31,6.6,3.9,12.2,2.5,9.1,2.9],[32,6.6,3.8,12.1,2.4,12.2,2.5],[33,6.3,3.8,11.9,2.4,12.1,2.4],[34,5.4,3.9,11,2.5,11.9,2.4],[35,4.2,4,9.8,2.7,11,2.5],[36,3.7,4.1,9.2,2.9,9.8,2.7],[37,6.5,3.9,12,2.5,9.2,2.9],[38,6.2,3.8,11.8,2.4,12,2.5]],"SpecU":[[5,5.5,9,11.1,10.2,-5.2,1.1],[6,4.4,13.2,8.2,17.5,11.1,10.2],[7,2.4,15.7,4.6,20.9,8.2,17.5],[8,0,16.8,0.2,22.6,4.6,20.9],[9,-1.5,16.9,-2.1,22.4,0.2,22.6],[10,-1.6,16.9,-2.1,22.4,-2.1,22.4]],"SpecDHit":[[3,5.7,10.8,10.9,13.1,-1.3,17.1],[4,5.8,9,11.1,8.4,10.9,13.1],[5,5.5,7.3,10,5.6,11.1,8.4],[6,4.5,6.2,7.6,3.1,10,5.6],[7,3.3,5.7,5,1.7,7.6,3.1],[8,2.8,5.6,4,1.2,5,1.7],[9,2.8,5.5,4,1.2,4,1.2]]};
+/* grab hand (x, y) by game frame - 1 */ const KESTREL_HAND = {"Grab":[[1.6,10.2],[6.3,8.8],[6.3,8.7],[5.6,8.5]],"DashGrab":[[3.1,7.9],[6.8,8.2],[6.9,8],[6.3,7.9]],"PivotGrab":[[-5,8.9],[-5,8.8],[-4.9,8.6],[-4.9,8.5],[-4.8,8.5]]};
+const KESTREL = (() => {
+  const H = 14.42, B = KESTREL_BLADE, HAND = KESTREL_HAND;
+  const seg = (f0, f1, x1, y1, x2, y2, r, d, a, b, k, o) => Object.assign({ f0, f1, x: x2, y: y2, r, in: [x1, y1], n: Math.max(3, Math.ceil(Math.hypot(x2 - x1, y2 - y1) / r) + 1), d, a, b, k }, o);
+  /* The blade over a clip's active frames [f0, f1]: the point (from where it was a frame before, so a fast swing leaves no gap)
+     at tip damage, and the edge from a quarter up the blade to the point at d. o: extra fields (g, vAir, ...); t: the point's own. */
+  const blade = (clip, f0, f1, d, tipD, a, b, k, o, t) => B[clip].filter(r => r[0] >= f0 && r[0] <= f1).flatMap(([n, bx, by, tx, ty, px, py]) => {
+    const first = n === f0, sx = first ? tx : px, sy = first ? ty : py;
+    return [seg(n, n, sx, sy, tx, ty, 2.0, tipD, a, b, Math.round(k * 1.08), Object.assign({}, o, t)), seg(n, n, bx, by, tx, ty, 1.6, d, a, Math.round(b * 0.9), k, o)]; });
+  const grab = (rows, f0, r) => rows.map(([x, y], j) => ({ f0: f0 + j, f1: f0 + j, x: Math.max(4, Math.abs(x)), y, r, in: [1.5, y], n: 3, grab: 1, d: 0 }));
+  const rise = () => (f, n) => { if (n === 1) f.invuln = Math.max(f.invuln, f.pct >= 100 ? 12 : 18); };
+  const UP = 2.0 * H, UPV = UP / 9.5;   /* the rising cut: 2 H over frames 5 to 22, fastest at the start */
+  /* Wind Dance (side special): four cuts in a row, each started by pressing special again in its window (after its hit, to
+     near its end). The second goes up or level, the third and fourth up, level or down: the stick picks. */
+  const dance = (next, from, to) => (f, n, i) => { if (n >= from && n <= to && f.ctl && f.ctl.take('spc')) f.startMove(next + (i.ly > 0.5 ? 'u' : i.ly < -0.5 && next !== 'sspec2' ? 'd' : 's')); };
+  const slowFall = f => { if (!f.grounded) f.vy = Math.max(f.vy, -0.7); };
+  const chargeHit = (d0, d1, k0, k1) => a => { const c = Math.min(30, a.ksC || 0) / 30; return { d: Math.round((d0 + (d1 - d0) * c) * 10) / 10, k: Math.round(k0 + (k1 - k0) * c) }; };
+  return {
+    name: 'Kestrel', sub: 'the wandering blade', forms: [{
+      name: 'Kestrel', col: ['#7a1f24', '#c9a24a', '#ff8a3c'], alt: ['#2e3f5c', '#b9b4ac', '#7fe0ff'],
+      /* a quick, light swordsman: weight 90, a fast dash and run, a floaty fall that drops hard when fast-falling */
+      st: { weight: 90, walk: 1.3, walkMul: 0.15, walkAdd: 0.105, trac: 0.1, dash: 2.1, runMul: 0.12, runAdd: 0.045, run: 1.82,
+        jumpX: 1.0, jumpXMul: 0.8, jumpXMax: 1.35, airJumpX: 0.95, jumpH: 34, jumpInit: 18.5, hopH: 16.5, airJumpH: 33, upH: UP,
+        airMul: 0.06, airAdd: 0.0095, airSpeed: 1.02, airBrake: 0.01, grav: 0.092, fall: 1.62, ffall: 2.5, jsq: 4, w: 7.4, h: H, jf: 3, jb: 1.4,
+        crouch: [0.7, 1.1], pummel: 1.6, pumAt: 7, pumT: 24, pumLock: 1, jumps: 1, dashF: 12, roll: [28, 1.35, 13], spot: [22, 15] },
+      moves: mk(1, 1, 1, 1, {
+        /* ---- ground: Quick Draw, Return Cut; Low Wind; Crescent, Skyward Arc, Ankle Cut; Gale Thrust, Highwind, Whirl Cut ---- */
+        jab: { t: 26, next: 'jab2', chain: 8, chainEnd: 24, h: blade('Jab1', 4, 7, 4, 6, 70, 20, 40) },
+        jab2: { t: 27, h: blade('Jab2', 5, 9, 4, 6, 50, 30, 55) },
+        dash: { t: 40, h: blade('DashAttack', 12, 15, 10, 13, 72, 45, 70), on(f, n) { if (n <= 14) f.vx = f.face * Math.max(0.3, 1.6 - n * 0.09); } },
+        ftilt: { t: 34, tilt: 1, h: blade('TiltF', 7, 10, 9, 13, 45, 30, 82) },
+        utilt: { t: 38, tilt: 1, h: blade('TiltU', 6, 12, 9, 12, 90, 30, 90) },
+        dtilt: { t: 20, tilt: 1, h: blade('TiltD', 7, 9, 7, 10, 75, 25, 50) },   /* free to act from frame 20 */
+        fsmash: { t: 48, chg: 4, h: blade('SmashF', 10, 13, 14, 20, 40, 40, 86) },
+        usmash: { t: 53, chg: 8, h: blade('SmashU', 13, 16, 13, 17, 88, 40, 92) },
+        dsmash: { t: 63, chg: 4, h: [...blade('SmashD', 5, 7, 11, 16, 30, 40, 76), ...blade('SmashD', 20, 22, 13, 18, 150, 40, 80, { g: 1 })] },
+        /* ---- air: Wheel, Swallow Cut, Turn Cut, Rising Moon, Talon Drop. Landing lag, and the frames that land without it ---- */
+        nair: { t: 48, air: 1, ll: 15, ac0: 5, ac: 25, h: [...blade('AirN', 6, 7, 5, 7, 70, 20, 30), ...blade('AirN', 15, 21, 9, 11, 60, 30, 75, { g: 1 })] },
+        fair: { t: 32, air: 1, ll: 15, ac0: 0, ac: 27, h: blade('AirF', 4, 7, 9, 13, 50, 25, 75) },
+        bair: { t: 38, air: 1, ll: 24, ac0: 0, ac: 32, h: blade('AirB', 7, 11, 11, 14, 145, 30, 85) },
+        uair: { t: 44, air: 1, ll: 15, ac0: 4, ac: 27, h: blade('AirU', 5, 8, 10, 13, 85, 35, 80) },
+        /* the point spikes anyone in the air; against someone standing, and with the edge, it sends up and out */
+        dair: { t: 58, air: 1, ll: 32, ac0: 5, ac: 48, h: B.AirD.filter(r => r[0] >= 6 && r[0] <= 9).flatMap(([n, bx, by, tx, ty, px, py]) => { const sx = n === 6 ? tx : px, sy = n === 6 ? ty : py;
+          return [seg(n, n, sx, sy, tx, ty, 2.0, 14, 270, 20, 80, { vAir: 1 }), seg(n, n, sx, sy, tx, ty, 2.0, 14, 70, 30, 75, { vGnd: 1 }), seg(n, n, bx, by, tx, ty, 1.6, 10, 60, 30, 70)]; }) },
+        /* ---- grabs and get-ups ---- */
+        grab: { t: 30, h: grab(HAND.Grab, 6, 2.6) },
+        dgrab: { t: 40, h: grab(HAND.DashGrab, 9, 2.6), on(f, n) { if (n <= 11) f.vx = f.face * 0.35 * H / 11; } },
+        pgrab: { t: 38, h: grab(HAND.PivotGrab, 10, 2.6) },
+        getup: { t: 48, h: [...blade('GetUpAttack', 22, 23, 7, 8, 45, 45, 55), ...blade('GetUpAttack', 27, 28, 7, 8, 135, 45, 55, { g: 1 })], on: rise() },
+        ledgeatk: { t: 53, h: blade('LedgeAttack', 24, 27, 9, 10, 45, 45, 60), on: rise() },
+        /* ---- specials ---- */
+        /* Sundering Edge: let go before frame 12 for the plain thrust (frames 16 to 21, 8%); hold it and the blade draws back
+           for up to 30 frames, and the thrust 5 frames after letting go does 8 to 26% (the point 9 to 28) and breaks guards. */
+        nspec: { t: 43, ll: 16, h: blade('SpecN', 16, 21, 8, 9, 40, 40, 70, { sd: 6 }), on(f, n, i) { slowFall(f); if (n === 12 && i.spc) f.startMove('nspecC'); } },
+        nspecC: { t: 31, h: [], on(f, n, i) { slowFall(f); f.ksC = n; if (!i.spc || n >= 30) f.startMove('nspecR'); } },
+        nspecR: { t: 33, ll: 18, h: blade('SpecNRelease', 6, 10, 8, 9, 40, 40, 72, { sd: 18, dyn: chargeHit(8, 26, 68, 90) }, { dyn: chargeHit(9, 28, 72, 96) }), on(f) { slowFall(f); } },
+        /* Wind Dance: light linking cuts, the fourth one the finisher (level: a hard send; up: high; down: five quick cuts).
+           In the air the first cut gives a small lift, once until he lands. */
+        sspec: { t: 28, h: blade('SpecS1', 6, 8, 4, 4, 70, 25, 30), on(f, n, i) { if (n === 1 && !f.grounded && !f.airUse.ksLift) { f.airUse.ksLift = true; f.vy = Math.max(f.vy, 0.7); } dance('sspec2', 9, 25)(f, n, i); } },
+        sspec2u: { t: 39, h: blade('SpecS2U', 12, 15, 4, 4, 88, 30, 20), on: dance('sspec3', 16, 35) },
+        sspec2s: { t: 39, h: blade('SpecS2S', 14, 16, 4, 4, 60, 30, 20), on: dance('sspec3', 17, 35) },
+        sspec3u: { t: 39, h: blade('SpecS3U', 13, 17, 5, 5, 85, 35, 25), on: dance('sspec4', 18, 35) },
+        sspec3s: { t: 45, h: blade('SpecS3S', 11, 14, 5, 5, 55, 35, 25), on: dance('sspec4', 15, 40) },
+        sspec3d: { t: 45, h: blade('SpecS3D', 15, 18, 5, 5, 75, 30, 20), on: dance('sspec4', 19, 40) },
+        sspec4u: { t: 49, h: blade('SpecS4U', 20, 25, 7, 8, 85, 50, 85) },
+        sspec4s: { t: 49, h: blade('SpecS4S', 23, 26, 7, 8, 38, 50, 88) },
+        sspec4d: { t: 59, h: [13, 19, 25, 31, 37].flatMap((s, j) => j < 4 ? blade('SpecS4D', s, s + 2, 2, 2, 80, 20, 0, { g: j }) : blade('SpecS4D', s, s + 1, 4, 4, 40, 55, 85, { g: j })) },
+        /* Kestrel Rise: a rising cut, untouchable on frame 5 (the strong part, 11%), then 7% to frame 10; up 2 H by frame 22
+           with a little drift forward and some steering. The ledge can be taken from frame 15. Special fall after; 34 on landing. */
+        uspec: { t: 38, helpless: 1, ledge: 1, snap: 15, nodrift: 1, ll: 34, hll: 34, rise: UP, h: [...blade('SpecU', 5, 5, 11, 12, 80, 45, 75), ...blade('SpecU', 6, 10, 7, 7, 82, 40, 65)],
+          on(f, n, i) { if (n < 5) { hang(f); return; } if (n === 5) { lift(f, 0); f.invuln = Math.max(f.invuln, 1); } if (n <= 22) { f.vy = UPV * (1 - (n - 5) / 18); f.vx = f.face * 0.18 + clamp(i.lx, -1, 1) * 0.28; } } },
+        /* Still Water (down special): from frame 5 to 29 any strike, from either side, is caught and answered (frames 3 to 9
+           of the answer, 7%, turned toward the striker). */
+        dspec: { t: 58, ll: 20, h: [], vCounter: [5, 29], on(f, n) { if (n === 1) f.vx *= 0.3; slowFall(f); } },
+        dspecHit: { t: 34, h: blade('SpecDHit', 3, 9, 7, 8, 40, 60, 70) },
+      /* throws: Shove, Turn Toss, Sky Toss, Floor Toss (let go on frames 14, 7, 12 and 14) */
+      }, { jabs: 3, throws: { f: { d: 4, a: 45, b: 60, k: 55, f: 14, t: 30 }, b: { d: 4, a: 135, b: 60, k: 55, f: 7, t: 43 }, u: { d: 4, a: 90, b: 70, k: 50, f: 12, t: 43 }, d: { d: 4, a: 70, b: 75, k: 30, f: 14, t: 41 } } }),
+    }],
+  };
+})();
+
 /* Joey (the owner's guide "Joey: from warm-up to Cronky Dong", v1.0, 2026-11-10). Two forms of one fighter:
    - Joey, an ordinary man with a gym bag's worth of moves, deliberately weak: no air jump, short reach, 0.5 to 5% hits.
      Every number here is the guide's (frames are its frames; FAF - 1 is a move's length t; H is his height, 13.5).
@@ -2057,7 +2145,7 @@ function knellDeflect(v, p) {
   return true;
 }
 
-const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE, FOWLS, CHOMP, BRAND, JOEY, VARGAN, KNELL];
+const ROSTER = [FLINT, WREN, SACK, SPROCKET, SCUTTLE, FOWLS, CHOMP, BRAND, JOEY, VARGAN, KNELL, KESTREL];
 /* Hitbox positions measured from the animations (hitboxes.js, written with tools/measure.html). Timing, damage and launch stay as defined above. */
 if (typeof HITBOXES !== 'undefined') for (const def of ROSTER) for (const fm of def.forms) {
   const set = HITBOXES[fm.name]; if (!set) continue;

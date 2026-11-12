@@ -228,6 +228,37 @@ const ART = {
     g.fillStyle = c[1]; g.fillRect(sx - sr * 0.6, sy - 0.25, sr * 0.55, 0.5);   /* brass hinge strap */
     g.fillStyle = c[2]; g.beginPath(); g.ellipse(sx + 0.25, sy, 0.32, 0.6, 0, 0, TAU); g.fill();   /* the glowing grille */
   },
+  /* Kestrel, the wandering blade: boots, a long crimson coat, a cape behind, pale swept hair and a long sword. The blade is
+     drawn to where the attack's own shape is, so the picture and the hit agree (as Brand's). Faces +x. */
+  Kestrel(c, t, f) {
+    const sw = gait(f) * 1.3, bob = Math.sin(t * 0.07) * 0.14, iron = '#55585f', skin = '#d9a383', hair = '#d8d4cc', boot = '#3a2f2a';
+    /* the long cape behind him, swinging with his step */
+    { const sw2 = gait(f) * 0.6; g.beginPath(); g.moveTo(-1.6, 11.4 + bob); g.quadraticCurveTo(-3.6 - sw2, 7, -4.4 - sw2, 1.6); g.lineTo(-1.4 - sw2 * 0.5, 2.2); g.quadraticCurveTo(-1.2, 7, 0.4, 11.2 + bob); g.closePath(); ink(vgrad(tint(c[0], -0.2), 2, 11)); }
+    limb(-1.3, 4, -1.3 - sw, 0.8, 1.5, '#23232b'); limb(1.3, 4, 1.3 + sw, 0.8, 1.5, '#23232b');
+    for (const s of [-1, 1]) { g.beginPath(); g.rect(s * 1.3 + s * sw - 1, 0.2, 2.1, 3.1); ink(boot, 0.28); g.beginPath(); g.ellipse(s * 1.3 + s * sw + 0.5, 0.5, 1.6, 0.7, 0, 0, TAU); ink(boot, 0.28); }
+    g.beginPath(); g.moveTo(-3.3, 3.3); g.quadraticCurveTo(0, 2.6, 3.4, 3.3); g.lineTo(2.3, 11.3 + bob); g.quadraticCurveTo(0, 12 + bob, -2.3, 11.3 + bob); g.closePath(); ink(vgrad(c[0], 3, 12));   /* coat */
+    g.strokeStyle = tint(c[0], -0.35); g.lineWidth = 0.16; g.beginPath(); for (let k = -2; k <= 2; k++) { g.moveTo(k * 1.1 - 1.4, 3.4); g.lineTo(k * 1.1 + 1.2, 11); g.moveTo(k * 1.1 + 1.4, 3.4); g.lineTo(k * 1.1 - 1.2, 11); } g.stroke();   /* quilting */
+    g.fillStyle = c[1]; for (const y of [8.2, 9.4, 10.5]) { g.beginPath(); g.arc(0.5, y + bob, 0.26, 0, TAU); g.fill(); }
+    g.beginPath(); g.rect(-2.9, 6.6, 5.8, 0.9); ink('#6b4630', 0.22); g.beginPath(); g.rect(0.1, 6.5, 1, 1.1); ink('#9a9aa2', 0.18);   /* belt */
+    /* the sword arm */
+    let tx = 4.6, ty = 2.2, hx = 2.6, hy = 6.6;
+    if (f && f.state === 'attack' && f.move && f.move.h) { const m = f.move, h = m.h.find(q => !q.grab && f.mf >= q.f0 && f.mf <= q.f1) || m.h.find(q => !q.grab && f.mf < q.f0) || m.h.filter(q => !q.grab).pop();
+      if (h && h.in) { const p = f.mf < h.f0 ? f.mf / h.f0 : f.mf <= h.f1 ? 1 : Math.max(0, 1 - (f.mf - h.f1) / Math.max(1, m.t - h.f1)), e = p * p * (3 - 2 * p), wind = f.mf < h.f0 ? Math.sin(p * Math.PI) * 2 : 0;
+        const ex = h.x + (h.x >= h.in[0] ? h.r : -h.r) * 0.8, ey = h.y; tx += (ex - tx) * e - wind * 1.5; ty += (ey - ty) * e + wind; hx += (h.in[0] * 0.8 - hx) * e; hy += (h.in[1] - hy) * e; } }
+    limb(0.6, 10 + bob, hx, hy, 1.2, tint(c[0], -0.12));
+    { const dx = tx - hx, dy = ty - hy, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+      g.lineCap = 'round'; g.beginPath(); g.moveTo(hx, hy); g.lineTo(tx, ty); g.strokeStyle = OL; g.lineWidth = 1.5; g.stroke(); g.strokeStyle = iron; g.lineWidth = 0.95; g.stroke();
+      const q = g.createLinearGradient(hx, hy, tx, ty); q.addColorStop(0, 'rgba(255,138,60,0)'); q.addColorStop(0.35, c[2]); q.addColorStop(1, '#ffd98a'); g.beginPath(); g.moveTo(hx + ux * L * 0.25 - uy * 0.25, hy + uy * L * 0.25 + ux * 0.25); g.lineTo(tx - uy * 0.2, ty + ux * 0.2); g.strokeStyle = q; g.lineWidth = 0.42; g.stroke();
+      g.beginPath(); g.moveTo(hx + ux * 0.9 - uy * 1.1, hy + uy * 0.9 + ux * 1.1); g.lineTo(hx + ux * 0.9 + uy * 1.1, hy + uy * 0.9 - ux * 1.1); g.strokeStyle = OL; g.lineWidth = 0.75; g.stroke(); g.strokeStyle = '#33353c'; g.lineWidth = 0.4; g.stroke();   /* crossguard */
+      g.beginPath(); g.arc(hx, hy, 0.75, 0, TAU); ink(skin, 0.22); }
+    /* while a sword hit is out, the red point at the end of the blade (as in 3D) */
+    if (f && f.state === 'attack' && f.move && f.move.h && f.move.h.some(q => !q.grab && !q.nb && q.d > 0 && f.mf >= q.f0 && f.mf <= q.f1)) { g.beginPath(); g.arc(tx, ty, 0.55, 0, TAU); g.fillStyle = '#ff1414'; g.fill(); }
+    /* head and swept-back pale hair */
+    g.strokeStyle = OL; g.lineWidth = 1.5; g.beginPath(); g.moveTo(-1.2, 13 + bob); g.quadraticCurveTo(-2.4, 11.4 + bob, -1.9, 8.8 + bob); g.stroke(); g.strokeStyle = hair; g.lineWidth = 0.9; g.stroke();
+    g.beginPath(); g.arc(0.3, 13 + bob, 1.75, 0, TAU); ink(skin, 0.28);
+    g.fillStyle = OL; g.beginPath(); g.arc(1.25, 13.1 + bob, 0.18, 0, TAU); g.fill();
+    g.beginPath(); g.moveTo(-1.6, 13.4 + bob); g.quadraticCurveTo(-0.4, 15.6 + bob, 1.9, 14.3 + bob); g.quadraticCurveTo(0.2, 14.6 + bob, -2.6, 12.4 + bob); g.closePath(); ink(hair, 0.22);
+  },
   /* Fyrdsman the Ashbound: heavy boots, dark trousers, a studded leather tunic, a fur mantle on one shoulder, a braided red
      beard, and Runebreaker. The axe is drawn where an axe hit's shape is (as Brand's blade); while it is thrown his hand is
      empty. In Berserker an orange glow rings him. Faces +x. */
