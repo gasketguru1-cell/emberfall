@@ -1,0 +1,86 @@
+[
+ {
+  "bird": 0,
+  "foe": [
+   0,
+   0
+  ],
+  "pct": 80,
+  "policy": {
+   "di": "downin",
+   "sdi": "down",
+   "esc": "jumpaway"
+  },
+  "x0": -30,
+  "sims": 13437,
+  "sec": 20.573,
+  "ztd": [
+   {
+    "route": [
+     "@10",
+     "sh_dair",
+     "usmash"
+    ],
+    "hits": 0,
+    "pct": 114
+   },
+   {
+    "route": [
+     "@13",
+     "sh_dair",
+     "usmash"
+    ],
+    "hits": 0,
+    "pct": 114
+   },
+   {
+    "route": [
+     "@13",
+     "sh_dair:7",
+     "usmash"
+    ],
+    "hits": 0,
+    "pct": 114
+   },
+   {
+    "route": [
+     "@13",
+     "sh_dair:7",
+     "dash_attack",
+     "sb:-1"
+    ],
+    "hits": 0,
+    "pct": 117.8
+   },
+   {
+    "route": [
+     "@13",
+     "sh_dair:7",
+     "dash_attack",
+     "sb:0"
+    ],
+    "hits": 0,
+    "pct": 117.8
+   },
+   {
+    "route": [
+     "@13",
+     "sh_dair:7",
+     "dash_attack",
+     "sb:1"
+    ],
+    "hits": 0,
+    "pct": 117.8
+   }
+  ],
+  "best": {
+   "route": [
+    "@13",
+    "sh_dair:7",
+    "dash_attack"
+   ],
+   "hits": 2,
+   "pct": 117.8
+  }
+ }
+]

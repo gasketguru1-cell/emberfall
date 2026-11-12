@@ -1,0 +1,30 @@
+{
+ "name": "bolt_skitter-step_jump-cancel",
+ "dir": "5_Movement_Tech",
+ "route": [
+  "dnj",
+  "land",
+  "dnj",
+  "land"
+ ],
+ "sit": {
+  "bird": 1,
+  "foe": [
+   0,
+   0
+  ],
+  "x0": -90,
+  "dist": 160,
+  "def": {
+   "di": "none"
+  }
+ },
+ "caption": "Bolt: Skitter Step (down B), jump on frame 13, twice",
+ "hits": 0,
+ "dmg": 0,
+ "ko": false,
+ "chainKO": false,
+ "startPct": 0,
+ "endPct": 0,
+ "seconds": 3.9
+}

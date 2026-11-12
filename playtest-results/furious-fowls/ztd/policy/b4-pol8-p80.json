@@ -1,0 +1,28 @@
+[
+ {
+  "bird": 4,
+  "foe": [
+   0,
+   0
+  ],
+  "pct": 80,
+  "policy": {
+   "di": "in",
+   "sdi": "in",
+   "esc": "jumpaway"
+  },
+  "x0": -30,
+  "sims": 20159,
+  "sec": 30.528,
+  "ztd": [],
+  "best": {
+   "route": [
+    "@13",
+    "dash_attack",
+    "seltap"
+   ],
+   "hits": 1,
+   "pct": 100.2
+  }
+ }
+]

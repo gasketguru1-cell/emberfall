@@ -1,0 +1,79 @@
+[
+ {
+  "bird": 3,
+  "foe": [
+   0,
+   0
+  ],
+  "pct": 80,
+  "policy": {
+   "di": "none"
+  },
+  "x0": 30,
+  "sims": 8601,
+  "sec": 9.383,
+  "ztd": [
+   {
+    "route": [
+     "@4",
+     "usmash"
+    ],
+    "hits": 0,
+    "pct": 97.6
+   },
+   {
+    "route": [
+     "@7",
+     "usmash"
+    ],
+    "hits": 0,
+    "pct": 97.6
+   },
+   {
+    "route": [
+     "@13",
+     "fsmash",
+     "jab"
+    ],
+    "hits": 0,
+    "pct": 98.9
+   },
+   {
+    "route": [
+     "@13",
+     "fsmash",
+     "jab3"
+    ],
+    "hits": 0,
+    "pct": 98.9
+   },
+   {
+    "route": [
+     "@13",
+     "fsmash",
+     "ftilt"
+    ],
+    "hits": 0,
+    "pct": 98.9
+   },
+   {
+    "route": [
+     "@13",
+     "fsmash",
+     "utilt"
+    ],
+    "hits": 0,
+    "pct": 98.9
+   }
+  ],
+  "best": {
+   "route": [
+    "@13",
+    "fsmash",
+    "wait:13"
+   ],
+   "hits": 1,
+   "pct": 98.9
+  }
+ }
+]

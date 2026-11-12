@@ -1,0 +1,30 @@
+{
+ "name": "cinder_dsmash_ledge_KO_80pct_vs_upout-SDI-airdodge",
+ "dir": "2_Kill_Confirms",
+ "route": [
+  "dsmash"
+ ],
+ "sit": {
+  "bird": 2,
+  "foe": [
+   0,
+   0
+  ],
+  "x0": 30,
+  "dist": 13,
+  "pct": 80,
+  "def": {
+   "di": "upout",
+   "sdi": "up",
+   "esc": "ad"
+  }
+ },
+ "caption": "Cinder at 80%, near the ledge: down smash. Defender DIs up-out, SDIs up, air dodges",
+ "hits": 1,
+ "dmg": 22.7,
+ "ko": true,
+ "chainKO": true,
+ "startPct": 80,
+ "endPct": 0,
+ "seconds": 3.4
+}

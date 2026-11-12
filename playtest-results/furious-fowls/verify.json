@@ -1,0 +1,6859 @@
+[
+ {
+  "kind": "chain",
+  "bird": 0,
+  "pct": 0,
+  "x0": -30,
+  "dist": 4,
+  "route": "sh_nair:11 > sh_nair > land > up:0:tu",
+  "noDI": {
+   "hits": 8,
+   "dmg": 16.8,
+   "chainKO": false,
+   "endPct": 26.9
+  },
+  "worst": {
+   "hits": 2,
+   "chainKO": false,
+   "def": {
+    "di": "out",
+    "sdi": "out",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "8",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "3",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "3",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "3",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "5",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "5",
+    "worst": 3,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 0,
+  "pct": 110,
+  "x0": -30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 18.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 0,
+  "pct": 110,
+  "x0": -30,
+  "dist": 7,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 18.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 0,
+  "pct": 140,
+  "x0": -30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 18.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 0,
+  "pct": 140,
+  "x0": -30,
+  "dist": 7,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 18.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 0,
+  "pct": 50,
+  "x0": -30,
+  "dist": 13,
+  "route": "sh_dair:7 > dash_attack > seltap > jab3",
+  "noDI": {
+   "hits": 2,
+   "dmg": 37.8,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 4,
+  "foes": {
+   "Flint": {
+    "noDI": "2K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "0",
+    "worst": 0,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "2",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 0,
+  "pct": 50,
+  "x0": -30,
+  "dist": 13,
+  "route": "sh_dair:7 > dash_attack > seltap > ftilt",
+  "noDI": {
+   "hits": 2,
+   "dmg": 37.8,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 4,
+  "foes": {
+   "Flint": {
+    "noDI": "2K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "0",
+    "worst": 0,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "2",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 0,
+  "pct": 80,
+  "x0": -30,
+  "dist": 13,
+  "route": "fsmash > fh_nair:16",
+  "noDI": {
+   "hits": 1,
+   "dmg": 22.7,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 5,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 0,
+  "pct": 80,
+  "x0": -30,
+  "dist": 13,
+  "route": "fsmash > fh_fair:16",
+  "noDI": {
+   "hits": 1,
+   "dmg": 22.7,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 5,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 0,
+  "pct": 0,
+  "x0": 0,
+  "dist": 4,
+  "route": "sh_nair:11 > sh_nair > land > up:0:tu",
+  "noDI": {
+   "hits": 8,
+   "dmg": 16.8,
+   "chainKO": false,
+   "endPct": 26.9
+  },
+  "worst": {
+   "hits": 2,
+   "chainKO": false,
+   "def": {
+    "di": "out",
+    "sdi": "out",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "8",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "3",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "3",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "3",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "5",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "5",
+    "worst": 3,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 0,
+  "pct": 0,
+  "x0": 30,
+  "dist": 4,
+  "route": "sh_nair:11 > sh_nair:4:n > dair",
+  "noDI": {
+   "hits": 9,
+   "dmg": 26.9,
+   "chainKO": false,
+   "endPct": 26.9
+  },
+  "worst": {
+   "hits": 2,
+   "chainKO": false,
+   "def": {
+    "di": "out",
+    "sdi": "out",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "9",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "3",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "5",
+    "worst": 5,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "5",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 0,
+  "pct": 110,
+  "x0": 30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 18.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 0,
+  "pct": 110,
+  "x0": 30,
+  "dist": 7,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 18.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 0,
+  "pct": 140,
+  "x0": 30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 18.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 0,
+  "pct": 140,
+  "x0": 30,
+  "dist": 7,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 18.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 0,
+  "pct": 50,
+  "x0": 30,
+  "dist": 13,
+  "route": "sh_dair > fsmash > fh_nair:16",
+  "noDI": {
+   "hits": 2,
+   "dmg": 37.8,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "down"
+   }
+  },
+  "koHolds": false,
+  "koCount": 4,
+  "foes": {
+   "Flint": {
+    "noDI": "2K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "2K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 0,
+  "pct": 50,
+  "x0": 30,
+  "dist": 13,
+  "route": "sh_dair > fsmash > fh_fair:16",
+  "noDI": {
+   "hits": 2,
+   "dmg": 37.8,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "down"
+   }
+  },
+  "koHolds": false,
+  "koCount": 4,
+  "foes": {
+   "Flint": {
+    "noDI": "2K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "2K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 0,
+  "pct": 80,
+  "x0": 30,
+  "dist": 13,
+  "route": "fsmash > fh_nair:16",
+  "noDI": {
+   "hits": 1,
+   "dmg": 22.7,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 7,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 0,
+  "pct": 80,
+  "x0": 30,
+  "dist": 13,
+  "route": "fsmash > fh_fair:16",
+  "noDI": {
+   "hits": 1,
+   "dmg": 22.7,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 7,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 0,
+  "pct": 0,
+  "x0": -30,
+  "dist": 4,
+  "route": "dash_attack > wait:1",
+  "noDI": {
+   "hits": 1,
+   "dmg": 22.7,
+   "chainKO": false,
+   "endPct": 22.7
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 0,
+  "pct": 0,
+  "x0": 0,
+  "dist": 13,
+  "route": "fsmash > wait:6",
+  "noDI": {
+   "hits": 1,
+   "dmg": 22.7,
+   "chainKO": false,
+   "endPct": 22.7
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 0,
+  "pct": 0,
+  "x0": 30,
+  "dist": 13,
+  "route": "dash_attack > seltap",
+  "noDI": {
+   "hits": 1,
+   "dmg": 22.7,
+   "chainKO": false,
+   "endPct": 22.7
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 0,
+  "pct": 0,
+  "x0": -30,
+  "dist": 13,
+  "route": "sh_nair:11 > up:15:tu > dj_bair",
+  "noDI": {
+   "hits": 7,
+   "dmg": 29.6,
+   "chainKO": false,
+   "endPct": 29.6
+  },
+  "worst": {
+   "hits": 4,
+   "chainKO": false,
+   "def": {
+    "di": "out",
+    "sdi": "out",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "3",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "3",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "3",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "3",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "7",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "5",
+    "worst": 3,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 0,
+  "pct": 0,
+  "x0": 0,
+  "dist": 13,
+  "route": "sh_nair:11 > up:15:tu > dj_bair",
+  "noDI": {
+   "hits": 7,
+   "dmg": 29.6,
+   "chainKO": false,
+   "endPct": 29.6
+  },
+  "worst": {
+   "hits": 4,
+   "chainKO": false,
+   "def": {
+    "di": "out",
+    "sdi": "out",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "3",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "3",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "3",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "3",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "7",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "5",
+    "worst": 3,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 0,
+  "pct": 0,
+  "x0": 30,
+  "dist": 13,
+  "route": "sh_nair:11 > up:15:tu",
+  "noDI": {
+   "hits": 6,
+   "dmg": 22,
+   "chainKO": false,
+   "endPct": 22
+  },
+  "worst": {
+   "hits": 4,
+   "chainKO": false,
+   "def": {
+    "di": "out",
+    "sdi": "out",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "3",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "3",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "3",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "3",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "6",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "5",
+    "worst": 3,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 1,
+  "pct": 0,
+  "x0": -30,
+  "dist": 4,
+  "route": "grab_b > wait:13",
+  "noDI": {
+   "hits": 1,
+   "dmg": 11.3,
+   "chainKO": false,
+   "endPct": 11.3
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 1,
+  "pct": 110,
+  "x0": -30,
+  "dist": 13,
+  "route": "fsmash > sh_bair:11",
+  "noDI": {
+   "hits": 1,
+   "dmg": 17.6,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 5,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 1,
+  "pct": 110,
+  "x0": -30,
+  "dist": 13,
+  "route": "fsmash > sh_uair:11",
+  "noDI": {
+   "hits": 1,
+   "dmg": 17.6,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 5,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 1,
+  "pct": 140,
+  "x0": -30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 15.1,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "0",
+    "worst": 0,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 1,
+  "pct": 140,
+  "x0": -30,
+  "dist": 7,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 15.1,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "0",
+    "worst": 0,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 1,
+  "pct": 50,
+  "x0": -30,
+  "dist": 13,
+  "route": "grab_u > fh_nair > dj_fair > bair",
+  "noDI": {
+   "hits": 9,
+   "dmg": 42.2,
+   "chainKO": false,
+   "endPct": 92.2
+  },
+  "worst": {
+   "hits": 5,
+   "chainKO": false,
+   "def": {
+    "di": "out",
+    "sdi": "out",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "9",
+    "worst": 5,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "8",
+    "worst": 5,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "8",
+    "worst": 5,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "9",
+    "worst": 6,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "7",
+    "worst": 3,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 1,
+  "pct": 80,
+  "x0": -30,
+  "dist": 13,
+  "route": "sh_dair:4:n > fsmash",
+  "noDI": {
+   "hits": 2,
+   "dmg": 26.2,
+   "chainKO": false,
+   "endPct": 106.2
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "downin",
+    "sdi": "down",
+    "esc": "jumpaway"
+   }
+  },
+  "koHolds": false,
+  "koCount": 1,
+  "foes": {
+   "Flint": {
+    "noDI": "2",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "2K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "2K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 1,
+  "pct": 0,
+  "x0": 0,
+  "dist": 4,
+  "route": "grab_b > seltap",
+  "noDI": {
+   "hits": 1,
+   "dmg": 11.3,
+   "chainKO": false,
+   "endPct": 11.3
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 1,
+  "pct": 0,
+  "x0": 30,
+  "dist": 4,
+  "route": "grab_b > seltap",
+  "noDI": {
+   "hits": 1,
+   "dmg": 11.3,
+   "chainKO": false,
+   "endPct": 11.3
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 1,
+  "pct": 110,
+  "x0": 30,
+  "dist": 13,
+  "route": "fsmash > sh_nair:11",
+  "noDI": {
+   "hits": 1,
+   "dmg": 17.6,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 5,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 1,
+  "pct": 110,
+  "x0": 30,
+  "dist": 13,
+  "route": "fsmash > sh_fair:11",
+  "noDI": {
+   "hits": 1,
+   "dmg": 17.6,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 5,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 1,
+  "pct": 140,
+  "x0": 30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 15.1,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "0",
+    "worst": 0,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 1,
+  "pct": 140,
+  "x0": 30,
+  "dist": 7,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 15.1,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "0",
+    "worst": 0,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 1,
+  "pct": 50,
+  "x0": 30,
+  "dist": 13,
+  "route": "sh_dair > up:0:u",
+  "noDI": {
+   "hits": 4,
+   "dmg": 16.8,
+   "chainKO": false,
+   "endPct": 66.8
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "downin",
+    "sdi": "down",
+    "esc": "jumpaway"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "4",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "4",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "2",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "4",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "3",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "3",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 1,
+  "pct": 80,
+  "x0": 30,
+  "dist": 13,
+  "route": "sh_dair:4:n > fsmash > sh_nair:11",
+  "noDI": {
+   "hits": 2,
+   "dmg": 26.2,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 2,
+   "chainKO": false,
+   "def": {
+    "di": "in",
+    "sdi": "in",
+    "esc": "jumpaway"
+   }
+  },
+  "koHolds": false,
+  "koCount": 7,
+  "foes": {
+   "Flint": {
+    "noDI": "2K",
+    "worst": 2,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "2K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "2K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 1,
+  "pct": 80,
+  "x0": 30,
+  "dist": 13,
+  "route": "sh_dair:4:n > fsmash > sh_fair:11",
+  "noDI": {
+   "hits": 2,
+   "dmg": 26.2,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "downin",
+    "sdi": "down",
+    "esc": "jumpaway"
+   }
+  },
+  "koHolds": false,
+  "koCount": 7,
+  "foes": {
+   "Flint": {
+    "noDI": "2K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "2K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "2K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 1,
+  "pct": 0,
+  "x0": -30,
+  "dist": 4,
+  "route": "sh_nair:11 > dj_nair",
+  "noDI": {
+   "hits": 6,
+   "dmg": 10.2,
+   "chainKO": false,
+   "endPct": 27.8
+  },
+  "worst": {
+   "hits": 6,
+   "chainKO": false,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "2",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "0",
+    "worst": 0,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "2",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "6",
+    "worst": 6,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "6",
+    "worst": 3,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 1,
+  "pct": 0,
+  "x0": 0,
+  "dist": 4,
+  "route": "sh_nair:11 > dj_nair",
+  "noDI": {
+   "hits": 6,
+   "dmg": 10.2,
+   "chainKO": false,
+   "endPct": 27.8
+  },
+  "worst": {
+   "hits": 6,
+   "chainKO": false,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "2",
+    "worst": 2,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "0",
+    "worst": 0,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "2",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "6",
+    "worst": 6,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "6",
+    "worst": 3,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 1,
+  "pct": 0,
+  "x0": 30,
+  "dist": 13,
+  "route": "sh_nair > ff > grab_f > dash_attack",
+  "noDI": {
+   "hits": 8,
+   "dmg": 30.3,
+   "chainKO": false,
+   "endPct": 30.3
+  },
+  "worst": {
+   "hits": 5,
+   "chainKO": false,
+   "def": {
+    "di": "out",
+    "sdi": "out",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "8",
+    "worst": 5,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "8",
+    "worst": 5,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 2,
+  "pct": 0,
+  "x0": -30,
+  "dist": 10,
+  "route": "sh_nair:7 > dair",
+  "noDI": {
+   "hits": 5,
+   "dmg": 29,
+   "chainKO": false,
+   "endPct": 29
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "out",
+    "sdi": "out",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "5",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "4",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "5",
+    "worst": 3,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "5",
+    "worst": 3,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 2,
+  "pct": 110,
+  "x0": -30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 23.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 2,
+  "pct": 110,
+  "x0": -30,
+  "dist": 7,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 23.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 2,
+  "pct": 140,
+  "x0": -30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 23.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 2,
+  "pct": 140,
+  "x0": -30,
+  "dist": 7,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 23.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 2,
+  "pct": 50,
+  "x0": -30,
+  "dist": 4,
+  "route": "sh_dair:8:f > usmash > jab",
+  "noDI": {
+   "hits": 2,
+   "dmg": 40,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 6,
+  "foes": {
+   "Flint": {
+    "noDI": "2K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "2K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 2,
+  "pct": 50,
+  "x0": -30,
+  "dist": 4,
+  "route": "sh_dair:8:f > usmash > jab3",
+  "noDI": {
+   "hits": 2,
+   "dmg": 40,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 6,
+  "foes": {
+   "Flint": {
+    "noDI": "2K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "2K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "2",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 2,
+  "pct": 80,
+  "x0": -30,
+  "dist": 4,
+  "route": "usmash > jab",
+  "noDI": {
+   "hits": 1,
+   "dmg": 23.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 2,
+  "pct": 80,
+  "x0": -30,
+  "dist": 4,
+  "route": "usmash > jab3",
+  "noDI": {
+   "hits": 1,
+   "dmg": 23.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 2,
+  "pct": 0,
+  "x0": 0,
+  "dist": 13,
+  "route": "sh_nair > dair",
+  "noDI": {
+   "hits": 5,
+   "dmg": 29,
+   "chainKO": false,
+   "endPct": 29
+  },
+  "worst": {
+   "hits": 4,
+   "chainKO": false,
+   "def": {
+    "di": "out"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "5",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "2",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "5",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "4",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 2,
+  "pct": 0,
+  "x0": 30,
+  "dist": 13,
+  "route": "sh_nair > dair",
+  "noDI": {
+   "hits": 5,
+   "dmg": 29,
+   "chainKO": false,
+   "endPct": 29
+  },
+  "worst": {
+   "hits": 4,
+   "chainKO": false,
+   "def": {
+    "di": "out"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "5",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "2",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "5",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "5",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 2,
+  "pct": 110,
+  "x0": 30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 23.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 2,
+  "pct": 110,
+  "x0": 30,
+  "dist": 7,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 23.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 2,
+  "pct": 140,
+  "x0": 30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 23.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 2,
+  "pct": 140,
+  "x0": 30,
+  "dist": 7,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 23.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 2,
+  "pct": 50,
+  "x0": 30,
+  "dist": 13,
+  "route": "fsmash > seltap > jab",
+  "noDI": {
+   "hits": 1,
+   "dmg": 26.5,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 5,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 2,
+  "pct": 50,
+  "x0": 30,
+  "dist": 13,
+  "route": "fsmash > seltap > jab3",
+  "noDI": {
+   "hits": 1,
+   "dmg": 26.5,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 5,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 2,
+  "pct": 80,
+  "x0": 30,
+  "dist": 13,
+  "route": "dsmash > jab",
+  "noDI": {
+   "hits": 1,
+   "dmg": 22.7,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 2,
+  "pct": 80,
+  "x0": 30,
+  "dist": 13,
+  "route": "dsmash > jab3",
+  "noDI": {
+   "hits": 1,
+   "dmg": 22.7,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 2,
+  "pct": 0,
+  "x0": -30,
+  "dist": 4,
+  "route": "dash_attack > wait:1",
+  "noDI": {
+   "hits": 1,
+   "dmg": 26.5,
+   "chainKO": false,
+   "endPct": 26.5
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 2,
+  "pct": 0,
+  "x0": 0,
+  "dist": 13,
+  "route": "fsmash > wait:13",
+  "noDI": {
+   "hits": 1,
+   "dmg": 26.5,
+   "chainKO": false,
+   "endPct": 26.5
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 2,
+  "pct": 0,
+  "x0": 30,
+  "dist": 13,
+  "route": "fsmash > wait:13",
+  "noDI": {
+   "hits": 1,
+   "dmg": 26.5,
+   "chainKO": false,
+   "endPct": 26.5
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 2,
+  "pct": 0,
+  "x0": -30,
+  "dist": 4,
+  "route": "sh_nair > fair",
+  "noDI": {
+   "hits": 5,
+   "dmg": 29,
+   "chainKO": false,
+   "endPct": 29
+  },
+  "worst": {
+   "hits": 3,
+   "chainKO": false,
+   "def": {
+    "di": "out",
+    "sdi": "out",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "2",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "2",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "5",
+    "worst": 3,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "5",
+    "worst": 3,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 3,
+  "pct": 0,
+  "x0": -30,
+  "dist": 13,
+  "route": "sh_nair > ff > sh_bair > seltap > grab_u > fh_nair > seltap > grab_u > fh_uair > dj_uair",
+  "noDI": {
+   "hits": 25,
+   "dmg": 63.9,
+   "chainKO": false,
+   "endPct": 63.9
+  },
+  "worst": {
+   "hits": 6,
+   "chainKO": false,
+   "def": {
+    "di": "out",
+    "sdi": "out",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "25",
+    "worst": 6,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "5",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "5",
+    "worst": 5,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "5",
+    "worst": 5,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "17",
+    "worst": 7,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "9",
+    "worst": 7,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 3,
+  "pct": 110,
+  "x0": -30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 17.6,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 3,
+  "pct": 110,
+  "x0": -30,
+  "dist": 7,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 17.6,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 3,
+  "pct": 140,
+  "x0": -30,
+  "dist": 4,
+  "route": "fsmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 18.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 3,
+  "pct": 140,
+  "x0": -30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 17.6,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 3,
+  "pct": 50,
+  "x0": -30,
+  "dist": 13,
+  "route": "fsmash > wait:13",
+  "noDI": {
+   "hits": 1,
+   "dmg": 18.9,
+   "chainKO": false,
+   "endPct": 68.9
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 3,
+  "pct": 80,
+  "x0": -30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 17.6,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 3,
+  "pct": 80,
+  "x0": -30,
+  "dist": 7,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 17.6,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 3,
+  "pct": 0,
+  "x0": 0,
+  "dist": 10,
+  "route": "sh_nair > ff > sh_nair:4:n > ff > sh_nair",
+  "noDI": {
+   "hits": 8,
+   "dmg": 17.4,
+   "chainKO": false,
+   "endPct": 27.6
+  },
+  "worst": {
+   "hits": 4,
+   "chainKO": false,
+   "def": {
+    "di": "out",
+    "sdi": "out",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "8",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "0",
+    "worst": 0,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "5",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "5",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "8",
+    "worst": 7,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "7",
+    "worst": 7,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 3,
+  "pct": 0,
+  "x0": 30,
+  "dist": 13,
+  "route": "sh_nair > ff > sh_nair",
+  "noDI": {
+   "hits": 14,
+   "dmg": 19,
+   "chainKO": false,
+   "endPct": 19
+  },
+  "worst": {
+   "hits": 4,
+   "chainKO": false,
+   "def": {
+    "di": "out",
+    "sdi": "out",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "14",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "0",
+    "worst": 0,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "5",
+    "worst": 5,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "5",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "7",
+    "worst": 6,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "14",
+    "worst": 6,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 3,
+  "pct": 110,
+  "x0": 30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 17.6,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 3,
+  "pct": 110,
+  "x0": 30,
+  "dist": 7,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 17.6,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 3,
+  "pct": 140,
+  "x0": 30,
+  "dist": 4,
+  "route": "fsmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 18.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 3,
+  "pct": 140,
+  "x0": 30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 17.6,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 3,
+  "pct": 50,
+  "x0": 30,
+  "dist": 13,
+  "route": "fsmash > fh_fair:16",
+  "noDI": {
+   "hits": 1,
+   "dmg": 18.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 5,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 3,
+  "pct": 50,
+  "x0": 30,
+  "dist": 13,
+  "route": "fsmash > fh_bair:16",
+  "noDI": {
+   "hits": 1,
+   "dmg": 18.9,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 5,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 3,
+  "pct": 80,
+  "x0": 30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 17.6,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 3,
+  "pct": 80,
+  "x0": 30,
+  "dist": 7,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 17.6,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 3,
+  "pct": 0,
+  "x0": -30,
+  "dist": 4,
+  "route": "dash_attack > wait:1",
+  "noDI": {
+   "hits": 1,
+   "dmg": 18.9,
+   "chainKO": false,
+   "endPct": 18.9
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 3,
+  "pct": 0,
+  "x0": 0,
+  "dist": 4,
+  "route": "grab_u > sh_nair",
+  "noDI": {
+   "hits": 8,
+   "dmg": 20.3,
+   "chainKO": false,
+   "endPct": 20.3
+  },
+  "worst": {
+   "hits": 6,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "8",
+    "worst": 5,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "8",
+    "worst": 6,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "7",
+    "worst": 6,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "8",
+    "worst": 6,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "7",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "7",
+    "worst": 6,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 3,
+  "pct": 0,
+  "x0": 30,
+  "dist": 13,
+  "route": "fsmash > wait:6",
+  "noDI": {
+   "hits": 1,
+   "dmg": 18.9,
+   "chainKO": false,
+   "endPct": 18.9
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 3,
+  "pct": 0,
+  "x0": -30,
+  "dist": 13,
+  "route": "sh_nair > seltap > grab_u > sh_nair > ff > sh_bair:4:n > ff > sh_nair:4:n > ff > fh_uair",
+  "noDI": {
+   "hits": 30,
+   "dmg": 53.3,
+   "chainKO": false,
+   "endPct": 53.3
+  },
+  "worst": {
+   "hits": 7,
+   "chainKO": false,
+   "def": {
+    "di": "downin",
+    "sdi": "down",
+    "esc": "jumpaway"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "18",
+    "worst": 7,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "5",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "6",
+    "worst": 5,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "6",
+    "worst": 5,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "30",
+    "worst": 7,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "29",
+    "worst": 7,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 3,
+  "pct": 0,
+  "x0": 0,
+  "dist": 7,
+  "route": "grab_u > sh_nair > ff > sh_nair:4:n > ff > sh_nair:4:n",
+  "noDI": {
+   "hits": 7,
+   "dmg": 10.2,
+   "chainKO": false,
+   "endPct": 29.1
+  },
+  "worst": {
+   "hits": 5,
+   "chainKO": false,
+   "def": {
+    "di": "up"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "8",
+    "worst": 6,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "8",
+    "worst": 6,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "14",
+    "worst": 6,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "8",
+    "worst": 6,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "7",
+    "worst": 5,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "14",
+    "worst": 6,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 3,
+  "pct": 0,
+  "x0": 30,
+  "dist": 13,
+  "route": "sh_nair > ff > wait:6 > grab_u > sh_nair",
+  "noDI": {
+   "hits": 15,
+   "dmg": 29.1,
+   "chainKO": false,
+   "endPct": 29.1
+  },
+  "worst": {
+   "hits": 6,
+   "chainKO": false,
+   "def": {
+    "di": "out",
+    "sdi": "out",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "15",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "7",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "5",
+    "worst": 5,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "5",
+    "worst": 4,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "15",
+    "worst": 6,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "15",
+    "worst": 6,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 4,
+  "pct": 0,
+  "x0": -30,
+  "dist": 4,
+  "route": "dash_attack > wait:1",
+  "noDI": {
+   "hits": 1,
+   "dmg": 20.2,
+   "chainKO": false,
+   "endPct": 20.2
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 4,
+  "pct": 110,
+  "x0": -30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 16.4,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 4,
+  "pct": 110,
+  "x0": -30,
+  "dist": 7,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 16.4,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 4,
+  "pct": 140,
+  "x0": -30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 16.4,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 4,
+  "pct": 140,
+  "x0": -30,
+  "dist": 7,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 16.4,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 4,
+  "pct": 50,
+  "x0": -30,
+  "dist": 4,
+  "route": "usmash > fh_nair",
+  "noDI": {
+   "hits": 6,
+   "dmg": 27.7,
+   "chainKO": false,
+   "endPct": 77.7
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "6",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "5",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "6",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "5",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "5",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 4,
+  "pct": 80,
+  "x0": -30,
+  "dist": 13,
+  "route": "fsmash > fh_nair:16",
+  "noDI": {
+   "hits": 1,
+   "dmg": 20.2,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 5,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 4,
+  "pct": 80,
+  "x0": -30,
+  "dist": 10,
+  "route": "fsmash > fh_nair:16",
+  "noDI": {
+   "hits": 1,
+   "dmg": 20.2,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 5,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 4,
+  "pct": 0,
+  "x0": 0,
+  "dist": 13,
+  "route": "grab_u > sh_bair",
+  "noDI": {
+   "hits": 2,
+   "dmg": 21,
+   "chainKO": false,
+   "endPct": 21
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "2",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "2",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 4,
+  "pct": 0,
+  "x0": 30,
+  "dist": 13,
+  "route": "dash_attack > wait:9",
+  "noDI": {
+   "hits": 1,
+   "dmg": 20.2,
+   "chainKO": false,
+   "endPct": 20.2
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 4,
+  "pct": 110,
+  "x0": 30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 16.4,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 4,
+  "pct": 110,
+  "x0": 30,
+  "dist": 7,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 16.4,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 4,
+  "pct": 140,
+  "x0": 30,
+  "dist": 4,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 16.4,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 4,
+  "pct": 140,
+  "x0": 30,
+  "dist": 7,
+  "route": "usmash",
+  "noDI": {
+   "hits": 1,
+   "dmg": 16.4,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": true,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": true,
+  "koCount": 9,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 4,
+  "pct": 50,
+  "x0": 30,
+  "dist": 10,
+  "route": "usmash > fh_nair",
+  "noDI": {
+   "hits": 6,
+   "dmg": 27.7,
+   "chainKO": false,
+   "endPct": 77.7
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "6",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "0",
+    "worst": 0,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "0",
+    "worst": 0,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "5",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "5",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 4,
+  "pct": 80,
+  "x0": 30,
+  "dist": 13,
+  "route": "fsmash > fh_nair:16",
+  "noDI": {
+   "hits": 1,
+   "dmg": 20.2,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 6,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "ko",
+  "bird": 4,
+  "pct": 80,
+  "x0": 30,
+  "dist": 13,
+  "route": "fsmash > fh_fair:16",
+  "noDI": {
+   "hits": 1,
+   "dmg": 20.2,
+   "chainKO": true,
+   "endPct": 0
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "upout",
+    "sdi": "up",
+    "esc": "ad"
+   }
+  },
+  "koHolds": false,
+  "koCount": 6,
+  "foes": {
+   "Flint": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Nib": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Hod": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Joey": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": true,
+    "koAny": true
+   },
+   "Cronky": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   },
+   "Fyrdsman": {
+    "noDI": "1K",
+    "worst": 1,
+    "koAll": false,
+    "koAny": true
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 4,
+  "pct": 0,
+  "x0": 30,
+  "dist": 13,
+  "route": "fsmash > wait:6",
+  "noDI": {
+   "hits": 1,
+   "dmg": 20.2,
+   "chainKO": false,
+   "endPct": 20.2
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 4,
+  "pct": 0,
+  "x0": 0,
+  "dist": 4,
+  "route": "fh_dair:16:n > nair",
+  "noDI": {
+   "hits": 6,
+   "dmg": 18.9,
+   "chainKO": false,
+   "endPct": 18.9
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "down"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "0",
+    "worst": 0,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "0",
+    "worst": 0,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "0",
+    "worst": 0,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "6",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "6",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ },
+ {
+  "kind": "chain",
+  "bird": 4,
+  "pct": 0,
+  "x0": 30,
+  "dist": 13,
+  "route": "dash_attack > wait:6",
+  "noDI": {
+   "hits": 1,
+   "dmg": 20.2,
+   "chainKO": false,
+   "endPct": 20.2
+  },
+  "worst": {
+   "hits": 1,
+   "chainKO": false,
+   "def": {
+    "di": "none"
+   }
+  },
+  "koHolds": false,
+  "koCount": 0,
+  "foes": {
+   "Flint": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Nib": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Hod": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Joey": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Cronky": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   },
+   "Fyrdsman": {
+    "noDI": "1",
+    "worst": 1,
+    "koAll": false,
+    "koAny": false
+   }
+  }
+ }
+]

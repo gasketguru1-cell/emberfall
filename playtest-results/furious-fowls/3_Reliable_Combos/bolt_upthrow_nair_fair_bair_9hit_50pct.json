@@ -1,0 +1,31 @@
+{
+ "name": "bolt_upthrow_nair_fair_bair_9hit_50pct",
+ "dir": "3_Reliable_Combos",
+ "route": [
+  "grab_u",
+  "fh_nair",
+  "dj_fair",
+  "bair"
+ ],
+ "sit": {
+  "bird": 1,
+  "foe": [
+   0,
+   0
+  ],
+  "x0": -30,
+  "dist": 13,
+  "pct": 50,
+  "def": {
+   "di": "none"
+  }
+ },
+ "caption": "Bolt at 50%: up throw, full-hop nair, double-jump fair, bair",
+ "hits": 9,
+ "dmg": 42.2,
+ "ko": false,
+ "chainKO": false,
+ "startPct": 50,
+ "endPct": 92.2,
+ "seconds": 5.8
+}
