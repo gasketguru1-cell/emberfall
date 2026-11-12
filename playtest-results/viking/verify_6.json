@@ -1,0 +1,3971 @@
+[
+ {
+  "name": "bz0 fsmash",
+  "route": "fsmash",
+  "sit": {
+   "foe": [
+    0
+   ],
+   "pct": 0,
+   "x0": -20,
+   "dist": 9,
+   "bz": true
+  },
+  "base": {
+   "hits": 1,
+   "dmg": 45.4,
+   "ko": true,
+   "resets": 1,
+   "firstReset": 115,
+   "endPct": 45.4,
+   "failedAt": -1
+  },
+  "di": {
+   "out/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-in/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-in/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-in/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-in/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-in/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-in/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-out/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-out/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-out/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-out/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-out/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-out/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-up/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-up/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-up/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-up/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-up/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-up/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-down/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-down/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-down/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-down/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-down/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-down/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-in/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-in/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-in/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-in/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-in/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-in/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-out/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-out/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-out/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-out/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-out/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-out/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-up/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-up/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-up/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-up/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-up/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-up/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-down/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-down/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-down/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-down/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-down/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-down/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-in/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-in/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-in/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-in/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-in/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-in/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-out/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-out/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-out/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-out/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-out/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-out/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-up/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-up/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-up/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-up/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-up/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-up/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-down/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-down/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-down/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-down/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-down/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-down/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   }
+  },
+  "cpu9": {
+   "hits": 0,
+   "dmg": 0,
+   "ko": false,
+   "resets": 0,
+   "firstReset": -1,
+   "endPct": 0,
+   "failedAt": -1,
+   "ok": false
+  },
+  "foes": {
+   "Flint": {
+    "hits": 1,
+    "dmg": 45.4,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 115,
+    "endPct": 45.4,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Joey": {
+    "hits": 1,
+    "dmg": 27.4,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 98,
+    "endPct": 27.4,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Potato Sack": {
+    "hits": 1,
+    "dmg": 45.4,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 120,
+    "endPct": 45.4,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Scuttle": {
+    "hits": 1,
+    "dmg": 45.4,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 110,
+    "endPct": 45.4,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Sprocket": {
+    "hits": 1,
+    "dmg": 45.4,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 119,
+    "endPct": 45.4,
+    "failedAt": -1,
+    "ok": true
+   }
+  },
+  "pcts": {
+   "0": {
+    "hits": 1,
+    "dmg": 45.4,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 115,
+    "endPct": 45.4,
+    "failedAt": -1,
+    "ok": true
+   },
+   "20": {
+    "hits": 1,
+    "dmg": 45.4,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 99,
+    "endPct": 65.4,
+    "failedAt": -1,
+    "ok": true
+   },
+   "40": {
+    "hits": 1,
+    "dmg": 45.4,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 89,
+    "endPct": 85.4,
+    "failedAt": -1,
+    "ok": true
+   },
+   "60": {
+    "hits": 1,
+    "dmg": 45.4,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 83,
+    "endPct": 105.4,
+    "failedAt": -1,
+    "ok": true
+   },
+   "90": {
+    "hits": 1,
+    "dmg": 45.4,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 78,
+    "endPct": 135.4,
+    "failedAt": -1,
+    "ok": true
+   }
+  },
+  "late": {
+   "1": "30/30",
+   "2": "30/30",
+   "3": "30/30",
+   "4": "30/30",
+   "6": "30/30"
+  },
+  "defPass": "150/270"
+ },
+ {
+  "name": "bz0 usmash",
+  "route": "usmash",
+  "sit": {
+   "foe": [
+    0
+   ],
+   "pct": 0,
+   "x0": -20,
+   "dist": 9,
+   "bz": true
+  },
+  "base": {
+   "hits": 1,
+   "dmg": 41.6,
+   "ko": false,
+   "resets": 1,
+   "firstReset": 136,
+   "endPct": 41.6,
+   "failedAt": -1
+  },
+  "di": {
+   "out/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-in/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-in/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-in/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-in/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-in/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-in/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-out/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-out/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-out/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-out/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-out/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-out/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-up/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-up/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-up/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-up/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-up/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-up/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-down/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-down/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-down/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-down/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-down/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-down/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-in/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-in/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-in/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-in/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-in/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-in/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-out/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-out/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-out/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-out/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-out/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-out/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-up/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-up/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-up/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-up/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-up/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-up/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-down/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-down/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-down/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-down/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-down/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-down/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   }
+  },
+  "cpu9": {
+   "hits": 0,
+   "dmg": 0,
+   "ko": false,
+   "resets": 0,
+   "firstReset": -1,
+   "endPct": 0,
+   "failedAt": -1,
+   "ok": false
+  },
+  "foes": {
+   "Flint": {
+    "hits": 1,
+    "dmg": 41.6,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 136,
+    "endPct": 41.6,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Joey": {
+    "hits": 1,
+    "dmg": 24.6,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 86,
+    "endPct": 24.6,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Potato Sack": {
+    "hits": 1,
+    "dmg": 41.6,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 133,
+    "endPct": 41.6,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Scuttle": {
+    "hits": 1,
+    "dmg": 41.6,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 97,
+    "endPct": 41.6,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Sprocket": {
+    "hits": 1,
+    "dmg": 41.6,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 133,
+    "endPct": 41.6,
+    "failedAt": -1,
+    "ok": true
+   }
+  },
+  "pcts": {
+   "0": {
+    "hits": 1,
+    "dmg": 41.6,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 136,
+    "endPct": 41.6,
+    "failedAt": -1,
+    "ok": true
+   },
+   "20": {
+    "hits": 1,
+    "dmg": 41.6,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 81,
+    "endPct": 61.6,
+    "failedAt": -1,
+    "ok": true
+   },
+   "40": {
+    "hits": 1,
+    "dmg": 41.6,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 75,
+    "endPct": 81.6,
+    "failedAt": -1,
+    "ok": true
+   },
+   "60": {
+    "hits": 1,
+    "dmg": 41.6,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 72,
+    "endPct": 101.6,
+    "failedAt": -1,
+    "ok": true
+   },
+   "90": {
+    "hits": 1,
+    "dmg": 41.6,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 69,
+    "endPct": 131.6,
+    "failedAt": -1,
+    "ok": true
+   }
+  },
+  "late": {
+   "1": "30/30",
+   "2": "30/30",
+   "3": "30/30",
+   "4": "30/30",
+   "6": "30/30"
+  },
+  "defPass": "180/270"
+ },
+ {
+  "name": "bz0 sspec",
+  "route": "sspec",
+  "sit": {
+   "foe": [
+    0
+   ],
+   "pct": 0,
+   "x0": -20,
+   "dist": 9,
+   "bz": true
+  },
+  "base": {
+   "hits": 1,
+   "dmg": 34,
+   "ko": false,
+   "resets": 1,
+   "firstReset": 123,
+   "endPct": 34,
+   "failedAt": -1
+  },
+  "di": {
+   "out/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   }
+  },
+  "cpu9": {
+   "hits": 0,
+   "dmg": 0,
+   "ko": false,
+   "resets": 0,
+   "firstReset": -1,
+   "endPct": 0,
+   "failedAt": -1,
+   "ok": false
+  },
+  "foes": {
+   "Flint": {
+    "hits": 1,
+    "dmg": 34,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 123,
+    "endPct": 34,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Joey": {
+    "hits": 1,
+    "dmg": 34,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 135,
+    "endPct": 34,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Potato Sack": {
+    "hits": 1,
+    "dmg": 34,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 121,
+    "endPct": 34,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Scuttle": {
+    "hits": 1,
+    "dmg": 34,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 134,
+    "endPct": 34,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Sprocket": {
+    "hits": 1,
+    "dmg": 34,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 121,
+    "endPct": 34,
+    "failedAt": -1,
+    "ok": true
+   }
+  },
+  "pcts": {
+   "0": {
+    "hits": 1,
+    "dmg": 34,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 123,
+    "endPct": 34,
+    "failedAt": -1,
+    "ok": true
+   },
+   "20": {
+    "hits": 1,
+    "dmg": 34,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 108,
+    "endPct": 54,
+    "failedAt": -1,
+    "ok": true
+   },
+   "40": {
+    "hits": 1,
+    "dmg": 34,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 93,
+    "endPct": 74,
+    "failedAt": -1,
+    "ok": true
+   },
+   "60": {
+    "hits": 1,
+    "dmg": 34,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 84,
+    "endPct": 94,
+    "failedAt": -1,
+    "ok": true
+   },
+   "90": {
+    "hits": 1,
+    "dmg": 34,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 74,
+    "endPct": 124,
+    "failedAt": -1,
+    "ok": true
+   }
+  },
+  "late": {
+   "1": "30/30",
+   "2": "30/30",
+   "3": "30/30",
+   "4": "30/30",
+   "6": "30/30"
+  },
+  "defPass": "240/270"
+ },
+ {
+  "name": "bz0 dash",
+  "route": "dash",
+  "sit": {
+   "foe": [
+    0
+   ],
+   "pct": 0,
+   "x0": -20,
+   "dist": 9,
+   "bz": true
+  },
+  "base": {
+   "hits": 1,
+   "dmg": 28.4,
+   "ko": false,
+   "resets": 1,
+   "firstReset": 105,
+   "endPct": 28.4,
+   "failedAt": -1
+  },
+  "di": {},
+  "cpu9": {
+   "hits": 0,
+   "dmg": 0,
+   "ko": false,
+   "resets": 0,
+   "firstReset": -1,
+   "endPct": 0,
+   "failedAt": -1,
+   "ok": false
+  },
+  "foes": {
+   "Flint": {
+    "hits": 1,
+    "dmg": 28.4,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 105,
+    "endPct": 28.4,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Joey": {
+    "hits": 1,
+    "dmg": 28.4,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 107,
+    "endPct": 28.4,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Potato Sack": {
+    "hits": 1,
+    "dmg": 28.4,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 104,
+    "endPct": 28.4,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Scuttle": {
+    "hits": 1,
+    "dmg": 28.4,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 107,
+    "endPct": 28.4,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Sprocket": {
+    "hits": 1,
+    "dmg": 28.4,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 104,
+    "endPct": 28.4,
+    "failedAt": -1,
+    "ok": true
+   }
+  },
+  "pcts": {
+   "0": {
+    "hits": 1,
+    "dmg": 28.4,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 105,
+    "endPct": 28.4,
+    "failedAt": -1,
+    "ok": true
+   },
+   "20": {
+    "hits": 1,
+    "dmg": 28.4,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 119,
+    "endPct": 48.4,
+    "failedAt": -1,
+    "ok": true
+   },
+   "40": {
+    "hits": 1,
+    "dmg": 28.4,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 114,
+    "endPct": 68.3,
+    "failedAt": -1,
+    "ok": true
+   },
+   "60": {
+    "hits": 1,
+    "dmg": 28.4,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 99,
+    "endPct": 88.3,
+    "failedAt": -1,
+    "ok": true
+   },
+   "90": {
+    "hits": 1,
+    "dmg": 28.4,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 87,
+    "endPct": 118.3,
+    "failedAt": -1,
+    "ok": true
+   }
+  },
+  "late": {
+   "1": "30/30",
+   "2": "30/30",
+   "3": "30/30",
+   "4": "30/30",
+   "6": "30/30"
+  },
+  "defPass": "270/270"
+ },
+ {
+  "name": "bz0 sh dair",
+  "route": "sh dair",
+  "sit": {
+   "foe": [
+    0
+   ],
+   "pct": 0,
+   "x0": -20,
+   "dist": 9,
+   "bz": true
+  },
+  "base": {
+   "hits": 1,
+   "dmg": 30.5,
+   "ko": false,
+   "resets": 1,
+   "firstReset": 106,
+   "endPct": 30.5,
+   "failedAt": -1
+  },
+  "di": {
+   "out/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-in/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-out/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-up/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "out/sdi-down/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-in/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-in/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-in/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-in/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-in/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-in/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-out/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-out/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-out/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-out/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-out/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-out/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-up/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-up/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-up/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-up/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-up/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-up/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-down/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-down/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-down/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-down/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-down/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "down/sdi-down/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-in/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-in/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-in/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-in/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-in/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-in/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-out/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-out/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-out/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-out/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-out/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-out/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-up/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-up/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-up/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-up/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-up/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-up/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-down/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-down/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-down/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-down/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-down/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "uo/sdi-down/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-in/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-in/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-in/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-in/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-in/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-in/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-out/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-out/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-out/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-out/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-out/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-out/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-up/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-up/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-up/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-up/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-up/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-up/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-down/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-down/jump/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-down/ad/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-down/atk/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-down/shield/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   },
+   "do/sdi-down/all/pre": {
+    "hits": 0,
+    "dmg": 0,
+    "ko": false,
+    "resets": 0,
+    "firstReset": -1,
+    "endPct": 0,
+    "failedAt": -1
+   }
+  },
+  "cpu9": {
+   "hits": 0,
+   "dmg": 0,
+   "ko": false,
+   "resets": 0,
+   "firstReset": -1,
+   "endPct": 0,
+   "failedAt": -1,
+   "ok": false
+  },
+  "foes": {
+   "Flint": {
+    "hits": 1,
+    "dmg": 30.5,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 106,
+    "endPct": 30.5,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Joey": {
+    "hits": 1,
+    "dmg": 30.5,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 109,
+    "endPct": 30.5,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Potato Sack": {
+    "hits": 1,
+    "dmg": 30.5,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 104,
+    "endPct": 30.5,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Scuttle": {
+    "hits": 1,
+    "dmg": 30.5,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 109,
+    "endPct": 30.5,
+    "failedAt": -1,
+    "ok": true
+   },
+   "Sprocket": {
+    "hits": 1,
+    "dmg": 30.5,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 104,
+    "endPct": 30.5,
+    "failedAt": -1,
+    "ok": true
+   }
+  },
+  "pcts": {
+   "0": {
+    "hits": 1,
+    "dmg": 30.5,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 106,
+    "endPct": 30.5,
+    "failedAt": -1,
+    "ok": true
+   },
+   "20": {
+    "hits": 1,
+    "dmg": 30.5,
+    "ko": false,
+    "resets": 1,
+    "firstReset": 124,
+    "endPct": 50.5,
+    "failedAt": -1,
+    "ok": true
+   },
+   "40": {
+    "hits": 1,
+    "dmg": 30.5,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 84,
+    "endPct": 70.5,
+    "failedAt": -1,
+    "ok": true
+   },
+   "60": {
+    "hits": 1,
+    "dmg": 30.5,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 75,
+    "endPct": 90.5,
+    "failedAt": -1,
+    "ok": true
+   },
+   "90": {
+    "hits": 1,
+    "dmg": 30.5,
+    "ko": true,
+    "resets": 1,
+    "firstReset": 70,
+    "endPct": 120.5,
+    "failedAt": -1,
+    "ok": true
+   }
+  },
+  "late": {
+   "1": "30/30",
+   "2": "30/30",
+   "3": "30/30",
+   "4": "30/30",
+   "6": "30/30"
+  },
+  "defPass": "150/270"
+ }
+]

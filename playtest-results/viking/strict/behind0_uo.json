@@ -1,0 +1,119 @@
+{
+ "job": {
+  "name": "behind0_uo",
+  "labs": [
+   "tools/viking-lab.js"
+  ],
+  "sit": {
+   "foe": [
+    0
+   ],
+   "pct": 0,
+   "x0": 10,
+   "dist": 10,
+   "axe": {
+    "from": -20
+   }
+  },
+  "G": [
+   "jab",
+   "ftilt",
+   "utilt",
+   "dtilt",
+   "fsmash",
+   "usmash",
+   "dsmash",
+   "dash",
+   "grab_f",
+   "grab_b",
+   "grab_u",
+   "grab_d",
+   "sspec",
+   "throw",
+   "rc"
+  ],
+  "AIR": [
+   "nair",
+   "fair",
+   "bair",
+   "uair",
+   "dair",
+   "sspecA",
+   "throwA",
+   "uspec",
+   "rc"
+  ],
+  "H": [],
+  "extra": [
+   "hs",
+   "w6 hs",
+   "rc",
+   "w20 rc",
+   "hs nair",
+   "hs fair",
+   "hs bair",
+   "hs uair",
+   "sh hs nair",
+   "sh hs bair",
+   "sh hs fair",
+   "sh hs uair",
+   "sh hs dair",
+   "throw hs",
+   "throw w12 hs",
+   "sh throwA hs",
+   "fh throwA hs"
+  ],
+  "depth": 12,
+  "beam": 10,
+  "goal": "ko",
+  "stopAfter": 40,
+  "hitW": 1,
+  "out": "playtest-results/viking/strict/behind0_uo.json",
+  "def": {
+   "di": "uo",
+   "esc": "all",
+   "gate": true
+  },
+  "hitsLog": true
+ },
+ "sims": 8124,
+ "frames": 376143,
+ "found": [
+  {
+   "route": "fsmash",
+   "hits": 1,
+   "dmg": 27.7,
+   "ko": false,
+   "pct": 27.7,
+   "thread": 0,
+   "depth": 1
+  },
+  {
+   "route": "sspec",
+   "hits": 1,
+   "dmg": 22.7,
+   "ko": false,
+   "pct": 22.7,
+   "thread": 0,
+   "depth": 1
+  },
+  {
+   "route": "sh dair",
+   "hits": 1,
+   "dmg": 20.3,
+   "ko": false,
+   "pct": 20.3,
+   "thread": 0,
+   "depth": 1
+  },
+  {
+   "route": "sh w9 dair | utilt",
+   "hits": 2,
+   "dmg": 31.7,
+   "ko": false,
+   "pct": 31.7,
+   "thread": 0,
+   "depth": 2
+  }
+ ]
+}

@@ -1,0 +1,251 @@
+{
+ "G1 recall in hitstun fsmash @30": {
+  "hitT": 21,
+  "recallT": 29,
+  "vikingStateAtRecall": "hurt+hitlag",
+  "axeHitFoeT": 40,
+  "foeDmg": -40,
+  "vikingFreeAfter": "idle"
+ },
+ "G1 recall in hitstun fsmash @90": {
+  "hitT": 21,
+  "recallT": 29,
+  "vikingStateAtRecall": "hurt+hitlag",
+  "axeHitFoeT": 40,
+  "foeDmg": -40,
+  "vikingFreeAfter": "attack"
+ },
+ "G1 recall in hitstun ftilt @30": {
+  "hitT": 8,
+  "recallT": 16,
+  "vikingStateAtRecall": "hurt+hitlag",
+  "axeHitFoeT": 26,
+  "foeDmg": -40,
+  "vikingFreeAfter": "idle"
+ },
+ "G1 recall in hitstun ftilt @90": {
+  "hitT": 8,
+  "recallT": 16,
+  "vikingStateAtRecall": "hurt+hitlag",
+  "axeHitFoeT": 27,
+  "foeDmg": -40,
+  "vikingFreeAfter": "idle"
+ },
+ "G1 recall in hitstun jab @30": {
+  "hitT": 5,
+  "recallT": 13,
+  "vikingStateAtRecall": "hurt",
+  "axeHitFoeT": 24,
+  "foeDmg": -40,
+  "vikingFreeAfter": "idle"
+ },
+ "G1 recall in hitstun jab @90": {
+  "hitT": 5,
+  "recallT": 13,
+  "vikingStateAtRecall": "hurt",
+  "axeHitFoeT": 23,
+  "foeDmg": -40,
+  "vikingFreeAfter": "idle"
+ },
+ "G2 recall while shielding": "shield t13",
+ "G2 recall while held in a grab": {
+  "grabbedAt": 7,
+  "recall": "held t15",
+  "foeDmg": 20.6,
+  "vikingNow": "idle"
+ },
+ "G2 recall while hanging on the ledge": {
+  "ledgeAt": 0,
+  "recall": "ledge t19",
+  "stillOnLedge": true
+ },
+ "G3 axe + Berserker across a KO": {
+  "before": {
+   "axe": {
+    "st": "stuck",
+    "x": 55.9,
+    "y": 0,
+    "ghost": true
+   },
+   "berserk": true,
+   "axeAway": true
+  },
+  "deadAt": 0,
+  "actionableAt": 201,
+  "after": {
+   "axe": null,
+   "berserk": false,
+   "axeAway": false,
+   "pct": 0
+  },
+  "snaps": [
+   "0:dead:{\"st\":\"stuck\",\"x\":55.9,\"y\":0,\"ghost\":true}:bztrue:0",
+   "40:dead:{\"st\":\"stuck\",\"x\":55.9,\"y\":0,\"ghost\":true}:bztrue:0",
+   "80:respawn:null:bzfalse:0",
+   "120:respawn:null:bzfalse:0",
+   "160:respawn:null:bzfalse:0",
+   "200:respawn:null:bzfalse:0",
+   "240:air:null:bzfalse:0",
+   "280:idle:null:bzfalse:0",
+   "320:idle:null:bzfalse:0",
+   "360:idle:null:bzfalse:0"
+  ]
+ },
+ "G4 throw, then special held from frame 3, foe at 12": {
+  "hits": [
+   "30:1:fly",
+   "90:0:stuck"
+  ],
+  "dmg": 18.9,
+  "counter": 0
+ },
+ "G4 throw, then special held from frame 3, foe at 20": {
+  "hits": [],
+  "dmg": 0,
+  "counter": 0
+ },
+ "G4 throw, then special held from frame 3, foe at 30": {
+  "hits": [],
+  "dmg": 0,
+  "counter": 0
+ },
+ "G4 throw, then special held from frame 3, foe at 45": {
+  "hits": [],
+  "dmg": 0,
+  "counter": 0
+ },
+ "G4 throw, then special held from frame 13, foe at 12": {
+  "hits": [
+   "30:1:fly",
+   "90:0:stuck"
+  ],
+  "dmg": 18.9,
+  "counter": 0
+ },
+ "G4 throw, then special held from frame 13, foe at 20": {
+  "hits": [],
+  "dmg": 0,
+  "counter": 0
+ },
+ "G4 throw, then special held from frame 13, foe at 30": {
+  "hits": [],
+  "dmg": 0,
+  "counter": 0
+ },
+ "G4 throw, then special held from frame 13, foe at 45": {
+  "hits": [],
+  "dmg": 0,
+  "counter": 0
+ },
+ "G4 throw, then special held from frame 23, foe at 12": {
+  "hits": [
+   "30:1:fly",
+   "90:0:stuck"
+  ],
+  "dmg": 18.9,
+  "counter": 0
+ },
+ "G4 throw, then special held from frame 23, foe at 20": {
+  "hits": [],
+  "dmg": 0,
+  "counter": 0
+ },
+ "G4 throw, then special held from frame 23, foe at 30": {
+  "hits": [],
+  "dmg": 0,
+  "counter": 0
+ },
+ "G4 throw, then special held from frame 23, foe at 45": {
+  "hits": [],
+  "dmg": 0,
+  "counter": 0
+ },
+ "G4 throw, then special held from frame 33, foe at 12": {
+  "hits": [
+   "30:1:fly",
+   "90:0:-"
+  ],
+  "dmg": 18.9,
+  "counter": 0
+ },
+ "G4 throw, then special held from frame 33, foe at 20": {
+  "hits": [],
+  "dmg": 0,
+  "counter": 0
+ },
+ "G4 throw, then special held from frame 33, foe at 30": {
+  "hits": [],
+  "dmg": 0,
+  "counter": 0
+ },
+ "G4 throw, then special held from frame 33, foe at 45": {
+  "hits": [],
+  "dmg": 0,
+  "counter": 0
+ },
+ "G5 counter while axe recalling vAt2": {
+  "caught": true,
+  "foeDmg": -40,
+  "counter": 0,
+  "axe": null,
+  "foeState": "respawn"
+ },
+ "G5 counter while axe recalling vAt6": {
+  "caught": true,
+  "foeDmg": -40,
+  "counter": 0,
+  "axe": null,
+  "foeState": "respawn"
+ },
+ "G5 counter while axe recalling vAt10": {
+  "caught": true,
+  "foeDmg": -40,
+  "counter": 0,
+  "axe": null,
+  "foeState": "respawn"
+ },
+ "G5 counter while axe recalling vAt14": {
+  "caught": true,
+  "foeDmg": 36.5,
+  "counter": 0,
+  "axe": null,
+  "foeState": "idle"
+ },
+ "G5 counter while axe flying vAt2": {
+  "caught": true,
+  "foeDmg": 10.1,
+  "counter": 0,
+  "axe": null,
+  "foeState": "idle"
+ },
+ "G5 counter while axe flying vAt6": {
+  "caught": true,
+  "foeDmg": 10.1,
+  "counter": 0,
+  "axe": null,
+  "foeState": "idle"
+ },
+ "G5 counter while axe flying vAt10": {
+  "caught": true,
+  "foeDmg": 10.1,
+  "counter": 0,
+  "axe": null,
+  "foeState": "idle"
+ },
+ "G5 counter while axe flying vAt14": {
+  "caught": true,
+  "foeDmg": 10.1,
+  "counter": 0,
+  "axe": null,
+  "foeState": "idle"
+ },
+ "G6 Berserker drain cap": {
+  "pct": 999,
+  "berserk": true
+ },
+ "G7 Berserker mashed through hitstun": {
+  "hitAt": 21,
+  "berserkAt": 85,
+  "gapFrames": 64
+ }
+}

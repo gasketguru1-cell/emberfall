@@ -2,6 +2,57 @@
 //   node tools/derive.mjs tools/flint-clips.mjs      reads flint-v3.glb, writes flint-v4.glb and Flint's manifest entry
 //   then: node tools/addbones.mjs flint               puts the added bones (tools/bones/flint.mjs) on top: flint-b.glb, the file the game loads
 // Directions: +Z the way he faces, +X his left, +Y up. turn(pose, bone, [pitch forward, yaw to his left, roll left side up]).
+import { NodeIO } from '@gltf-transform/core'; import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
+import * as THREE from 'three';
+
+/* ---- Fyrdsman's unarmed up air (UairE, the backflip kick) carried onto Flint's bones ----
+   Each mapped bone takes the source bone's turn from its rest, in model space; limbs are first lined up so that at rest they
+   point the way the source's do (his bind is an A-pose). The hips' travel is scaled by hip height. Bones with no
+   counterpart (Spine01, neck, shoulders, toes) keep their own rest turn. */
+const FYRD = await (async () => {
+  const io = new NodeIO().registerExtensions(ALL_EXTENSIONS);
+  const [sd, fd] = [await io.read('assets/vargan/export/vargan-b.glb'), await io.read('assets/flint/export/flint-v3.glb')];
+  const joints = d => new Map(d.getRoot().listSkins()[0].listJoints().map(j => [j.getName(), j]));
+  const SJ = joints(sd), FJ = joints(fd);
+  const anim = sd.getRoot().listAnimations().find(a => a.getName() === 'UairE'), tr = new Map(); let dur = 0;
+  for (const ch of anim.listChannels()) { const pth = ch.getTargetPath(); if (pth === 'scale') continue; const s = ch.getSampler(), times = s.getInput().getArray();
+    dur = Math.max(dur, times[times.length - 1]); const k = ch.getTargetNode().getName(); tr.set(k, Object.assign(tr.get(k) || {}, { [pth[0]]: { times, vals: s.getOutput().getArray() } })); }
+  const find = (ts, t) => { let lo = 0, hi = ts.length - 1; if (t <= ts[0]) return [0, 0, 0]; if (t >= ts[hi]) return [hi, hi, 0]; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (ts[m] <= t) lo = m; else hi = m; } return [lo, hi, (t - ts[lo]) / (ts[hi] - ts[lo])]; };
+  /* a skeleton's world matrices: local TRS from fn(node), everything above the skeleton as the file has it */
+  const worldOf = (J, fn) => { const W = new Map(), get = n => { const k = n.getName(); if (W.has(k)) return W.get(k); const p = n.getParentNode();
+      const pm = !p ? new THREE.Matrix4() : J.has(p.getName()) ? get(p) : new THREE.Matrix4().fromArray(p.getWorldMatrix());
+      const [q, t] = fn(n), m = pm.clone().multiply(new THREE.Matrix4().compose(t, q, new THREE.Vector3(1, 1, 1))); W.set(k, m); return m; };
+    for (const n of J.values()) get(n); return W; };
+  const restTRS = n => [new THREE.Quaternion(...n.getRotation()), new THREE.Vector3(...n.getTranslation())];
+  const animTRS = t => n => { const [q, p] = restTRS(n), e = tr.get(n.getName()), a = new THREE.Quaternion(), b = new THREE.Quaternion();
+    if (e && e.r) { const [i, j, u] = find(e.r.times, t); a.fromArray(e.r.vals, i * 4); b.fromArray(e.r.vals, j * 4); q.copy(a).slerp(b, u); }
+    if (e && e.t) { const [i, j, u] = find(e.t.times, t); p.fromArray(e.t.vals, i * 3).lerp(new THREE.Vector3().fromArray(e.t.vals, j * 3), u); }
+    return [q, p]; };
+  const dec = m => { const p = new THREE.Vector3(), q = new THREE.Quaternion(); m.decompose(p, q, new THREE.Vector3()); return { p, q }; };
+  const SR = worldOf(SJ, restTRS), FR = worldOf(FJ, restTRS);
+  /* flint bone: [source bone, source child, flint child] (children give the line used to line the limb up) */
+  const MAP = { Hips: ['hips'], Spine02: ['spine'], Spine: ['chest'], Head: ['head'] };
+  for (const [s, F] of [['L', 'Left'], ['R', 'Right']]) Object.assign(MAP, {
+    [F + 'Arm']: ['arm' + s, 'fore' + s, F + 'ForeArm'], [F + 'ForeArm']: ['fore' + s, 'hand' + s, F + 'Hand'], [F + 'Hand']: ['hand' + s],
+    [F + 'UpLeg']: ['thigh' + s, 'shin' + s, F + 'Leg'], [F + 'Leg']: ['shin' + s, 'foot' + s, F + 'Foot'], [F + 'Foot']: ['foot' + s] });
+  const off = new Map();   /* per mapped bone: srcRest^-1 * align * flintRest */
+  for (const [f, [s, sc, fc]] of Object.entries(MAP)) {
+    const sr = dec(SR.get(s)), fr = dec(FR.get(f)), al = new THREE.Quaternion();
+    if (sc) al.setFromUnitVectors(dec(FR.get(fc)).p.sub(fr.p).normalize(), dec(SR.get(sc)).p.sub(sr.p).normalize());
+    off.set(f, sr.q.clone().invert().multiply(al).multiply(fr.q));
+  }
+  const sHip = dec(SR.get('hips')).p, fHip = dec(FR.get('Hips')).p, k = fHip.y / sHip.y;
+  const hipsParent = new THREE.Matrix4().fromArray(FJ.get('Hips').getParentNode().getWorldMatrix()), hpInv = hipsParent.clone().invert();
+  const order = [...FJ.values()];   /* skin order: parents before children */
+  return { dur, at: t => {   /* Flint's pose at time t: bone -> { q, p } in parent space */
+    const SW = worldOf(SJ, animTRS(t)), W = new Map(), pose = new Map();
+    for (const n of order) { const b = n.getName(), [rq, rp] = restTRS(n), p = n.getParentNode(), pw = p && W.has(p.getName()) ? W.get(p.getName()) : dec(new THREE.Matrix4().fromArray(p.getWorldMatrix())).q;
+      let q = rq; if (off.has(b)) q = pw.clone().invert().multiply(dec(SW.get(MAP[b][0])).q.multiply(off.get(b)));
+      W.set(b, pw.clone().multiply(q)); pose.set(b, { q, p: rp }); }
+    const hp = dec(SW.get('hips')).p.sub(sHip).multiplyScalar(k).add(fHip).applyMatrix4(hpInv); pose.get('Hips').p = hp;
+    return pose; } };
+})();
+
 export default L => {
   const o = { in: 'assets/flint/export/flint-v3.glb', out: 'assets/flint/export/flint-v4.glb', clips: {} };
   if (!L) return o;
@@ -51,6 +102,7 @@ export default L => {
   const pull = turn(shift(turn(copy(grabAt(0.3)), 'Spine02', [-16, 0, 0]), [0, -0.03, -0.06]), 'Hips', [-5, 0, 0]);
   const shove = turn(shift(turn(copy(held), 'Spine02', [14, 0, 0]), [0, -0.03, 0.1]), 'Head', [-14, 0, 0]);
   C.ThrowF = keys([[0, held], [0.2, pull, ease.out], [0.33, shove, ease.snap], [0.5, shove], [0.87, S('Idle', 0), ease.io]]);   /* hauls them in, then shoves with both hands */
+  C.UairFlip = { dur: FYRD.dur, fn: t => { const f = FYRD.at(t), p = S('Idle', 0); for (const b of L.bones) if (f.has(b)) p.set(b, f.get(b)); return p; } };   /* the backflip kick, as Fyrdsman's unarmed up air */
   return Object.assign(o, { manifest: man => {
     const F = man.Flint, c = F.clips, a = F.attacks; F.file = o.out;
     Object.assign(c, {
@@ -64,6 +116,7 @@ export default L => {
     a.jab2 = { clip: 'Jab2', start: 0.3, contact: [0.47, 0.68], end: 1.05 };
     a.utilt = { clip: 'UpTilt', start: 0.25, contact: [0.5, 0.68], end: 0.95 };
     a.grab = { clip: 'Grab', start: 0.3, contact: [0.5, 0.63], end: 1.05 };
+    a.uair = { clip: 'UairFlip', start: 0, contact: [11 / 60, 16 / 60], end: 0.55 };   /* same clip times as Fyrdsman's uairE */
     a.getup = { clip: '360_Power_Spin_Jump', start: 1.25, contact: [1.45, 1.65], end: 2.1, spin: 0.5 };
   } });
 };

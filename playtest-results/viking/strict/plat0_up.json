@@ -1,0 +1,164 @@
+{
+ "job": {
+  "name": "plat0_up",
+  "labs": [
+   "tools/viking-lab.js"
+  ],
+  "sit": {
+   "foe": [
+    0
+   ],
+   "pct": 0,
+   "x0": -20,
+   "dist": 9,
+   "axe": {
+    "from": -40
+   }
+  },
+  "G": [
+   "jab",
+   "ftilt",
+   "utilt",
+   "dtilt",
+   "fsmash",
+   "usmash",
+   "dsmash",
+   "dash",
+   "grab_f",
+   "grab_b",
+   "grab_u",
+   "grab_d",
+   "sspec",
+   "throw",
+   "rc"
+  ],
+  "AIR": [
+   "nair",
+   "fair",
+   "bair",
+   "uair",
+   "dair",
+   "sspecA",
+   "throwA",
+   "uspec",
+   "rc"
+  ],
+  "H": [],
+  "extra": [
+   "hs",
+   "w6 hs",
+   "rc",
+   "w20 rc",
+   "hs nair",
+   "hs fair",
+   "hs bair",
+   "hs uair",
+   "sh hs nair",
+   "sh hs bair",
+   "sh hs fair",
+   "sh hs uair",
+   "sh hs dair",
+   "throw hs",
+   "throw w12 hs",
+   "sh throwA hs",
+   "fh throwA hs"
+  ],
+  "depth": 12,
+  "beam": 10,
+  "goal": "ko",
+  "stopAfter": 40,
+  "hitW": 1,
+  "out": "playtest-results/viking/strict/plat0_up.json",
+  "def": {
+   "di": "up",
+   "esc": "all",
+   "gate": true
+  },
+  "hitsLog": true
+ },
+ "sims": 16925,
+ "frames": 837731,
+ "found": [
+  {
+   "route": "fsmash",
+   "hits": 1,
+   "dmg": 27.7,
+   "ko": false,
+   "pct": 27.7,
+   "thread": 0,
+   "depth": 1
+  },
+  {
+   "route": "sspec",
+   "hits": 1,
+   "dmg": 22.7,
+   "ko": false,
+   "pct": 22.7,
+   "thread": 0,
+   "depth": 1
+  },
+  {
+   "route": "sh dair",
+   "hits": 1,
+   "dmg": 20.3,
+   "ko": false,
+   "pct": 20.3,
+   "thread": 0,
+   "depth": 1
+  },
+  {
+   "route": "grab_f | w20 rc",
+   "hits": 3,
+   "dmg": 38.4,
+   "ko": false,
+   "pct": 38.4,
+   "thread": 0,
+   "depth": 2
+  },
+  {
+   "route": "grab_f | w18 rc",
+   "hits": 3,
+   "dmg": 38.4,
+   "ko": false,
+   "pct": 38.4,
+   "thread": 0,
+   "depth": 2
+  },
+  {
+   "route": "w18 grab_f | w18 rc",
+   "hits": 3,
+   "dmg": 38.4,
+   "ko": false,
+   "pct": 38.4,
+   "thread": 0,
+   "depth": 2
+  },
+  {
+   "route": "grab_f | w20 rc | fh w9 uair",
+   "hits": 4,
+   "dmg": 57.3,
+   "ko": false,
+   "pct": 57.3,
+   "thread": 0,
+   "depth": 3
+  },
+  {
+   "route": "grab_f | w20 rc | w12 fh w4 uair",
+   "hits": 4,
+   "dmg": 57.3,
+   "ko": false,
+   "pct": 57.3,
+   "thread": 0,
+   "depth": 3
+  },
+  {
+   "route": "grab_f | w18 rc | fh w9 uair",
+   "hits": 4,
+   "dmg": 57.3,
+   "ko": false,
+   "pct": 57.3,
+   "thread": 0,
+   "depth": 3
+  }
+ ]
+}

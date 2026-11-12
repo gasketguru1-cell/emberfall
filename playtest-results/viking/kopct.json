@@ -1,0 +1,560 @@
+{
+ "grab f, recall (axe on the left platform)": {
+  "Flint": {
+   "n": 50,
+   "in": 55,
+   "out": 50,
+   "up": 45,
+   "down": 50,
+   "ui": 50,
+   "uo": 45,
+   "di": 50,
+   "do": 55,
+   "worst": 55
+  },
+  "Sprocket": {
+   "n": 55,
+   "in": 55,
+   "out": 55,
+   "up": 50,
+   "down": 60,
+   "ui": 55,
+   "uo": 50,
+   "di": 60,
+   "do": 55,
+   "worst": 60
+  },
+  "Potato Sack": {
+   "n": 65,
+   "in": 65,
+   "out": 65,
+   "up": 60,
+   "down": 60,
+   "ui": 65,
+   "uo": 50,
+   "di": 60,
+   "do": 65,
+   "worst": 65
+  },
+  "Scuttle": {
+   "n": 45,
+   "in": 45,
+   "out": 45,
+   "up": 40,
+   "down": 50,
+   "ui": 45,
+   "uo": 40,
+   "di": 50,
+   "do": 45,
+   "worst": 50
+  },
+  "Joey": {
+   "n": 45,
+   "in": 45,
+   "out": 45,
+   "up": 40,
+   "down": 50,
+   "ui": 45,
+   "uo": 40,
+   "di": 50,
+   "do": 45,
+   "worst": 50
+  }
+ },
+ "grab f, recall, bair (axe on the platform)": {
+  "Flint": {
+   "n": 40,
+   "in": 55,
+   "out": 45,
+   "up": 30,
+   "down": 45,
+   "ui": 40,
+   "uo": 25,
+   "di": 45,
+   "do": 50,
+   "worst": 55
+  },
+  "Sprocket": {
+   "n": 45,
+   "in": 50,
+   "out": 45,
+   "up": 45,
+   "down": 45,
+   "ui": 45,
+   "uo": 35,
+   "di": 45,
+   "do": 60,
+   "worst": 60
+  },
+  "Potato Sack": {
+   "n": 50,
+   "in": 50,
+   "out": 60,
+   "up": 40,
+   "down": 50,
+   "ui": 50,
+   "uo": 40,
+   "di": 50,
+   "do": 50,
+   "worst": 60
+  },
+  "Scuttle": {
+   "n": 25,
+   "in": 40,
+   "out": 40,
+   "up": 25,
+   "down": 40,
+   "ui": 35,
+   "uo": 35,
+   "di": 35,
+   "do": 45,
+   "worst": 45
+  },
+  "Joey": {
+   "n": 40,
+   "in": 35,
+   "out": 40,
+   "up": 25,
+   "down": 35,
+   "ui": 35,
+   "uo": 25,
+   "di": 40,
+   "do": 35,
+   "worst": 40
+  }
+ },
+ "Berserker forward smash": {
+  "Flint": {
+   "n": 55,
+   "in": 55,
+   "out": 55,
+   "up": 55,
+   "down": 55,
+   "ui": 55,
+   "uo": 55,
+   "di": 55,
+   "do": 55,
+   "worst": 55
+  },
+  "Sprocket": {
+   "n": 65,
+   "in": 65,
+   "out": 65,
+   "up": 60,
+   "down": 65,
+   "ui": 60,
+   "uo": 60,
+   "di": 65,
+   "do": 65,
+   "worst": 65
+  },
+  "Potato Sack": {
+   "n": 65,
+   "in": 65,
+   "out": 65,
+   "up": 65,
+   "down": 65,
+   "ui": 65,
+   "uo": 65,
+   "di": 65,
+   "do": 65,
+   "worst": 65
+  },
+  "Scuttle": {
+   "n": 50,
+   "in": 50,
+   "out": 50,
+   "up": 45,
+   "down": 50,
+   "ui": 45,
+   "uo": 45,
+   "di": 50,
+   "do": 50,
+   "worst": 50
+  },
+  "Joey": {
+   "n": 130,
+   "in": 130,
+   "out": 130,
+   "up": 130,
+   "down": 130,
+   "ui": 130,
+   "uo": 130,
+   "di": 130,
+   "do": 130,
+   "worst": 130
+  }
+ },
+ "Berserker up smash": {
+  "Flint": {
+   "n": 25,
+   "in": 25,
+   "out": 25,
+   "up": 25,
+   "down": 25,
+   "ui": 25,
+   "uo": 25,
+   "di": 25,
+   "do": 25,
+   "worst": 25
+  },
+  "Sprocket": {
+   "n": 30,
+   "in": 30,
+   "out": 30,
+   "up": 25,
+   "down": 30,
+   "ui": 25,
+   "uo": 25,
+   "di": 30,
+   "do": 30,
+   "worst": 30
+  },
+  "Potato Sack": {
+   "n": 30,
+   "in": 30,
+   "out": 30,
+   "up": 30,
+   "down": 30,
+   "ui": 30,
+   "uo": 30,
+   "di": 30,
+   "do": 30,
+   "worst": 30
+  },
+  "Scuttle": {
+   "n": 20,
+   "in": 20,
+   "out": 20,
+   "up": 20,
+   "down": 20,
+   "ui": 20,
+   "uo": 20,
+   "di": 20,
+   "do": 20,
+   "worst": 20
+  },
+  "Joey": {
+   "n": 75,
+   "in": 75,
+   "out": 75,
+   "up": 75,
+   "down": 80,
+   "ui": 75,
+   "uo": 75,
+   "di": 80,
+   "do": 80,
+   "worst": 80
+  }
+ },
+ "Berserker Side-B": {
+  "Flint": {
+   "n": 85,
+   "in": 85,
+   "out": 85,
+   "up": 85,
+   "down": 85,
+   "ui": 85,
+   "uo": 85,
+   "di": 85,
+   "do": 85,
+   "worst": 85
+  },
+  "Sprocket": {
+   "n": 95,
+   "in": 95,
+   "out": 95,
+   "up": 95,
+   "down": 95,
+   "ui": 95,
+   "uo": 95,
+   "di": 95,
+   "do": 95,
+   "worst": 95
+  },
+  "Potato Sack": {
+   "n": 100,
+   "in": 100,
+   "out": 100,
+   "up": 95,
+   "down": 100,
+   "ui": 95,
+   "uo": 95,
+   "di": 100,
+   "do": 100,
+   "worst": 100
+  },
+  "Scuttle": {
+   "n": 75,
+   "in": 75,
+   "out": 75,
+   "up": 75,
+   "down": 75,
+   "ui": 75,
+   "uo": 75,
+   "di": 75,
+   "do": 75,
+   "worst": 75
+  },
+  "Joey": {
+   "n": 75,
+   "in": 75,
+   "out": 75,
+   "up": 75,
+   "down": 75,
+   "ui": 75,
+   "uo": 75,
+   "di": 75,
+   "do": 75,
+   "worst": 75
+  }
+ },
+ "Berserker dtilt, recall (axe far)": {
+  "Flint": {
+   "n": 30,
+   "in": 85,
+   "out": 70,
+   "up": 75,
+   "down": 85,
+   "ui": 85,
+   "uo": 80,
+   "di": 90,
+   "do": 75,
+   "worst": 90
+  },
+  "Sprocket": {
+   "n": 35,
+   "in": 85,
+   "out": 80,
+   "up": 85,
+   "down": 0,
+   "ui": 85,
+   "uo": 85,
+   "di": 0,
+   "do": 85,
+   "worst": 85
+  },
+  "Potato Sack": {
+   "n": 0,
+   "in": 0,
+   "out": 0,
+   "up": 0,
+   "down": 0,
+   "ui": 0,
+   "uo": 0,
+   "di": 0,
+   "do": 0,
+   "worst": 0
+  },
+  "Scuttle": {
+   "n": 25,
+   "in": 65,
+   "out": 65,
+   "up": 65,
+   "down": 80,
+   "ui": 70,
+   "uo": 65,
+   "di": 80,
+   "do": 65,
+   "worst": 80
+  },
+  "Joey": {
+   "n": 35,
+   "in": 80,
+   "out": 60,
+   "up": 65,
+   "down": 80,
+   "ui": 65,
+   "uo": 70,
+   "di": 80,
+   "do": 70,
+   "worst": 80
+  }
+ },
+ "up-B, recall (axe far)": {
+  "Flint": {
+   "n": 175,
+   "in": null,
+   "out": 160,
+   "up": 170,
+   "down": null,
+   "ui": 190,
+   "uo": 150,
+   "di": null,
+   "do": null,
+   "worst": null
+  },
+  "Sprocket": {
+   "n": 190,
+   "in": null,
+   "out": 175,
+   "up": 190,
+   "down": null,
+   "ui": null,
+   "uo": 165,
+   "di": null,
+   "do": null,
+   "worst": null
+  },
+  "Potato Sack": {
+   "n": 195,
+   "in": null,
+   "out": 170,
+   "up": 170,
+   "down": null,
+   "ui": null,
+   "uo": 170,
+   "di": null,
+   "do": null,
+   "worst": null
+  },
+  "Scuttle": {
+   "n": null,
+   "in": null,
+   "out": 135,
+   "up": 190,
+   "down": null,
+   "ui": 175,
+   "uo": null,
+   "di": null,
+   "do": null,
+   "worst": null
+  },
+  "Joey": {
+   "n": 160,
+   "in": null,
+   "out": 130,
+   "up": 190,
+   "down": null,
+   "ui": 180,
+   "uo": null,
+   "di": null,
+   "do": null,
+   "worst": null
+  }
+ },
+ "forward smash (axe in hand)": {
+  "Flint": {
+   "n": 110,
+   "in": 110,
+   "out": 110,
+   "up": 110,
+   "down": 110,
+   "ui": 110,
+   "uo": 110,
+   "di": 110,
+   "do": 110,
+   "worst": 110
+  },
+  "Sprocket": {
+   "n": 120,
+   "in": 120,
+   "out": 120,
+   "up": 120,
+   "down": 125,
+   "ui": 120,
+   "uo": 120,
+   "di": 125,
+   "do": 125,
+   "worst": 125
+  },
+  "Potato Sack": {
+   "n": 125,
+   "in": 125,
+   "out": 125,
+   "up": 125,
+   "down": 125,
+   "ui": 125,
+   "uo": 125,
+   "di": 125,
+   "do": 125,
+   "worst": 125
+  },
+  "Scuttle": {
+   "n": 100,
+   "in": 100,
+   "out": 100,
+   "up": 100,
+   "down": 100,
+   "ui": 100,
+   "uo": 100,
+   "di": 100,
+   "do": 100,
+   "worst": 100
+  },
+  "Joey": {
+   "n": 195,
+   "in": 195,
+   "out": 195,
+   "up": 195,
+   "down": 195,
+   "ui": 195,
+   "uo": 195,
+   "di": 195,
+   "do": 195,
+   "worst": 195
+  }
+ },
+ "recall at full range (axe far, Viking at -12)": {
+  "Flint": {
+   "n": null,
+   "in": null,
+   "out": null,
+   "up": null,
+   "down": null,
+   "ui": null,
+   "uo": null,
+   "di": null,
+   "do": null,
+   "worst": null
+  },
+  "Sprocket": {
+   "n": null,
+   "in": null,
+   "out": null,
+   "up": null,
+   "down": null,
+   "ui": null,
+   "uo": null,
+   "di": null,
+   "do": null,
+   "worst": null
+  },
+  "Potato Sack": {
+   "n": null,
+   "in": null,
+   "out": null,
+   "up": null,
+   "down": null,
+   "ui": null,
+   "uo": null,
+   "di": null,
+   "do": null,
+   "worst": null
+  },
+  "Scuttle": {
+   "n": null,
+   "in": null,
+   "out": null,
+   "up": null,
+   "down": null,
+   "ui": null,
+   "uo": null,
+   "di": null,
+   "do": null,
+   "worst": null
+  },
+  "Joey": {
+   "n": null,
+   "in": null,
+   "out": null,
+   "up": null,
+   "down": null,
+   "ui": null,
+   "uo": null,
+   "di": null,
+   "do": null,
+   "worst": null
+  }
+ }
+}
