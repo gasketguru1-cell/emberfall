@@ -163,6 +163,11 @@ function keyHint(x, y, cap, action) {
   g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#cfc8e8'; g.fillText(action, x + w + 6, y + 1);
   return x + w + 6 + g.measureText(action).width + 16;
 }
+/* the cap of the button (or key) that does act for this player, from their own setup */
+function actCap(dev, act) { const m = setupOf(dev).map; if (dev === 'kb') return m[act] ? keyName(m[act]) : '—'; const r = padRowsFor(dev).find(r => m[r[0]] === act); return r ? padCap(r[2], dev) : '—'; }
+/* key hints ending at xr: measured first, then drawn left to right */
+function hintsRight(xr, y, list) { let w = 0; for (const [cap, act] of list) { g.font = 'bold 12px system-ui, sans-serif'; w += g.measureText(cap).width + 20; g.font = '13px system-ui, sans-serif'; w += g.measureText(act).width + 16; } let x = xr - w + 16; for (const [cap, act] of list) x = keyHint(x, y, cap, act); }
+let SEL_GO_T = 0;   /* frames since everyone got ready, for the banner sliding in */
 /* The controls shown under the fighter select: whatever the keyboard's setup and the first controller's setup say right now. */
 function legendRows() {
   const pd = allDevs().find(d => d !== 'kb') || 'pad0', pm = setupOf(pd).map, km = setupOf('kb').map, ps = pd;
@@ -253,12 +258,13 @@ function drawSelect(three) {
   q = g.createLinearGradient(0, 390, 0, H); q.addColorStop(0, 'rgba(14,10,26,0)'); q.addColorStop(0.4, 'rgba(14,10,26,.72)'); q.addColorStop(1, 'rgba(14,10,26,.95)'); g.fillStyle = q; g.fillRect(0, 390, W, H - 390);
 
   /* ---- title ---- */
-  g.textAlign = 'center'; g.font = '900 84px ' + serif; spaced(12);
-  g.save(); g.shadowColor = 'rgba(255,130,40,.65)'; g.shadowBlur = 34 + Math.sin(t * 0.05) * 8;
-  q = g.createLinearGradient(0, 40, 0, 112); q.addColorStop(0, '#fff6dc'); q.addColorStop(0.5, '#ffc56a'); q.addColorStop(1, '#f0702c');
-  g.lineWidth = 7; g.strokeStyle = '#2a1410'; g.lineJoin = 'round'; g.strokeText('EMBERFALL', W / 2 + 6, 104); g.fillStyle = q; g.fillText('EMBERFALL', W / 2 + 6, 104); g.restore();
-  g.font = 'bold 14px system-ui, sans-serif'; spaced(4); g.fillStyle = '#f3dfb6'; g.fillText(OPT.stocks + (OPT.stocks === 1 ? ' STOCK' : ' STOCKS') + '   ·   8 MINUTES   ·   ' + STAGES[OPT.stage].name.toUpperCase(), W / 2 + 2, 138); spaced(0);
-  for (const dir of [-1, 1]) { q = g.createLinearGradient(W / 2 + dir * 250, 0, W / 2 + dir * 430, 0); q.addColorStop(0, 'rgba(255,170,90,.85)'); q.addColorStop(1, 'rgba(255,170,90,0)'); g.fillStyle = q; g.fillRect(dir > 0 ? W / 2 + 250 : W / 2 - 430, 132, 180, 2); }
+  g.textAlign = 'center'; g.font = '900 72px ' + serif; spaced(10);
+  g.save(); g.shadowColor = 'rgba(255,130,40,.65)'; g.shadowBlur = 30 + Math.sin(t * 0.05) * 7;
+  q = g.createLinearGradient(0, 56, 0, 112); q.addColorStop(0, '#fff6dc'); q.addColorStop(0.5, '#ffc56a'); q.addColorStop(1, '#f0702c');
+  g.lineWidth = 6; g.strokeStyle = '#2a1410'; g.lineJoin = 'round'; g.strokeText('EMBERFALL', W / 2 + 5, 110); g.fillStyle = q; g.fillText('EMBERFALL', W / 2 + 5, 110); g.restore();
+  g.font = 'bold 14px system-ui, sans-serif'; spaced(4); g.fillStyle = '#f3dfb6'; g.fillText(OPT.stocks + (OPT.stocks === 1 ? ' STOCK' : ' STOCKS') + '   ·   8 MINUTES   ·   ' + STAGES[OPT.stage].name.toUpperCase(), W / 2 + 2, 140); spaced(0);
+  for (const dir of [-1, 1]) { q = g.createLinearGradient(W / 2 + dir * 250, 0, W / 2 + dir * 430, 0); q.addColorStop(0, 'rgba(255,170,90,.85)'); q.addColorStop(1, 'rgba(255,170,90,0)'); g.fillStyle = q; g.fillRect(dir > 0 ? W / 2 + 250 : W / 2 - 430, 134, 180, 2); }
+  const pointed = b => (MOUSE && inBox(b, MOUSE.x, MOUSE.y)) || slots.some(p => p && p.cx !== undefined && inBox(b, p.cx, p.cy));
 
   /* ---- the roster: one portrait tile for each fighter, with each player's marker on the one they are on ---- */
   { const th = 124, y0 = 158, tw = rosterTile(0)[2];
@@ -267,8 +273,10 @@ function drawSelect(three) {
       g.save(); rr(x, y0, tw, th, 10); g.clip(); g.fillStyle = fm.col[0]; g.globalAlpha = 0.16; g.beginPath(); g.arc(x + tw / 2, y0 + th * 0.62, tw * 0.46, 0, TAU); g.fill(); g.globalAlpha = 1;
       const k2 = Math.min(5.2, 74 / (fm.st.h + 3)); g.translate(x + tw / 2, y0 + th - 30); g.scale(k2, -k2); ART[fm.name](fm.col, frame + k * 30, null); g.restore();
       g.fillStyle = 'rgba(10,8,20,.82)'; rr(x, y0 + th - 26, tw, 26, 10); g.fill(); g.fillRect(x, y0 + th - 26, tw, 10);
-      g.textAlign = 'center'; g.font = 'bold 14px system-ui, sans-serif'; g.fillStyle = on.length ? '#fff' : '#d8d2ee'; g.fillText(d.name, x + tw / 2, y0 + th - 8);
-      g.strokeStyle = 'rgba(255,255,255,.14)'; g.lineWidth = 1; rr(x, y0, tw, th, 10); g.stroke();
+      let fs = 14; g.font = 'bold 14px system-ui, sans-serif'; while (fs > 10 && g.measureText(d.name).width > tw - 10) { fs--; g.font = 'bold ' + fs + 'px system-ui, sans-serif'; }   /* long names shrink to fit */
+      g.textAlign = 'center'; g.fillStyle = on.length ? '#fff' : '#d8d2ee'; g.fillText(d.name, x + tw / 2, y0 + th - 8);
+      const hov = MOUSE && inBox(rosterTile(k), MOUSE.x, MOUSE.y);
+      g.strokeStyle = hov ? 'rgba(255,217,138,.85)' : 'rgba(255,255,255,.14)'; g.lineWidth = hov ? 2 : 1; rr(x, y0, tw, th, 10); g.stroke();
       on.forEach((pk, m) => { const pc = PC[pk], sl = slots[pk], pulse = sl.ready ? 1 : 0.65 + 0.35 * Math.sin(t * 0.12 + pk); g.globalAlpha = pulse; g.strokeStyle = pc; g.lineWidth = 4; rr(x - 3 - m * 5, y0 - 3 - m * 5, tw + 6 + m * 10, th + 6 + m * 10, 12 + m * 3); g.stroke(); g.globalAlpha = 1;
         const bx = pk ? x + tw - 44 : x + 6; g.fillStyle = pc; rr(bx, y0 + 6, 38, 20, 10); g.fill(); g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#16121f'; g.fillText(sl.ready ? 'P' + (pk + 1) + ' ✓' : 'P' + (pk + 1), bx + 19, y0 + 20); });
     }); }
@@ -281,41 +289,58 @@ function drawSelect(three) {
     g.textAlign = 'left'; g.font = 'bold 13px system-ui, sans-serif'; spaced(3); g.fillStyle = pc; g.fillText(!sl && k ? 'PLAYER 2  /  CPU' : 'PLAYER ' + (k + 1), x + 24, y + 30); spaced(0);
     if (!sl) {
       const pulse = 0.6 + 0.4 * Math.sin(t * 0.07);
-      if (!k) { g.textAlign = 'center'; g.font = 'bold 26px system-ui, sans-serif'; g.fillStyle = 'rgba(255,255,255,' + pulse.toFixed(2) + ')'; g.fillText('Press Attack to join', x + cw / 2, y + 92); g.font = '14px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('Attack on a controller  ·  ' + keyName(setupOf('kb').map.atk) + ' on the keyboard', x + cw / 2, y + 120); continue; }
-      /* empty second slot: the CPU and its level */
-      g.font = 'bold 34px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('CPU', x + 24, y + 78);
-      g.font = '15px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(CPU_LEVEL === 0 ? 'level 0: stands still, for testing' : CPU_PICK >= 0 ? 'plays ' + ROSTER[CPU_PICK].name : 'drag its token to a fighter, or it picks at random', x + 24, y + 102);
-      g.textAlign = 'right'; g.font = 'bold 13px system-ui, sans-serif'; spaced(2); g.fillStyle = '#f3dfb6'; g.fillText('LEVEL', x + cw - 86, y + 62); spaced(0);
-      g.font = '900 44px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(String(CPU_LEVEL), x + cw - 30, y + 74);
-      for (let n = 1; n <= 9; n++) { g.fillStyle = n <= CPU_LEVEL ? pc : 'rgba(255,255,255,.16)'; rr(x + cw - 30 - (10 - n) * 21, y + 88, 17, 7, 3); g.fill(); }
-      g.font = '13px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point here: Attack raises, Special lowers', x + cw - 30, y + 116);
-      g.textAlign = 'left'; g.fillStyle = 'rgba(255,255,255,' + (0.45 + 0.3 * pulse).toFixed(2) + ')'; g.fillText('or press Attack on another controller to join', x + 24, y + 140);
+      if (!k) { g.textAlign = 'center'; g.font = 'bold 26px system-ui, sans-serif'; g.fillStyle = 'rgba(255,255,255,' + pulse.toFixed(2) + ')'; g.fillText('Press Attack to join', x + cw / 2, y + 88);
+        g.font = '14px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('Attack on a controller  ·  ' + keyName(setupOf('kb').map.atk) + ' on the keyboard', x + cw / 2, y + 116);
+        g.font = '13px system-ui, sans-serif'; g.fillStyle = '#8f88ad'; g.fillText('or click a fighter', x + cw / 2, y + 138); continue; }
+      /* empty second slot: the CPU, the spot its token rests on, and its level with − and + */
+      g.font = 'bold 34px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('CPU', x + 24, y + 80);
+      g.font = '15px system-ui, sans-serif'; g.fillStyle = '#d8d2ee'; g.fillText(CPU_LEVEL === 0 ? 'stands still, for testing' : CPU_PICK >= 0 ? 'plays ' + ROSTER[CPU_PICK].name : 'random fighter', x + 24, y + 106);
+      { const [dx, dy] = CPU_DOCK, free = CPU_PICK >= 0 || CPU_TOK.drag; g.strokeStyle = 'rgba(201,195,220,' + (free ? 0.75 : 0.35) + ')'; g.lineWidth = 2; g.setLineDash([5, 4]); g.beginPath(); g.arc(dx, dy, 22, 0, TAU); g.stroke(); g.setLineDash([]);
+        g.textAlign = 'center'; g.font = '12px system-ui, sans-serif'; g.fillStyle = '#9d96b8'; g.fillText(free ? 'drop here for random' : 'drag to a fighter', dx, dy + 40); }
+      { const m = CPU_LV.length - 1, cx = (CPU_MINUS[0] + CPU_PLUS[0] + CPU_PLUS[2]) / 2;
+        g.textAlign = 'center'; g.font = 'bold 12px system-ui, sans-serif'; spaced(2); g.fillStyle = '#f3dfb6'; g.fillText('LEVEL', cx, y + 36); spaced(0);
+        for (const [b, glyph, off] of [[CPU_MINUS, '−', CPU_LEVEL <= 0], [CPU_PLUS, '+', CPU_LEVEL >= m]]) { const hot = !off && pointed(b);
+          g.fillStyle = hot ? 'rgba(255,217,138,.9)' : off ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.12)'; rr(b[0], b[1], b[2], b[3], 10); g.fill(); g.strokeStyle = off ? 'rgba(255,255,255,.1)' : 'rgba(255,255,255,.3)'; g.lineWidth = 1; g.stroke();
+          g.font = 'bold 26px system-ui, sans-serif'; g.fillStyle = hot ? '#1a1230' : off ? '#5a5570' : '#fff'; g.fillText(glyph, b[0] + b[2] / 2, b[1] + b[3] / 2 + 9); }
+        g.font = '900 40px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(String(CPU_LEVEL), cx, CPU_MINUS[1] + 35);
+        const bx = CPU_MINUS[0], bw = CPU_PLUS[0] + CPU_PLUS[2] - bx, sw = (bw - (m - 1) * 3) / m;
+        for (let n = 1; n <= m; n++) { g.fillStyle = n <= CPU_LEVEL ? pc : 'rgba(255,255,255,.16)'; rr(bx + (n - 1) * (sw + 3), y + 100, sw, 7, 3); g.fill(); } }
+      g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = 'rgba(255,255,255,' + (0.45 + 0.3 * pulse).toFixed(2) + ')'; g.fillText('Another controller?  Press Attack to join', x + 24, y + 140);
       continue;
     }
-    const d = ROSTER[sl.pick], same = k && slots[0] && slots[0].pick === sl.pick;
+    const d = ROSTER[sl.pick], same = k && slots[0] && slots[0].pick === sl.pick, nf = selForms(d).length;
     g.textAlign = 'right'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(devName(sl.dev) + '  ·  ' + setupOf(sl.dev).name.replace(/\s+/g, ' '), x + cw - 20, y + 30);
-    g.textAlign = 'left'; g.font = 'bold 44px ' + serif; g.fillStyle = '#fff'; g.fillText(d.name, x + 52, y + 84);
-    const nw = g.measureText(d.name).width; g.font = 'bold 30px system-ui, sans-serif'; g.fillStyle = sl.ready ? 'rgba(255,255,255,.18)' : '#ffd98a'; g.fillText('‹', x + 24, y + 81); g.fillText('›', x + 62 + nw, y + 81);
+    g.textAlign = 'left'; g.font = 'bold 44px ' + serif; g.fillStyle = '#fff'; g.fillText(d.name, x + 24, y + 84);
     g.font = 'italic 16px ' + serif; g.fillStyle = '#f3dfb6'; g.fillText(d.sub, x + 26, y + 110);
-    if (selForms(d).length > 1) {   /* the companions; in 3D the one standing on the island is lit */
-      const now = Math.floor(t / 170) % selForms(d).length; let fx = x + 26;
+    if (nf > 1) {   /* the companions; in 3D the one standing on the island is lit */
+      const now = Math.floor(t / 170) % nf; let fx = x + 26;
       selForms(d).forEach((fm, n) => { g.font = (three && n === now ? 'bold ' : '') + '13px system-ui, sans-serif'; const w = g.measureText(fm.label || fm.name).width + 18; g.fillStyle = three && n === now ? pc : 'rgba(255,255,255,.1)'; rr(fx, y + 120, w, 22, 11); g.fill(); g.fillStyle = three && n === now ? '#16121f' : '#d8d2ee'; g.textAlign = 'center'; g.fillText(fm.label || fm.name, fx + w / 2, y + 135); g.textAlign = 'left'; fx += w + 6; });
     }
     if (!three) selForms(d).forEach((fm, n, a) => { g.save(); g.translate(x + cw - 60 - (a.length - 1 - n) * 62, y + 112); g.scale(3.4, -3.4); ART[fm.name](same ? fm.alt : fm.col, frame, null); g.restore(); });
-    g.textAlign = 'right';
-    if (sl.ready) { g.fillStyle = '#9be564'; rr(x + cw - 108, y + 118, 88, 26, 13); g.fill(); g.font = 'bold 14px system-ui, sans-serif'; spaced(2); g.fillStyle = '#12200c'; g.textAlign = 'center'; g.fillText('READY', x + cw - 63, y + 136); spaced(0); }
-    else if ((three || selForms(d).length === 1) && selForms(d).length < 4) { g.font = '13px system-ui, sans-serif'; g.fillStyle = '#cfc8e8'; g.fillText('Point at a fighter  ·  Attack to pick', x + cw - 20, y + 136); }
+    /* what this player's buttons do now, with their own buttons on the caps */
+    if (sl.ready) { g.fillStyle = '#9be564'; rr(x + cw - 108, y + 120, 88, 26, 13); g.fill(); g.font = 'bold 14px system-ui, sans-serif'; spaced(2); g.fillStyle = '#12200c'; g.textAlign = 'center'; g.fillText('READY', x + cw - 63, y + 138); spaced(0);
+      if (nf === 1) hintsRight(x + cw - 120, y + 138, [[actCap(sl.dev, 'spc'), 'Change']]); }
+    else if (nf < 4) hintsRight(x + cw - 20, y + 138, nf > 1 ? [[actCap(sl.dev, 'atk'), 'Pick']] : [[actCap(sl.dev, 'atk'), 'Pick'], [actCap(sl.dev, 'spc'), 'Leave'], [sl.dev === 'kb' ? '+' : padCap('+', sl.dev), 'Moves']]);
   }
 
-  /* ---- start prompt, between the cards ---- */
+  /* ---- the middle: READY TO FIGHT across the screen once everyone in is ready, or who is still choosing ---- */
   g.textAlign = 'center';
-  const go = slots[0] && slots[0].ready && (!slots[1] || slots[1].ready);
-  if (go) {
-    const p = 0.5 + 0.5 * Math.sin(t * 0.09), bw = 236, bx = W / 2 - bw / 2, by = 486;
-    g.save(); g.shadowColor = 'rgba(255,140,50,' + (0.5 + 0.4 * p).toFixed(2) + ')'; g.shadowBlur = 26; q = g.createLinearGradient(0, by, 0, by + 56); q.addColorStop(0, '#ffc867'); q.addColorStop(1, '#ef6d2a'); g.fillStyle = q; rr(bx, by, bw, 56, 28); g.fill(); g.restore();
-    g.font = '900 26px system-ui, sans-serif'; spaced(4); g.fillStyle = '#2a1208'; g.fillText('FIGHT', W / 2 + 2, by + 36); spaced(0);
-    g.font = '13px system-ui, sans-serif'; g.fillStyle = '#f3dfb6'; g.fillText('Start on a controller  ·  Enter on the keyboard', W / 2, by + 80);
-  } else if (slots[0]) { g.fillStyle = 'rgba(20,17,36,.72)'; rr(W / 2 - 108, 492, 216, 54, 14); g.fill(); g.font = '14px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Point at a fighter,', W / 2, 515); g.fillText('then Attack to pick', W / 2, 535); }
+  if (selReady()) { SEL_GO_T++; const e = Math.min(1, SEL_GO_T / 12), ease = 1 - Math.pow(1 - e, 3), p = 0.5 + 0.5 * Math.sin(t * 0.09), [, by, , bh] = FIGHT_BAR, hot = pointed(FIGHT_BAR);
+    g.save(); g.globalAlpha = ease; g.translate((1 - ease) * -W * 0.25, 0);
+    q = g.createLinearGradient(0, 0, W, 0); q.addColorStop(0, 'rgba(239,109,42,0)'); q.addColorStop(0.2, 'rgba(239,109,42,.9)'); q.addColorStop(0.5, hot ? 'rgba(255,200,103,.98)' : 'rgba(255,178,82,.95)'); q.addColorStop(0.8, 'rgba(239,109,42,.9)'); q.addColorStop(1, 'rgba(239,109,42,0)');
+    g.shadowColor = 'rgba(255,140,50,' + (0.45 + 0.4 * p).toFixed(2) + ')'; g.shadowBlur = 24; g.fillStyle = q; g.fillRect(0, by, W, bh); g.shadowBlur = 0;
+    g.fillStyle = 'rgba(255,240,200,.75)'; g.fillRect(W * 0.15, by, W * 0.7, 2); g.fillRect(W * 0.15, by + bh - 2, W * 0.7, 2);
+    g.font = 'italic 900 34px system-ui, sans-serif'; spaced(6); g.fillStyle = '#2a1208'; g.fillText('READY TO FIGHT', W / 2 + 3, by + 38); spaced(0);
+    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = 'rgba(42,18,8,.8)'; g.fillText((slots.some(q => q && q.dev !== 'kb') ? padCap('+', slots.find(q => q && q.dev !== 'kb').dev) + ' / Start' : 'Start') + '  ·  Enter  ·  or click here', W / 2, by + 56);
+    g.restore(); }
+  else { SEL_GO_T = 0; if (slots[0]) {
+    const part = n => { const sl = slots[n]; return sl ? ['P' + (n + 1) + (sl.ready ? '  ready ✓' : '  choosing…'), sl.ready ? '#9be564' : PC[n]] : ['CPU  level ' + CPU_LEVEL, '#c9c3dc']; };
+    const parts = [part(0), part(1)]; g.font = 'bold 14px system-ui, sans-serif'; const ws = parts.map(([s]) => g.measureText(s).width), tw = ws[0] + ws[1] + 44, bx = W / 2 - tw / 2;
+    g.fillStyle = 'rgba(20,17,36,.78)'; rr(bx - 14, 378, tw + 28, 32, 16); g.fill(); g.strokeStyle = 'rgba(255,255,255,.14)'; g.lineWidth = 1; g.stroke();
+    g.textAlign = 'left'; let px = bx; parts.forEach(([s, c], n) => { g.fillStyle = c; g.fillText(s, px, 399); px += ws[n]; if (!n) { g.fillStyle = '#6d6885'; g.fillText('·', px + 18, 399); px += 44; } }); g.textAlign = 'center'; } }
+  /* ---- a short note when a switch changes ---- */
+  if (SEL_TOAST) { const a = Math.min(1, SEL_TOAST.t / 6, (100 - SEL_TOAST.t) / 20); g.globalAlpha = Math.max(0, a); g.font = 'bold 15px system-ui, sans-serif'; const w = g.measureText(SEL_TOAST.text).width + 40;
+    g.fillStyle = 'rgba(20,17,36,.92)'; rr(W / 2 - w / 2, 326, w, 30, 15); g.fill(); g.strokeStyle = SEL_TOAST.col; g.lineWidth = 2; g.stroke(); g.fillStyle = SEL_TOAST.col; g.textAlign = 'center'; g.fillText(SEL_TOAST.text, W / 2, 346); g.globalAlpha = 1; }
 
   /* ---- controls and a tip ---- */
   const px = 44, py = 620, pw = W - 88;
@@ -329,37 +354,17 @@ function drawSelect(three) {
   g.textAlign = 'left'; g.font = 'bold 11px system-ui, sans-serif'; spaced(2); g.fillStyle = '#ffb86b'; g.fillText('TIP', px + 18, py + 77); spaced(0);
   g.font = '14px system-ui, sans-serif'; g.fillStyle = 'rgba(255,255,255,' + a.toFixed(2) + ')'; g.fillText(TIPS[n].replace(/(press|and) A\b/g, (s, w) => w + ' ' + padCap('A')), px + 126, py + 77);
 
-  /* ---- hitbox switch (top right) and the note about a newer version (top middle) ---- */
-  if (!SWITCHES) { const w = 168, x = W - 44 - w, y = 20;   /* the switches are hidden: just say how to bring them back */
-    g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = 'rgba(255,255,255,.16)'; g.lineWidth = 1; g.stroke();
-    g.fillStyle = '#ffd166'; g.beginPath(); g.arc(x + 20, y + 17, 10, 0, TAU); g.fill(); g.textAlign = 'center'; g.font = 'bold 15px system-ui, sans-serif'; g.fillStyle = '#2a1208'; g.fillText('+', x + 20, y + 22);
-    g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Show switches', x + 38, y + 22); }
-  if (SWITCHES) {
-  { const on = DBG.boxes, w = 214, x = W - 44 - w, y = 20;
-    g.fillStyle = 'rgba(20,17,36,.8)'; rr(x - 36, y, w + 36, 34, 17); g.fill(); g.strokeStyle = on ? '#ff6a6a' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
-    g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.font = '12px system-ui, sans-serif'; g.fillText('Show Hitboxes', x - 22, y + 22);
-    g.fillStyle = on ? '#ff6a6a' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
-    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(padCap('X') + ' / ' + padCap('Y') + '  or  B key', x + 130, y + 22); }
-  { const on = TRAINING, w = 214, x = W - 44 - w, y = 100;   /* training mode switch */
-    g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = on ? '#9be564' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
-    g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Training', x + 12, y + 22);
-    g.fillStyle = on ? '#9be564' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
-    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point + ' + padCap('A') + '  or  T key', x + 128, y + 22); }
-  { const on = DBG.fx, w = 214, x = W - 44 - w, y = 60;   /* hit effects switch: the sparks and flash where a hit lands */
-    g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = on ? '#ffd166' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
-    g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Hit sparks', x + 12, y + 22);
-    g.fillStyle = on ? '#ffd166' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
-    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('Shield  or  H key', x + 128, y + 22); }
-  { const on = DBG.arcs, w = 214, x = W - 44 - w, y = 140;   /* attack arcs switch: the circles and sweeps over an attack while it can hit */
-    g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = on ? '#8fd3ff' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
-    g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Attack arcs', x + 12, y + 22);
-    g.fillStyle = on ? '#8fd3ff' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
-    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point + ' + padCap('A') + '  or  G key', x + 128, y + 22); }
-  }
-  if (SWITCHES && DESKTOP()) for (const [box, label, hint, col, hot] of [[ONLINE_PILL, 'Online', 'point + ' + padCap('A') + ': host or join', '#ffb35c', false], [QUIT_PILL, QUIT_ASK > 0 ? 'Quit?' : 'Quit', QUIT_ASK > 0 ? 'press ' + padCap('A') + ' again to quit' : 'point + A, twice', '#ff6a6a', QUIT_ASK > 0]]) {   /* desktop app: reachable with a controller's cursor */
-    const [x, y, w] = box; g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = hot ? col : 'rgba(255,255,255,.16)'; g.lineWidth = hot ? 2 : 1; g.stroke();
-    g.textAlign = 'left'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = col; g.fillText(label, x + 12, y + 22);
-    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(hint, x + 80, y + 22); }
+  /* ---- the bar along the top (sim.js: selChips): switches drawn as switches, buttons as buttons; what one does shows while it is pointed at ---- */
+  let tip = null;
+  for (const c of selChips()) { const [x, y, w, h] = c.box, hot = pointed(c.box), sw = c.on !== undefined;
+    g.fillStyle = hot ? 'rgba(40,33,66,.92)' : 'rgba(20,17,36,.8)'; rr(x, y, w, h, h / 2); g.fill(); g.strokeStyle = hot || c.hot ? c.col : sw && c.on ? c.col + '88' : 'rgba(255,255,255,.16)'; g.lineWidth = hot || c.hot ? 2 : 1; g.stroke();
+    g.font = (sw ? '' : 'bold ') + '13px system-ui, sans-serif';
+    if (sw) { g.textAlign = 'left'; g.fillStyle = c.on ? '#fff' : '#cfc8e8'; g.fillText(c.label, x + 14, y + 21);
+      g.fillStyle = c.on ? c.col : '#55506a'; rr(x + w - 50, y + 8, 36, 16, 8); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(c.on ? x + w - 22 : x + w - 42, y + 16, 6, 0, TAU); g.fill(); }
+    else { g.textAlign = 'center'; g.fillStyle = c.col; g.fillText(c.label, x + w / 2, y + 21); }
+    if (hot && !tip) tip = c; }
+  if (tip) { g.font = '12px system-ui, sans-serif'; const w = g.measureText(tip.tip).width + 20, x = Math.max(8, Math.min(W - 8 - w, tip.box[0] + tip.box[2] / 2 - w / 2)), y = tip.box[1] + tip.box[3] + 6;
+    g.fillStyle = 'rgba(10,8,20,.94)'; rr(x, y, w, 24, 6); g.fill(); g.strokeStyle = 'rgba(255,255,255,.18)'; g.lineWidth = 1; g.stroke(); g.textAlign = 'center'; g.fillStyle = '#e6e0f6'; g.fillText(tip.tip, x + w / 2, y + 16); }
   /* ---- each player's cursor: a round token with a pointer at its top left, where it points ---- */
   for (let k = 0; k < 2; k++) { const sl = slots[k]; if (!sl || sl.cx === undefined) continue; const x = sl.cx, y = sl.cy, pc = PC[k];
     g.save(); g.shadowColor = 'rgba(0,0,0,.55)'; g.shadowBlur = 8; g.shadowOffsetY = 2;
@@ -376,18 +381,17 @@ function drawSelect(three) {
     g.strokeStyle = hov ? '#ffd98a' : '#fff'; g.lineWidth = 2.5; g.beginPath(); g.arc(x + 24, y + 24 - lift, 18, 0, TAU); g.stroke();
     g.textAlign = 'center'; g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#16121f'; g.fillText('CPU', x + 24, y + 28 - lift); }
   drawOptButton();
-  g.textAlign = 'center'; drawUpdateNote(14);
+  g.textAlign = 'center'; drawUpdateNote(290);
   drawOptions();
   drawCMenu();
 }
 /* the Options button at the top left of the fighter select (sim.js: OPT_PILL), lit while a cursor or the mouse is on it */
 function drawOptButton() {
   const [x, y, w, h] = OPT_PILL, hot = OPT_UI.open || slots.some(q => q && q.cx !== undefined && inBox(OPT_PILL, q.cx, q.cy)) || (MOUSE && inBox(OPT_PILL, MOUSE.x, MOUSE.y));
-  g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, h, 17); g.fill(); g.strokeStyle = hot ? '#ffd166' : 'rgba(255,255,255,.16)'; g.lineWidth = hot ? 2 : 1; g.stroke();
-  const cx = x + 20, cy = y + 17; g.fillStyle = '#ffd166'; g.beginPath(); for (let k = 0; k < 16; k++) { const a = k * Math.PI / 8, r = k % 2 ? 6 : 9; g.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); } g.closePath(); g.fill();   /* a little cog */
+  g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, h, h / 2); g.fill(); g.strokeStyle = hot ? '#ffd166' : 'rgba(255,255,255,.16)'; g.lineWidth = hot ? 2 : 1; g.stroke();
+  const cx = x + 22, cy = y + h / 2; g.fillStyle = '#ffd166'; g.beginPath(); for (let k = 0; k < 16; k++) { const a = k * Math.PI / 8, r = k % 2 ? 6 : 9; g.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); } g.closePath(); g.fill();   /* a little cog */
   g.fillStyle = '#2a1208'; g.beginPath(); g.arc(cx, cy, 3, 0, TAU); g.fill();
-  g.textAlign = 'left'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = '#ffe2a8'; g.fillText('Options', x + 38, y + 22);
-  g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('stage, controllers', x + 104, y + 22);
+  g.textAlign = 'left'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = '#ffe2a8'; g.fillText('Options', x + 42, y + 21);
 }
 /* the Options panel: Stocks and Stage, each with arrows; the Controllers box (what is plugged in, what kind it is, the setup
    it uses; A or a click opens its controls screen); Done */

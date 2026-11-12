@@ -56,7 +56,7 @@ const NET = (function () {
   };
   N.load = s => {
     /* write each copy back into the very object it was taken from, so outside references (the renderer's) stay good */
-    const back = new Map(); for (const [live, c] of s.g.pairs) back.set(c, live);
+    let back = s.back; if (!back) { back = new Map(); for (const [live, c] of s.g.pairs) back.set(c, live); s.back = back; }   /* kept with the snapshot: one loaded again (the CPU's look-ahead loads the same few many times) skips rebuilding it */
     const tr = v => (v !== null && typeof v === 'object' && back.has(v)) ? back.get(v) : v;
     for (const [live, c] of s.g.pairs) {
       if (Array.isArray(live)) { live.length = c.length; for (let i = 0; i < c.length; i++) live[i] = tr(c[i]); }
