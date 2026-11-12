@@ -17,7 +17,8 @@ function finalBg(c, w, h, s) {
   c.translate(w / 2, h / 2); c.rotate(FINAL_ROLL); c.translate(-w / 2, -h / 2);
   let q = c.createRadialGradient(s.cx, s.cy, 0, s.cx, s.cy, R * 0.75);
   q.addColorStop(0, '#fff8d2'); q.addColorStop(0.07, '#ffd65c'); q.addColorStop(0.18, '#ff8a1e'); q.addColorStop(0.38, '#e8261a'); q.addColorStop(0.68, '#8c0712'); q.addColorStop(1, '#2c0006');
-  c.fillStyle = q; c.fillRect(-w, -h, w * 3, h * 3);
+  const m = 0.1 * w;   /* the tilt only needs a little past the edges filled, not nine screens' worth */
+  c.fillStyle = q; c.fillRect(-m, -m, w + 2 * m, h + 2 * m);
   /* rays out of the victim: light and dark wedges, turning slowly */
   const rnd = finalRnd(7), n = 72;
   for (let k = 0; k < n; k++) {
@@ -27,17 +28,17 @@ function finalBg(c, w, h, s) {
   }
   /* the hot core behind the victim */
   q = c.createRadialGradient(s.cx, s.cy, 0, s.cx, s.cy, Math.max(80, s.vh * 1.6)); q.addColorStop(0, 'rgba(255,255,235,.95)'); q.addColorStop(0.35, 'rgba(255,220,120,.55)'); q.addColorStop(1, 'rgba(255,140,40,0)');
-  c.fillStyle = q; c.fillRect(-w, -h, w * 3, h * 3);
+  c.fillStyle = q; c.fillRect(-m, -m, w + 2 * m, h + 2 * m);
   c.restore();
 }
 function finalBolt(c, rnd, x0, y0, x1, y1) {
   const pts = [[x0, y0]], n = 9;
   for (let k = 1; k < n; k++) { const f = k / n, j = (1 - f) * 38 + 8; pts.push([x0 + (x1 - x0) * f + (rnd() - 0.5) * j * 2, y0 + (y1 - y0) * f + (rnd() - 0.5) * j * 2]); }
   pts.push([x1, y1]);
-  for (const [lw, col, blur] of [[9, 'rgba(255,150,30,.55)', 22], [3.5, '#fff1a8', 10], [1.4, '#ffffff', 0]]) {
-    c.lineWidth = lw; c.strokeStyle = col; c.shadowColor = '#ffb020'; c.shadowBlur = blur; c.beginPath(); pts.forEach(([x, y], k) => k ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke();
-  }
-  c.shadowBlur = 0;
+  /* the glow is wide faint strokes under the bright ones (drawn with 'lighter'): a canvas shadowBlur here cost more than the
+     rest of the frame put together, every frame of the freeze */
+  c.lineJoin = 'round'; c.lineCap = 'round'; c.beginPath(); pts.forEach(([x, y], k) => k ? c.lineTo(x, y) : c.moveTo(x, y));
+  for (const [lw, col] of [[30, 'rgba(255,140,20,.10)'], [18, 'rgba(255,160,40,.16)'], [9, 'rgba(255,150,30,.5)'], [3.5, '#fff1a8'], [1.4, '#ffffff']]) { c.lineWidth = lw; c.strokeStyle = col; c.stroke(); }
 }
 function finalFg(c, w, h, s) {
   const R = Math.hypot(w, h), t = s.t;

@@ -10,17 +10,18 @@ global.document = { getElementById: () => ({ getContext: () => ctx }) }; global.
 global.localStorage = { getItem() { return null; }, setItem() {} };
 Object.defineProperty(global, 'navigator', { value: { getGamepads: () => [] }, configurable: true });
 let seed = 4242; Math.random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
-for (const f of ['hitboxes.js', 'sim.js', 'net.js', 'tools/knell-lab.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 global.JOB = JSON.parse(fs.readFileSync(process.argv[2], 'utf8')); global.FS = fs;
+/* JOB.labs: more lab files loaded after knell-lab.js (e.g. tools/sack-lab.js for Potato Sack, with sit.me his roster index) */
+for (const f of ['hitboxes.js', 'sim.js', 'net.js', 'tools/knell-lab.js'].concat(JOB.labs || [])) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 vm.runInThisContext(`
 (function () {
   const J = JOB, K = KLAB;
-  const G = ['jab', 'jab2', 'jab3', 'ftilt', 'ftiltH', 'ftiltL', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash', 'dash', 'grab_f', 'grab_b', 'grab_u', 'grab_d', 'nspec', 'nspecH', 'nspecL', 'sspec', 'uspecG'];
-  const AIR = ['nair', 'fair', 'fairH', 'fairL', 'bair', 'uair', 'dair', 'nspecA', 'nspecAH', 'sspecA', 'uspec'];
-  const H = ['hf', 'hb', 'hu'];
+  const G = J.G || ['jab', 'jab2', 'jab3', 'ftilt', 'ftiltH', 'ftiltL', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash', 'dash', 'grab_f', 'grab_b', 'grab_u', 'grab_d', 'nspec', 'nspecH', 'nspecL', 'sspec', 'uspecG'];
+  const AIR = J.AIR || ['nair', 'fair', 'fairH', 'fairL', 'bair', 'uair', 'dair', 'nspecA', 'nspecAH', 'sspecA', 'uspec'];
+  const H = J.H || ['hf', 'hb', 'hu'];
   const W = J.steps === 'lite' ? ['', 'w4', 'w10'] : ['', 'w3', 'w7', 'w12', 'w18'], W2 = J.steps === 'lite' ? ['', 'w6'] : ['', 'w4', 'w9'];
   const cat = (...p) => p.filter(Boolean);
-  const STEPS = [];
+  const STEPS = (J.extra || []).map(x => x.split(' '));
   for (const w of W) { for (const g of G) STEPS.push(cat(w, g)); for (const a of AIR) STEPS.push(cat(w, a)); }
   for (const w of W) for (const j of ['sh', 'fh']) for (const w2 of W2) for (const a of AIR) STEPS.push(cat(w, j, w2, a));
   for (const w of W) for (const w2 of W2) for (const a of AIR) { STEPS.push(cat(w, 'dj', w2, a)); STEPS.push(cat(w, 'ff', w2, a)); }
@@ -73,7 +74,7 @@ vm.runInThisContext(`
     for (let t = 0; t < 240; t++) { step(); frames++; K.after(e, F[0]); w.frame(); if (F[1].kos > kDeaths0) return null; if (w.ko) return w.koHurt && (w.firstReset < 0 || w.firstReset >= w.koT) ? strip(w) : null; if (w.resets > 0) return null; }
     return null;
   }
-  const sig = () => { const f = F[0], v = F[1]; return [Math.round(f.x / 2), Math.round(f.y / 2), Math.round(v.x / 2), Math.round(v.y / 2), Math.round(v.pct / 3), f.thread, f.state, f.mname, v.slowT > 0 ? 1 : 0].join(','); };
+  const sig = () => { const f = F[0], v = F[1]; return [Math.round(f.x / 2), Math.round(f.y / 2), Math.round(v.x / 2), Math.round(v.y / 2), Math.round(v.pct / 3), f.thread, f.state, f.mname, v.slowT > 0 ? 1 : 0].join(',') + (typeof LABSIG === 'function' ? ',' + LABSIG() : ''); };   /* LABSIG: a fighter lab's own state (the Viking's axe) */
   const score = c => c.pct + c.thread * (J.threadW || 6) + c.w.best * (J.hitW || 0.5);
   const found = [], seen = new Set(); let beam = [root];
   const t0 = Date.now();
