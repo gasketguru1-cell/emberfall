@@ -298,7 +298,8 @@ async function gcuOpen(d) {
 }
 function gcuConnect() {   /* the browser's own device chooser (needs a click); the desktop app picks the adapter itself */
   if (typeof navigator === 'undefined' || !navigator.usb) { GCU.err = 'this browser cannot reach USB devices: use Chrome or Edge, or the desktop app'; return Promise.resolve(); }
-  return navigator.usb.requestDevice({ filters: [{ vendorId: GC_VID, productId: GC_PID }] }).then(gcuOpen).catch(e => { if (!/no device selected/i.test(e.message)) GCU.err = e.message; });
+  if (navigator.userActivation && !navigator.userActivation.isActive) { GCU.err = 'click this row with the mouse: the browser only asks about USB after a click'; return Promise.resolve(); }   /* a controller press does not count */
+  return navigator.usb.requestDevice({ filters: [{ vendorId: GC_VID, productId: GC_PID }] }).then(gcuOpen).catch(e => { GCU.err = /no device selected/i.test(e.message) ? 'none chosen: is it plugged in, with the WinUSB driver (Zadig)?' : e.message; });
 }
 if (typeof navigator !== 'undefined' && navigator.usb && navigator.usb.getDevices) {
   navigator.usb.getDevices().then(ds => gcuOpen(ds.find(isGCU))).catch(() => {});
@@ -369,7 +370,9 @@ function menuRaw(dev) {
   const r = padRead(p), b = k => r.b(k) || (k === 8 && r.touch), ax = k => r.ax[k];
   return { x: b(15) || ax(0) > 0.55 ? 1 : b(14) || ax(0) < -0.55 ? -1 : 0, y: b(13) || ax(1) > 0.55 ? 1 : b(12) || ax(1) < -0.55 ? -1 : 0, ok: b(0), back: b(1) || b(8) || b(9), clear: b(3) };
 }
-function openCMenu(dev) { CMENU = { dev, page: 'controls', row: 0, capture: false, wait: false, closing: false, note: '', noteT: 0, prev: menuRaw(dev), rep: 0 }; sfx('confirm'); }
+function openCMenu(dev, via) { CMENU = { dev, via: via !== dev ? via : undefined, page: 'controls', row: 0, capture: false, wait: false, closing: false, note: '', noteT: 0, rep: 0 }; CMENU.prev = cmenuRaw(CMENU); sfx('confirm'); }
+/* the controls screen is worked by its own device, and also by the one that opened it from the Options panel (via) */
+function cmenuRaw(m) { const a = menuRaw(m.dev); if (!m.via) return a; const b = menuRaw(m.via); return { x: a.x || b.x, y: a.y || b.y, ok: a.ok || b.ok, back: a.back || b.back, clear: a.clear || b.clear }; }
 function cmenuNote(t) { CMENU.note = t; CMENU.noteT = 260; }
 /* The Sound page of the same screen: a slider and a mute for music, sound effects and menu sounds, and which battle music plays. */
 const SOUND_ROWS = [['music', 'Music'], ['sfx', 'Sound effects'], ['ui', 'Menu sounds']];
@@ -477,7 +480,7 @@ function cmenuClick(x, y) {
   cmenuOk(it, x < it.box[0] + it.box[2] / 2 ? -1 : 1);
 }
 function stepCMenu() {
-  const m = CMENU, r = menuRaw(m.dev), p = m.prev; m.prev = r; if (m.noteT > 0) m.noteT--;
+  const m = CMENU, r = cmenuRaw(m), p = m.prev; m.prev = r; if (m.noteT > 0) m.noteT--;
   const idle = !r.x && !r.y && !r.ok && !r.back && !r.clear;
   if (m.closing) { if (idle) CMENU = null; return; }   /* closes once everything is let go, so the press that closed it does nothing else */
   if (m.teach) { stepTeach(); return; }
@@ -3445,10 +3448,18 @@ function rosterTile(k) { const n = ROSTER.length, tw = Math.min(168, (W - 120) /
 const CPU_CARD = [W - 44 - 460, 446, 460, 158], TRAIN_PILL = [W - 44 - 214, 100, 214, 34], ARC_PILL = [W - 44 - 214, 140, 214, 34];
 /* Desktop app only (window.desktop): Online and Quit, under the switches, so a controller can reach them too. */
 const ONLINE_PILL = [W - 44 - 214, 180, 214, 34], QUIT_PILL = [W - 44 - 214, 220, 214, 34];
-/* The Options button, and the Options panel it opens (drawn by hud.js from the same boxes). Rows: Stocks, Stage, Done. */
+/* The Options button, and the Options panel it opens (drawn by hud.js from the same boxes). Rows: Stocks, Stage, then the
+   Controllers box (the keyboard and every controller plugged in, each opening its controls screen, and Nintendo's GameCube
+   adapter), then Done. */
 const OPT_PILL = [44, 20, 214, 34], OPT_UI = { open: false, row: 0, esc: false };
-function optLayout() { const P = [W / 2 - 300, 140, 600, 400], rows = [0, 1].map(k => { const y = P[1] + 96 + k * 84; return { box: [P[0] + 30, y, 540, 68], l: [P[0] + 290, y + 14, 40, 40], r: [P[0] + 510, y + 14, 40, 40] }; });
-  return { P, rows, done: [W / 2 - 90, P[1] + P[3] - 104, 180, 46] }; }
+function optLayout() {
+  const list = allDevs().map(dev => ({ kind: 'dev', dev })).concat([{ kind: 'gcu' }]), ph = Math.min(660, 236 + list.length * 46 + 112);   /* as tall as what is plugged in needs */
+  const P = [W / 2 - 320, (H - ph) / 2, 640, ph], rows = [0, 1].map(k => { const y = P[1] + 74 + k * 64; return { kind: k ? 'stage' : 'stocks', box: [P[0] + 30, y, 580, 56], l: [P[0] + 300, y + 8, 40, 40], r: [P[0] + 550, y + 8, 40, 40] }; });
+  const top = P[1] + 236, room = P[1] + P[3] - 104 - top, step = Math.min(46, room / list.length);
+  list.forEach((it, n) => { it.box = [P[0] + 30, top + n * step, 580, step - 6]; rows.push(it); });
+  rows.push({ kind: 'done', box: [W / 2 - 90, P[1] + P[3] - 92, 180, 46] });
+  return { P, rows, cbox: [P[0] + 18, P[1] + 196, P[2] - 36, top + list.length * step - P[1] - 196 + 6] };
+}
 function optOpen() { OPT_UI.open = true; OPT_UI.row = 0; OPT_UI.esc = true; for (const c of Object.values(DEVS)) { c.oh = c.ov = 0; c.orep = 0; } beep(700, 0.05, 'square', 0.03); }
 function optClose() { OPT_UI.open = false; saveOpt(); beep(420, 0.05, 'square', 0.03); }
 function optChange(row, d) {
@@ -3456,26 +3467,37 @@ function optChange(row, d) {
   else if (row === 1) { const n = STAGES.length; if (n < 2) { beep(220, 0.04, 'square', 0.02); return; } OPT.stage = (OPT.stage + d + n) % n; beep(600, 0.04, 'square', 0.03); }
   saveOpt();
 }
-/* a controller or the keyboard on the panel: up / down picks a row, left / right changes it (held to repeat), A changes it or
-   presses Done, B / Start / Esc closes */
+/* A on a row of the Controllers box: a device opens its controls screen (set up its buttons, teach it); the adapter row connects */
+function optPick(it, via) {
+  if (it.kind === 'done') optClose();
+  else if (it.kind === 'dev') openCMenu(it.dev, via);
+  else if (it.kind === 'gcu') { if (GCU.dev) { beep(220, 0.04, 'square', 0.02); return; } GCU.err = ''; sfx('confirm'); gcuConnect(); }
+}
+/* a controller or the keyboard on the panel: up / down picks a row, left / right changes it (held to repeat), A changes it,
+   opens a controller's controls or presses Done, B / Start / Esc closes */
 function optInput(c) {
-  const esc = c.dev === 'kb' && !!keys.Escape;
+  const esc = c.dev === 'kb' && !!keys.Escape, rows = optLayout().rows, n = rows.length; if (OPT_UI.row >= n) OPT_UI.row = n - 1;   /* a controller was unplugged */
   if (c.pressed('spc') || c.pressed('start') || c.pressed('sel') || (esc && !OPT_UI.esc)) { OPT_UI.esc = esc; optClose(); return; }
   if (c.dev === 'kb') OPT_UI.esc = esc;
   const lx = c.c.lx, ly = c.c.ly, hx = lx > 0.6 ? 1 : lx < -0.6 ? -1 : 0, vy = Math.abs(ly) > 0.6 && Math.abs(ly) > Math.abs(lx) ? sgn(ly) : 0;
-  if (vy && vy !== c.ov) { OPT_UI.row = (OPT_UI.row - vy + 3) % 3; sfx('menu_move'); } c.ov = vy;
+  if (vy && vy !== c.ov) { OPT_UI.row = (OPT_UI.row - vy + n) % n; sfx('menu_move'); } c.ov = vy;
   if (OPT_UI.row < 2) { if (hx && hx === c.oh) { if (++c.orep > 20 && c.orep % 4 === 0) optChange(OPT_UI.row, hx); } else if (hx) { c.orep = 0; optChange(OPT_UI.row, hx); } } c.oh = hx;
-  if (c.pressed('atk')) { if (OPT_UI.row === 2) optClose(); else if (OPT_UI.row === 0 && OPT.stocks >= 99) { OPT.stocks = 1; saveOpt(); beep(450, 0.04, 'square', 0.03); }   /* A past 99 goes round to 1 */ else optChange(OPT_UI.row, 1); }
+  if (c.pressed('atk')) { if (OPT_UI.row >= 2) optPick(rows[OPT_UI.row], c.dev); else if (OPT_UI.row === 0 && OPT.stocks >= 99) { OPT.stocks = 1; saveOpt(); beep(450, 0.04, 'square', 0.03); }   /* A past 99 goes round to 1 */ else optChange(OPT_UI.row, 1); }
 }
-/* the mouse (or a finger): the Options button opens the panel; on it, the arrows change a row, Done or anywhere outside closes it */
+/* the mouse (or a finger): the Options button opens the panel; on it, the arrows change a row, a controller's row opens its
+   controls, Done or anywhere outside closes it */
 function optClick(x, y) {
   if (mode !== 'select' || UI_MODAL || CMENU || (typeof ML !== 'undefined' && ML.open)) return false;
   if (!OPT_UI.open) { if (!inBox(OPT_PILL, x, y)) return false; optOpen(); return true; }
   const L = optLayout();
-  for (let k = 0; k < L.rows.length; k++) { const r = L.rows[k]; if (inBox(r.l, x, y)) { OPT_UI.row = k; optChange(k, -1); return true; } if (inBox(r.r, x, y)) { OPT_UI.row = k; optChange(k, 1); return true; } if (inBox(r.box, x, y)) { OPT_UI.row = k; return true; } }
-  if (inBox(L.done, x, y) || !inBox(L.P, x, y)) optClose();
+  for (let k = 0; k < L.rows.length; k++) { const r = L.rows[k];
+    if (r.l && inBox(r.l, x, y)) { OPT_UI.row = k; optChange(k, -1); return true; } if (r.r && inBox(r.r, x, y)) { OPT_UI.row = k; optChange(k, 1); return true; }
+    if (inBox(r.box, x, y)) { OPT_UI.row = k; if (k >= 2) optPick(r); return true; } }
+  if (!inBox(L.P, x, y)) optClose();
   return true;
 }
+/* who a device plays for on the select screen, for the Controllers box ('' if nobody) */
+function devPlayer(dev) { for (let k = 0; k < slots.length; k++) if (slots[k] && slots[k].dev === dev) return 'P' + (k + 1); return ''; }
 const DESKTOP = () => typeof window !== 'undefined' && !!window.desktop;
 let UI_MODAL = false, QUIT_ASK = 0;   /* UI_MODAL: a screen drawn over the game (the online menu) has the controllers; QUIT_ASK: frames left to confirm quitting */
 const inBox = (b, x, y) => x >= b[0] && x <= b[0] + b[2] && y >= b[1] && y <= b[1] + b[3];
