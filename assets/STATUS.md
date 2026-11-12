@@ -128,7 +128,7 @@ Measured with tests/combat-audit.js (movement timings, how near and far each att
 - Training mode (2026-11-10): a switch on the start screen (point at it and press Attack, or the T key). No clock, stocks never run out, and a true-combo counter at the top right: hits landed while the target is still in hitstun or held from the hit before, with the damage they dealt; it shows the last and best combo too. Remembered between visits.
 - Reset shortcut (2026-11-10, for testing): during a match, attack + special + grab pressed together (A + B + L or R on a controller; Z + X + A or S on the keyboard) puts both fighters back at their starting places with full stocks and no damage. The clock keeps running.
 - CPU level 0 (2026-11-10, for testing): the CPU stands still and does nothing. Up / Down on the start screen goes down to it.
-- CPU level 1 to 9, set with Up / Down on the select screen while player 2 is empty, and remembered. Level 7 is the CPU as it always played; every test and balance figure uses it. The numbers for each level are in `CPU_LV` in `sim.js`.
+- CPU level 1 to 10, set with Up / Down on the select screen while player 2 is empty, and remembered. Level 10 as Furious Fowls plans its combos ahead (`cpu10.js`, checked by `tests/cpu10.js`); other fighters at level 10 play the normal CPU at its sharpest settings. Level 7 is the CPU as it always played; every test and balance figure uses it. The numbers for each level are in `CPU_LV` in `sim.js`.
 - Tap jump is removed (owner's request, 2026-11-10): only the jump buttons jump, never the stick. There is no switch for it.
 
 ## The owner's moveset document (2026-11-10)

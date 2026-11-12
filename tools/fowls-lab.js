@@ -127,6 +127,7 @@
     if (f === F[1] && script) { const r = defender(f, o); if (r) return r; return orig(f, o, m); }
     return orig(f, o, m);
   }
+  FL.defender = (v, a) => defender(v, a);   /* the scripted defender on its own (cpu10 tests drive the attacker with the real CPU) */
   FL.install = function () { if (!orig) { orig = cpuInput; cpuInput = input; } };
   /* A fresh training-room situation. o: { bird 0..4, foe [roster, form], pct, dist, x0, foeY, fowlPct, plat, def } */
   FL.setup = function (o) {

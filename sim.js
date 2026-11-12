@@ -3267,7 +3267,7 @@ function updateProj() {
 }
 
 /* ---------- CPU opponent ---------- */
-/* CPU level, 1 (easiest) to 9. Level 7 is the CPU exactly as it played before levels existed, and the one every test uses.
+/* CPU level, 1 (easiest) to 10. Level 7 is the CPU exactly as it played before levels existed, and the one every test uses.
    tempo: how long it waits between attacks (x its usual wait)   guard: chance it shields an attack it sees coming
    tech: chance it techs a hard landing   punish: chance it grabs a shield   air: chance it takes an opening in the air
    nap: chance each second that it stops attacking for napLen frames and only walks
@@ -3281,13 +3281,19 @@ const CPU_LV = [null,
   { tempo: 1.15, guard: 0.38, tech: 0.44, punish: 0.48, air: 0.85, nap: 0.08, napLen: 40, mash: 10 },
   { tempo: 1, guard: 0.45, tech: 0.55, punish: 0.6, air: 1, nap: 0, napLen: 0, mash: 8 },
   { tempo: 0.8, guard: 0.62, tech: 0.76, punish: 0.78, air: 1, nap: 0, napLen: 0, mash: 7 },
-  { tempo: 0.62, guard: 0.8, tech: 0.94, punish: 0.92, air: 1, nap: 0, napLen: 0, mash: 6 }];
+  { tempo: 0.62, guard: 0.8, tech: 0.94, punish: 0.92, air: 1, nap: 0, napLen: 0, mash: 6 },
+  /* 10: everything at its sharpest. As Furious Fowls it also plans its combos (cpu10.js): it plays each option it has out
+     ahead of time in a copy of the match and takes the one that keeps the combo going whichever way the opponent DIs */
+  { tempo: 0.5, guard: 0.9, tech: 1, punish: 1, air: 1, nap: 0, napLen: 0, mash: 4 }];
+const CPU_MAX = CPU_LV.length - 1;
+let PRO_SIM = null;   /* set by cpu10.js only while it plays options out ahead of time: then it supplies every fighter's input */
 let CPU_LEVEL = 7;
-try { const raw = localStorage.getItem('emberfall.cpulevel'), v = +raw; if (raw !== null && raw !== '' && v >= 0 && v <= 9) CPU_LEVEL = Math.round(v); } catch (e) { /* no storage */ }   /* level 0 is for testing: the CPU stands still */
-function setCpuLevel(v) { CPU_LEVEL = clamp(Math.round(v), 0, 9); try { localStorage.setItem('emberfall.cpulevel', String(CPU_LEVEL)); } catch (e) { /* no storage */ } }
+try { const raw = localStorage.getItem('emberfall.cpulevel'), v = +raw; if (raw !== null && raw !== '' && v >= 0 && v <= CPU_MAX) CPU_LEVEL = Math.round(v); } catch (e) { /* no storage */ }   /* level 0 is for testing: the CPU stands still */
+function setCpuLevel(v) { CPU_LEVEL = clamp(Math.round(v), 0, CPU_MAX); try { localStorage.setItem('emberfall.cpulevel', String(CPU_LEVEL)); } catch (e) { /* no storage */ } }
 const NAP_STATES = { idle: 1, dash: 1, run: 1, brake: 1, land: 1, wd: 1 };
 function cpuInput(f, o, m) {
   if (!m.lv && CPU_LEVEL === 0) return blankIn();   /* level 0: a target that does nothing at all, for testing moves on */
+  if ((m.lv || CPU_LEVEL) === 10 && typeof cpuPro === 'function') { const r = cpuPro(f, o, m); if (r) return r; }   /* level 10's planner (cpu10.js), when it has something to do */
   const L = CPU_LV[m.lv || CPU_LEVEL], before = m.cd > 0 ? m.cd - 1 : 0, i = cpuBrain(f, o, m, L);
   if (m.cd > before && L.tempo !== 1) m.cd = Math.max(1, Math.round(m.cd * L.tempo));   /* a wait it has just set itself */
   if (L.nap > 0) {
@@ -3557,18 +3563,18 @@ function stepSelect() {
       if (SWITCHES && DESKTOP() && inBox(QUIT_PILL, sl.cx, sl.cy)) { if (QUIT_ASK > 0) window.close(); else { QUIT_ASK = 150; beep(300, 0.08, 'square', 0.04); } continue; }   /* press twice to quit */
       if (SWITCHES && inBox(TRAIN_PILL, sl.cx, sl.cy)) { setTraining(!TRAINING); sfx('toggle'); }
       if (SWITCHES && inBox(ARC_PILL, sl.cx, sl.cy)) { setArcs(!DBG.arcs); beep(DBG.arcs ? 700 : 420, 0.05, 'square', 0.03); }
-      else if (onCpu) { setCpuLevel(CPU_LEVEL + 1 > 9 ? 0 : CPU_LEVEL + 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
+      else if (onCpu) { setCpuLevel(CPU_LEVEL + 1 > CPU_MAX ? 0 : CPU_LEVEL + 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
       else if (over >= 0) { sl.pick = over; sl.ready = true; sfx('ready'); }
       else if (sl.ready && slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { selectGo(); return; }
     } else if (c.pressed('spc')) {
-      if (onCpu) { setCpuLevel(CPU_LEVEL - 1 < 0 ? 9 : CPU_LEVEL - 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
+      if (onCpu) { setCpuLevel(CPU_LEVEL - 1 < 0 ? CPU_MAX : CPU_LEVEL - 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
       else if (sl.ready) { sl.ready = false; sfx('cancel'); }
       else { sfx('cancel'); slots[slots.indexOf(sl)] = null; if (!slots[0] && slots[1]) { slots[0] = slots[1]; slots[1] = null; } }
     }
   }
 }
 function pollMatch() {
-  for (const f of F) f.ctl.poll(f.ctl.dev === 'cpu' ? (mode === 'play' ? cpuInput(f, F[1 - f.idx], f.ctl.ai) : blankIn()) : readDev(f.ctl.dev));
+  for (const f of F) f.ctl.poll(PRO_SIM ? PRO_SIM(f) : f.ctl.dev === 'cpu' ? (mode === 'play' ? cpuInput(f, F[1 - f.idx], f.ctl.ai) : blankIn()) : readDev(f.ctl.dev));
 }
 function finish(text) { result = text; mode = 'over'; overT = 0; }   /* the victory sound plays as the mode changes (audio.js) */
 function resetFighters() {
