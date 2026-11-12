@@ -49,7 +49,7 @@ vm.runInThisContext(`
     check('document: two-part moves', u[0].f0 === 13 && u[0].d === 3 && u[1].f0 === 15 && u[1].f1 === 17 && u[1].d === 12 && n[0].f0 === 6 && n[0].d === 4 && n[1].f0 === 13 && n[1].d === 7 && d[0].d === 10 && d[0].vAir && d[2].d === 13 && d[2].a === 275 && d[2].vAir && d[3].d === 9 && d[3].vGnd && d[d.length - 1].f0 === 17 && ds.f0 === 17 && ds.d === 12 && ds.a === 149 && ut.f0 === 9 && ut.a === 96,
       'up smash 3% then 12%, neutral air 4% then 7%, down air spikes 10% at the ends, 13% in the middle, pops up standing ones, down smash rear f17 12%, up tilt arc f9');
     const g = mv.grab.h[0], dg = mv.dgrab.h[0], pg = mv.pgrab.h[0], T = mv.throws;
-    check('document: grabs, pummel and throws', g.f0 === 7 && mv.grab.t === 30 && dg.f0 === 10 && mv.dgrab.t === 38 && pg.f0 === 11 && mv.pgrab.t === 36 && st.pummel === 1.3 && T.f.d === 8 && T.f.a === 40 && T.f.f === 10 && T.b.d === 8 && T.b.a === 143 && T.b.f === 13 && T.u.d === 7 && T.u.f === 14 && T.d.d === 6 && T.d.a === 71 && T.d.f === 16,
+    check('document: grabs, pummel and throws', g.f0 === 7 && mv.grab.t === 30 && dg.f0 === 10 && mv.dgrab.t === 38 && pg.f0 === 11 && mv.pgrab.t === 36 && st.pummel === 1.3 && T.f.d === 8 && T.f.a === 40 && T.f.f === 10 && T.b.d === 8 && T.b.a === 143 && T.b.f === 13 && T.u.d === 7 && T.u.f === 14 && T.d.d === 6 && T.d.a === 71 && T.d.f === 5 && T.d.t === 10,
       'grab f7, dash grab f10, turnaround f11; throws 8 / 8 / 7 / 6% released on f10 / 13 / 14 / 16');
     const ft = mv.ftilt.h[0], fs2 = mv.fsmash.h[0];
     check('document: shapes are in units of Flint\\u2019s height', near(ft.x / H, 0.90, 0.001) && near(ft.y / H, 0.59, 0.001) && near(ft.r / H, 0.14, 0.001) && near(ft.in[0] / H, 0.31, 0.001) && near(fs2.r / H, 0.19, 0.001),
@@ -176,7 +176,7 @@ vm.runInThisContext(`
     const thr = (k, lx, ly) => { const [b, f] = setup(BR, FL, 0, 6); b.startMove('grab'); let rel = 0, dmg = 0, end = 0, sx = 0; SCRIPT[0] = (i, tt) => { if (b.state === 'hold' || b.state === 'throw') { i.lx = lx; i.ly = ly; } };
       run(120, () => { if (b.state === 'throw' && !rel && f.state !== 'held') { rel = b.sf; dmg = f.pct; sx = f.vx; } if (rel && !end && b.state !== 'throw') { end = t; return false; } }); return { rel, dmg, sx, held: rel > 0 }; };
     const f = thr('f', 1, 0), bk = thr('b', -1, 0), u = thr('u', 0, 1), d = thr('d', 0, -1);
-    check('throws: released on frames 10, 13, 14 and 16 for 8, 8, 7 and 6%', f.rel === 10 && bk.rel === 13 && u.rel === 14 && d.rel === 16 && near(f.dmg, 8 * B, 0.05) && near(bk.dmg, 8 * B, 0.05) && near(u.dmg, 7 * B, 0.05) && near(d.dmg, 6 * B, 0.05) && f.sx > 0 && bk.sx < 0,
+    check('throws: released on frames 10, 13, 14 and 5 for 8, 8, 7 and 6%', f.rel === 10 && bk.rel === 13 && u.rel === 14 && d.rel === 5 && near(f.dmg, 8 * B, 0.05) && near(bk.dmg, 8 * B, 0.05) && near(u.dmg, 7 * B, 0.05) && near(d.dmg, 6 * B, 0.05) && f.sx > 0 && bk.sx < 0,
       'forward f' + f.rel + ' ' + pct(f.dmg) + ', back f' + bk.rel + ' ' + pct(bk.dmg) + ', up f' + u.rel + ' ' + pct(u.dmg) + ', down f' + d.rel + ' ' + pct(d.dmg));
     const reach = g => { const [b, fx] = setup(BR, FL, 0, g); b.startMove('grab'); let got = false; run(12, () => { if (fx.state === 'held') got = true; }); return got; };
     const gmax = mv.grab.h[0].x + mv.grab.h[0].r + fl.w / 2;

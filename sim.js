@@ -72,6 +72,9 @@ const HITSTUN = 0.4, COMBO_EASE = 1.065;
    before landing or being hit gets 0.8 of it, the third 0.5, later ones none; at most six grabs; hanging lets go after 6.5 s. */
 const LEDGE_INV = (air, pct) => clamp(Math.round(60 * Math.min(air, 300) / 300 + 44 - Math.min(pct, 120) / 120 * 44), 23, 123);
 const LEDGE_REGRAB = [1, 0.8, 0.5], LEDGE_HANG = 390, TECH_WINDOW = 11;
+/* Down throw at 0.3 of the shared throw's length (the owner, 2026-11-12): released on frame 3 instead of 10, free on 8
+   instead of 26, its clip played over 8 frames (ap). Fighters with throws of their own have theirs cut the same way. */
+const DTHROW_T = { f: 3, t: 8, ap: 8 };
 const SMASH_HOLD = 180, GRAB_MIN = 30;   /* frames a smash can be held; frames a grab holds at the very least, however hard the victim mashes */
 const FRESH = 1.05, SHORT_HOP_MUL = 0.85, TUMBLE_KB = 80, CROUCH_MUL = 0.85, CHARGING_MUL = 1.2;
 const CROUCH_Y = -0.4;
@@ -605,7 +608,7 @@ function mk(R, P, S, Y, special, kit) {
   /* Aerials land without lag before the hit comes out or once it is well over. */
   for (const k of ['nair', 'fair', 'bair', 'uair', 'dair']) m[k].ac = Math.max(...m[k].h.map(h => h.f1)) + F(9);
   const th = (d, a, b, k) => ({ d: Math.round(d * P * 10) / 10, a, b, k });
-  m.throws = { f: th(8, 45, 60, 60), b: th(9, 135, 60, 65), u: th(7, 88, 55, 55), d: th(5, 75, 62, 30) };   /* down throw: a set pop that barely grows, so it starts combos at any damage */
+  m.throws = { f: th(8, 45, 60, 60), b: th(9, 135, 60, 65), u: th(7, 88, 55, 55), d: Object.assign(th(5, 75, 62, 30), DTHROW_T) };   /* down throw: a set pop that barely grows, so it starts combos at any damage */
   /* Per-fighter kit: how many jabs chain, grab reach and speed, throw strengths, armoured moves. */
   kit = kit || {};
   if (kit.rapid) m.jabr = { t: F(6), rapid: 1, next: 'jab3', h: [hb(2, 3, 9.5, 8, 4.5, 0.8, 80, 16, 0, { hl: 2 })] };   /* a flurry of light hits that hold the target in place */
@@ -986,7 +989,7 @@ function fowlNormals(m, src, unit, cy, jabs) {
     if (q.g && q.g.rear) tm.h.push(fowlHit(Object.assign({}, q, { g: { x: q.g.rear[0], y: q.g.rear[1], r: q.g.rear[2] } }), unit, cy));
     if (tm.chg) tm.chg = Math.max(2, q.s - 1); if (tm.chain) tm.chain = q.s + q.a + 1; if (tm.ac) tm.ac = q.s + q.a + 9; }
   const g = src.grab, gh = fowlHit(g, unit, cy); for (const [k, add, dx] of [['grab', 0, 0], ['dgrab', 3, 2.5], ['pgrab', 4, 3.2]]) { m[k].t = g.s + g.a + g.e + add * 2; m[k].h = [{ f0: gh.f0 + add, f1: gh.f1 + add, x: gh.x + dx, y: gh.y, r: Math.max(3.6, gh.r), grab: 1, d: 0 }]; }
-  for (const [k, id] of [['f', 'forward_throw'], ['b', 'back_throw'], ['u', 'up_throw'], ['d', 'down_throw']]) { const q = src[id]; m.throws[k] = { d: q.d, a: q.ang, b: q.b, k: q.k }; }
+  for (const [k, id] of [['f', 'forward_throw'], ['b', 'back_throw'], ['u', 'up_throw'], ['d', 'down_throw']]) { const q = src[id]; m.throws[k] = Object.assign({ d: q.d, a: q.ang, b: q.b, k: q.k }, k === 'd' ? DTHROW_T : {}); }
   return m;
 }
 function fowlLate(mv, d) { const h = mv.h[0], cut = h.f0 + Math.max(1, Math.round((h.f1 - h.f0) * 0.35)); mv.h.push(Object.assign({}, h, { f0: cut + 1, d, k: Math.round(h.k * 0.8), part: 'late' })); h.f1 = cut; }
@@ -1644,7 +1647,7 @@ const BRAND = (() => {
       /* throws: Shield Shove, Gauntlet Turn, Crown Lift, Kneel Break. Gauntlet Turn holds the target at the usual place in front
          until it lets go on frame 13 at 0.41 H behind her, measured from where she stood and faced on frame 1. */
       }, { jabs: 3, throws: { f: { d: 8, a: 40, b: 43, k: 68, f: 10, t: 29 },
-        b: { d: 8, a: 143, b: 43, k: 68, f: 13, t: 33, at(f, v, n) { if (n <= 1 || f.twX === undefined) { f.twX = f.x; f.twFace = f.face; } v.x = n >= 13 ? f.twX - f.twFace * q(0.41) : f.x + f.face * 8; v.y = f.y; } }, u: { d: 7, a: 88, b: 44, k: 68, f: 14, t: 34 }, d: { d: 6, a: 71, b: 33, k: 51, f: 16, t: 33 } } }),
+        b: { d: 8, a: 143, b: 43, k: 68, f: 13, t: 33, at(f, v, n) { if (n <= 1 || f.twX === undefined) { f.twX = f.x; f.twFace = f.face; } v.x = n >= 13 ? f.twX - f.twFace * q(0.41) : f.x + f.face * 8; v.y = f.y; } }, u: { d: 7, a: 88, b: 44, k: 68, f: 14, t: 34 }, d: { d: 6, a: 71, b: 33, k: 51, f: 5, t: 10, ap: 8 } } }),   /* down throw at 0.3 (2026-11-12): was 16 / 33 */
     }],
   };
 })();
@@ -1731,7 +1734,7 @@ const KESTREL = (() => {
         dspec: { t: 58, ll: 20, h: [], vCounter: [5, 29], on(f, n) { if (n === 1) f.vx *= 0.3; slowFall(f); } },
         dspecHit: { t: 34, h: blade('SpecDHit', 3, 9, 7, 8, 40, 60, 70) },
       /* throws: Shove, Turn Toss, Sky Toss, Floor Toss (let go on frames 14, 7, 12 and 14) */
-      }, { jabs: 3, throws: { f: { d: 4, a: 45, b: 60, k: 55, f: 14, t: 30 }, b: { d: 4, a: 135, b: 60, k: 55, f: 7, t: 43 }, u: { d: 4, a: 90, b: 70, k: 50, f: 12, t: 43, jc: 21 }, d: { d: 4, a: 70, b: 75, k: 30, f: 14, t: 41 } } }),
+      }, { jabs: 3, throws: { f: { d: 4, a: 45, b: 60, k: 55, f: 14, t: 30 }, b: { d: 4, a: 135, b: 60, k: 55, f: 7, t: 43 }, u: { d: 4, a: 90, b: 70, k: 50, f: 12, t: 43, jc: 21 }, d: { d: 4, a: 70, b: 75, k: 30, f: 4, t: 12, ap: 8 } } }),   /* down throw at 0.3 (2026-11-12): was 14 / 41 */
     }],
   };
 })();
@@ -1815,7 +1818,8 @@ const JOEY = (() => {
       b: { d: 3, a: 140, b: 24, k: 30, f: 31, t: 55 },
       /* the Three-Rep Bench PR: reps of 0.5 on 20, 38 and 56, released on 65 for 1.5 */
       u: { d: 1.5, a: 85, b: 28, k: 25, f: 65, t: 87, hits: [[20, 0.5], [38, 0.5], [56, 0.5]], at(f, v, n) { const rep = [20, 38, 56].some(r => Math.abs(n - r) < 5); v.x = f.x + f.face * 0.5; v.y = f.y + q(0.30) + (rep ? q(0.12) : 0); } },
-      d: { d: 2, a: 65, b: 22, k: 25, f: 39, t: 61, hits: [[30, 1]], at(f, v) { v.x = f.x + f.face * q(0.35); v.y = f.y; } } } }),
+      /* down throw at 0.3 (2026-11-12): the slap on 9 (was 30), released on 12 (was 39), free on 18 (was 61) */
+      d: { d: 2, a: 65, b: 22, k: 25, f: 12, t: 18, ap: 8, hits: [[9, 1]], at(f, v) { v.x = f.x + f.face * q(0.35); v.y = f.y; } } } }),
   };
 
   const big = {
@@ -1906,7 +1910,7 @@ const JOEY = (() => {
       f: { d: 12, a: 60, b: 90, k: 46, f: 15, t: 45 },
       b: { d: 11, a: 140, b: 60, k: 65, f: 15, t: 39 },
       u: { d: 9, a: 90, b: 70, k: 50, f: 14, t: 43 },
-      d: { d: 7, a: 38, b: 60, k: 50, f: 19, t: 54 },
+      d: { d: 7, a: 38, b: 60, k: 50, f: 6, t: 16, ap: 8 },   /* down throw at 0.3 (2026-11-12): was 19 / 54 */
       cf: { d: 12, a: 60, b: 90, k: 46, f: 15, t: 45, at: over },
       cb: { d: 13, a: 108, b: 85, k: 52, f: 16, t: 42, at: over },
       cu: { d: 12, a: 92, b: 65, k: 53, f: 15, t: 29, at: over },
@@ -2096,7 +2100,7 @@ const VARGAN = (() => {
         f: { d: 8, a: 45, b: 65, k: 62, f: 13, t: 39, hits: [[11, 5]] },
         b: { d: 5, a: 135, b: 60, k: 90, f: 14, t: 49, hits: [[12, 5]] },
         u: { d: 3, a: 90, b: 70, k: 62, f: 13, t: 43, hits: [[11, 10]], at(f, v, n) { v.x = f.x + f.face * 3; v.y = f.y + Math.min(1, n / 11) * q(0.85); } },
-        d: { d: 7, a: 72, b: 78, k: 40, f: 23, t: 39 } } }),
+        d: { d: 7, a: 72, b: 78, k: 40, f: 7, t: 12, ap: 8 } } }),   /* Stonebreaker at 0.3 (2026-11-12): released on 7 (was 23), free on 12 (was 39) */
     }],
   };
 })();
