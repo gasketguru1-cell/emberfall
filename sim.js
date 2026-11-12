@@ -1682,7 +1682,7 @@ const KESTREL = (() => {
         jab2: { t: 27, h: blade('Jab2', 5, 9, 4, 6, 50, 30, 55) },
         dash: { t: 40, h: blade('DashAttack', 12, 15, 10, 13, 72, 45, 70), on(f, n) { if (n <= 14) f.vx = f.face * Math.max(0.3, 1.6 - n * 0.09); } },
         ftilt: { t: 34, tilt: 1, h: blade('TiltF', 7, 10, 9, 13, 45, 30, 82) },
-        utilt: { t: 38, tilt: 1, h: blade('TiltU', 6, 12, 9, 12, 90, 30, 90) },
+        utilt: { t: 38, tilt: 1, jc: 20, h: blade('TiltU', 6, 12, 9, 12, 90, 30, 90) },
         dtilt: { t: 20, tilt: 1, h: blade('TiltD', 7, 9, 7, 10, 75, 25, 50) },   /* free to act from frame 20 */
         fsmash: { t: 48, chg: 4, h: blade('SmashF', 10, 13, 14, 20, 40, 40, 86) },
         usmash: { t: 53, chg: 8, h: blade('SmashU', 13, 16, 13, 17, 88, 40, 92) },
@@ -1727,7 +1727,7 @@ const KESTREL = (() => {
         dspec: { t: 58, ll: 20, h: [], vCounter: [5, 29], on(f, n) { if (n === 1) f.vx *= 0.3; slowFall(f); } },
         dspecHit: { t: 34, h: blade('SpecDHit', 3, 9, 7, 8, 40, 60, 70) },
       /* throws: Shove, Turn Toss, Sky Toss, Floor Toss (let go on frames 14, 7, 12 and 14) */
-      }, { jabs: 3, throws: { f: { d: 4, a: 45, b: 60, k: 55, f: 14, t: 30 }, b: { d: 4, a: 135, b: 60, k: 55, f: 7, t: 43 }, u: { d: 4, a: 90, b: 70, k: 50, f: 12, t: 43 }, d: { d: 4, a: 70, b: 75, k: 30, f: 14, t: 41 } } }),
+      }, { jabs: 3, throws: { f: { d: 4, a: 45, b: 60, k: 55, f: 14, t: 30 }, b: { d: 4, a: 135, b: 60, k: 55, f: 7, t: 43 }, u: { d: 4, a: 90, b: 70, k: 50, f: 12, t: 43, jc: 21 }, d: { d: 4, a: 70, b: 75, k: 30, f: 14, t: 41 } } }),
     }],
   };
 })();
@@ -2805,6 +2805,7 @@ class Fighter {
             if ((sx && sx !== this.burstX) || (down && !this.burstDown && !this.grounded)) { this.endMove(); break; }
           }
         }
+        if (this.state === 'attack' && this.move === m && m.jc && this.mf >= m.jc && this.grounded && c.take('jmp')) { this.move = null; this.set('jsq'); break; }   /* jc: from this frame a jump ends the move early (Kestrel's up tilt, to chase) */
         /* jab chain: attack again once the jab allows it and the next hit comes out */
         /* rapid jab: loops while attack is held (three at least, fourteen at most), then the finisher */
         if (this.state === 'attack' && m.rapid && this.mf >= m.t) { const n = this.rapidN + 1; if ((i.atk || n < 3) && n < 14 && this.grounded) { this.startMove(this.mname); this.rapidN = n; } else if (this.grounded) this.startMove(m.next); else this.endMove(); break; }
@@ -2894,6 +2895,7 @@ class Fighter {
           comboHit(this, v, d, true); v.launch(knock(v, d, h.b, h.k) * rage(this), h.a * Math.PI / 180, this.face); v.hitlag = 6; this.hitlag = 6; spark(v.x, v.y + 8, '#fff', 12, 1.6); thwack(90, v.x); sfx('throw', v.x);
         }
         if (!this.grounded) this.vy = 0;   /* a catch in the air hangs there for the fling */
+        if (tw.jc && this.sf >= tw.jc && !this.victim && this.grounded && this.ctl.take('jmp')) { this.set('jsq'); break; }   /* jc: from this frame a jump ends the throw early (Kestrel's Sky Toss, to chase) */
         if (this.sf >= (tw.t || 26)) this.set(this.grounded ? 'idle' : 'air');
         break;
       }
