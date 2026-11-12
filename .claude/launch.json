@@ -3,6 +3,7 @@
   "configurations": [
     { "name": "emberfall", "runtimeExecutable": "node", "runtimeArgs": ["serve.js"], "port": 8317 },
     { "name": "emberfall-check", "runtimeExecutable": "node", "runtimeArgs": ["-e", "process.env.EMBERFALL_PORT='8327';require('./serve.js')"], "port": 8327 },
-    { "name": "emberfall-anim", "runtimeExecutable": "node", "runtimeArgs": ["-e", "process.env.EMBERFALL_PORT='8341';require('./serve.js')"], "port": 8341, "autoPort": false }
+    { "name": "emberfall-anim", "runtimeExecutable": "node", "runtimeArgs": ["-e", "process.env.EMBERFALL_PORT='8341';require('./serve.js')"], "port": 8341, "autoPort": false },
+    { "name": "emberfall-knell", "runtimeExecutable": "node", "runtimeArgs": ["-e", "process.env.EMBERFALL_PORT='8353';require('./serve.js')"], "port": 8353, "autoPort": false }
   ]
 }
