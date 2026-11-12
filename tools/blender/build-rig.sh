@@ -12,3 +12,4 @@ dir="assets/$c"; raw="$dir/raw"; [ -d "$raw" ] || raw="${RAW_ROOT:-$(git worktre
 mesh=$(ls -S "$raw"/*/model_url.glb | head -1)
 "$B" -b --factory-startup --python tools/blender/rig.py -- --mesh "$mesh" --spec "$dir/work/rig.json" --out "$dir/work/$c-rigged.glb" --blend "$(cygpath -w "$PWD/$dir/work/$c-anim.blend")" 2>&1 | grep -E "Error|Traceback|rig: wrote|unweighted|line [0-9]" || true
 node tools/pack.mjs "$dir/work/pack.json" | tail -1
+if [ -f "tools/bones/$c.mjs" ]; then node tools/addbones.mjs "$c" | head -1; fi   # the added bones on top: writes the -b GLB the game loads

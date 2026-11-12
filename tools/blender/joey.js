@@ -404,14 +404,26 @@ big.pack = { base: 'work/joey-big-rigged.glb', texture: 2048, out: 'export/cronk
    Dong's moves were then checked against the owner's animation atlas (Donkey Kong in Super Smash Bros. Ultimate as the
    motion reference; original poses) and the ones that read differently are remade here, before the retarget.
    ===================================================================================================================== */
-function apose(T) {
+/* Joey's thirty further bones (2026-11-12): his two-part fingers and single thumb become five fingers of three joints each
+   (joints found on the owner's model by tools/blender/joey-fingers.py into work/human-fingers.json), curled one finger at
+   a time by gripFull below; and six bones that swing on the game's springs, weighted by place: two pecs, the belly, two
+   glutes and the back of the neck. */
+const HFING = JSON.parse(fs.readFileSync(path.join(OUT, 'human-fingers.json'), 'utf8'));
+const HJIG = [['pec', 'chest', [-0.09, 1.36, 0.03], [-0.09, 1.34, 0.13]], ['glute', 'hips', [-0.09, 0.88, -0.08], [-0.09, 0.84, -0.18]]];
+function apose(T, extra) {
+  if (extra === true) return aposeX(T);
+  const hx = extra === 'human';
+  const fingers5 = s => ['thumb', 'index', 'middle', 'ring', 'pinky'].flatMap(f => [0, 1, 2].map(i =>
+    ({ name: f + s + (i + 1), head: HFING[s][f][i], tail: HFING[s][f][i + 1], parent: i ? f + s + i : 'hand' + s, connect: i > 0 })));
   const side = (s, k) => [
     { name: 'arm' + s, head: T.sho[k], tail: T.elb[k], parent: 'chest' },
     { name: 'fore' + s, head: T.elb[k], tail: T.wri[k], parent: 'arm' + s, connect: true },
     { name: 'hand' + s, head: T.wri[k], tail: T.knu[k], parent: 'fore' + s, connect: true },
-    { name: 'fing' + s + '1', head: T.knu[k], tail: T.mid[k], parent: 'hand' + s, connect: true },
-    { name: 'fing' + s + '2', head: T.mid[k], tail: T.tip[k], parent: 'fing' + s + '1', connect: true },
-    { name: 'thumb' + s, head: T.thb[k], tail: T.tht[k], parent: 'hand' + s },
+    ...(hx ? fingers5(s) : [
+      { name: 'fing' + s + '1', head: T.knu[k], tail: T.mid[k], parent: 'hand' + s, connect: true },
+      { name: 'fing' + s + '2', head: T.mid[k], tail: T.tip[k], parent: 'fing' + s + '1', connect: true },
+      { name: 'thumb' + s, head: T.thb[k], tail: T.tht[k], parent: 'hand' + s }]),
+    ...(hx ? HJIG.map(([n, par, h, t]) => ({ name: n + s, head: [(k ? -1 : 1) * h[0], h[1], h[2]], tail: [(k ? -1 : 1) * t[0], t[1], t[2]], parent: par, noauto: true })) : []),
     { name: 'c_hand' + s, head: T.wri[k], tail: add(T.wri[k], [0, 0, 0.12]), parent: 'all', deform: false },
     { name: 'thigh' + s, head: T.hip[k], tail: T.knee[k], parent: 'hips' },
     { name: 'shin' + s, head: T.knee[k], tail: T.ankle[k], parent: 'thigh' + s, connect: true },
@@ -424,11 +436,169 @@ function apose(T) {
       { name: 'spine', head: T.waist, tail: T.ribs, parent: 'hips', connect: true },
       { name: 'chest', head: T.ribs, tail: T.neck, parent: 'spine', connect: true },
       { name: 'head', head: T.neck, tail: T.top, parent: 'chest' },
+      ...(hx ? [{ name: 'belly', head: [0, 1.05, 0.02], tail: [0, 1.03, 0.12], parent: 'spine', noauto: true },
+        { name: 'nape', head: [0, 1.55, -0.04], tail: [0, 1.53, -0.12], parent: 'chest', noauto: true }] : []),
       ...side('R', 0), ...side('L', 1)],
     ik: [{ name: 'c_handL', bone: 'foreL', chain: 2 }, { name: 'c_handR', bone: 'foreR', chain: 2 }, { name: 'c_footL', bone: 'shinL', chain: 2 }, { name: 'c_footR', bone: 'shinR', chain: 2 }],
+    ...(hx ? { soft: [
+      ...['R', 'L'].flatMap((s, k) => [
+        { bone: 'pec' + s, surf: [(k ? 1 : -1) * 0.09, 1.36, 'front'], r: 0.08, s: 0.7, from: ['chest', 'spine'] },
+        { bone: 'glute' + s, surf: [(k ? 1 : -1) * 0.09, 0.86, 'back'], r: 0.1, s: 0.7, from: ['hips', 'thigh' + s] }]),
+      { bone: 'belly', surf: [0, 1.04, 'front'], r: 0.1, s: 0.7, from: ['hips', 'spine'] },
+      { bone: 'nape', surf: [0, 1.55, 'back'], r: 0.05, s: 0.7, from: ['chest', 'head'] }],
+      /* his fingers lie close together: each one's skin goes to that finger alone */
+      fingersplit: ['R', 'L'].map(s => ({ chains: ['thumb', 'index', 'middle', 'ring', 'pinky'].map(f => [1, 2, 3].map(i => f + s + i)) })) } : {}),
     rigid: [{ bone: 'head', box: T.headBox }], poses: {}, clips: {} };
 }
 const lerp = (a, b, u) => a + (b - a) * u, sm = x => x * x * (3 - 2 * x);
+/* Cronky Dong's full skeleton (2026-11-11, the owner's list: a hundred bones, laid out like a modern fighting game's
+   heavyweight). By region:
+     root, hips, torso, neck (9): all, cog, hips, spine, spine2, spine3, chest, neck, neck2
+     shoulders and arms (8):     clav, arm, fore, hand on each side
+     hands and fingers (30):     thumb, index, middle, ring, pinky, three joints each, both hands (joints found from the
+                                 mesh by tools/blender/fingers.py into work/big-fingers.json)
+     legs and feet (12):         thigh, shin, foot, toe, and a thigh twist and an ankle helper on each side
+     head and face (22):         head, jaw, chin, upper and lower lip, two lip corners, nose, two cheeks, four brows,
+                                 four eyelids, two ears, the cap and its brim (places read off gridded close-ups of the head)
+     secondary motion (5):       belly, two pecs, two glutes (in place of a tie: his drawstring is only painted on), which
+                                 the game swings on springs
+     controls and helpers (14):  four hand and foot targets, upper-arm and forearm twist, elbow, knee and shoulder helpers
+   The clips still say spine / head / hands / feet: rig.py spreads a spine turn over the three spine bones and a head turn
+   over the two neck bones and the head ("share"), turns each collarbone part of the way toward its hand's reach
+   ("clavicles"), bends the toes on the floor ("toes"), and the twist and joint helpers follow by constraint. The face and
+   the secondary bones are weighted by place ("soft"), not by heat, so each moves only its own patch of skin. */
+const FING = JSON.parse(fs.readFileSync(path.join(OUT, 'big-fingers.json'), 'utf8'));
+const FACE = {   /* his right side; the left is the same mirrored about the middle of his face (x 0.012) */
+  jaw: [0, 1.505, -0.085], chin: [0.012, 1.432, 0.035], lipUp: [0.012, 1.488, 0.048], lipLo: [0.012, 1.471, 0.045], nose: [0.015, 1.515, 0.05],
+  lipCorner: [-0.028, 1.477, 0.027], cheek: [-0.06, 1.525, 0.0], browIn: [-0.02, 1.588, 0.012], browOut: [-0.055, 1.59, 0.0],
+  lidUp: [-0.0275, 1.563, 0.002], lidLo: [-0.0275, 1.547, 0.002], ear: [-0.1, 1.53, -0.12] };
+const fx = (p, k) => k ? [+(0.024 - p[0]).toFixed(4), p[1], p[2]] : p;   /* mirror about x 0.012 */
+/* Cronky Dong's thirty further bones. JIG: per side [name, parent, head, tail], his right side (the left mirrors): each sits
+   inside the muscle, fat or cloth it moves and points out through it, and swings on the game's springs (manifest
+   springs). MID: the same down his middle. Their weights are "soft" rules in aposeX. */
+const JIG = [
+  ['bicep', 'arm', [-0.48, 1.13, -0.08], [-0.5, 1.09, 0.02]], ['tricep', 'arm', [-0.49, 1.12, -0.08], [-0.52, 1.08, -0.18]],
+  ['foreMus', 'fore', [-0.62, 0.86, 0.0], [-0.64, 0.82, 0.08]], ['lat', 'chest', [-0.24, 1.2, -0.15], [-0.3, 1.16, -0.28]],
+  ['trap', 'chest', [-0.13, 1.33, -0.12], [-0.2, 1.4, -0.16]], ['oblique', 'spine', [-0.25, 0.98, 0.0], [-0.28, 0.96, 0.1]],
+  ['serratus', 'chest', [-0.23, 1.12, -0.02], [-0.26, 1.1, 0.08]],
+  ['shortsF', 'thigh', [-0.2, 0.66, -0.02], [-0.2, 0.55, 0.05]], ['shortsB', 'thigh', [-0.2, 0.66, -0.2], [-0.2, 0.55, -0.29]],
+  ['shortsS', 'thigh', [-0.25, 0.66, -0.1], [-0.31, 0.55, -0.1]]];
+const MID = [
+  ['abs', 'spine2', [0, 1.08, -0.02], [0, 1.06, 0.1]], ['rhomboid', 'chest', [0, 1.28, -0.22], [0, 1.26, -0.34]],
+  ['nape', 'neck2', [0.012, 1.43, -0.15], [0.012, 1.41, -0.22]], ['dewlap', 'neck2', [0.012, 1.42, -0.04], [0.012, 1.39, 0.02]],
+  ['capBack', 'cap', [0.012, 1.66, -0.12], [0.012, 1.63, -0.2]], ['browMid', 'head', [0.012, 1.585, 0.0], [0.012, 1.585, 0.02]]];
+function aposeX(T) {
+  const L = (a, c, u) => a.map((v, i) => v + (c[i] - v) * u), fwd = (p, l) => [p[0], p[1], p[2] + (l || 0.015)];
+  const s1 = L(T.waist, T.ribs, 1 / 3), s2 = L(T.waist, T.ribs, 2 / 3), ctop = L(T.ribs, T.neck, 0.62), nk = L(ctop, T.neck, 0.5);
+  const side = (s, k) => { const sg = k ? 1 : -1, sho = T.sho[k];
+    const clav = [sg * 0.07, ctop[1] - 0.02, sho[2] + 0.07];   /* the inner end of the collarbone, by the top of the breastbone */
+    const ball = [T.toe[k][0], Math.max(0.03, T.toe[k][1] + 0.01), lerp(T.ankle[k][2], T.toe[k][2], 0.6)];
+    const F = FING[s], fingers = [];
+    for (const f of ['thumb', 'index', 'middle', 'ring', 'pinky']) {
+      const j = F[f];
+      for (let i = 0; i < 3; i++) fingers.push({ name: f + s + (i + 1), head: j[i], tail: j[i + 1], parent: i ? f + s + i : 'hand' + s, connect: i > 0 }); }
+    const fb = (n, p, tail) => ({ name: n + s, head: fx(p, k), tail: tail || fwd(fx(p, k)), parent: 'head', noauto: true });
+    return [
+      { name: 'clav' + s, head: clav, tail: sho, parent: 'chest' },
+      { name: 'arm' + s, head: sho, tail: T.elb[k], parent: 'clav' + s },
+      { name: 'armTw' + s, head: sho, tail: L(sho, T.elb[k], 0.5), parent: 'clav' + s },
+      { name: 'delt' + s, head: sho, tail: L(sho, T.elb[k], 0.3), parent: 'clav' + s },
+      { name: 'fore' + s, head: T.elb[k], tail: T.wri[k], parent: 'arm' + s, connect: true },
+      { name: 'elbow' + s, head: T.elb[k], tail: L(T.elb[k], T.wri[k], 0.3), parent: 'arm' + s },
+      { name: 'foreTw' + s, head: L(T.elb[k], T.wri[k], 0.5), tail: T.wri[k], parent: 'fore' + s },
+      { name: 'hand' + s, head: T.wri[k], tail: T.knu[k], parent: 'fore' + s, connect: true },
+      ...fingers,
+      { name: 'c_hand' + s, head: T.wri[k], tail: add(T.wri[k], [0, 0, 0.12]), parent: 'all', deform: false },
+      { name: 'thigh' + s, head: T.hip[k], tail: T.knee[k], parent: 'hips' },
+      { name: 'thighTw' + s, head: T.hip[k], tail: L(T.hip[k], T.knee[k], 0.5), parent: 'hips' },
+      { name: 'shin' + s, head: T.knee[k], tail: T.ankle[k], parent: 'thigh' + s, connect: true },
+      { name: 'knee' + s, head: T.knee[k], tail: L(T.knee[k], T.ankle[k], 0.3), parent: 'thigh' + s },
+      { name: 'foot' + s, head: T.ankle[k], tail: ball, parent: 'shin' + s },
+      { name: 'shinTw' + s, head: T.ankle[k], tail: L(T.ankle[k], ball, 0.5), parent: 'shin' + s },   /* the ankle helper: half the foot's turn */
+      { name: 'toe' + s, head: ball, tail: T.toe[k], parent: 'foot' + s, connect: true },
+      { name: 'c_foot' + s, head: T.ankle[k], tail: add(T.ankle[k], [0, 0, 0.12]), parent: 'all', deform: false },
+      fb('lipCorner', FACE.lipCorner), fb('cheek', FACE.cheek), fb('browIn', FACE.browIn), fb('browOut', FACE.browOut),
+      fb('lidUp', FACE.lidUp), fb('lidLo', FACE.lidLo), fb('ear', FACE.ear, add(fx(FACE.ear, k), [sg * 0.02, 0, 0])),
+      { name: 'pec' + s, head: [sg * 0.14, 1.2, -0.02], tail: [sg * 0.14, 1.18, 0.1], parent: 'chest', noauto: true },
+      { name: 'glute' + s, head: [sg * 0.12, 0.72, -0.2], tail: [sg * 0.12, 0.66, -0.32], parent: 'hips', noauto: true },
+      /* the thirty more (2026-11-12): muscle and fat that swing on the game's springs, the shorts' hem, and face bones */
+      ...JIG.map(([n, par, h, t]) => ({ name: n + s, head: [sg * Math.abs(h[0]), h[1], h[2]], tail: [sg * Math.abs(t[0]), t[1], t[2]], parent: par === 'thigh' || par === 'arm' || par === 'fore' || par === 'clav' ? par + s : par, noauto: true })),
+      fb('jowl', [-0.05, 1.47, -0.01]), Object.assign(fb('nostril', [-0.0, 1.508, 0.04]), { parent: 'nose' })]; };
+  const S = ['R', 'L'];
+  /* weights by place: a sphere ("at", radius "r", strength "s"), or a surface point found on the mesh ("surf": [x, y,
+     front|back]), and/or half-spaces ("half": [point, normal] pairs, each faded over "soft"); the share is taken from the
+     bones listed in "from" */
+  const HEADS = ['head', 'neck', 'neck2', 'jaw'], sph = (bone, at, r, s, extra) => Object.assign({ bone, at, r, s: s || 1, from: HEADS }, extra || {});
+  const soft = [
+    { bone: 'jaw', from: HEADS, soft: 0.012, half: [[[0, 1.48, 0.05], [0, -0.978, -0.21]], [[0, 1.5, -0.1], [0, 0, 1]], [[0, 1.405, 0], [0, 1, 0]], [[0.123, 0, 0], [-1, 0, 0]], [[-0.099, 0, 0], [1, 0, 0]]] },
+    { bone: 'cap', from: HEADS, soft: 0.008, half: [[[0, 1.64, 0.01], [0, 0.927, -0.375]]] },
+    { bone: 'capBrim', from: ['cap'], soft: 0.01, half: [[[0, 0, -0.005], [0, 0, 1]]] },
+    ...S.map((s, k) => sph('ear' + s, fx(FACE.ear, k), 0.045, 1, { half: [[[k ? 0.097 : -0.073, 0, 0], [k ? 1 : -1, 0, 0]]], soft: 0.01 })),
+    ...S.flatMap((s, k) => [sph('browIn' + s, fx(FACE.browIn, k), 0.02, 0.9), sph('browOut' + s, fx(FACE.browOut, k), 0.022, 0.9),
+      sph('lidUp' + s, fx(FACE.lidUp, k), 0.013, 1), sph('lidLo' + s, fx(FACE.lidLo, k), 0.011, 0.8), sph('cheek' + s, fx(FACE.cheek, k), 0.03, 0.6)]),
+    sph('nose', FACE.nose, 0.018, 0.8), sph('lipUp', FACE.lipUp, 0.016, 0.8), sph('lipLo', FACE.lipLo, 0.014, 0.8),
+    ...S.map((s, k) => sph('lipCorner' + s, fx(FACE.lipCorner, k), 0.016, 0.8)),
+    sph('chin', FACE.chin, 0.025, 0.7),
+    { bone: 'belly', surf: [0, 0.84, 'front'], r: 0.15, s: 0.75, from: ['hips', 'spine', 'spine2', 'spine3'] },
+    ...S.map((s, k) => ({ bone: 'pec' + s, surf: [(k ? 1 : -1) * 0.14, 1.18, 'front'], r: 0.11, s: 0.7, from: ['chest', 'spine3', 'clav' + s] })),
+    ...S.map((s, k) => ({ bone: 'glute' + s, surf: [(k ? 1 : -1) * 0.12, 0.66, 'back'], r: 0.13, s: 0.7, from: ['hips', 'thigh' + s] })),
+    ...S.flatMap((s, k) => { const x = v => (k ? 1 : -1) * v, T_ = ['chest', 'spine3', 'spine2'];
+      return [
+        { bone: 'bicep' + s, surf: [x(0.5), 1.11, 'front'], r: 0.08, s: 0.75, from: ['arm' + s, 'armTw' + s, 'delt' + s] },
+        { bone: 'tricep' + s, surf: [x(0.5), 1.11, 'back'], r: 0.08, s: 0.75, from: ['arm' + s, 'armTw' + s, 'delt' + s] },
+        { bone: 'foreMus' + s, surf: [x(0.63), 0.84, 'front'], r: 0.07, s: 0.7, from: ['fore' + s, 'foreTw' + s, 'elbow' + s] },
+        { bone: 'lat' + s, surf: [x(0.28), 1.2, 'back'], r: 0.12, s: 0.7, from: [...T_, 'clav' + s] },
+        { bone: 'trap' + s, at: [x(0.18), 1.38, -0.14], r: 0.09, s: 0.7, from: ['chest', 'neck', 'clav' + s] },
+        { bone: 'oblique' + s, surf: [x(0.27), 0.98, 'front'], r: 0.1, s: 0.7, from: ['hips', 'spine', 'spine2', 'spine3', 'belly'] },
+        { bone: 'serratus' + s, surf: [x(0.25), 1.12, 'front'], r: 0.08, s: 0.65, from: [...T_, 'pec' + s, 'clav' + s] },
+        { bone: 'shortsF' + s, surf: [x(0.2), 0.57, 'front'], r: 0.1, s: 0.75, from: ['thigh' + s, 'thighTw' + s, 'hips'] },
+        { bone: 'shortsB' + s, surf: [x(0.2), 0.57, 'back'], r: 0.1, s: 0.75, from: ['thigh' + s, 'thighTw' + s, 'hips', 'glute' + s] },
+        { bone: 'shortsS' + s, at: [x(0.31), 0.6, -0.1], r: 0.09, s: 0.75, from: ['thigh' + s, 'thighTw' + s, 'hips'] },
+        sph('jowl' + s, fx([-0.05, 1.46, 0.0], k), 0.04, 0.65, { from: [...HEADS, 'cheek' + s] }),
+        sph('nostril' + s, fx([-0.004, 1.506, 0.045], k), 0.011, 0.7, { from: [...HEADS, 'nose'] })]; }),
+    { bone: 'abs', surf: [0, 1.08, 'front'], r: 0.1, s: 0.6, from: ['spine', 'spine2', 'spine3'] },
+    { bone: 'rhomboid', surf: [0, 1.28, 'back'], r: 0.1, s: 0.6, from: ['chest', 'spine3'] },
+    { bone: 'nape', surf: [0.012, 1.42, 'back'], r: 0.05, s: 0.7, from: ['neck', 'neck2', 'head'] },
+    sph('dewlap', [0.012, 1.405, 0.0], 0.04, 0.6, { from: ['neck', 'neck2', 'head', 'jaw', 'chin'] }),
+    { bone: 'capBack', surf: [0.012, 1.66, 'back'], r: 0.06, s: 0.8, from: ['cap'] },
+    sph('browMid', [0.012, 1.585, 0.015], 0.016, 0.8, { from: [...HEADS, 'browInR', 'browInL'] })];
+  return { note: T.note, prep: { yaw: 0, translate: [0, 0, 0] },
+    bones: [
+      { name: 'all', head: [0, 0, 0], tail: [0, 0.15, 0], parent: null, deform: false },
+      { name: 'cog', head: T.pelvis, tail: add(T.pelvis, [0, 0, 0.15]), parent: 'all', deform: false },
+      { name: 'hips', head: T.pelvis, tail: T.waist, parent: 'cog' },
+      { name: 'spine', head: T.waist, tail: s1, parent: 'hips', connect: true },
+      { name: 'spine2', head: s1, tail: s2, parent: 'spine', connect: true },
+      { name: 'spine3', head: s2, tail: T.ribs, parent: 'spine2', connect: true },
+      { name: 'chest', head: T.ribs, tail: ctop, parent: 'spine3', connect: true },
+      { name: 'neck', head: ctop, tail: nk, parent: 'chest', connect: true },
+      { name: 'neck2', head: nk, tail: T.neck, parent: 'neck', connect: true },
+      { name: 'head', head: T.neck, tail: T.top, parent: 'neck2', connect: true },
+      { name: 'jaw', head: FACE.jaw, tail: FACE.chin, parent: 'head', noauto: true },
+      { name: 'chin', head: FACE.chin, tail: fwd(FACE.chin), parent: 'jaw', noauto: true },
+      { name: 'lipLo', head: FACE.lipLo, tail: fwd(FACE.lipLo), parent: 'jaw', noauto: true },
+      { name: 'lipUp', head: FACE.lipUp, tail: fwd(FACE.lipUp), parent: 'head', noauto: true },
+      { name: 'nose', head: FACE.nose, tail: fwd(FACE.nose), parent: 'head', noauto: true },
+      { name: 'cap', head: [0, 1.64, -0.06], tail: [0, 1.72, -0.06], parent: 'head', noauto: true },
+      { name: 'capBrim', head: [0, 1.665, 0.0], tail: [0, 1.715, 0.05], parent: 'cap', noauto: true },
+      { name: 'belly', head: [0, 0.88, -0.04], tail: [0, 0.86, 0.1], parent: 'spine', noauto: true },
+      ...MID.map(([n, par, h, t]) => ({ name: n, head: h, tail: t, parent: par, noauto: true })),
+      ...side('R', 0), ...side('L', 1)],
+    ik: [{ name: 'c_handL', bone: 'foreL', chain: 2 }, { name: 'c_handR', bone: 'foreR', chain: 2 }, { name: 'c_footL', bone: 'shinL', chain: 2 }, { name: 'c_footR', bone: 'shinR', chain: 2 }],
+    share: { spine: [['spine', 0.34], ['spine2', 0.33], ['spine3', 0.33]], head: [['neck', 0.25], ['neck2', 0.25], ['head', 0.5]] },
+    clavicles: S.map((s, k) => ({ bone: 'clav' + s, target: 'c_hand' + s, rest: T.wri[k], k: 0.4, max: 30 })),
+    toes: S.map(s => ({ bone: 'toe' + s, foot: 'foot' + s, floor: 0.015, near: 0.07 })),
+    feet: S.map(s => ({ bone: 'foot' + s, side: s === 'R' ? -1 : 1, out: 6 })),
+    legcut: Object.fromEntries(S.map(s => [s, ['thigh', 'thighTw', 'shin', 'knee', 'foot', 'shinTw', 'toe', 'shortsF', 'shortsB', 'shortsS'].map(n => n + s)])),   /* the bare legs are their own mesh: the game draws stick legs instead (stickLegs) */   /* the model's feet are sculpted splayed: stand them nearly straight */
+    /* the forward smash's clap: palms pressed flat together from the strike until the hands part (bone lines 0.065 apart,
+       measured on the rendered clap: closer and the hands pass into each other) */
+    meet: { ClapCap: { at: [0.73, 1.4], fade: 0.2, gap: 0.055, toein: 6, hands: ['handR', 'handL'], targets: ['c_handR', 'c_handL'] } },
+    track: S.flatMap(s => [{ bone: 'armTw' + s, target: 'arm' + s, headtail: 1 }, { bone: 'thighTw' + s, target: 'thigh' + s, headtail: 1 }]),
+    copyrot: S.flatMap(s => [{ bone: 'foreTw' + s, from: 'hand' + s, space: 'LOCAL', axes: 'Y', influence: 0.5 },
+      { bone: 'elbow' + s, from: 'fore' + s, space: 'LOCAL', influence: 0.5 }, { bone: 'knee' + s, from: 'shin' + s, space: 'LOCAL', influence: 0.5 },
+      { bone: 'delt' + s, from: 'arm' + s, space: 'LOCAL', influence: 0.5 }, { bone: 'shinTw' + s, from: 'foot' + s, space: 'LOCAL', influence: 0.5 }]),
+    soft, proxy: true, rigid: [{ bone: 'head', box: T.headBox }], poses: {}, clips: {} };
+}
 /* both sides from the right side's points (the models are near enough symmetric) */
 const both = o => { const T = {}; for (const [k, v] of Object.entries(o)) T[k] = Array.isArray(v) && Array.isArray(v[0]) && k !== 'headBox' ? [v[0], mir(v[0])] : v; return T; };
 /* Joint places read off gridded views and the hand's own vertices (tools/blender/gridview.py). knu: the knuckles,
@@ -454,7 +624,7 @@ const TBA = both({ note: 'Cronky Dong: the owner\'s A-pose model. Metres, feet o
    to the old shoulder's width becomes the new shoulder's width, past it scales with the arm; forward scales with the arm.
    Feet keep their stride (scaled with the leg) from the new hips' width. The hips' move scales with the leg. */
 function retarget(old, J, T, o) {
-  const s = apose(T), k = o.arm, kl = o.leg, ox = Math.abs(J.sho[0][0]), nx = Math.abs(T.sho[0][0]);
+  const s = apose(T, o.extra), k = o.arm, kl = o.leg, ox = Math.abs(J.sho[0][0]), nx = Math.abs(T.sho[0][0]);
   const hand = (i, mv) => { const sd = i ? 1 : -1, a = add(J.wri[i], mv || [0, 0, 0]), u = a[0] * sd;
     const x = sd * (u <= 0 ? u : u < ox ? u * nx / ox : nx + (u - ox) * k);
     const y = a[1] > J.sho[i][1] ? T.sho[i][1] + (a[1] - J.sho[i][1]) * k : a[1] * T.sho[i][1] / J.sho[i][1] + o.lift * Math.max(0, 1 - a[1] / J.sho[i][1]);
@@ -571,6 +741,78 @@ K.Clap = keys([{ t: 0, use: GB },
   { t: 1.35, in: 'quad', pose: Object.assign({ hips: HP(0, 0.02, 0.18), spine: R(36), chest: R(22), head: R(-52), c_handR: b.HR(0.9, 0.2, -0.25), c_handL: b.HL(0.9, 0.2, 0.25), c_footR: b.FR(0.2, 0, -0.25) }, FP) },
   /* 41-54: gathers back into the knuckles */
   { t: 1.85, ...backB }]);
+/* ---- motion capture test (2026-11-11): the forward smash from a Mixamo two-handed heavy swing, retargeted by
+   tools/blender/mocap.py --handspace root into assets/joey/mocap/<name>.json. The capture is the in-between (a key every
+   frame); on top of it he stays down in his ape's crouch, the hands meet in a clap at the strike and reach as far as the
+   hand-keyed clap did, and the clip blends out of and back into the knuckle stance. ---- */
+const MOCAPDIR = path.join(__dirname, '..', '..', 'assets', 'joey', 'mocap');
+/* keeps a capture readable side-on: the chest's turn about the vertical is eased to within yawMax degrees (soft, so a turn
+   still reads), the correction turning the whole body about the hips, hand and foot targets with it */
+const qmulB = (a, b) => [a[0] * b[0] - a[1] * b[1] - a[2] * b[2] - a[3] * b[3], a[0] * b[1] + a[1] * b[0] + a[2] * b[3] - a[3] * b[2], a[0] * b[2] - a[1] * b[3] + a[2] * b[0] + a[3] * b[1], a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0]];
+function unturnB(pose, yawMax) {
+  const h = pose.hips, cw = qmulB(qmulB(h.qb, pose.spine.qb), pose.chest.qb), th0 = 2 * Math.atan2(cw[3], cw[0]), th = Math.atan2(Math.sin(th0), Math.cos(th0));
+  const m = yawMax * Math.PI / 180, D = m * Math.tanh(th / m) - th, c = Math.cos(D), s = Math.sin(D), cq = Math.cos(D / 2), sq = Math.sin(D / 2);
+  const rot = v => [v[0] * c + v[2] * s, v[1], -v[0] * s + v[2] * c], q = h.qb;
+  h.qb = [cq * q[0] - sq * q[3], cq * q[1] - sq * q[2], cq * q[2] + sq * q[1], cq * q[3] + sq * q[0]];
+  const bone = n => big.bones.find(b => b.name === n).head, hp = bone('hips').map((v, i) => v + h.move[i]);
+  for (const bn of ['c_handL', 'c_handR', 'c_footL', 'c_footR']) { const r = bone(bn), p = r.map((v, i) => v + pose[bn].move[i] - hp[i]); pose[bn].move = rot(p).map((v, i) => v + hp[i] - r[i]); }
+}
+function capClip(name, o) {
+  const d = JSON.parse(fs.readFileSync(path.join(MOCAPDIR, name + '.json'), 'utf8')), F = d.frames, sf = d.fps || 30, fr = n => (n - 1) / sf;
+  const warp = o.warp.map(([c, t]) => [fr(c), t]), dur = warp[warp.length - 1][1];
+  const src = t => { for (let i = 1; i < warp.length; i++) if (t <= warp[i][1] || i === warp.length - 1) { const [s0, d0] = warp[i - 1], [s1, d1] = warp[i]; return s0 + (s1 - s0) * Math.min(1, Math.max(0, (t - d0) / ((d1 - d0) || 1))); } };
+  const mix = (a, b, u) => a.map((v, i) => v + (b[i] - v) * u), dot = (a, b) => a.reduce((s, v, i) => s + v * b[i], 0);
+  const nq = q => { const l = Math.hypot(...q); return q.map(v => +(v / l).toFixed(5)); };
+  const nlerp = (a, b, u) => { if (dot(a, b) < 0) b = b.map(v => -v); return nq(mix(a, b, u)); };
+  const sample = s => { const x = Math.min(F.length - 1, Math.max(0, s * sf)), i = Math.floor(x), j = Math.min(F.length - 1, i + 1), u = x - i, out = {};
+    for (const bn of ['hips', 'spine', 'chest', 'head', 'c_handL', 'c_handR', 'c_footL', 'c_footR']) { const A = F[i][bn], B = F[j][bn], r = {};
+      if (A.qb) r.qb = nlerp(A.qb, B.qb, u); if (A.move) r.move = mix(A.move, B.move, u); out[bn] = r; }
+    return out; };
+  const smooth = u => { u = Math.min(1, Math.max(0, u)); return u * u * (3 - 2 * u); };
+  /* a window over clip time [a, b], eased in over e0 seconds before and out over e1 after */
+  const win = (t, [a, b], e0, e1) => t < a ? smooth(1 - (a - t) / e0) : t > b ? smooth(1 - (t - b) / e1) : 1;
+  const stance = big.poses.kn, keysOut = [], n = Math.round(dur * 30);
+  for (let k = 0; k <= n; k++) {
+    const t = k / 30, c = sample(src(t)), pose = {};
+    if (o.yawMax) unturnB(c, o.yawMax);
+    for (const bn in o.add) { const a = o.add[bn]; c[bn] = c[bn] || {}; if (a.move) c[bn].move = (c[bn].move || [0, 0, 0]).map((v, i) => v + a.move[i]); if (a.rot) c[bn].rot = a.rot; }
+    for (const bw of o.boost || []) { const w = win(t, bw.at, bw.ease[0], bw.ease[1]); if (!w) continue;
+      for (const bn in bw.pose) { const p = bw.pose[bn]; c[bn] = c[bn] || {};
+        if (p.move) c[bn].move = (c[bn].move || [0, 0, 0]).map((v, i) => v + p.move[i] * w);
+        if (p.rot) c[bn].rot = (c[bn].rot || [0, 0, 0]).map((v, i) => v + p.rot[i] * w);
+        if (p.toX !== undefined) { const rest = big.bones.find(b => b.name === bn).head[0]; c[bn].move[0] += ((p.toX - rest) - c[bn].move[0]) * w; } } }   /* toX: the hand pulled to this x (the clap) */
+    if (o.hands) {   /* the hands follow their own path ([t, forward, height, out to the side, ease into this key]), the body stays the capture's; the left hand mirrors the right */
+      const H = o.hands; let i = 1; while (i < H.length - 1 && t > H[i][0]) i++;
+      const A = H[i - 1], B = H[i], u0 = Math.min(1, Math.max(0, (t - A[0]) / (B[0] - A[0]))), u = B[4] === 'snap' ? u0 * u0 * u0 : smooth(u0);
+      const z = A[1] + (B[1] - A[1]) * u, y = A[2] + (B[2] - A[2]) * u, x = A[3] + (B[3] - A[3]) * u;
+      c.c_handR = { move: b.HR(z, y, -x).move }; c.c_handL = { move: b.HL(z, y, x).move }; }
+    const ws = Math.max(1 - smooth(t / o.blendIn), smooth((t - (dur - o.blendOut)) / o.blendOut));   /* how much of the knuckle stance shows */
+    for (const bn of new Set([...Object.keys(stance), ...Object.keys(c)])) { const s = stance[bn] || {}, m = c[bn] || {}, r = {};
+      const sr = s.rot || [0, 0, 0], mr = m.rot || [0, 0, 0]; r.rot = mix(mr, sr, ws).map(v => +v.toFixed(2));
+      if (m.qb) r.qb = nlerp(m.qb, [1, 0, 0, 0], ws);
+      r.move = mix(m.move || [0, 0, 0], s.move || [0, 0, 0], ws).map(v => +v.toFixed(4));
+      pose[bn] = r; }
+    keysOut.push(k === 0 ? { t: 0, use: GB, pose } : { t: +t.toFixed(4), pose });
+  }
+  return keys(keysOut);
+}
+/* Two Handed Heavy Weapon Swing: 40-55 both arms drawn back low behind him, 58-73 swung up over his head, 76-80 slammed
+   down in front, 82-110 the follow-through and settle. Startup 0-0.73 (the charge holds near capture frame 63, arms back),
+   contact 0.73-0.8, recovery to 1.85. */
+K.ClapCap = capClip('Two_Handed_Heavy_Weapon_Swing', {
+  warp: [[38, 0], [66, 0.5], [76, 0.73], [80, 0.8], [104, 1.45], [110, 1.85]], blendIn: 0.18, blendOut: 0.4, yawMax: 15,
+  add: { hips: M(0, -0.22, -0.04), spine: R(4), head: R(-30), footL: R(-20), footR: R(-20) },   /* stays down in his crouch, face forward */
+  /* Studied (not copied) from the owner's reference clip, 2026-11-11: a long wind-up with the arms flung straight back and
+     the body leaning back; a release of about one frame; the whole body diving low and long into the clap, back leg
+     stretched out behind, the hands meeting low; the dive held a long while, then a slow climb back. */
+  boost: [
+    { at: [0.3, 0.64], ease: [0.25, 0.04], pose: { hips: M(0, 0.06, -0.1), spine: R(-12), chest: R(-16), head: R(14) } },   /* leaning back, chest open, arms behind */
+    { at: [0.7, 1.1], ease: [0.03, 0.6], pose: { hips: M(0, -0.2, 0.45), spine: R(24), chest: R(10), head: R(-38), c_footR: M(0, 0, 0.42), c_footL: M(0, 0, -0.32), footL: R(30) } },   /* the dive: low and long, back leg straight out behind */
+    { at: [0.86, 1.25], ease: [0.1, 0.4], pose: { spine: R(-22), chest: R(-10), head: R(16) } }],   /* the capture keeps bending over after the strike: hold him up so his face stays off the floor */
+  /* [t, forward, height, out to the side; below 0 aims past the middle, so arms stretched beyond their reach still meet]: arms drawn straight back behind him, held while charging, then one frame to
+     whip through and the palms smash together low and far in front; they part a little and drift back as he rises */
+  hands: [[0, 0.36, 0.13, 0.38], [0.22, -0.1, 1.15, 0.6], [0.5, -0.78, 1.32, 0.45], [0.65, -0.86, 1.28, 0.42], [0.69, 0.55, 0.95, 0.55, 'snap'],
+    [0.73, 1.8, 0.55, -0.1, 'snap'], [0.8, 1.83, 0.52, -0.1], [1.0, 1.76, 0.5, -0.08], [1.25, 1.62, 0.46, -0.09], [1.4, 1.45, 0.42, -0.06], [1.62, 0.9, 0.3, 0.28], [1.85, 0.36, 0.13, 0.38]] });
 K.OverClap = keys([{ t: 0, use: GB }, { t: 0.25, pose: { hips: HP(0, -0.1, -0.02), spine: R(34), chest: R(20), head: R(-50), c_handR: b.HR(0.3, 0.15, -0.85), c_handL: b.HL(0.3, 0.15, 0.85), c_footR: b.FR(-0.06, 0, -0.3), c_footL: b.FL(-0.1, 0, 0.3) } },
   { t: 0.47, in: 'snap', pose: { hips: HP(0, 0.24, 0), spine: R(4), chest: R(-10), head: R(-14), c_handR: b.HR(0.12, 1.95, -0.05), c_handL: b.HL(0.12, 1.95, 0.05), c_footR: b.FR(-0.06, 0, -0.26), c_footL: b.FL(-0.1, 0, 0.26) } },
   { t: 0.56, pose: { c_handR: b.HR(0.12, 1.93, -0.05), c_handL: b.HL(0.12, 1.93, 0.05) } },
@@ -613,8 +855,8 @@ K.Grab = keys([{ t: 0, use: GB }, { t: 0.17, pose: { hips: HP(0, 0.06, -0.04), c
   { t: 0.27, in: 'snap', pose: Object.assign(SW(0.14), { spine: R(24), chest: R(14, -14), head: R(-42), c_handR: b.HR(1.1, 0.95, -0.1), c_handL: b.HL(-0.35, 1.35, 0.5) }) }, { t: 0.33, pose: {} },
   { t: 0.8, in: 'quad', pose: { hips: HP(0, 0.04, 0), chest: R(20, 0), c_handR: b.HR(0.5, 0.5, -0.35), c_handL: b.HL(0.36, 0.13, 0.38) } }, { t: 1.25, ...backB }]);
 
-const humanA = retarget(human, JH, THA, { arm: 1.05, leg: 1, lift: 0 });
-const bigA = retarget(big, JB, TBA, { arm: 1.18, leg: 0.7, lift: 0.09 });
+const humanA = retarget(human, JH, THA, { arm: 1.05, leg: 1, lift: 0, extra: process.env.JOEY_PLAIN ? false : 'human' });
+const bigA = retarget(big, JB, TBA, { arm: 1.18, leg: 0.7, lift: 0.09, extra: !process.env.JOEY_PLAIN });
 
 /* ---- the hands: how closed each hand is (0 open, 1 a fist) through every clip, added to each key ----
    Cronky Dong walks on his knuckles, so his hands are fists on the ground unless a move slaps, claps or grabs; in the air
@@ -626,7 +868,7 @@ const GRIPB = { '*': [[0, 1, 1]], Rise: [[0, 0.35]], Fall: [[0, 0.3]], FastFall:
   ThrowB: [[0, 0.8, 1], [0.4, 0.8, 0.3], [0.45, 0.1, 0.3], [0.9, 1]], ThrowU: [[0, 0.8, 1], [0.4, 0.8, 0.6], [0.45, 0.1, 0.6], [0.95, 1]], ThrowD: [[0, 0.8, 1], [0.4, 0.8, 1], [0.45, 0.2, 1], [0.95, 1]],
   ThrowCB: [[0, 0.75], [0.4, 0.75], [0.45, 0.1], [0.95, 1]], ThrowCU: [[0, 0.75], [0.4, 0.75], [0.45, 0.05], [0.95, 1]], ThrowCD: [[0, 0.75], [0.18, 0.4], [0.42, 0.5], [0.55, 0.05], [0.95, 1]],
   Backhand: [[0, 1], [0.12, 0.1, 1], [0.6, 0.15, 1], [1.15, 1]], ArmSweep: [[0, 1], [0.1, 0.1, 1], [0.8, 0.2, 1], [1.3, 1]], LowSlap: [[0, 1], [0.08, 0.1, 1], [0.55, 0.2, 1], [0.83, 1]],
-  Clap: [[0, 1], [0.3, 0.1], [1.4, 0.2], [1.85, 1]], OverClap: [[0, 1], [0.15, 0.1], [1.2, 0.2], [1.65, 1]], Slap: [[0, 1], [0.15, 0.1], [1.2, 0.15], [1.55, 1]], SlapAir: [[0, 0.3], [0.3, 0.05], [1.65, 0.3]],
+  Clap: [[0, 1], [0.3, 0.1], [1.4, 0.2], [1.85, 1]], ClapCap: [[0, 1], [0.2, 0.15], [0.66, -0.3], [1.35, -0.3], [1.6, 0.2], [1.85, 1]], OverClap: [[0, 1], [0.15, 0.1], [1.2, 0.2], [1.65, 1]], Slap: [[0, 1], [0.15, 0.1], [1.2, 0.15], [1.55, 1]], SlapAir: [[0, 0.3], [0.3, 0.05], [1.65, 0.3]],
   Spin: [[0, 0.3], [0.25, 0.05], [1.0, 0.2], [1.27, 0.3]], SpinG: [[0, 1], [0.12, 0.05], [3.1, 0.1], [3.5, 1]], SpinA: [[0, 0.3], [0.1, 0.05], [2.3, 0.3]],
   GetupAtk: [[0, 0.3], [0.25, 0.05], [1.0, 0.2], [1.6, 1]], Idle2: [[0, 1], [0.35, 1, 0.05], [1.2, 1, 0.05], [1.4, 0.4, 1], [2.3, 0.4, 1], [2.65, 1]],
   Stomp: [[0, 0.3]], Bump: [[0, 0.3], [0.15, 0.6], [1.25, 0.3]], BackKick: [[0, 0.3]], FistDrop: [[0, 0.3], [0.4, 0.9], [1.4, 0.9], [1.85, 0.3]],
@@ -645,7 +887,86 @@ function grip(spec, table, deg) {
   }
 }
 
-grip(humanA, GRIPH, { f1: 45, f2: 50, tp: 0, ty: 30 }); grip(bigA, GRIPB, { f1: 80, f2: 85, tp: 0, ty: 45 });
+if (process.env.JOEY_PLAIN) grip(humanA, GRIPH, { f1: 45, f2: 50, tp: 0, ty: 30 });
+/* Cronky Dong's hands, one finger at a time: every joint curls about the hand's own hinge line (across the palm, measured
+   from the mesh), the outer fingers curling a little further and sooner than the index, the thumb folding across last;
+   an open hand (below 0.25) also spreads its fingers, and below 0 the fingers straighten past the model's relaxed curl
+   (flat for a slap or a clap) */
+function gripFull(spec, table, FING) {
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]], dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const unit = v => { const l = Math.hypot(...v); return v.map(x => x / l); }, sub = (a, b) => a.map((v, i) => v - b[i]);
+  const bone = n => spec.bones.find(b => b.name === n);
+  const qax = (ax, deg) => { const h = deg * Math.PI / 360, s = Math.sin(h); return [Math.cos(h), ax[0] * s, -ax[2] * s, ax[1] * s]; };   /* model axis -> Blender quaternion */
+  const qmul = (a, b) => [a[0] * b[0] - a[1] * b[1] - a[2] * b[2] - a[3] * b[3], a[0] * b[1] + a[1] * b[0] + a[2] * b[3] - a[3] * b[2], a[0] * b[2] - a[1] * b[3] + a[2] * b[0] + a[3] * b[1], a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0]];
+  const CURL = { index: [70, 95, 60, 1.0], middle: [75, 95, 60, 1.03], ring: [80, 98, 62, 1.07], pinky: [85, 100, 65, 1.12] };
+  const SPREAD = { index: 5, middle: 0, ring: -5, pinky: -11 }, THUMB = [32, 48, 50];
+  const frame = {};
+  for (const s of ['R', 'L']) {
+    const h = bone('hand' + s), d = unit(sub(h.tail, h.head)), n = unit(FING[s].palm), hinge = unit(cross(d, n));
+    const tb = bone('thumb' + s + '1'), t = unit(sub(bone('thumb' + s + '3').tail, tb.head)), thinge = unit(cross(t, n));
+    const toThumb = Math.sign(dot(sub(tb.head, h.head), cross(n, d))) || 1;   /* turning about the palm's normal this way swings a finger toward the thumb */
+    frame[s] = { hinge, thinge, n, toThumb };
+  }
+  const hand = (c, s) => { const F = frame[s], out = {}, open = c < 0 ? 0 : Math.max(0, 0.25 - c) / 0.25;   /* a relaxed open hand spreads; one held flat keeps its fingers together */
+    for (const [f, a] of Object.entries(CURL)) {
+      const k = c < 0 ? Math.max(c, -0.35) * 0.6 : Math.min(1, c * a[3]);
+      for (let j = 0; j < 3; j++) {
+        let q = qax(F.hinge, a[j] * k);
+        if (j === 0 && SPREAD[f]) q = qmul(q, qax(F.n, SPREAD[f] * open * F.toThumb));
+        out[f + s + (j + 1)] = { qb: q.map(v => +v.toFixed(5)) }; } }
+    const kt = Math.max(-0.2, Math.min(1, (c - 0.15) / 0.85));   /* the thumb folds in after the fingers */
+    for (let j = 0; j < 3; j++) out['thumb' + s + (j + 1)] = { qb: qax(F.thinge, THUMB[j] * kt).map(v => +v.toFixed(5)) };
+    return out; };
+  const at = (pts, t) => { const v = i => [pts[i][1], pts[i].length > 2 ? pts[i][2] : pts[i][1]];
+    if (t <= pts[0][0]) return v(0); for (let i = 1; i < pts.length; i++) if (t <= pts[i][0]) { const u = (t - pts[i - 1][0]) / (pts[i][0] - pts[i - 1][0]), a = v(i - 1), c = v(i); return [lerp(a[0], c[0], u), lerp(a[1], c[1], u)]; } return v(pts.length - 1); };
+  for (const [nm, clip] of Object.entries(spec.clips)) {
+    const pts = table[nm] || (AIRCLIPS.includes(nm) ? [[0, 0.6]] : table['*']);
+    for (const key of clip.keys) { const [r, l] = at(pts, key.t); key.pose = Object.assign({}, key.pose || {}, hand(r, 'R'), hand(l, 'L')); }
+  }
+}
+gripFull(bigA, GRIPB, FING);
+if (!process.env.JOEY_PLAIN) gripFull(humanA, GRIPH, HFING);
+/* ---- Cronky Dong's face: an expression through every clip, added to each key ----
+   Expressions are small moves of the face bones (metres, his right side; the left mirrors) and the jaw's opening (degrees;
+   kept small: the mouth has no inside, so a wide jaw only stretches the lower lip).
+   Every attack (any clip with a strike, a key marked "snap") grits through the wind-up, roars on the strike and calms
+   down through the recovery; getting hit winces; the second idle and the respawn look pleased with themselves; the rest
+   wear his resting scowl. */
+const EXPR = {
+  calm:   { browIn: [0, -0.003, 0.001] },
+  effort: { browIn: [0.002, -0.007, 0.003], browOut: [0, 0.002, 0], lidUp: [0, -0.005, 0], lidLo: [0, 0.003, 0], cheek: [0, 0.004, 0.001], nose: [0, 0.002, 0], lipUp: [0, 0.002, 0], lipCorner: [-0.004, -0.002, -0.003], browMid: [0, -0.005, 0.002], nostril: [-0.002, 0.001, 0], jaw: 3 },
+  roar:   { browIn: [0.002, -0.008, 0.003], browOut: [0, 0.001, 0], lidUp: [0, -0.004, 0], cheek: [0, 0.005, 0.001], nose: [0, 0.003, 0], lipUp: [0, 0.005, 0.002], lipCorner: [-0.006, -0.002, -0.004], browMid: [0, -0.006, 0.002], nostril: [-0.003, 0.002, 0], jaw: 6 },
+  hurt:   { browIn: [0, 0.008, 0], browOut: [0, -0.003, 0], lidUp: [0, -0.009, 0], lidLo: [0, 0.004, 0], cheek: [0, 0.003, 0], lipCorner: [-0.003, -0.005, 0], browMid: [0, 0.007, 0], jaw: 4 },
+  smug:   { browOut: [0, 0.004, 0], browIn: [0, 0.002, 0], lidUp: [0, -0.003, 0], lipCorner: [-0.003, 0.004, 0], jaw: 0 } };
+const FACEBONES = ['jaw', 'lipUp', 'nose', 'browMid', ...['R', 'L'].flatMap(s => ['browIn', 'browOut', 'lidUp', 'lidLo', 'cheek', 'lipCorner', 'nostril'].map(n => n + s))];
+const HURT = ['Hit', 'HitHeavy', 'Launch', 'LaunchUp', 'Spike', 'Tumble', 'Held', 'Buried', 'Helpless', 'Down', 'ShieldHit'], SMUG = ['Idle2', 'Respawn', 'Respawn2'];
+function faceOf(mix) {   /* mix: [[name, amount], ...] -> a pose for every face bone */
+  const out = {};
+  for (const n of FACEBONES) out[n] = { move: [0, 0, 0] };
+  out.jaw = { rot: [0, 0, 0] };
+  for (const [nm, a] of mix) for (const [k, v] of Object.entries(EXPR[nm])) {
+    if (k === 'jaw') { out.jaw.rot[0] += v * a; continue; }
+    for (const s of (k === 'nose' || k === 'lipUp' || k === 'browMid' ? [''] : ['R', 'L'])) { const m = out[k + s].move, sx = s === 'L' ? -1 : 1;
+      m[0] += v[0] * a * sx; m[1] += v[1] * a; m[2] += v[2] * a; } }
+  for (const n of FACEBONES) if (out[n].move) out[n].move = out[n].move.map(x => +x.toFixed(4));
+  return out;
+}
+function faceFull(spec) {
+  for (const [nm, clip] of Object.entries(spec.clips)) {
+    const ks = clip.keys, end = ks[ks.length - 1].t, snap = nm === 'ClapCap' ? 0.73 : (ks.find(k => k.in === 'snap') || {}).t;
+    let pts;   /* [t, expression, amount] */
+    if (HURT.includes(nm)) pts = [[0, 'hurt', 1], [end, 'hurt', 0.7]];
+    else if (SMUG.includes(nm)) pts = [[0, 'calm', 1], [end * 0.3, 'smug', 1], [end * 0.8, 'smug', 1], [end, 'calm', 1]];
+    else if (snap !== undefined) pts = [[0, 'calm', 1], [Math.max(0.04, snap * 0.5), 'effort', 1], [snap - 0.04, 'effort', 1], [snap, 'roar', 1], [Math.min(end, snap + 0.3), 'roar', 0.8], [end, 'calm', 1]];
+    else pts = [[0, 'calm', 1]];
+    for (const key of ks) {
+      let i = 0; while (i < pts.length - 1 && key.t > pts[i + 1][0]) i++;
+      const a = pts[i], b = pts[Math.min(i + 1, pts.length - 1)], u = b[0] > a[0] ? Math.min(1, Math.max(0, (key.t - a[0]) / (b[0] - a[0]))) : 0;
+      key.pose = Object.assign({}, key.pose || {}, faceOf(a[1] === b[1] ? [[a[1], lerp(a[2], b[2], u)]] : [[a[1], a[2] * (1 - u)], [b[1], b[2] * u]]));
+    }
+  }
+}
+faceFull(bigA);
 
 /* ---- write ---- */
 fs.mkdirSync(OUT, { recursive: true });
@@ -667,12 +988,15 @@ cur.Joey = { file: 'assets/joey/export/joey-v1.glb', height: 13.5, feel: 1,
     hitHeavy: { clip: 'HitHeavy', from: 0, to: 0.8 }, launch: { clip: 'Launch', from: 0, to: 0.5 }, launchUp: { clip: 'LaunchUp', from: 0, to: 0.6 }, spike: { clip: 'Spike', from: 0, to: 0.6 },
     airdodge: { clip: 'AirDodge', from: 0, to: 0.66 }, roll: { clip: 'Ball', bounce: true }, respawn: { clip: 'Respawn' }, pummel: { clip: 'Pummel', from: 0, to: 0.3 },
     throw_f: { clip: 'ThrowF', from: 0, to: 1.0 }, throw_b: { clip: 'ThrowB', from: 0, to: 1.05 }, throw_d: { clip: 'ThrowD', from: 0, to: 1.1 } }),
-  strikers: [{ bone: 'handR', ext: 1.0 }, { bone: 'handL', ext: 1.0 }, { bone: 'footL', ext: 1.4 }, { bone: 'footR', ext: 1.4 }], springs: [],
+  strikers: [{ bone: 'handR', ext: 1.0 }, { bone: 'handL', ext: 1.0 }, { bone: 'footL', ext: 1.4 }, { bone: 'footR', ext: 1.4 }],
+  springs: [['pecR', 0.32, 0.68, 0.12, 0.03], ['pecL', 0.32, 0.68, 0.12, 0.03], ['belly', 0.26, 0.7, 0.14, 0.04], ['gluteR', 0.3, 0.68, 0.14, 0.04], ['gluteL', 0.3, 0.68, 0.14, 0.04], ['nape', 0.32, 0.68, 0.1, 0.03]]
+    .map(([n, k, d, max, drag]) => ({ bones: [n], k, d, max, drag })),   /* a little give in his chest, belly, seat and neck as he moves */
   attacks: { jab: A('Palm', 0.23, 0.27, 0, 0.7), jab2: A('Curl', 0.3, 0.33, 0, 0.8), jab3: A('Shove', 0.5, 0.57, 0, 1.3), ftilt: A('Raise', 0.4, 0.5, 0, 1.1), utilt: A('Press', 0.43, 0.53, 0, 1.2), dtilt: A('Toe', 0.33, 0.4, 0, 1.0), dash: A('Jog', 0.56, 0.67, 0, 1.75),
     fsmash: A('PR', 1.0, 1.07, 0, 2.4), usmash: A('Clean', 0.93, 1.0, 0, 2.35), dsmash: A('Lunge', 0.77, 1.27, 0, 2.4), nair: A('Jack', 0.36, 0.5, 0, 1.25), fair: A('Front', 0.53, 0.6, 0, 1.5), bair: A('Kick', 0.43, 0.53, 0, 1.35), uair: A('High5', 0.4, 0.47, 0, 1.2), dair: A('Box', 0.67, 0.77, 0, 1.8),
     grab: A('Reach', 0.37, 0.43, 0, 1.3), dgrab: A('Reach', 0.37, 0.43, 0, 1.3), pgrab: A('Reach', 0.37, 0.43, 0, 1.3), getup: A('Lunge', 0.77, 0.8, 0, 1.6), ledgeatk: A('Shove', 0.5, 0.57, 0, 1.3),
     nspec: A('Shake', 0.73, 0.8, 0, 1.4), sspec: A('Band', 0.8, 0.9, 0, 1.9), uspec: A('Strap', 0.33, 0.55, 0, 1.4), dspec: A('Wheel', 0.6, 1.07, 0, 2.2), '*': A('Palm', 0.23, 0.27, 0, 0.7) } };
 cur['Cronky Dong'] = { file: 'assets/joey/export/cronky-v1.glb', height: 24.4, feel: 1,
+  stickLegs: { moves: ['bair', 'dair'], line: 0.3, outline: 0.34, color: '#161616' },   /* stick legs below the shorts; the kick and the stomp show the legs' outline instead */
   clips: Object.assign(common(0.12), { throw: { clip: 'Toss', from: 0, to: 1.4 }, carry: { clip: 'Carry' }, carryWalk: { clip: 'CarryWalk' }, punchWind: { clip: 'Wind' }, buried: { clip: 'Buried' },
     brake: { clip: 'Skid', from: 0, to: 0.4 }, jumpsquat: { clip: 'Squat', from: 0, to: 0.1 }, crouch: { clip: 'Crouch', at: 0.15 }, rise: { clip: 'Rise', from: 0, to: 0.45 }, airjump: { clip: 'AirJump', from: 0, to: 0.48 },
     fastfall: { clip: 'FastFall' }, helpless: { clip: 'Helpless' }, land: { clip: 'Land', from: 0, to: 0.4 }, landHard: { clip: 'LandHard', from: 0, to: 0.65 }, shieldHit: { clip: 'ShieldHit', from: 0, to: 0.3 },
@@ -680,9 +1004,16 @@ cur['Cronky Dong'] = { file: 'assets/joey/export/cronky-v1.glb', height: 24.4, f
     airdodge: { clip: 'AirDodge', from: 0, to: 0.66 }, roll: { clip: 'Ball', bounce: true }, respawn: { clip: 'Respawn' }, pummel: { clip: 'Pummel', from: 0, to: 0.23 },
     throw_b: { clip: 'ThrowB', from: 0, to: 0.9 }, throw_u: { clip: 'ThrowU', from: 0, to: 0.95 }, throw_d: { clip: 'ThrowD', from: 0, to: 0.95 },
     throw_cf: { clip: 'Toss', from: 0, to: 1.4 }, throw_cb: { clip: 'ThrowCB', from: 0, to: 0.95 }, throw_cu: { clip: 'ThrowCU', from: 0, to: 0.95 }, throw_cd: { clip: 'ThrowCD', from: 0, to: 0.95 } }),
-  strikers: [{ bone: 'handR', ext: 1.4 }, { bone: 'handL', ext: 1.4 }, { bone: 'footR', ext: 1.6 }, { bone: 'head', ext: 1.6 }], springs: [],
+  strikers: [{ bone: 'handR', ext: 1.4 }, { bone: 'handL', ext: 1.4 }, { bone: 'footR', ext: 1.6 }, { bone: 'head', ext: 1.6 }],
+  springs: [{ bones: ['belly'], k: 0.22, d: 0.72, max: 0.22, drag: 0.05 }, { bones: ['pecR'], k: 0.3, d: 0.66, max: 0.18, drag: 0.04 }, { bones: ['pecL'], k: 0.3, d: 0.66, max: 0.18, drag: 0.04 },
+    { bones: ['gluteR'], k: 0.28, d: 0.68, max: 0.2, drag: 0.05 }, { bones: ['gluteL'], k: 0.28, d: 0.68, max: 0.2, drag: 0.05 },
+    ...['R', 'L'].flatMap(s => [['bicep', 0.3, 0.66, 0.16, 0.04], ['tricep', 0.26, 0.68, 0.2, 0.05], ['foreMus', 0.32, 0.66, 0.14, 0.03], ['lat', 0.28, 0.7, 0.14, 0.04],
+      ['trap', 0.3, 0.68, 0.12, 0.03], ['oblique', 0.22, 0.72, 0.2, 0.05], ['serratus', 0.3, 0.68, 0.12, 0.03], ['jowl', 0.3, 0.66, 0.16, 0.03],
+      ['shortsF', 0.2, 0.72, 0.3, 0.08], ['shortsB', 0.2, 0.72, 0.3, 0.08], ['shortsS', 0.2, 0.72, 0.3, 0.08]].map(([n, k, d, max, drag]) => ({ bones: [n + s], k, d, max, drag }))),
+    ...[['abs', 0.28, 0.7, 0.12, 0.04], ['rhomboid', 0.3, 0.68, 0.12, 0.03], ['nape', 0.3, 0.68, 0.14, 0.03], ['dewlap', 0.26, 0.7, 0.2, 0.05], ['capBack', 0.24, 0.7, 0.22, 0.06]]
+      .map(([n, k, d, max, drag]) => ({ bones: [n], k, d, max, drag }))],   /* his weight wobbling as he moves */
   attacks: { jab: A('Check', 0.17, 0.2, 0, 0.8), jab2: A('Uppercut', 0.13, 0.2, 0, 1.05), ftilt: A('Backhand', 0.23, 0.3, 0, 1.15), utilt: A('ArmSweep', 0.13, 0.37, 0, 1.3), dtilt: A('LowSlap', 0.17, 0.23, 0, 0.83), dash: A('Roll', 0.27, 0.6, 0, 1.15),
-    fsmash: A('Clap', 0.73, 0.8, 0, 1.85), usmash: A('OverClap', 0.47, 0.53, 0, 1.65), dsmash: A('Hammer', 0.37, 0.47, 0, 1.85), nair: A('Spin', 0.33, 0.87, 0, 1.27), fair: A('FistDrop', 0.6, 0.77, 0, 1.85), bair: A('BackKick', 0.23, 0.53, 0, 1.05), uair: A('Bump', 0.2, 0.33, 0, 1.25), dair: A('Stomp', 0.47, 0.53, 0, 1.8),
+    fsmash: A('ClapCap', 0.73, 0.8, 0, 1.85), usmash: A('OverClap', 0.47, 0.53, 0, 1.65), dsmash: A('Hammer', 0.37, 0.47, 0, 1.85), nair: A('Spin', 0.33, 0.87, 0, 1.27), fair: A('FistDrop', 0.6, 0.77, 0, 1.85), bair: A('BackKick', 0.23, 0.53, 0, 1.05), uair: A('Bump', 0.2, 0.33, 0, 1.25), dair: A('Stomp', 0.47, 0.53, 0, 1.8),
     grab: A('Grab', 0.27, 0.33, 0, 1.25), dgrab: A('Grab', 0.27, 0.33, 0, 1.25), pgrab: A('Grab', 0.27, 0.33, 0, 1.25), ledgeatk: A('LedgeAtk', 0.23, 0.3, 0, 1.15), getup: A('GetupAtk', 0.37, 0.47, 0, 1.85),
     nspec: A('Wind', 0, 0.5, 0, 0.5), nspecR: A('Punch', 0.63, 0.7, 0, 2.05), nspecF: A('Punch', 0.63, 0.7, 0, 2.05), sspec: A('Headbutt', 0.67, 0.73, 0, 2.1), uspec: A('SpinG', 0.63, 2.1, 0, 3.5), uspecA: A('SpinA', 0.13, 1.43, 0, 2.3),
     dspec: A('Slap', 0.4, 0.77, 0, 1.55), dspecA: A('SlapAir', 0.63, 0.93, 0, 1.65), '*': A('Check', 0.17, 0.2, 0, 0.8) } };

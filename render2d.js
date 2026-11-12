@@ -157,23 +157,38 @@ const ART = {
     g.fillStyle = c[2]; for (const x of [1.6, 3]) { g.beginPath(); g.arc(x, 4.1 + bob, 0.38, 0, TAU); g.fill(); }   /* eyes under the lip */
     g.save(); g.translate(4.2, 3.4 + bob); g.rotate(-1.2 * a + 0.5); g.strokeStyle = '#4a4d57'; g.lineWidth = 0.55; g.beginPath(); g.moveTo(0, 0); g.lineTo(0, 5.2); g.moveTo(0, 3.4); g.lineTo(-0.7, 6); g.moveTo(0, 3.4); g.lineTo(0.7, 6); g.stroke(); g.restore();   /* fire tongs */
   },
-  /* Chomp Chomp: a squat round blue critter with a leaf sprout, small beady eyes and a huge mouth of triangular teeth. The
-     mouth opens wide in an attack; the leaf bobs. Faces +x. */
+  /* Chomp Chomp: the owner's Magma Munchkin. A round lump of cooled black lava on four stubby legs, two huge glowing
+     molten eyes with red pupils under a dark hood, a curled antenna, and a mouth that takes up his whole front: glowing
+     studs on the two upper fangs, the lower lip and his sides, a red tongue inside. c[0] is the glow (orange, or the
+     second player's colour). Seen from the front, turned a little toward +x. */
   'Chomp Chomp'(c, t, f) {
-    const sw = gait(f) * 0.8, a = swing(f), bob = Math.sin(t * 0.12) * 0.18, open = f && f.state === 'attack' ? 0.55 + 0.45 * Math.abs(Math.sin(a * 2.2)) : 0.25 + Math.max(0, Math.sin(t * 0.05)) * 0.1;
-    for (const s2 of [-1, 1]) { g.beginPath(); g.ellipse(s2 * 2 + s2 * sw * 0.6 + 0.4, 0.7, 2, 1, 0, 0, TAU); ink(tint(c[0], -0.1), 0.35); }   /* stubby feet */
-    for (const s2 of [-1, 1]) { g.beginPath(); g.moveTo(s2 * 4.6, 5.6 + bob); g.quadraticCurveTo(s2 * 6.6, 5.2 + bob, s2 * 6.7, 3.2 + bob); g.quadraticCurveTo(s2 * 5.4, 3.6 + bob, s2 * 4.4, 4.4 + bob); g.closePath(); ink(tint(c[0], -0.2), 0.32); }   /* fins */
-    g.beginPath(); g.ellipse(0, 5.7 + bob, 5.2, 5.2, 0, 0, TAU); ink(vgrad(c[0], 0.5, 11), 0.5);   /* body */
-    const my = 5 + bob, mh = 2.2 + open * 2.4;   /* the mouth, on the front of the body */
-    g.beginPath(); g.moveTo(-1.6, my + 0.6); g.quadraticCurveTo(2, my + 1, 5.1, my + 0.6); g.quadraticCurveTo(4.6, my - mh, 1.6, my - mh * 0.9); g.quadraticCurveTo(-1.2, my - mh * 0.6, -1.6, my + 0.6); g.closePath(); ink('#5a0f1c', 0.35);
-    g.fillStyle = '#fff'; g.strokeStyle = OL; g.lineWidth = 0.18;
-    for (let k = 0; k < 5; k++) { const x0 = -1 + k * 1.2; g.beginPath(); g.moveTo(x0, my + 0.6); g.lineTo(x0 + 0.6, my - 0.5); g.lineTo(x0 + 1.2, my + 0.65); g.closePath(); g.fill(); g.stroke(); }   /* top teeth */
-    for (let k = 0; k < 3; k++) { const x0 = 0 + k * 1.4, yb = my - mh * 0.8; g.beginPath(); g.moveTo(x0, yb); g.lineTo(x0 + 0.7, yb + 0.9); g.lineTo(x0 + 1.4, yb + 0.1); g.closePath(); g.fill(); g.stroke(); }   /* bottom teeth */
-    g.fillStyle = OL; for (const x of [1.2, 3]) { g.beginPath(); g.arc(x, 8.4 + bob, 0.45, 0, TAU); g.fill(); }   /* small beady eyes */
-    g.fillStyle = '#fff'; for (const x of [1.35, 3.15]) { g.beginPath(); g.arc(x, 8.6 + bob, 0.14, 0, TAU); g.fill(); }
-    const lb = Math.sin(t * 0.15) * 0.3;   /* the leaf sprout, bobbing */
-    g.strokeStyle = '#2f6b1e'; g.lineWidth = 0.4; g.beginPath(); g.moveTo(0, 10.8 + bob); g.quadraticCurveTo(0.1, 11.8 + bob, 0.2 + lb * 0.3, 12.4 + bob); g.stroke();
-    g.beginPath(); g.ellipse(1.3 + lb, 12.9 + bob, 1.3, 0.55, 0.35, 0, TAU); ink(c[1], 0.25); g.beginPath(); g.ellipse(-0.8 + lb * 0.6, 12.6 + bob, 1, 0.45, -0.4, 0, TAU); ink(tint(c[1], -0.15), 0.25);
+    const sw = gait(f) * 0.8, a = swing(f), bob = Math.sin(t * 0.12) * 0.18, open = !f ? 1 : f.state === 'attack' ? 0.6 + 0.4 * Math.abs(Math.sin(a * 2.2)) : 0.2 + Math.max(0, Math.sin(t * 0.05)) * 0.08;
+    const rock = '#2a2126', glow = c[0], hot = tint(c[0], 0.55), ox = 0.6, by = bob;
+    const stud = (x, y, r) => { g.save(); g.shadowColor = glow; g.shadowBlur = 6; g.beginPath(); g.arc(x, y, r, 0, TAU); const q = g.createRadialGradient(x - r * 0.3, y + r * 0.3, 0, x, y, r); q.addColorStop(0, hot); q.addColorStop(1, glow); g.fillStyle = q; g.fill(); g.restore(); g.lineWidth = 0.14; g.strokeStyle = OL; g.stroke(); };
+    for (const [x, y, rx] of [[-3.7, 1.1, 1.5], [4.3, 1.1, 1.5], [-1.9 - sw * 0.5, 0.75, 1.9], [2.9 + sw * 0.5, 0.75, 1.9]]) { g.beginPath(); g.ellipse(x + ox * 0.4, y, rx, 1.15, 0, 0, TAU); ink(rock, 0.38); }   /* four stubby legs, the near pair bigger */
+    g.beginPath(); g.ellipse(ox * 0.3, 5.4 + by, 5.6, 5.1, 0, 0, TAU);   /* body */
+    { const q = g.createRadialGradient(ox + 1.6, 7.6 + by, 0.5, ox * 0.3, 5.4 + by, 6.6); q.addColorStop(0, '#4a3a40'); q.addColorStop(0.6, rock); q.addColorStop(1, '#120d10'); ink(q, 0.5); }
+    g.save(); g.globalAlpha = 0.55; g.strokeStyle = glow; g.lineWidth = 0.16;   /* lava cracks */
+    g.beginPath(); g.moveTo(-4.6, 6.8 + by); g.lineTo(-3.8, 5.9 + by); g.lineTo(-4.1, 4.6 + by); g.moveTo(-3.8, 5.9 + by); g.lineTo(-3.1, 6.3 + by); g.moveTo(4.9, 3.6 + by); g.lineTo(4.2, 2.8 + by); g.lineTo(4.5, 1.9 + by); g.stroke(); g.restore();
+    stud(-5.15 + ox * 0.3, 5.3 + by, 0.42); stud(5.6 + ox * 0.3, 5.3 + by, 0.42);   /* side studs */
+    const mt = 7.3 + by, mb = 1.9 + by + (1 - open) * 3.4, mw = 3.7;   /* the mouth: a wide U from under the hood to just above the legs */
+    g.beginPath(); g.moveTo(ox - mw, mt); g.bezierCurveTo(ox - mw - 0.5, mt - (mt - mb) * 0.7, ox - 1.8, mb, ox, mb); g.bezierCurveTo(ox + 1.8, mb, ox + mw + 0.5, mt - (mt - mb) * 0.7, ox + mw, mt); g.closePath();
+    { const q = g.createRadialGradient(ox, mt - 1.6, 0.4, ox, (mt + mb) / 2, mw + 0.6); q.addColorStop(0, '#3a0a06'); q.addColorStop(0.65, '#9a2410'); q.addColorStop(1, tint(glow, -0.05)); ink(q, 0.45); }
+    if (open > 0.35) { g.beginPath(); const ty = mb + 0.2 + (mt - mb) * 0.12, tw2 = Math.min(2.4, (mt - mb) * 0.55); g.moveTo(ox, ty + tw2 * 0.55); g.bezierCurveTo(ox - tw2 * 0.4, ty + tw2 * 0.95, ox - tw2, ty + tw2 * 0.6, ox - tw2, ty + tw2 * 0.15); g.bezierCurveTo(ox - tw2, ty - tw2 * 0.25, ox - tw2 * 0.4, ty - tw2 * 0.15, ox, ty);
+      g.bezierCurveTo(ox + tw2 * 0.4, ty - tw2 * 0.15, ox + tw2, ty - tw2 * 0.25, ox + tw2, ty + tw2 * 0.15); g.bezierCurveTo(ox + tw2, ty + tw2 * 0.6, ox + tw2 * 0.4, ty + tw2 * 0.95, ox, ty + tw2 * 0.55); ink('#e04a3a', 0.25); }   /* the tongue, heart-shaped */
+    g.beginPath(); g.moveTo(ox - 0.9, mb - 0.05); g.lineTo(ox + 0.9, mb - 0.05); g.lineTo(ox, mb + 0.75); g.closePath(); ink(rock, 0.25); stud(ox, mb + 0.18, 0.3);   /* the lower lip's stud */
+    const blink = f && (t % 220) < 6 ? 0.25 : 1;
+    for (const s2 of [-1, 1]) { const ex = ox + s2 * 2.15, ey = 9.3 + by, r = 2.15;   /* the molten eyes */
+      g.save(); g.translate(ex, ey); g.scale(1, blink); g.beginPath(); g.arc(0, 0, r, 0, TAU); const q = g.createRadialGradient(s2 * 0.6, 0.2, 0.2, 0, 0, r); q.addColorStop(0, '#ffe36a'); q.addColorStop(0.45, tint(glow, 0.15)); q.addColorStop(1, tint(glow, -0.35)); ink(q, 0.45);
+      g.fillStyle = 'rgba(255,255,255,.55)'; g.beginPath(); g.ellipse(-s2 * 0.7, 1.1, 0.7, 0.35, -s2 * 0.5, 0, TAU); g.fill();
+      if (blink === 1) { g.beginPath(); g.arc(-s2 * 0.75 + 0.15, 0.25, 0.48, 0, TAU); ink('#c81e14', 0.12); g.fillStyle = 'rgba(255,255,255,.8)'; g.beginPath(); g.arc(-s2 * 0.75 + 0.02, 0.4, 0.13, 0, TAU); g.fill(); }
+      g.restore(); }
+    g.beginPath(); g.moveTo(ox - 5.0, mt - 0.9); g.quadraticCurveTo(ox - 4.9, 8.2 + by, ox - 3.6, 8.3 + by); g.quadraticCurveTo(ox - 1.4, 8.0 + by, ox - 0.35, 9.4 + by); g.quadraticCurveTo(ox, 10.6 + by, ox + 0.35, 9.4 + by); g.quadraticCurveTo(ox + 1.4, 8.0 + by, ox + 3.6, 8.3 + by); g.quadraticCurveTo(ox + 4.9, 8.2 + by, ox + 5.0, mt - 0.9); g.quadraticCurveTo(ox + 4.2, mt + 0.1, ox + mw, mt); g.quadraticCurveTo(ox, mt - 0.7, ox - mw, mt); g.quadraticCurveTo(ox - 4.2, mt + 0.1, ox - 5.0, mt - 0.9); g.closePath(); ink(rock, 0.35);   /* the hood: the dark band under the eyes that rises between them and is the mouth's upper lip */
+    for (const s2 of [-1, 1]) { const fx = ox + s2 * 1.7; g.beginPath(); g.moveTo(fx - 1.2, mt - 0.45); g.lineTo(fx + 1.2, mt - 0.45); g.lineTo(fx + s2 * 0.1, mt - 2.0 - open * 0.3); g.closePath(); ink(rock, 0.3); stud(fx + s2 * 0.05, mt - 1.0, 0.33); }   /* upper fangs, each with a glowing stud */
+    const lb = Math.sin(t * 0.15) * 0.3;   /* the antenna, bobbing */
+    g.strokeStyle = OL; g.lineWidth = 0.95; g.lineCap = 'round'; g.beginPath(); g.moveTo(ox - 0.1, 10.9 + by); g.quadraticCurveTo(ox - 0.3, 12 + by, ox + 0.3 + lb * 0.3, 12.7 + by); g.stroke();
+    g.strokeStyle = rock; g.lineWidth = 0.6; g.stroke();
+    g.beginPath(); g.ellipse(ox + 0.9 + lb * 0.5, 13.1 + by, 0.95, 0.75, 0.3, 0, TAU); ink(rock, 0.3);
     if (f && f.bubble) { g.beginPath(); g.arc(0, 5.5, 7.5, 0, TAU); g.fillStyle = 'rgba(190,225,255,.22)'; g.fill(); g.strokeStyle = 'rgba(220,240,255,.85)'; g.lineWidth = 0.35; g.stroke(); }
   },
   /* Brand: the night-watch captain. Tall boots, a long quilted slate coat with brass buttons, a kettle hat, a dark braid,

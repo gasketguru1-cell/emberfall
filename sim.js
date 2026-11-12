@@ -1311,7 +1311,7 @@ function chompCushion(f, n) {
 }
 const CHOMP = {
   name: 'Chomp Chomp', sub: 'the hungry critter', forms: [{
-    name: 'Chomp Chomp', ropeOut: 1, col: ['#2a5fd6', '#5fc23a', '#ffb13b'], alt: ['#8a3fd0', '#ffcf3a', '#ff6a3c'], reachMul: 1.0,
+    name: 'Chomp Chomp', ropeOut: 1, col: ['#ff6a1e', '#ffb13b', '#ffe27a'], alt: ['#b44dff', '#e0a0ff', '#ffe0ff'], reachMul: 1.0,
     /* the design's targets against an average fighter (Flint): weight 94, walk 108, dash 115, run 110, air speed average,
        gravity and fall a little low, jump squat 4, a high full hop. Squat and round. */
     st: { weight: 94, walk: 1.21, walkMul: 0.15, walkAdd: 0.1, trac: 0.11, dash: 2.2, runMul: 0.12, runAdd: 0.045, run: 1.91,

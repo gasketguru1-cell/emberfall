@@ -39,10 +39,10 @@
   "seconds": 0.6
  },
  "Shield": {
-  "seconds": 0.133
+  "seconds": 0.167
  },
  "ShieldHit": {
-  "seconds": 0.133
+  "seconds": 0.167
  },
  "Dodge": {
   "seconds": 0.4
