@@ -9,6 +9,9 @@ const files = ['index.html', 'hitboxes.js', 'sim.js', 'anim.js', 'net.js', 'rend
   'assets/manifest.json', 'assets/stage/export/stage.json', 'assets/stage/export/backdrop.jpg', 'assets/stage/source/concept.webp',
   'node_modules/three/build/three.module.js', 'node_modules/three/build/three.core.js'];
 const stage = JSON.parse(fs.readFileSync(path.join(root, 'assets/stage/export/stage.json'), 'utf8')); files.push(stage.file);
+/* every other stage (assets/stage-<name>/export/stage.json): its file, its model and its backdrop */
+for (const d of fs.readdirSync(path.join(root, 'assets'))) { const rel = 'assets/' + d + '/export/stage.json'; if (!d.startsWith('stage-') || !fs.existsSync(path.join(root, rel))) continue;
+  const c = JSON.parse(fs.readFileSync(path.join(root, rel), 'utf8')); files.push(rel, c.file); if (c.backdrop) files.push(c.backdrop); }
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'assets/manifest.json'), 'utf8'));
 for (const k in manifest) if (manifest[k].file && !files.includes(manifest[k].file)) files.push(manifest[k].file);
 for (const f of files) if (fs.existsSync(path.join(root, f))) copy(f); else console.log('missing (skipped): ' + f);
