@@ -1,12 +1,12 @@
 {
  "Idle": {
-  "seconds": 2.433
+  "seconds": 2.033
  },
  "Walk": {
-  "seconds": 1.033
+  "seconds": 1.4
  },
  "Run": {
-  "seconds": 0.733
+  "seconds": 0.633
  },
  "Crouch": {
   "seconds": 0.233
@@ -15,28 +15,28 @@
   "seconds": 0.433
  },
  "Fall": {
-  "seconds": 0.533
+  "seconds": 0.733
  },
  "Land": {
   "seconds": 0.433
  },
  "Shield": {
-  "seconds": 0.167
+  "seconds": 1
  },
  "Hit": {
-  "seconds": 0.633
+  "seconds": 1.233
  },
  "Tumble": {
   "seconds": 0.633
  },
  "Down": {
-  "seconds": 0.333
+  "seconds": 2.167
  },
  "Dodge": {
-  "seconds": 0.433
+  "seconds": 1.467
  },
  "Ledge": {
-  "seconds": 1.233
+  "seconds": 4.733
  },
  "Hold": {
   "seconds": 0.633
@@ -45,37 +45,37 @@
   "seconds": 0.533
  },
  "Jab": {
-  "seconds": 0.533
+  "seconds": 1.133
  },
  "Shove": {
   "seconds": 0.733
  },
  "Poke": {
-  "seconds": 0.833
+  "seconds": 1.167
  },
  "Crank": {
-  "seconds": 0.933
+  "seconds": 1.7
  },
  "Scrape": {
-  "seconds": 0.767
+  "seconds": 1.767
  },
  "Slide": {
-  "seconds": 0.933
+  "seconds": 2.167
  },
  "Hammer": {
-  "seconds": 1.233
+  "seconds": 1.3
  },
  "Jack": {
-  "seconds": 1.033
+  "seconds": 1.467
  },
  "BenchSweep": {
-  "seconds": 1.233
+  "seconds": 2.533
  },
  "Turn": {
-  "seconds": 0.833
+  "seconds": 1.533
  },
  "Arc": {
-  "seconds": 0.933
+  "seconds": 1.267
  },
  "Heel": {
   "seconds": 0.933
@@ -87,16 +87,16 @@
   "seconds": 1.033
  },
  "Reach": {
-  "seconds": 0.833
+  "seconds": 1.067
  },
  "Flick": {
   "seconds": 0.967
  },
  "Hook": {
-  "seconds": 1.033
+  "seconds": 0.9
  },
  "Ratchet": {
-  "seconds": 1.033
+  "seconds": 1.9
  },
  "Vise": {
   "seconds": 1.133
@@ -114,7 +114,7 @@
   "seconds": 0.433
  },
  "Helpless": {
-  "seconds": 0.633
+  "seconds": 0.467
  },
  "LandHard": {
   "seconds": 0.5
@@ -123,7 +123,7 @@
   "seconds": 0.333
  },
  "HitHeavy": {
-  "seconds": 0.833
+  "seconds": 1.3
  },
  "LaunchUp": {
   "seconds": 0.633
@@ -156,7 +156,7 @@
   "seconds": 0.767
  },
  "Jab2": {
-  "seconds": 0.533
+  "seconds": 1.233
  },
  "GetupSwing": {
   "seconds": 1.033

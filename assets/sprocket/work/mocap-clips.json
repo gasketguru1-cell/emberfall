@@ -1,0 +1,271 @@
+{
+ "Idle": {
+  "src": "Great_Sword_Idle",
+  "loop": 0.3,
+  "add": {
+   "spine": {
+    "rot": [
+     -8,
+     0,
+     0
+    ]
+   }
+  }
+ },
+ "Walk": {
+  "src": "Great_Sword_Walk",
+  "loop": 0.15,
+  "zs": 2.2
+ },
+ "Run": {
+  "src": "Great_Sword_Run",
+  "loop": 0.1,
+  "zs": 2.6
+ },
+ "Shield": {
+  "src": "Great_Sword_Blocking_Idle"
+ },
+ "Hit": {
+  "src": "Great_Sword_Unblocked_Impact"
+ },
+ "HitHeavy": {
+  "src": "Great_Sword_Head_Impact"
+ },
+ "Fall": {
+  "src": "Mid-Air_Falling_Idle",
+  "loop": 0.15,
+  "noTool": 1
+ },
+ "Helpless": {
+  "src": "Mid-Air_Falling_Idle",
+  "loop": 0.15,
+  "noTool": 1,
+  "speed": 1.6
+ },
+ "Down": {
+  "src": "Male_Knocked_Down_From_A_Punch",
+  "noTool": 1
+ },
+ "Ledge": {
+  "src": "Hanging_From_A_Ledge_Idle",
+  "loop": 0.4,
+  "noTool": 1
+ },
+ "Dodge": {
+  "src": "Dodging_To_The_Right_In_Place",
+  "noTool": 1
+ },
+ "Jab": {
+  "src": "Quick_Left_Handed_Punch",
+  "hit": [
+   11,
+   15
+  ],
+  "noTool": 1
+ },
+ "Jab2": {
+  "src": "Great_Sword_Hilt_Melee",
+  "hit": [
+   4,
+   9
+  ],
+  "by": [
+   "handL",
+   "handR"
+  ],
+  "loose": 1
+ },
+ "Reach": {
+  "src": "Jab_Punch",
+  "hit": [
+   13,
+   18
+  ],
+  "noTool": 1
+ },
+ "Poke": {
+  "src": "Great_Sword_Combo_Slash",
+  "f": [
+   8,
+   42
+  ],
+  "hit": [
+   22,
+   27
+  ]
+ },
+ "Hook": {
+  "src": "Great_Sword_Combo_Slash",
+  "f": [
+   40,
+   66
+  ],
+  "hit": [
+   49,
+   54
+  ],
+  "boost": {
+   "at": [
+    44,
+    54
+   ],
+   "pose": {
+    "c_wrench": {
+     "rot": [
+      -55,
+      0,
+      0
+     ]
+    },
+    "c_handR": {
+     "move": [
+      0,
+      0.5,
+      0.3
+     ]
+    },
+    "chest": {
+     "rot": [
+      -10,
+      0,
+      0
+     ]
+    }
+   }
+  }
+ },
+ "Crank": {
+  "src": "Overhead_Bashing_Swing",
+  "f": [
+   25,
+   75
+  ],
+  "hit": [
+   46,
+   52
+  ],
+  "boost": {
+   "at": [
+    44,
+    52
+   ],
+   "pose": {
+    "c_wrench": {
+     "rot": [
+      35,
+      0,
+      0
+     ]
+    },
+    "c_handR": {
+     "move": [
+      0,
+      0.25,
+      0.05
+     ]
+    }
+   }
+  }
+ },
+ "Hammer": {
+  "src": "Great_Sword_Downward_Slash",
+  "hit": [
+   17,
+   22
+  ]
+ },
+ "Jack": {
+  "src": "Great_Sword_Crouching_Slash",
+  "hit": [
+   14,
+   19
+  ],
+  "boost": {
+   "at": [
+    20,
+    26
+   ],
+   "pose": {
+    "c_wrench": {
+     "rot": [
+      -40,
+      0,
+      0
+     ]
+    },
+    "c_handR": {
+     "move": [
+      0,
+      0.3,
+      -0.1
+     ]
+    },
+    "c_handL": {
+     "move": [
+      0,
+      0.3,
+      -0.1
+     ]
+    }
+   }
+  }
+ },
+ "BenchSweep": {
+  "src": "Left_To_Right_Spin_Attack_With_Axe",
+  "spin": 1,
+  "hit": [
+   25,
+   33
+  ]
+ },
+ "Turn": {
+  "src": "Great_Sword_Spin_Kick",
+  "spin": 1,
+  "kick": 1,
+  "hit": [
+   6,
+   18
+  ],
+  "air": "rel"
+ },
+ "Arc": {
+  "src": "Great_Sword_Jump_Attack_From_Run",
+  "f": [
+   18,
+   55
+  ],
+  "hit": [
+   33,
+   38
+  ],
+  "air": "tuck"
+ },
+ "Slide": {
+  "src": "Great_Sword_Low_Slide_Attack_From_Run",
+  "hit": [
+   18,
+   40
+  ],
+  "by": [
+   "wrenchTip",
+   "footL",
+   "footR"
+  ]
+ },
+ "Scrape": {
+  "src": "Sword_And_Shield_Low_Attack",
+  "hit": [
+   22,
+   27
+  ]
+ },
+ "Ratchet": {
+  "src": "Great_Sword_High_Spin_Attack_From_Run",
+  "spin": 1,
+  "hit": [
+   11,
+   34
+  ],
+  "air": "tuck"
+ }
+}

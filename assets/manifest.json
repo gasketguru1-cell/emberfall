@@ -1869,10 +1869,12 @@
     "clip": "Idle"
    },
    "walk": {
-    "clip": "Walk"
+    "clip": "Walk",
+    "stride": 11.3
    },
    "run": {
-    "clip": "Run"
+    "clip": "Run",
+    "stride": 17.9
    },
    "crouch": {
     "clip": "Crouch",
@@ -1909,7 +1911,7 @@
    "hit": {
     "clip": "Hit",
     "from": 0,
-    "to": 0.6
+    "to": 0.9
    },
    "tumble": {
     "clip": "Tumble",
@@ -1918,12 +1920,12 @@
    "down": {
     "clip": "Down",
     "from": 0,
-    "to": 0.3
+    "to": 2.1333
    },
    "dizzy": {
     "clip": "Hit",
     "from": 0,
-    "to": 0.6,
+    "to": 0.9,
     "bounce": true
    },
    "airdodge": {
@@ -1932,7 +1934,7 @@
    "dodge": {
     "clip": "Dodge",
     "from": 0,
-    "to": 0.4
+    "to": 1.4333
    },
    "roll": {
     "clip": "Roll",
@@ -2037,19 +2039,19 @@
     "clip": "Jab",
     "start": 0,
     "contact": [
-     0.17,
-     0.27
+     0.36666666666666664,
+     0.43333333333333335
     ],
-    "end": 0.5
+    "end": 1.1
    },
    "jab2": {
     "clip": "Jab2",
     "start": 0,
     "contact": [
-     0.17,
-     0.27
+     0.16666666666666666,
+     0.23333333333333334
     ],
-    "end": 0.5
+    "end": 1.2
    },
    "jab3": {
     "clip": "Shove",
@@ -2064,82 +2066,82 @@
     "clip": "Poke",
     "start": 0,
     "contact": [
-     0.3,
-     0.42
+     0.6333333333333333,
+     0.6666666666666666
     ],
-    "end": 0.8
+    "end": 1.1333
    },
    "utilt": {
     "clip": "Crank",
     "start": 0,
     "contact": [
-     0.36,
-     0.5
+     0.6333333333333333,
+     0.7
     ],
-    "end": 0.9
+    "end": 1.6667
    },
    "dtilt": {
     "clip": "Scrape",
     "start": 0,
     "contact": [
-     0.32,
-     0.42
+     0.9,
+     0.9333333333333333
     ],
-    "end": 0.75
+    "end": 1.7333
    },
    "dash": {
     "clip": "Slide",
     "start": 0,
     "contact": [
-     0.35,
-     0.6
+     0.9,
+     0.9666666666666667
     ],
-    "end": 0.9
+    "end": 2.1333
    },
    "fsmash": {
     "clip": "Hammer",
     "start": 0,
     "contact": [
-     0.6,
-     0.75
+     0.7,
+     0.7333333333333333
     ],
-    "end": 1.2
+    "end": 1.2667
    },
    "usmash": {
     "clip": "Jack",
     "start": 0,
     "contact": [
-     0.42,
-     0.58
+     0.7333333333333333,
+     0.7666666666666667
     ],
-    "end": 1
+    "end": 1.4333
    },
    "dsmash": {
     "clip": "BenchSweep",
     "start": 0,
     "contact": [
-     0.38,
-     0.74
+     1.1333333333333333,
+     1.1666666666666667
     ],
-    "end": 1.2
+    "end": 2.5
    },
    "nair": {
     "clip": "Turn",
     "start": 0,
     "contact": [
-     0.15,
-     0.6
+     0.3,
+     0.43333333333333335
     ],
-    "end": 0.8
+    "end": 1.5
    },
    "fair": {
     "clip": "Arc",
     "start": 0,
     "contact": [
-     0.37,
-     0.5
+     0.6,
+     0.6666666666666666
     ],
-    "end": 0.9
+    "end": 1.2333
    },
    "bair": {
     "clip": "Heel",
@@ -2172,10 +2174,10 @@
     "clip": "Reach",
     "start": 0,
     "contact": [
-     0.36,
-     0.48
+     0.4666666666666667,
+     0.5333333333333333
     ],
-    "end": 0.8
+    "end": 1.0333
    },
    "getup": {
     "clip": "GetupSwing",
@@ -2199,19 +2201,19 @@
     "clip": "Hook",
     "start": 0,
     "contact": [
-     0.42,
-     0.52
+     0.4666666666666667,
+     0.5
     ],
-    "end": 1
+    "end": 0.8667
    },
    "uspec": {
     "clip": "Ratchet",
     "start": 0,
     "contact": [
-     0.3,
-     0.45
+     0.6,
+     0.6666666666666666
     ],
-    "end": 1
+    "end": 1.8667
    },
    "dspec": {
     "clip": "Vise",
@@ -2226,10 +2228,10 @@
     "clip": "Jab",
     "start": 0,
     "contact": [
-     0.17,
-     0.27
+     0.36666666666666664,
+     0.43333333333333335
     ],
-    "end": 0.5
+    "end": 1.1
    }
   }
  },

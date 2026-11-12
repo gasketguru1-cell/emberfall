@@ -143,7 +143,7 @@ const sprocket = {
       { t: 0.3, pose: { chest: R(0, -16), c_handR: M(0.1, 0, -0.15), c_wrench: R(-60) } },
       { t: 0.42, pose: { hips: M(0, -0.06, 0.14), chest: R(-6, 20), head: R(-10), c_footL: M(0, 0, 0.28), c_handR: M(0.28, 0.5, 0.42), c_wrench: R(-132) } },
       { t: 0.52, pose: { c_handR: M(0.26, 0.46, 0.3), c_wrench: R(-150) } }, { t: 1.0, reset: true, use: ['stand', 'ready'] }] },
-    Ratchet: { fps: 30, keys: [{ t: 0, use: ['stand', 'ready'] },   /* Ratchet Spin: twice round under the raised wrench */
+  Ratchet: { fps: 30, keys: [{ t: 0, use: ['stand', 'ready'] },   /* Ratchet Spin: twice round under the raised wrench */
       { t: 0.2, pose: { hips: M(0, -0.2, 0), c_handR: M(0.2, 0.3, 0.2), c_wrench: R(-150) } },
       { t: 0.3, pose: { all: R(0, 150), hips: M(0, 0.05, 0), c_handR: M(0.25, 0.66, 0.05), c_wrench: R(-160), c_footL: M(0, 0.1, 0.05), c_footR: M(0, 0.2, 0.1) } },
       { t: 0.45, pose: { all: R(0, 300) } }, { t: 0.6, pose: { all: R(0, 450) } }, { t: 0.75, pose: { all: R(0, 600) } }, { t: 0.9, pose: { all: R(0, 720) } }, { t: 1.0, reset: true, use: ['stand', 'ready'], pose: { all: R(0, 720) } }] },
@@ -219,7 +219,116 @@ Object.assign(sprocket.clips, {
     { t: 0.74, pose: { c_wrench: R(86, 36) } }, { t: 1.0, reset: true, use: ['stand', 'ready'] }] },
 });
 
+/* ---- motion capture (2026-11-11): clips built from Mixamo motions, retargeted by tools/blender/mocap.py into
+   assets/sprocket/mocap/<name>.json (per-frame keys). MOCAP(name, o) makes a clip's keys from one:
+     o.from / o.to   the part of the capture used, in its own seconds
+     o.warp          [[capture s, clip s], ...] retimes it (piecewise straight); default: plays from..to at o.speed (1)
+     o.add           { bone: pose } added on top of every frame (rot adds a turn, move adds an offset)
+     o.loop          the last frame blends back into the first over o.loop seconds (for idles, walks and runs)
+   Keys come out every frame of the clip (30 a second), so rig.py's easing is not used: the capture is the in-between. ---- */
+/* o.yaw scales how far the whole body turns about the vertical (0.5 = half as far, so a swing that turns his back to the
+   camera stays readable side-on) and o.turn adds degrees; the tool and both feet are turned with him about his hips. */
+const FOOTREST = { c_footL: [0.28, 0.1, -0.03], c_footR: [-0.19, 0.1, -0.03] }, HIPREST = [0.04, 0.52, 0];
+/* o.yawMax (degrees): the chest's facing is eased so it never turns much past that from side-on (soft, so a turn still
+   reads as a turn); the correction turns the whole body at the hips. */
+const qmul = (a, b) => [a[0] * b[0] - a[1] * b[1] - a[2] * b[2] - a[3] * b[3], a[0] * b[1] + a[1] * b[0] + a[2] * b[3] - a[3] * b[2], a[0] * b[2] - a[1] * b[3] + a[2] * b[0] + a[3] * b[1], a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0]];
+function unturn(pose, f, turnDeg, yawMax) {
+  const h = pose.hips; if (!h || !h.qb) return pose;
+  const cw = qmul(qmul(h.qb, pose.spine ? pose.spine.qb : [1, 0, 0, 0]), pose.chest ? pose.chest.qb : [1, 0, 0, 0]);   /* the chest's turn in the world */
+  const [w, , , z] = cw, th = 2 * Math.atan2(z, w), th2 = th > Math.PI ? th - 2 * Math.PI : th < -Math.PI ? th + 2 * Math.PI : th;
+  let want = f * th2; if (yawMax) { const m = yawMax * Math.PI / 180; want = m * Math.tanh(want / m); }
+  const D = want - th2 + turnDeg * Math.PI / 180, c = Math.cos(D), s = Math.sin(D), cq = Math.cos(D / 2), sq = Math.sin(D / 2);
+  const rot = v => [v[0] * c + v[2] * s, v[1], -v[0] * s + v[2] * c];
+  const q = h.qb; h.qb = [cq * q[0] - sq * q[3], cq * q[1] - sq * q[2], cq * q[2] + sq * q[1], cq * q[3] + sq * q[0]].map(v => +v.toFixed(5));
+  const hp = HIPREST.map((v, i) => v + (h.move ? h.move[i] : 0));
+  for (const fb in FOOTREST) if (pose[fb] && pose[fb].move) { const r = FOOTREST[fb], p = r.map((v, i) => v + pose[fb].move[i] - hp[i]), p2 = rot(p);
+    pose[fb].move = p2.map((v, i) => +(v + hp[i] - r[i]).toFixed(4)); }
+  if (pose.c_wrench && pose.c_wrench.aim) pose.c_wrench.aim = rot(pose.c_wrench.aim).map(v => +v.toFixed(4));
+  return pose;
+}
+const MOCAPDIR = path.join(__dirname, '..', '..', 'assets', 'sprocket', 'mocap');
+function MOCAP(name, o) {
+  o = o || {}; const d = JSON.parse(fs.readFileSync(path.join(MOCAPDIR, name + '.json'), 'utf8')), F = d.frames, sf = d.fps || 30;
+  const from = o.from || 0, to = o.to !== undefined ? o.to : (F.length - 1) / sf;
+  const warp = o.warp || [[from, 0], [to, (to - from) / (o.speed || 1)]];
+  const src = t => { for (let i = 1; i < warp.length; i++) if (t <= warp[i][1] || i === warp.length - 1) { const [s0, d0] = warp[i - 1], [s1, d1] = warp[i]; return s0 + (s1 - s0) * Math.min(1, Math.max(0, (t - d0) / ((d1 - d0) || 1))); } };
+  const mix = (a, b, u) => a.map((v, i) => v + (b[i] - v) * u);
+  const nq = q => { const l = Math.hypot(...q); return q.map(v => +(v / l).toFixed(5)); };
+  const sample = s => { const x = Math.min(F.length - 1, Math.max(0, s * sf)), i = Math.floor(x), j = Math.min(F.length - 1, i + 1), u = x - i, out = {};
+    for (const b in F[i]) { const A = F[i][b], Bq = F[j][b], r = {};
+      if (A.qb) { let q2 = Bq.qb; if (A.qb.reduce((s, v, k) => s + v * q2[k], 0) < 0) q2 = q2.map(v => -v); r.qb = nq(mix(A.qb, q2, u)); }
+      if (A.move) r.move = mix(A.move, Bq.move, u).map(v => +v.toFixed(4));
+      if (A.aim) r.aim = mix(A.aim, Bq.aim, u).map(v => +v.toFixed(4));
+      out[b] = r; }
+    return out; };
+  const dur = warp[warp.length - 1][1], n = Math.round(dur * 30), keys = [];
+  for (let k = 0; k <= n; k++) {
+    const t = k / 30; let pose = sample(src(t));
+    if (o.loop && t > dur - o.loop) { const u = (t - (dur - o.loop)) / o.loop, p0 = sample(src(0)); for (const b in pose) { const A = pose[b], Bp = p0[b];
+      if (A.qb) { let q2 = Bp.qb; if (A.qb.reduce((s, v, i) => s + v * q2[i], 0) < 0) q2 = q2.map(v => -v); A.qb = nq(mix(A.qb, q2, u)); }
+      if (A.move) A.move = mix(A.move, Bp.move, u); if (A.aim) A.aim = mix(A.aim, Bp.aim, u); } }
+    if (o.yaw !== undefined || o.turn || o.yawMax) pose = unturn(pose, o.yaw === undefined ? 1 : o.yaw, o.turn || 0, o.yawMax);
+    if (o.zs) for (const fb of ['c_footL', 'c_footR']) if (pose[fb] && pose[fb].move) pose[fb].move = [pose[fb].move[0], pose[fb].move[1], +(pose[fb].move[2] * o.zs).toFixed(4)];   /* longer steps: this game's fighters cover ground fast */
+    if (o.noTool) pose.c_wrench = { rot: [-28, 0, 0] };   /* an unarmed capture: the wrench held as he stands ready, angled ahead */
+    if (o.air) {   /* in the air: the hips stop bobbing, and the legs tuck (or, 'rel', keep the capture's kicks relative to the hips, lifted) */
+      const hm = pose.hips.move || [0, 0, 0];
+      for (const fb of ['c_footL', 'c_footR']) pose[fb] = { move: o.air === 'rel' ? pose[fb].move.map((v, i) => +(v - hm[i] + [0, 0.2, 0.05][i]).toFixed(4)) : [0, 0.3, 0.12] };
+      pose.hips.move = [0, 0, 0];
+    }
+    /* o.boost: { at: [first, last] capture frames, pose: { bone: { rot, move } } } pushes the pose further there only (eased in
+       over the 5 frames before and out over the 5 after): to carry a strike up into a hitbox the capture falls short of */
+    if (o.boost) { const cf = src(t) * sf + 1, [b0, b1] = o.boost.at, w = cf < b0 ? Math.max(0, 1 - (b0 - cf) / 5) : cf > b1 ? Math.max(0, 1 - (cf - b1) / 5) : 1, ws = w * w * (3 - 2 * w);
+      if (ws > 0) for (const bn in o.boost.pose) { const q = o.boost.pose[bn], P = pose[bn] = Object.assign({}, pose[bn]);
+        if (q.rot) P.rot = q.rot.map((v, i) => +((P.rot ? P.rot[i] : 0) + v * ws).toFixed(2));
+        if (q.move) P.move = q.move.map((v, i) => +((P.move ? P.move[i] : 0) + v * ws).toFixed(4)); } }
+    for (const b in o.add || {}) pose[b] = Object.assign({}, pose[b], o.add[b], o.add[b].move && pose[b] && pose[b].move ? { move: pose[b].move.map((v, i) => v + o.add[b].move[i]) } : {});
+    keys.push(k === 0 ? { t, use: 'stand', pose } : { t: +t.toFixed(4), pose });
+  }
+  return { fps: 30, keys };
+}
+/* which capture makes which clip. f: [first, last] capture frame used (30 a second, counted from 1); hit: the capture
+   frames where the strike lands, which become the attack's contact window (the game stretches startup, contact and
+   recovery onto the move's real frame data, so the capture's own timing only sets the spacing inside each part). */
+const fr = n => (n - 1) / 30;
+const MC = {   /* kept hand-keyed (no capture reads as well side-on, or reaches the hitbox): Shove, Pummel, Flip, Drop, Heel, Flick, Vise, the throws, Crouch/Rise/Land, Roll, AirDodge */
+  Idle: ['Great_Sword_Idle', { loop: 0.3, add: { spine: R(-8) } }],
+  Walk: ['Great_Sword_Walk', { loop: 0.15, zs: 2.2 }],
+  Run: ['Great_Sword_Run', { loop: 0.1, zs: 2.6 }],
+  Shield: ['Great_Sword_Blocking_Idle', {}],
+  Hit: ['Great_Sword_Unblocked_Impact', {}],
+  HitHeavy: ['Great_Sword_Head_Impact', {}],
+  Fall: ['Mid-Air_Falling_Idle', { loop: 0.15, noTool: 1 }],
+  Helpless: ['Mid-Air_Falling_Idle', { loop: 0.15, noTool: 1, speed: 1.6 }],
+  Down: ['Male_Knocked_Down_From_A_Punch', { noTool: 1 }],
+  Ledge: ['Hanging_From_A_Ledge_Idle', { loop: 0.4, noTool: 1 }],
+  Dodge: ['Dodging_To_The_Right_In_Place', { noTool: 1 }],
+  Jab: ['Quick_Left_Handed_Punch', { hit: [11, 15], noTool: 1 }],
+  Jab2: ['Great_Sword_Hilt_Melee', { hit: [4, 9], by: ['handL', 'handR'], loose: 1 }],
+  Reach: ['Jab_Punch', { hit: [13, 18], noTool: 1 }],
+  Poke: ['Great_Sword_Combo_Slash', { f: [8, 42], hit: [22, 27] }],
+  Hook: ['Great_Sword_Combo_Slash', { f: [40, 66], hit: [49, 54], boost: { at: [44, 54], pose: { c_wrench: R(-55), c_handR: M(0, 0.5, 0.3), chest: R(-10) } } }],
+  Crank: ['Overhead_Bashing_Swing', { f: [25, 75], hit: [46, 52], boost: { at: [44, 52], pose: { c_wrench: R(35), c_handR: M(0, 0.25, 0.05) } } }],
+  Hammer: ['Great_Sword_Downward_Slash', { hit: [17, 22] }],
+  Jack: ['Great_Sword_Crouching_Slash', { hit: [14, 19], boost: { at: [20, 26], pose: { c_wrench: R(-40), c_handR: M(0, 0.3, -0.1), c_handL: M(0, 0.3, -0.1) } } }],
+  BenchSweep: ['Left_To_Right_Spin_Attack_With_Axe', { spin: 1, hit: [25, 33] }],
+  Turn: ['Great_Sword_Spin_Kick', { spin: 1, kick: 1, hit: [6, 18], air: 'rel' }],
+  Arc: ['Great_Sword_Jump_Attack_From_Run', { f: [18, 55], hit: [33, 38], air: 'tuck' }],
+  Slide: ['Great_Sword_Low_Slide_Attack_From_Run', { hit: [18, 40], by: ['wrenchTip', 'footL', 'footR'] }],
+  Scrape: ['Sword_And_Shield_Low_Attack', { hit: [22, 27] }],
+  Ratchet: ['Great_Sword_High_Spin_Attack_From_Run', { spin: 1, hit: [11, 34], air: 'tuck' }],
+};
+const CONTACT = {}, FIT = path.join(MOCAPDIR, 'contact.json'), fitted = fs.existsSync(FIT) ? JSON.parse(fs.readFileSync(FIT, 'utf8')) : {};   /* contact.json: windows fitted to the hitboxes by tools/fit-contact.js */
+if (process.env.SPROCKET_MOCAP !== '0') for (const c in MC) {
+  const [src, o] = MC[c]; if (!fs.existsSync(path.join(MOCAPDIR, src + '.json'))) { console.log('no capture yet for ' + c + ': ' + src); continue; }
+  const oo = Object.assign({ yawMax: o.spin ? undefined : 40 }, o); if (o.f) { oo.from = fr(o.f[0]); oo.to = fr(o.f[1]); }
+  sprocket.clips[c] = MOCAP(src, oo);
+  const k = sprocket.clips[c].keys, from = oo.from || 0;
+  if (o.hit) CONTACT[c] = [+(fr(o.hit[0]) - from).toFixed(3), +(fr(o.hit[1]) - from).toFixed(3), k[k.length - 1].t];
+  if (o.hit && fitted[c]) CONTACT[c] = [fitted[c][0] / 30, fitted[c][1] / 30, k[k.length - 1].t];
+}
+
 const out = path.join(__dirname, '..', '..', 'assets', 'sprocket', 'work'); fs.mkdirSync(out, { recursive: true });
+fs.writeFileSync(path.join(out, 'mocap-clips.json'), JSON.stringify(Object.fromEntries(Object.entries(MC).map(([c, [src, o]]) => [c, Object.assign({ src }, o)])), null, 1));
 fs.writeFileSync(path.join(out, 'rig.json'), JSON.stringify(sprocket, null, 1));
 fs.writeFileSync(path.join(out, 'pack.json'), JSON.stringify({ base: 'work/sprocket-rigged.glb', texture: 1024, out: 'export/sprocket-v1.glb' }, null, 1) + '\n');
 console.log('wrote rig.json: ' + sprocket.bones.length + ' bones, ' + Object.keys(sprocket.clips).length + ' clips');
@@ -238,5 +347,15 @@ const entry = { file: 'assets/sprocket/export/sprocket-v1.glb', height: 14, feel
     fsmash: A('Hammer', 0.6, 0.75, 0, 1.2), usmash: A('Jack', 0.42, 0.58, 0, 1.0), dsmash: A('BenchSweep', 0.38, 0.74, 0, 1.2),
     nair: A('Turn', 0.15, 0.6, 0, 0.8), fair: A('Arc', 0.37, 0.5), bair: A('Heel', 0.4, 0.52), uair: A('Flip', 0.4, 0.52, 0, 0.8), dair: A('Drop', 0.48, 0.6, 0, 1.0),
     grab: A('Reach', 0.36, 0.48, 0, 0.8), getup: A('GetupSwing', 0.38, 0.74, 0.22, 1.0), nspec: A('Flick', 0.4, 0.5, 0, 0.95), sspec: A('Hook', 0.42, 0.52, 0, 1.0), uspec: A('Ratchet', 0.3, 0.45, 0, 1.0), dspec: A('Vise', 0.4, 0.5, 0, 1.1), '*': A('Jab', 0.17, 0.27, 0, 0.5) } };
+/* captured clips: each attack's contact window is where its capture strikes, and states shown as part of a clip use all of it */
+for (const a in entry.attacks) { const c = CONTACT[entry.attacks[a].clip]; if (c) entry.attacks[a] = A(entry.attacks[a].clip, c[0], c[1], 0, c[2]); }
+/* walk and run: one cycle per `stride` game units walked, so the planted foot stays put (the capture is in place: the foot
+   on the floor travels back the whole forward and back range of the foot once a cycle, each foot in turn) */
+const UPM = 14 / 1.9;   /* game units a metre: he is 14 units tall, 1.9 m in the model */
+for (const [s, c] of [['walk', 'Walk'], ['run', 'Run']]) if (MC[c] && sprocket.clips[c].keys.length > 8) {
+  const z = sprocket.clips[c].keys.map(k => k.pose.c_footL.move[2]); entry.clips[s].stride = +(2 * (Math.max(...z) - Math.min(...z)) * UPM).toFixed(1); }
+const clipLen = c => { const k = sprocket.clips[c].keys; return k[k.length - 1].t; };
+for (const s of ['down', 'dodge']) { const e = entry.clips[s]; if (MC[e.clip] && CONTACT[e.clip] === undefined && sprocket.clips[e.clip].keys.length > 20) e.to = clipLen(e.clip); }
+if (sprocket.clips.Hit.keys.length > 20) entry.clips.hit.to = entry.clips.dizzy.to = Math.min(0.9, clipLen('Hit'));
 const mf = path.join(__dirname, '..', '..', 'assets', 'manifest.json'), current = JSON.parse(fs.readFileSync(mf, 'utf8'));
 current.Sprocket = entry; fs.writeFileSync(mf, JSON.stringify(current, null, 1) + '\n'); console.log('manifest: ' + Object.keys(current).join(', '));

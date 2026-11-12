@@ -323,6 +323,7 @@ for name, clip in spec.get('clips', {}).items():
             prevb[bname] = fb; last = max(last, fb)
             pb = rig.pose.bones[bname]; R = rest[bname]
             D = delta(tr.get('rot', [0, 0, 0]))
+            if tr.get('qb'): D = D @ Quaternion(tr['qb']).to_matrix()   # a turn given directly in Blender's axes (motion capture, tools/blender/mocap.py); "rot" adds on top
             if tr.get('aim'):
                 tgt = conv(tr['aim']).normalized(); A = restdir[bname].rotation_difference(tgt).to_matrix()
                 if tr.get('twist'): A = Quaternion(tgt, math.radians(tr['twist'])).to_matrix() @ A
