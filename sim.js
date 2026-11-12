@@ -86,7 +86,7 @@ function rage(a) { return a.pct <= 35 ? 1 : a.pct >= 150 ? 1.1 : 1 + (a.pct - 35
    The game only names what happened (sfx('parry', x)); audio.js decides what that sounds like. x is where on the stage it
    happened, for left and right. With no audio.js loaded (the tests, the search tools) every one of these does nothing. */
 function sfx(id, x, o) { if (typeof SND !== 'undefined') SND.play(id, x, o); }
-function thwack(kb, x) { if (typeof SND !== 'undefined') SND.hit(kb, x); }
+function thwack(kb, x, smash) { if (typeof SND !== 'undefined') SND.hit(kb, x, smash); }   /* smash: a smash attack landed, which gets the biggest hit sound */
 function beep(freq, dur, type, vol, slide) { if (typeof SND !== 'undefined') SND.tone(freq, dur, type, vol, slide); }   /* a plain tone: the stand-in for moves with no recording yet */
 
 /* ---------- Input ---------- */
@@ -2565,7 +2565,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   else {
   spark(hx, hy, kb > 110 ? '#ffd166' : '#fff', Math.min(40, 6 + kb / 6 | 0), 1 + kb / 80);
   if (kb > 110) shake = Math.max(shake, 8);
-  thwack(kb, hx); }
+  thwack(kb, hx, !proj && a && a.move && !!a.move.chg); }
 }
 function resolveHits() {
   for (const f of F) { if (f.px === undefined) { f.px = f.x; f.py = f.y; } }

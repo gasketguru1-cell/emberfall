@@ -19,9 +19,12 @@ const SND = (function () {
      syn: made in code. [freq, seconds, wave, loudness, slide] or ['whoosh', seconds, from Hz, to Hz, loudness] or a list of [delay, freq, ...] notes */
   const EV = {
     /* --- combat, every fighter --- */
-    jab_hit_light: { f: n('hit_light', 5), v: 0.5, pv: 0.08, pr: 2 },
-    tilt_hit_mid: { f: n('hit_mid', 5), v: 0.7, pv: 0.06, pr: 3 },
-    smash_hit_heavy: { f: n('hit_heavy', 5), v: 0.95, pv: 0.05, pr: 4, thump: 1 },
+    /* hits: a punch recording, with a crack on top and a low thud underneath added in code (see hit) */
+    jab_hit_light: { f: n('punch_medium', 5, 'wav'), v: 0.32, p: 1.3, pv: 0.07, cut: 0.14, pr: 2, bus: 'hit' },
+    tilt_hit_mid: { f: n('punch_medium', 5, 'wav'), v: 0.58, pv: 0.06, pr: 3, bus: 'hit' },
+    hit_heavy: { f: n('punch_heavy', 5, 'wav'), v: 0.95, pv: 0.05, pr: 4, bus: 'hit' },
+    smash_hit_heavy: { f: n('punch_heavy', 5, 'wav'), v: 1.25, p: 0.86, pv: 0.04, pr: 5, bus: 'hit' },
+    smash_hit_crack: { f: n('punch_medium', 5, 'wav'), v: 0.8, p: 1.12, pv: 0.05, pr: 5, bus: 'hit' },
     ko_hit: { f: n('ko_low', 1), v: 0.75, pr: 6, cut: 0.7, duck: 1 },   /* under the hit that is going to KO */
     armor_clang: { f: n('armor', 3), v: 0.6, pv: 0.05, pr: 3 },
     clank: { f: n('clank', 3), v: 0.65, pv: 0.05, pr: 3, cut: 0.5 },
@@ -33,7 +36,7 @@ const SND = (function () {
     grab: { f: n('grab', 2), v: 0.7, pv: 0.05, pr: 3 },
     pummel: { f: n('soft', 5), v: 0.5, pv: 0.08, pr: 2 },
     throw: { syn: ['whoosh', 0.22, 500, 1800, 0.16], pr: 2 },
-    spike: { f: ['sfx/hit_heavy_1.ogg', 'sfx/ko_low_1.ogg'], all: 1, v: 0.85, cut: 0.5, pr: 5 },
+    spike: { f: ['sfx/punch_heavy_1.wav', 'sfx/ko_low_1.ogg'], all: 1, v: 0.85, p: 0.8, cut: 0.5, pr: 5 },
     blastzone_ko: { f: ['sfx/ko_boom_1.ogg', 'sfx/ko_low_1.ogg'], all: 1, v: 0.9, pr: 7, duck: 1 },
     tech: { f: n('tech', 1), v: 0.6, p: 1.3, pr: 3 },
     tech_miss: { f: n('thud', 4), v: 0.6, pv: 0.06, pr: 2 },
@@ -80,7 +83,7 @@ const SND = (function () {
     bird_launch: { syn: ['whoosh', 0.25, 400, 2400, 0.2], pr: 3 },
     bird_reload: { f: n('latch', 1), v: 0.5, pr: 2 },
     /* Joey: the owner's own voice note over the transformation. badmic: played through a terrible microphone, and on purpose a little louder than is comfortable. */
-    joey_transform_voice: { f: ['voice/joey_transform.m4a'], badmic: 1, v: 0.8, gap: 1 }   /* measured: about twice as loud as the hardest hit, just short of clipping the speakers */,
+    joey_transform_voice: { f: ['voice/joey_transform.m4a'], badmic: 1, v: 0.8, gap: 1 }   /* measured: louder than the hardest hit, just short of clipping the speakers */,
     transformation_start: { syn: ['whoosh', 0.7, 300, 1800, 0.12], pr: 3, also: [110, 0.7, 'sawtooth', 0.04, 2.2] },
     transformation_complete: { f: ['sfx/thud_1.ogg', 'sfx/ko_low_1.ogg'], all: 1, v: 0.7, cut: 0.6, pr: 5, thump: 1 }
   };
@@ -110,9 +113,12 @@ const SND = (function () {
       ctx = new (window.AudioContext || window.webkitAudioContext)();
       const g = v => { const x = ctx.createGain(); x.gain.value = v; return x; };
       const lim = ctx.createDynamicsCompressor(); lim.threshold.value = -10; lim.knee.value = 6; lim.ratio.value = 8; lim.attack.value = 0.002; lim.release.value = 0.12;   /* many hits at once never get louder than a controlled mix */
-      bus = { master: g(1), music: g(level('music')), duck: g(1), sfx: g(level('sfx')), ui: g(level('ui')), lim };
+      bus = { master: g(1), music: g(level('music')), duck: g(1), sfx: g(level('sfx')), ui: g(level('ui')), lim, hit: ctx.createWaveShaper() };
+      /* hits skip the limiter, which would shave the front edge off them (the part that makes a hit feel hard). They go through a
+         soft clip instead: it thickens a loud hit and holds any pile of them under full scale. */
+      const sc = new Float32Array(2049); for (let k = 0; k < 2049; k++) sc[k] = Math.tanh((k / 1024 - 1) * 2.2) * 0.9; bus.hit.curve = sc; bus.hit.oversample = '2x'; bus.hit.connect(bus.sfx);
       bus.duck.connect(bus.music); bus.music.connect(bus.master); lim.connect(bus.sfx); bus.sfx.connect(bus.master); bus.ui.connect(bus.master); bus.master.connect(ctx.destination);
-      for (const k of ['master', 'music', 'lim', 'ui']) { const m = ctx.createAnalyser(); m.fftSize = 2048; bus[k].connect(m); meters[k] = m; }   /* for checking levels (SND.level) */
+      for (const k of ['master', 'music', 'lim', 'ui', 'hit']) { const m = ctx.createAnalyser(); m.fftSize = 2048; bus[k].connect(m); meters[k] = m; }   /* for checking levels (SND.level) */
       noise = ctx.createBuffer(1, ctx.sampleRate * 0.5 | 0, ctx.sampleRate); const d = noise.getChannelData(0); for (let k = 0; k < d.length; k++) d[k] = rnd() * 2 - 1;
       for (const id in EV) for (const f of EV[id].f || []) load(f);   /* short sounds are fetched up front, so the first hit is never late */
     } catch (e) { dead = true; ctx = null; }
@@ -124,7 +130,7 @@ const SND = (function () {
     return Promise.resolve(buffers.get(path));
   }
   function miss(what) { if (!missing[what]) { missing[what] = true; console.warn('[sound] no recording for ' + what + ': playing a stand-in'); } }
-  function out(e) { return e && e.bus === 'ui' ? bus.ui : bus.lim; }
+  function out(e) { return e && e.bus === 'ui' ? bus.ui : e && e.bus === 'hit' ? bus.hit : bus.lim; }
   function panned(node, x, dest) {   /* left and right follow the fighter, but never all the way to one ear */
     if (!x || !ctx.createStereoPanner) { node.connect(dest); return; }
     const p = ctx.createStereoPanner(); p.pan.value = Math.max(-0.45, Math.min(0.45, x / 220)); node.connect(p); p.connect(dest);
@@ -147,6 +153,18 @@ const SND = (function () {
     const t = Math.max(ctx.currentTime, at || 0), dur = 0.16 + k * 0.12, o = ctx.createOscillator(), a = ctx.createGain(); o.type = 'sine';
     o.frequency.setValueAtTime(150 - k * 50, t); o.frequency.exponentialRampToValueAtTime(42, t + dur); a.gain.setValueAtTime(0.16 + k * 0.14, t); a.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     o.connect(a); panned(a, x, bus.lim); o.start(t); o.stop(t + dur);
+  }
+  function crack(vol, hz, dur, x) {   /* the front edge of a hit: a burst of bright noise that starts at full and is gone in a few hundredths of a second */
+    const t = ctx.currentTime, s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), a = ctx.createGain(); s.buffer = noise;
+    f.type = 'highpass'; f.frequency.setValueAtTime(hz, t); f.frequency.exponentialRampToValueAtTime(hz * 0.35, t + dur); f.Q.value = 0.9;
+    a.gain.setValueAtTime(vol, t); a.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(f); f.connect(a); panned(a, x, bus.hit); s.start(t, rnd() * 0.3); s.stop(t + dur + 0.01);
+  }
+  function thud(vol, f0, f1, dur, x) {   /* the weight of a hit: a low note that drops fast, like a kick drum */
+    const t = ctx.currentTime, o = ctx.createOscillator(), a = ctx.createGain(); o.type = 'sine';
+    o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur * 0.45);
+    a.gain.setValueAtTime(0.0001, t); a.gain.linearRampToValueAtTime(vol, t + 0.003); a.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(a); panned(a, x, bus.hit); o.start(t); o.stop(t + dur + 0.01);
   }
   function synth(spec, e, x, vol, pitch, at) {
     const dest = out(e);
@@ -200,10 +218,18 @@ const SND = (function () {
     let list = e.f; if (!e.all) { let k = rnd() * e.f.length | 0; if (e.f.length > 1 && k === lastPick[id]) k = (k + 1) % e.f.length; lastPick[id] = k; list = [e.f[k]]; }
     for (const f of list) { const b = buffers.get(f); if (b && b.duration) { if (e.badmic) badMic(b, vol); else voice(b, e, x, vol, pitch, at); } else if (b === null) { if (e.syn) synth(e.syn, e, x, 1, pitch, at); else tone(300, 0.06, 'triangle', 0.04, 0.7, out(e), x, at); } }
   }
-  /* A hit, by how hard it launches: light = a bright short snap; medium = snap and body; heavy = snap, a low thump and a short tail. */
-  function hit(kb, x, ko) {
-    play(kb < 50 ? 'jab_hit_light' : kb < 100 ? 'tilt_hit_mid' : 'smash_hit_heavy', x, { vol: 0.8 + Math.min(0.2, kb / 600) });
-    if (ko) play('ko_hit', x); else if (kb > 130) duck(0.6, 0.15);
+  /* A hit, by how hard it launches. Every one is three things at once: a punch recording, a crack on its front edge and a low
+     thud under it. A jab is short and bright; a tilt or an aerial is fuller; a hard launch is deeper. A smash attack is its own
+     thing whatever it launches for: two recordings at once, the biggest crack, a long deep thud, and the music steps back. */
+  function hit(kb, x, smash) {
+    if (!boot() || ctx.state !== 'running') return; const k = Math.min(1, kb / 160);
+    if (lastAt.hit !== undefined && ctx.currentTime - lastAt.hit < 0.03) return; lastAt.hit = ctx.currentTime;
+    if (smash) {
+      play('smash_hit_heavy', x, { vol: 0.85 + k * 0.15 }); play('smash_hit_crack', x);
+      crack(0.75, 2400, 0.07, x); crack(0.35, 700, 0.16, x); thud(0.95, 190, 40, 0.34 + k * 0.1, x); duck(0.45, 0.22);
+    } else if (kb < 50) { play('jab_hit_light', x); crack(0.22, 3200, 0.035, x); thud(0.24, 230, 95, 0.09, x); }
+    else if (kb < 100) { play('tilt_hit_mid', x); crack(0.36, 2800, 0.045, x); thud(0.44, 200, 65, 0.15, x); }
+    else { play('hit_heavy', x); crack(0.6, 2600, 0.055, x); thud(0.8, 180, 50, 0.24, x); if (kb > 130) duck(0.6, 0.15); }
   }
 
   /* ---- music ---- */

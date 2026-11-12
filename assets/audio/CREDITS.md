@@ -18,7 +18,7 @@ The packs' own license files are in `licenses/`.
 
 | Files | Original names | Pack | Source |
 |---|---|---|---|
-| `hit_light_*`, `hit_mid_*`, `hit_heavy_*` | impactGeneric_light, impactPunch_medium, impactPunch_heavy | Kenney Impact Sounds | https://kenney.nl/assets/impact-sounds |
+| `punch_medium_*.wav`, `punch_heavy_*.wav` | impact_punch_medium_000-004, impact_punch_heavy_000-004, trimmed to start on the hit, made mono and evened out in loudness | 150 Combat Sound Effects | https://opengameart.org/content/150-combat-sound-effects |
 | `armor_*`, `clank_*`, `shield_hit_*`, `glass_heavy_1`, `parry_1`, `tech_1` | impactMetal_medium, impactMetal_heavy, impactGlass_light, impactGlass_heavy, impactBell_heavy, impactPlank_medium | Kenney Impact Sounds | same |
 | `thud_*`, `soft_*`, `ledge_*`, `step_*`, `dash_*`, `slide_*` | impactSoft_heavy, impactSoft_medium, impactWood_light, footstep_grass, footstep_concrete, footstep_snow | Kenney Impact Sounds | same |
 | `cloth_*`, `grab_*`, `metal_click_1`, `latch_1` | cloth1-4, beltHandle1-2, metalClick, metalLatch | Kenney RPG Audio | https://kenney.nl/assets/rpg-audio |
