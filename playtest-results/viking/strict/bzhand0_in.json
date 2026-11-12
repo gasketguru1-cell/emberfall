@@ -1,0 +1,108 @@
+{
+ "job": {
+  "name": "bzhand0_in",
+  "labs": [
+   "tools/viking-lab.js"
+  ],
+  "sit": {
+   "foe": [
+    0
+   ],
+   "pct": 0,
+   "x0": -20,
+   "dist": 9,
+   "bz": true
+  },
+  "G": [
+   "jab",
+   "ftilt",
+   "utilt",
+   "dtilt",
+   "fsmash",
+   "usmash",
+   "dsmash",
+   "dash",
+   "grab_f",
+   "grab_b",
+   "grab_u",
+   "grab_d",
+   "sspec",
+   "throw",
+   "rc"
+  ],
+  "AIR": [
+   "nair",
+   "fair",
+   "bair",
+   "uair",
+   "dair",
+   "sspecA",
+   "throwA",
+   "uspec",
+   "rc"
+  ],
+  "H": [],
+  "extra": [
+   "hs",
+   "w6 hs",
+   "rc",
+   "w20 rc",
+   "hs nair",
+   "hs fair",
+   "hs bair",
+   "hs uair",
+   "sh hs nair",
+   "sh hs bair",
+   "sh hs fair",
+   "sh hs uair",
+   "sh hs dair",
+   "throw hs",
+   "throw w12 hs",
+   "sh throwA hs",
+   "fh throwA hs"
+  ],
+  "depth": 12,
+  "beam": 10,
+  "goal": "ko",
+  "stopAfter": 40,
+  "hitW": 1,
+  "out": "playtest-results/viking/strict/bzhand0_in.json",
+  "def": {
+   "di": "in",
+   "esc": "all",
+   "gate": true
+  },
+  "hitsLog": true
+ },
+ "sims": 7447,
+ "frames": 410962,
+ "found": [
+  {
+   "route": "fsmash",
+   "hits": 1,
+   "dmg": 45.4,
+   "ko": false,
+   "pct": 45.4,
+   "thread": 0,
+   "depth": 1
+  },
+  {
+   "route": "usmash",
+   "hits": 1,
+   "dmg": 41.6,
+   "ko": false,
+   "pct": 41.6,
+   "thread": 0,
+   "depth": 1
+  },
+  {
+   "route": "sspec",
+   "hits": 1,
+   "dmg": 34,
+   "ko": false,
+   "pct": 34,
+   "thread": 0,
+   "depth": 1
+  }
+ ]
+}

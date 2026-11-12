@@ -1,0 +1,164 @@
+{
+ "job": {
+  "name": "plat40_down",
+  "labs": [
+   "tools/viking-lab.js"
+  ],
+  "sit": {
+   "foe": [
+    0
+   ],
+   "pct": 40,
+   "x0": -20,
+   "dist": 9,
+   "axe": {
+    "from": -40
+   }
+  },
+  "G": [
+   "jab",
+   "ftilt",
+   "utilt",
+   "dtilt",
+   "fsmash",
+   "usmash",
+   "dsmash",
+   "dash",
+   "grab_f",
+   "grab_b",
+   "grab_u",
+   "grab_d",
+   "sspec",
+   "throw",
+   "rc"
+  ],
+  "AIR": [
+   "nair",
+   "fair",
+   "bair",
+   "uair",
+   "dair",
+   "sspecA",
+   "throwA",
+   "uspec",
+   "rc"
+  ],
+  "H": [],
+  "extra": [
+   "hs",
+   "w6 hs",
+   "rc",
+   "w20 rc",
+   "hs nair",
+   "hs fair",
+   "hs bair",
+   "hs uair",
+   "sh hs nair",
+   "sh hs bair",
+   "sh hs fair",
+   "sh hs uair",
+   "sh hs dair",
+   "throw hs",
+   "throw w12 hs",
+   "sh throwA hs",
+   "fh throwA hs"
+  ],
+  "depth": 12,
+  "beam": 10,
+  "goal": "ko",
+  "stopAfter": 40,
+  "hitW": 1,
+  "out": "playtest-results/viking/strict/plat40_down.json",
+  "def": {
+   "di": "down",
+   "esc": "all",
+   "gate": true
+  },
+  "hitsLog": true
+ },
+ "sims": 14894,
+ "frames": 718996,
+ "found": [
+  {
+   "route": "fsmash",
+   "hits": 1,
+   "dmg": 27.7,
+   "ko": false,
+   "pct": 67.7,
+   "thread": 0,
+   "depth": 1
+  },
+  {
+   "route": "sspec",
+   "hits": 1,
+   "dmg": 22.7,
+   "ko": false,
+   "pct": 62.7,
+   "thread": 0,
+   "depth": 1
+  },
+  {
+   "route": "sh dair",
+   "hits": 1,
+   "dmg": 20.3,
+   "ko": false,
+   "pct": 60.3,
+   "thread": 0,
+   "depth": 1
+  },
+  {
+   "route": "sspec | w20 rc",
+   "hits": 2,
+   "dmg": 43.3,
+   "ko": false,
+   "pct": 83.3,
+   "thread": 0,
+   "depth": 2
+  },
+  {
+   "route": "dtilt | w20 rc",
+   "hits": 2,
+   "dmg": 40,
+   "ko": false,
+   "pct": 80,
+   "thread": 0,
+   "depth": 2
+  },
+  {
+   "route": "dash | w20 rc",
+   "hits": 2,
+   "dmg": 39.9,
+   "ko": false,
+   "pct": 79.9,
+   "thread": 0,
+   "depth": 2
+  },
+  {
+   "route": "dtilt | w20 rc | w18 fh w4 nair",
+   "hits": 3,
+   "dmg": 48.8,
+   "ko": false,
+   "pct": 88.8,
+   "thread": 0,
+   "depth": 3
+  },
+  {
+   "route": "grab_f | w20 rc | w12 fh w9 uspec",
+   "hits": 4,
+   "dmg": 46,
+   "ko": false,
+   "pct": 86,
+   "thread": 0,
+   "depth": 3
+  },
+  {
+   "route": "w18 grab_f | w20 rc | w18 fh w4 uspec",
+   "hits": 4,
+   "dmg": 46,
+   "ko": false,
+   "pct": 86,
+   "thread": 0,
+   "depth": 3
+  }
+ ]
+}

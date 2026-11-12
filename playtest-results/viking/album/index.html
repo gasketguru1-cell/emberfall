@@ -1,0 +1,174 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fyrdsman Discovery Album</title>
+<style>
+:root{--bg:#f6f3ee;--panel:#fff;--ink:#1d1a16;--mute:#6b645a;--line:#e3ddd3;--accent:#2f6f9f;--accent2:#8a5a00;--code:#f1ece4}
+@media (prefers-color-scheme:dark){:root{--bg:#141210;--panel:#1d1a17;--ink:#f1ece4;--mute:#a59d92;--line:#302b26;--accent:#7cc4ff;--accent2:#ffd166;--code:#26221e}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:40px 20px 24px;max-width:1240px;margin:auto}h1{font-size:34px;margin:0 0 6px;letter-spacing:-.01em}header p{color:var(--mute);margin:4px 0;max-width:820px}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}nav div{max-width:1240px;margin:auto;padding:10px 20px;display:flex;gap:16px;overflow-x:auto;white-space:nowrap}
+nav a{color:var(--mute);text-decoration:none;font-size:14px}nav a:hover{color:var(--accent)}
+section{max-width:1240px;margin:auto;padding:28px 20px 8px}h2{font-size:22px;margin:0 0 4px}.blurb{color:var(--mute);margin:0 0 16px;max-width:820px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;outline:none}
+.card:hover,.card:focus{border-color:var(--accent)}
+.thumb{position:relative;aspect-ratio:16/9;background:#000}.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.play{position:absolute;inset:0;margin:auto;width:54px;height:54px;border-radius:50%;background:rgba(0,0,0,.55)}.play:after{content:"";position:absolute;left:21px;top:16px;border-left:18px solid #fff;border-top:11px solid transparent;border-bottom:11px solid transparent}
+.rank{position:absolute;left:10px;top:10px;background:var(--accent);color:#fff;font-weight:700;font-size:13px;padding:2px 8px;border-radius:6px}
+.body{padding:12px 14px 14px}.body h3{margin:0 0 6px;font-size:16px}
+.chip{display:inline-block;font-size:12px;color:var(--accent2);border:1px solid var(--line);border-radius:999px;padding:0 8px;margin-bottom:6px}
+.route{display:block;background:var(--code);border-radius:6px;padding:6px 8px;font:12px/1.45 ui-monospace,Consolas,monospace;word-break:break-word;margin:4px 0 8px}
+ul{margin:0;padding-left:18px}li{margin:2px 0;font-size:14px}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:10px}.strip img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:4px;display:block}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}.modal.on{display:flex}
+.modal video{max-width:min(1280px,100%);max-height:90vh;width:100%;background:#000;border-radius:8px}
+.close{position:absolute;right:18px;top:12px;color:#fff;font-size:30px;background:none;border:0;cursor:pointer}
+footer{max-width:1240px;margin:auto;padding:24px 20px 48px;color:var(--mute);font-size:13px}
+@media (max-width:420px){.grid{grid-template-columns:1fr}h1{font-size:27px}}
+</style></head><body>
+<header><h1>Fyrdsman Discovery Album</h1>
+<p>Fyrdsman (the Viking), tested in the real game with scripted routes against every DI (the nine stick directions an opponent can hold when hit), with and without mashing, and against the level 9 CPU. Every clip is a recording of the game itself; click one to play it.</p><p>Odds are from 20 headless runs each, because the game has some randomness. Nothing found here is a zero-to-death on Flint whatever direction he drifts.</p></header>
+<nav><div><a href="#top">Top discoveries</a><a href="#kill">Kill confirms</a><a href="#bz">Berserker</a><a href="#combo">Combos</a><a href="#tc">Tech chase</a><a href="#axe">Axe recall</a><a href="#counter">Counter</a><a href="#edge">Edgeguards and recovery</a><a href="#move">Movement</a><a href="#glitch">Glitches</a></div></nav>
+<section id="top"><h2>Top discoveries, ranked</h2><p class="blurb">Ranked by how much each changes how the Viking is played, weighted toward what holds up under DI and human timing.</p>
+<div class="grid"><article class="card big" data-src="bz/bz_usmash25.webm" tabindex="0">
+  <div class="thumb"><img src="bz/stills/bz_usmash25_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#1</span></div>
+  <div class="body"><h3>Berserker up smash KOs Flint at 25%</h3><span class="chip">every DI, 20 of 20</span>
+  <code class="route">A+B on; up smash</code>
+  <ul><li>KOs at 25% on all nine DIs, mashing or not</li><li>Not at 20%</li><li>Kills from 20 to 30% on the other fighters tested, 80% on Joey</li></ul>
+  <div class="strip"><img src="bz/stills/bz_usmash25_00.png" alt="" loading="lazy"><img src="bz/stills/bz_usmash25_01.png" alt="" loading="lazy"><img src="bz/stills/bz_usmash25_02.png" alt="" loading="lazy"><img src="bz/stills/bz_usmash25_03.png" alt="" loading="lazy"></div></div></article><article class="card big" data-src="bz/bz_fsmash55.webm" tabindex="0">
+  <div class="thumb"><img src="bz/stills/bz_fsmash55_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#2</span></div>
+  <div class="body"><h3>Berserker forward smash KOs Flint at 55%</h3><span class="chip">every DI, 20 of 20</span>
+  <code class="route">A+B on; forward smash</code>
+  <ul><li>KOs at 55% on all nine DIs</li><li>Not at 50%</li></ul>
+  <div class="strip"><img src="bz/stills/bz_fsmash55_00.png" alt="" loading="lazy"><img src="bz/stills/bz_fsmash55_01.png" alt="" loading="lazy"><img src="bz/stills/bz_fsmash55_02.png" alt="" loading="lazy"><img src="bz/stills/bz_fsmash55_03.png" alt="" loading="lazy"></div></div></article><article class="card big" data-src="kill/kill_plat55_bair.webm" tabindex="0">
+  <div class="thumb"><img src="kill/stills/kill_plat55_bair_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#3</span></div>
+  <div class="body"><h3>Kill confirm at 55%: fthrow, recall, back air</h3><span class="chip">DI out, mashing: 20 of 20</span>
+  <code class="route">axe on right platform; grab_f w20 rc w7 fh w9 bair</code>
+  <ul><li>Forward throw, the axe recalled off the platform, then a back air</li><li>Mashing: kills on 5 of 9 DIs (survives neutral, in, down and down-in)</li><li>Not mashing: kills on 6 of 9 (survives down, down-in and down-out)</li></ul>
+  <div class="strip"><img src="kill/stills/kill_plat55_bair_00.png" alt="" loading="lazy"><img src="kill/stills/kill_plat55_bair_01.png" alt="" loading="lazy"><img src="kill/stills/kill_plat55_bair_02.png" alt="" loading="lazy"><img src="kill/stills/kill_plat55_bair_03.png" alt="" loading="lazy"><img src="kill/stills/kill_plat55_bair_04.png" alt="" loading="lazy"><img src="kill/stills/kill_plat55_bair_05.png" alt="" loading="lazy"></div></div></article><article class="card big" data-src="combo/combo_plat0_bair.webm" tabindex="0">
+  <div class="thumb"><img src="combo/stills/combo_plat0_bair_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#4</span></div>
+  <div class="body"><h3>4 hits from 0% (62%): grab, recall, back air</h3><span class="chip">DI in: 14 of 20</span>
+  <code class="route">axe on right platform; grab_f w20 rc fh w9 bair</code>
+  <ul><li>The best route from 0% on Flint: 4 hits, 53 to 62%</li><li>On DI out, up or up-out the back air misses: 3 hits, 38%</li><li>No route tested kills Flint from 0% on every DI</li></ul>
+  <div class="strip"><img src="combo/stills/combo_plat0_bair_00.png" alt="" loading="lazy"><img src="combo/stills/combo_plat0_bair_01.png" alt="" loading="lazy"><img src="combo/stills/combo_plat0_bair_02.png" alt="" loading="lazy"><img src="combo/stills/combo_plat0_bair_03.png" alt="" loading="lazy"><img src="combo/stills/combo_plat0_bair_04.png" alt="" loading="lazy"><img src="combo/stills/combo_plat0_bair_05.png" alt="" loading="lazy"></div></div></article><article class="card big" data-src="tc/tc_sack_dtilt_rc.webm" tabindex="0">
+  <div class="thumb"><img src="tc/stills/tc_sack_dtilt_rc_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#5</span></div>
+  <div class="body"><h3>Missed-tech punish: Berserker dtilt, recall KOs Potato Sack at 0%</h3><span class="chip">any DI, if the Sack misses its tech</span>
+  <code class="route">A+B on; axe stuck far right; dtilt w3 fh rc</code>
+  <ul><li>The down-tilt knocks the Sack down; the recalled axe hits it on the floor and carries it off the far side</li><li>The combo counter resets on the knockdown, so this is not a true combo</li><li>Mashing out of hitstun stops the Sack from teching (each shield press restarts the 40-frame tech lockout)</li><li>Getting up in place still dies; any tech or roll away survives</li></ul>
+  <div class="strip"><img src="tc/stills/tc_sack_dtilt_rc_00.png" alt="" loading="lazy"><img src="tc/stills/tc_sack_dtilt_rc_01.png" alt="" loading="lazy"><img src="tc/stills/tc_sack_dtilt_rc_02.png" alt="" loading="lazy"><img src="tc/stills/tc_sack_dtilt_rc_03.png" alt="" loading="lazy"><img src="tc/stills/tc_sack_dtilt_rc_04.png" alt="" loading="lazy"><img src="tc/stills/tc_sack_dtilt_rc_tech_00.png" alt="" loading="lazy"><img src="tc/stills/tc_sack_dtilt_rc_tech_01.png" alt="" loading="lazy"><img src="tc/stills/tc_sack_dtilt_rc_tech_02.png" alt="" loading="lazy"></div></div></article></div></section>
+<section id="kill"><h2>Kill confirms</h2><p class="blurb">What actually closes a stock, and how reliably.</p><div class="grid"><article class="card" data-src="kill/kill_plat55_bair.webm" tabindex="0">
+  <div class="thumb"><img src="kill/stills/kill_plat55_bair_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#3</span></div>
+  <div class="body"><h3>Kill confirm at 55%: fthrow, recall, back air</h3><span class="chip">DI out, mashing: 20 of 20</span>
+  <code class="route">axe on right platform; grab_f w20 rc w7 fh w9 bair</code>
+  <ul><li>Forward throw, the axe recalled off the platform, then a back air</li><li>Mashing: kills on 5 of 9 DIs (survives neutral, in, down and down-in)</li><li>Not mashing: kills on 6 of 9 (survives down, down-in and down-out)</li></ul>
+  <div class="strip"><img src="kill/stills/kill_plat55_bair_00.png" alt="" loading="lazy"><img src="kill/stills/kill_plat55_bair_01.png" alt="" loading="lazy"><img src="kill/stills/kill_plat55_bair_02.png" alt="" loading="lazy"><img src="kill/stills/kill_plat55_bair_03.png" alt="" loading="lazy"><img src="kill/stills/kill_plat55_bair_04.png" alt="" loading="lazy"><img src="kill/stills/kill_plat55_bair_05.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="kill/kill_plat55_grab_rc.webm" tabindex="0">
+  <div class="thumb"><img src="kill/stills/kill_plat55_grab_rc_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Kill confirm at 55%? fthrow, platform-axe recall KOs half the time</h3><span class="chip">DI down-out: 10 of 20</span>
+  <code class="route">axe on right platform; grab_f w18 rc</code>
+  <ul><li>Shown here when it kills; it survives just as often</li><li>A coin flip, not a confirm</li></ul>
+  <div class="strip"><img src="kill/stills/kill_plat55_grab_rc_00.png" alt="" loading="lazy"><img src="kill/stills/kill_plat55_grab_rc_01.png" alt="" loading="lazy"><img src="kill/stills/kill_plat55_grab_rc_02.png" alt="" loading="lazy"><img src="kill/stills/kill_plat55_grab_rc_03.png" alt="" loading="lazy"><img src="kill/stills/kill_plat55_grab_rc_04.png" alt="" loading="lazy"><img src="kill/stills/kill_plat55_grab_rc_05.png" alt="" loading="lazy"></div></div></article></div></section>
+<section id="bz"><h2>Berserker</h2><p class="blurb">With Berserker on (A+B), the smashes kill early on every DI.</p><div class="grid"><article class="card" data-src="bz/bz_usmash25.webm" tabindex="0">
+  <div class="thumb"><img src="bz/stills/bz_usmash25_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#1</span></div>
+  <div class="body"><h3>Berserker up smash KOs Flint at 25%</h3><span class="chip">every DI, 20 of 20</span>
+  <code class="route">A+B on; up smash</code>
+  <ul><li>KOs at 25% on all nine DIs, mashing or not</li><li>Not at 20%</li><li>Kills from 20 to 30% on the other fighters tested, 80% on Joey</li></ul>
+  <div class="strip"><img src="bz/stills/bz_usmash25_00.png" alt="" loading="lazy"><img src="bz/stills/bz_usmash25_01.png" alt="" loading="lazy"><img src="bz/stills/bz_usmash25_02.png" alt="" loading="lazy"><img src="bz/stills/bz_usmash25_03.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="bz/bz_fsmash55.webm" tabindex="0">
+  <div class="thumb"><img src="bz/stills/bz_fsmash55_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#2</span></div>
+  <div class="body"><h3>Berserker forward smash KOs Flint at 55%</h3><span class="chip">every DI, 20 of 20</span>
+  <code class="route">A+B on; forward smash</code>
+  <ul><li>KOs at 55% on all nine DIs</li><li>Not at 50%</li></ul>
+  <div class="strip"><img src="bz/stills/bz_fsmash55_00.png" alt="" loading="lazy"><img src="bz/stills/bz_fsmash55_01.png" alt="" loading="lazy"><img src="bz/stills/bz_fsmash55_02.png" alt="" loading="lazy"><img src="bz/stills/bz_fsmash55_03.png" alt="" loading="lazy"></div></div></article></div></section>
+<section id="combo"><h2>Combos</h2><p class="blurb">The best route from 0% on Flint, which still isn't a zero-to-death.</p><div class="grid"><article class="card" data-src="combo/combo_plat0_bair.webm" tabindex="0">
+  <div class="thumb"><img src="combo/stills/combo_plat0_bair_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#4</span></div>
+  <div class="body"><h3>4 hits from 0% (62%): grab, recall, back air</h3><span class="chip">DI in: 14 of 20</span>
+  <code class="route">axe on right platform; grab_f w20 rc fh w9 bair</code>
+  <ul><li>The best route from 0% on Flint: 4 hits, 53 to 62%</li><li>On DI out, up or up-out the back air misses: 3 hits, 38%</li><li>No route tested kills Flint from 0% on every DI</li></ul>
+  <div class="strip"><img src="combo/stills/combo_plat0_bair_00.png" alt="" loading="lazy"><img src="combo/stills/combo_plat0_bair_01.png" alt="" loading="lazy"><img src="combo/stills/combo_plat0_bair_02.png" alt="" loading="lazy"><img src="combo/stills/combo_plat0_bair_03.png" alt="" loading="lazy"><img src="combo/stills/combo_plat0_bair_04.png" alt="" loading="lazy"><img src="combo/stills/combo_plat0_bair_05.png" alt="" loading="lazy"></div></div></article></div></section>
+<section id="tc"><h2>Tech chase</h2><p class="blurb">Looked like a zero-to-death on Potato Sack under every DI. It isn't: it works only if the Sack misses its tech.</p><div class="grid"><article class="card" data-src="tc/tc_sack_dtilt_rc.webm" tabindex="0">
+  <div class="thumb"><img src="tc/stills/tc_sack_dtilt_rc_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#5</span></div>
+  <div class="body"><h3>Missed-tech punish: Berserker dtilt, recall KOs Potato Sack at 0%</h3><span class="chip">any DI, if the Sack misses its tech</span>
+  <code class="route">A+B on; axe stuck far right; dtilt w3 fh rc</code>
+  <ul><li>The down-tilt knocks the Sack down; the recalled axe hits it on the floor and carries it off the far side</li><li>The combo counter resets on the knockdown, so this is not a true combo</li><li>Mashing out of hitstun stops the Sack from teching (each shield press restarts the 40-frame tech lockout)</li><li>Getting up in place still dies; any tech or roll away survives</li></ul>
+  <div class="strip"><img src="tc/stills/tc_sack_dtilt_rc_00.png" alt="" loading="lazy"><img src="tc/stills/tc_sack_dtilt_rc_01.png" alt="" loading="lazy"><img src="tc/stills/tc_sack_dtilt_rc_02.png" alt="" loading="lazy"><img src="tc/stills/tc_sack_dtilt_rc_03.png" alt="" loading="lazy"><img src="tc/stills/tc_sack_dtilt_rc_04.png" alt="" loading="lazy"><img src="tc/stills/tc_sack_dtilt_rc_tech_00.png" alt="" loading="lazy"><img src="tc/stills/tc_sack_dtilt_rc_tech_01.png" alt="" loading="lazy"><img src="tc/stills/tc_sack_dtilt_rc_tech_02.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="tc/tc_sack_dtilt_rc_tech.webm" tabindex="0">
+  <div class="thumb"><img src="tc/stills/tc_sack_dtilt_rc_tech_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Same route, the Sack techs the landing: it survives</h3><span class="chip">tech in place</span>
+  <code class="route">dtilt w3 fh rc</code>
+  <ul><li>Shield pressed in the 11 frames before landing</li><li>Tech in place, tech roll either way and a roll away from the floor all escape, on every DI</li></ul>
+  <div class="strip"><img src="tc/stills/tc_sack_dtilt_rc_tech_00.png" alt="" loading="lazy"><img src="tc/stills/tc_sack_dtilt_rc_tech_01.png" alt="" loading="lazy"><img src="tc/stills/tc_sack_dtilt_rc_tech_02.png" alt="" loading="lazy"></div></div></article></div></section>
+<section id="axe"><h2>Axe recall</h2><p class="blurb">The recalled axe's range and how it combines with Side-B.</p><div class="grid"><article class="card" data-src="axe/rc_fullrange.webm" tabindex="0">
+  <div class="thumb"><img src="axe/stills/rc_fullrange_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Recall across the stage KOs Flint at 80%</h3><span class="chip">every DI, 20 of 20</span>
+  <code class="route">axe stuck far right; Viking at x -12; rc w40</code>
+  <ul><li>The axe hits once per trip and passes through</li><li>Kills at 80% on all nine DIs</li></ul>
+  <div class="strip"><img src="axe/stills/rc_fullrange_00.png" alt="" loading="lazy"><img src="axe/stills/rc_fullrange_01.png" alt="" loading="lazy"><img src="axe/stills/rc_fullrange_02.png" alt="" loading="lazy"><img src="axe/stills/rc_fullrange_03.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="axe/axe_ride_sspec.webm" tabindex="0">
+  <div class="thumb"><img src="axe/stills/axe_ride_sspec_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Side-B with special held: the recall rides along</h3>
+  <code class="route">throw wstuck sspecR w30</code>
+  <ul><li>Keeping B held through Side-B recalls the axe during the dash</li><li>2 hits, 48%, and it KOed Flint from 30% in all 20 runs</li></ul>
+  <div class="strip"><img src="axe/stills/axe_ride_sspec_00.png" alt="" loading="lazy"><img src="axe/stills/axe_ride_sspec_01.png" alt="" loading="lazy"><img src="axe/stills/axe_ride_sspec_02.png" alt="" loading="lazy"><img src="axe/stills/axe_ride_sspec_03.png" alt="" loading="lazy"><img src="axe/stills/axe_ride_sspec_04.png" alt="" loading="lazy"></div></div></article></div></section>
+<section id="counter"><h2>Counter</h2><p class="blurb">Down-B: what follows a successful counter depends on where the axe is.</p><div class="grid"><article class="card" data-src="counter/counter_homing.webm" tabindex="0">
+  <div class="thumb"><img src="counter/stills/counter_homing_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Counter, then the stuck axe homes in (Flint 40%)</h3><span class="chip">DI in</span>
+  <code class="route">axe stuck far right; dspec as Flint forward tilts</code>
+  <ul><li>With the axe stuck, a successful counter pops the attacker up and the axe tears free and homes in</li><li>2 hits, 36.5%, KO</li></ul>
+  <div class="strip"><img src="counter/stills/counter_homing_00.png" alt="" loading="lazy"><img src="counter/stills/counter_homing_01.png" alt="" loading="lazy"><img src="counter/stills/counter_homing_02.png" alt="" loading="lazy"><img src="counter/stills/counter_homing_03.png" alt="" loading="lazy"><img src="counter/stills/counter_homing_04.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="counter/counter_flying.webm" tabindex="0">
+  <div class="thumb"><img src="counter/stills/counter_flying_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Counter while the axe flies: the uppercut only, no homing axe</h3>
+  <code class="route">throw, then dspec as Flint forward tilts</code>
+  <ul><li>With the axe in the air (going out or coming back) the counter gives the unarmed uppercut and nothing else</li><li>1 hit, 18.9% here</li></ul>
+  <div class="strip"><img src="counter/stills/counter_flying_00.png" alt="" loading="lazy"><img src="counter/stills/counter_flying_01.png" alt="" loading="lazy"><img src="counter/stills/counter_flying_02.png" alt="" loading="lazy"></div></div></article></div></section>
+<section id="edge"><h2>Edgeguards and recovery</h2><p class="blurb">One take each against the level 9 CPU, so these show options, not odds.</p><div class="grid"><article class="card" data-src="edge/eg_throw_rc.webm" tabindex="0">
+  <div class="thumb"><img src="edge/stills/eg_throw_rc_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Edgeguard: throw offstage, recall through the recovering foe</h3><span class="chip">level 9 CPU, KO on the second take</span>
+  <code class="route">throw w20 rc w40</code>
+  <ul><li>Missed on the first take, KOed at 80% on the second</li></ul>
+  <div class="strip"><img src="edge/stills/eg_throw_rc_00.png" alt="" loading="lazy"><img src="edge/stills/eg_throw_rc_01.png" alt="" loading="lazy"><img src="edge/stills/eg_throw_rc_02.png" alt="" loading="lazy"><img src="edge/stills/eg_throw_rc_03.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="edge/eg_sh_fair.webm" tabindex="0">
+  <div class="thumb"><img src="edge/stills/eg_sh_fair_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Edgeguard: short-hop forward air at the ledge</h3><span class="chip">level 9 CPU</span>
+  <code class="route">sh fair w60</code>
+  <ul><li>Hit on the first take for 11.8%, no KO</li></ul>
+  <div class="strip"><img src="edge/stills/eg_sh_fair_00.png" alt="" loading="lazy"><img src="edge/stills/eg_sh_fair_01.png" alt="" loading="lazy"><img src="edge/stills/eg_sh_fair_02.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="edge/eg_ground_sspec.webm" tabindex="0">
+  <div class="thumb"><img src="edge/stills/eg_ground_sspec_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Edgeguard: ground Side-B stops at the ledge</h3><span class="chip">level 9 CPU</span>
+  <code class="route">sspec w60</code>
+  <ul><li>Side-B from the ground won't run off the stage, so it can't reach a recovering foe</li><li>Whiffed in all 6 takes</li></ul>
+  <div class="strip"><img src="edge/stills/eg_ground_sspec_00.png" alt="" loading="lazy"><img src="edge/stills/eg_ground_sspec_01.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="edge/rec_far.webm" tabindex="0">
+  <div class="thumb"><img src="edge/stills/rec_far_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Recovery from far out: double jump, Side-B, Up-B</h3>
+  <code class="route">tele120_0 w10 djIn sspecIn uspecIn w60</code>
+  <ul><li>Starting at x 120: double jump in, Side-B in, then Up-B in</li></ul>
+  <div class="strip"><img src="edge/stills/rec_far_00.png" alt="" loading="lazy"><img src="edge/stills/rec_far_01.png" alt="" loading="lazy"></div></div></article></div></section>
+<section id="move"><h2>Movement</h2><p class="blurb">How far and how fast he goes.</p><div class="grid"><article class="card" data-src="move/bz_run.webm" tabindex="0">
+  <div class="thumb"><img src="move/stills/bz_run_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Berserker run: 61 units in 30 frames (normal 21.5)</h3>
+  <code class="route">A+B on; rf30 w30</code>
+  <ul><li>Berserker nearly triples his run speed</li></ul>
+  <div class="strip"><img src="move/stills/bz_run_00.png" alt="" loading="lazy"><img src="move/stills/bz_run_01.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="move/mv_wavedash.webm" tabindex="0">
+  <div class="thumb"><img src="move/stills/mv_wavedash_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Wavedash forward, back, forward</h3>
+  <code class="route">wd_f w4 wd_b w4 wd_f w30</code>
+  <ul><li>Jump, then an air dodge down-forward or down-back on the first frame</li></ul>
+  <div class="strip"><img src="move/stills/mv_wavedash_00.png" alt="" loading="lazy"><img src="move/stills/mv_wavedash_01.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="move/mv_shthrow.webm" tabindex="0">
+  <div class="thumb"><img src="move/stills/mv_shthrow_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Short-hop axe throw: 67.6 units of drift</h3>
+  <code class="route">sh throwA w40</code>
+  <ul><li>The air throw carries on through the landing, so the drift continues</li></ul>
+  <div class="strip"><img src="move/stills/mv_shthrow_00.png" alt="" loading="lazy"><img src="move/stills/mv_shthrow_01.png" alt="" loading="lazy"></div></div></article></div></section>
+<section id="glitch"><h2>Glitches</h2><p class="blurb">Recall inputs that work when they probably shouldn't.</p><div class="grid"><article class="card" data-src="glitch/g1_hitstun_recall.webm" tabindex="0">
+  <div class="thumb"><img src="glitch/stills/g1_hitstun_recall_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>G1: recall fires from hitstun, KOs Flint at 40%</h3>
+  <code class="route">axe stuck behind Flint; hold B while being hit</code>
+  <ul><li>Holding special while in hitstun still calls the axe home</li><li>The axe hits Flint on its way back: 1 hit, KO from 40%</li></ul>
+  <div class="strip"><img src="glitch/stills/g1_hitstun_recall_00.png" alt="" loading="lazy"><img src="glitch/stills/g1_hitstun_recall_01.png" alt="" loading="lazy"><img src="glitch/stills/g1_hitstun_recall_02.png" alt="" loading="lazy"><img src="glitch/stills/g1_hitstun_recall_03.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="glitch/g2_grab_escape.webm" tabindex="0">
+  <div class="thumb"><img src="glitch/stills/g2_grab_escape_01.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>G2: recall while held in a grab frees the Viking</h3>
+  <code class="route">axe stuck behind; hold B while grabbed</code>
+  <ul><li>Holding special in a grab recalls the axe, which hits the grabber and frees him</li><li>KO from 40% here</li></ul>
+  <div class="strip"><img src="glitch/stills/g2_grab_escape_00.png" alt="" loading="lazy"><img src="glitch/stills/g2_grab_escape_01.png" alt="" loading="lazy"><img src="glitch/stills/g2_grab_escape_02.png" alt="" loading="lazy"><img src="glitch/stills/g2_grab_escape_03.png" alt="" loading="lazy"></div></div></article></div></section>
+<footer>Recorded 2026-11-12 from the dev build with tools/viking-record.js; clip list in tools/viking-studies/clips-list.js, odds from tools/viking-studies/clipodds.js. Testing tools only; nothing in the game was changed.</footer>
+<div class="modal" id="m"><button class="close" aria-label="Close">&times;</button><video id="v" controls playsinline></video></div>
+<script>
+const m=document.getElementById('m'),v=document.getElementById('v');
+const open=s=>{v.src=s;m.classList.add('on');v.play().catch(()=>{});},shut=()=>{v.pause();v.removeAttribute('src');v.load();m.classList.remove('on');};
+document.querySelectorAll('.card').forEach(c=>{c.addEventListener('click',()=>open(c.dataset.src));c.addEventListener('keydown',e=>{if(e.key==='Enter')open(c.dataset.src);});});
+m.addEventListener('click',e=>{if(e.target===m||e.target.classList.contains('close'))shut();});document.addEventListener('keydown',e=>{if(e.key==='Escape')shut();});
+</script></body></html>

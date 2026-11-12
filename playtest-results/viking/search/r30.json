@@ -1,0 +1,79 @@
+{
+ "job": {
+  "name": "r30",
+  "labs": [
+   "tools/viking-lab.js"
+  ],
+  "sit": {
+   "foe": [
+    0
+   ],
+   "pct": 0,
+   "x0": -40,
+   "dist": 30
+  },
+  "G": [
+   "jab",
+   "ftilt",
+   "utilt",
+   "dtilt",
+   "fsmash",
+   "usmash",
+   "dsmash",
+   "dash",
+   "grab_f",
+   "grab_b",
+   "grab_u",
+   "grab_d",
+   "sspec",
+   "throw",
+   "rc"
+  ],
+  "AIR": [
+   "nair",
+   "fair",
+   "bair",
+   "uair",
+   "dair",
+   "sspecA",
+   "throwA",
+   "uspec",
+   "rc"
+  ],
+  "H": [],
+  "extra": [
+   "hs",
+   "w6 hs",
+   "rc",
+   "w20 rc",
+   "hs nair",
+   "hs fair",
+   "hs bair",
+   "hs uair",
+   "sh hs nair",
+   "sh hs bair",
+   "sh hs fair",
+   "sh hs uair",
+   "sh hs dair",
+   "throw hs",
+   "throw w6 hs",
+   "throw w12 hs",
+   "throw w20 hs",
+   "throwA hs",
+   "sh throwA hs",
+   "fh throwA hs",
+   "throw",
+   "sh throwA",
+   "fh throwA"
+  ],
+  "depth": 14,
+  "beam": 10,
+  "goal": "ko",
+  "stopAfter": 40,
+  "hitW": 1,
+  "out": "playtest-results/viking/search/r30.json"
+ },
+ "sims": 4781,
+ "frames": 227271,
+ "found": []
+}

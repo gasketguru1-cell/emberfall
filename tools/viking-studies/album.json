@@ -1,0 +1,38 @@
+{
+  "intro": "Fyrdsman (the Viking), tested in the real game with scripted routes against every DI (the nine stick directions an opponent can hold when hit), with and without mashing, and against the level 9 CPU. Every clip is a recording of the game itself; click one to play it.",
+  "note": "Odds are from 20 headless runs each, because the game has some randomness. Nothing found here is a zero-to-death on Flint whatever direction he drifts.",
+  "footer": "Recorded 2026-11-12 from the dev build with tools/viking-record.js; clip list in tools/viking-studies/clips-list.js, odds from tools/viking-studies/clipodds.js. Testing tools only; nothing in the game was changed.",
+  "sections": [
+    { "id": "kill", "title": "Kill confirms", "blurb": "What actually closes a stock, and how reliably." },
+    { "id": "bz", "title": "Berserker", "blurb": "With Berserker on (A+B), the smashes kill early on every DI." },
+    { "id": "combo", "title": "Combos", "blurb": "The best route from 0% on Flint, which still isn't a zero-to-death." },
+    { "id": "tc", "title": "Tech chase", "blurb": "Looked like a zero-to-death on Potato Sack under every DI. It isn't: it works only if the Sack misses its tech." },
+    { "id": "axe", "title": "Axe recall", "blurb": "The recalled axe's range and how it combines with Side-B." },
+    { "id": "counter", "title": "Counter", "blurb": "Down-B: what follows a successful counter depends on where the axe is." },
+    { "id": "edge", "title": "Edgeguards and recovery", "blurb": "One take each against the level 9 CPU, so these show options, not odds." },
+    { "id": "move", "title": "Movement", "blurb": "How far and how fast he goes." },
+    { "id": "glitch", "title": "Glitches", "blurb": "Recall inputs that work when they probably shouldn't." }
+  ],
+  "clips": [
+    { "sec": "bz", "file": "bz_usmash25", "rank": 1, "title": "Berserker up smash KOs Flint at 25%", "di": "every DI, 20 of 20", "route": "A+B on; up smash", "facts": ["KOs at 25% on all nine DIs, mashing or not", "Not at 20%", "Kills from 20 to 30% on the other fighters tested, 80% on Joey"] },
+    { "sec": "bz", "file": "bz_fsmash55", "rank": 2, "title": "Berserker forward smash KOs Flint at 55%", "di": "every DI, 20 of 20", "route": "A+B on; forward smash", "facts": ["KOs at 55% on all nine DIs", "Not at 50%"] },
+    { "sec": "kill", "file": "kill_plat55_bair", "rank": 3, "title": "Kill confirm at 55%: fthrow, recall, back air", "di": "DI out, mashing: 20 of 20", "route": "axe on right platform; grab_f w20 rc w7 fh w9 bair", "facts": ["Forward throw, the axe recalled off the platform, then a back air", "Mashing: kills on 5 of 9 DIs (survives neutral, in, down and down-in)", "Not mashing: kills on 6 of 9 (survives down, down-in and down-out)"] },
+    { "sec": "combo", "file": "combo_plat0_bair", "rank": 4, "title": "4 hits from 0% (62%): grab, recall, back air", "di": "DI in: 14 of 20", "route": "axe on right platform; grab_f w20 rc fh w9 bair", "facts": ["The best route from 0% on Flint: 4 hits, 53 to 62%", "On DI out, up or up-out the back air misses: 3 hits, 38%", "No route tested kills Flint from 0% on every DI"] },
+    { "sec": "tc", "file": "tc_sack_dtilt_rc", "rank": 5, "title": "Missed-tech punish: Berserker dtilt, recall KOs Potato Sack at 0%", "di": "any DI, if the Sack misses its tech", "route": "A+B on; axe stuck far right; dtilt w3 fh rc", "facts": ["The down-tilt knocks the Sack down; the recalled axe hits it on the floor and carries it off the far side", "The combo counter resets on the knockdown, so this is not a true combo", "Mashing out of hitstun stops the Sack from teching (each shield press restarts the 40-frame tech lockout)", "Getting up in place still dies; any tech or roll away survives"] },
+    { "sec": "tc", "file": "tc_sack_dtilt_rc_tech", "title": "Same route, the Sack techs the landing: it survives", "di": "tech in place", "route": "dtilt w3 fh rc", "facts": ["Shield pressed in the 11 frames before landing", "Tech in place, tech roll either way and a roll away from the floor all escape, on every DI"] },
+    { "sec": "kill", "file": "kill_plat55_grab_rc", "title": "Kill confirm at 55%? fthrow, platform-axe recall KOs half the time", "di": "DI down-out: 10 of 20", "route": "axe on right platform; grab_f w18 rc", "facts": ["Shown here when it kills; it survives just as often", "A coin flip, not a confirm"] },
+    { "sec": "axe", "file": "rc_fullrange", "title": "Recall across the stage KOs Flint at 80%", "di": "every DI, 20 of 20", "route": "axe stuck far right; Viking at x -12; rc w40", "facts": ["The axe hits once per trip and passes through", "Kills at 80% on all nine DIs"] },
+    { "sec": "axe", "file": "axe_ride_sspec", "title": "Side-B with special held: the recall rides along", "route": "throw wstuck sspecR w30", "facts": ["Keeping B held through Side-B recalls the axe during the dash", "2 hits, 48%, and it KOed Flint from 30% in all 20 runs"] },
+    { "sec": "counter", "file": "counter_homing", "title": "Counter, then the stuck axe homes in (Flint 40%)", "di": "DI in", "route": "axe stuck far right; dspec as Flint forward tilts", "facts": ["With the axe stuck, a successful counter pops the attacker up and the axe tears free and homes in", "2 hits, 36.5%, KO"] },
+    { "sec": "counter", "file": "counter_flying", "title": "Counter while the axe flies: the uppercut only, no homing axe", "route": "throw, then dspec as Flint forward tilts", "facts": ["With the axe in the air (going out or coming back) the counter gives the unarmed uppercut and nothing else", "1 hit, 18.9% here"] },
+    { "sec": "edge", "file": "eg_throw_rc", "title": "Edgeguard: throw offstage, recall through the recovering foe", "di": "level 9 CPU, KO on the second take", "route": "throw w20 rc w40", "facts": ["Missed on the first take, KOed at 80% on the second"] },
+    { "sec": "edge", "file": "eg_sh_fair", "title": "Edgeguard: short-hop forward air at the ledge", "di": "level 9 CPU", "route": "sh fair w60", "facts": ["Hit on the first take for 11.8%, no KO"] },
+    { "sec": "edge", "file": "eg_ground_sspec", "title": "Edgeguard: ground Side-B stops at the ledge", "di": "level 9 CPU", "route": "sspec w60", "facts": ["Side-B from the ground won't run off the stage, so it can't reach a recovering foe", "Whiffed in all 6 takes"] },
+    { "sec": "edge", "file": "rec_far", "title": "Recovery from far out: double jump, Side-B, Up-B", "route": "tele120_0 w10 djIn sspecIn uspecIn w60", "facts": ["Starting at x 120: double jump in, Side-B in, then Up-B in"] },
+    { "sec": "move", "file": "bz_run", "title": "Berserker run: 61 units in 30 frames (normal 21.5)", "route": "A+B on; rf30 w30", "facts": ["Berserker nearly triples his run speed"] },
+    { "sec": "move", "file": "mv_wavedash", "title": "Wavedash forward, back, forward", "route": "wd_f w4 wd_b w4 wd_f w30", "facts": ["Jump, then an air dodge down-forward or down-back on the first frame"] },
+    { "sec": "move", "file": "mv_shthrow", "title": "Short-hop axe throw: 67.6 units of drift", "route": "sh throwA w40", "facts": ["The air throw carries on through the landing, so the drift continues"] },
+    { "sec": "glitch", "file": "g1_hitstun_recall", "title": "G1: recall fires from hitstun, KOs Flint at 40%", "route": "axe stuck behind Flint; hold B while being hit", "facts": ["Holding special while in hitstun still calls the axe home", "The axe hits Flint on its way back: 1 hit, KO from 40%"] },
+    { "sec": "glitch", "file": "g2_grab_escape", "title": "G2: recall while held in a grab frees the Viking", "route": "axe stuck behind; hold B while grabbed", "facts": ["Holding special in a grab recalls the axe, which hits the grabber and frees him", "KO from 40% here"] }
+  ]
+}
