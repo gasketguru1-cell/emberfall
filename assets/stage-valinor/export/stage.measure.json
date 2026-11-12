@@ -1,0 +1,28 @@
+{
+ "file": "assets/stage-valinor/export/stage-valinor-v1.glb",
+ "source": "assets/stage-valinor/raw/valinor.glb",
+ "measure": {
+  "box": {
+   "min": [
+    -0.9515,
+    -0.4738,
+    -0.8654
+   ],
+   "max": [
+    0.9518,
+    0.4684,
+    0.8517
+   ]
+  },
+  "deckY": 0.08,
+  "deckX": [
+   -0.9146,
+   0.9146
+  ],
+  "deckZ": [
+   -0.8184,
+   0.8152
+  ],
+  "triangles": 99999
+ }
+}

@@ -1,0 +1,19 @@
+{
+ "file": "assets/stage-valinor/export/stage-valinor-v1.glb",
+ "backdrop": "assets/stage-valinor/export/backdrop.jpg",
+ "scale": [72, 72, 39.6],
+ "offset": [0, -5.76, -4],
+ "yaw": 0,
+ "glow": ["#ff6418", 0.3],
+ "lights": [
+  { "at": [0, -16, 44], "color": "#ff5a1a", "power": 3200, "reach": 170 },
+  { "at": [42, 14, -18], "color": "#ff7a30", "power": 1800, "reach": 110 }
+ ],
+ "look": {
+  "sky": "#2a1012", "fog": "#3a1a1c",
+  "hemi": ["#e0b0a4", "#40201e", 0.6],
+  "key": ["#ffd2b0", 1.9], "rim": ["#ff4030", 1.1], "fill": ["#ffb090", 0.6],
+  "slab": "#2c282b", "band": "#55484a", "line": ["#ff7a40", "#ff4a1a"], "ember": "#ff6a30"
+ },
+ "note": "scale and offset put the model's flat top at y = 0 and its rim at the ledges (x = +-68); the third scale number squashes it front to back. glow: the model's own colours lit from within by this colour and strength, so the lava cracks shine. lights: lava under the front rim and in the rocks behind. look: sky, fog, the four scene lights, the floating platforms (stone, band, edge line and its glow) and the drifting embers."
+}

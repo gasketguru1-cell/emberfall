@@ -1,7 +1,7 @@
 /* Emberfall 3D renderer (Three.js). It only reads the simulation: fighters, projectiles, camera. It never writes to it.
    A fighter with an entry in assets/manifest.json is drawn as its rigged model, posed every frame from the simulation's
    own frame counters (see anim.js). Fighters without a model yet are grey-box capsules. */
-/* global W, H, TAU, clamp, MAIN, EDGE, PLATS, BODY_H, RIM, DEPTH, SHOULDER, SHOULDER_IN, F, PROJ, cam, SHK, frame, tick, mode, cv, animState */
+/* global W, H, TAU, clamp, MAIN, EDGE, PLATS, STAGES, STAGE, BODY_H, RIM, DEPTH, SHOULDER, SHOULDER_IN, F, PROJ, cam, SHK, frame, tick, mode, cv, animState */
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
@@ -33,7 +33,6 @@ function build() {
      little against the camera so the distance reads. Shown as painted: no fog, no tone mapping. */
   const backdrop = new THREE.Mesh(new THREE.PlaneGeometry(16, 9), new THREE.MeshBasicMaterial({ color: 0xb4bcdc, fog: false, depthWrite: false, toneMapped: false }));
   backdrop.position.z = -2600; backdrop.renderOrder = -10; backdrop.frustumCulled = false; scene.add(backdrop);
-  new THREE.TextureLoader().load('assets/stage/export/backdrop.jpg', t => { t.colorSpace = THREE.SRGBColorSpace; backdrop.material.map = t; backdrop.material.color.set(0xffffff); backdrop.material.needsUpdate = true; });
 
   /* ---- stage ---- */
   const stone = new THREE.MeshStandardMaterial({ color: 0x5b5560, roughness: 0.95, flatShading: true }), plain = new THREE.Group(); scene.add(plain);   /* plain: the stand-in stage shown until the island model has loaded */
@@ -44,15 +43,16 @@ function build() {
   const deck = new THREE.Mesh(new THREE.BoxGeometry(EDGE * 2 + 4, 3, 48), new THREE.MeshStandardMaterial({ color: 0xffffff, map: planks, roughness: 0.82 })); deck.position.set(0, -1.5, 0); deck.castShadow = deck.receiveShadow = true; plain.add(deck);
   /* floating slabs: weathered stone with a copper band and a glowing ember line along the top edge */
   const slab = new THREE.MeshStandardMaterial({ color: 0x8a8079, roughness: 0.9, flatShading: true }), copper = new THREE.MeshStandardMaterial({ color: 0xa8623a, roughness: 0.45, metalness: 0.7 }), emberLine = new THREE.MeshStandardMaterial({ color: 0xffb060, emissive: 0xff8a30, emissiveIntensity: 2.4, roughness: 0.5 });
-  for (const p of PLATS) if (p.soft) {
-    const w = p.x1 - p.x0, cx = (p.x0 + p.x1) / 2, g = new THREE.Group(); g.position.set(cx, p.y, 0); scene.add(g);
+  const platGroup = new THREE.Group(); scene.add(platGroup);
+  function buildPlats() { platGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); }); platGroup.clear(); for (const p of PLATS) if (p.soft) {
+    const w = p.x1 - p.x0, cx = (p.x0 + p.x1) / 2, g = new THREE.Group(); g.position.set(cx, p.y, 0); platGroup.add(g);
     const top = new THREE.Mesh(new THREE.BoxGeometry(w, 1.4, 15), slab); top.position.y = -0.7; top.castShadow = top.receiveShadow = true; g.add(top);
     const sh = new THREE.Shape([[-w / 2 + 1, 0], [w / 2 - 1, 0], [w / 2 - 4, -2.6], [-w / 2 + 4, -2.6]].map(q => new THREE.Vector2(q[0], q[1])));   /* the chamfered underside */
     const under = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 13, bevelEnabled: false }), slab); under.position.set(0, -1.4, -6.5); under.castShadow = true; g.add(under);
     const band = new THREE.Mesh(new THREE.BoxGeometry(w + 0.5, 0.7, 15.5), copper); band.position.y = -1.05; g.add(band);
     for (const z of [7.6, -7.6]) { const l = new THREE.Mesh(new THREE.BoxGeometry(w - 1, 0.28, 0.28), emberLine); l.position.set(0, -0.12, z); g.add(l); }
     for (const ex of [-w / 2, w / 2]) { const l = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.28, 15), emberLine); l.position.set(ex, -0.12, 0); g.add(l); }
-  }
+  } }
   const iron = new THREE.MeshStandardMaterial({ color: 0x3d3548, roughness: 0.6, metalness: 0.4 }), lampGlass = new THREE.MeshStandardMaterial({ color: 0xffe2a0, emissive: 0xffb85a, emissiveIntensity: 2.2, roughness: 0.4 });
   /* two warm lights: on lamp posts while the stand-in stage shows, moved to the forge mouth and the lantern once the island has loaded */
   const lamps = [];
@@ -64,20 +64,42 @@ function build() {
     const light = new THREE.PointLight(0xffb866, 2200, 150, 2); light.position.set(lx, 21, -9); light.userData.i = 2200; scene.add(light); lamps.push(light);
   }
 
-  /* ---- the island: a generated model, placed by assets/stage/export/stage.json so its flat top is the floor and its rim the ledges ---- */
-  fetch('assets/stage/export/stage.json').then(r => r.ok ? r.json() : null).then(cfg => {
-    if (!cfg) return;
-    new GLTFLoader().load(cfg.file, g => {
-      const m = g.scene; m.scale.set(cfg.scale[0], cfg.scale[1], cfg.scale[2]); m.position.set(cfg.offset[0], cfg.offset[1], cfg.offset[2]); m.rotation.y = (cfg.yaw || 0) * Math.PI / 180;
-      m.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = true; o.frustumCulled = false; if (o.material) o.material.envMapIntensity = 0.25; } });   /* takes the fighters' shadows; casts none itself, to keep the frame cheap */
-      scene.add(m); plain.visible = false; R3.stage = m;
-      /* the two warm lights move to the forge mouth and the lantern */
-      (cfg.lights || []).forEach((q, k) => { const l = lamps[k]; if (!l) return; l.position.set(q.at[0], q.at[1], q.at[2]); l.color.set(q.color); l.userData.i = q.power; l.distance = q.reach; });
-    }, undefined, e => console.warn('stage model failed to load; the plain stage stays', e));
-  }).catch(() => {});
+  /* ---- the stages (sim.js: STAGES). Each has a file that names its model and backdrop, places the model so its flat top is the
+     floor and its rim the ledges, and may give its own look (sky, lights, platform colours). A stage is fetched the first time
+     it is shown; until its model has arrived the plain stand-in shows. LOOK0 is the forge island's dawn. ---- */
+  const LOOK0 = { sky: '#b4bcdc', fog: '#b7bedb', hemi: ['#cdd6ff', '#6b5a58', 0.8], key: ['#ffd9b0', 2.3], rim: ['#ffb7c8', 1.5], fill: ['#ffd9b0', 0.7], slab: '#8a8079', band: '#a8623a', line: ['#ffb060', '#ff8a30'], ember: '#ff9a44' };
+  const SHOWN = STAGES.map(() => ({ cfg: null, model: null, back: null, asked: false })); let shownStage = -1;
+  function loadStage(k) {
+    const S = SHOWN[k]; if (S.asked) return; S.asked = true;
+    fetch(STAGES[k].cfg).then(r => r.ok ? r.json() : null).then(cfg => {
+      if (!cfg) return; S.cfg = cfg; shownStage = -1;
+      new THREE.TextureLoader().load(cfg.backdrop || 'assets/stage/export/backdrop.jpg', t => { t.colorSpace = THREE.SRGBColorSpace; S.back = t; shownStage = -1; });
+      new GLTFLoader().load(cfg.file, g => {
+        const m = g.scene; m.scale.set(cfg.scale[0], cfg.scale[1], cfg.scale[2]); m.position.set(cfg.offset[0], cfg.offset[1], cfg.offset[2]); m.rotation.y = (cfg.yaw || 0) * Math.PI / 180;
+        m.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = true; o.frustumCulled = false; if (o.material) { o.material.envMapIntensity = 0.25;   /* takes the fighters' shadows; casts none itself, to keep the frame cheap */
+          if (cfg.glow && o.material.map) { o.material.emissiveMap = o.material.map; o.material.emissive.set(cfg.glow[0]); o.material.emissiveIntensity = cfg.glow[1]; } } } });   /* lit from within by its own colours: bright lava shines, dark rock stays dark */
+        m.visible = false; scene.add(m); S.model = m; shownStage = -1;
+      }, undefined, e => console.warn('stage model failed to load; the plain stage stays', e));
+    }).catch(() => {});
+  }
+  function applyStage() {
+    const k = STAGE, S = SHOWN[k]; loadStage(k); shownStage = k;
+    const L = Object.assign({}, LOOK0, S.cfg && S.cfg.look);
+    SHOWN.forEach((q, n) => { if (q.model) q.model.visible = n === k; }); plain.visible = !S.model; R3.stage = S.model;
+    backdrop.material.map = S.back; backdrop.material.color.set(S.back ? '#ffffff' : L.sky); backdrop.material.needsUpdate = true;
+    scene.background.set(L.sky); scene.fog.color.set(L.fog);
+    hemi.color.set(L.hemi[0]); hemi.groundColor.set(L.hemi[1]); hemi.intensity = L.hemi[2];
+    key.color.set(L.key[0]); key.intensity = L.key[1]; rim.color.set(L.rim[0]); rim.intensity = L.rim[1]; fill.color.set(L.fill[0]); fill.intensity = L.fill[1];
+    slab.color.set(L.slab); copper.color.set(L.band); emberLine.color.set(L.line[0]); emberLine.emissive.set(L.line[1]); embers.material.color.set(L.ember);
+    /* the two warm lights: on the lamp posts while the stand-in shows, at the stage's own spots once its model is in */
+    lamps.forEach((l, n) => { const q = S.model && S.cfg.lights && S.cfg.lights[n];
+      if (q) { l.position.set(q.at[0], q.at[1], q.at[2]); l.color.set(q.color); l.userData.i = q.power; l.distance = q.reach; }
+      else { l.position.set((n ? 1 : -1) * (EDGE - 10), 21, -9); l.color.set(0xffb866); l.userData.i = 2200; l.distance = 150; } });
+    buildPlats();
+  }
 
   /* ---- lights ---- */
-  scene.add(new THREE.HemisphereLight(0xcdd6ff, 0x6b5a58, 0.8));   /* dawn: cool sky above, warm rock below */
+  const hemi = new THREE.HemisphereLight(0xcdd6ff, 0x6b5a58, 0.8); scene.add(hemi);   /* dawn: cool sky above, warm rock below */
   const key = new THREE.DirectionalLight(0xffd9b0, 2.3); key.position.set(-120, 130, 120);   /* low sun from the left */ key.target.position.set(0, 10, 0); scene.add(key, key.target);
   key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004; key.shadow.normalBias = 0.6;
   Object.assign(key.shadow.camera, { left: -150, right: 150, top: 150, bottom: -70, near: 10, far: 520 }); key.shadow.camera.updateProjectionMatrix();
@@ -364,6 +386,7 @@ function build() {
   R3.show = on => { glc.style.visibility = on ? 'visible' : 'hidden'; };
   R3.render = () => {
     const w = cv.width, h = cv.height;
+    if (shownStage !== STAGE) applyStage();
     if (w !== lastW || h !== lastH) { renderer.setPixelRatio(1); renderer.setSize(w, h, false); lastW = w; lastH = h; }
     /* Camera: reproduces the 2D view exactly on the play plane (z = 0), so the HUD layer, hit sparks and debug boxes line up. */
     const s = cam.s, vH = H / s, d = (vH / 2) / Math.tan(THREE.MathUtils.degToRad(FOV / 2)), lift = d * LIFT;

@@ -46,6 +46,20 @@ function stageHalf(y) {
   return y >= -SHOULDER ? EDGE - SHOULDER_IN * (-RIM - y) / (SHOULDER - RIM) : (EDGE - SHOULDER_IN) * (DEPTH + y) / (DEPTH - SHOULDER);
 }
 const BLAST = { l: -(EDGE + 155), r: EDGE + 155, t: 140, b: -140 };   /* the ceiling was 200 until 2026-11-10: lowered 30% at the owner's request */  //   /* the same distance beyond the ledges as before the stage shrank */
+/* The stages. Every stage is the same island underneath (the same floor, ledges, rock and blast lines); what differs is
+   the soft platforms ([left, right, height] each) and the look, which the 3D renderer reads from the stage's own file.
+   setStage swaps the platforms in place, so it is only for the start screen and for tests, never during a match. */
+const STAGES = [
+  { id: 'forge', name: 'The Forge Isle', plats: [[-44, -15, 26], [15, 44, 26]], cfg: 'assets/stage/export/stage.json' },
+  { id: 'valinor', name: 'Valinor', plats: [[-20, 20, 26]], cfg: 'assets/stage-valinor/export/stage.json' },   /* one platform over the middle */
+];
+let STAGE = 0;
+function setStage(k, keep) {
+  STAGE = ((k % STAGES.length) + STAGES.length) % STAGES.length; PLATS.length = 1;
+  for (const [x0, x1, y] of STAGES[STAGE].plats) PLATS.push({ x0, x1, y, soft: true });
+  if (keep !== false) try { localStorage.setItem('emberfall.stage', STAGES[STAGE].id); } catch (e) { /* no storage */ }
+}
+try { const k = STAGES.findIndex(q => q.id === localStorage.getItem('emberfall.stage')); if (k > 0) setStage(k, false); } catch (e) { /* no storage */ }
 
 /* ---------- Combat rules ---------- */
 const DMG_1V1 = 1.2;                 /* one-on-one damage bonus */
@@ -120,7 +134,7 @@ function comboStep() {   /* a combo ends when its target is free to act */
 function setBoxes(on) { DBG.boxes = !!on; try { localStorage.setItem('emberfall.boxes', on ? '1' : '0'); } catch (e) { /* no storage */ } }
 function debugKey(code) {
   if (code === 'KeyP') { DBG.step = !DBG.step; DBG.advance = 0; } else if (code === 'KeyO') { if (DBG.step) DBG.advance++; }
-  else if (code === 'KeyT' && mode === 'select') setTraining(!TRAINING); else if (code === 'KeyB') setBoxes(!DBG.boxes); else if (code === 'KeyH') setHitFx(!DBG.fx); else if (code === 'KeyM') DBG.r3d = !DBG.r3d;
+  else if (code === 'KeyT' && mode === 'select') setTraining(!TRAINING); else if (code === 'KeyG' && mode === 'select') setStage(STAGE + 1); else if (code === 'KeyB') setBoxes(!DBG.boxes); else if (code === 'KeyH') setHitFx(!DBG.fx); else if (code === 'KeyM') DBG.r3d = !DBG.r3d;
 }
 addEventListener('keyup', e => { keys[e.code] = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
@@ -1848,7 +1862,7 @@ function selectPreview() {
 /* The fighter select screen: where each roster tile and the CPU card are (the HUD draws them from the same numbers), and
    which one a player's cursor is over. */
 function rosterTile(k) { const n = ROSTER.length, tw = Math.min(168, (W - 120) / n - 12), gap = 12, x0 = (W - (n * tw + (n - 1) * gap)) / 2; return [x0 + k * (tw + gap), 158, tw, 124]; }
-const CPU_CARD = [W - 44 - 460, 446, 460, 158], TRAIN_PILL = [W - 44 - 214, 100, 214, 34];
+const CPU_CARD = [W - 44 - 460, 446, 460, 158], TRAIN_PILL = [W - 44 - 214, 100, 214, 34], STAGE_PILL = [44, 20, 236, 34];
 const inBox = (b, x, y) => x >= b[0] && x <= b[0] + b[2] && y >= b[1] && y <= b[1] + b[3];
 function tileUnder(x, y) { for (let k = 0; k < ROSTER.length; k++) if (inBox(rosterTile(k), x, y)) return k; return -1; }
 /* The CPU's token: dragged with the mouse (or a finger) onto a fighter's tile to choose the CPU's fighter. Dropped anywhere
@@ -1877,12 +1891,14 @@ function stepSelect() {
     if (over >= 0 && !sl.ready && sl.pick !== over) { sl.pick = over; beep(440, 0.03, 'square', 0.02); }
     if (c.pressed('start')) { if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; } }
     else if (c.pressed('atk')) {
-      if (inBox(TRAIN_PILL, sl.cx, sl.cy)) { setTraining(!TRAINING); beep(TRAINING ? 700 : 420, 0.05, 'square', 0.03); }
+      if (inBox(STAGE_PILL, sl.cx, sl.cy)) { setStage(STAGE + 1); PREVIEW = null; beep(520, 0.05, 'triangle', 0.04); }
+      else if (inBox(TRAIN_PILL, sl.cx, sl.cy)) { setTraining(!TRAINING); beep(TRAINING ? 700 : 420, 0.05, 'square', 0.03); }
       else if (onCpu) { setCpuLevel(CPU_LEVEL + 1 > 9 ? 0 : CPU_LEVEL + 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
       else if (over >= 0) { sl.pick = over; sl.ready = true; beep(800, 0.08, 'triangle', 0.05); }
       else if (sl.ready && slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; }
     } else if (c.pressed('spc')) {
-      if (onCpu) { setCpuLevel(CPU_LEVEL - 1 < 0 ? 9 : CPU_LEVEL - 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
+      if (inBox(STAGE_PILL, sl.cx, sl.cy)) { setStage(STAGE - 1); PREVIEW = null; beep(440, 0.05, 'triangle', 0.04); }
+      else if (onCpu) { setCpuLevel(CPU_LEVEL - 1 < 0 ? 9 : CPU_LEVEL - 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
       else if (sl.ready) sl.ready = false;
       else { slots[slots.indexOf(sl)] = null; if (!slots[0] && slots[1]) { slots[0] = slots[1]; slots[1] = null; } }
     }

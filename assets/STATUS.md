@@ -208,6 +208,14 @@ Two fighters standing on the same ground cannot walk or run through each other. 
 - **The island is solid like this** (`RIM`, `SHOULDER`, `DEPTH`, `stageHalf()` in `sim.js`): a rim 5 thick at full width, a steep shoulder of rock giving way 12 by 22 down (a wall for wall jumps and techs), then rock tapering to a point 45 down. There is no flat underside. A fighter touching any of it is moved out sideways and keeps rising, so coming up from underneath ends beside the ledge; up specials past their hit take the ledge on the way up too; a fighter thrown against the island bounces back out. The hitbox view draws this outline.
 - The start screen shows the island live in 3D with the chosen fighters standing on it (the owner's stage picture without 3D). The 2D fallback view of a match (M) still draws the old dusk stage.
 
+## Stages and Valinor (2026-11-11)
+
+- **Stage pick:** the start screen has a STAGE pill at the top left. Point at it and press Attack (Special goes back), or press G. The choice is remembered.
+- **Stage table:** `STAGES` in `sim.js`. Every stage is the same island underneath (floor half-width `EDGE`, ledges, rock, blast lines); a stage sets its soft platforms and names its own file for the look. `setStage(k)` swaps the platforms.
+- **Valinor:** the owner's model (Meshy "Molten Warlord's Arena", cut from 2.5 million to 100,000 triangles in Blender, 5 MB) and the owner's backdrop picture. One soft platform over the middle (x -20 to 20, height 26); that layout was my pick, not the owner's. Files in `assets/stage-valinor/`: `export/stage.json` places the model and sets the red sky, lights, lava glow and platform colours. To rebuild the model file: `node tools/stage.mjs assets/stage-valinor/raw/valinor.glb stage-valinor`.
+- The 2D fallback view (M) draws the old dusk island on every stage, with the right platforms.
+- `tests/stages.js` checks every stage: files on disk, platforms over the floor, a CPU match per fighter with no bad states.
+
 ## Movement (2026-11-10)
 
 The movement rules now work the way the reference build's do, with Emberfall's own numbers for each fighter.

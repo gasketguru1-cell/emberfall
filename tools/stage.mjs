@@ -1,12 +1,13 @@
 // Prepares the stage model for the game: shrinks its textures, measures it, and writes where it has to sit so that its
 // flat top is the fighting floor (y = 0) and its rim lines up with the ledges.
-//   node tools/stage.mjs assets/stage/raw/<task>/model_url.glb
-// Writes assets/stage/export/stage-v1.glb and assets/stage/export/stage.json (file, scale, offset, measurements).
+//   node tools/stage.mjs assets/stage/raw/<task>/model_url.glb [folder]
+// folder is the stage's folder under assets (stage when left out; stage-valinor for Valinor).
+// Writes assets/<folder>/export/<folder>-v1.glb and stage.measure.json beside it (file, measurements).
 import fs from 'node:fs'; import path from 'node:path'; import { fileURLToPath } from 'node:url';
 import { NodeIO } from '@gltf-transform/core'; import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
 import { prune, dedup, textureCompress } from '@gltf-transform/functions'; import sharp from 'sharp';
 
-const root0 = path.join(path.dirname(fileURLToPath(import.meta.url)), '..'), src = path.resolve(process.argv[2]);
+const root0 = path.join(path.dirname(fileURLToPath(import.meta.url)), '..'), src = path.resolve(process.argv[2]), folder = process.argv[3] || 'stage';
 const io = new NodeIO().registerExtensions(ALL_EXTENSIONS), doc = await io.read(src), root = doc.getRoot();
 
 /* ---- measure in the model's own units: bounding box, and the height of the big flat top ---- */
@@ -36,9 +37,9 @@ await doc.transform(dedup(), prune());
 /* textures: colour at 2048, the others at 1024, all as webp */
 await doc.transform(textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [2048, 2048], quality: 86, slots: /baseColor/ }));
 await doc.transform(textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [1024, 1024], quality: 86, slots: /^(?!baseColor)/ }));
-const outDir = path.join(root0, 'assets/stage/export'); fs.mkdirSync(outDir, { recursive: true });
-const out = path.join(outDir, 'stage-v1.glb'); await io.write(out, doc);
-const info = { file: 'assets/stage/export/stage-v1.glb', source: path.relative(root0, src).replace(/\\/g, '/'), measure };
+const outDir = path.join(root0, 'assets', folder, 'export'); fs.mkdirSync(outDir, { recursive: true });
+const out = path.join(outDir, folder + '-v1.glb'); await io.write(out, doc);
+const info = { file: 'assets/' + folder + '/export/' + folder + '-v1.glb', source: path.relative(root0, src).replace(/\\/g, '/'), measure };
 fs.writeFileSync(path.join(outDir, 'stage.measure.json'), JSON.stringify(info, null, 1) + '\n');
 console.log('wrote ' + path.relative(root0, out) + ': ' + Math.round(fs.statSync(out).size / 1024) + ' KB, ' + tris + ' triangles');
 console.log(JSON.stringify(measure));

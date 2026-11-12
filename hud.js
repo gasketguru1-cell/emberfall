@@ -126,7 +126,7 @@ function drawSelect(three) {
   g.save(); g.shadowColor = 'rgba(255,130,40,.65)'; g.shadowBlur = 34 + Math.sin(t * 0.05) * 8;
   q = g.createLinearGradient(0, 40, 0, 112); q.addColorStop(0, '#fff6dc'); q.addColorStop(0.5, '#ffc56a'); q.addColorStop(1, '#f0702c');
   g.lineWidth = 7; g.strokeStyle = '#2a1410'; g.lineJoin = 'round'; g.strokeText('EMBERFALL', W / 2 + 6, 104); g.fillStyle = q; g.fillText('EMBERFALL', W / 2 + 6, 104); g.restore();
-  g.font = 'bold 14px system-ui, sans-serif'; spaced(4); g.fillStyle = '#f3dfb6'; g.fillText('3 STOCKS   ·   8 MINUTES   ·   THE FORGE ISLE', W / 2 + 2, 138); spaced(0);
+  g.font = 'bold 14px system-ui, sans-serif'; spaced(4); g.fillStyle = '#f3dfb6'; g.fillText('3 STOCKS   ·   8 MINUTES   ·   ' + STAGES[STAGE].name.toUpperCase(), W / 2 + 2, 138); spaced(0);
   for (const dir of [-1, 1]) { q = g.createLinearGradient(W / 2 + dir * 250, 0, W / 2 + dir * 430, 0); q.addColorStop(0, 'rgba(255,170,90,.85)'); q.addColorStop(1, 'rgba(255,170,90,0)'); g.fillStyle = q; g.fillRect(dir > 0 ? W / 2 + 250 : W / 2 - 430, 132, 180, 2); }
 
   /* ---- the roster: one portrait tile for each fighter, with each player's marker on the one they are on ---- */
@@ -204,6 +204,12 @@ function drawSelect(three) {
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.font = '12px system-ui, sans-serif'; g.fillText('Show Hitboxes', x - 22, y + 22);
     g.fillStyle = on ? '#ff6a6a' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
     g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('X / Y  or  B key', x + 130, y + 22); }
+  { const [x, y, w, h] = STAGE_PILL, name = STAGES[STAGE].name;   /* stage pick (top left): point at it and press Attack, or the G key */
+    g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, h, 17); g.fill(); g.strokeStyle = 'rgba(255,184,107,.55)'; g.lineWidth = 1; g.stroke();
+    g.textAlign = 'left'; g.font = 'bold 11px system-ui, sans-serif'; spaced(2); g.fillStyle = '#ffb86b'; g.fillText('STAGE', x + 14, y + 22); spaced(0);
+    g.textAlign = 'center'; g.font = 'bold 15px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(name, x + 142, y + 23);
+    g.font = 'bold 18px system-ui, sans-serif'; g.fillStyle = '#ffd98a'; g.fillText('‹', x + 72, y + 23); g.fillText('›', x + w - 20, y + 23);
+    g.textAlign = 'left'; g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point + A  or  G key', x + 14, y + h + 16); }
   { const on = TRAINING, w = 214, x = W - 44 - w, y = 100;   /* training mode switch */
     g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = on ? '#9be564' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Training', x + 12, y + 22);
