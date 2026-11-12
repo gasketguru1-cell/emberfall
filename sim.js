@@ -157,8 +157,7 @@ function stick(x, y) { const m = Math.hypot(x, y); if (m === 0 || m <= PAD.deadz
 const KB_ROWS = [['left', 'Move left'], ['right', 'Move right'], ['up', 'Move up'], ['down', 'Move down'], ['walk', 'Walk (hold)'], ['atk', 'Attack'], ['spc', 'Special'], ['jmp', 'Jump'], ['jmp2', 'Jump (second key)'],
   ['shd', 'Shield'], ['shd2', 'Shield (second key)'], ['grb', 'Grab'], ['grb2', 'Grab (second key)'], ['cu', 'Tilt stick up'], ['cd', 'Tilt stick down'], ['cl', 'Tilt stick left'], ['cr', 'Tilt stick right'], ['tf', 'Transform (tap twice)']];
 const PAD_ROWS = [[0, 'A  (bottom button)', 'A'], [1, 'B  (right button)', 'B'], [2, 'X  (left button)', 'X'], [3, 'Y  (top button)', 'Y'], [4, 'L  (left bumper)', 'L'], [5, 'R  (right bumper)', 'R'], [6, 'ZL  (left trigger)', 'ZL'], [7, 'ZR  (right trigger)', 'ZR'], [10, 'Left stick click', 'L click'], [11, 'Right stick click', 'R click']];
-const PS_LONG = { A: '✕  Cross (bottom button)', B: '○  Circle (right button)', X: '□  Square (left button)', Y: '△  Triangle (top button)', L: 'L1  (left bumper)', R: 'R1  (right bumper)', ZL: 'L2  (left trigger)', ZR: 'R2  (right trigger)', 'L click': 'L3  (left stick click)', 'R click': 'R3  (right stick click)' };
-const PAD_ACTS = ['', 'atk', 'spc', 'jmp', 'shd', 'grb'], ACT_NAME = { '': 'Nothing', atk: 'Attack', spc: 'Special', jmp: 'Jump', shd: 'Shield', grb: 'Grab' };
+const PAD_ACTS = ['', 'atk', 'spc', 'jmp', 'shd', 'grb', 'mod'], ACT_NAME = { '': 'Nothing', atk: 'Attack', spc: 'Special', jmp: 'Jump', shd: 'Shield', grb: 'Grab', mod: 'Half stick' };   /* mod: held, the stick (or D-pad) only goes half way: tilts and walking */
 const KB_STD = { left: 'ArrowLeft', right: 'ArrowRight', up: 'ArrowUp', down: 'ArrowDown', walk: 'ShiftLeft', atk: 'KeyZ', spc: 'KeyX', jmp: 'KeyC', jmp2: 'KeyV', shd: 'KeyQ', shd2: 'KeyW', grb: 'KeyA', grb2: 'KeyS', cu: 'KeyI', cd: 'KeyK', cl: 'KeyJ', cr: 'KeyL', tf: 'KeyE' };
 const KB_WASD = { left: 'KeyA', right: 'KeyD', up: 'KeyW', down: 'KeyS', walk: 'ShiftLeft', atk: 'KeyJ', spc: 'KeyK', jmp: 'Space', jmp2: 'KeyL', shd: 'KeyU', shd2: '', grb: 'KeyI', grb2: '', cu: 'ArrowUp', cd: 'ArrowDown', cl: 'ArrowLeft', cr: 'ArrowRight', tf: 'KeyE' };
 const PAD_STD = { 0: 'atk', 1: 'spc', 2: 'jmp', 3: 'jmp', 4: 'grb', 5: 'grb', 6: 'shd', 7: 'shd', 10: '', 11: '' };   /* the bottom button attacks (owner's choice, 2026-11-10) */
@@ -175,7 +174,7 @@ const SETUPS = [], USE = {};   /* USE: device -> the id of the setup it uses */
     for (const s of SETUPS) { const m = !s.fixed && sv.custom && sv.custom[s.id]; if (!m) continue; for (const k in s.map) if (typeof m[k] === 'string') s.map[k] = m[k]; s.touched = true; }
   } catch (e) { /* no storage */ }
 })();
-function saveControls() { try { const custom = {}; for (const s of SETUPS) if (!s.fixed && s.touched) custom[s.id] = s.map; localStorage.setItem('emberfall.controls', JSON.stringify({ use: USE, custom })); } catch (e) { /* no storage */ } }
+function saveControls() { try { const custom = {}; for (const s of SETUPS) if (!s.fixed && s.touched) custom[s.id] = s.map; localStorage.setItem('emberfall.controls', JSON.stringify({ use: USE, custom, socd: SOCD.mode })); } catch (e) { /* no storage */ } }
 function setupsFor(dev) { const t = dev === 'kb' ? 'kb' : 'pad'; return SETUPS.filter(s => s.type === t); }
 function setupOf(dev) { const t = dev === 'kb' ? 'kb' : 'pad', id = USE[dev]; return SETUPS.find(s => s.id === id && s.type === t) || SETUPS.find(s => s.type === t); }
 function keyName(c) {
@@ -186,47 +185,175 @@ function keyHeld(code) { if (!code) return false; if (keys[code]) return true; r
 /* Keyboard: by default the same keys as the reference build. Arrows are the left stick, I J K L the right stick, Shift walks. */
 function readKb() {
   const i = blankIn(), k = setupOf('kb').map, h = n => keyHeld(k[n]), m = h('walk') ? 0.5 : 1, j = h('jmp'), j2 = h('jmp2');
-  i.lx = ((h('right') ? 1 : 0) - (h('left') ? 1 : 0)) * m; i.ly = ((h('up') ? 1 : 0) - (h('down') ? 1 : 0)) * m;
+  i.lx = (socd('kx', h('left'), h('right')) || 0) * m; i.ly = (socd('ky', h('down'), h('up')) || 0) * m;
   i.cx = (h('cr') ? 1 : 0) - (h('cl') ? 1 : 0); i.cy = (h('cu') ? 1 : 0) - (h('cd') ? 1 : 0);
   i.tf = h('tf'); i.atk = h('atk'); i.spc = h('spc'); i.jmp = j || j2; i.jmp2 = j && j2; i.grb = h('grb') || h('grb2'); i.shd = h('shd') || h('shd2');
   i.start = !!keys.Enter; i.sel = !!keys.Backspace;
   return i;
 }
-/* ---------- PlayStation controllers (PS5 DualSense, PS4 DualShock 4) ----------
-   Chrome and the desktop app usually hand a PlayStation pad over in the "standard" layout, the same button numbers as any
-   other pad (cross 0, circle 1, square 2, triangle 3, L1/R1 4/5, L2/R2 6/7, Create 8, Options 9, L3/R3 10/11, touchpad 17).
-   Some browsers and Bluetooth set-ups give the raw layout instead (square 0, cross 1, circle 2, triangle 3, ..., PS 12,
-   touchpad 13, the right stick on axes 2 and 5, the D-pad as one "hat" axis). padRead turns either into the standard one,
-   so the rest of the game never sees the difference. The touchpad click opens the controls screen like Create does, and
-   PlayStation pads are shown with their own button names. */
-const PS_RE = /054c|playstation|dualsense|dualshock|wireless controller/i;
-function padPS(p) { return !!(p && PS_RE.test(p.id || '')); }
+/* ---------- Controller types ----------
+   Every controller is read in the "standard" layout: buttons by where they sit, not by what is printed on them
+   (0 bottom, 1 right, 2 left, 3 top face button, 4/5 bumpers, 6/7 triggers, 8 back / select, 9 start, 10/11 stick clicks,
+   12-15 D-pad up / down / left / right, 16 home, 17 touchpad), sticks on axes 0-3. Chrome and the desktop app hand most pads
+   over like that already. padRead turns the rest into it:
+   - PlayStation (PS5 DualSense, PS4 DualShock 4) in the raw layout some browsers and Bluetooth set-ups give: square 0,
+     cross 1, circle 2, triangle 3, right stick on axes 2 and 5, the D-pad as one "hat" axis.
+   - Switch Pro Controller (and Switch-style pads) in the raw layout: B A Y X L R ZL ZR - + clicks home capture, hat D-pad.
+   - GameCube controllers on a Mayflash adapter in PC mode: X 0, A 1, B 2, Y 3, L 4, R 5, Z 7, Start 9, D-pad 12-15,
+     C-stick on axes 5 and 2, analog L / R on axes 3 and 4. GameCube A attacks, B specials, X / Y jump, Z grabs, L / R shield.
+   - GameCube controllers on Nintendo's own adapter (or a Mayflash one in Wii U mode) are read over USB (GCU below) and
+     show up as controllers 5 to 8.
+   - Any controller can be taught its buttons on the controls screen (TAUGHT): that wins over everything above.
+   Joy-Cons: Chrome joins a left and right Joy-Con into one controller by itself; one Joy-Con alone is held sideways. */
+const KIND_NAME = { ps5: 'PS5 controller', ps4: 'PS4 controller', switch: 'Switch Pro Controller', switchlike: 'Switch-style controller', joyLR: 'Joy-Con pair', joyL: 'Joy-Con (L), sideways', joyR: 'Joy-Con (R), sideways', gc: 'GameCube controller', xbox: 'Xbox controller', other: 'Controller' };
+function padIds(id) {   /* vendor and product, from Chrome's "(... Vendor: 054c Product: 0ce6)" or Firefox's "054c-0ce6-Name" */
+  const v = id.match(/Vendor:\s*([0-9a-f]{4})/i) || id.match(/^([0-9a-f]{1,4})-[0-9a-f]{1,4}-/i), p = id.match(/Product:\s*([0-9a-f]{4})/i) || id.match(/^[0-9a-f]{1,4}-([0-9a-f]{1,4})-/i);
+  return [v ? v[1].toLowerCase().padStart(4, '0') : '', p ? p[1].toLowerCase().padStart(4, '0') : ''];
+}
+const KIND_CACHE = {};
+function padKind(p) {
+  if (!p) return ''; const id = p.id || ''; if (KIND_CACHE[id]) return KIND_CACHE[id];
+  const [v, pr] = padIds(id); let k = 'other';
+  if (v === '054c' || /playstation|dualsense|dualshock|wireless controller/i.test(id)) k = /0ce6|0df2/.test(pr) || /dualsense|ps5/i.test(id) ? 'ps5' : 'ps4';
+  else if ((v === '057e' && pr === '2006') || /joy-?con\s*\(l\)/i.test(id)) k = 'joyL';
+  else if ((v === '057e' && pr === '2007') || /joy-?con\s*\(r\)/i.test(id)) k = 'joyR';
+  else if ((v === '057e' && pr === '2008') || /joy-?con/i.test(id)) k = 'joyLR';   /* Chrome's joined pair, or the charging grip */
+  else if (/gamecube|gc adapter|game ?cube/i.test(id) || (v === '0079' && /^184[3-6]$/.test(pr)) || (v === '057e' && pr === '0337')) k = 'gc';
+  else if (v === '057e' || /pro controller|nintendo|switch/i.test(id)) k = v === '057e' || /pro controller/i.test(id) ? 'switch' : 'switchlike';
+  else if ((v === '20d6' && /^a7/.test(pr)) || (v === '0f0d' && /horipad s|switch/i.test(id)) || (v === '0e6f' && /^01[89]/.test(pr))) k = 'switchlike';   /* PowerA, Hori and PDP pads made for Switch */
+  else if (v === '045e' || /xbox|xinput/i.test(id)) k = 'xbox';
+  return (KIND_CACHE[id] = k);
+}
+function kindGroup(k) { return k === 'ps5' || k === 'ps4' ? 'ps' : k === 'switch' || k === 'switchlike' || k === 'joyLR' ? 'nin' : k === 'joyL' || k === 'joyR' ? 'joy' : k === 'gc' ? 'gc' : 'x'; }
+/* ---------- Buttons a controller was taught on the controls screen (per controller model, kept between visits) ----------
+   A binding is { b: raw button } or { a: raw axis, s: direction, r: where it rests } or { h: hat axis, v: its value }. */
+let TAUGHT = {}; try { TAUGHT = JSON.parse(localStorage.getItem('emberfall.taught') || '{}') || {}; } catch (e) { /* no storage */ }
+function saveTaught() { try { localStorage.setItem('emberfall.taught', JSON.stringify(TAUGHT)); } catch (e) { /* no storage */ } }
+function bindVal(p, t) {
+  if (!t) return 0;
+  if (t.b !== undefined) { const q = p.buttons[t.b]; return q ? (q.pressed ? Math.max(1, q.value || 0) : q.value || 0) : 0; }
+  const x = p.axes[t.h !== undefined ? t.h : t.a]; if (x === undefined) return 0;
+  if (t.h !== undefined) return Math.abs(x - t.v) < 0.1 ? 1 : 0;
+  return clamp((t.s * x - t.s * t.r) / (1 - t.s * t.r || 1), 0, 1);
+}
+/* ---------- Raw layouts: standard button -> raw button (-1: none), where the sticks are, and a hat D-pad ---------- */
+const RAW = {
+  ps: { from: [1, 2, 0, 3, 4, 5, 6, 7, 8, 9, 10, 11, -1, -1, -1, -1, 12, 13], ax: [0, 1, 2, 5], hat: 9 },
+  nin: { from: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, -1, -1, -1, -1, 12, 13], ax: [0, 1, 2, 3], hat: 9 },
+  gc: { from: [1, 2, 3, 0, -1, 7, 4, 5, -1, 9, -1, -1, 12, 14, 15, 13, -1, -1], ax: [0, 1, 5, 2], trig: [3, 4], gain: 1.2 },
+};
+const REST = {};   /* where a GameCube adapter's analog triggers rest, learned from the first reading (adapters differ) */
 function padRead(p) {
   const B = p.buttons, A = p.axes, pr = f => !!(B[f] && B[f].pressed), val = f => (B[f] ? B[f].value || (B[f].pressed ? 1 : 0) : 0);
-  if (p.mapping === 'standard' || !padPS(p)) return { b: pr, v: val, ax: [A[0] || 0, A[1] || 0, A[2] || 0, A[3] || 0], touch: pr(17) };
-  const FROM = [1, 2, 0, 3, 4, 5, 6, 7, 8, 9, 10, 11, -1, -1, -1, -1, 12, 13];   /* standard button -> raw button */
-  const hat = A.length > 9 ? A[9] : 9, dir = Math.abs(hat) > 1.05 ? -1 : Math.round((hat + 1) * 3.5);   /* hat: 0 up, 2 right, 4 down, 6 left, odd = diagonals */
-  const dp = [dir === 7 || dir === 0 || dir === 1, dir >= 3 && dir <= 5, dir >= 5 && dir <= 7, dir >= 1 && dir <= 3];   /* up, down, left, right */
-  const b = k => (k >= 12 && k <= 15 ? dp[k - 12] : FROM[k] >= 0 && pr(FROM[k]));
-  const v = k => (k >= 12 && k <= 15 ? (dp[k - 12] ? 1 : 0) : FROM[k] >= 0 ? val(FROM[k]) : 0);
-  return { b, v, ax: [A[0] || 0, A[1] || 0, A[2] || 0, A.length > 5 ? A[5] || 0 : A[3] || 0], touch: b(17) };
+  const t = TAUGHT[p.id];
+  if (t) {   /* taught on the controls screen */
+    const b = k => bindVal(p, t.b && t.b[k]) > 0.5, v = k => bindVal(p, t.b && t.b[k]), axv = k => { const q = t.ax && t.ax[k]; return q ? q.s * (A[q.a] || 0) : 0; };
+    return { b, v, ax: [axv(0), axv(1), axv(2), axv(3)], touch: false };
+  }
+  const kind = padKind(p), grp = kindGroup(kind), raw = p.mapping !== 'standard' && RAW[grp === 'joy' ? '' : grp];
+  if (!raw) return { b: pr, v: val, ax: [A[0] || 0, A[1] || 0, A[2] || 0, A[3] || 0], touch: pr(17) };
+  const F = raw.from, hat = raw.hat !== undefined && A.length > raw.hat ? A[raw.hat] : 9, dir = Math.abs(hat) > 1.05 ? -1 : Math.round((hat + 1) * 3.5);   /* hat: 0 up, 2 right, 4 down, 6 left, odd = diagonals */
+  const dp = raw.hat === undefined ? null : [dir === 7 || dir === 0 || dir === 1, dir >= 3 && dir <= 5, dir >= 5 && dir <= 7, dir >= 1 && dir <= 3];   /* up, down, left, right */
+  const trig = k => { if (!raw.trig || (k !== 6 && k !== 7)) return 0; const a = raw.trig[k - 6], x = A[a] || 0, key = p.id + '|' + a; if (REST[key] === undefined) REST[key] = x < -0.5 ? -1 : 0; return clamp((x - REST[key]) / (1 - REST[key]), 0, 1); };
+  const b = k => (dp && k >= 12 && k <= 15 ? dp[k - 12] : (F[k] >= 0 && pr(F[k])) || trig(k) > 0.9);
+  const v = k => (dp && k >= 12 && k <= 15 ? (dp[k - 12] ? 1 : 0) : Math.max(F[k] >= 0 ? val(F[k]) : 0, trig(k)));
+  const g = raw.gain || 1, ax = raw.ax.map(a => clamp((A[a] || 0) * g, -1, 1));
+  return { b, v, ax, touch: b(17) };
 }
-function padGet(n) { const p = navigator.getGamepads ? navigator.getGamepads()[n] : null; return p ? padRead(p) : null; }
-function anyPS() { const gp = navigator.getGamepads ? navigator.getGamepads() : []; for (let n = 0; n < gp.length; n++) if (padPS(gp[n])) return true; return false; }
-function devPS(dev) { return !!dev && dev.startsWith('pad') && padPS(navigator.getGamepads ? navigator.getGamepads()[+dev.slice(3)] : null); }
-/* Button names: by default the letters printed on Xbox / Switch pads; the PlayStation names on a PlayStation pad. */
-const PS_CAP = { A: '✕', B: '○', X: '□', Y: '△', L: 'L1', R: 'R1', ZL: 'L2', ZR: 'R2', '+': 'Options', '−': 'Create', 'L click': 'L3', 'R click': 'R3' };
-function padCap(name, ps) { return (ps === undefined ? anyPS() : ps) ? PS_CAP[name] || name : name; }
-function padInfo(n) { const p = navigator.getGamepads ? navigator.getGamepads()[n] : null; return p ? p.id : ''; }
+/* ---------- Nintendo's GameCube adapter (and Mayflash adapters in Wii U mode), read over USB ----------
+   Windows needs the WinUSB driver on the adapter first (Zadig, as for Dolphin). The desktop app connects by itself; in a
+   browser it is connected once from the Options panel. Its four ports become controllers 5 to 8 (pad4..pad7). The packet
+   (37 bytes, starting 0x21) has 9 bytes per port: status, buttons, buttons, stick x / y, C-stick x / y, L, R. */
+const GCU = { dev: null, pads: [null, null, null, null], origin: [null, null, null, null], rumble: [0, 0, 0, 0], err: '', sendRumble: null };
+const GC_VID = 0x057e, GC_PID = 0x0337, isGCU = d => d && d.vendorId === GC_VID && d.productId === GC_PID;
+function gcuPad(i, u, o) {
+  const st = (u[o] >> 4) & 3; if (!st) { GCU.origin[i] = null; return null; }
+  const b1 = u[o + 1], b2 = u[o + 2], q = { sx: u[o + 3], sy: u[o + 4], cx: u[o + 5], cy: u[o + 6], l: u[o + 7], r: u[o + 8] };
+  const org = GCU.origin[i] || (GCU.origin[i] = Object.assign({}, q));   /* the first reading is the controller at rest */
+  const st1 = (n, c, s) => clamp((n - c) / s, -1, 1), tr = (n, c) => clamp((n - c) / Math.max(40, 200 - c), 0, 1);
+  const btn = (on, value) => ({ pressed: !!on, touched: !!on, value: value !== undefined ? value : on ? 1 : 0 });
+  const L = Math.max(b2 & 0x08 ? 1 : 0, tr(q.l, org.l)), R = Math.max(b2 & 0x04 ? 1 : 0, tr(q.r, org.r));
+  const buttons = [btn(b1 & 0x01), btn(b1 & 0x02), btn(b1 & 0x08), btn(b1 & 0x04), btn(0), btn(b2 & 0x02), btn(L > 0.95, L), btn(R > 0.95, R), btn(0), btn(b2 & 0x01), btn(0), btn(0),
+    btn(b1 & 0x80), btn(b1 & 0x40), btn(b1 & 0x10), btn(b1 & 0x20), btn(0), btn(0)];   /* A, B, Y, X, -, Z, L, R, -, Start, -, -, D-pad up / down / left / right */
+  return { id: 'GameCube Controller (Nintendo adapter, port ' + (i + 1) + ') (Vendor: 057e Product: 0337)', index: 4 + i, mapping: 'standard', connected: true, timestamp: Date.now(), buttons,
+    axes: [st1(q.sx, org.sx, 72), -st1(q.sy, org.sy, 72), st1(q.cx, org.cx, 64), -st1(q.cy, org.cy, 64)],
+    vibrationActuator: { playEffect(type, o) { GCU.rumble[i] = (o && o.strongMagnitude) > 0.15 ? 1 : 0; gcuRumble(); clearTimeout(GCU['t' + i]); GCU['t' + i] = setTimeout(() => { GCU.rumble[i] = 0; gcuRumble(); }, (o && o.duration) || 100); return Promise.resolve('complete'); } } };
+}
+function gcuRumble() { const d = GCU.dev; if (d) d.transferOut(2, new Uint8Array([0x11].concat(GCU.rumble))).catch(() => {}); }
+async function gcuOpen(d) {
+  if (!d || GCU.dev === d) return;
+  try {
+    if (!d.opened) await d.open(); if (d.configuration === null) await d.selectConfiguration(1);
+    try { await d.claimInterface(0); } catch (e) { /* claimed already */ }
+    await d.transferOut(2, new Uint8Array([0x13]));   /* start sending */
+    GCU.dev = d; GCU.err = '';
+  } catch (e) { GCU.err = /access|denied|security/i.test(e.message) ? 'Windows needs the WinUSB driver on the adapter (Zadig, as for Dolphin)' : e.message; return; }
+  while (GCU.dev === d) {
+    let r; try { r = await d.transferIn(1, 37); } catch (e) { if (GCU.dev === d) { GCU.err = e.message; GCU.dev = null; } break; }
+    if (!r.data || r.data.byteLength < 37) continue;
+    const u = new Uint8Array(r.data.buffer, r.data.byteOffset, r.data.byteLength); if (u[0] !== 0x21) continue;
+    for (let i = 0; i < 4; i++) GCU.pads[i] = gcuPad(i, u, 1 + 9 * i);
+  }
+  GCU.pads = [null, null, null, null]; GCU.origin = [null, null, null, null];
+}
+function gcuConnect() {   /* the browser's own device chooser (needs a click); the desktop app picks the adapter itself */
+  if (typeof navigator === 'undefined' || !navigator.usb) { GCU.err = 'this browser cannot reach USB devices: use Chrome or Edge, or the desktop app'; return Promise.resolve(); }
+  return navigator.usb.requestDevice({ filters: [{ vendorId: GC_VID, productId: GC_PID }] }).then(gcuOpen).catch(e => { if (!/no device selected/i.test(e.message)) GCU.err = e.message; });
+}
+if (typeof navigator !== 'undefined' && navigator.usb && navigator.usb.getDevices) {
+  navigator.usb.getDevices().then(ds => gcuOpen(ds.find(isGCU))).catch(() => {});
+  navigator.usb.addEventListener('connect', e => { if (isGCU(e.device)) gcuOpen(e.device); });
+  navigator.usb.addEventListener('disconnect', e => { if (e.device === GCU.dev) GCU.dev = null; });
+}
+/* Every controller the game can see: the browser's four, then the four GameCube adapter ports. */
+function gamepads() {
+  const real = typeof navigator !== 'undefined' && navigator.getGamepads ? navigator.getGamepads() : [], out = [];
+  for (let n = 0; n < 4; n++) out.push(real[n] || null);
+  for (let i = 0; i < 4; i++) out.push(GCU.pads[i]);
+  return out;
+}
+function padObj(dev) { return dev && dev.startsWith('pad') ? gamepads()[+dev.slice(3)] || null : null; }
+function padGet(n) { const p = gamepads()[n]; return p ? padRead(p) : null; }
+function devKind(dev) { return padKind(padObj(dev)); }
+function mainPad() { const gp = gamepads(); for (const p of gp) if (p) return p; return null; }
+/* Button names: the Xbox letters by default; each controller family's own names on its own controllers. */
+const CAPS = {
+  ps: { A: '✕', B: '○', X: '□', Y: '△', L: 'L1', R: 'R1', ZL: 'L2', ZR: 'R2', '+': 'Options', '−': 'Create', 'L click': 'L3', 'R click': 'R3' },
+  nin: { A: 'B', B: 'A', X: 'Y', Y: 'X', 'L click': 'L stick', 'R click': 'R stick' },
+  gc: { A: 'A', B: 'B', X: 'Y', Y: 'X', L: '—', R: 'Z', ZL: 'L', ZR: 'R', '+': 'Start', '−': '—', 'L click': '—', 'R click': '—' },
+  joy: { A: '↓', B: '→', X: '←', Y: '↑', L: 'SL', R: 'SR', ZL: 'L/R', ZR: 'ZL/ZR', '+': '+/−', '−': 'Capture', 'L click': 'Stick', 'R click': '—' },
+};
+const LONG = {
+  ps: { A: '✕  Cross (bottom button)', B: '○  Circle (right button)', X: '□  Square (left button)', Y: '△  Triangle (top button)', L: 'L1  (left bumper)', R: 'R1  (right bumper)', ZL: 'L2  (left trigger)', ZR: 'R2  (right trigger)', 'L click': 'L3  (left stick click)', 'R click': 'R3  (right stick click)' },
+  nin: { A: 'B  (bottom button)', B: 'A  (right button)', X: 'Y  (left button)', Y: 'X  (top button)', L: 'L  (left bumper)', R: 'R  (right bumper)', ZL: 'ZL  (left trigger)', ZR: 'ZR  (right trigger)', 'L click': 'Left stick click', 'R click': 'Right stick click' },
+  gc: { A: 'A  (big green button)', B: 'B  (small red button)', X: 'Y  (top button)', Y: 'X  (right button)', R: 'Z  (right shoulder button)', ZL: 'L  (left trigger)', ZR: 'R  (right trigger)' },
+  joy: { A: '↓  Bottom button (held sideways)', B: '→  Right button', X: '←  Left button', Y: '↑  Top button', L: 'SL  (left side button)', R: 'SR  (right side button)', ZL: 'L or R  (shoulder)', ZR: 'ZL or ZR  (trigger)', 'L click': 'Stick click' },
+};
+const KIND_HIDE = { gc: [4, 8, 10, 11], joy: [11] };   /* rows a controller does not have */
+function padGroupOf(dev) { const p = dev === undefined ? mainPad() : padObj(dev); return p && !TAUGHT[p.id] ? kindGroup(padKind(p)) : 'x'; }
+function padCap(name, dev) { const c = CAPS[padGroupOf(dev)]; return (c && c[name]) || name; }
+function padRowsFor(dev) { const h = KIND_HIDE[padGroupOf(dev)] || []; return PAD_ROWS.filter(r => !h.includes(r[0])); }
+function padInfo(n) { const p = gamepads()[n]; return p ? p.id : ''; }
+/* ---------- When opposite directions are held together (all-button controllers, D-pads, the keyboard) ----------
+   'neutral': left + right is neither (the tournament rule for all-button controllers); 'last': the last one pressed wins. */
+const SOCD = { mode: 'neutral', st: {} };
+try { const sv = JSON.parse(localStorage.getItem('emberfall.controls') || '{}'); if (sv.socd === 'last') SOCD.mode = 'last'; } catch (e) { /* no storage */ }
+function socd(key, neg, pos) {
+  const s = SOCD.st[key] || (SOCD.st[key] = { n: false, p: false, last: 0 });
+  if (neg && !s.n) s.last = -1; if (pos && !s.p) s.last = 1; s.n = neg; s.p = pos;
+  if (!neg && !pos) return undefined; if (neg && pos) return SOCD.mode === 'last' ? s.last : 0;
+  return pos ? 1 : -1;
+}
 function readPad(n) {
-  const p = navigator.getGamepads ? navigator.getGamepads()[n] : null, i = blankIn();
+  const p = gamepads()[n], i = blankIn();
   if (!p) return i;
   const r = padRead(p), b = k => r.b(k) || r.v(k) > PAD.trigger, ax = k => r.ax[k];
   [i.lx, i.ly] = stick(ax(0), -ax(1)); [i.cx, i.cy] = stick(ax(2), -ax(3));
-  if (b(14)) i.lx = -1; if (b(15)) i.lx = 1; if (b(12)) i.ly = 1; if (b(13)) i.ly = -1; i.tf = b(13);   /* the D-pad's down button is also the transform action */
+  const sx = socd('p' + n + 'x', b(14), b(15)), sy = socd('p' + n + 'y', b(13), b(12)); if (sx !== undefined) i.lx = sx; if (sy !== undefined) i.ly = sy; i.tf = b(13);   /* the D-pad's down button is also the transform action */
   const m = Math.hypot(i.lx, i.ly); if (m > 1) { i.lx /= m; i.ly /= m; }
-  const map = setupOf('pad' + n).map; let jumps = 0;
-  for (const k in map) { const a = map[k]; if (a && b(+k)) { i[a] = true; if (a === 'jmp') jumps++; } }
+  const map = setupOf('pad' + n).map; let jumps = 0, half = false;
+  for (const k in map) { const a = map[k]; if (a && b(+k)) { if (a === 'mod') half = true; else i[a] = true; if (a === 'jmp') jumps++; } }
+  if (half) { i.lx *= 0.5; i.ly *= 0.5; }   /* the half-stick button: tilts and walking from a D-pad or an all-button controller */
   i.jmp2 = jumps >= 2; i.start = b(9); i.sel = b(8) || r.touch;   /* PlayStation: Options starts; Create or the touchpad opens the controls screen */
   return i;
 }
@@ -238,7 +365,7 @@ const CM = { x: 190, y: 50, w: 900, h: 620, done: [968, 66, 100, 34] };
 const KEY_NO = /^(Enter|Backspace|Delete|Tab|Escape|Equal|NumpadAdd|Control|Alt|Meta|OS|ContextMenu|CapsLock|NumLock|ScrollLock|PrintScreen|Pause|F\d+$|Key[BPOMHT]$)/;
 function menuRaw(dev) {
   if (dev === 'kb') return { x: (keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0), y: (keys.ArrowDown ? 1 : 0) - (keys.ArrowUp ? 1 : 0), ok: !!(keys.Enter || keys.Space), back: !!(keys.Backspace || keys.Escape), clear: !!keys.Delete };
-  const p = navigator.getGamepads ? navigator.getGamepads()[+dev.slice(3)] : null; if (!p) return { x: 0, y: 0, ok: false, back: true, clear: false };   /* unplugged: leave */
+  const p = padObj(dev); if (!p) return { x: 0, y: 0, ok: false, back: true, clear: false };   /* unplugged: leave */
   const r = padRead(p), b = k => r.b(k) || (k === 8 && r.touch), ax = k => r.ax[k];
   return { x: b(15) || ax(0) > 0.55 ? 1 : b(14) || ax(0) < -0.55 ? -1 : 0, y: b(13) || ax(1) > 0.55 ? 1 : b(12) || ax(1) < -0.55 ? -1 : 0, ok: b(0), back: b(1) || b(8) || b(9), clear: b(3) };
 }
@@ -256,8 +383,10 @@ function cmenuItems() {   /* the rows, each with the box it is drawn in (the mou
   }
   const su = setupOf(CMENU.dev), items = [{ kind: 'setup', box: [CM.x + 30, CM.y + 68, CM.w - 60, 46] }];
   if (su.type === 'kb') { const cw = (CM.w - 80) / 2; KB_ROWS.forEach(([key, label], n) => items.push({ kind: 'bind', key, label, box: [CM.x + 30 + (n >= 9 ? cw + 20 : 0), CM.y + 134 + (n % 9) * 36, cw, 32] })); }
-  else { const ps = devPS(CMENU.dev); PAD_ROWS.forEach(([key, label, short], n) => items.push({ kind: 'bind', key, label: ps ? PS_LONG[short] : label, box: [CM.x + 170, CM.y + 130 + n * 33, CM.w - 340, 29] })); }
-  if (!su.fixed) items.push({ kind: 'reset', box: [CM.x + CM.w / 2 - 160, CM.y + 476, 320, 34] });
+  else { const L = LONG[padGroupOf(CMENU.dev)] || {}; padRowsFor(CMENU.dev).forEach(([key, label, short], n) => items.push({ kind: 'bind', key, label: L[short] || label, box: [CM.x + 170, CM.y + 130 + n * 33, CM.w - 340, 29] })); }
+  /* the row under the buttons: opposite directions, teaching a controller its buttons, and Reset for a Custom setup */
+  const extra = [{ kind: 'socd' }].concat(su.type === 'pad' ? [{ kind: 'teach' }] : [], su.fixed ? [] : [{ kind: 'reset' }]), ew = (CM.w - 60 - (extra.length - 1) * 12) / extra.length;
+  extra.forEach((it, n) => { it.box = [CM.x + 30 + n * (ew + 12), CM.y + 476, ew, 34]; items.push(it); });
   if (typeof SND !== 'undefined') items.push({ kind: 'page', to: 'sound', box: CM_TAB });   /* last, so the rows above keep their numbers */
   return items;
 }
@@ -274,10 +403,60 @@ function cmenuOk(it, d) {
   if (it.kind === 'page') { m.page = it.to; m.row = 0; m.wait = true; sfx('confirm'); return; }
   if (it.kind === 'vol') { SND.mute(it.key); sfx(it.key === 'ui' ? 'toggle' : 'jab_hit_light'); return; }   /* Enter on a slider: mute or unmute */
   if (it.kind === 'track') { SND.cycleTrack(d); sfx('toggle'); return; }
+  if (it.kind === 'socd') { SOCD.mode = SOCD.mode === 'neutral' ? 'last' : 'neutral'; saveControls(); sfx('toggle'); return; }
+  if (it.kind === 'teach') { teachStart(); return; }
   if (it.kind === 'setup') cmenuCycle(d);
   else if (it.kind === 'reset') { const su = setupOf(m.dev); su.map = Object.assign({}, su.base); su.touched = false; saveControls(); cmenuNote(su.name + ' is back to the standard layout.'); sfx('confirm'); }
   else if (m.dev === 'kb') { if (cmenuEditable()) { m.capture = true; sfx('confirm'); } }
   else { const su = cmenuEditable(); if (!su) return; const n = PAD_ACTS.indexOf(su.map[it.key] || ''); su.map[it.key] = PAD_ACTS[(n + d + PAD_ACTS.length) % PAD_ACTS.length]; su.touched = true; saveControls(); sfx('toggle'); }
+}
+/* ---------- Teaching a controller its buttons ----------
+   For a controller the game reads wrongly (an unusual adapter, an old USB pad, a single Joy-Con in another browser): the
+   screen asks for each button and stick in turn and remembers the answers for that controller model. Pressing a button
+   that was already taught skips a step; Escape, Delete or a click stops (and keeps nothing). */
+const TEACH_STEPS = [[0, 'the BOTTOM face button', 'A on Xbox · ✕ on PlayStation · B on Switch · A on GameCube'], [1, 'the RIGHT face button', 'B · ○ · A'], [2, 'the LEFT face button', 'X · □ · Y · B on GameCube'],
+  [3, 'the TOP face button', 'Y · △ · X · Y on GameCube'], [4, 'the LEFT bumper', 'LB · L1 · L'], [5, 'the RIGHT bumper', 'RB · R1 · R · Z on GameCube'], [6, 'the LEFT trigger', 'LT · L2 · ZL · L on GameCube'],
+  [7, 'the RIGHT trigger', 'RT · R2 · ZR · R on GameCube'], [8, 'Back / Select', 'View · Create · −  (skip it if there is none)'], [9, 'Start', 'Menu · Options · +'],
+  [12, 'D-pad UP', ''], [13, 'D-pad DOWN', ''], [14, 'D-pad LEFT', ''], [15, 'D-pad RIGHT', ''],
+  ['lx', 'Push the LEFT stick to the RIGHT', 'and let it go'], ['ly', 'Push the LEFT stick DOWN', 'and let it go'], ['rx', 'Push the RIGHT stick to the RIGHT', 'the C-stick on GameCube'], ['ry', 'Push the RIGHT stick DOWN', ''],
+  [10, 'Click the LEFT stick in', '(skip it if it does not click)'], [11, 'Click the RIGHT stick in', '']];
+function teachSnap(p) { return { b: p.buttons.map(q => !!(q && q.pressed)), a: p.axes.slice() }; }
+function teachStart() {
+  const p = padObj(CMENU.dev); if (!p) return;
+  const snap = teachSnap(p); CMENU.teach = { id: p.id, step: 0, base: snap, rest: snap.a, rel: true, got: { b: {}, ax: {} }, used: [] }; sfx('confirm');
+}
+function teachEnd(keep) {
+  const t = CMENU.teach; CMENU.teach = null; CMENU.wait = true;
+  if (keep) { TAUGHT[t.id] = t.got; saveTaught(); cmenuNote('Taught. This controller now uses the buttons you showed it (Y on that row, or Delete, forgets them).'); sfx('ready'); }
+  else { cmenuNote('Stopped teaching: nothing was changed.'); sfx('cancel'); }
+}
+function stepTeach() {
+  const m = CMENU, t = m.teach, p = padObj(m.dev);
+  if (!p || keys.Escape || keys.Delete) { teachEnd(false); return; }
+  const now = teachSnap(p), base = t.base;
+  if (t.rel) {   /* wait for everything to be let go, then take that as "at rest" */
+    if (now.b.every(on => !on) && now.a.every((x, k) => Math.abs(x - t.rest[k]) < 0.3)) { t.rel = false; t.base = now; }
+    return;
+  }
+  const [key] = TEACH_STEPS[t.step], isStick = typeof key === 'string';
+  let bind = null, k = now.b.findIndex((on, n) => on && !base.b[n]);
+  if (k >= 0 && !isStick) bind = { b: k };
+  else if (k >= 0 && isStick && t.used.some(u => u.b === k)) bind = 'skip';
+  else for (let a = 0; a < now.a.length && !bind; a++) {
+    const x = now.a[a], r = base.a[a]; if (Math.abs(x - r) < 0.5) continue;
+    if (isStick) bind = { a, s: x > r ? 1 : -1 };
+    else if (Math.abs(r) > 1.05) bind = { h: a, v: x };   /* a hat (rests outside -1..1): one axis, a value per direction */
+    else bind = { a, s: x > r ? 1 : -1, r };
+  }
+  if (!bind) return;
+  if (bind !== 'skip' && bind.b !== undefined && t.used.some(u => u.b === bind.b)) bind = 'skip';   /* an old button again: skip this one */
+  if (bind !== 'skip') {
+    if (isStick) t.got.ax[{ lx: 0, ly: 1, rx: 2, ry: 3 }[key]] = bind; else t.got.b[key] = bind;
+    if (bind.b !== undefined) t.used.push(bind);
+    sfx('menu_move');
+  } else sfx('toggle');
+  t.rel = true;
+  if (++t.step >= TEACH_STEPS.length) teachEnd(true);
 }
 function cmenuKey(code) {   /* a key pressed while a row is waiting for one */
   const m = CMENU, it = cmenuItems()[m.row];
@@ -290,6 +469,7 @@ function cmenuVol(it, v) { SND.set(it.key, v); if (SND.settings.mute[it.key]) SN
 function cmenuClick(x, y) {
   const m = CMENU; if (!m || m.closing) return;
   if (m.capture) { m.capture = false; return; }
+  if (m.teach) { teachEnd(false); return; }   /* a click stops teaching */
   if (inBox(CM.done, x, y)) { m.closing = true; saveControls(); sfx('cancel'); return; }
   const items = cmenuItems(), n = items.findIndex(it => inBox(it.box, x, y)); if (n < 0) return;
   m.row = n; const it = items[n];
@@ -300,6 +480,7 @@ function stepCMenu() {
   const m = CMENU, r = menuRaw(m.dev), p = m.prev; m.prev = r; if (m.noteT > 0) m.noteT--;
   const idle = !r.x && !r.y && !r.ok && !r.back && !r.clear;
   if (m.closing) { if (idle) CMENU = null; return; }   /* closes once everything is let go, so the press that closed it does nothing else */
+  if (m.teach) { stepTeach(); return; }
   if (m.capture) return;
   if (m.wait) { if (idle) m.wait = false; return; }
   const items = cmenuItems(); m.row = Math.min(m.row, items.length - 1); const it = items[m.row];
@@ -316,16 +497,17 @@ function stepCMenu() {
     return;
   }
   if (r.ok && !p.ok) cmenuOk(it, 1);
+  else if (r.clear && !p.clear && it.kind === 'teach') { const q = padObj(m.dev); if (q && TAUGHT[q.id]) { delete TAUGHT[q.id]; saveTaught(); cmenuNote('Forgot the taught buttons: this controller is read the usual way again.'); sfx('cancel'); } }
   else if (r.clear && !p.clear && it.kind === 'bind') { const su = cmenuEditable(); if (su) { su.map[it.key] = ''; su.touched = true; saveControls(); sfx('cancel'); } }
 }
 function rumble(ctl, ms, strength) {
   if (!ctl || ctl.dev === 'kb' || ctl.dev === 'cpu') return;
-  try { const p = navigator.getGamepads()[+ctl.dev.slice(3)]; if (p && p.vibrationActuator) p.vibrationActuator.playEffect('dual-rumble', { duration: ms, strongMagnitude: strength, weakMagnitude: strength * 0.6 }); } catch (e) { /* no rumble */ }
+  try { const p = padObj(ctl.dev); if (p && p.vibrationActuator) p.vibrationActuator.playEffect('dual-rumble', { duration: ms, strongMagnitude: strength, weakMagnitude: strength * 0.6 }); } catch (e) { /* no rumble */ }
 }
 function readDev(dev) { return dev === 'kb' ? readKb() : readPad(+dev.slice(3)); }
 function devName(dev) {
   if (dev === 'kb' || dev === 'cpu') return dev === 'kb' ? 'Keyboard' : 'CPU';
-  const n = +dev.slice(3), id = padInfo(n); return (padPS({ id }) ? (/0ce6|0df2|dualsense/i.test(id) ? 'PS5 controller ' : 'PlayStation controller ') : 'Controller ') + (n + 1);
+  const n = +dev.slice(3), p = padObj(dev); return (p ? KIND_NAME[padKind(p)] : 'Controller') + ' ' + (n + 1);
 }
 
 class Ctl {
@@ -3230,7 +3412,7 @@ let LOBBY = null;   /* online.js: set while linked to a friend; the fighter sele
 function selectGo() { if (LOBBY && LOBBY.linked()) LOBBY.ready(); else startMatch(); }
 const cam = { x: 0, y: 30, s: 3.4 };
 function devCtl(dev) { return DEVS[dev] || (DEVS[dev] = new Ctl(dev)); }
-function allDevs() { const d = ['kb']; const gp = navigator.getGamepads ? navigator.getGamepads() : []; for (let n = 0; n < gp.length && n < 4; n++) if (gp[n]) d.push('pad' + n); return d; }
+function allDevs() { const d = ['kb']; const gp = gamepads(); for (let n = 0; n < gp.length; n++) if (gp[n]) d.push('pad' + n); return d; }
 function startMatch(stocks, stage) {   /* stocks, stage: an online match plays with the host's choices; otherwise the options' */
   STOCKS = stocks >= 1 ? stocks | 0 : OPT.stocks;
   useStage(stage >= 0 && stage < STAGES.length ? stage | 0 : OPT.stage);   /* online: the host's stage, sent with the start message, so both sides stand on the same platforms */
