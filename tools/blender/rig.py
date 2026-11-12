@@ -312,6 +312,40 @@ if spec.get('soft'):
         print('rig: soft %s: %d vertices' % (rule['bone'], len(idx)))
 for n in NOAUTO: arm.bones[n].use_deform = True
 
+# ---- "fingersplit": [ { "chains": [[bone, bone, bone], ...] } ]   heat (or voxel) weighting lets fingers that lie close
+# together share each other's skin. Each vertex's weight on any of these chains, summed, is handed to the chains by how near
+# the vertex is to each chain's bone lines (the nearest takes it, blended over "blend" metres where two are about as near,
+# at the webs between fingers); inside a chain it goes to the nearest bone, shared between the two over "joint" metres
+# about a knuckle. The weight on everything else stays as it was.
+for fs_ in spec.get('fingersplit', []):
+    import numpy as np
+    chains = fs_['chains']; blend = fs_.get('blend', 0.003); G = {g.name: g for g in mesh.vertex_groups}
+    for ch in chains:
+        for n in ch:
+            if n not in G: G[n] = mesh.vertex_groups.new(name=n)
+    seg = [[(np.array((rig.matrix_world @ arm.bones[n].head_local)[:]), np.array((rig.matrix_world @ arm.bones[n].tail_local)[:])) for n in ch] for ch in chains]
+    gi = {G[n].index: (c, j) for c, ch in enumerate(chains) for j, n in enumerate(ch)}
+    W = mesh.matrix_world; moved = 0
+    for v in mesh.data.vertices:
+        tot = sum(g.weight for g in v.groups if g.group in gi)
+        if tot < 1e-4: continue
+        p = np.array((W @ v.co)[:]); best = []
+        for c, ss in enumerate(seg):
+            ds = []
+            for a, b in ss:
+                u = b - a; t = min(1.0, max(0.0, (p - a) @ u / max(1e-12, u @ u))); ds.append(np.linalg.norm(p - (a + u * t)))
+            ds = np.array(ds); js = np.exp(-(ds - ds.min()) / fs_.get('joint', 0.004)); js[js < 0.02] = 0
+            best.append((ds.min(), js / js.sum()))   # across a knuckle the two bones share the skin
+        dmin = min(d for d, _ in best); share = np.array([np.exp(-(d - dmin) / blend) for d, _ in best]); share[share < 0.02] = 0; share /= share.sum()
+        for g in list(v.groups):
+            if g.group in gi: g.weight = 0.0
+        for c, s_ in enumerate(share):
+            if s_ <= 0: continue
+            for j, sj in enumerate(best[c][1]):
+                if sj > 0: G[chains[c][j]].add([v.index], float(tot * s_ * sj), 'ADD')
+        moved += 1
+    print('rig: fingersplit: %d vertices over %d chains' % (moved, len(chains)))
+
 # ---- leg reach (IK): the lower leg's tip follows a control bone; the exporter bakes the result into plain rotations ----
 bpy.context.view_layer.objects.active = rig
 for ik in spec.get('ik', []):

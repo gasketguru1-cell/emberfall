@@ -24,6 +24,6 @@ mkdir -p "$dir/export"
 for n in human big; do
   [ "$which" != "both" ] && [ "$which" != "$n" ] && continue
   "$B" -b --factory-startup --python tools/blender/farmtan.py -- --in "$T/$n-a.glb" --spec "$dir/work/rig-$n.json" --out "$T/$n-tan.glb" --tan "$TAN" --pale "$PALE" 2>&1 | grep -E "farmtan: (skin|wrote)|Error|Traceback" || true
-  "$B" -b --factory-startup --python tools/blender/rig.py -- --mesh "$T/$n-tan.glb" --spec "$dir/work/rig-$n.json" --out "$dir/work/joey-$n-rigged.glb" --start 0 "${extra[@]}" 2>&1 | grep -E "Error|Traceback|rig: (mesh|skeleton|weights|wrote|[0-9])|unweighted|line [0-9]+" || true
+  "$B" -b --factory-startup --python tools/blender/rig.py -- --mesh "$T/$n-tan.glb" --spec "$dir/work/rig-$n.json" --out "$dir/work/joey-$n-rigged.glb" --start 0 "${extra[@]}" 2>&1 | grep -E "Error|Traceback|rig: (mesh|skeleton|weights|wrote|fingersplit|[0-9])|unweighted|line [0-9]+" || true
   node tools/pack.mjs "$dir/work/pack-$n.json" | tail -1
 done

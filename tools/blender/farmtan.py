@@ -18,7 +18,7 @@ tex = next(n for n in nt.nodes if n.type == 'TEX_IMAGE' and any(l.to_socket.name
 W, H = img.size; print('farmtan: %d verts, texture %dx%d' % (len(me.vertices), W, H))
 
 # ---- which part of the body each vertex is: nearest deform bone ----
-bones = [b for b in spec['bones'] if b.get('deform', True) and not b['name'].startswith('c_') and b['name'] != 'all' and 'Tw' not in b['name'] and not b['name'].startswith(('elbow', 'knee', 'delt'))]   # helpers overlap their limb bones: leave them out
+bones = [b for b in spec['bones'] if b.get('deform', True) and not b['name'].startswith('c_') and b['name'] != 'all' and 'Tw' not in b['name'] and not b['name'].startswith(('elbow', 'knee', 'delt')) and not b.get('noauto')]   # helpers overlap their limb bones: leave them out
 segs = [(b['name'], np.array(b['head']), np.array(b['tail'])) for b in bones]
 neckY = next(b['head'][1] for b in bones if b['name'] == 'head')
 co = np.array([(ob.matrix_world @ v.co)[:] for v in me.vertices]); P = np.stack([co[:, 0], co[:, 2], -co[:, 1]], 1)   # model x, y up, z forward
