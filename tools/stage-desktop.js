@@ -17,7 +17,12 @@ const stage = JSON.parse(fs.readFileSync(path.join(root, 'assets/stage/export/st
 for (const d of fs.readdirSync(path.join(root, 'assets'))) { const rel = 'assets/' + d + '/export/stage.json'; if (!d.startsWith('stage-') || !fs.existsSync(path.join(root, rel))) continue;
   const c = JSON.parse(fs.readFileSync(path.join(root, rel), 'utf8')); files.push(rel, c.file); if (c.backdrop) files.push(c.backdrop); }
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'assets/manifest.json'), 'utf8'));
-for (const k in manifest) if (manifest[k].file && !files.includes(manifest[k].file)) files.push(manifest[k].file);
+/* every file the manifest names anywhere in an entry (the model, and extras like Kestrel's cape or Fyrdsman's runebreaker) */
+const named = v => { if (typeof v === 'string') { if (/^assets\/.+\.\w+$/.test(v) && !files.includes(v)) files.push(v); } else if (v && typeof v === 'object') Object.values(v).forEach(named); };
+named(manifest);
+/* every model the game's scripts load by name (the props: Flint's light ball, Joey's needle, the Fowls' slingshot, ...) */
+for (const f of files.filter(f => /\.js$/.test(f) && !f.startsWith('node_modules/')))
+  for (const m of fs.readFileSync(path.join(root, f), 'utf8').matchAll(/['"`](assets\/[\w./-]+\.(?:glb|gltf|png|jpg|webp))['"`]/g)) if (!files.includes(m[1])) files.push(m[1]);
 for (const f of files) if (fs.existsSync(path.join(root, f))) copy(f); else console.log('missing (skipped): ' + f);
 /* the three.js add-ons the renderer imports, with whatever they import in turn */
 const addons = new Set(), want = ['loaders/GLTFLoader.js', 'utils/SkeletonUtils.js', 'environments/RoomEnvironment.js', 'utils/BufferGeometryUtils.js'];
