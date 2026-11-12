@@ -21,6 +21,10 @@ http.createServer((req, res) => {
       const od = path.join(root, 'playtest-results', 'animation-overhaul', safe(u.searchParams.get('dir'))); fs.mkdirSync(od, { recursive: true }); const out = path.join(od, clip + '.webm');
       fs.writeFileSync(out, raw); res.writeHead(200, cors); return res.end('wrote ' + out + ' (' + raw.length + ' bytes)');
     }
+    if (u.pathname === '/kfile') {   /* a Knell playtest clip (tools/knell-record.js): playtest-results/knell/<dir>/<clip>.webm */
+      const od = path.join(root, 'playtest-results', 'knell', safe(u.searchParams.get('dir'))); fs.mkdirSync(od, { recursive: true }); const out = path.join(od, clip + '.webm');
+      fs.writeFileSync(out, raw); res.writeHead(200, cors); return res.end('wrote ' + out + ' (' + raw.length + ' bytes)');
+    }
     if (u.pathname === '/png') {   /* a still from the running game: playtest-results/<dir>/<clip>.png */
       const od = path.join(root, 'playtest-results', safe(u.searchParams.get('dir'))); fs.mkdirSync(od, { recursive: true }); const out = path.join(od, clip + '.png');
       fs.writeFileSync(out, Buffer.from(body.slice(body.indexOf(',') + 1), 'base64')); res.writeHead(200, cors); return res.end('wrote ' + out);
