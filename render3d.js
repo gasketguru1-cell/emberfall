@@ -156,7 +156,7 @@ function build() {
     if (v.key === k) return; const prevKey = v.key; v.key = k;
     while (v.pivot.children.length) { const c = v.pivot.children.pop(); if (c.geometry) c.geometry.dispose(); }
     if (v.mixer) v.mixer.stopAllAction();
-    v.mixer = null; v.model = null; v.chomp = null; v.bubble = null; v.actions = {}; v.cur = null; v.prev = null; v.hand = null; v.springs = []; v.springTick = -1;
+    v.mixer = null; v.model = null; v.chomp = null; v.bubble = null; v.actions = {}; v.cur = null; v.prev = null; v.hand = null; v.springs = []; v.springTick = -1; v.cloth = null;
     if (v.prop) { scene.remove(v.prop); v.prop = null; }
     if (useModel) {
       /* A copy of the loaded model with its own skeleton, scaled to the fighter's height and turned so its front is +x. */
@@ -164,6 +164,8 @@ function build() {
       v.obj = obj; v.unit = M.cfg.height / M.height; v.flip = f.face;
       obj.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; o.frustumCulled = false; o.material = o.material.clone(); if (f.alt) o.material.color.setRGB(0.78, 0.9, 1.25); v.mats.push(o.material); } });
       v.pivot.add(obj); v.model = M; v.mixer = new THREE.AnimationMixer(obj); setupSprings(v, M);
+      /* cloth (manifest "cloth": a capesim.js spec, e.g. Brand's cape from assets/brand/work/brand2-cape.json): simulated, stepped once per game step */
+      v.cloth = M.cfg.cloth && typeof CapeSim !== 'undefined' ? CapeSim.three(THREE, obj, M.cfg.cloth) : null; v.clothTick = -1;
       if (M.cfg.lift) obj.position.y = M.cfg.lift;   /* a rider: the model sits this high above the fighter's feet */
       if (M.cfg.prop && M.cfg.prop.type === 'sling') { v.prop = makeSling(); v.hand = null; scene.add(v.prop); if (/ alone/.test(prevKey)) v.prop.userData.rig.k = { py: -2.2, sq: -0.14, bend: 0.15 }; }   /* the bird drops back into the pouch: the bands take its weight */
       if (fm.name === 'Chomp Chomp') { const bubble = makeBubble(); bubble.position.y = 6; v.pivot.add(bubble); v.bubble = bubble; }   /* his Bubble Ride bubble */
@@ -841,6 +843,7 @@ function build() {
       if (v.bubble) { const on = !!f.bubble, grow = f.state === 'attack' && f.mname === 'uspec' && !on ? clamp((f.mf - 3) / 5, 0, 1) : 0;   /* it swells from his mouth as he blows, then wobbles round him; it sits round his middle whatever the pivot is doing */
         v.bubble.visible = on || grow > 0; v.bubble.scale.setScalar(on ? 1 + Math.sin(tick * 0.3) * 0.03 : 0.15 + 0.85 * grow); v.bubble.position.x = on ? 0 : 5 * (1 - grow); }
       if (v.springs.length) applySprings(v);
+      if (v.cloth) { const st = tick !== v.clothTick; v.clothTick = tick; v.cloth.update(st, 1 / 60); }
       if (v.model && v.model.cfg.axe) axeShow(v, f);
       if (v.model && v.model.cfg.carry) { const c = v.model.cfg.carry; if (v.carryObj !== v.obj) { v.carryObj = v.obj; v.carryB = v.obj.getObjectByName(c.bone); } if (v.carryB) { v.carryB.updateWorldMatrix(true, false); v.carryB.getWorldPosition(_v3); v.handW = { x: _v3.x, y: _v3.y, t: tick }; } }
       if (v.model && f.def.transform && !v.needleTried && PROPS.needle) { v.needleTried = true; v.needle = propOf('needle'); v.needle.visible = false; scene.add(v.needle); }   /* Joey's steroid needle, the owner's model */

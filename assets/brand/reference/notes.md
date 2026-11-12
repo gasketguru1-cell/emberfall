@@ -42,6 +42,16 @@ Brand's clips) and checked against the Melee numbers in framedata.json. These ar
 ## Jumpsquat (4 frames)
 - Already at 0.40 of standing on frame 1 and held to frame 4. The crouch is instant, not eased in.
 
+## Movement (batch 1)
+- Idle: almost still. Hip height moves about 5% over a 71-frame breath; the blade barely moves.
+- Walk: hips lowest just after a foot lands and highest as the other passes (0.84 to 1.00 of standing).
+- Dash: lowest (0.51) by frame 8. The sword swings down and back in the first two frames, the fastest thing in the move.
+- Run brake: lowest (0.47) on frame 4, held low and sliding to about frame 17, then standing by 26.
+- Crouch: 8 frames down to 0.38, fastest on frame 2.
+- Landing (light): lowest (0.58) on frame 4, standing by 16. Landing (heavy): lowest (0.38) on frame 8, held to about 18, standing by 31.
+- Double jump: a full body turn in the middle of the rise. The legs kick first, the hips turn fastest around frame 20, the chest a few frames later.
+- Fall: a short, nearly still loop.
+
 ## Rules taken from this for every Brand clip
 1. Peak blade speed on the first active frame, never before or after.
 2. Hips → chest → blade, one frame apart on ground strikes. In the air the hips stay quiet and the chest leads.

@@ -272,10 +272,13 @@ for rg in spec.get('rigid', []):
 # ---- leg reach (IK): the lower leg's tip follows a control bone; the exporter bakes the result into plain rotations ----
 bpy.context.view_layer.objects.active = rig
 # "influence" on an ik entry: how much it applies when a clip does not say (default 1). A second chain on the same bone with
-# influence 0 can be switched on per key with "iinf": { "<its control>": 0..1 } (a hand that takes hold of something).
+# influence 0 can be switched on per key with "iinf": { "<its control>": 0..1 } (a hand that takes hold of something), or
+# { "<its id>": 0..1 } for a chain given an "id" (two chains on one control: one with a "pole" for the elbow, one without).
 for ik in spec.get('ik', []):
     c = rig.pose.bones[ik['bone']].constraints.new('IK'); c.target = rig; c.subtarget = ik['name']; c.chain_count = ik.get('chain', 2)
     c.influence = ik.get('influence', 1.0)
+    if ik.get('id'): c.name = ik['id']   # "id": a name a key's "iinf" can switch this chain by, when two chains share a control
+    if ik.get('pole'): c.pole_target = rig; c.pole_subtarget = ik['pole']; c.pole_angle = math.radians(ik.get('pole_angle', 0))   # "pole": the bone the knee or elbow points at
 if spec.get('ik'): print('rig: %d IK chains' % len(spec['ik']))
 # "influence" on a copyrot entry sets how much it applies when a clip does not say (default 1); a pose can key it per bone
 # with "cinf": 0..1 (a free hand that takes hold of a two-handed grip for some frames only).
@@ -361,7 +364,7 @@ for name, clip in spec.get('clips', {}).items():
                     if c.type == 'COPY_ROTATION': c.influence = tr['cinf']; c.keyframe_insert('influence', frame=fb)
             for sub, val in tr.get('iinf', {}).items():
                 for c in pb.constraints:
-                    if c.type == 'IK' and c.subtarget == sub: c.influence = val; c.keyframe_insert('influence', frame=fb)
+                    if c.type == 'IK' and (c.name == sub or (c.subtarget == sub and not any(k.name == sub for k in pb.constraints))): c.influence = val; c.keyframe_insert('influence', frame=fb)
         if key.get('in') and prevf is not None: eases.append((prevf, key['in']))
         prevf = f
     fcs = fcurves_of(act)
@@ -379,6 +382,14 @@ for name, clip in spec.get('clips', {}).items():
     track = ad.nla_tracks.new(); track.name = name; track.strips.new(name, int(opt.get('start', 1)), act); ad.action = None
     print('rig: clip %s, %d keys%s' % (name, len(clip['keys']), (', %d eased' % len(eases)) if eases else ''))
 for pb in rig.pose.bones: pb.rotation_quaternion = Quaternion(); pb.location = Vector(); pb.scale = Vector((1, 1, 1))
+# keying left each switched constraint at the last clip's last value; put them back to their defaults, which every clip
+# that does not key them plays with
+for ik in spec.get('ik', []):
+    for c in rig.pose.bones[ik['bone']].constraints:
+        if c.type == 'IK' and c.subtarget == ik['name'] and c.name == ik.get('id', c.name): c.influence = ik.get('influence', 1.0)
+for cr in spec.get('copyrot', []):
+    for c in rig.pose.bones[cr['bone']].constraints:
+        if c.type == 'COPY_ROTATION' and c.subtarget == cr['from']: c.influence = cr.get('influence', 1.0)
 scene.frame_start = 1; scene.frame_end = last
 
 if opt.get('shots'):   # pictures of chosen clips at chosen times, from her right side with her front to the right of the picture

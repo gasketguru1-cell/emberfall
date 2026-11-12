@@ -9,7 +9,9 @@ args = sys.argv[sys.argv.index('--') + 1:]
 opt = {args[i].lstrip('-'): args[i + 1] for i in range(0, len(args), 2)}
 fd = json.load(open(opt['data'], encoding='utf-8'))['moves']
 MOVE = {'AirF': 'fair', 'SmashF': 'fsmash', 'AirN': 'nair'}
-GROUND = {'Run': (0.2, 1, 99), 'RunTurn': (None, 3, 11)}   # (run speed the floor slides back under him in m/frame, or None: the foot stays put; frames checked)
+if 'hits' in opt:   # the rest of the strikes: their first and last active frames, from brand2.js
+    for k, v in json.load(open(opt['hits'], encoding='utf-8')).items(): fd['_' + k] = {'hit': [v[:2]], 'upto': v[2] if len(v) > 2 else 999}; MOVE[k] = '_' + k
+GROUND = {'Run': (0.2, 1, 99), 'RunTurn': (None, 3, 11), 'Walk': (0.0233, 1, 99), 'Brake': (None, 3, 16), 'Idle': (None, 1, 99), 'Crouch': (None, 1, 99), 'JumpSquat': (None, 1, 99), 'Land': (None, 1, 99), 'LandHard': (None, 1, 99), 'Jab1': (None, 1, 99), 'Jab2': (None, 1, 99), 'TiltU': (None, 1, 99), 'TiltD': (None, 1, 99), 'SmashU': (None, 1, 12), 'SmashD': (None, 1, 99), 'SpecD': (None, 1, 99), 'SpecDHit': (None, 1, 99), 'Shield': (None, 1, 99), 'ShieldHit': (None, 1, 99), 'Taunt': (None, 1, 99), 'Idle2': (None, 1, 99), 'Win2': (None, 1, 99), 'Pummel': (None, 1, 99), 'Hold': (None, 1, 99), 'SpecNLoop': (None, 1, 99), 'Dizzy': (None, 1, 99)}   # (run speed the floor slides back under him in m/frame, or None: the foot stays put; frames checked)
 rig = bpy.data.objects['Rig']; sc = bpy.context.scene; ad = rig.animation_data
 W = lambda b, end='head': rig.matrix_world @ getattr(rig.pose.bones[b], end)
 report = []; fails = 0
@@ -25,7 +27,7 @@ for tr in ad.nla_tracks:
     line = '%-8s %2d frames' % (name, n)
     if name in MOVE:
         mv = fd[MOVE[name]]; first = mv['hit'][0][0]; last = mv['hit'][-1][1]
-        peak = max(range(n), key=lambda i: speed[i]) + 1   # a frame's speed is how far the tip came to reach it (as the reference notes count it)
+        peak = max(range(min(n, mv.get('upto', 999))), key=lambda i: speed[i]) + 1   # a frame's speed is how far the tip came to reach it (as the reference notes count it)
         ok = first <= peak <= last
         line += ' | blade fastest on frame %d (%.2f m/frame), active %d-%d: %s' % (peak, speed[peak - 1], first, last, 'ok' if ok else 'OFF')
         fails += not ok
