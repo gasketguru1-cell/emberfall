@@ -20,30 +20,30 @@ const manifest = {};
 const leg = (s, x) => {
   const m = v => [v[0] * x, v[1], v[2]];
   return [
-    { name: 'f' + s + '_upper', head: m([0.26, 0.5, 0.17]), tail: m([0.31, 0.28, 0.2]), parent: 'chest' },
-    { name: 'f' + s + '_lower', head: m([0.31, 0.28, 0.2]), tail: m([0.29, 0.1, 0.33]), parent: 'f' + s + '_upper', connect: true },
-    { name: 'ik_f' + s, head: m([0.29, 0.1, 0.33]), tail: m([0.29, 0.1, 0.45]), parent: 'all', deform: false },
-    { name: 'f' + s + '_paw', head: m([0.29, 0.1, 0.33]), tail: m([0.284, 0.0, 0.45]), parent: 'ik_f' + s },
-    { name: 'r' + s + '_upper', head: m([0.24, 0.5, -0.22]), tail: m([0.3, 0.28, -0.15]), parent: 'hips' },
-    { name: 'r' + s + '_lower', head: m([0.3, 0.28, -0.15]), tail: m([0.26, 0.09, -0.3]), parent: 'r' + s + '_upper', connect: true },
-    { name: 'ik_r' + s, head: m([0.26, 0.09, -0.3]), tail: m([0.26, 0.09, -0.18]), parent: 'all', deform: false },
-    { name: 'r' + s + '_paw', head: m([0.26, 0.09, -0.3]), tail: m([0.252, 0.0, -0.16]), parent: 'ik_r' + s }];
+    { name: 'f' + s + '_upper', head: m([0.24, 0.38, 0.19]), tail: m([0.3, 0.22, 0.22]), parent: 'chest' },
+    { name: 'f' + s + '_lower', head: m([0.3, 0.22, 0.22]), tail: m([0.28, 0.09, 0.37]), parent: 'f' + s + '_upper', connect: true },
+    { name: 'ik_f' + s, head: m([0.28, 0.09, 0.37]), tail: m([0.28, 0.09, 0.49]), parent: 'all', deform: false },
+    { name: 'f' + s + '_paw', head: m([0.28, 0.09, 0.37]), tail: m([0.28, 0.0, 0.57]), parent: 'ik_f' + s },
+    { name: 'r' + s + '_upper', head: m([0.22, 0.36, -0.3]), tail: m([0.29, 0.2, -0.17]), parent: 'hips' },
+    { name: 'r' + s + '_lower', head: m([0.29, 0.2, -0.17]), tail: m([0.27, 0.07, -0.33]), parent: 'r' + s + '_upper', connect: true },
+    { name: 'ik_r' + s, head: m([0.27, 0.07, -0.33]), tail: m([0.27, 0.07, -0.21]), parent: 'all', deform: false },
+    { name: 'r' + s + '_paw', head: m([0.27, 0.07, -0.33]), tail: m([0.27, 0.0, -0.09]), parent: 'ik_r' + s }];
 };
 const hod = {
-  note: 'Hod: metres after prep (feet on y = 0, facing +Z). Joint positions were measured from the generated mesh.',
-  prep: { yaw: 0, translate: [0, 0.475, -0.275] },
+  note: 'Hod: metres after prep (feet on y = 0, facing +Z). Joint positions were measured from the owner\'s model (2026-11-12): low-slung, tail lying along the floor.',
+  prep: { yaw: 0, translate: [0, 0.373, -0.275] }, proxy: true, heatScale: 10,
   bones: [
     { name: 'all', head: [0, 0, 0], tail: [0, 0.15, 0], parent: null, deform: false },
-    { name: 'root', head: [0, 0.5, 0], tail: [0, 0.7, 0], parent: 'all', deform: false },
-    { name: 'hips', head: [0, 0.5, -0.36], tail: [0, 0.52, -0.1], parent: 'root' },
-    { name: 'spine', head: [0, 0.52, -0.1], tail: [0, 0.54, 0.14], parent: 'hips', connect: true },
-    { name: 'chest', head: [0, 0.54, 0.14], tail: [0, 0.56, 0.36], parent: 'spine', connect: true },
-    { name: 'neck', head: [0, 0.56, 0.36], tail: [0, 0.54, 0.5], parent: 'chest', connect: true },
-    { name: 'head', head: [0, 0.54, 0.5], tail: [0, 0.47, 0.67], parent: 'neck', connect: true },
-    { name: 'tail1', head: [0, 0.42, -0.42], tail: [0, 0.34, -0.62], parent: 'hips' },
-    { name: 'tail2', head: [0, 0.34, -0.62], tail: [0, 0.27, -0.82], parent: 'tail1', connect: true },
-    { name: 'tail3', head: [0, 0.27, -0.82], tail: [0, 0.25, -1.02], parent: 'tail2', connect: true },
-    { name: 'tail4', head: [0, 0.25, -1.02], tail: [0, 0.28, -1.22], parent: 'tail3', connect: true },
+    { name: 'root', head: [0, 0.42, 0], tail: [0, 0.62, 0], parent: 'all', deform: false },
+    { name: 'hips', head: [0, 0.42, -0.36], tail: [0, 0.44, -0.08], parent: 'root' },
+    { name: 'spine', head: [0, 0.44, -0.08], tail: [0, 0.45, 0.16], parent: 'hips', connect: true },
+    { name: 'chest', head: [0, 0.45, 0.16], tail: [0, 0.44, 0.36], parent: 'spine', connect: true },
+    { name: 'neck', head: [0, 0.44, 0.36], tail: [0, 0.43, 0.41], parent: 'chest', connect: true },
+    { name: 'head', head: [0, 0.43, 0.41], tail: [0, 0.29, 0.67], parent: 'neck', connect: true },
+    { name: 'tail1', head: [0, 0.34, -0.42], tail: [0, 0.25, -0.62], parent: 'hips' },
+    { name: 'tail2', head: [0, 0.25, -0.62], tail: [0, 0.16, -0.82], parent: 'tail1', connect: true },
+    { name: 'tail3', head: [0, 0.16, -0.82], tail: [0, 0.09, -1.02], parent: 'tail2', connect: true },
+    { name: 'tail4', head: [0, 0.09, -1.02], tail: [0, 0.04, -1.22], parent: 'tail3', connect: true },
     ...leg('l', 1), ...leg('r', -1)],
   ik: ['fl', 'fr', 'rl', 'rr'].map(k => ({ name: 'ik_' + k, bone: k + '_lower', chain: 2 })),
   poses: {
@@ -89,7 +89,7 @@ const hod = {
     Sweep: { fps: 30, keys: [
       { t: 0, use: 'stand' },
       { t: 0.28, pose: { all: R(0, -35), root: M(0, -0.07, 0), tail1: R(4, -20), tail2: R(0, -15) } },
-      { t: 0.33, pose: { all: R(0, 90), tail1: R(-6, 22), tail2: R(0, 18), tail3: R(0, 12) } },
+      { t: 0.33, pose: { all: R(0, 90), tail1: R(2, 22), tail2: R(8, 18), tail3: R(6, 12) } },
       { t: 0.38, pose: { all: R(0, 180) } }, { t: 0.43, pose: { all: R(0, 270) } },
       { t: 0.55, pose: { all: R(0, 360), root: M(0, -0.03, 0), tail1: R(0), tail2: R(0), tail3: R(0) } },
       { t: 0.9, pose: { root: M(0, 0, 0) } }] },
@@ -106,7 +106,7 @@ const hod = {
       { t: 0.5, pose: { root: M(0, -0.02, 0.34) } },
       { t: 0.9, reset: true, use: 'stand' }] } },
 };
-const HOD_C = [0.5, 0];
+const HOD_C = [0.42, 0];
 Object.assign(hod.clips, {
   Jab: { fps: 30, keys: [
     { t: 0, use: 'stand' },
@@ -123,8 +123,8 @@ Object.assign(hod.clips, {
   TailSlam: { fps: 30, keys: [
     { t: 0, use: 'stand' },
     { t: 0.28, pose: { all: R(0, -25), root: M(0, -0.05, 0), tail1: R(26), tail2: R(16) } },
-    { t: 0.36, pose: { all: R(0, 172), tail1: R(-9), tail2: R(-6), tail3: R(-4) } },
-    { t: 0.48, pose: { all: R(0, 178), tail1: R(-12) } },
+    { t: 0.36, pose: { all: R(0, 172), tail1: R(-2), tail2: R(-2), tail3: R(0) } },
+    { t: 0.48, pose: { all: R(0, 178), tail1: R(-8) } },
     { t: 0.9, pose: { all: R(0, 0), root: M(0, 0, 0), tail1: R(0), tail2: R(0), tail3: R(0) } }] },
   Toss: { fps: 30, keys: [
     { t: 0, use: 'stand' },
@@ -167,7 +167,8 @@ Object.assign(hod.clips, {
     { t: 0.5, pose: { ik_fl: M(0, 0.12, 0.1), ik_fr: M(0, 0.04, 0.02), ik_rl: M(0, 0.04, 0.06), ik_rr: M(0, 0.1, 0), head: R(-8, 0), tail1: R(-20, 0) } }] },
 });
 out('hod', hod);
-manifest.Hod = { file: 'assets/hod/export/hod-v1.glb', height: 11.5, clips: baseClips('Swipe', 'Slam'),
+/* height 9.2: the owner's model (2026-11-12) is lower than the first one (0.75 m against 0.94 m); this keeps Hod the same length in the game */
+manifest.Hod = { file: 'assets/hod/export/hod-v1.glb', height: 9.2, clips: baseClips('Swipe', 'Slam'),
   strikers: [{ bone: 'head', ext: 2.4 }, { bone: 'fl_paw', ext: 1.8 }, { bone: 'fr_paw', ext: 1.8 }, { bone: 'rl_paw', ext: 1.2 }, { bone: 'rr_paw', ext: 1.2 }, { bone: 'tail4', ext: 2.6 }],
   springs: [{ bones: ['tail1', 'tail2', 'tail3', 'tail4'], k: 0.3, d: 0.68, max: 0.5, drag: 0.08 }],
   attacks: { jab: A('Jab', 0.28, 0.4, 0, 0.7), jab3: A('Swipe', 0.39, 0.48), ftilt: A('Headbutt', 0.39, 0.5), utilt: A('UpStrike', 0.39, 0.48), dtilt: A('TailSlam', 0.34, 0.52), dash: A('Ram', 0.34, 0.52),
