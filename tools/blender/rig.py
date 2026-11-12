@@ -69,6 +69,9 @@ for b in spec['bones']:
 bpy.ops.object.mode_set(mode='OBJECT')
 for b in spec['bones']: arm.bones[b['name']].use_deform = b.get('deform', True)
 print('rig: skeleton %d bones (%d deform)' % (len(arm.bones), sum(1 for b in arm.bones if b.use_deform)))
+# "noauto": true on a bone leaves it out of the automatic weighting; its weights come only from "soft" rules (below)
+NOAUTO = [b['name'] for b in spec['bones'] if b.get('noauto')]
+for n in NOAUTO: arm.bones[n].use_deform = False
 
 # ---- weights: automatic (heat) on the mesh itself; if that leaves gaps, weight a clean voxel copy and transfer ----
 def auto_weight(target):
@@ -151,7 +154,8 @@ def placed_weights(target):
 
 if spec.get('weights'): missing = placed_weights(mesh); method = 'placed (%d rules)' % len(spec['weights'])
 else: missing = auto_weight(mesh); method = 'automatic'
-if not spec.get('weights') and missing > len(mesh.data.vertices) * 0.01:
+# "proxy": true in the spec always weights through the voxel copy (a mesh whose own heat weighting succeeds but comes out ragged)
+if not spec.get('weights') and (missing > len(mesh.data.vertices) * 0.01 or spec.get('proxy')):
     print('rig: automatic weights left %d vertices unweighted; using a voxel proxy' % missing)
     for vg in list(mesh.vertex_groups): mesh.vertex_groups.remove(vg)
     for m in list(mesh.modifiers): mesh.modifiers.remove(m)
@@ -260,6 +264,54 @@ for rg in spec.get('rigid', []):
     bmesh.ops.delete(bm, geom=gone, context='FACES_ONLY'); bm.to_mesh(mesh.data); bm.free(); mesh.data.update()
     print('rig: detached %s from the body between heights %.2f and %.2f (%d faces)' % (rg['bone'], y0, y1, len(gone)))
 
+# ---- "soft": weights by place, for small bones that heat weighting can't place (a face, a belly). Each rule gives its bone
+# a share w of a vertex's weight, taken from the bones listed in "from" in proportion to what they hold there:
+#   "at": [x,y,z] and "r": a sphere, w = s * smooth(1 - distance / r);  "surf": [x, y, "front"|"back"] puts that sphere's
+#   centre on the skin, at the frontmost / backmost vertex near x, y;  "half": [[point, normal], ...] half-spaces, each
+#   faded over "soft" metres (alone, or cutting a sphere down)
+if spec.get('soft'):
+    import numpy as np
+    W = mesh.matrix_world; P = np.array([(lambda w: (w.x, w.z, -w.y))(W @ v.co) for v in mesh.data.vertices])
+    def smooth_np(x): x = np.clip(x, 0, 1); return x * x * (3 - 2 * x)
+    G = {g.name: g for g in mesh.vertex_groups}
+    def group(n): return G[n] if n in G else G.setdefault(n, mesh.vertex_groups.new(name=n))
+    nv = len(P)
+    def weights_of(n):
+        out = np.zeros(nv)
+        if n not in G: return out
+        gi = G[n].index
+        for v in mesh.data.vertices:
+            for g in v.groups:
+                if g.group == gi: out[v.index] = g.weight
+        return out
+    cache = {}
+    def wt(n):
+        if n not in cache: cache[n] = weights_of(n)
+        return cache[n]
+    for rule in spec['soft']:
+        w = np.ones(nv) * rule.get('s', 1.0)
+        if rule.get('surf'):
+            x0, y0, side = rule['surf']; near = (np.abs(P[:, 0] - x0) < 0.03) & (np.abs(P[:, 1] - y0) < 0.03)
+            zs = P[near, 2]; z0 = zs.max() if side == 'front' else zs.min()
+            rule = dict(rule, at=[x0, y0, z0 - (0.4 if side == 'front' else -0.4) * rule['r']])
+        if rule.get('at'):
+            d = np.linalg.norm(P - np.array(rule['at']), axis=1); w *= smooth_np(1 - d / rule['r'])
+        for pt, nrm in rule.get('half', []):
+            nrm = np.array(nrm, float); nrm /= np.linalg.norm(nrm); w *= smooth_np((P - np.array(pt)) @ nrm / rule.get('soft', 0.01) + 0.5)
+        src = [n for n in rule['from'] if n in G]
+        tot = sum(wt(n) for n in src) if src else np.zeros(nv)
+        w = np.minimum(w, 1.0) * np.minimum(tot, 1.0)
+        idx = np.nonzero(w > 1e-3)[0]
+        if not len(idx): print('rig: soft %s took nothing' % rule['bone']); continue
+        for n in src:
+            cur = wt(n); share = np.where(tot > 1e-6, cur / np.maximum(tot, 1e-6), 0)
+            new = cur - w * share; cache[n] = new; g = group(n)
+            for i in idx: g.add([int(i)], float(max(0.0, new[i])), 'REPLACE')
+        mine = wt(rule['bone']) + w; cache[rule['bone']] = mine; g = group(rule['bone'])
+        for i in idx: g.add([int(i)], float(min(1.0, mine[i])), 'REPLACE')
+        print('rig: soft %s: %d vertices' % (rule['bone'], len(idx)))
+for n in NOAUTO: arm.bones[n].use_deform = True
+
 # ---- leg reach (IK): the lower leg's tip follows a control bone; the exporter bakes the result into plain rotations ----
 bpy.context.view_layer.objects.active = rig
 for ik in spec.get('ik', []):
@@ -350,8 +402,10 @@ def palm_normal(bone, sg):
     palm and fingers together), turned toward the body (at rest, in the A-pose, the palms face the thighs)"""
     if bone in _palm: return _palm[bone]
     import numpy as np
-    me = mesh; gi = me.vertex_groups[bone].index; Mi = arm.bones[bone].matrix_local.inverted(); W = me.matrix_world
-    pts = [Mi @ (W @ v.co) for v in me.data.vertices if any(g.group == gi and g.weight > 0.5 for g in v.groups)]
+    me = mesh; sd = bone[-1]; Mi = arm.bones[bone].matrix_local.inverted(); W = me.matrix_world
+    # the palm with its four fingers (not the thumb): the hand's own flat slab
+    gis = {g.index for g in me.vertex_groups if g.name == bone or (g.name[:-1].endswith(sd) and g.name.startswith(('fing', 'index', 'middle', 'ring', 'pinky')))}
+    pts = [Mi @ (W @ v.co) for v in me.data.vertices if sum(g.weight for g in v.groups if g.group in gis) > 0.5]
     P = np.array([p[:] for p in pts]); P -= P.mean(0); ev, evec = np.linalg.eigh(P.T @ P); n = Vector(evec[:, 0])
     inward = arm.bones[bone].matrix_local.to_3x3().inverted() @ (RIGHT * sg)
     if n.dot(inward) < 0: n = -n
@@ -372,7 +426,9 @@ def palms(c, f, t):
         if w <= 0: pb.rotation_quaternion = Quaternion(); pb.keyframe_insert('rotation_quaternion', frame=f); continue
         n = palm_normal(pb.name, sg); yl = Vector((0, 1, 0)); n = (n - yl * n.dot(yl)).normalized()
         Bl = Matrix((n, yl, n.cross(yl))).transposed()                       # palm, finger line, side: in the bone's own axes
-        tn = RIGHT * sg; Bt = Matrix((tn, FWD, tn.cross(FWD))).transposed()   # where they should point: palm in, fingers ahead
+        toe = math.radians(c.get('toein', 0)) * sg   # fingers angled in a little, so the palms close from heel to fingertip
+        fw = (FWD * math.cos(toe) + RIGHT * math.sin(toe)).normalized(); tn = (RIGHT * sg - fw * (RIGHT * sg).dot(fw)).normalized()
+        Bt = Matrix((tn, fw, tn.cross(fw))).transposed()   # where they should point: palm in, fingers ahead
         Wd = (Bt @ Bl.transposed()).to_quaternion()
         cur = pb.matrix.to_quaternion(); want = cur.slerp(Wd, w)
         M4 = want.to_matrix().to_4x4(); M4.translation = pb.matrix.translation; pb.matrix = M4

@@ -18,7 +18,7 @@ tex = next(n for n in nt.nodes if n.type == 'TEX_IMAGE' and any(l.to_socket.name
 W, H = img.size; print('farmtan: %d verts, texture %dx%d' % (len(me.vertices), W, H))
 
 # ---- which part of the body each vertex is: nearest deform bone ----
-bones = [b for b in spec['bones'] if b.get('deform', True) and not b['name'].startswith('c_') and b['name'] != 'all' and 'Tw' not in b['name']]   # twist helpers overlap their limb bones: leave them out
+bones = [b for b in spec['bones'] if b.get('deform', True) and not b['name'].startswith('c_') and b['name'] != 'all' and 'Tw' not in b['name'] and not b['name'].startswith(('elbow', 'knee', 'delt'))]   # helpers overlap their limb bones: leave them out
 segs = [(b['name'], np.array(b['head']), np.array(b['tail'])) for b in bones]
 neckY = next(b['head'][1] for b in bones if b['name'] == 'head')
 co = np.array([(ob.matrix_world @ v.co)[:] for v in me.vertices]); P = np.stack([co[:, 0], co[:, 2], -co[:, 1]], 1)   # model x, y up, z forward
@@ -31,9 +31,9 @@ tan = np.zeros(len(P))
 collar = sm((P[:, 1] - (neckY - 0.06)) / 0.04)            # the neck above a crew collar
 for j, n in enumerate(names):
     m = near == j
-    if n.startswith(('fore', 'hand', 'fing', 'thumb')): tan[m] = 1
+    if n.startswith(('fore', 'hand', 'fing', 'thumb', 'index', 'middle', 'ring', 'pinky')): tan[m] = 1
     elif n.startswith('arm'): tan[m] = sm((Tp[m, j] - SLEEVE) / 0.08 + 0.5)
-    elif n in ('head', 'neck', 'chest', 'spine', 'spine2', 'hips') or n.startswith('clav'): tan[m] = collar[m]
+    elif not n.startswith(('thigh', 'shin', 'foot', 'toe', 'glute')): tan[m] = collar[m]   # head, face, neck, torso: tanned above the collar
 print('farmtan: tanned share of the vertices %.2f' % tan.mean())
 
 # ---- bake the mask into the texture's layout ----
