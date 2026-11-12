@@ -38,7 +38,7 @@ function animBase(f) {
     case 'ledge': return { key: 'ledge', mode: 'loop', v: t };
     case 'hold': return { key: 'hold', mode: 'loop', v: t };
     case 'held': return { key: 'held', mode: 'loop', v: t };
-    case 'throw': return { key: 'throw', mode: 'phase', v: phase(f.sf, 26) };
+    case 'throw': { const tw = f.throwK && f.form && f.form.moves && f.form.moves.throws && f.form.moves.throws[f.throwK]; return { key: 'throw', mode: 'phase', v: phase(f.sf, (tw && tw.ap) || 26) }; }   /* ap: a quicker throw's clip plays faster */
     case 'respawn': return { key: 'idle', mode: 'loop', v: t };
     case 'exhaust': return { key: 'exhaust', mode: 'phase', v: phase(frame - f.exStart, 900) };   /* Joey's 15 seconds: the clip is the whole performance, sampled at the elapsed tick */
     case 'grow': return { key: 'grow', mode: 'phase', v: phase(f.sf, 180) };
