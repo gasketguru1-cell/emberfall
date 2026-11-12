@@ -567,7 +567,7 @@ function brevPuff(x, y) {
   for (let k = 0; k < 6; k++) { const a = k * TAU / 6; PART.push({ x: x + Math.cos(a) * 2, y: y + Math.sin(a) * 2, vx: -Math.sin(a) * 1.2, vy: Math.cos(a) * 1.2, life: 11, col: '#a8e0ff', r: 0.5 }); }
   beep(1250, 0.04, 'triangle', 0.012, 0.8);
 }
-function pop(x, y, text, col) { POPS.push({ x, y, text, col, life: 50 }); }
+function pop(x, y, text, col, sz) { POPS.push({ x, y, text, col, life: 50, sz }); }
 
 /* ---------- Moves ---------- */
 let PROJ = [];
@@ -2079,7 +2079,7 @@ const VARGAN = (() => {
         /* ---- specials ---- */
         /* Axe Throw: a high lobbed arc, the axe leaving his hand on frame 30 (66 in all). With the axe away, neutral special
            is a beckoning hand, and keeping special held 8 frames calls the axe home (Fighter.varganTick). */
-        nspec: { t: 66, h: [], on(f, n) { if (n === 30) vThrow(f); } },
+        nspec: { t: 66, h: [], sarm: [1, 34], sarmText: 1, on(f, n) { if (n === 30) vThrow(f); }, onLand() { return true; } },   /* the throw: super armour from the wind-up through the release; begun in the air, it carries on through a landing and the axe still flies */
         nspecE: { t: 24, h: [] },
         sspec: { t: 57, ll: 20, once: 1, nodrift: 1, ownPhys: 1, on: meteor, h: [circ(15, 24, 0.38, 0.62, 0.3, 18, 40, 60, 85, NB), circ(25, 40, 0.36, 0.6, 0.28, 12, 40, 45, 70, NB)] },
         uspec: upMove(false), uspecE: upMove(true),
@@ -3161,7 +3161,7 @@ function applyHitRaw(a, v, h, face, srcX, proj, poke, at) {
   /* Armour: a move either shrugs off anything short of a hard launch, or (armorMax) takes one strike of that base damage or less, on the ground only. */
   const am = v.state === 'attack' && v.move && v.move.armor && v.mf >= v.move.armor[0] && v.mf <= v.move.armor[1] ? v.move : null;
   const sa = v.state === 'attack' && v.move && (v.grounded ? v.move.sarm : (v.move.sarmAir || v.move.sarm));   /* super armour: no flinch at all for those frames (the damage is still taken) */
-  if (sa && v.mf >= sa[0] && v.mf <= sa[1]) { v.hitlag = hl; if (!proj) a.hitlag = hl; spark(hx, hy, '#ffcf8a', 10, 1.2); sfx('armor_clang', hx); return; }
+  if (sa && v.mf >= sa[0] && v.mf <= sa[1]) { v.hitlag = hl; if (!proj) a.hitlag = hl; spark(hx, hy, '#ffcf8a', 10, 1.2); sfx('armor_clang', hx); if (v.move.sarmText) pop(hx, hy, 'SUPER ARMOR', '#ffcf8a', 14); return; }
   if (h.bury && v.grounded) {   /* buried: stuck in the floor for a time that grows with the launch it would have had */
     v.freeVictim(); v.move = null; v.vx = v.vy = 0; v.buryT = Math.min(180, Math.round(kb * 0.6) + 12); v.set('buried'); v.hitlag = hl; if (!proj) a.hitlag = hl;
     spark(hx, v.y, '#c9a27a', 18, 1.6); pop(hx, hy + 10, 'BURIED', '#e0b98a'); thwack(kb, hx); shake = Math.max(shake, 6); return; }
