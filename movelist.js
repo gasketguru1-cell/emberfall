@@ -254,6 +254,35 @@ const MOVE_TEXT = {
     d: ['Kneel Break', 'Forces the opponent down and pops them up in front, into a rising Crown Arc or High Guard at low damage.'],
     getup: ['Guard Sweep / Rising Cut', 'From the floor, sweeps low in front on frame 19 and behind on frame 24 (lying on her back: behind first, then in front). From the ledge, a rising cut onto the stage on frames 20 to 22 for 8%. Briefly intangible as she rises (less above 100%).'],
   },
+  /* Knell: the owner's design bible v1.0 (2026-11-11) */
+  Knell: {
+    nspec: ['Needlewheel', 'Spins the buckler rim across his palm while the dagger ticks three times, on frames 9, 16 and 23. Tilt the stick down or up on the first frames for the LOW or HIGH line; level is MID. The two light ticks hold, the third (5.3%) sends away at 45 degrees, but it can be shaken out of. Very unsafe on shield. In the air it stops his drift for 5 frames. No Hinge.', 'f9 / f16 / f23 · 2.2 + 2.2 + 5.3%'],
+    sspec: ['Rimskip', 'Hooks the buckler on the floor ahead and vaults over it, dragging the dagger through: 9.2% on frames 12 to 15, 3 m on the ground or 4.7 m across in the air. It stops at fighters and at the end of the floor. Into a stage wall in the air it rebounds 55 degrees up with a little steering. No special fall after it, so he can still act: a strong way back. Once each time in the air.'],
+    uspec: ['Turnkey Ascent', 'Levers himself up the buckler in two beats, hitting on frames 7 to 10 (4.5%, pulls the opponent in) and 14 to 16 (4%, sends away): 5.7 m up, steered up to 0.75 m either way. The ledge can be taken from frame 18. Helpless after frame 34, and it does not give his air jump back.'],
+    dspec: ['Deadbolt', 'A narrow shield catch: from frame 5 to 14 the buckler catches one strike of 12% or less from in front (110 degrees across), and the dagger ripostes 6 frames later for 7%. A caught strike gives him a Thread if he has none. A projectile is turned aside, harmless. Grabs, hits from behind, stronger hits and the later hits of a multi-hit get through. A miss leaves 28 frames to punish. In the air, once until he lands or is hit.', 'Catch f5-14 · riposte 7%'],
+    jab: ['Needle, Reversal, Buckle', 'A tip poke, a wrist turned down through the shins, then Buckle: the buckler rim clips the hip for a 2% sting that holds them in front, and the dagger rakes up for 4.5%. Press again on frames 6 to 14, then 7 to 16. The first two are light and can be stopped; Buckle pushes away and is unsafe on shield. Needle and Reversal each have a Hinge window after contact.'],
+    dash: ['Slipstitch Roll', 'Leaps out of the run into a forward roll along the floor, the dagger held out from his middle going once round with him: four linked 1.5% passes on frames 6 to 24 that carry them along, then 4.5% on 25 to 28 as he comes up. It leaves them just above him for an up tilt. Heavily punishable if shielded.'],
+    ftilt: ['Dial Cut', 'Three real tracks chosen by the stick on its first two frames: LOW (down-forward) scoops ankle to hip and reaches low profiles, MID (forward) is a short level gouge with the best range, HIGH (up-forward) flicks shoulder to eye against jumps. Same startup and damage; the launch is 28, 42 or 75 degrees. Hinge window after contact.'],
+    utilt: ['Keyturn', 'Spins the dagger forearm over his helm, two hits: a 2.5% sting rising in front of him on frames 5 and 6 that draws them overhead, then 4.5% overhead on 7 to 9. It follows a down tilt or the dash attack. A safe anti-air if spaced. Hinge window after contact.'],
+    dtilt: ['Ankle Tick', 'A fast diagonal clip at the calf with a tiny pop-up: his main starter at low damage. Hinge window after contact.'],
+    fsmash: ['Guillotine Arc', 'The dagger raised to eyebrow height and dragged down in a hooked cut on frames 16 to 18. 17% with the outer part of the blade on 16 and 17, 12% near the grip. A strong ledge catch, poor against anything above. A smash can earn a Thread like any other move.'],
+    usmash: ['Clockstrike', 'The buckler lifts, the dagger sweeps up through the space above him: two 2% stings on frames 12 and 13 draw them up the arc, then the finish on 14 and 15, 13% at the tip, 11% near the grip. Narrow, good through a platform.'],
+    dsmash: ['Split Seconds', 'A cut at the front ankle on frame 10, then the torso ratchets round and a second cut snaps behind on frame 17. Each side can hit its own target.', 'f10 · 6%  ·  f17 · 8%'],
+    nair: ['Pendulum', 'A full front flip with the dagger held out, so the blade goes right round him: three stinging passes (in front, underneath, behind, frames 5 to 14) that hold the opponent close, then the finisher over the top and down in front on frames 15 to 20. Hits on every side. Hinge window after the finisher only.'],
+    fair: ['Prismatic Fang', 'A snapped stab in an abrupt bracket shape, aimed LOW, MID or HIGH by the stick as it starts. LOW sets up a tech chase, MID carries outward, HIGH pops up for Bell Needle. Hinge window after contact; in the air the Hinge only moves him.'],
+    bair: ['Backhand Ratchet', 'A whole spin on the spot: his back turns to the target as the blade lashes out behind him, and he comes all the way round. 10.5% near the hilt, 8.5% at the tip. His strongest aerial off the stage.'],
+    uair: ['Bell Needle', 'A back flip with the dagger held at full stretch, raking over his head from in front to behind on frames 5 to 8. His juggle tool; ideal for landing on platforms.'],
+    dair: ['Deadfall', 'A dive: he pitches over till he hangs head-down and drives the dagger straight down, then rolls on round. The curved tip spikes on frames 10 and 11; the rest sends diagonally away. A hit stops his fall for 3 frames. A miss lands with 24 frames of lag.', 'f10-11 spike · 10.5%'],
+    grab: ['Arm Hook', 'A short arm-hook reach, about 0.87 of the usual. Out of a dash he advances a little; turning round out of a run reaches furthest.'],
+    pummel: ['Knuckle Ping', 'The buckler\'s knuckle taps the ribcage for 1.1%. 17 frames between pummels.'],
+    f: ['Slip Knot', 'Thrusts the buckler under the sternum and sends the opponent ahead at 42 degrees.'],
+    b: ['Rewind', 'Spins the opponent round the buckler\'s handle and lets go behind him. Strong at the ledge.'],
+    u: ['Open Clock', 'Ratchets the dagger against the buckler and sends the opponent straight up: juggles start here.'],
+    d: ['Set the Tooth', 'Pins an ankle with the buckler rim and kicks the opponent up in front, for a follow-up at low damage.'],
+    getup: ['Low Ticks', 'From the floor, a low cut in front on frame 19 and behind on frame 24. From the ledge, a cut along the lip on frames 20 to 22. Briefly intangible as he rises (less above 100%).'],
+    hinge: ['Hinge Cancel', 'After a move with a Hinge window has hit or been shielded, tap special with a direction inside that window (without holding shield) to spend a Thread: the buckler rim is set against his body and he pivots 0.8 m forward, 0.65 m back or 0.45 m up. He can attack from frame 5 (frame 9 if the hit was shielded) and do anything after frame 7. No hitbox and no intangibility. After a clean hit (not a shielded one) the opponent is slowed to a quarter speed for half a second. No limit per string: as long as he has Thread and keeps making contact, he can Hinge out of every move in a combo.'],
+    _extra: { title: 'Thread and the Hinge', keys: ['hinge'] },
+  },
   /* Joey: the owner's guide, v1.0 (2026-11-10). Weak on purpose. */
   Joey: {
     nspec: ['Shaker Disaster', 'Shakes a protein shaker, forgets the lid and throws the whole bottle. It leaves on frame 22 in a short arc and breaks on the first thing it touches. One bottle at a time. The powder on his face is only for show.'],
@@ -461,6 +490,13 @@ const MOVE_RULES = {
     ['↓ B', 'Counter, Then the Axe', 'Counter with the axe stuck in the stage and it rips itself out and homes in on the attacker, as strong as the distance it had to travel. It never homes while it is still flying.'],
     ['A + B', 'Berserker', 'Damage, knockback and speed up by half, fire on everything, and his own damage climbing 5% a second. Turn it off with A + B again before it costs too much.'],
   ],
+  Knell: [
+    ['★', 'Crossline and Thread', 'Link two moves of different directions (neutral, forward, up, down, back; LOW and HIGH tracks count as their own) and a gold notch at his feet lights: a Thread, five at most, one a move. The second must make contact within 90 frames of the first (45 after a shield). Down tilt into up tilt, dash attack into up tilt, jab into forward tilt all earn one; the same move twice, a multi-hit on its own, whiffs and throws do not.'],
+    ['B + dir', 'Hinge Cancel', 'Spend a Thread inside a move\'s Hinge window after contact for a short pivot forward, back or up. It is not an attack: it changes where the next cut comes from. After a clean hit it slows the opponent to a quarter speed for half a second. As many per string as he has Thread.'],
+    ['→ A', 'Blade Clock', 'Dial Cut, Prismatic Fang and Needlewheel each have three tracks: aim LOW, MID or HIGH with the stick as they start. Aim where the opponent will be.'],
+    ['Shield', 'Clink', 'A perfect block gives 60 frames of Clink: his next grounded dagger hit does 1.5% more and holds 2 frames longer. Taking damage loses it.'],
+    ['★', 'Small Shield, Short Blade', 'His shield is 0.9 the usual size; tilt it toward a hit (shield + forward or back) to be pushed less. The dagger is short: against long swords, catch with Deadbolt or punish the whiff.'],
+  ],
   Brand: [
     ['★', 'The Whole Blade', 'Her sword hits the same from the guard to the tip, and it is longer than most swings. Stand where it reaches and the other fighter falls short. While a cut is out its arc stays on screen, with a red spot at the tip: the end of her reach.'],
     ['→ B', 'The Door Guards Once', 'Shield Bash stops one light strike (8% or less) from the front on frames 5 to 8, on the ground only. It is a read: thrown out with nothing to stop, it leaves 24 frames to punish.'],
@@ -479,11 +515,11 @@ const GETUP_TEXT = ['Get-up Attack', 'Getting up from the floor, strikes both si
 const PUMMEL_TEXT = ['Pummel', 'Press attack while holding the opponent to add damage before a throw.'];
 
 /* ---------- Pages, built from the words and the moves themselves ---------- */
-const ML_INPUT = { berserk: 'A + B', nspec: 'B', sspec: '→ B', uspec: '↑ B', dspec: '↓ B', jab: 'A', ftilt: '→ A', utilt: '↑ A', dtilt: '↓ A', dash: 'Dash A', fsmash: 'Smash → A', usmash: 'Smash ↑ A', dsmash: 'Smash ↓ A',
+const ML_INPUT = { hinge: 'B + dir', berserk: 'A + B', nspec: 'B', sspec: '→ B', uspec: '↑ B', dspec: '↓ B', jab: 'A', ftilt: '→ A', utilt: '↑ A', dtilt: '↓ A', dash: 'Dash A', fsmash: 'Smash → A', usmash: 'Smash ↑ A', dsmash: 'Smash ↓ A',
   nair: 'Air A', fair: 'Air → A', bair: 'Air ← A', uair: 'Air ↑ A', dair: 'Air ↓ A', grab: 'Grab', pummel: 'Grab A', f: 'Grab →', b: 'Grab ←', u: 'Grab ↑', d: 'Grab ↓', getup: 'Get-up A', launch: 'In flight' };
 const ML_GROUND = ['jab', 'dash', 'ftilt', 'utilt', 'dtilt', 'fsmash', 'usmash', 'dsmash'], ML_AIR = ['nair', 'fair', 'bair', 'uair', 'dair'], ML_SPEC = ['nspec', 'sspec', 'uspec', 'dspec'];
 /* every move a form has, and the entry that documents it (the move keys that are part of another move) */
-const ML_PART_OF = { nspecE: 'nspec', fsmashE: 'fsmash', usmashE: 'usmash', dsmashE: 'dsmash', fairE: 'fair', bairE: 'bair', uairE: 'uair', uspecE: 'uspec', uspecL: 'uspec', uspecLE: 'uspec', dspecHit: 'dspec', dspecHitE: 'dspec', nspecR: 'nspec', nspecF: 'nspec', uspecA: 'uspec', dspecA: 'dspec', jab2: 'jab', jab3: 'jab', jabr: 'jab', dgrab: 'grab', pgrab: 'grab', sbrake: 'sspec', dsnap: 'dspec', dcounter: 'dspec', flyStop: 'launch', swingBite: 'sspec', throws: 'grab', nspecH: 'nspec', ledgeatk: 'getup', getupB: 'getup' };
+const ML_PART_OF = { ftiltL: 'ftilt', ftiltH: 'ftilt', fairL: 'fair', fairH: 'fair', nspecL: 'nspec', sspecW: 'sspec', sspecB: 'sspec', dspecR: 'dspec', hingeS: 'hinge', nspecE: 'nspec', fsmashE: 'fsmash', usmashE: 'usmash', dsmashE: 'dsmash', fairE: 'fair', bairE: 'bair', uairE: 'uair', uspecE: 'uspec', uspecL: 'uspec', uspecLE: 'uspec', dspecHit: 'dspec', dspecHitE: 'dspec', nspecR: 'nspec', nspecF: 'nspec', uspecA: 'uspec', dspecA: 'dspec', jab2: 'jab', jab3: 'jab', jabr: 'jab', dgrab: 'grab', pgrab: 'grab', sbrake: 'sspec', dsnap: 'dspec', dcounter: 'dspec', flyStop: 'launch', swingBite: 'sspec', throws: 'grab', nspecH: 'nspec', ledgeatk: 'getup', getupB: 'getup' };
 const pc = v => +(+v).toFixed(1) + '%';
 function mlFd(fm, key) {
   const mv = fm.moves;

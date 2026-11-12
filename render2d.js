@@ -243,6 +243,45 @@ const ART = {
     g.strokeStyle = OL; g.lineWidth = 1.1; g.beginPath(); g.moveTo(-1.2, 14.8 + bob); g.quadraticCurveTo(-2.2, 13.2 + bob, -1.8, 11.6 + bob); g.stroke(); g.strokeStyle = beard; g.lineWidth = 0.6; g.stroke();
     g.fillStyle = OL; g.beginPath(); g.arc(1.6, 14.6 + bob, 0.2, 0, TAU); g.fill(); g.fillStyle = c[1]; g.fillRect(1.0, 14.9 + bob, 1.2, 0.35);   /* the gold plate over one eye */
   },
+  /* Knell, the Angle Thief: a compact skeletal automaton. Iron greaves, a bone-and-brass ribcage with an ember behind it,
+     a crested helm with two lamp eyes, a round buckler on the leading forearm and a short recurved dagger. The dagger is
+     drawn to where the attack's own shape is (as Brand's blade), with the red point while it can hit; his Thread shows as
+     two gold notches at his feet. Faces +x. */
+  Knell(c, t, f) {
+    const sw = gait(f) * 1.1, bob = Math.sin(t * 0.08) * 0.12, bone = '#d8d0bc', iron = c[0], brass = c[1], ember = c[2];
+    limb(-1.1, 4.2, -1.2 - sw, 0.8, 1.3, tint(iron, -0.2)); limb(1.1, 4.2, 1.2 + sw, 0.8, 1.3, tint(iron, -0.2));
+    for (const s of [-1, 1]) { g.beginPath(); g.ellipse(s * 1.2 + s * sw + 0.5, 0.5, 1.4, 0.6, 0, 0, TAU); ink(tint(iron, -0.35), 0.26); }
+    g.beginPath(); g.moveTo(-2.4, 4.4); g.quadraticCurveTo(0, 3.6, 2.6, 4.4); g.lineTo(2.2, 6.0); g.lineTo(-2.0, 6.0); g.closePath(); ink(vgrad(iron, 3.6, 6.2));   /* the pelvis plate */
+    g.beginPath(); g.rect(-0.35, 5.8, 0.7, 2.2); ink(bone, 0.22);   /* the spine */
+    g.beginPath(); g.ellipse(0.2, 9.4 + bob, 2.6, 2.4, 0, 0, TAU); g.fillStyle = 'rgba(255,122,42,.35)'; g.fill();   /* the ember behind the ribs */
+    g.strokeStyle = OL; g.lineWidth = 0.75; for (const y of [8.2, 9.2, 10.2, 11.1]) { g.beginPath(); g.moveTo(-2.2, y + bob); g.quadraticCurveTo(0.2, y - 0.9 + bob, 2.5, y + bob); g.stroke(); }
+    g.strokeStyle = bone; g.lineWidth = 0.42; for (const y of [8.2, 9.2, 10.2, 11.1]) { g.beginPath(); g.moveTo(-2.2, y + bob); g.quadraticCurveTo(0.2, y - 0.9 + bob, 2.5, y + bob); g.stroke(); }
+    g.beginPath(); g.ellipse(-0.6, 11.6 + bob, 1.6, 0.9, 0, 0, TAU); ink(vgrad(brass, 10.8, 12.4), 0.3);   /* the far pauldron */
+    /* the dagger arm */
+    let tx = 4.1, ty = 4.6, hx = 2.4, hy = 6.4;
+    if (f && f.state === 'attack' && f.move && f.move.h) { const m = f.move, h = m.h.find(q => !q.grab && !q.nb && f.mf >= q.f0 && f.mf <= q.f1) || m.h.find(q => !q.grab && !q.nb && f.mf < q.f0) || m.h.filter(q => !q.grab && !q.nb).pop();
+      if (h && h.in) { const p = f.mf < h.f0 ? f.mf / h.f0 : f.mf <= h.f1 ? 1 : Math.max(0, 1 - (f.mf - h.f1) / Math.max(1, m.t - h.f1)), e = p * p * (3 - 2 * p);
+        tx += (h.x - tx) * e; ty += (h.y - ty) * e; hx += (h.in[0] - hx) * e; hy += (h.in[1] - hy) * e; } }
+    limb(0.9, 11 + bob, (0.9 + hx) / 2 + 0.3, (11 + bob + hy) / 2 - 0.4, 0.8, bone); limb((0.9 + hx) / 2 + 0.3, (11 + bob + hy) / 2 - 0.4, hx, hy, 0.7, bone);
+    { const dx = tx - hx, dy = ty - hy, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, nx = -uy, ny = ux, bx = hx + dx * 0.6 + nx * 0.35, by = hy + dy * 0.6 + ny * 0.35;
+      g.beginPath(); g.moveTo(hx + nx * 0.28, hy + ny * 0.28); g.quadraticCurveTo(bx + nx * 0.25, by + ny * 0.25, tx, ty); g.quadraticCurveTo(bx - nx * 0.25, by - ny * 0.25, hx - nx * 0.28, hy - ny * 0.28); g.closePath(); ink('#b9bec6', 0.3);   /* the recurved blade */
+      g.beginPath(); g.moveTo(hx + ux * 0.4 + nx * 0.8, hy + uy * 0.4 + ny * 0.8); g.lineTo(hx + ux * 0.4 - nx * 0.8, hy + uy * 0.4 - ny * 0.8); g.strokeStyle = OL; g.lineWidth = 0.6; g.stroke(); g.strokeStyle = brass; g.lineWidth = 0.32; g.stroke();
+      g.beginPath(); g.arc(hx, hy, 0.6, 0, TAU); ink(bone, 0.2); }
+    if (f && f.state === 'attack' && f.move && f.move.h && f.move.h.some(q => !q.grab && !q.nb && q.d > 0 && f.mf >= q.f0 && f.mf <= q.f1)) { g.beginPath(); g.arc(tx, ty, 0.45, 0, TAU); g.fillStyle = '#ff1414'; g.fill(); }
+    /* the helm: a rounded iron shell with a brass crest, two lamp eyes */
+    g.beginPath(); g.arc(0.4, 12.6 + bob, 1.55, 0, TAU); ink(vgrad(iron, 11, 14.2), 0.3);
+    g.beginPath(); g.moveTo(-1.2, 13.6 + bob); g.quadraticCurveTo(0.2, 15.2 + bob, 1.8, 13.8 + bob); g.lineTo(0.9, 13.9 + bob); g.closePath(); ink(brass, 0.24);
+    g.fillStyle = ember; for (const ex of [1.05, 1.7]) { g.beginPath(); g.arc(ex, 12.7 + bob, 0.22 + 0.06 * Math.sin(t * 0.09), 0, TAU); g.fill(); }
+    /* the buckler on the leading forearm: forward while shielding, catching (Deadbolt) or vaulting */
+    const up = f && f.state === 'attack' && (f.mname === 'dspec' || f.mname === 'sspec') ? 1 : f && (f.state === 'shield' || f.state === 'shieldstun') ? 0.8 : f && f.state === 'attack' && f.mname === 'hinge' ? 0.6 : 0;
+    const sx = 2.1 + up * 1.9, sy = 7.8 + bob + up * 0.6, sr = 1.75 + up * 0.25, spin = f && f.state === 'attack' && (f.mname === 'hinge' || f.mname === 'hingeS') ? f.mf * 0.9 : 0;
+    g.beginPath(); g.ellipse(sx, sy, sr * 0.6, sr, 0, 0, TAU); ink(vgrad(tint(iron, 0.1), sy - sr, sy + sr), 0.34);
+    g.strokeStyle = brass; g.lineWidth = 0.22; g.beginPath(); g.ellipse(sx, sy, sr * 0.45, sr * 0.78, 0, 0, TAU); g.stroke();
+    g.beginPath(); for (let k = 0; k < 6; k++) { const a = spin + k * TAU / 6; g.moveTo(sx, sy); g.lineTo(sx + Math.cos(a) * sr * 0.42, sy + Math.sin(a) * sr * 0.7); } g.stroke();   /* the gear spokes */
+    g.fillStyle = brass; g.beginPath(); g.arc(sx, sy, 0.3, 0, TAU); g.fill();
+    /* Thread: two notches under his feet, lit gold when held */
+    if (f && f.thread !== undefined) for (let k = 0; k < KN.max; k++) { const ox = (k - (KN.max - 1) / 2) * 1.6 - 0.5; g.beginPath(); g.moveTo(ox - 0.5, -0.35); g.lineTo(ox + 0.5, -0.35); g.lineTo(ox + 0.2, -0.95); g.lineTo(ox - 0.2, -0.95); g.closePath(); g.fillStyle = k < f.thread ? '#ffd166' : 'rgba(255,209,102,.18)'; g.fill(); }
+  },
   /* Joey: an ordinary lean man, red cap, a dark mustache, grey camouflage shorts, bare feet. The reaching hand is drawn to
      where the attack's own shape is, as Brand's blade is. Faces +x. */
   Joey(c, t, f) {
