@@ -54,9 +54,9 @@ vm.runInThisContext(`
     const T = mv.throws, g = mv.grab.h[0], dg = mv.dgrab.h[0], pg = mv.pgrab.h[0];
     check('document: grabs, pummel and throws', g.f0 === 6 && mv.grab.t === 31 && dg.f0 === 9 && mv.dgrab.t === 41 && pg.f0 === 10 && mv.pgrab.t === 40 && st.pummel === 1.1 && st.pumT === 17
       && T.f.d === 6.5 && T.f.a === 42 && T.b.d === 8.2 && T.b.a === 142 && T.u.d === 5.8 && T.u.a === 88 && T.d.d === 5 && T.d.a === 77, 'grab f6, dash f9, pivot f10; throws 6.5 / 8.2 / 5.8 / 5%');
-    const hw = { jab: [8, 11], jab2: [9, 12], ftilt: [10, 13], utilt: [11, 14], dtilt: [8, 11], nair: [21, 24], fair: [10, 13] }, wrong = Object.keys(hw).filter(k => !mv[k].hinge || mv[k].hinge.join() !== hw[k].join());
-    const none = ['jab3', 'dash', 'fsmash', 'usmash', 'dsmash', 'bair', 'uair', 'dair', 'grab', 'nspec', 'sspec', 'uspec', 'dspec', 'ledgeatk'].filter(k => mv[k].hinge);
-    check('document: Hinge windows', !wrong.length && !none.length, wrong.length || none.length ? 'wrong: ' + wrong.concat(none).join(', ') : 'jab 8-11, jab 2 9-12, f-tilt 10-13, u-tilt 11-14, d-tilt 8-11, n-air 21-24, f-air 10-13; none elsewhere');
+    const hw = { jab: [8, 11], jab2: [9, 12], ftilt: [10, 13], utilt: [11, 14], dtilt: [8, 11], nair: [5, 34], fair: [6, 31], fairL: [6, 31], fairH: [6, 31], bair: [8, 35], uair: [5, 28], dair: [10, 41] }, wrong = Object.keys(hw).filter(k => !mv[k].hinge || mv[k].hinge.join() !== hw[k].join());
+    const none = ['jab3', 'dash', 'fsmash', 'usmash', 'dsmash', 'grab', 'nspec', 'sspec', 'uspec', 'dspec', 'ledgeatk'].filter(k => mv[k].hinge);
+    check('document: Hinge windows', !wrong.length && !none.length, wrong.length || none.length ? 'wrong: ' + wrong.concat(none).join(', ') : 'jab 8-11, jab 2 9-12, f-tilt 10-13, u-tilt 11-14, d-tilt 8-11, every aerial from its first hit to its end (n 5-34, f 6-31, b 8-35, u 5-28, d 10-41); none on smashes or specials');
     /* blade paths: each dagger hit's direction and its class */
     const pa = [['jab', 10, 'M'], ['jab2', -35, 'L'], ['jab3', 65, 'H'], ['ftiltL', -55, 'L'], ['ftilt', 0, 'M'], ['ftiltH', 55, 'H'], ['dtilt', -72, 'L'], ['uair', 34, 'H'], ['fairL', -55, 'L'], ['fairH', 55, 'H'], ['nspecL', -60, 'L'], ['nspecH', 10, 'M']];
     const pbad = pa.filter(([m, a, c]) => { const h = mv[m].h.find(x => x.cl); const ang = Math.atan2(h.y - h.in[1], h.x - h.in[0]) * 180 / Math.PI; return !(Math.abs(ang - a) <= 8 && h.cl === c); }).map(r => r[0]);
@@ -137,6 +137,15 @@ vm.runInThisContext(`
     check('Hinge: after a clean hit the opponent is slowed for 30 frames; not after a shielded one', fw.slow >= 29 && atkS.slow === 0, 'slow frames ' + fw.slow + ' / shielded ' + atkS.slow);
     const sl = (() => { const [k, f] = setup(KN_, FL, -30, 30); run(5); const s0 = f.sf; f.slowT = 30; f.slowAc = 0; run(30); const a = f.sf - s0; const s1 = f.sf; run(30); return [a, f.sf - s1]; })();
     check('Hinge slow: a quarter speed for half a second, then normal', sl[0] >= 7 && sl[0] <= 8 && sl[1] === 30, 'state frames over 30 game frames: ' + sl[0] + ' slowed, ' + sl[1] + ' after');
+    /* the owner's aerial chains (2026-11-12): any aerial into a Hinge, the Hinge into any aerial */
+    const chain = (() => { const [k, f] = setup(KN_, FL, 0, 7); airborne(k, 0, 40); airborne(f, 7, 40); k.thread = 3; k.startMove('fair');
+      const plan = [['fair', 'u'], ['hinge', ''], ['nair', 'f'], ['hinge', 'b']]; let step = 0; const log = [];
+      SCRIPT[0] = (i, tt, ff) => { const pl = plan[step]; if (!pl) return; const d = pl[1];
+        if (ff.mname === 'hinge' || ff.mname === 'hingeS') { if (ff.mf >= 2) { i.atk = tt % 2 === 0; i.lx = d === 'b' ? -ff.face : 0; } }
+        else if (ff.knC && ff.move && ff.move.hinge && ff.mf >= ff.move.hinge[0]) { i.spc = tt % 2 === 0; i.lx = d === 'f' ? ff.face : 0; i.ly = d === 'u' ? 1 : 0; } };
+      run(120, () => { const n = k.mname || k.state; if (n !== log[log.length - 1]) { log.push(n); if (plan[step + 1] && n === plan[step + 1][0]) step++; } });
+      SCRIPT[0] = null; return log.join(' > '); })();
+    check('Hinge: any aerial cancels into a Hinge and the Hinge into any aerial', /^fair > hinge > nair > hinge > bair/.test(chain), chain);
     check('Hinge: attack from its frame 5, frame 9 after a shielded hit', atk.ok && atkS.ok && atk.act === 5 && atkS.act === 9, 'attacked on frame ' + atk.act + ' / ' + atkS.act);
   }
   /* ---- stinging multi-hits (the owner, 2026-11-12) ---- */

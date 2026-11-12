@@ -2267,16 +2267,16 @@ const KNELL = (() => {
           return [seg(c, 0, 0.6, { part: 'near', d: 11, g: 2 }), seg(c, 0.6, 1, { d: 13, k: 100, g: 2 })]; }) },
         dsmash: { t: 45, chg: 6, chgK: 0.35, h: [dag(10, 11, 0.3, 0.27, -80, 6, 32, 35, 70, { ru: 0.18 }), dag(17, 18, -0.3, 0.27, 260, 8, 145, 38, 88, { ru: 0.18, g: 1 })] },
         /* ---- air: Pendulum, Prismatic Fang (three tracks), Backhand Ratchet, Bell Needle, Deadfall ---- */
-        nair: { t: 34, air: 1, ll: 9, ac0: 3, ac: 29, hinge: [21, 24], h: NAIR,
-          on(f, n) { if (n === 1) f.knNair2 = false; if (n < 21) f.knC = f.knC && n >= 15; } },   /* the Hinge only after the finisher: contact counts from frame 15 */
-        fair: { t: 31, air: 1, ll: 10, ac0: 4, ac: 26, hinge: [10, 13], on: aimOn('fair'), h: [dag(6, 8, 0.28, 0.54, 0, 7.2, 48, 30, 72, { ru: 0.15 })] },
-        fairL: { t: 31, air: 1, ll: 10, ac0: 4, ac: 26, hinge: [10, 13], on: aimOn('fair'), h: [dag(6, 8, 0.26, 0.4, -55, 7.2, 32, 30, 72, { ru: 0.15 })] },
-        fairH: { t: 31, air: 1, ll: 10, ac0: 4, ac: 26, hinge: [10, 13], on: aimOn('fair'), h: [dag(6, 8, 0.24, 0.66, 55, 7.2, 78, 30, 72, { ru: 0.15 })] },
+        nair: { t: 34, air: 1, ll: 9, ac0: 3, ac: 29, hinge: [5, 34], h: NAIR,
+          on(f, n) { if (n === 1) f.knNair2 = false; } },   /* every aerial can Hinge from its first hit to its end (the owner, 2026-11-12) */
+        fair: { t: 31, air: 1, ll: 10, ac0: 4, ac: 26, hinge: [6, 31], on: aimOn('fair'), h: [dag(6, 8, 0.28, 0.54, 0, 7.2, 48, 30, 72, { ru: 0.15 })] },
+        fairL: { t: 31, air: 1, ll: 10, ac0: 4, ac: 26, hinge: [6, 31], on: aimOn('fair'), h: [dag(6, 8, 0.26, 0.4, -55, 7.2, 32, 30, 72, { ru: 0.15 })] },
+        fairH: { t: 31, air: 1, ll: 10, ac0: 4, ac: 26, hinge: [6, 31], on: aimOn('fair'), h: [dag(6, 8, 0.24, 0.66, 55, 7.2, 78, 30, 72, { ru: 0.15 })] },
         /* the backhand turns only his shoulder and wrist: strongest near the hilt (10.5%), weakest at the tip (8.5%) */
-        bair: { t: 35, air: 1, ll: 12, ac0: 5, ac: 30, h: (c => [seg(c, 0, 0.45, { part: 'near', d: 10.5, k: 96 }), seg(c, 0.45, 1, { d: 8.5, k: 88 })])(dag(8, 10, -0.22, 0.56, 205, 9.5, 144, 36, 92, { len: 0.96 * KU, ru: 0.16 })) },
-        uair: { t: 28, air: 1, ll: 8, ac0: 3, ac: 23, h: UAIR },
+        bair: { t: 35, air: 1, ll: 12, ac0: 5, ac: 30, hinge: [8, 35], h: (c => [seg(c, 0, 0.45, { part: 'near', d: 10.5, k: 96 }), seg(c, 0.45, 1, { d: 8.5, k: 88 })])(dag(8, 10, -0.22, 0.56, 205, 9.5, 144, 36, 92, { len: 0.96 * KU, ru: 0.16 })) },
+        uair: { t: 28, air: 1, ll: 8, ac0: 3, ac: 23, hinge: [5, 28], h: UAIR },
         /* a straight drop of the dagger: the curved tip spikes on 10 and 11, the rest sends away at 65; a hit stops his fall 3 frames */
-        dair: { t: 41, air: 1, ll: 15, ac0: 6, ac: 36, llf: f => f.hitG.size ? 15 : 24,
+        dair: { t: 41, air: 1, ll: 15, ac0: 6, ac: 36, hinge: [10, 41], llf: f => f.hitG.size ? 15 : 24,
           h: (c => [seg(c, 0.6, 1, { f1: 11, a: 270, b: 30, k: 80 }), seg(c, 0, 1, { a: 65, b: 30, k: 70 })])(dag(10, 12, 0.02, 0.24, -95, 10.5, 270, 30, 80, { len: 0.91 * KU })),
           on(f, n) { if (n === 1) f.knFz = -1; if (f.hitG.size && f.knFz === -1) f.knFz = 3; if (f.knFz > 0) { f.knFz--; f.vy = 0; } } },
         /* ---- grabs: a short arm-hook (0.87 of the usual reach), Knuckle Ping; get-ups ---- */
