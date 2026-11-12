@@ -66,6 +66,18 @@ vm.runInThisContext(`
   { const [k] = setup(KS, FL, 0, 60); airborne(k, -30, 10); k.startMove('uspec'); const y0 = k.y; let top = y0, state = '';
     run(60, () => { top = Math.max(top, k.y); if (k.mf === 0 || k.state === 'helpless') state = state || k.state; });
     check('Kestrel Rise: climbs about two of his heights, then special fall', top - y0 > 22 && top - y0 < 36 && state === 'helpless', 'rose ' + (top - y0).toFixed(1) + ', then ' + state); }
+  /* ---- Sky Toss: a jump ends it early, from frame 21; without one it runs its full length ---- */
+  { const toss = press => { const [k, f] = setup(KS, FL, 0, 8); k.victim = f; f.set('held'); k.throwK = 'u'; k.set('throw'); let out = -1, last = 0;
+      SCRIPT[0] = (i, tt, ff) => { i.jmp = press && ff.state === 'throw' && ff.sf >= 16; };
+      run(60, () => { if (k.state === 'throw') last = k.sf; else if (out < 0) out = last + 1; }); return { out, state: k.state, air: !k.grounded, fy: f.y }; };
+    const j = toss(true), n = toss(false);
+    check('Sky Toss: jumps out on frame 21, else ends on 43', j.out === 21 && j.air && n.out === 43, 'with a jump: out on ' + j.out + (j.air ? ', airborne' : ', grounded') + '; without: out on ' + n.out); }
+  /* ---- Skyward Arc (up tilt): a jump ends it early, from frame 20; without one it runs its full length ---- */
+  { const arc = press => { const [k] = setup(KS, FL, 0, 40); k.startMove('utilt'); let out = -1, last = 0;
+      SCRIPT[0] = (i, tt, ff) => { i.jmp = press && ff.state === 'attack' && ff.mf >= 15; };
+      run(60, () => { if (k.state === 'attack') last = k.mf; else if (out < 0) out = last + 1; }); return { out, air: !k.grounded }; };
+    const j = arc(true), n = arc(false);
+    check('Skyward Arc: jumps out on frame 20, else ends on 38', j.out === 20 && j.air && n.out === 38, 'with a jump: out on ' + j.out + (j.air ? ', airborne' : ', grounded') + '; without: out on ' + n.out); }
   /* ---- CPU matches against the roster run clean ---- */
   { let badN = 0, done = 0; const msg = [];
     for (let o = 0; o < ROSTER.length; o++) { setup(KS, [o, 0], -30, 30); cpuInput = AI;
