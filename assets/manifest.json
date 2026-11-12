@@ -8580,5 +8580,547 @@
     "end": 0.43333333333333335
    }
   }
+ },
+ "Kestrel": {
+  "file": "assets/brand/export/kestrel-v1.glb",
+  "height": 14.42,
+  "cloth": "assets/brand/export/kestrel-cape.json",
+  "blendIn": {
+   "Idle": 8,
+   "Walk": 6,
+   "Run": 5
+  },
+  "chargeShake": 0.2,
+  "clips": {
+   "idle": {
+    "clip": "Idle"
+   },
+   "idle2": {
+    "clip": "Idle2"
+   },
+   "walk": {
+    "clip": "Walk",
+    "stride": 14
+   },
+   "run": {
+    "clip": "Run",
+    "stride": 36
+   },
+   "crouch": {
+    "clip": "Crouch",
+    "at": 0.183
+   },
+   "brake": {
+    "clip": "Brake",
+    "from": 0,
+    "to": 0.483
+   },
+   "jumpsquat": {
+    "clip": "JumpSquat",
+    "from": 0,
+    "to": 0.05
+   },
+   "rise": {
+    "clip": "Rise",
+    "from": 0,
+    "to": 0.55
+   },
+   "fall": {
+    "clip": "Fall"
+   },
+   "fastfall": {
+    "clip": "FastFall"
+   },
+   "airjump": {
+    "clip": "AirJump",
+    "from": 0,
+    "to": 0.833
+   },
+   "helpless": {
+    "clip": "Helpless"
+   },
+   "land": {
+    "clip": "Land",
+    "from": 0,
+    "to": 0.317
+   },
+   "landHard": {
+    "clip": "LandHard",
+    "from": 0,
+    "to": 0.567
+   },
+   "shield": {
+    "clip": "Shield",
+    "from": 0,
+    "to": 0.167
+   },
+   "shieldHit": {
+    "clip": "ShieldHit",
+    "from": 0,
+    "to": 0.217
+   },
+   "hit": {
+    "clip": "Hit",
+    "from": 0,
+    "to": 0.45
+   },
+   "hitHeavy": {
+    "clip": "HitHeavy",
+    "from": 0,
+    "to": 0.65
+   },
+   "hitBack": {
+    "clip": "HitBack",
+    "from": 0,
+    "to": 0.45
+   },
+   "hitHeavyBack": {
+    "clip": "HitHeavyBack",
+    "from": 0,
+    "to": 0.65
+   },
+   "launch": {
+    "clip": "Launch",
+    "from": 0,
+    "to": 0.55
+   },
+   "launchUp": {
+    "clip": "LaunchUp",
+    "from": 0,
+    "to": 0.717
+   },
+   "spike": {
+    "clip": "Spike",
+    "from": 0,
+    "to": 0.717
+   },
+   "tumble": {
+    "clip": "Tumble"
+   },
+   "down": {
+    "clip": "Down",
+    "from": 0,
+    "to": 0.383
+   },
+   "dizzy": {
+    "clip": "Dizzy"
+   },
+   "airdodge": {
+    "clip": "AirDodge",
+    "from": 0,
+    "to": 0.8
+   },
+   "dodge": {
+    "clip": "Spot",
+    "from": 0,
+    "to": 0.5
+   },
+   "roll": {
+    "clip": "Roll",
+    "from": 0,
+    "to": 0.633
+   },
+   "ledge": {
+    "clip": "LedgeHang"
+   },
+   "hold": {
+    "clip": "Hold"
+   },
+   "held": {
+    "clip": "Held"
+   },
+   "pummel": {
+    "clip": "Pummel",
+    "from": 0,
+    "to": 0.45
+   },
+   "respawn": {
+    "clip": "Respawn"
+   },
+   "throw": {
+    "clip": "ThrowF",
+    "from": 0,
+    "to": 0.567
+   },
+   "throw_f": {
+    "clip": "ThrowF",
+    "from": 0,
+    "to": 0.567
+   },
+   "throw_b": {
+    "clip": "ThrowB",
+    "from": 0,
+    "to": 0.783
+   },
+   "throw_u": {
+    "clip": "ThrowU",
+    "from": 0,
+    "to": 0.783
+   },
+   "throw_d": {
+    "clip": "ThrowD",
+    "from": 0,
+    "to": 0.75
+   }
+  },
+  "blade": {
+   "base": "sword",
+   "tip": "swordTip",
+   "at": 0.2,
+   "dot": 0.6,
+   "col": 16757850,
+   "col2": 16734750
+  },
+  "strikers": [
+   {
+    "bone": "swordTip",
+    "ext": 0.4
+   },
+   {
+    "bone": "handL",
+    "ext": 1.2
+   },
+   {
+    "bone": "handR",
+    "ext": 1.2
+   },
+   {
+    "bone": "footR",
+    "ext": 1.6
+   },
+   {
+    "bone": "footL",
+    "ext": 1.6
+   }
+  ],
+  "springs": [],
+  "attacks": {
+   "jab": {
+    "clip": "Jab1",
+    "start": 0,
+    "contact": [
+     0.05,
+     0.11666666666666667
+    ],
+    "end": 0.45
+   },
+   "jab2": {
+    "clip": "Jab2",
+    "start": 0,
+    "contact": [
+     0.06666666666666667,
+     0.15
+    ],
+    "end": 0.4666666666666667
+   },
+   "ftilt": {
+    "clip": "TiltF",
+    "start": 0,
+    "contact": [
+     0.1,
+     0.16666666666666666
+    ],
+    "end": 0.5833333333333334
+   },
+   "utilt": {
+    "clip": "TiltU",
+    "start": 0,
+    "contact": [
+     0.08333333333333333,
+     0.2
+    ],
+    "end": 0.65
+   },
+   "dtilt": {
+    "clip": "TiltD",
+    "start": 0,
+    "contact": [
+     0.1,
+     0.15
+    ],
+    "end": 0.35
+   },
+   "dash": {
+    "clip": "DashAttack",
+    "start": 0,
+    "contact": [
+     0.18333333333333332,
+     0.25
+    ],
+    "end": 0.6833333333333333
+   },
+   "fsmash": {
+    "clip": "SmashF",
+    "start": 0,
+    "contact": [
+     0.15,
+     0.21666666666666667
+    ],
+    "end": 0.8166666666666667
+   },
+   "usmash": {
+    "clip": "SmashU",
+    "start": 0,
+    "contact": [
+     0.2,
+     0.26666666666666666
+    ],
+    "end": 0.9
+   },
+   "dsmash": {
+    "clip": "SmashD",
+    "start": 0,
+    "contact": [
+     0.06666666666666667,
+     0.36666666666666664
+    ],
+    "end": 1.0666666666666667
+   },
+   "nair": {
+    "clip": "AirN",
+    "start": 0,
+    "contact": [
+     0.08333333333333333,
+     0.35
+    ],
+    "end": 0.8
+   },
+   "fair": {
+    "clip": "AirF",
+    "start": 0,
+    "contact": [
+     0.05,
+     0.11666666666666667
+    ],
+    "end": 0.55
+   },
+   "bair": {
+    "clip": "AirB",
+    "start": 0,
+    "contact": [
+     0.1,
+     0.18333333333333332
+    ],
+    "end": 0.65
+   },
+   "uair": {
+    "clip": "AirU",
+    "start": 0,
+    "contact": [
+     0.06666666666666667,
+     0.13333333333333333
+    ],
+    "end": 0.75
+   },
+   "dair": {
+    "clip": "AirD",
+    "start": 0,
+    "contact": [
+     0.08333333333333333,
+     0.15
+    ],
+    "end": 0.9833333333333333
+   },
+   "grab": {
+    "clip": "Grab",
+    "start": 0,
+    "contact": [
+     0.08333333333333333,
+     0.15
+    ],
+    "end": 0.5166666666666667
+   },
+   "dgrab": {
+    "clip": "DashGrab",
+    "start": 0,
+    "contact": [
+     0.13333333333333333,
+     0.2
+    ],
+    "end": 0.6833333333333333
+   },
+   "pgrab": {
+    "clip": "PivotGrab",
+    "start": 0,
+    "contact": [
+     0.15,
+     0.23333333333333334
+    ],
+    "end": 0.65,
+    "flip": true
+   },
+   "getup": {
+    "clip": "GetUpAttack",
+    "start": 0,
+    "contact": [
+     0.35,
+     0.4666666666666667
+    ],
+    "end": 0.8166666666666667
+   },
+   "ledgeatk": {
+    "clip": "LedgeAttack",
+    "start": 0,
+    "contact": [
+     0.38333333333333336,
+     0.45
+    ],
+    "end": 0.9
+   },
+   "nspec": {
+    "clip": "SpecN",
+    "start": 0,
+    "contact": [
+     0.25,
+     0.35
+    ],
+    "end": 0.7333333333333333
+   },
+   "nspecC": {
+    "clip": "SpecNLoop",
+    "start": 0,
+    "contact": [
+     0,
+     0.01
+    ],
+    "end": 0.5666666666666667
+   },
+   "nspecR": {
+    "clip": "SpecNRelease",
+    "start": 0,
+    "contact": [
+     0.08333333333333333,
+     0.16666666666666666
+    ],
+    "end": 0.5666666666666667
+   },
+   "sspec": {
+    "clip": "SpecS1",
+    "start": 0,
+    "contact": [
+     0.08333333333333333,
+     0.13333333333333333
+    ],
+    "end": 0.48333333333333334
+   },
+   "sspec2u": {
+    "clip": "SpecS2U",
+    "start": 0,
+    "contact": [
+     0.18333333333333332,
+     0.25
+    ],
+    "end": 0.6666666666666666
+   },
+   "sspec2s": {
+    "clip": "SpecS2S",
+    "start": 0,
+    "contact": [
+     0.21666666666666667,
+     0.26666666666666666
+    ],
+    "end": 0.6666666666666666
+   },
+   "sspec3u": {
+    "clip": "SpecS3U",
+    "start": 0,
+    "contact": [
+     0.2,
+     0.2833333333333333
+    ],
+    "end": 0.6666666666666666
+   },
+   "sspec3s": {
+    "clip": "SpecS3S",
+    "start": 0,
+    "contact": [
+     0.16666666666666666,
+     0.23333333333333334
+    ],
+    "end": 0.7666666666666667
+   },
+   "sspec3d": {
+    "clip": "SpecS3D",
+    "start": 0,
+    "contact": [
+     0.23333333333333334,
+     0.3
+    ],
+    "end": 0.7666666666666667
+   },
+   "sspec4u": {
+    "clip": "SpecS4U",
+    "start": 0,
+    "contact": [
+     0.31666666666666665,
+     0.4166666666666667
+    ],
+    "end": 0.8333333333333334
+   },
+   "sspec4s": {
+    "clip": "SpecS4S",
+    "start": 0,
+    "contact": [
+     0.36666666666666664,
+     0.43333333333333335
+    ],
+    "end": 0.8333333333333334
+   },
+   "sspec4d": {
+    "clip": "SpecS4D",
+    "start": 0,
+    "contact": [
+     0.2,
+     0.6333333333333333
+    ],
+    "end": 1
+   },
+   "uspec": {
+    "clip": "SpecU",
+    "start": 0,
+    "contact": [
+     0.06666666666666667,
+     0.16666666666666666
+    ],
+    "end": 0.633
+   },
+   "dspec": {
+    "clip": "SpecD",
+    "start": 0,
+    "contact": [
+     0,
+     0.01
+    ],
+    "end": 0.9833333333333333
+   },
+   "dspecHit": {
+    "clip": "SpecDHit",
+    "start": 0,
+    "contact": [
+     0.03333333333333333,
+     0.15
+    ],
+    "end": 0.5833333333333334
+   },
+   "*": {
+    "clip": "Jab1",
+    "start": 0,
+    "contact": [
+     0.05,
+     0.11666666666666667
+    ],
+    "end": 0.45
+   }
+  },
+  "points": {
+   "swordTip": [
+    "sword",
+    [
+     0.0116,
+     1.0036,
+     -0.2871
+    ]
+   ]
+  }
  }
 }

@@ -114,6 +114,7 @@ function build() {
         M.scene = g.scene; M.clips = Object.fromEntries(g.animations.map(c => [c.name, c]));
         const box = new THREE.Box3().setFromObject(g.scene); M.height = box.max.y - box.min.y; M.ready = true;
       }, undefined, e => { M.error = String((e && e.message) || e); console.warn('model failed to load: ' + name, e); });
+      if (typeof cfg.cloth === 'string') { const file = cfg.cloth; cfg.cloth = null; fetch(file).then(r => r.json()).then(s => { cfg.cloth = s; }).catch(e => console.warn('cloth failed to load: ' + name, e)); }   /* a cape spec kept in its own file (Kestrel's) */
       if (cfg.axe) new GLTFLoader().load(cfg.axe.file, g => { M.axe = g.scene; }, undefined, e => console.warn('axe failed to load: ' + name, e));   /* Fyrdsman's axe on its own, drawn while it is thrown */
     }
   }).catch(e => console.warn('no model manifest', e));
@@ -164,6 +165,8 @@ function build() {
       v.obj = obj; v.unit = M.cfg.height / M.height; v.flip = f.face;
       obj.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; o.frustumCulled = false; o.material = o.material.clone(); if (f.alt) o.material.color.setRGB(0.78, 0.9, 1.25); v.mats.push(o.material); } });
       v.pivot.add(obj); v.model = M; v.mixer = new THREE.AnimationMixer(obj); setupSprings(v, M);
+      /* points a model was exported without (manifest "points": {name: [parent bone, [x, y, z] in its frame]}): Kestrel's sword point, a bone Blender left out as it bends no mesh */
+      for (const n in M.cfg.points || {}) { const [pn, at] = M.cfg.points[n], par = obj.getObjectByName(pn); if (par && !obj.getObjectByName(n)) { const p = new THREE.Object3D(); p.name = n; p.position.fromArray(at); par.add(p); } }
       /* cloth (manifest "cloth": a capesim.js spec, e.g. Brand's cape from assets/brand/work/brand2-cape.json): simulated, stepped once per game step */
       v.cloth = M.cfg.cloth && typeof CapeSim !== 'undefined' ? CapeSim.three(THREE, obj, M.cfg.cloth) : null; v.clothTick = -1;
       if (M.cfg.lift) obj.position.y = M.cfg.lift;   /* a rider: the model sits this high above the fighter's feet */

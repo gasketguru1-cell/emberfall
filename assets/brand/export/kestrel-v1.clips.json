@@ -1,0 +1,269 @@
+{
+ "AirF": {
+  "seconds": 0.567
+ },
+ "SmashF": {
+  "seconds": 0.85
+ },
+ "AirN": {
+  "seconds": 0.8
+ },
+ "Run": {
+  "seconds": 0.267
+ },
+ "RunTurn": {
+  "seconds": 0.55
+ },
+ "Idle": {
+  "seconds": 1.267
+ },
+ "Walk": {
+  "seconds": 0.8
+ },
+ "Dash": {
+  "seconds": 0.317
+ },
+ "Brake": {
+  "seconds": 0.483
+ },
+ "Crouch": {
+  "seconds": 0.183
+ },
+ "JumpSquat": {
+  "seconds": 0.05
+ },
+ "Rise": {
+  "seconds": 0.55
+ },
+ "AirJump": {
+  "seconds": 0.833
+ },
+ "Fall": {
+  "seconds": 0.6
+ },
+ "FastFall": {
+  "seconds": 0.333
+ },
+ "Land": {
+  "seconds": 0.317
+ },
+ "LandHard": {
+  "seconds": 0.567
+ },
+ "Jab1": {
+  "seconds": 0.5
+ },
+ "Jab2": {
+  "seconds": 0.517
+ },
+ "TiltF": {
+  "seconds": 0.633
+ },
+ "TiltU": {
+  "seconds": 0.7
+ },
+ "TiltD": {
+  "seconds": 0.8
+ },
+ "DashAttack": {
+  "seconds": 0.867
+ },
+ "SmashU": {
+  "seconds": 0.95
+ },
+ "SmashD": {
+  "seconds": 1.117
+ },
+ "AirB": {
+  "seconds": 0.7
+ },
+ "AirU": {
+  "seconds": 0.8
+ },
+ "AirD": {
+  "seconds": 1.033
+ },
+ "SpecN": {
+  "seconds": 0.783
+ },
+ "SpecNLoop": {
+  "seconds": 0.567
+ },
+ "SpecNRelease": {
+  "seconds": 0.6
+ },
+ "SpecS1": {
+  "seconds": 0.533
+ },
+ "SpecS2U": {
+  "seconds": 0.717
+ },
+ "SpecS2S": {
+  "seconds": 0.717
+ },
+ "SpecS3U": {
+  "seconds": 0.717
+ },
+ "SpecS3S": {
+  "seconds": 0.817
+ },
+ "SpecS3D": {
+  "seconds": 0.817
+ },
+ "SpecS4U": {
+  "seconds": 0.883
+ },
+ "SpecS4S": {
+  "seconds": 0.883
+ },
+ "SpecS4D": {
+  "seconds": 1.05
+ },
+ "SpecU": {
+  "seconds": 0.633
+ },
+ "Helpless": {
+  "seconds": 0.6
+ },
+ "SpecD": {
+  "seconds": 1.033
+ },
+ "SpecDHit": {
+  "seconds": 0.633
+ },
+ "Shield": {
+  "seconds": 0.167
+ },
+ "ShieldHit": {
+  "seconds": 0.217
+ },
+ "Roll": {
+  "seconds": 0.633
+ },
+ "RollB": {
+  "seconds": 0.633
+ },
+ "Spot": {
+  "seconds": 0.5
+ },
+ "AirDodge": {
+  "seconds": 0.8
+ },
+ "Hit": {
+  "seconds": 0.45
+ },
+ "HitBack": {
+  "seconds": 0.45
+ },
+ "HitHeavy": {
+  "seconds": 0.65
+ },
+ "HitHeavyBack": {
+  "seconds": 0.65
+ },
+ "Launch": {
+  "seconds": 0.55
+ },
+ "LaunchUp": {
+  "seconds": 0.717
+ },
+ "Spike": {
+  "seconds": 0.717
+ },
+ "Tumble": {
+  "seconds": 0.733
+ },
+ "Down": {
+  "seconds": 0.383
+ },
+ "DownLie": {
+  "seconds": 1.067
+ },
+ "GetUp": {
+  "seconds": 0.55
+ },
+ "GetUpAttack": {
+  "seconds": 0.867
+ },
+ "TechInPlace": {
+  "seconds": 0.483
+ },
+ "TechRoll": {
+  "seconds": 0.717
+ },
+ "Dizzy": {
+  "seconds": 1.067
+ },
+ "Grab": {
+  "seconds": 0.55
+ },
+ "DashGrab": {
+  "seconds": 0.717
+ },
+ "PivotGrab": {
+  "seconds": 0.65
+ },
+ "Hold": {
+  "seconds": 0.733
+ },
+ "Pummel": {
+  "seconds": 0.45
+ },
+ "ThrowF": {
+  "seconds": 0.567
+ },
+ "ThrowB": {
+  "seconds": 0.783
+ },
+ "ThrowU": {
+  "seconds": 0.783
+ },
+ "ThrowD": {
+  "seconds": 0.75
+ },
+ "Held": {
+  "seconds": 0.733
+ },
+ "LedgeHang": {
+  "seconds": 1.067
+ },
+ "LedgeGrab": {
+  "seconds": 0.25
+ },
+ "LedgeGetUp": {
+  "seconds": 0.6
+ },
+ "LedgeGetUpSlow": {
+  "seconds": 1.05
+ },
+ "LedgeAttack": {
+  "seconds": 0.95
+ },
+ "LedgeRoll": {
+  "seconds": 0.867
+ },
+ "LedgeJump": {
+  "seconds": 0.383
+ },
+ "Taunt": {
+  "seconds": 1.55
+ },
+ "Idle2": {
+  "seconds": 3.383
+ },
+ "Win1": {
+  "seconds": 2.55
+ },
+ "Win2": {
+  "seconds": 2.55
+ },
+ "Win3": {
+  "seconds": 2.55
+ },
+ "Entrance": {
+  "seconds": 1.55
+ },
+ "Respawn": {
+  "seconds": 1.067
+ }
+}
