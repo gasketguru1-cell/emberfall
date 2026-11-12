@@ -8,8 +8,8 @@
    to the corrections already there; rebuild with bash tools/blender/build-brand.sh. Changes nothing in the game itself
    except that it starts a Brand-against-Flint match and steps it by hand. */
 const HM = 14 / 7.5837;
-const CT = { jab2: ['jab2', 5, 6], jab3: ['jab3', 7, 9], ftilt: ['ftilt', 7, 9], utiltA: ['utilt', 7, 8], utiltB: ['utilt', 9, 10], dtilt: ['dtilt', 6, 8], fsmash: ['fsmash', 16, 19], usmash: ['usmash', 15, 17], dsmashF: ['dsmash', 12, 13], dsmashR: ['dsmash', 17, 18],
-  getupF: ['getup', 19, 20], getupR: ['getup', 24, 25], fair: ['fair', 7, 10, 1], bair: ['bair', 8, 10, 1], uair: ['uair', 6, 9, 1], dair: ['dair', 13, 15, 1], dairLate: ['dair', 16, 16, 1], ledgeatk: ['ledgeatk', 20, 22], nspec: ['nspec', 14, 16], nspecH: ['nspecH', 24, 26], uspec: ['uspec', 7, 9], dspec: ['dspec', 15, 17] };
+const CT = { jab2: ['jab2', 5, 6], jab3: ['jab3', 7, 9], ftilt: ['ftilt', 7, 9], utiltA: ['utilt', 7, 8], utiltB: ['utilt', 9, 10], dtilt: ['dtilt', 6, 8], fsmash0: ['fsmash', 16, 16], fsmash1: ['fsmash', 17, 17], fsmash2: ['fsmash', 18, 18], fsmash3: ['fsmash', 19, 19], fsmash4: ['fsmash', 20, 20], usmash: ['usmash', 15, 17], dsmashF: ['dsmash', 12, 13], dsmashR: ['dsmash', 17, 18],
+  getupF: ['getup', 19, 20], getupR: ['getup', 24, 25], fair0: ['fair', 7, 7, 1], fair1: ['fair', 8, 8, 1], fair2: ['fair', 9, 9, 1], fair3: ['fair', 10, 10, 1], fair4: ['fair', 11, 11, 1], bair0: ['bair', 9, 9, 1], bair1: ['bair', 10, 10, 1], bair2: ['bair', 11, 11, 1], bair3: ['bair', 12, 12, 1], bair4: ['bair', 13, 13, 1], bair5: ['bair', 14, 14, 1], uair: ['uair', 6, 9, 1], dair0: ['dair', 13, 13, 1], dair1: ['dair', 14, 14, 1], dair2: ['dair', 15, 15, 1], dair3: ['dair', 16, 16, 1], dair4: ['dair', 17, 17, 1], ledgeatk: ['ledgeatk', 20, 22], nspec: ['nspec', 14, 16], nspecH: ['nspecH', 24, 26], uspec: ['uspec', 7, 9], dspec: ['dspec', 15, 17] };
 function setup() {
   const G = window.__game, BI = ROSTER.findIndex(d => d.name === 'Brand');
   G.slots[0] = { dev: 'kb', pick: BI, ready: true }; G.slots[1] = { dev: 'kb', pick: 0, ready: true };

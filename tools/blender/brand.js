@@ -143,6 +143,18 @@ const CAP = {
   dair: [0.10, 0.36, 0.13, -0.23, 0.19], dairLate: [0.10, 0.62, 0.10, 0.04, 0.17],
   getupF: [0.27, 0.24, 0.65, 0.23, 0.17], getupR: [-0.28, 0.23, -0.61, 0.23, 0.17], ledgeatk: [0.26, 0.33, 0.73, 0.38, 0.16],
   nspec: [0.32, 0.56, 0.96, 0.57, 0.14], nspecH: [0.35, 0.56, 1.26, 0.59, 0.15], uspec: [0.19, 0.56, 0.33, 0.97, 0.17], dspec: [0.32, 0.22, 0.95, 0.25, 0.15] };
+/* the back air's sweep (sim.js BAIR_ARC): one capsule a frame, 20 to 140 degrees behind her from straight up, round her sword shoulder */
+const BAIR_TH = [20, 44, 68, 92, 116, 140], BAIR_P = [-0.05, 0.75], BAIR_R = [0.3, 0.88];
+BAIR_TH.forEach((th, j) => { const u = th * Math.PI / 180, sx = -Math.sin(u), sy = Math.cos(u); CAP['bair' + j] = [BAIR_P[0] + sx * BAIR_R[0], BAIR_P[1] + sy * BAIR_R[0], BAIR_P[0] + sx * BAIR_R[1], BAIR_P[1] + sy * BAIR_R[1], 0.17]; });
+/* the forward air's (sim.js FAIR_ARC): the same clock, 340 down to 250, round the same shoulder seen from in front */
+const FAIR_TH = [340, 318, 295, 272, 250], FAIR_P = [0.05, 0.75];
+FAIR_TH.forEach((th, j) => { const u = th * Math.PI / 180, sx = -Math.sin(u), sy = Math.cos(u); CAP['fair' + j] = [FAIR_P[0] + sx * BAIR_R[0], FAIR_P[1] + sy * BAIR_R[0], FAIR_P[0] + sx * BAIR_R[1], FAIR_P[1] + sy * BAIR_R[1], 0.16]; });
+/* the forward smash's (sim.js FSM_ARC): 0 to 100 degrees in front of straight up */
+const FSM_TH = [0, 25, 50, 75, 100], FSM_P = [0.18, 0.68];
+FSM_TH.forEach((th, j) => { const u = th * Math.PI / 180, sx = Math.sin(u), sy = Math.cos(u); CAP['fsmash' + j] = [FSM_P[0] + sx * BAIR_R[0], FSM_P[1] + sy * BAIR_R[0], FSM_P[0] + sx * BAIR_R[1], FSM_P[1] + sy * BAIR_R[1], 0.19]; });
+/* the down air's (sim.js DAIR_ARC): 210 to 150, under her, front to back */
+const DAIR_TH = [210, 195, 180, 165, 150], DAIR_P = [0, 0.7], DAIR_R = [0.3, 0.92];
+DAIR_TH.forEach((th, j) => { const u = th * Math.PI / 180, sx = -Math.sin(u), sy = Math.cos(u); CAP['dair' + j] = [DAIR_P[0] + sx * DAIR_R[0], DAIR_P[1] + sy * DAIR_R[0], DAIR_P[0] + sx * DAIR_R[1], DAIR_P[1] + sy * DAIR_R[1], 0.18]; });
 const WIND = { chest: R(-4, -24), c_sword: AIM(-0.35, 0.85, -0.4) };   /* a level cut starts with the blade raised up and back, so its arc shows from the side */
 /* a level cut: drawn back on frame a0 - 3, on the capsule from a0 to a1, back to guard by t */
 const levelCut = (id, a0, a1, t, dz) => { const hip = [0, -0.08, dz]; return { fps: 60, keys: [{ t: 0, use: G },
@@ -166,13 +178,17 @@ const low = [0, -0.32, 0.1], lowBody = { hips: M(0, -0.32, 0.1), spine: R(24), c
 const crouchWind = { chest: R(8, -30), c_handR: HR(0.1, 0.5, -0.5, [0, -0.3, 0]), c_sword: AIM(-1, -0.1, 0.1) };
 C.Low = { fps: 60, keys: [{ t: 0, use: G }, { t: fr(3), use: 'crouch', pose: crouchWind },
   { t: fr(6), in: 'snap', pose: cat(lowBody, onCap('dtilt', CAP.dtilt, low)) }, { t: fr(8), pose: cat({ chest: R(10, 16) }, onCap('dtilt', CAP.dtilt, low)) }, { t: fr(23), ...back }] };
-/* Vorpal Cleave: a long backswing (held there while it charges, frame 8), then everything forward on 16 to 19 */
-{ const hp = [0, -0.16, 0.4];
-  C.Cleave = { fps: 60, keys: [{ t: 0, use: G },
+/* Vorpal Cleave (2026-11-11): a long backswing (held there while it charges, frame 8), the blade brought up over her head, then one
+   great sweep from straight up down in front on 16 to 20 (one capsule a frame) as she lunges, carried on low and let settle. */
+{ const hp = j => [0, -0.06 - 0.025 * j, 0.22 + 0.045 * j], lean = [-8, 0, 8, 14, 18], turn = [-6, 4, 12, 16, 18];
+  const keys = [{ t: 0, use: G },
     { t: fr(8), pose: { hips: M(0, -0.02, -0.1), spine: R(-8), chest: R(-10, -26), head: HEAD(-4), c_handR: HR(-0.1, 1.72, -0.34, [0, -0.02, -0.1]), c_sword: AIM(-0.1, 0.55, -1), c_handL: HL(0.4, 1.15, 0.12, [0, -0.02, -0.1]), c_shield: AIM(0.2, 0.05, 1) } },
     { t: fr(13), pose: { chest: R(-12, -30), c_sword: AIM(-0.1, 0.45, -1) } },
-    { t: fr(16), in: 'snap', pose: cat(lunge(0.4, 0.16), { spine: R(14), chest: R(16, 16), head: HEAD(-6), c_handL: HL(0.2, 1.0, 0.4, hp), c_shield: AIM(1, 0.1, 0.2) }, onCap('fsmash', CAP.fsmash, hp)) },
-    { t: fr(19), pose: onCap('fsmash', CAP.fsmash, hp) }, { t: fr(26), pose: { c_sword: AIM(0.3, -0.6, 0.8), c_handR: HR(0.7, 0.9, -0.14, hp) } }, { t: fr(47), ...back }] }; }
+    { t: fr(15), pose: { hips: M(0, -0.04, 0.12), spine: R(-6), chest: R(-12, -14), head: HEAD(-10), c_handR: HR(0.12, 1.85, -0.3, [0, -0.04, 0.12]), c_sword: AIM(0, 1, -0.35), c_footR: M(0, 0, 0.3) } }];
+  FSM_TH.forEach((th, j) => keys.push({ t: fr(16 + j), in: j === 0 ? 'snap' : undefined, pose: cat(lunge(0.22 + 0.045 * j, 0.06 + 0.025 * j), { spine: R(4 + 3 * j), chest: R(lean[j], turn[j]), head: HEAD(-10 + 2 * j), c_handL: HL(0.2, 1.0, 0.4, hp(j)), c_shield: AIM(1, 0.1, 0.2) }, onCap('fsmash' + j, CAP['fsmash' + j], hp(j))) }));
+  keys.push({ t: fr(26), pose: { spine: R(18), chest: R(22, 20), c_sword: AIM(0.3, -0.8, 0.6), c_handR: HR(0.72, 0.72, -0.14, [0, -0.18, 0.4]) } });
+  keys.push({ t: fr(48), ...back });
+  C.Cleave = { fps: 60, keys }; }
 /* Gate Raise: the door's rim scoops on 13 and 14, the blade cleaves up through on 15 to 17 */
 { const hp = [0, 0, 0.1];
   C.Lift = { fps: 60, keys: [{ t: 0, use: G },
@@ -197,24 +213,45 @@ C.FloorSweep = sweep('getupF', 'getupR', 19, 24, 47);
     { t: fr(9), pose: { chest: R(4, -20), c_handR: HR(0.2, 1.02, -0.5), c_sword: AIM(-1, 0.05, 0.2) } },
     { t: fr(12), pose: cat({ all: R(0, 0), chest: R(4, 0) }, lv) }, { t: fr(13), pose: { all: R(0, 120) } }, { t: fr(14), pose: { all: R(0, 240) } },
     { t: fr(15), pose: { all: R(0, 360) } }, { t: fr(24), reset: true, use: AIR, pose: { all: R(0, 360) } }] }; }
-/* High Guard: a forward cut held out on 7 to 10 */
-C.Ward = { fps: 60, keys: [{ t: 0, use: AIR }, { t: fr(4), pose: { chest: R(-4, -24), c_handR: HR(0.05, 1.5, -0.4), c_sword: AIM(-0.5, 0.8, -0.3) } },
-  { t: fr(7), in: 'snap', pose: cat({ hips: M(0, 0.02, 0.08), chest: R(10, 16), c_footL: M(0, 0.12, -0.2) }, onCap('fair', CAP.fair, [0, 0.02, 0.08])) },
-  { t: fr(10), pose: onCap('fair', CAP.fair, [0, 0.02, 0.08]) }, { t: fr(30), ...backAir }] };
-/* Reverse Cut: a hard cut behind her on 8 to 10 */
-C.About = { fps: 60, keys: [{ t: 0, use: AIR }, { t: fr(5), pose: { chest: R(0, 20), c_handR: HR(0.4, 1.15, -0.2), c_sword: AIM(0.4, 0.2, 1) } },
-  { t: fr(8), in: 'snap', pose: cat({ hips: M(0, 0.02, -0.06), chest: R(-8, -50), head: HEAD(0, -40), c_footR: M(0, 0.1, 0.25), c_handL: HL(0.4, 1.1, 0.2), c_shield: AIM(0.2, 0, 1) }, onCap('bair', CAP.bair, [0, 0.02, -0.06], { dep: -0.4 })) },
-  { t: fr(10), pose: onCap('bair', CAP.bair, [0, 0.02, -0.06], { dep: -0.4 }) }, { t: fr(34), ...backAir }] };
+/* High Guard (2026-11-11): a graceful, heavy sweep in front. The blade is drawn up and back over her shoulder (frames 2 to 5),
+   brought over the top and down in front on 7 to 11 (340 to 250 on the clock, one capsule a frame), then carried on low and
+   let settle. She leans into it, the trailing leg kicking back against the swing. */
+{ const hp = j => [0, 0.02 - 0.015 * j, 0.04 + 0.015 * j], turn = [-14, 0, 12, 20, 24], lean = [-10, -2, 6, 14, 20];
+  const keys = [{ t: 0, use: AIR },
+    { t: fr(2), pose: { chest: R(-6, -18), head: HEAD(-6), c_handR: HR(0.0, 1.35, -0.3), c_sword: AIM(-0.1, 0.6, -0.8), c_footL: M(0, 0.14, 0.06) } },
+    { t: fr(5), pose: { hips: M(0, 0.03, -0.02), chest: R(-14, -26), head: HEAD(-14), c_handR: HR(-0.08, 1.62, -0.3), c_sword: AIM(0, 1, -0.3), c_handL: HL(0.36, 1.1, 0.22), c_footR: M(0, 0.18, 0.12), c_footL: M(0, 0.1, -0.08) } }];
+  FAIR_TH.forEach((th, j) => keys.push({ t: fr(7 + j), in: j === 0 ? 'snap' : undefined, pose: cat({ chest: R(lean[j], turn[j]), head: HEAD(-10 + 4 * j), c_footR: M(0, 0.14 + 0.02 * j, 0.1 - 0.02 * j), c_footL: M(0, 0.12, -0.12 - 0.04 * j), c_handL: HL(0.2, 1.1, 0.3), c_shield: AIM(0.9, 0.1, 0.4) }, onCap('fair' + j, CAP['fair' + j], hp(j))) }));
+  keys.push({ t: fr(16), pose: { hips: M(0, -0.06, 0.1), chest: R(24, 26), head: HEAD(6), c_handR: HR(0.45, 0.72, -0.3, [0, -0.06, 0.1]), c_sword: AIM(0.1, -0.85, 0.5), c_footR: M(0, 0.2, 0.0), c_footL: M(0, 0.16, -0.26) } });
+  keys.push({ t: fr(23), pose: { hips: M(0, -0.03, 0.05), chest: R(12, 10), head: HEAD(0), c_handR: HR(0.32, 0.86, -0.32, [0, -0.03, 0.05]), c_sword: AIM(0, -0.6, 0.8) } });
+  keys.push({ t: fr(33), ...backAir });
+  C.Ward = { fps: 60, keys }; }
+/* Reverse Cut (2026-11-11): a graceful, heavy sweep behind her. The blade is gathered high in front (frames 3 to 7), swung up
+   over her head and down behind her on 9 to 14 (20 to 140 degrees from straight up, one capsule a frame), then carried on
+   low behind her and let settle. The chest turns away as the blade goes round, the legs swing against it. */
+{ const hp = j => [0, 0.02 - 0.02 * j, -0.04 - 0.01 * j], turn = [-10, -26, -42, -56, -66, -72], lean = [-14, -10, -4, 4, 12, 18];
+  const keys = [{ t: 0, use: AIR },
+    { t: fr(3), pose: { chest: R(-2, 10), head: HEAD(-6), c_handR: HR(0.32, 1.25, -0.26), c_sword: AIM(0.1, 0.55, 0.85), c_footR: M(0, 0.2, 0.1) } },
+    { t: fr(7), pose: { hips: M(0, 0.03, 0), chest: R(-12, 4), head: HEAD(-14, -10), c_handR: HR(0.12, 1.62, -0.28), c_sword: AIM(0, 1, 0.25), c_handL: HL(0.32, 1.12, 0.24), c_footR: M(0, 0.18, 0.16), c_footL: M(0, 0.12, -0.04) } }];
+  BAIR_TH.forEach((th, j) => keys.push({ t: fr(9 + j), in: j === 0 ? 'snap' : undefined, pose: cat({ chest: R(lean[j], turn[j]), head: HEAD(-4 + 3 * j, -20 - 6 * j), c_footR: M(0, 0.12 + 0.03 * j, 0.14 + 0.04 * j), c_footL: M(0, 0.1, -0.06 - 0.03 * j), c_handL: HL(0.4, 1.1, 0.2), c_shield: AIM(0.3, 0, 1) }, onCap('bair' + j, CAP['bair' + j], hp(j), { dep: -0.4 })) }));
+  keys.push({ t: fr(19), pose: { hips: M(0, -0.08, -0.08), chest: R(20, -70), head: HEAD(8, -46), c_handR: HR(-0.32, 0.7, -0.4, [0, -0.08, -0.08]), c_sword: AIM(-0.1, -0.85, -0.45), c_footR: M(0, 0.26, 0.3), c_footL: M(0, 0.12, -0.14) } });
+  keys.push({ t: fr(26), pose: { hips: M(0, -0.04, -0.04), chest: R(10, -40), head: HEAD(4, -20), c_handR: HR(-0.12, 0.85, -0.38, [0, -0.04, -0.04]), c_sword: AIM(-0.12, -0.7, -0.6) } });
+  keys.push({ t: fr(38), ...backAir });
+  C.About = { fps: 60, keys }; }
 /* Crown Arc: from in front, over her head, to behind: on the capsule from 6 to 9 */
 C.Arc = { fps: 60, keys: [{ t: 0, use: AIR }, { t: fr(3), pose: { c_handR: HR(0.5, 1.25, -0.26), c_sword: AIM(0, 0.3, 1) } },
   { t: fr(6), in: 'snap', pose: cat({ chest: R(-12, -6), head: HEAD(-14) }, onCap('uair', CAP.uair, [0, 0, 0])) },
   { t: fr(9), pose: onCap('uair', CAP.uair, [0, 0, 0]) }, { t: fr(13), pose: { c_sword: AIM(0, -0.2, -1), c_handR: HR(-0.05, 1.6, -0.26) } }, { t: fr(27), ...backAir }] };
-/* Blade Drop: the point driven straight down; on 13 to 15 the point is the spike, then on 16 the blade has come up a little (the late hit) */
-{ const hp = [0, 0.1, 0], body = { hips: M(0, 0.1, 0), chest: R(18, -4), head: HEAD(20), c_footL: M(0, 0.34, -0.2), c_footR: M(0, 0.34, -0.2) };
-  C.Drop = { fps: 60, keys: [{ t: 0, use: AIR },
-    { t: fr(8), pose: { chest: R(-8, -8), c_handR: HR(0.2, 1.66, -0.24), c_sword: AIM(0, -1, 0.1), c_handL: HL(0.25, 1.5, 0.1), c_shield: AIM(0.9, 0.3, 0.3), c_footL: M(0, 0.26, 0.1), c_footR: M(0, 0.26, 0.1) } },
-    { t: fr(13), in: 'snap', pose: cat(body, onCap('dair', CAP.dair, hp, { k: 0 })) }, { t: fr(15), pose: onCap('dair', CAP.dair, hp, { k: 0 }) },
-    { t: fr(16), pose: onCap('dairLate', CAP.dairLate, hp, { k: 0 }) }, { t: fr(41), ...backAir }] }; }
+/* Blade Drop (2026-11-11): a heavy sweep under her. Knees drawn up and the blade lifted in front of her (frames 4 to 10), then swung
+   down and under her on 13 to 17 (210 to 150 on the clock, one capsule a frame), carried on up behind her and let settle. */
+{ const hp = j => [0, 0.12, 0.02 - 0.01 * j], tilt = [-10, -2, 6, 14, 20];
+  const keys = [{ t: 0, use: AIR },
+    { t: fr(4), pose: { chest: R(-6, 4), head: HEAD(8), c_handR: HR(0.3, 1.35, -0.32), c_sword: AIM(0.1, 0.3, 0.95), c_footL: M(0, 0.22, -0.08), c_footR: M(0, 0.22, -0.04) } },
+    { t: fr(10), pose: { hips: M(0, 0.1, 0), chest: R(-4, 10), head: HEAD(16), c_handR: HR(0.4, 1.3, -0.34, [0, 0.1, 0]), c_sword: AIM(0.1, -0.35, 0.95), c_handL: HL(0.3, 1.25, 0.2, [0, 0.1, 0]), c_shield: AIM(0.9, 0.3, 0.3), c_footL: M(0, 0.36, -0.14), c_footR: M(0, 0.36, -0.08) } }];
+  DAIR_TH.forEach((th, j) => keys.push({ t: fr(13 + j), in: j === 0 ? 'snap' : undefined, pose: cat({ chest: R(16 + tilt[4 - j] * 0.3, 4 - 6 * j), head: HEAD(22), c_footL: M(0, 0.4, -0.18 + 0.06 * j), c_footR: M(0, 0.4, -0.12 + 0.06 * j), c_handL: HL(0.3, 1.25, 0.2), c_shield: AIM(0.9, 0.3, 0.3) }, onCap('dair' + j, CAP['dair' + j], hp(j))) }));
+  keys.push({ t: fr(22), pose: { hips: M(0, 0.06, -0.04), chest: R(10, -32), head: HEAD(10), c_handR: HR(-0.32, 0.85, -0.36, [0, 0.06, -0.04]), c_sword: AIM(-0.1, -0.2, -1), c_footL: M(0, 0.2, 0.16), c_footR: M(0, 0.24, 0.22) } });
+  keys.push({ t: fr(30), pose: { chest: R(6, -16), c_handR: HR(-0.12, 0.88, -0.36), c_sword: AIM(-0.1, -0.6, -0.75) } });
+  keys.push({ t: fr(41), ...backAir });
+  C.Drop = { fps: 60, keys }; }
 /* ---- get-ups ---- */
 /* Rising Cut, from the ledge: up onto the stage and a cut along the lip on 20 to 22 */
 C.LipCut = { fps: 60, keys: [{ t: 0, use: 'crouch' }, { t: fr(16), use: 'crouch', pose: crouchWind },
@@ -266,8 +303,8 @@ const entry = { file: 'assets/brand/export/brand-v1.glb', height: 14.42,
   strikers: [{ bone: 'swordTip', ext: 0.4 }, { bone: 'shield', ext: 2.4 }, { bone: 'handL', ext: 1.2 }, { bone: 'handR', ext: 1.2 }, { bone: 'footR', ext: 1.8 }],
   springs: [],
   attacks: { jab: A('Jab', 0.17, 0.27, 0, 0.5), jab2: AF('Cut2', 5, 6, 19), jab3: AF('Cut3', 7, 9, 26), ftilt: AF('Ember', 7, 9, 24), utilt: AF('Brim', 7, 10, 25), dtilt: AF('Low', 6, 8, 23), dash: A('Drive', 0.3, 0.5),
-    fsmash: AF('Cleave', 16, 19, 47), usmash: AF('Lift', 13, 17, 46), dsmash: AF('Sweep', 12, 18, 42),
-    nair: AF('Wheel', 6, 15, 36), fair: AF('Ward', 7, 10, 30), bair: AF('About', 8, 10, 34), uair: AF('Arc', 6, 9, 27), dair: AF('Drop', 13, 16, 41),
+    fsmash: AF('Cleave', 16, 20, 48), usmash: AF('Lift', 13, 17, 46), dsmash: AF('Sweep', 12, 18, 42),
+    nair: AF('Wheel', 6, 15, 36), fair: AF('Ward', 7, 11, 33), bair: AF('About', 9, 14, 38), uair: AF('Arc', 6, 9, 27), dair: AF('Drop', 13, 17, 41),
     grab: A('Reach', 0.34, 0.46, 0, 0.8), dgrab: A('Reach', 0.34, 0.46, 0, 0.8), pgrab: A('Reach', 0.34, 0.46, 0, 0.8),
     getup: AF('FloorSweep', 19, 25, 47), getupB: AF('FloorSweep', 19, 25, 47, { flip: true }), ledgeatk: AF('LipCut', 20, 22, 46),
     nspec: AF('Thrust', 14, 16, 38), nspecH: AF('ThrustLong', 24, 26, 52), sspec: AF('Bash', 12, 14, 38), uspec: AF('RiseCut', 7, 9, 25), dspec: AF('Step', 15, 17, 39), '*': AF('Cut2', 5, 6, 19) } };
