@@ -278,7 +278,7 @@ const MOVE_TEXT = {
     f: ['Shove', 'Shoves the opponent straight out, toward the ledge.'],
     b: ['Turn Toss', 'Turns and lets go behind him on frame 7.'],
     u: ['Sky Toss', 'Throws the opponent straight up, letting go on frame 12. He can jump out of it from frame 21, well before it ends, to chase with an up air or Rising Moon.'],
-    d: ['Floor Toss', 'Puts them down at his feet and pops them up in front at a set height, for a follow-up at low damage.'],
+    d: ['Floor Toss', 'Puts them down at his feet and pops them up in front at a set height, for a follow-up at low damage. Very quick: he can act on frame 10.'],
     getup: ['Floor Cut / Ledge Cut', 'From the floor, cuts low in front on frame 22 and behind on frame 27. From the ledge, a rising cut onto the stage on frames 24 to 27. Briefly untouchable as he rises.'],
   },
   /* Knell: the owner's design bible v1.0 (2026-11-11) */
@@ -304,7 +304,7 @@ const MOVE_TEXT = {
     pummel: ['Knuckle Ping', 'The buckler\'s knuckle taps the ribcage for 1.1%. 17 frames between pummels.'],
     f: ['Slip Knot', 'Thrusts the buckler under the sternum and sends the opponent ahead at 42 degrees.'],
     b: ['Rewind', 'Spins the opponent round the buckler\'s handle and lets go behind him. Strong at the ledge.'],
-    u: ['Open Clock', 'Ratchets the dagger against the buckler and sends the opponent straight up: juggles start here.'],
+    u: ['Open Clock', 'Ratchets the dagger against the buckler and sends the opponent straight up: juggles start here. Very quick: he can act on frame 11.'],
     d: ['Set the Tooth', 'Pins an ankle with the buckler rim and kicks the opponent up in front, for a follow-up at low damage.'],
     getup: ['Low Ticks', 'From the floor, a low cut in front on frame 19 and behind on frame 24. From the ledge, a cut along the lip on frames 20 to 22. Briefly intangible as he rises (less above 100%).'],
     hinge: ['Hinge Cancel', 'After a move with a Hinge window has hit or been shielded, tap special with a direction inside that window (without holding shield) to spend a Thread: the buckler rim is set against his body and he pivots 0.8 m forward, 0.65 m back or 0.45 m up. He can attack from frame 5 (frame 9 if the hit was shielded); in the air that is any aerial, chosen by the stick or the C-stick, and every aerial has its own Hinge window, so aerial, Hinge, aerial, Hinge chains as long as the Thread lasts. Each aerial of a new direction earns a Thread back. and do anything after frame 7. No hitbox and no intangibility. After a clean hit (not a shielded one) the opponent is slowed to a quarter speed for half a second. No limit per string: as long as he has Thread and keeps making contact, he can Hinge out of every move in a combo.'],

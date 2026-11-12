@@ -54,6 +54,12 @@ vm.runInThisContext(`
     const T = mv.throws, g = mv.grab.h[0], dg = mv.dgrab.h[0], pg = mv.pgrab.h[0];
     check('document: grabs, pummel and throws', g.f0 === 6 && mv.grab.t === 31 && dg.f0 === 9 && mv.dgrab.t === 41 && pg.f0 === 10 && mv.pgrab.t === 40 && st.pummel === 1.1 && st.pumT === 17
       && T.f.d === 6.5 && T.f.a === 42 && T.b.d === 8.2 && T.b.a === 142 && T.u.d === 5.8 && T.u.a === 88 && T.d.d === 5 && T.d.a === 77, 'grab f6, dash f9, pivot f10; throws 6.5 / 8.2 / 5.8 / 5%');
+    /* the owner's quick up and down throws (2026-11-12): free at 0.3 of the old time */
+    const tq = k => { const [kn, f] = setup(KN_, FL, 0, 8); f.set('held'); kn.victim = f; kn.throwK = k; kn.set('throw'); let rel = -1, free = -1;
+      run(60, () => { if (rel < 0 && !kn.victim) rel = kn.sf; if (free < 0 && kn.state !== 'throw') free = t; }); return [rel, free, f.pct > 0]; };
+    const tu = tq('u'), td = tq('d');
+    check('up and down throw: free at 0.3 of the old time', T.u.t === 11 && T.d.t === 10 && T.u.f === 4 && T.d.f === 4 && tu[2] && td[2] && tu[1] > 0 && tu[1] <= 11 + 7 && td[1] > 0 && td[1] <= 10 + 7,
+      'up throw releases f' + T.u.f + ', free after ' + tu[1] + ' game frames with the 6 of hitlag (was 43); down throw f' + T.d.f + ', free after ' + td[1] + ' (was 40)');
     const hw = { jab: [8, 11], jab2: [9, 12], ftilt: [10, 13], utilt: [11, 14], dtilt: [8, 11], nair: [5, 34], fair: [6, 31], fairL: [6, 31], fairH: [6, 31], bair: [8, 35], uair: [5, 28], dair: [10, 41] }, wrong = Object.keys(hw).filter(k => !mv[k].hinge || mv[k].hinge.join() !== hw[k].join());
     const none = ['jab3', 'dash', 'fsmash', 'usmash', 'dsmash', 'grab', 'nspec', 'sspec', 'uspec', 'dspec', 'ledgeatk'].filter(k => mv[k].hinge);
     check('document: Hinge windows', !wrong.length && !none.length, wrong.length || none.length ? 'wrong: ' + wrong.concat(none).join(', ') : 'jab 8-11, jab 2 9-12, f-tilt 10-13, u-tilt 11-14, d-tilt 8-11, every aerial from its first hit to its end (n 5-34, f 6-31, b 8-35, u 5-28, d 10-41); none on smashes or specials');

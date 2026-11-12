@@ -80,7 +80,8 @@ function animAlt(f, a) {
     case 'land': return f.lag >= 9 ? { key: 'landHard', mode: 'phase', v: a.v } : null;
     case 'shieldstun': return { key: 'shieldHit', mode: 'phase', v: phase(f.sf, 10) };
     case 'respawn': return { key: 'respawn', mode: 'loop', v: t };
-    case 'throw': return f.throwK ? { key: 'throw_' + f.throwK, mode: 'phase', v: phase(f.sf, 26) } : null;
+    case 'throw': { if (!f.throwK) return null; const tw = f.form && f.form.moves && f.form.moves.throws && f.form.moves.throws[f.throwK];   /* ap: a throw whose clip plays faster */
+      return { key: 'throw_' + f.throwK, mode: 'phase', v: phase(f.sf, (tw && tw.ap) || 26) }; }
     case 'hurt': {
       const ax = Math.abs(f.vx);
       if (f.grounded) {   /* hit from behind (driven the way he faces): a model with its own back reactions shows them, others fall back */
