@@ -22,7 +22,13 @@ const side = (s, x) => [
 const flip = (deg, x, y, z) => { const a = deg * Math.PI / 180, cs = Math.cos(a), sn = Math.sin(a); return { rot: [deg, 0, 0], move: [x || 0, C[0] - (C[0] * cs - C[1] * sn) + (y || 0), C[1] - (C[0] * sn + C[1] * cs) + (z || 0)] }; };
 /* The mouth: 0 shut, 1 as modelled (wide open), up to about 1.8 for a gape no jaw should manage. */
 /* (this model's lower lip sits just above his front legs, so the head does most of the shutting and the jaw little) */
-const mouth = g => g <= 1 ? { jaw: R(-10 * (1 - g)), top: R(32 * (1 - g)) } : { jaw: R(26 * (g - 1)), top: R(-50 * (g - 1)) };
+/* shutting it: the head comes down 24 degrees, the jaw up 14, and the lips close the last of the gap */
+const MC = { top: 26, jaw: 8, up: 0.09, dn: 0.18 };
+/* The lips, on top of whatever mouth() set (so put lips() after mouth() in a pose): up/dn move the upper and lower lip up
+   (+) or down; curl rolls them out (+, a pout or a flap) or in; then the corners: up (+, a smile) or down, and out (+, wider). */
+const lips = (up, dn, curlU, curlD) => ({ lipU: { move: [0, up || 0, 0], rot: [-(curlU || 0), 0, 0] }, lipD: { move: [0, dn || 0, 0], rot: [curlD || 0, 0, 0] } });
+const corners = (up, out, upR) => ({ cornerL: M(out || 0, up || 0, 0), cornerR: M(-(out || 0), upR === undefined ? (up || 0) : upR, 0) });
+const mouth = g => g <= 1 ? { jaw: R(-MC.jaw * (1 - g)), top: R(MC.top * (1 - g)), lipU: { move: [0, -MC.up * (1 - g), 0], rot: [0, 0, 0] }, lipD: { move: [0, MC.dn * (1 - g), 0], rot: [0, 0, 0] } } : { jaw: R(26 * (g - 1)), top: R(-50 * (g - 1)), lipU: { move: [0, 0, 0], rot: [0, 0, 0] }, lipD: { move: [0, 0, 0], rot: [0, 0, 0] } };
 /* Squash (k > 0) and stretch (k < 0) of the ball, with an optional lean: pitch, yaw, roll. */
 const sq = (k, p, y, r) => ({ scale: [1 + k * 0.5, 1 - k, 1 + k * 0.5], rot: [p || 0, y || 0, r || 0] });
 const lg = k => ({ scale: [1 - k * 0.35, 1 - k * 0.35, 1 + k], rot: [0, 0, 0] });   /* stretched along the way his mouth points: a lunge */
@@ -37,7 +43,10 @@ const leaves = (a, p, r) => ({ sprout: R(p || 0, 0, r || 0), leafL: R(0, 0, a), 
 const tongue = (len, yaw, pitch) => ({ tongue: { scale: [len > 2 ? 0.75 : 1, len > 2 ? 0.75 : 1, 1 + (len - 1) * 0.36], rot: [pitch === undefined ? -10 : pitch, yaw || 0, 0] } });
 const feet = (ly, lz, ry, rz, out) => ({ footL: M(out || 0, ly, lz), footR: M(-(out || 0), ry === undefined ? ly : ry, rz === undefined ? lz : rz) });
 const root = (x, y, z) => ({ root: M(x, y, z) });
-const P = (...parts) => Object.assign({}, ...parts);
+/* Parts of a pose, later ones winning, except that the lips' moves add up: lips() moves them on from where mouth() put them. */
+const ADD = new Set(['lipU', 'lipD']);
+const P = (...parts) => parts.reduce((o, p) => { for (const k in p) { const a = o[k], b = p[k];
+  o[k] = ADD.has(k) && a && a.move && b && b.move ? Object.assign({}, a, b, { move: a.move.map((v, i) => +(v + b.move[i]).toFixed(4)) }) : b; } return o; }, {});
 const S = 'stand';
 /* the shared attack layout: wind-up held to 0.3, the strike arrives at 0.34, is held to 0.44, overshoots at 0.56, settled by 0.9 */
 const atk = (wind, hit, over, extra) => [{ t: 0, use: S }, { t: 0.2, pose: wind, in: 'out' }, { t: 0.3, pose: wind }, { t: 0.34, reset: true, use: S, pose: hit, in: 'snap' }, { t: 0.44, pose: hit }, { t: 0.56, pose: over, in: 'back' }, ...(extra || []), { t: 0.9, reset: true, use: S, in: 'quad' }];
@@ -47,14 +56,14 @@ const thr = (wind, hit, over) => [{ t: 0, use: S, pose: P(mouth(0.4), root(0, 0,
 const turns = (kind, from, to, t0, t1, pose) => { const n = Math.ceil(Math.abs(to - from) / 150), keys = []; for (let i = 1; i <= n; i++) { const d = from + (to - from) * i / n; keys.push({ t: +(t0 + (t1 - t0) * i / n).toFixed(3), pose: P(pose || {}, { all: kind === 'flip' ? flip(d) : R(0, d, 0) }), in: 'lin' }); } return keys; };
 const waddle = (() => { const keys = [], n = 6, dt = 0.2;   /* six steps: the game plays the clip once per 40 units walked */
   for (let i = 0; i <= n; i++) { const s = i % 2 ? 1 : -1;
-    keys.push({ t: +(i * dt).toFixed(2), reset: true, use: S, pose: P({ body: sq(0.06, 4, s * 6, s * 11) }, mouth(0.5), tongue(1.15, -s * 14), fins(s * 22, 0, -s * 22), leaves(8, 0, -s * 16), feet(s > 0 ? 0 : 0.02, s > 0 ? 0.14 : -0.12, s > 0 ? 0.02 : 0, s > 0 ? -0.12 : 0.14), eyes(1.05, 0.8)) });
-    if (i < n) keys.push({ t: +(i * dt + dt / 2).toFixed(2), reset: true, use: S, pose: P({ body: sq(-0.05, 4, 0, 0) }, root(0, 0.07, 0), mouth(0.4), tongue(1.1, 0), fins(0), leaves(-6), feet(s > 0 ? 0.02 : 0.13, 0, s > 0 ? 0.13 : 0.02, 0)) }); }
+    keys.push({ t: +(i * dt).toFixed(2), reset: true, use: S, pose: P({ body: sq(0.06, 4, s * 6, s * 11) }, mouth(0), lips(0, -0.02, 0, 10), corners(s * 0.015, 0, -s * 0.015), fins(s * 22, 0, -s * 22), leaves(8, 0, -s * 16), feet(s > 0 ? 0 : 0.02, s > 0 ? 0.14 : -0.12, s > 0 ? 0.02 : 0, s > 0 ? -0.12 : 0.14), eyes(1.05, 0.8)) });
+    if (i < n) keys.push({ t: +(i * dt + dt / 2).toFixed(2), reset: true, use: S, pose: P({ body: sq(-0.05, 4, 0, 0) }, root(0, 0.07, 0), mouth(0), lips(0, 0.01, 0, -4), corners(0), fins(0), leaves(-6), feet(s > 0 ? 0.02 : 0.13, 0, s > 0 ? 0.13 : 0.02, 0)) }); }
   return keys; })();
 const scamper = (() => { const keys = [], n = 8, dt = 0.1;   /* eight steps per 46 units run */
   for (let i = 0; i <= n; i++) { const s = i % 2 ? 1 : -1;
-    keys.push({ t: +(i * dt).toFixed(2), reset: true, use: S, pose: P({ all: flip(20), body: sq(i % 2 ? 0.08 : -0.04, 0, 0, s * 5) }, root(0, i % 2 ? 0 : 0.06, 0), mouth(0.95), tongue(1.7, s * 22, -24), eyes(1.2), brows(0.03), fins(26, -62), leaves(-30, -34, s * 8), feet(s > 0 ? 0 : 0.12, s > 0 ? 0.2 : -0.2, s > 0 ? 0.12 : 0, s > 0 ? -0.2 : 0.2)) }); }
+    keys.push({ t: +(i * dt).toFixed(2), reset: true, use: S, pose: P({ all: flip(20), body: sq(i % 2 ? 0.08 : -0.04, 0, 0, s * 5) }, root(0, i % 2 ? 0 : 0.06, 0), ...(i % 2 ? [mouth(0.8), lips(0, -0.04, 10, 18), tongue(1.6, s * 22, -24)] : [mouth(0.12), lips(0, 0, -6, 6), tongue(1, 0)]), corners(0.02, 0.03), eyes(1.2), brows(0.03), fins(26, -62), leaves(-30, -34, s * 8), feet(s > 0 ? 0 : 0.12, s > 0 ? 0.2 : -0.2, s > 0 ? 0.12 : 0, s > 0 ? -0.2 : 0.2)) }); }
   return keys; })();
-const shieldPose = P({ body: puff(1.08, 0.94) }, mouth(0), eyes(1.25, 0.2), brows(-0.03, 16), fins(10, 70), leaves(-58));
+const shieldPose = P({ body: puff(1.08, 0.94) }, mouth(0), lips(-0.02, 0.02, -10, -10), corners(-0.03, 0.04), eyes(1.25, 0.2), brows(-0.03, 16), fins(10, 70), leaves(-58));
 const chomp = {
   note: 'Chomp Chomp: metres after prep (feet on y = 0, facing +Z). Joint positions were measured from the generated mesh.',
   prep: { yaw: 0, translate: [0, 0.953, 0] },
@@ -69,12 +78,22 @@ const chomp = {
     { name: 'sprout', head: [0, 1.55, 0], tail: [0.1, 1.85, 0], parent: 'top' },
     { name: 'leafL', head: [0.02, 1.8, 0], tail: [0.2, 1.85, 0], parent: 'sprout', deform: false },
     { name: 'leafR', head: [-0.02, 1.8, 0], tail: [-0.2, 1.85, 0], parent: 'sprout', deform: false },
+    /* lips: the rim of the mouth, so it can seal, pout, curl, sneer or flap on its own */
+    { name: 'lipU', head: [0, 1.18, 0.4], tail: [0, 1.18, 0.75], parent: 'top' },
+    { name: 'lipD', head: [0, 0.38, 0.4], tail: [0, 0.38, 0.72], parent: 'jaw' },
+    { name: 'cornerL', head: [0.55, 0.8, 0.35], tail: [0.7, 0.8, 0.5], parent: 'body' },
+    { name: 'cornerR', head: [-0.55, 0.8, 0.35], tail: [-0.7, 0.8, 0.5], parent: 'body' },
     ...side('L', 1), ...side('R', -1)],
   weights: [
     { bone: 'body', all: true },
     { bone: 'top', wedge: { hinge: [HY, HZ], from: [0, 8, 60], to: [150, 50], side: [0.62, 0.1], fade: [0.72, 0.25] } },
     { bone: 'jaw', wedge: { hinge: [HY, HZ], from: [-75, 25], to: [0, 8, 60], side: [0.62, 0.1], fade: [0.72, 0.25] } },
     { bone: 'tongue', sphere: { c: [0, 0.46, 0.06], r0: 0.88, r1: 1.02, scale: [0.42, 0.22, 0.48] }, halves: [[2, 0.5, 0.06, -1]] },
+    { bone: 'lipU', wedge: { hinge: [HY, HZ], from: [9, 7], to: [27, 8], side: [0.62, 0.1], fade: [0.7, 0.15] }, halves: [[2, 0.42, 0.12, 1]] },
+    /* the lower lip: its middle dips almost to the floor between the front legs, its sides rise clear of them */
+    { bone: 'lipD', wedge: { hinge: [HY, HZ], from: [-36, 10], to: [-9, 7], side: [0.62, 0.1], fade: [0.7, 0.15] }, halves: [[2, 0.42, 0.12, 1], [1, 0.46, 0.12, 1]] },
+    { bone: 'lipD', wedge: { hinge: [HY, HZ], from: [-40, 10], to: [-9, 7] }, halves: [[2, 0.42, 0.12, 1], [1, 0.16, 0.06, 1]], sphere: { c: [0, 0.3, 0.6], r0: 0.75, r1: 1, scale: [0.36, 0.6, 0.6] } },
+    { bone: 'cornerL', sphere: { c: [0.64, 0.8, 0.45], r0: 0.1, r1: 0.24, scale: [1, 1.6, 1] } }, { bone: 'cornerR', sphere: { c: [-0.64, 0.8, 0.45], r0: 0.1, r1: 0.24, scale: [1, 1.6, 1] } },
     { bone: 'eyeL', sphere: { c: [0.29, 1.5, 0.52], r0: 0.85, r1: 1, scale: [0.3, 0.22, 0.24] } }, { bone: 'eyeR', sphere: { c: [-0.29, 1.5, 0.52], r0: 0.85, r1: 1, scale: [0.3, 0.22, 0.24] } },
     { bone: 'browL', sphere: { c: [0.29, 1.52, 0.52], r0: 0.95, r1: 1.05, scale: [0.32, 0.24, 0.26] }, halves: [[1, 1.6, 0.06, 1]] },
     { bone: 'browR', sphere: { c: [-0.29, 1.52, 0.52], r0: 0.95, r1: 1.05, scale: [0.32, 0.24, 0.26] }, halves: [[1, 1.6, 0.06, 1]] },
@@ -86,15 +105,15 @@ const chomp = {
     { bone: 'hindL', halves: [[1, 0.26, 0.08, -1], [0, 0.5, 0.1, 1], [2, 0.32, 0.1, -1]] },
     { bone: 'hindR', halves: [[1, 0.26, 0.08, -1], [0, -0.5, 0.1, -1], [2, 0.32, 0.1, -1]] }],
   poses: {
-    stand: P({ all: {}, root: {}, body: {}, tongue: {}, sprout: {}, leafL: {}, leafR: {}, eyeL: {}, eyeR: {}, browL: {}, browR: {}, finL: {}, finR: {}, footL: {}, footR: {} }, mouth(0.36)),
+    stand: P({ all: {}, root: {}, body: {}, tongue: {}, lipU: {}, lipD: {}, cornerL: {}, cornerR: {}, sprout: {}, leafL: {}, leafR: {}, eyeL: {}, eyeR: {}, browL: {}, browR: {}, finL: {}, finR: {}, footL: {}, footR: {} }, mouth(0), corners(0)),
     /* tucked into a ball: mouth shut, eyes screwed up, fins and feet pulled in, leaves flat */
     ball: P(mouth(0.04), eyes(1.25, 0.2), brows(-0.02, 14), fins(-34, 20), leaves(-52), feet(0.1, 0.05), { body: sq(0.08) }) },
   clips: {
     /* ---------- standing about ---------- */
-    Idle: { fps: 30, keys: [{ t: 0, use: S },   /* breathes, leaves sway, a blink near the end */
-      { t: 0.6, pose: P({ body: sq(0.045, 0, 0, 2) }, mouth(0.3), fins(-8), leaves(-5, 0, 6)) },
-      { t: 1.2, pose: P({ body: sq(-0.025) }, mouth(0.42), fins(6), leaves(5, 0, 0)) },
-      { t: 1.8, pose: P({ body: sq(0.045, 0, 0, -2) }, mouth(0.3), fins(-8), leaves(-5, 0, -6)) },
+    Idle: { fps: 30, keys: [{ t: 0, use: S },   /* mouth shut: breathes out through puffed lips, the antenna sways, a blink near the end */
+      { t: 0.6, pose: P({ body: sq(0.045, 0, 0, 2) }, mouth(0), lips(0, 0, 6, 8), corners(-0.015), fins(-8), leaves(-5, 0, 6)) },
+      { t: 1.2, pose: P({ body: sq(-0.025) }, mouth(0), lips(0.01, -0.01, -3, -3), corners(0.02, 0.01), fins(6), leaves(5, 0, 0)) },
+      { t: 1.8, pose: P({ body: sq(0.045, 0, 0, -2) }, mouth(0), lips(0, 0, 6, 8), corners(-0.015), fins(-8), leaves(-5, 0, -6)) },
       { t: 2.0, pose: P({ body: sq(0.02) }, eyes(1, 1)) }, { t: 2.08, pose: eyes(1.1, 0.1), in: 'lin' }, { t: 2.18, pose: eyes(1, 1), in: 'lin' },
       { t: 2.4, reset: true, use: S }] },
     /* now and then: spots a fly, follows it, snaps at it twice, chews, licks his lips */
@@ -106,34 +125,34 @@ const chomp = {
       { t: 1.15, reset: true, use: S, pose: P({ body: sq(0.2, -18, -14, 0) }, mouth(1.1), eyes(1.4), fins(-20)), in: 'quad' },
       { t: 1.26, reset: true, use: S, pose: P({ body: sq(-0.22, -32, -14, 0) }, root(0, 0.36, 0.08), mouth(0), eyes(1.2, 0.25), fins(60), leaves(-34)), in: 'snap' },
       { t: 1.45, reset: true, use: S, pose: P({ body: sq(0.22) }, mouth(0.05), eyes(1.15, 0.3), brows(0.03), leaves(12)), in: 'quad' },
-      { t: 1.65, pose: P({ body: sq(0.02, 0, 0, 5) }, mouth(0.28)) }, { t: 1.82, pose: P({ body: sq(0.1, 0, 0, -5) }, mouth(0.03)) }, { t: 2.0, pose: P({ body: sq(0.02, 0, 0, 5) }, mouth(0.28)) }, { t: 2.17, pose: P({ body: sq(0.1) }, mouth(0.03)) },
-      { t: 2.4, pose: P({ body: sq(-0.04, -6, 0, 0) }, mouth(0.45), tongue(1.9, 34, -30), eyes(1.1, 0.5)), in: 'out' }, { t: 2.75, pose: tongue(1.9, -34, -30) }, { t: 2.95, pose: P(tongue(1, 0), mouth(0.36)), in: 'quad' },
+      { t: 1.65, pose: P({ body: sq(0.02, 0, 0, 5) }, mouth(0.22), corners(0.03, 0, -0.02)) }, { t: 1.82, pose: P({ body: sq(0.1, 0, 0, -5) }, mouth(0), lips(0, 0, 8, 10), corners(-0.02, 0, 0.03)) }, { t: 2.0, pose: P({ body: sq(0.02, 0, 0, 5) }, mouth(0.22), corners(0.03, 0, -0.02)) }, { t: 2.17, pose: P({ body: sq(0.1) }, mouth(0), lips(0, 0, 8, 10), corners(0)) },
+      { t: 2.4, pose: P({ body: sq(-0.04, -6, 0, 0) }, mouth(0.45), tongue(1.9, 34, -30), eyes(1.1, 0.5)), in: 'out' }, { t: 2.75, pose: tongue(1.9, -34, -30) }, { t: 2.95, pose: P(tongue(1, 0), mouth(0), lips(0, 0, 0, 10), corners(0.03)), in: 'quad' },
       { t: 3.3, reset: true, use: S, in: 'back' }] },
     Waddle: { fps: 30, keys: waddle },
     Scamper: { fps: 30, keys: scamper },
-    Skid: { fps: 30, keys: [{ t: 0, use: S, pose: P({ all: flip(-24), body: sq(0.16) }, feet(0, 0.26, 0, 0.2), eyes(1.5), brows(0.06, -10), mouth(0.12), fins(60, 30), leaves(-20, 44)) },
+    Skid: { fps: 30, keys: [{ t: 0, use: S, pose: P({ all: flip(-24), body: sq(0.16) }, feet(0, 0.26, 0, 0.2), eyes(1.5), brows(0.06, -10), mouth(0), lips(0.02, -0.02), corners(-0.03, 0.05), fins(60, 30), leaves(-20, 44)) },
       { t: 0.2, pose: P({ all: flip(-10), body: sq(0.05) }, leaves(8, -20), eyes(1.2)), in: 'quad' }, { t: 0.4, reset: true, use: S, in: 'back' }] },
-    Crouch: { fps: 30, keys: [{ t: 0, use: S }, { t: 0.2, pose: P({ body: sq(0.4) }, mouth(0.12), eyes(1.15, 0.6), brows(-0.03), fins(-28), leaves(-36, 10), feet(0, 0, 0, 0, 0.08)) }] },
+    Crouch: { fps: 30, keys: [{ t: 0, use: S }, { t: 0.2, pose: P({ body: sq(0.4) }, mouth(0), lips(0, 0, 8, 8), corners(-0.02, 0.03), eyes(1.15, 0.6), brows(-0.03), fins(-28), leaves(-36, 10), feet(0, 0, 0, 0, 0.08)) }] },
     /* ---------- in the air ---------- */
     Rise: { fps: 30, keys: [{ t: 0, use: S, pose: P({ body: sq(-0.3) }, mouth(0.95), eyes(1.25), brows(0.05), fins(64), feet(-0.08, 0), leaves(-46, 0)) },
-      { t: 0.4, reset: true, use: S, pose: P({ body: sq(0.03) }, mouth(0.6), fins(14), feet(0.08, 0.05), leaves(6)) }] },
+      { t: 0.4, reset: true, use: S, pose: P({ body: sq(0.03) }, mouth(0.05), lips(0, 0, 6, 10), fins(14), feet(0.08, 0.05), leaves(6)) }] },
     /* the second jump: a twirl with his fins flung out */
-    AirJump: { fps: 30, keys: [{ t: 0, use: S, pose: P({ body: sq(-0.26) }, mouth(0.8), eyes(1.2, 0.3), fins(80), leaves(-40), feet(-0.06, 0)) }, ...turns('yaw', 0, 360, 0, 0.36, {}), { t: 0.5, reset: true, use: S, pose: P({ all: R(0, 360, 0), body: sq(0.04) }, fins(10), mouth(0.6)), in: 'back' }] },
+    AirJump: { fps: 30, keys: [{ t: 0, use: S, pose: P({ body: sq(-0.26) }, mouth(0.8), eyes(1.2, 0.3), fins(80), leaves(-40), feet(-0.06, 0)) }, ...turns('yaw', 0, 360, 0, 0.36, {}), { t: 0.5, reset: true, use: S, pose: P({ all: R(0, 360, 0), body: sq(0.04) }, fins(10), mouth(0), corners(0.03)), in: 'back' }] },
     Fall: { fps: 30, keys: [   /* flaps his little fins as if it helped */
-      { t: 0, use: S, pose: P({ body: sq(-0.08) }, mouth(0.55), eyes(1.3), brows(0.05, -14), fins(54), leaves(40, -10), feet(0.1, 0.05, 0.04, -0.04)) },
-      { t: 0.125, pose: P(fins(-16), mouth(0.72), feet(0.04, -0.04, 0.1, 0.05), leaves(48, -10, 6)) },
-      { t: 0.25, pose: P(fins(54), mouth(0.55), feet(0.1, 0.05, 0.04, -0.04), leaves(40, -10, 0)) },
-      { t: 0.375, pose: P(fins(-16), mouth(0.72), feet(0.04, -0.04, 0.1, 0.05), leaves(48, -10, -6)) },
-      { t: 0.5, pose: P(fins(54), mouth(0.55), feet(0.1, 0.05, 0.04, -0.04), leaves(40, -10, 0)) }] },
+      { t: 0, use: S, pose: P({ body: sq(-0.08) }, mouth(0.1), lips(0.02, -0.03, 14, 20), eyes(1.3), brows(0.05, -14), fins(54), leaves(40, -10), feet(0.1, 0.05, 0.04, -0.04)) },
+      { t: 0.125, pose: P(fins(-16), mouth(0.22), lips(0.03, -0.05, 22, 30), feet(0.04, -0.04, 0.1, 0.05), leaves(48, -10, 6)) },
+      { t: 0.25, pose: P(fins(54), mouth(0.1), lips(0.02, -0.03, 14, 20), feet(0.1, 0.05, 0.04, -0.04), leaves(40, -10, 0)) },
+      { t: 0.375, pose: P(fins(-16), mouth(0.22), lips(0.03, -0.05, 22, 30), feet(0.04, -0.04, 0.1, 0.05), leaves(48, -10, -6)) },
+      { t: 0.5, pose: P(fins(54), mouth(0.1), lips(0.02, -0.03, 14, 20), feet(0.1, 0.05, 0.04, -0.04), leaves(40, -10, 0)) }] },
     FastFall: { fps: 30, keys: [{ t: 0, use: S, pose: P({ all: flip(55), body: sq(-0.2) }, mouth(1.1), tongue(1.5, 0, -30), eyes(1.2, 0.5), brows(-0.02, 18), fins(70, -40), leaves(-50, -40), feet(-0.08, -0.05)) },
       { t: 0.2, pose: P(tongue(1.6, 14, -34), fins(78, -46)) }, { t: 0.4, pose: P(tongue(1.5, 0, -30), fins(70, -40)) }] },
     /* helpless after the bubble pops: flops about, flapping in turn */
     Helpless: { fps: 30, keys: [{ t: 0, use: S, pose: P({ body: sq(0.1, 0, 0, 18) }, mouth(0.6), tongue(1.5, 20, 0), eyes(1.35), brows(0.05, -20), fins(60, 0, -20), leaves(30, 0, -20), feet(0.08, 0.06, 0, -0.06)) },
       { t: 0.4, pose: P({ body: sq(0.1, 0, 0, -18) }, tongue(1.5, -20, 0), fins(-20, 0, 60), leaves(30, 0, 20), feet(0, -0.06, 0.08, 0.06)) },
       { t: 0.8, pose: P({ body: sq(0.1, 0, 0, 18) }, tongue(1.5, 20, 0), fins(60, 0, -20), leaves(30, 0, -20), feet(0.08, 0.06, 0, -0.06)) }] },
-    Land: { fps: 30, keys: [{ t: 0, use: S, pose: P({ body: sq(0.3) }, mouth(0.1), eyes(1.2, 0.35), fins(-30), leaves(-46), feet(0, 0, 0, 0, 0.06)) }, { t: 0.18, reset: true, use: S, pose: P({ body: sq(-0.1) }, leaves(20)), in: 'out' }, { t: 0.4, reset: true, use: S, in: 'back' }] },
-    LandHard: { fps: 30, keys: [{ t: 0, use: S, pose: P({ body: sq(0.52) }, mouth(0.5), tongue(1.8, 0, -20), eyes(1.7), brows(0.07), fins(-40), leaves(-60), feet(0, 0, 0, 0, 0.14)) },
-      { t: 0.22, pose: P({ body: sq(0.4) }, eyes(1.3), tongue(1.3, 0)) }, { t: 0.36, reset: true, use: S, pose: P({ body: sq(-0.16) }, leaves(26), fins(30)), in: 'out' }, { t: 0.6, reset: true, use: S, in: 'back' }] },
+    Land: { fps: 30, keys: [{ t: 0, use: S, pose: P({ body: sq(0.3) }, mouth(0.5), lips(0, -0.04, 10, 24), eyes(1.2, 0.35), fins(-30), leaves(-46), feet(0, 0, 0, 0, 0.06)) }, { t: 0.18, reset: true, use: S, pose: P({ body: sq(-0.1) }, mouth(0), lips(0, 0.01, -4, -6), leaves(20)), in: 'out' }, { t: 0.4, reset: true, use: S, in: 'back' }] },
+    LandHard: { fps: 30, keys: [{ t: 0, use: S, pose: P({ body: sq(0.52) }, mouth(1.05), lips(0, -0.05, 14, 30), tongue(1.8, 0, -20), eyes(1.7), brows(0.07), fins(-40), leaves(-60), feet(0, 0, 0, 0, 0.14)) },
+      { t: 0.22, pose: P({ body: sq(0.4) }, mouth(0.4), lips(0, -0.02, 6, 14), eyes(1.3), tongue(1.3, 0)) }, { t: 0.36, reset: true, use: S, pose: P({ body: sq(-0.16) }, leaves(26), fins(30)), in: 'out' }, { t: 0.6, reset: true, use: S, in: 'back' }] },
     /* ---------- defending ---------- */
     Shield: { fps: 30, keys: [{ t: 0, use: S }, { t: 0.15, pose: shieldPose }] },   /* clamps his mouth, screws his eyes shut, hides behind his fins */
     ShieldHit: { fps: 30, keys: [{ t: 0, use: S, pose: P({ body: sq(0.26) }, root(0, 0, -0.12), mouth(0.02), eyes(1.6), brows(0.06), fins(30, 80), leaves(-30, 30)) }, { t: 0.15, pose: P(shieldPose, root(0, 0, 0)), in: 'back' }] },
@@ -171,58 +190,58 @@ const chomp = {
     ThrowB: { fps: 30, keys: thr(P({ all: R(0, 70, 0), body: sq(0.12) }, mouth(0.35), fins(40)), P({ all: R(0, 200, 0), body: sq(-0.2) }, mouth(1.1), tongue(1.8, 0, -20), eyes(1.2, 0.25), fins(80), leaves(-30, 0, 30)), P({ all: R(0, 320, 0), body: sq(0.05) }, mouth(0.6))).concat([{ t: 1.02, reset: true, use: S, pose: { all: R(0, 360, 0) } }]) },
     ThrowU: { fps: 30, keys: thr(P({ body: sq(0.34) }, mouth(0.35), eyes(1.1, 0.4), fins(-30)), P({ all: flip(-78), body: lg(0.3) }, root(0, 0.3, 0), mouth(1.2), tongue(1.8, 0, -10), eyes(1.4), fins(70), leaves(-40)), P({ all: flip(-60), body: lg(0.08) }, root(0, 0.16, 0), mouth(0.8))) },
     ThrowD: { fps: 30, keys: thr(P({ body: sq(-0.24) }, root(0, 0.34, 0.1), mouth(0.3), eyes(1.3), fins(80)), P({ all: flip(24), body: sq(0.46) }, root(0, -0.06, 0.3), mouth(0.1), eyes(1.25, 0.2), fins(-30), leaves(-56), feet(0, 0, 0, 0, 0.12)), P({ all: flip(10), body: sq(0.2) }, root(0, 0, 0.2), mouth(0.5))) },   /* hops up and sits on them */
-    Respawn: { fps: 30, keys: [{ t: 0, use: S, pose: P({ body: sq(-0.08) }, mouth(0.75), eyes(1.15, 0.3), fins(70, 0, 10), leaves(16)) }, { t: 0.3, pose: P({ body: sq(0.08, 0, 0, 6) }, fins(34, 0, 0), leaves(-10, 0, -8)), in: 'quad' }, { t: 0.6, pose: P({ body: sq(-0.08) }, fins(70, 0, 10), leaves(16)), in: 'quad' }, { t: 0.9, pose: P({ body: sq(0.08, 0, 0, -6) }, fins(34, 0, 0), leaves(-10, 0, 8)), in: 'quad' }, { t: 1.2, pose: P({ body: sq(-0.08) }, fins(70, 0, 10), leaves(16)), in: 'quad' }] },   /* waves and bounces on the pad */
+    Respawn: { fps: 30, keys: [{ t: 0, use: S, pose: P({ body: sq(-0.08) }, mouth(0), corners(0.06, 0.03), lips(0, 0, 0, 8), eyes(1.15, 0.3), fins(70, 0, 10), leaves(16)) }, { t: 0.3, pose: P({ body: sq(0.08, 0, 0, 6) }, fins(34, 0, 0), leaves(-10, 0, -8)), in: 'quad' }, { t: 0.6, pose: P({ body: sq(-0.08) }, fins(70, 0, 10), leaves(16)), in: 'quad' }, { t: 0.9, pose: P({ body: sq(0.08, 0, 0, -6) }, fins(34, 0, 0), leaves(-10, 0, 8)), in: 'quad' }, { t: 1.2, pose: P({ body: sq(-0.08) }, fins(70, 0, 10), leaves(16)), in: 'quad' }] },   /* waves and bounces on the pad */
     /* ---------- ground attacks ---------- */
-    Jab1: { fps: 30, keys: atk(P({ body: sq(0.06, -6, 0, 0) }, root(0, 0, -0.05), mouth(0.8), eyes(1.2)), P({ body: sq(-0.1, 9, 0, 0) }, root(0, 0, 0.4), mouth(0), eyes(1.1, 0.4), leaves(-10, -24)), P({ body: sq(0.03, 6, 0, 0) }, root(0, 0, 0.32), mouth(0.16))) },
-    Jab2: { fps: 30, keys: atk(P({ body: sq(0.06, -6, 0, -12) }, root(0, 0, 0.05), mouth(0.85), eyes(1.2)), P({ body: sq(-0.1, 9, 0, 12) }, root(0, 0, 0.44), mouth(0), eyes(1.1, 0.4), leaves(-10, -24, -14)), P({ body: sq(0.03, 6, 0, 8) }, root(0, 0, 0.36), mouth(0.16))) },
-    Jab3: { fps: 30, keys: atk(P({ all: flip(-14), body: sq(0.22) }, root(0, -0.03, -0.14), mouth(1.3), eyes(1.4), brows(0.05), fins(50), leaves(10, 30)), P({ all: flip(14), body: lg(0.24) }, root(0, 0.1, 0.62), mouth(0), eyes(1.2, 0.25), brows(-0.02, 18), fins(-30, -30), leaves(-30, -44)), P({ all: flip(8), body: sq(0.1) }, root(0, 0, 0.5), mouth(0.12))) },
+    Jab1: { fps: 30, keys: atk(P({ body: sq(0.06, -6, 0, 0) }, root(0, 0, -0.05), mouth(0.8), eyes(1.2)), P({ body: sq(-0.1, 9, 0, 0) }, root(0, 0, 0.4), mouth(0), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), eyes(1.1, 0.4), leaves(-10, -24)), P({ body: sq(0.03, 6, 0, 0) }, root(0, 0, 0.32), mouth(0.16))) },
+    Jab2: { fps: 30, keys: atk(P({ body: sq(0.06, -6, 0, -12) }, root(0, 0, 0.05), mouth(0.85), eyes(1.2)), P({ body: sq(-0.1, 9, 0, 12) }, root(0, 0, 0.44), mouth(0), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), eyes(1.1, 0.4), leaves(-10, -24, -14)), P({ body: sq(0.03, 6, 0, 8) }, root(0, 0, 0.36), mouth(0.16))) },
+    Jab3: { fps: 30, keys: atk(P({ all: flip(-14), body: sq(0.22) }, root(0, -0.03, -0.14), mouth(1.3), lips(0.05, -0.04, 18, 22), corners(0.03, 0.04), eyes(1.4), brows(0.05), fins(50), leaves(10, 30)), P({ all: flip(14), body: lg(0.24) }, root(0, 0.1, 0.62), mouth(0), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), eyes(1.2, 0.25), brows(-0.02, 18), fins(-30, -30), leaves(-30, -44)), P({ all: flip(8), body: sq(0.1) }, root(0, 0, 0.5), mouth(0.12))) },
     /* forward tilt: his tongue shoots out */
     TongueFlick: { fps: 30, keys: atk(P({ all: flip(-10), body: sq(0.1) }, root(0, 0, -0.06), mouth(0.95), tongue(0.6, 0, -20), eyes(1.2, 0.5)), P({ all: flip(6), body: sq(-0.08) }, root(0, 0, 0.3), mouth(0.72), tongue(4.7, 0, -13), eyes(1.2, 0.18), brows(0.04), fins(40, -30), leaves(-10, -30)), P({ all: flip(4) }, root(0, 0, 0.26), mouth(0.72), tongue(4.2, 9, -9)), [{ t: 0.68, pose: P(tongue(0.8, 0, -10), mouth(0.5), root(0, 0, 0.1)), in: 'snap' }]) },
-    SnapUp: { fps: 30, keys: atk(P({ all: flip(-46), body: sq(0.26) }, mouth(1.2), eyes(1.3)), P({ all: flip(-82), body: lg(0.26) }, root(0, 0.44, 0.34), mouth(0), eyes(1.1, 0.4), fins(-40), leaves(-50)), P({ all: flip(-72), body: lg(0.05) }, root(0, 0.32, 0.26), mouth(0.15))) },
-    ToeNibble: { fps: 30, keys: atk(P({ all: flip(26), body: sq(0.3) }, root(0, 0, -0.04), mouth(0.95), eyes(1.2)), P({ all: flip(44), body: sq(0.3) }, root(0, -0.08, 0.86), mouth(0), eyes(1.1, 0.4), fins(40), leaves(-20, -30)), P({ all: flip(38), body: sq(0.26) }, root(0, -0.06, 0.76), mouth(0.2))) },
+    SnapUp: { fps: 30, keys: atk(P({ all: flip(-46), body: sq(0.26) }, mouth(1.2), lips(0.05, -0.04, 18, 22), corners(0.03, 0.04), eyes(1.3)), P({ all: flip(-82), body: lg(0.26) }, root(0, 0.44, 0.34), mouth(0), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), eyes(1.1, 0.4), fins(-40), leaves(-50)), P({ all: flip(-72), body: lg(0.05) }, root(0, 0.32, 0.26), mouth(0.15))) },
+    ToeNibble: { fps: 30, keys: atk(P({ all: flip(26), body: sq(0.3) }, root(0, 0, -0.04), mouth(0.95), eyes(1.2)), P({ all: flip(44), body: sq(0.3) }, root(0, -0.08, 0.86), mouth(0), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), eyes(1.1, 0.4), fins(40), leaves(-20, -30)), P({ all: flip(38), body: sq(0.26) }, root(0, -0.06, 0.76), mouth(0.2))) },
     /* dash attack: tumbles head over heels into a bite, then a second munch */
     RollingHunger: { fps: 30, keys: [{ t: 0, use: S, pose: P({ all: flip(0) }, mouth(0.5)) }, { t: 0.08, use: 'ball', pose: { all: flip(60) }, in: 'lin' }, ...turns('flip', 60, 330, 0.08, 0.3, {}),
-      { t: 0.34, reset: true, use: S, pose: P({ all: flip(372), body: lg(0.2) }, root(0, 0, 0.5), mouth(0), eyes(1.2, 0.3), fins(40, -30), leaves(-30, -40)), in: 'lin' },
-      { t: 0.4, pose: P(mouth(0.9), { body: sq(0.1) }) }, { t: 0.47, pose: P(mouth(0), { body: lg(0.1) }), in: 'snap' }, { t: 0.52, pose: mouth(0.05) },
+      { t: 0.34, reset: true, use: S, pose: P({ all: flip(372), body: lg(0.2) }, root(0, 0, 0.5), mouth(0), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), eyes(1.2, 0.3), fins(40, -30), leaves(-30, -40)), in: 'lin' },
+      { t: 0.4, pose: P(mouth(0.9), { body: sq(0.1) }) }, { t: 0.47, pose: P(mouth(0), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), { body: lg(0.1) }), in: 'snap' }, { t: 0.52, pose: P(mouth(0.05), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03)) },
       { t: 0.64, pose: P({ all: flip(364), body: sq(0.1) }, root(0, 0, 0.36), mouth(0.3)), in: 'back' }, { t: 0.9, reset: true, use: S, pose: { all: flip(360) }, in: 'quad' }] },
     /* forward smash: a mouth no jaw should manage, then it slams */
-    MegaChomp: { fps: 30, keys: atk(P({ all: flip(-32, 0, 0.04, -0.26), body: sq(-0.16) }, mouth(1.78), tongue(1.3, 0, 24), eyes(1.6), brows(0.08), fins(76), leaves(20, 40), feet(0, 0.1, 0, 0)), P({ all: flip(28, 0, -0.03, 0.78), body: sq(0.2) }, mouth(0), eyes(1.3, 0.16), brows(-0.03, 22), fins(-36, -30), leaves(-40, -50)), P({ all: flip(34, 0, -0.03, 0.8), body: sq(0.06) }, mouth(0.04)), [{ t: 0.66, pose: P({ body: sq(0.14) }, mouth(0.1)) }, { t: 0.74, pose: P({ all: flip(16, 0, 0, 0.5), body: sq(-0.04) }, mouth(0.3), eyes(1.1, 0.5)) }]) },
-    SugarSnap: { fps: 30, keys: atk(P({ all: flip(-56), body: sq(0.4) }, mouth(1.35), eyes(1.4), fins(-30), leaves(-30)), P({ all: flip(-92), body: lg(0.36) }, root(0, 0.56, 0.2), mouth(0), eyes(1.2, 0.25), fins(60), leaves(-60)), P({ all: flip(-84), body: lg(0.1) }, root(0, 0.44, 0.16), mouth(0.12))) },
+    MegaChomp: { fps: 30, keys: atk(P({ all: flip(-32, 0, 0.04, -0.26), body: sq(-0.16) }, mouth(1.78), lips(0.05, -0.04, 18, 22), corners(0.03, 0.04), tongue(1.3, 0, 24), eyes(1.6), brows(0.08), fins(76), leaves(20, 40), feet(0, 0.1, 0, 0)), P({ all: flip(28, 0, -0.03, 0.78), body: sq(0.2) }, mouth(0), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), eyes(1.3, 0.16), brows(-0.03, 22), fins(-36, -30), leaves(-40, -50)), P({ all: flip(34, 0, -0.03, 0.8), body: sq(0.06) }, mouth(0.04), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03)), [{ t: 0.66, pose: P({ body: sq(0.14) }, mouth(0.1)) }, { t: 0.74, pose: P({ all: flip(16, 0, 0, 0.5), body: sq(-0.04) }, mouth(0.3), eyes(1.1, 0.5)) }]) },
+    SugarSnap: { fps: 30, keys: atk(P({ all: flip(-56), body: sq(0.4) }, mouth(1.35), lips(0.05, -0.04, 18, 22), corners(0.03, 0.04), eyes(1.4), fins(-30), leaves(-30)), P({ all: flip(-92), body: lg(0.36) }, root(0, 0.56, 0.2), mouth(0), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), eyes(1.2, 0.25), fins(60), leaves(-60)), P({ all: flip(-84), body: lg(0.1) }, root(0, 0.44, 0.16), mouth(0.12))) },
     /* down smash: a low bite in front; the game spins him half round and he bites again behind */
     FloorFeast: { fps: 30, keys: [{ t: 0, use: S }, { t: 0.2, pose: P({ all: flip(24), body: sq(0.32) }, mouth(1.05), eyes(1.3)), in: 'out' }, { t: 0.3, pose: P({ all: flip(24), body: sq(0.32) }, mouth(1.05)) },
-      { t: 0.34, reset: true, use: S, pose: P({ all: flip(42), body: sq(0.28) }, root(0, -0.08, 0.56), mouth(0), eyes(1.2, 0.3), fins(40)), in: 'snap' }, { t: 0.39, pose: mouth(0) },
-      { t: 0.44, pose: P(mouth(1.1), root(0, -0.08, 0.2), eyes(1.3), fins(80)) }, { t: 0.485, pose: P(mouth(0), root(0, -0.08, 0.56), eyes(1.2, 0.3), fins(40)), in: 'snap' }, { t: 0.52, pose: mouth(0) },
+      { t: 0.34, reset: true, use: S, pose: P({ all: flip(42), body: sq(0.28) }, root(0, -0.08, 0.56), mouth(0), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), eyes(1.2, 0.3), fins(40)), in: 'snap' }, { t: 0.39, pose: P(mouth(0), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03)) },
+      { t: 0.44, pose: P(mouth(1.1), root(0, -0.08, 0.2), eyes(1.3), fins(80)) }, { t: 0.485, pose: P(mouth(0), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), root(0, -0.08, 0.56), eyes(1.2, 0.3), fins(40)), in: 'snap' }, { t: 0.52, pose: P(mouth(0), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03)) },
       { t: 0.64, pose: P({ all: flip(30), body: sq(0.2) }, root(0, -0.05, 0.36), mouth(0.2)), in: 'back' }, { t: 0.9, reset: true, use: S, in: 'quad' }] },
     /* ---------- air attacks ---------- */
     /* neutral air: rolls twice round with his mouth wide open */
-    HungrySpin: { fps: 30, keys: [{ t: 0, use: S }, { t: 0.12, pose: P({ all: flip(-24), body: sq(0.12) }, mouth(0.7), fins(40)), in: 'out' }, { t: 0.2, pose: P({ all: flip(50), body: sq(-0.06) }, mouth(1.25), tongue(1.6, 0, -30), eyes(1.2, 0.3), fins(70, -20), leaves(-40), feet(0.08, 0)), in: 'snap' },
+    HungrySpin: { fps: 30, keys: [{ t: 0, use: S }, { t: 0.12, pose: P({ all: flip(-24), body: sq(0.12) }, mouth(0.7), fins(40)), in: 'out' }, { t: 0.2, pose: P({ all: flip(50), body: sq(-0.06) }, mouth(1.25), lips(0.05, -0.04, 18, 22), corners(0.03, 0.04), tongue(1.6, 0, -30), eyes(1.2, 0.3), fins(70, -20), leaves(-40), feet(0.08, 0)), in: 'snap' },
       ...turns('flip', 50, 720, 0.2, 0.6, {}), { t: 0.7, reset: true, use: S, pose: P({ all: flip(732), body: sq(-0.1) }, mouth(0.8), fins(60), eyes2(1.4, 0.8)), in: 'quad' }, { t: 0.9, reset: true, use: S, pose: { all: flip(720) }, in: 'back' }] },
-    FlyingChomp: { fps: 30, keys: atk(P({ all: flip(-26), body: sq(0.1) }, mouth(1.45), eyes(1.4), fins(64), feet(0.06, -0.1)), P({ all: flip(20), body: lg(0.2) }, root(0, 0, 0.56), mouth(0), eyes(1.2, 0.25), fins(-24, -40), leaves(-30, -44), feet(-0.04, -0.14)), P({ all: flip(12), body: sq(0.05) }, root(0, 0, 0.44), mouth(0.14))) },
+    FlyingChomp: { fps: 30, keys: atk(P({ all: flip(-26), body: sq(0.1) }, mouth(1.45), lips(0.05, -0.04, 18, 22), corners(0.03, 0.04), eyes(1.4), fins(64), feet(0.06, -0.1)), P({ all: flip(20), body: lg(0.2) }, root(0, 0, 0.56), mouth(0), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), eyes(1.2, 0.25), fins(-24, -40), leaves(-30, -44), feet(-0.04, -0.14)), P({ all: flip(12), body: sq(0.05) }, root(0, 0, 0.44), mouth(0.14))) },
     HeelFlick: { fps: 30, keys: atk(P({ all: flip(28), body: sq(0.1) }, feet(0.12, 0.1), mouth(0.3), eyes(1.2)), P({ all: flip(84), body: sq(-0.06) }, root(0, -0.14, -0.2), feet(-0.3, -0.04), mouth(0.75), eyes(1.2, 0.3), fins(60), leaves(-20, 30)), P({ all: flip(76) }, root(0, -0.1, -0.16), feet(-0.22, -0.04), mouth(0.6))) },
-    SkyBite: { fps: 30, keys: atk(P({ all: flip(-58), body: sq(0.16) }, mouth(1.25), eyes(1.3), fins(-30)), P({ all: flip(-92), body: lg(0.26) }, root(0, 0.42, 0.14), mouth(0), eyes(1.1, 0.4), fins(50), leaves(-50)), P({ all: flip(-82), body: lg(0.06) }, root(0, 0.3, 0.1), mouth(0.15))) },
-    JawDrop: { fps: 30, keys: atk(P({ all: flip(64), body: lg(0.12) }, root(0, 0.12, 0), mouth(1.75), tongue(1.3, 0, 20), eyes(1.5), brows(0.06), fins(84), leaves(30)), P({ all: flip(100), body: lg(0.28) }, root(0, 0.34, 0.62), mouth(0), eyes(1.2, 0.2), brows(-0.02, 20), fins(-30), leaves(40)), P({ all: flip(102), body: lg(0.1) }, root(0, 0.3, 0.52), mouth(0.08))) },
+    SkyBite: { fps: 30, keys: atk(P({ all: flip(-58), body: sq(0.16) }, mouth(1.25), lips(0.05, -0.04, 18, 22), corners(0.03, 0.04), eyes(1.3), fins(-30)), P({ all: flip(-92), body: lg(0.26) }, root(0, 0.42, 0.14), mouth(0), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), eyes(1.1, 0.4), fins(50), leaves(-50)), P({ all: flip(-82), body: lg(0.06) }, root(0, 0.3, 0.1), mouth(0.15))) },
+    JawDrop: { fps: 30, keys: atk(P({ all: flip(64), body: lg(0.12) }, root(0, 0.12, 0), mouth(1.75), lips(0.05, -0.04, 18, 22), corners(0.03, 0.04), tongue(1.3, 0, 20), eyes(1.5), brows(0.06), fins(84), leaves(30)), P({ all: flip(100), body: lg(0.28) }, root(0, 0.34, 0.62), mouth(0), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), eyes(1.2, 0.2), brows(-0.02, 20), fins(-30), leaves(40)), P({ all: flip(102), body: lg(0.1) }, root(0, 0.3, 0.52), mouth(0.08))) },
     /* get-up attack: springs up off his back and twirls with his mouth open, snapping shut as he stops */
     GetupSpin: { fps: 30, keys: [{ t: 0, use: S, pose: P({ all: flip(-90) }, mouth(0.6), eyes(1.3, 0.2)) }, { t: 0.2, reset: true, use: S, pose: P({ all: R(0, 0, 0), body: sq(0.34) }, mouth(1.1), eyes(1.3), fins(70)), in: 'out' },
-      ...turns('yaw', 0, 360, 0.26, 0.5, P(mouth(1.1), { body: sq(0.2) })), { t: 0.54, reset: true, use: S, pose: P({ all: R(0, 360, 0), body: sq(-0.1) }, mouth(0), eyes(1.2, 0.3), fins(20)), in: 'snap' }, { t: 0.9, reset: true, use: S, pose: { all: R(0, 360, 0) }, in: 'quad' }] },
+      ...turns('yaw', 0, 360, 0.26, 0.5, P(mouth(1.1), { body: sq(0.2) })), { t: 0.54, reset: true, use: S, pose: P({ all: R(0, 360, 0), body: sq(-0.1) }, mouth(0), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), eyes(1.2, 0.3), fins(20)), in: 'snap' }, { t: 0.9, reset: true, use: S, pose: { all: R(0, 360, 0) }, in: 'quad' }] },
     /* ---------- specials ---------- */
     /* letting go of the rope: flies on mouth first and bites */
-    SwingBite: { fps: 30, keys: [{ t: 0, use: S, pose: P({ all: flip(18), body: lg(0.18) }, mouth(1.4), eyes(1.4), fins(60, -40), leaves(-40, -40), feet(-0.06, -0.12)) }, { t: 0.1, pose: P(mouth(0), { body: lg(0.24) }, eyes(1.2, 0.25)), in: 'snap' }, { t: 0.2, pose: mouth(0.9) }, { t: 0.3, pose: P(mouth(0.05), { body: lg(0.1) }), in: 'snap' },
+    SwingBite: { fps: 30, keys: [{ t: 0, use: S, pose: P({ all: flip(18), body: lg(0.18) }, mouth(1.4), lips(0.05, -0.04, 18, 22), corners(0.03, 0.04), eyes(1.4), fins(60, -40), leaves(-40, -40), feet(-0.06, -0.12)) }, { t: 0.1, pose: P(mouth(0), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), { body: lg(0.24) }, eyes(1.2, 0.25)), in: 'snap' }, { t: 0.2, pose: mouth(0.9) }, { t: 0.3, pose: P(mouth(0.05), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), { body: lg(0.1) }), in: 'snap' },
       { t: 0.5, pose: P({ all: flip(6), body: sq(0.06) }, mouth(0.3), fins(20)), in: 'back' }, { t: 0.9, reset: true, use: S, in: 'quad' }] },
     /* down special: puffs right up, then squeezes it all out in one gust */
     AirCushion: { fps: 30, keys: atk(P({ all: flip(-16), body: puff(1.24, 1.18) }, mouth(0.06), eyes(1.5), brows(0.07), fins(70), leaves(20, 20)), P({ all: flip(14), body: puff(0.84, 0.86) }, root(0, 0, -0.14), mouth(0.5), eyes(1.25, 0.2), brows(-0.02, 16), fins(-10, 84), leaves(-30, 50)), P({ all: flip(8), body: puff(0.92, 0.9) }, root(0, 0, -0.1), mouth(0.4), fins(0, 70)), [{ t: 0.7, pose: P({ body: sq(0.1) }, mouth(0.6), tongue(1.5, 0), eyes(1.1, 0.5)) }]) },
     /* neutral special, no coal out: gulps, cheeks bulging, spits it up onto its rope on frame 13 of 22, then fans his burnt tongue */
-    CoalToss: { fps: 30, keys: [{ t: 0, use: S }, { t: 0.22, pose: P({ all: flip(-22), body: puff(1.16, 1.1) }, mouth(0.05), eyes(1.5), brows(0.07), fins(30)), in: 'out' }, { t: 0.36, pose: { body: { scale: [1.2, 1.06, 1.2], rot: [0, 0, 5] } } }, { t: 0.5, pose: { body: { scale: [1.2, 1.1, 1.2], rot: [0, 0, -5] } } },
+    CoalToss: { fps: 30, keys: [{ t: 0, use: S }, { t: 0.22, pose: P({ all: flip(-22), body: puff(1.16, 1.1) }, mouth(0.05), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), eyes(1.5), brows(0.07), fins(30)), in: 'out' }, { t: 0.36, pose: { body: { scale: [1.2, 1.06, 1.2], rot: [0, 0, 5] } } }, { t: 0.5, pose: { body: { scale: [1.2, 1.1, 1.2], rot: [0, 0, -5] } } },
       { t: 0.59, reset: true, use: S, pose: P({ all: flip(-30), body: sq(-0.2) }, root(0, 0.06, 0.12), mouth(1.1), tongue(1.4, 0, -30), eyes(1.2, 0.25), fins(-30), leaves(-30, 40)), in: 'snap' },
       { t: 0.72, pose: P({ all: flip(-8), body: sq(0.08) }, root(0, 0, 0), mouth(0.8), tongue(2, 16, -4), eyes(1.5), brows(0.05, -18), fins(50, 60, 10)) }, { t: 0.82, pose: P(tongue(2, -16, -4), fins(10, 60, 50)) }, { t: 0.92, pose: P(tongue(1.6, 10, -4), fins(40, 60, 10)) }, { t: 1.0, reset: true, use: S }] },
     CoalFlick: { fps: 30, keys: [{ t: 0, use: S }, { t: 0.3, pose: P({ all: flip(-20), body: sq(-0.08) }, mouth(0.7), eyes(1.3), fins(50), leaves(10, 40)), in: 'out' }, { t: 0.6, pose: P({ all: flip(12), body: sq(0.08) }, mouth(0.1), eyes(1.1, 0.4), leaves(-10, -40)), in: 'snap' }, { t: 1.0, reset: true, use: S, in: 'back' }] },   /* a relay: a quick toss of the head */
     AntCall: { fps: 30, keys: [{ t: 0, use: S }, { t: 0.25, pose: P({ body: sq(0.06, 12, 0, -8) }, mouth(0.22), eyes(1.2), brows(0.05), fins(86, 30, 0)), in: 'out' }, { t: 0.4, pose: fins(50, 60, 0) }, { t: 0.55, pose: P(fins(86, 30, 0), { body: sq(-0.04, 12, 0, -8) }, mouth(0.3)) }, { t: 0.7, pose: fins(50, 60, 0) }, { t: 1.0, reset: true, use: S, in: 'quad' }] },   /* beckons his ant: come on, come on */
     CoalNone: { fps: 30, keys: [{ t: 0, use: S }, { t: 0.4, pose: P({ body: sq(0.06, 0, 0, 10) }, mouth(0.15), eyes(1.2), brows(0.06, -14), fins(50), leaves(-30)), in: 'out' }, { t: 1.0, reset: true, use: S, in: 'quad' }] },   /* nothing to throw: a shrug */
     /* side special: throws his head back to hook the rope, then hangs from it by his teeth (the game turns him along the rope) */
-    RopeToss: { fps: 30, keys: [{ t: 0, use: S }, { t: 0.5, pose: P({ all: flip(-40), body: sq(0.16) }, mouth(1.2), eyes(1.3), fins(-20)), in: 'out' }, { t: 1.0, reset: true, use: S, pose: P({ all: flip(-90), body: sq(-0.24) }, mouth(0.1), eyes(1.3), fins(70), feet(-0.1, 0)), in: 'snap' }] },
+    RopeToss: { fps: 30, keys: [{ t: 0, use: S }, { t: 0.5, pose: P({ all: flip(-40), body: sq(0.16) }, mouth(1.2), lips(0.05, -0.04, 18, 22), corners(0.03, 0.04), eyes(1.3), fins(-20)), in: 'out' }, { t: 1.0, reset: true, use: S, pose: P({ all: flip(-90), body: sq(-0.24) }, mouth(0.1), eyes(1.3), fins(70), feet(-0.1, 0)), in: 'snap' }] },
     RopeSwing: { fps: 30, keys: [{ t: 0, use: S, pose: P({ all: flip(-90), body: sq(-0.22, 8, 0, 0) }, mouth(0.1), eyes(1.2, 0.3), brows(0.04), fins(74, 0, 40), leaves(-50, 30), feet(-0.12, 0.08, -0.06, -0.06)) },
       { t: 0.3, pose: P({ body: sq(-0.26, -8, 0, 0) }, fins(40, 0, 74), feet(-0.06, -0.06, -0.12, 0.08), leaves(-50, -30)) }, { t: 0.6, pose: P({ body: sq(-0.22, 8, 0, 0) }, fins(74, 0, 40), feet(-0.12, 0.08, -0.06, -0.06), leaves(-50, 30)) }] },
     /* up special: a deep breath, blows the bubble, then paddles about inside it */
-    BubbleBlow: { fps: 30, keys: [{ t: 0, use: S }, { t: 0.4, pose: P({ all: flip(-14), body: puff(1.2, 1.14) }, mouth(0.05), eyes(1.4), fins(60)), in: 'out' }, { t: 1.0, reset: true, use: S, pose: P({ all: flip(6), body: puff(0.9, 0.92) }, mouth(0.3), eyes(1.2, 0.25), fins(-10, 50)), in: 'snap' }] },
+    BubbleBlow: { fps: 30, keys: [{ t: 0, use: S }, { t: 0.4, pose: P({ all: flip(-14), body: puff(1.2, 1.14) }, mouth(0.05), lips(-0.02, 0.02, -8, -8), corners(-0.02, 0.03), eyes(1.4), fins(60)), in: 'out' }, { t: 1.0, reset: true, use: S, pose: P({ all: flip(6), body: puff(0.9, 0.92) }, mouth(0.3), eyes(1.2, 0.25), fins(-10, 50)), in: 'snap' }] },
     BubbleRide: { fps: 30, keys: [{ t: 0, use: S, pose: P({ all: flip(-16), body: sq(0.02, 0, 0, 9) }, mouth(0.8), tongue(1.3, 0), eyes(1.15, 0.3), fins(60, 30, -10), feet(0.1, 0.1, 0, -0.08), leaves(20, 0, -14)) },
       { t: 0.35, pose: P({ body: sq(-0.04, 0, 0, -9) }, fins(-10, 30, 60), feet(0, -0.08, 0.1, 0.1), leaves(20, 0, 14)) }, { t: 0.7, pose: P({ body: sq(0.02, 0, 0, 9) }, fins(60, 30, -10), feet(0.1, 0.1, 0, -0.08), leaves(20, 0, -14)) }] },
   },
