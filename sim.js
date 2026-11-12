@@ -2303,9 +2303,10 @@ const KNELL = (() => {
         dspecR: { t: 32, ll: 14, h: RIPOSTE.map(([n, wx, wy, ang]) => dag(n, n, wx, wy, ang, 7, 68, 40, 75, { len: 0.9 * KU, ru: 0.15 })) },
         hinge: { t: 7, ll: 3, h: [], ownPhys: 1, nodrift: 1, on: hingeOn }, hingeS: { t: 11, ll: 3, h: [], ownPhys: 1, nodrift: 1, on: hingeOn },
       }, { jabs: 3, throws: {
-        /* Slip Knot, Rewind, Open Clock, Set the Tooth (release frames mine) */
+        /* Slip Knot, Rewind, Open Clock, Set the Tooth (release frames mine). Up and down throw run at 0.3 of their old length
+           (the owner, 2026-11-12): release 12 > 4, free on 37 > 11 and 34 > 10, the clip played over 8 frames (ap) instead of 26 */
         f: { d: 6.5, a: 42, b: 50, k: 62, f: 11, t: 35 }, b: { d: 8.2, a: 142, b: 50, k: 72, f: 13, t: 42 },
-        u: { d: 5.8, a: 88, b: 60, k: 56, f: 12, t: 37 }, d: { d: 5, a: 77, b: 58, k: 32, f: 12, t: 34 } } }),
+        u: { d: 5.8, a: 88, b: 60, k: 56, f: 4, t: 11, ap: 8 }, d: { d: 5, a: 77, b: 58, k: 32, f: 4, t: 10, ap: 8 } } }),
     }],
   };
 })();
