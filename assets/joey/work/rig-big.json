@@ -1577,6 +1577,18 @@
    "near": 0.07
   }
  ],
+ "feet": [
+  {
+   "bone": "footR",
+   "side": -1,
+   "out": 6
+  },
+  {
+   "bone": "footL",
+   "side": 1,
+   "out": 6
+  }
+ ],
  "meet": {
   "ClapCap": {
    "at": [

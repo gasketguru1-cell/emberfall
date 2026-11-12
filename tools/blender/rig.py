@@ -370,6 +370,10 @@ AUTO_CLAV = spec.get('clavicles', [])
 # "toes": [ { "bone", "foot": foot bone, "floor": rest height of the tip above the floor, "near": height } ]   while the ball of
 #          the foot is within "near" of the floor, the toes bend up just enough to keep their tip on or above it (push-off, landing)
 AUTO_TOE = spec.get('toes', [])
+# "feet": [{ "bone": "footR", "side": -1, "out": 6 }]: after the legs are posed, each foot is turned about the floor's upright
+# so its toes point "out" degrees away from straight ahead (toward its own "side", -1 his right), keeping its pitch and
+# roll; a foot pointing mostly up or down turns less (a model whose feet are sculpted splayed stands toe-out otherwise)
+AUTO_FEET = spec.get('feet', [])
 lastq = {}
 def turn_of(bname, tr):
     D = delta(tr.get('rot', [0, 0, 0]))
@@ -449,6 +453,25 @@ def automatic(state, f, cname=None, t=0.0):
         put(c['bone'], Dc, {}, f)
     if mc and AUTO_CLAV:   # the collarbones moved the arms: turn the hands again from where the forearms now are
         bpy.context.scene.frame_set(f); palms(mc, f, t)
+    if AUTO_FEET:
+        Ma = rig.pose.bones['all'].matrix @ arm.bones['all'].matrix_local.inverted(); n = (Ma.to_3x3() @ UP).normalized()
+        fw = (Ma.to_3x3() @ FWD); fw = (fw - n * fw.dot(n)).normalized()
+        for c in AUTO_FEET:
+            fb_ = c['bone']; ab = arm.bones[fb_]
+            # measured across the foot (the line from its outer to inner edge), which stays level whether the toes point
+            # forward, down or up
+            a0 = (ab.tail_local - ab.head_local).cross(UP); a = frame_delta(fb_) @ a0; ah = a - n * a.dot(n)
+            if ah.length < 1e-4: continue
+            side = (Ma.to_3x3() @ RIGHT) * c.get('side', 1); o_ = math.radians(c.get('out', 6))
+            want = (fw * math.cos(o_) + side.normalized() * math.sin(o_)); want = (want - n * want.dot(n)).normalized()
+            wa = want.cross(n).normalized(); hn = ah.normalized()
+            ang = math.atan2(hn.cross(wa).dot(n), hn.dot(wa))
+            ang *= min(1.0, ah.length / a.length / 0.5)   # a foot rolled onto its edge: turn less
+            par = arm.bones[fb_].parent.name; P = frame_delta(par).to_matrix()
+            Dcur = P.inverted() @ frame_delta(fb_).to_matrix()
+            D = P.inverted() @ Quaternion(n, ang).to_matrix() @ P @ Dcur
+            put(fb_, D, state.get(fb_, {}), f)
+        bpy.context.scene.frame_set(f)
     for c in AUTO_TOE:
         if c['bone'] in state: continue
         ft = c['foot']; X = frame_delta(ft); Xi = X.inverted()
@@ -492,7 +515,7 @@ for name, clip in spec.get('clips', {}).items():
                     put(tb, Quaternion().slerp(Dq, fr).to_matrix(), tr if tb == bname else {}, fb)
                 continue
             put(bname, turn_of(bname, tr), tr, fb)
-        if AUTO_CLAV or AUTO_TOE or name in MEET: automatic(state, f, name, key['t'])
+        if AUTO_CLAV or AUTO_TOE or AUTO_FEET or name in MEET: automatic(state, f, name, key['t'])
         if key.get('in') and prevf is not None: eases.append((prevf, key['in']))
         prevf = f
     fcs = fcurves_of(act)

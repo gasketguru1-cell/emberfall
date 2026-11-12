@@ -529,6 +529,7 @@ function aposeX(T) {
     share: { spine: [['spine', 0.34], ['spine2', 0.33], ['spine3', 0.33]], head: [['neck', 0.25], ['neck2', 0.25], ['head', 0.5]] },
     clavicles: S.map((s, k) => ({ bone: 'clav' + s, target: 'c_hand' + s, rest: T.wri[k], k: 0.4, max: 30 })),
     toes: S.map(s => ({ bone: 'toe' + s, foot: 'foot' + s, floor: 0.015, near: 0.07 })),
+    feet: S.map(s => ({ bone: 'foot' + s, side: s === 'R' ? -1 : 1, out: 6 })),   /* the model's feet are sculpted splayed: stand them nearly straight */
     /* the forward smash's clap: palms pressed flat together from the strike until the hands part (bone lines 0.065 apart,
        measured on the rendered clap: closer and the hands pass into each other) */
     meet: { ClapCap: { at: [0.73, 1.4], fade: 0.2, gap: 0.055, toein: 6, hands: ['handR', 'handL'], targets: ['c_handR', 'c_handL'] } },
