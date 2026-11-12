@@ -159,8 +159,22 @@ function build() {
   }
 
   /* ---- projectiles ---- */
-  /* The living slingshot (Furious Fowls): a forked branch on two small feet, with two bands and a leather pouch. Built here, not generated. Faces +x. */
-  const emptySlings = [];
+  /* The living slingshot (Furious Fowls): the owner's model, cut by tools/blender/slingshot.py into this puppet's own parts
+     (trunk, fork, pouch, two bands, two feet) with its anchors, so the same code below moves it. Faces +x. Until the model has
+     loaded, the puppet wears simple stand-in shapes, and every slingshot already made is dressed in the model when it arrives. */
+  const emptySlings = [], SLING = { scene: null, waiting: [] };
+  const dressSling = rig => {
+    const S = SLING.scene, part = n => { const m = S.getObjectByName(n).clone(); m.castShadow = m.receiveShadow = true; m.frustumCulled = false; return m; }, at = n => S.getObjectByName(n).position.clone();
+    for (const o of rig.stand) o.visible = false;
+    rig.trunk.add(part('sling_trunk')); rig.fork.add(part('sling_fork'));
+    rig.tips.forEach((tp, i) => tp.position.copy(at('tip' + i))); rig.seat.position.copy(at('seat'));
+    rig.seatRest = rig.seat.position.clone().add(new THREE.Vector3(0, rig.trunk.position.y + rig.fork.position.y, 0)); rig.ends = [at('end0'), at('end1')];
+    const pouch = new THREE.Group(); pouch.add(part('sling_pouch')); rig.grp.add(pouch); rig.pouch = pouch;
+    rig.bands = [0, 1].map(i => { const m = part('sling_band' + i); rig.grp.add(m); return m; });
+    rig.feet = rig.feet.map((old, i) => { const g = new THREE.Group(), m = part('sling_foot' + i); g.position.copy(old.position); m.position.copy(old.position).negate(); g.add(m); rig.grp.add(g); return g; });   /* stepping lifts each foot from where it stands */
+  };
+  new GLTFLoader().load('assets/fowls/export/slingshot-v2.glb', g => { SLING.scene = g.scene; SLING.waiting.forEach(dressSling); SLING.waiting.length = 0; },
+    undefined, e => console.warn('slingshot model failed to load; the stand-in shapes stay', e));
   /* Built as a small puppet: feet, a trunk that bends from its base, the fork bending again above it, two bands drawn fresh
      each frame from the fork tips to a pouch that hangs on a spring. Poses come from slingWant, which only reads the game. */
   const makeSling = () => {
@@ -178,7 +192,8 @@ function build() {
     const feet = [1.2, -1.2].map(z => { const foot = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), wood); foot.scale.set(1.0, 0.45, 0.7); foot.position.set(0.5, 0.5, z); foot.castShadow = true; grp.add(foot); return foot; });
     const eye = new THREE.MeshBasicMaterial({ color: 0x2a1a12 }); for (const z of [0.5, -0.5]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 6), eye); e.position.set(1.42, 3.0, z); trunk.add(e); }
     const out = new THREE.Group(); grp.rotation.y = 0.95; out.add(grp); out.visible = false;   /* turned so the fork shows from the side */
-    const rig = { grp, trunk, fork, tips, pouch, seat, bands, feet, bend: 0, bendV: 0, sq: 1, sqV: 0, px: 0, py: 0, pvx: 0, pvy: 0, tick: -1, lastVy: 0, lastState: '', lastKey: '', k: null, seatRest: null };
+    const stand = []; grp.traverse(o => { if (o.isMesh) stand.push(o); });   /* the stand-in shapes, hidden once the model is on */
+    const rig = { grp, trunk, fork, tips, pouch, seat, bands, feet, stand, ends: null, bend: 0, bendV: 0, sq: 1, sqV: 0, px: 0, py: 0, pvx: 0, pvy: 0, tick: -1, lastVy: 0, lastState: '', lastKey: '', k: null, seatRest: null };
     /* Each game step every part chases the pose it is asked for on a spring, so it overshoots and settles (follow-through).
        Returns how far the pouch sits from its resting place, in the slingshot's own space, so a rider can move with it. */
     rig.drive = (want, step) => {
@@ -199,10 +214,11 @@ function build() {
       const off = c.clone().sub(rig.seatRest), ca = Math.cos(0.95), sa = Math.sin(0.95); c.x += rig.px * ca; c.z += rig.px * sa; c.y += rig.py; off.x += rig.px * ca; off.z += rig.px * sa; off.y += rig.py;
       rig.pouch.position.copy(c); rig.pouch.rotation.z = clamp(rig.pvx * -0.3, -0.6, 0.6);
       const thinB = 1 / (1 + Math.hypot(rig.px, rig.py) * 0.08);   /* stretched bands get thinner */
-      rig.tips.forEach((tp, i) => { const a = tp.getWorldPosition(new THREE.Vector3()); rig.grp.worldToLocal(a); const b = c.clone().add(new THREE.Vector3(0.1, -0.6, i ? -1.4 : 1.4)), m = rig.bands[i];
+      rig.tips.forEach((tp, i) => { const a = tp.getWorldPosition(new THREE.Vector3()); rig.grp.worldToLocal(a); const b = c.clone().add(rig.ends ? rig.ends[i] : new THREE.Vector3(0.1, -0.6, i ? -1.4 : 1.4)), m = rig.bands[i];
         m.position.copy(a).add(b).multiplyScalar(0.5); m.scale.set(thinB, Math.max(0.1, a.distanceTo(b)), thinB); m.quaternion.setFromUnitVectors(unitY, b.clone().sub(a).normalize()); });
       return off;
     };
+    if (SLING.scene) dressSling(rig); else SLING.waiting.push(rig);
     out.userData.rig = rig; return out;
   };
   /* What the slingshot is asked to do this frame. bend > 0 leans its top the way it faces; sq < 1 squashes it; px, py pull
