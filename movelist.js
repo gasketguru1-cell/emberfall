@@ -700,7 +700,7 @@ function drawPauseMenu() {
     else { g.fillStyle = 'rgba(20,17,36,.86)'; rr(x, y, bw, bh, 23); g.fill(); g.strokeStyle = 'rgba(255,255,255,.16)'; g.lineWidth = 1; g.stroke(); }
     g.font = (on ? '900 ' : 'bold ') + '19px system-ui, sans-serif'; spaced(on ? 2 : 1); g.fillStyle = on ? '#2a1208' : '#e6e0f6'; g.fillText(t.toUpperCase(), W / 2, y + 30); spaced(0); });
   let hx = W / 2 - 300; const hy = H * 0.3 + 64 + PAUSE_ITEMS.length * (bh + 12) + 26;
-  for (const [cap, a] of [['↑ ↓', 'Choose'], [padCap('A') + ' / Z', 'Select'], [(anyPS() ? 'Options' : 'Start') + ' / Enter', 'Resume'], [padCap('B') + ' / X', 'Exit to fighter select'], [padCap('+'), 'Move list']]) hx = keyHint(hx, hy, cap, a);
+  for (const [cap, a] of [['↑ ↓', 'Choose'], [padCap('A') + ' / Z', 'Select'], [(padGroupOf() === 'x' ? 'Start' : padCap('+')) + ' / Enter', 'Resume'], [padCap('B') + ' / X', 'Exit to fighter select'], [padCap('+'), 'Move list']]) hx = keyHint(hx, hy, cap, a);
 }
 
 /* ---------- Drawing ---------- */

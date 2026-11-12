@@ -125,15 +125,15 @@ function keyHint(x, y, cap, action) {
 }
 /* The controls shown under the fighter select: whatever the keyboard's setup and the first controller's setup say right now. */
 function legendRows() {
-  const pd = allDevs().find(d => d !== 'kb') || 'pad0', pm = setupOf(pd).map, km = setupOf('kb').map, ps = devPS(pd);
-  const pb = a => PAD_ROWS.filter(r => pm[r[0]] === a).map(r => padCap(r[2], ps)).join(' / ') || '—';
+  const pd = allDevs().find(d => d !== 'kb') || 'pad0', pm = setupOf(pd).map, km = setupOf('kb').map, ps = pd;
+  const pb = a => padRowsFor(pd).filter(r => pm[r[0]] === a).map(r => padCap(r[2], ps)).join(' / ') || '—';
   const kk = (...n) => n.map(x => km[x]).filter(Boolean).map(keyName).join(' / ') || '—';
   const four = (u, l, d, r) => km[u] + km[l] + km[d] + km[r] === 'ArrowUpArrowLeftArrowDownArrowRight' ? 'Arrows' : [u, l, d, r].map(x => keyName(km[x])).join(' ');
   return [['CONTROLLER', [['Stick', 'Move'], [pb('atk'), 'Attack'], [pb('spc'), 'Special'], [pb('jmp'), 'Jump'], [pb('shd'), 'Shield'], [pb('grb'), 'Grab'], ['R Stick', 'Tilt'], [padCap('+', ps), 'Start'], [padCap('−', ps), 'Controls']]],
           ['KEYBOARD', [[four('up', 'left', 'down', 'right'), 'Move'], [kk('atk'), 'Attack'], [kk('spc'), 'Special'], [kk('jmp', 'jmp2'), 'Jump'], [kk('shd', 'shd2'), 'Shield'], [kk('grb', 'grb2'), 'Grab'], [four('cu', 'cl', 'cd', 'cr'), 'Tilt'], [kk('walk'), 'Walk'], ['Enter', 'Start'], ['Bksp', 'Controls']]]];
 }
 /* The controls screen (sim.js: CMENU), over the fighter select or the pause screen. */
-const ACT_COL = { '': '#6d6885', atk: '#ff7b6c', spc: '#6cb4ff', jmp: '#9be564', shd: '#7fe3e0', grb: '#d59bff' };
+const ACT_COL = { mod: '#f2c14e', '': '#6d6885', atk: '#ff7b6c', spc: '#6cb4ff', jmp: '#9be564', shd: '#7fe3e0', grb: '#d59bff' };
 function drawCMenu() {
   if (!CMENU) return; const m = CMENU, su = setupOf(m.dev), kb = su.type === 'kb', snd = m.page === 'sound', items = cmenuItems(), list = setupsFor(m.dev), ui = 'system-ui, sans-serif';
   g.save(); spaced(0); g.fillStyle = 'rgba(8,6,16,.8)'; g.fillRect(0, 0, W, H);
@@ -166,7 +166,9 @@ function drawCMenu() {
       g.textAlign = 'center'; g.font = 'bold 22px ' + ui; g.fillStyle = '#fff'; g.fillText(name, x + w / 2, my + 3);
       const nw = g.measureText(name).width; g.fillStyle = '#ffd98a'; g.fillText('‹', x + w / 2 - nw / 2 - 26, my + 2); g.fillText('›', x + w / 2 + nw / 2 + 26, my + 2);
       g.textAlign = 'right'; g.font = '13px ' + ui; g.fillStyle = '#b9b2d6'; g.fillText((su.fixed ? 'built-in' : su.touched ? 'your own' : 'your own, not changed yet') + '  ·  ' + (list.indexOf(su) + 1) + ' of ' + list.length, x + w - 16, my);
-    } else if (it.kind === 'reset') { g.textAlign = 'center'; g.font = 'bold 14px ' + ui; g.fillStyle = on ? '#fff' : '#d8d2ee'; g.fillText('Reset ' + su.name + ' to the standard layout', x + w / 2, my); }
+    } else if (it.kind === 'socd') { g.textAlign = 'center'; g.font = 'bold 14px ' + ui; g.fillStyle = on ? '#fff' : '#d8d2ee'; g.fillText('Left + right together:  ' + (SOCD.mode === 'last' ? 'last pressed wins' : 'neither (neutral)'), x + w / 2, my); }
+    else if (it.kind === 'teach') { const q = padObj(m.dev), has = q && TAUGHT[q.id]; g.textAlign = 'center'; g.font = 'bold 14px ' + ui; g.fillStyle = on ? '#fff' : has ? '#9be564' : '#d8d2ee'; g.fillText(has ? 'Buttons taught ✓  (teach again)' : 'Teach this controller its buttons', x + w / 2, my); }
+    else if (it.kind === 'reset') { g.textAlign = 'center'; g.font = 'bold 14px ' + ui; g.fillStyle = on ? '#fff' : '#d8d2ee'; g.fillText('Reset ' + su.name + ' to the standard layout', x + w / 2, my); }
     else {
       g.textAlign = 'left'; g.font = '15px ' + ui; g.fillStyle = on ? '#fff' : '#d8d2ee'; g.fillText(it.label, x + 14, my);
       if (kb) {
@@ -180,10 +182,21 @@ function drawCMenu() {
       }
     }
   });
+  if (m.teach) {   /* teaching: one big question at a time */
+    const t = m.teach, [, what, hint] = TEACH_STEPS[t.step], bx = CM.x + 30, by = CM.y + 124, bw = CM.w - 60, bh = 400;
+    g.fillStyle = 'rgba(16,13,30,.97)'; rr(bx, by, bw, bh, 14); g.fill(); g.strokeStyle = '#ffd98a'; g.lineWidth = 2; g.stroke();
+    g.textAlign = 'center'; g.font = 'bold 13px ' + ui; spaced(2); g.fillStyle = '#ffb86b'; g.fillText('TEACHING  ·  STEP ' + (t.step + 1) + ' OF ' + TEACH_STEPS.length, W / 2, by + 52); spaced(0);
+    const ask = typeof TEACH_STEPS[t.step][0] === 'string' ? what : 'Press ' + what;
+    g.font = '900 30px ' + ui; g.fillStyle = t.rel ? '#8f88ad' : '#fff'; g.fillText(t.rel ? 'Let go of everything…' : ask, W / 2, by + 150);
+    g.font = '16px ' + ui; g.fillStyle = '#cfc8e8'; if (!t.rel && hint) g.fillText(hint, W / 2, by + 190);
+    g.fillStyle = 'rgba(255,255,255,.1)'; rr(bx + 120, by + 250, bw - 240, 10, 5); g.fill(); g.fillStyle = '#ffb86b'; rr(bx + 120, by + 250, (bw - 240) * t.step / TEACH_STEPS.length, 10, 5); g.fill();
+    g.font = '14px ' + ui; g.fillStyle = '#9d96b8'; g.fillText('No such button?  Press one you already taught to skip it.', W / 2, by + 310);
+    g.fillText('Escape, Delete or a click stops without changing anything.', W / 2, by + 334);
+  }
   if (m.noteT > 0) { g.globalAlpha = Math.min(1, m.noteT / 30); g.textAlign = 'center'; g.font = '14px ' + ui; g.fillStyle = '#ffd98a'; g.fillText(m.note, CM.x + CM.w / 2, CM.y + 542); g.globalAlpha = 1; }
   g.textAlign = 'center'; g.font = '13px ' + ui; g.fillStyle = '#8f88ad'; g.fillText(snd ? 'The music steps back by itself for heavy hits and KOs, and while the game is paused.' : 'Two jump buttons together: short hop   ·   Right stick down while falling: fast fall', CM.x + CM.w / 2, CM.y + 568);
   let hx = CM.x + (snd ? 190 : kb ? 96 : 250); const hy = CM.y + CM.h - 24;
-  for (const [cap, act] of snd ? (kb ? [['↑ ↓', 'choose'], ['← →', 'quieter / louder'], ['Enter', 'mute'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'quieter / louder'], [padCap('A', devPS(m.dev)), 'mute'], [padCap('B', devPS(m.dev)), 'done']]) : kb ? [['↑ ↓ ← →', 'choose'], ['Enter', 'change a key'], ['Delete', 'clear it'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'change'], [padCap('Y', devPS(m.dev)), 'set to nothing'], [padCap('B', devPS(m.dev)), 'done']]) hx = keyHint(hx, hy, cap, act) + 8;
+  for (const [cap, act] of snd ? (kb ? [['↑ ↓', 'choose'], ['← →', 'quieter / louder'], ['Enter', 'mute'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'quieter / louder'], [padCap('A', m.dev), 'mute'], [padCap('B', m.dev), 'done']]) : kb ? [['↑ ↓ ← →', 'choose'], ['Enter', 'change a key'], ['Delete', 'clear it'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'change'], [padCap('Y', m.dev), 'set to nothing / forget'], [padCap('B', m.dev), 'done']]) hx = keyHint(hx, hy, cap, act) + 8;
   g.restore();
 }
 /* the forms the fighter select shows: Wren's companions, the first five Fowls; Joey only as himself (his other form is a surprise) */
