@@ -156,7 +156,7 @@ function build() {
     if (v.key === k) return; const prevKey = v.key; v.key = k;
     while (v.pivot.children.length) { const c = v.pivot.children.pop(); if (c.geometry) c.geometry.dispose(); }
     if (v.mixer) v.mixer.stopAllAction();
-    v.mixer = null; v.model = null; v.chomp = null; v.bubble = null; v.actions = {}; v.cur = null; v.prev = null; v.hand = null; v.springs = []; v.springTick = -1;
+    v.mixer = null; v.model = null; v.chomp = null; v.bubble = null; v.actions = {}; v.cur = null; v.prev = null; v.hand = null; v.springs = []; v.springTick = -1; v.jiggle = [];
     if (v.prop) { scene.remove(v.prop); v.prop = null; }
     if (useModel) {
       /* A copy of the loaded model with its own skeleton, scaled to the fighter's height and turned so its front is +x. */
@@ -506,6 +506,37 @@ function build() {
       links: c.bones.map(n => v.obj.getObjectByName(n)).filter(Boolean).map(b => ({ bone: b, dir: null, dv: new THREE.Vector3(), lastHead: null, tipLocal: null, animQ: null, setQ: null })) }));
     for (const ch of v.springs) ch.links.forEach((l, i) => { const next = ch.links[i + 1]; l.tipLocal = next ? next.bone.position.clone() : (i > 0 ? ch.links[i - 1].tipLocal.clone() : new THREE.Vector3(0, 0.2, 0)); });
     v.springTick = -1;
+    /* jiggle (manifest "jiggle"): soft flesh that slides behind the bone the animation moves it with */
+    v.jiggle = (M.cfg.jiggle || []).map(c => ({ b: v.obj.getObjectByName(c.bone), k: c.k || 0.2, d: c.d || 0.8, max: c.max || 0.05, g: c.g === undefined ? 1 : c.g,
+      off: new THREE.Vector3(), vel: new THREE.Vector3(), tv: new THREE.Vector3(), last: null, animP: null, setP: null })).filter(j => j.b);
+  }
+  /* Each jiggle bone keeps an offset from where the animation puts it, in world space. When the anchor moves (the
+     fighter running, landing, being hit, or the clip itself throwing the body about) the flesh is left behind by that much
+     and springs back, overshooting and wobbling until it settles. The offset is eased off toward its limit so it never
+     tears away. Stepped once per game step, like the springs. */
+  const _jw = new THREE.Vector3(), _jd = new THREE.Vector3();
+  function applyJiggle(v) {
+    const step = tick !== v.jiggleTick; v.jiggleTick = tick;
+    for (const j of v.jiggle) { if (j.setP && j.b.position.equals(j.setP)) j.b.position.copy(j.animP); else j.animP = j.b.position.clone(); }
+    v.root.updateMatrixWorld(true);
+    const scale = new THREE.Vector3().setFromMatrixScale(v.obj.matrixWorld), u = (Math.abs(scale.x) + scale.y + scale.z) / 3;
+    for (const j of v.jiggle) {
+      j.b.updateWorldMatrix(true, false); _jw.setFromMatrixPosition(j.b.matrixWorld);
+      if (!j.last || j.last.distanceToSquared(_jw) > 400) { j.last = _jw.clone(); j.off.set(0, 0, 0); j.vel.set(0, 0, 0); j.tv.set(0, 0, 0); }
+      const lim = j.max * u;
+      if (step) {
+        _jd.copy(_jw).sub(j.last); j.last.copy(_jw);
+        const acc = _jd.clone().sub(j.tv); j.tv.copy(_jd); if (acc.lengthSq() > 16) acc.setLength(4);   /* the anchor speeding up or stopping, not steady travel */
+        j.vel.addScaledVector(acc, -j.g).addScaledVector(j.off, -j.k).multiplyScalar(j.d); j.off.add(j.vel);
+        if (j.off.length() > lim * 2.5) { j.off.setLength(lim * 2.5); j.vel.multiplyScalar(0.5); }
+      }
+      const n = j.off.length();
+      if (n > 1e-5) {
+        _jd.copy(j.off).multiplyScalar(lim * Math.tanh(n / lim) / n).add(_jw);
+        j.b.parent.worldToLocal(_jd); j.b.position.copy(_jd); j.b.updateMatrixWorld(true);
+      }
+      j.setP = j.b.position.clone();
+    }
   }
   /* Each bone keeps the direction it is pointing, in world space. That direction is pulled toward where the animation
      points the bone, carries a little momentum, and is dragged back by how fast the bone's base is travelling, so a tail
@@ -840,6 +871,7 @@ function build() {
       if (v.chomp) poseChomp(v, f);
       if (v.bubble) { const on = !!f.bubble, grow = f.state === 'attack' && f.mname === 'uspec' && !on ? clamp((f.mf - 3) / 5, 0, 1) : 0;   /* it swells from his mouth as he blows, then wobbles round him; it sits round his middle whatever the pivot is doing */
         v.bubble.visible = on || grow > 0; v.bubble.scale.setScalar(on ? 1 + Math.sin(tick * 0.3) * 0.03 : 0.15 + 0.85 * grow); v.bubble.position.x = on ? 0 : 5 * (1 - grow); }
+      if (v.jiggle && v.jiggle.length) applyJiggle(v);
       if (v.springs.length) applySprings(v);
       if (v.model && v.model.cfg.axe) axeShow(v, f);
       if (v.model && v.model.cfg.carry) { const c = v.model.cfg.carry; if (v.carryObj !== v.obj) { v.carryObj = v.obj; v.carryB = v.obj.getObjectByName(c.bone); } if (v.carryB) { v.carryB.updateWorldMatrix(true, false); v.carryB.getWorldPosition(_v3); v.handW = { x: _v3.x, y: _v3.y, t: tick }; } }
