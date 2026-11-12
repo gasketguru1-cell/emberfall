@@ -2651,7 +2651,7 @@ class Fighter {
     if (tum && (st === 'air' || st === 'airdodge' || (st === 'attack' && !this.move.burst))) {
       const c = this.ctl, ks = Object.keys(c.age).filter(k => c.age[k] <= T.buffer);
       if (ks.length) { for (const k of ks) if (k === 'c') c.cPress = true; else c.buf[k] = Math.max(c.buf[k], T.buffer - c.age[k], 1);
-        this.move = null; this.lag = 0; this.set('idle'); this.groundActs(false); return; }
+        const vx = this.vx; this.move = null; this.lag = 0; this.set('idle'); this.groundActs(false); this.vx = vx; return; }   /* whatever comes out keeps his speed, as a tumble slide does */
     }
     if (st === 'attack' && this.move.burst) {   /* a tumble never falls over: a dive that reaches the floor carries on as a slide, anything else lands ready to act */
       if (this.burstKind === 'dive') { this.burstKind = 'slide'; spark(this.x, this.y, '#ddd', 8, 1.2); } else { this.move = null; this.set('idle'); }
