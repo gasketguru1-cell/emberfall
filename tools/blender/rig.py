@@ -71,9 +71,18 @@ for b in spec['bones']: arm.bones[b['name']].use_deform = b.get('deform', True)
 print('rig: skeleton %d bones (%d deform)' % (len(arm.bones), sum(1 for b in arm.bones if b.use_deform)))
 
 # ---- weights: automatic (heat) on the mesh itself; if that leaves gaps, weight a clean voxel copy and transfer ----
+# "heatScale": k weights at k times the size and then sets the size back: Blender's heat solver can fail on a small mesh
+# with fine detail (a 1.8 m generated character), where the same mesh ten times larger solves.
 def auto_weight(target):
     bpy.ops.object.select_all(action='DESELECT'); target.select_set(True); rig.select_set(True); bpy.context.view_layer.objects.active = rig
+    k = spec.get('heatScale', 1)
+    if k != 1:
+        for o in (target, rig): o.scale = (k, k, k)
+        bpy.context.view_layer.update()
     bpy.ops.object.parent_set(type='ARMATURE_AUTO')
+    if k != 1:
+        for o in (target, rig): o.scale = (1, 1, 1)
+        target.matrix_parent_inverse.identity(); bpy.context.view_layer.update()
     return sum(1 for v in target.data.vertices if not any(g.weight > 1e-4 for g in v.groups))
 
 # "weights" in the spec replaces automatic weighting with weights worked out from where each vertex is: for a simple shape
@@ -262,11 +271,21 @@ for rg in spec.get('rigid', []):
 
 # ---- leg reach (IK): the lower leg's tip follows a control bone; the exporter bakes the result into plain rotations ----
 bpy.context.view_layer.objects.active = rig
+# "influence" on an ik entry: how much it applies when a clip does not say (default 1). A second chain on the same bone with
+# influence 0 can be switched on per key with "iinf": { "<its control>": 0..1 } (a hand that takes hold of something).
 for ik in spec.get('ik', []):
     c = rig.pose.bones[ik['bone']].constraints.new('IK'); c.target = rig; c.subtarget = ik['name']; c.chain_count = ik.get('chain', 2)
+    c.influence = ik.get('influence', 1.0)
 if spec.get('ik'): print('rig: %d IK chains' % len(spec['ik']))
+# "influence" on a copyrot entry sets how much it applies when a clip does not say (default 1); a pose can key it per bone
+# with "cinf": 0..1 (a free hand that takes hold of a two-handed grip for some frames only).
+# "space": "LOCAL" copies the control's turn from its own rest (a twist bone taking part of the wrist's roll); "axes":
+# [x, y, z] limits which of the bone's own axes are copied (y runs along the bone); "mix": "ADD" adds it to the bone's own.
 for cr in spec.get('copyrot', []):
-    c = rig.pose.bones[cr['bone']].constraints.new('COPY_ROTATION'); c.target = rig; c.subtarget = cr['from']; c.target_space = 'WORLD'; c.owner_space = 'WORLD'; c.mix_mode = 'REPLACE'
+    c = rig.pose.bones[cr['bone']].constraints.new('COPY_ROTATION'); c.target = rig; c.subtarget = cr['from']
+    c.target_space = c.owner_space = cr.get('space', 'WORLD'); c.mix_mode = cr.get('mix', 'REPLACE')
+    if 'axes' in cr: c.use_x, c.use_y, c.use_z = cr['axes']
+    c.influence = cr.get('influence', 1.0)
 if spec.get('copyrot'): print('rig: %d aimed bones' % len(spec['copyrot']))
 
 # ---- animation ----
@@ -316,7 +335,8 @@ for name, clip in spec.get('clips', {}).items():
         # "lag": { bone: frames } keys those bones that many frames later than the key's time (overlap: the hips lead, the
         # chest, arms and tool follow); the bone's own ease from its previous key comes with it
         lag = key.get('lag', {})
-        for bname, tr in state.items():
+        # "only": key just the bones this key names (a leg key between body keys leaves the rest to interpolate)
+        for bname, tr in ([(b, state[b]) for b in key.get('pose', {})] if key.get('only') else state.items()):
             fb = f + int(lag.get(bname, 0))
             if bname in prevb and fb <= prevb[bname]: fb = prevb[bname] + 1
             if key.get('in') and bname in prevb and bname in lag: beases.append((bname, prevb[bname], key['in']))
@@ -336,6 +356,12 @@ for name, clip in spec.get('clips', {}).items():
             pb.location = R.inverted() @ conv(tr.get('move', [0, 0, 0]))
             pb.scale = bone_scale(R, tr.get('scale', [1, 1, 1]))
             pb.keyframe_insert('rotation_quaternion', frame=fb); pb.keyframe_insert('location', frame=fb); pb.keyframe_insert('scale', frame=fb)
+            if 'cinf' in tr:
+                for c in pb.constraints:
+                    if c.type == 'COPY_ROTATION': c.influence = tr['cinf']; c.keyframe_insert('influence', frame=fb)
+            for sub, val in tr.get('iinf', {}).items():
+                for c in pb.constraints:
+                    if c.type == 'IK' and c.subtarget == sub: c.influence = val; c.keyframe_insert('influence', frame=fb)
         if key.get('in') and prevf is not None: eases.append((prevf, key['in']))
         prevf = f
     fcs = fcurves_of(act)
