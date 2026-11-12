@@ -1,5 +1,6 @@
 // Flint's extra clips, cut, mirrored and re-posed from the motion already in his GLB (Meshy's presets). No Meshy calls.
 //   node tools/derive.mjs tools/flint-clips.mjs      reads flint-v3.glb, writes flint-v4.glb and Flint's manifest entry
+//   then: node tools/addbones.mjs flint               puts the added bones (tools/bones/flint.mjs) on top: flint-b.glb, the file the game loads
 // Directions: +Z the way he faces, +X his left, +Y up. turn(pose, bone, [pitch forward, yaw to his left, roll left side up]).
 export default L => {
   const o = { in: 'assets/flint/export/flint-v3.glb', out: 'assets/flint/export/flint-v4.glb', clips: {} };

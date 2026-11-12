@@ -21,3 +21,4 @@ mkdir -p assets/vargan/export
 "$B" -b --factory-startup --python tools/blender/rig.py -- --mesh "$W/joined.glb" --spec "$W/rig.json" --out "$W/vargan-rigged.glb" --start 0 "${extra[@]}" 2>&1 | grep -E "Error|Traceback|rig: (mesh|part|skeleton|weights|wrote|[0-9]|shots)|unweighted|line [0-9]+" || true
 node tools/pack.mjs "$W/pack.json" | tail -1
 node tools/pack.mjs "$W/pack-axe.json" | tail -1
+node tools/addbones.mjs fyrdsman | head -1   # the added bones (tools/bones/fyrdsman.mjs) on top: writes vargan-b.glb, the file the game loads
