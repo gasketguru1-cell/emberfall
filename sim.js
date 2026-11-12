@@ -3267,7 +3267,7 @@ function updateProj() {
 }
 
 /* ---------- CPU opponent ---------- */
-/* CPU level, 1 (easiest) to 9. Level 7 is the CPU exactly as it played before levels existed, and the one every test uses.
+/* CPU level, 1 (easiest) to 10. Level 10 is level 9's numbers; for Knell it adds the combo planner of knellcpu.js. Level 7 is the CPU exactly as it played before levels existed, and the one every test uses.
    tempo: how long it waits between attacks (x its usual wait)   guard: chance it shields an attack it sees coming
    tech: chance it techs a hard landing   punish: chance it grabs a shield   air: chance it takes an opening in the air
    nap: chance each second that it stops attacking for napLen frames and only walks
@@ -3281,20 +3281,24 @@ const CPU_LV = [null,
   { tempo: 1.15, guard: 0.38, tech: 0.44, punish: 0.48, air: 0.85, nap: 0.08, napLen: 40, mash: 10 },
   { tempo: 1, guard: 0.45, tech: 0.55, punish: 0.6, air: 1, nap: 0, napLen: 0, mash: 8 },
   { tempo: 0.8, guard: 0.62, tech: 0.76, punish: 0.78, air: 1, nap: 0, napLen: 0, mash: 7 },
+  { tempo: 0.62, guard: 0.8, tech: 0.94, punish: 0.92, air: 1, nap: 0, napLen: 0, mash: 6 },
   { tempo: 0.62, guard: 0.8, tech: 0.94, punish: 0.92, air: 1, nap: 0, napLen: 0, mash: 6 }];
 let CPU_LEVEL = 7;
-try { const raw = localStorage.getItem('emberfall.cpulevel'), v = +raw; if (raw !== null && raw !== '' && v >= 0 && v <= 9) CPU_LEVEL = Math.round(v); } catch (e) { /* no storage */ }   /* level 0 is for testing: the CPU stands still */
-function setCpuLevel(v) { CPU_LEVEL = clamp(Math.round(v), 0, 9); try { localStorage.setItem('emberfall.cpulevel', String(CPU_LEVEL)); } catch (e) { /* no storage */ } }
+try { const raw = localStorage.getItem('emberfall.cpulevel'), v = +raw; if (raw !== null && raw !== '' && v >= 0 && v <= 10) CPU_LEVEL = Math.round(v); } catch (e) { /* no storage */ }   /* level 0 is for testing: the CPU stands still */
+function setCpuLevel(v) { CPU_LEVEL = clamp(Math.round(v), 0, 10); try { localStorage.setItem('emberfall.cpulevel', String(CPU_LEVEL)); } catch (e) { /* no storage */ } }
 const NAP_STATES = { idle: 1, dash: 1, run: 1, brake: 1, land: 1, wd: 1 };
 function cpuInput(f, o, m) {
   if (!m.lv && CPU_LEVEL === 0) return blankIn();   /* level 0: a target that does nothing at all, for testing moves on */
-  const L = CPU_LV[m.lv || CPU_LEVEL], before = m.cd > 0 ? m.cd - 1 : 0, i = cpuBrain(f, o, m, L);
+  const lv = m.lv || CPU_LEVEL, kp = lv === 10 && f.def.name === 'Knell' && typeof KCPU !== 'undefined' && KCPU ? KCPU : null;
+  if (kp) { const k = kp.input(f, o, m); if (k) return k; }   /* Knell at level 10: a follow-up it has planned (knellcpu.js) */
+  const L = CPU_LV[lv], before = m.cd > 0 ? m.cd - 1 : 0; let i = cpuBrain(f, o, m, L);
   if (m.cd > before && L.tempo !== 1) m.cd = Math.max(1, Math.round(m.cd * L.tempo));   /* a wait it has just set itself */
   if (L.nap > 0) {
     if (m.nap > 0) m.nap--; else if (m.t % 60 === 0 && Math.random() < L.nap) m.nap = L.napLen;
     /* napping: standing safely on the stage it throws nothing out, and only ambles */
     if (m.nap > 0 && f.grounded && NAP_STATES[f.state] && Math.abs(f.x) < EDGE - 8) { i.atk = i.spc = i.grb = i.jmp = i.sm = false; i.cx = i.cy = 0; i.lx *= 0.45; if (i.ly > 0) i.ly = 0; }
   }
+  if (kp) i = kp.opener(f, o, m, i);   /* the brain chose to attack: the planner picks which opener */
   return i;
 }
 /* Fyrdsman as the CPU: calls his axe home a little while after it lands (holding special 12 frames), turns Berserker on now
