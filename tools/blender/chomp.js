@@ -17,7 +17,10 @@ const side = (s, x) => [
   { name: 'brow' + s, head: [0.29 * x, 1.5, 0.4], tail: [0.29 * x, 1.5, 0.6], parent: 'eye' + s },
   { name: 'fin' + s, head: [0.6 * x, 0.8, 0.3], tail: [0.85 * x, 0.8, 0.42], parent: 'body' },
   { name: 'foot' + s, head: [0.57 * x, 0.3, 0.55], tail: [0.6 * x, 0.04, 0.72], parent: 'body' },
-  { name: 'hind' + s, head: [0.8 * x, 0.3, -0.12], tail: [0.86 * x, 0.04, -0.08], parent: 'body' }];
+  { name: 'hind' + s, head: [0.8 * x, 0.3, -0.12], tail: [0.86 * x, 0.04, -0.08], parent: 'body' },
+  { name: 'pupil' + s, head: [(x > 0 ? 0.15 : -0.11), 1.55, 0.55], tail: [(x > 0 ? 0.15 : -0.11), 1.55, 0.72], parent: 'eye' + s },
+  { name: 'toe' + s, head: [0.52 * x, 0.1, 0.6], tail: [0.55 * x, 0.04, 0.78], parent: 'foot' + s },
+  { name: 'hindToe' + s, head: [0.82 * x, 0.1, -0.13], tail: [0.98 * x, 0.04, -0.13], parent: 'hind' + s }];
 /* A somersault for the whole-body bone: pitch it by deg (positive tips his face down) keeping the ball's middle in place; x, y, z then move him. */
 const flip = (deg, x, y, z) => { const a = deg * Math.PI / 180, cs = Math.cos(a), sn = Math.sin(a); return { rot: [deg, 0, 0], move: [x || 0, C[0] - (C[0] * cs - C[1] * sn) + (y || 0), C[1] - (C[0] * sn + C[1] * cs) + (z || 0)] }; };
 /* The mouth: 0 shut, 1 as modelled (wide open), up to about 1.8 for a gape no jaw should manage. */
@@ -40,7 +43,11 @@ const fins = (up, fwd, upR) => ({ finL: R(0, -(fwd || 0), up), finR: R(0, fwd ||
 const leaves = (a, p, r) => ({ sprout: R(p || 0, 0, r || 0), leafL: R(0, 0, a), leafR: R(0, 0, -a) });   /* a > 0 lifts both leaves, a < 0 folds them down; p bends the sprout forward */
 /* len is how far the tongue reaches as the old, short tongue measured it; this one lies the whole length of the mouth floor,
    so it stretches about a third as much for the same reach */
-const tongue = (len, yaw, pitch) => ({ tongue: { scale: [len > 2 ? 0.75 : 1, len > 2 ? 0.75 : 1, 1 + (len - 1) * 0.36], rot: [pitch === undefined ? -10 : pitch, yaw || 0, 0] } });
+/* The pitch and swing are shared along its four links, so it curls rather than levering up from the back of the mouth,
+   and the further it shoots out the more its tip curls up. */
+const tongue = (len, yaw, pitch) => { const p = pitch === undefined ? -10 : pitch, y = yaw || 0, o = Math.max(0, Math.min(1.5, (len - 1) * 0.58 - 0.08)), f = v => +v.toFixed(2);
+  return { tongue: { scale: [len > 2 ? 0.75 : 1, len > 2 ? 0.75 : 1, 1 + (len - 1) * 0.36], rot: [f(p * 0.3), f(y * 0.5), 0] },
+    tongue2: R(f(p * 0.2 - 5 * o), f(y * 0.2)), tongue3: R(f(p * 0.25 - 9 * o), f(y * 0.25)), tongueTip: R(f(p * 0.25 - 16 * o), f(y * 0.35)) }; };
 const feet = (ly, lz, ry, rz, out) => ({ footL: M(out || 0, ly, lz), footR: M(-(out || 0), ry === undefined ? ly : ry, rz === undefined ? lz : rz) });
 const root = (x, y, z) => ({ root: M(x, y, z) });
 /* Parts of a pose, later ones winning, except that the lips' moves add up: lips() moves them on from where mouth() put them. */
@@ -75,35 +82,87 @@ const chomp = {
     { name: 'jaw', head: [0, HY, HZ], tail: [0, 0.3, 0.55], parent: 'body' },
     { name: 'tongue', head: [0, 0.45, -0.42], tail: [0, 0.5, 0.5], parent: 'jaw' },
     /* the antenna takes the old leaf sprout's moves and spring; the leaf bones stay so old poses still load, but weigh nothing */
-    { name: 'sprout', head: [0, 1.55, 0], tail: [0.1, 1.85, 0], parent: 'top' },
+    { name: 'sprout', head: [0, 1.55, 0], tail: [0.08, 1.68, 0], parent: 'top' },
+    /* ---- the 30 detail bones (2026-11-11) ---- */
+    /* the antenna in three more links, so it curls and whips instead of swinging stiff */
+    { name: 'sprout2', head: [0.08, 1.68, 0], tail: [0.12, 1.75, 0], parent: 'sprout' },
+    { name: 'sprout3', head: [0.12, 1.75, 0], tail: [0.14, 1.8, 0], parent: 'sprout2' },
+    { name: 'bulb', head: [0.14, 1.8, 0], tail: [0.16, 1.9, 0], parent: 'sprout3' },
+    /* the body's soft parts: they lag, bulge and settle behind the big moves */
+    { name: 'belly', head: [0, 0.3, 0.05], tail: [0, 0.15, 0.3], parent: 'body' },
+    { name: 'back', head: [0, 0.9, -0.4], tail: [0, 0.9, -0.75], parent: 'body' },
+    { name: 'haunchL', head: [0.6, 0.42, -0.15], tail: [0.85, 0.42, -0.15], parent: 'body' },
+    { name: 'haunchR', head: [-0.6, 0.42, -0.15], tail: [-0.85, 0.42, -0.15], parent: 'body' },
+    { name: 'cheekL', head: [0.6, 0.95, 0.1], tail: [0.9, 0.95, 0.15], parent: 'body' },
+    { name: 'cheekR', head: [-0.6, 0.95, 0.1], tail: [-0.9, 0.95, 0.15], parent: 'body' },
+    { name: 'crown', head: [0, 1.35, -0.1], tail: [0, 1.6, -0.1], parent: 'top' },
+    { name: 'chin', head: [0, 0.3, 0.35], tail: [0, 0.15, 0.6], parent: 'jaw' },
+    /* the face: the dark ridge between his eyes and the eyelids above them (the pupils are in side()) */
+    { name: 'ridge', head: [0, 1.3, 0.45], tail: [0, 1.3, 0.75], parent: 'top' },
+    { name: 'lidL', head: [0.29, 1.62, 0.3], tail: [0.29, 1.76, 0.45], parent: 'top' },
+    { name: 'lidR', head: [-0.29, 1.62, 0.3], tail: [-0.29, 1.76, 0.45], parent: 'top' },
+    /* the tongue in four links: it curls, ripples and flicks at the tip */
+    { name: 'tongue2', head: [0, 0.5, 0], tail: [0, 0.52, 0.25], parent: 'tongue' },
+    { name: 'tongue3', head: [0, 0.52, 0.25], tail: [0, 0.5, 0.4], parent: 'tongue2' },
+    { name: 'tongueTip', head: [0, 0.5, 0.4], tail: [0, 0.48, 0.52], parent: 'tongue3' },
     { name: 'leafL', head: [0.02, 1.8, 0], tail: [0.2, 1.85, 0], parent: 'sprout', deform: false },
     { name: 'leafR', head: [-0.02, 1.8, 0], tail: [-0.2, 1.85, 0], parent: 'sprout', deform: false },
     /* lips: the rim of the mouth, so it can seal, pout, curl, sneer or flap on its own */
     { name: 'lipU', head: [0, 1.18, 0.4], tail: [0, 1.18, 0.75], parent: 'top' },
     { name: 'lipD', head: [0, 0.38, 0.4], tail: [0, 0.38, 0.72], parent: 'jaw' },
+    /* each lip split in halves for sneers and lopsided grins, and the three glowing fangs */
+    { name: 'lipUL', head: [0.25, 1.15, 0.45], tail: [0.3, 1.15, 0.72], parent: 'lipU' },
+    { name: 'lipUR', head: [-0.25, 1.15, 0.45], tail: [-0.3, 1.15, 0.72], parent: 'lipU' },
+    { name: 'lipDL', head: [0.22, 0.4, 0.45], tail: [0.25, 0.4, 0.7], parent: 'lipD' },
+    { name: 'lipDR', head: [-0.22, 0.4, 0.45], tail: [-0.25, 0.4, 0.7], parent: 'lipD' },
+    { name: 'fangL', head: [0.31, 1.22, 0.55], tail: [0.31, 1.1, 0.66], parent: 'lipUL' },
+    { name: 'fangR', head: [-0.3, 1.22, 0.55], tail: [-0.3, 1.1, 0.66], parent: 'lipUR' },
+    { name: 'fangD', head: [0, 0.22, 0.6], tail: [0, 0.34, 0.7], parent: 'lipD' },
     { name: 'cornerL', head: [0.55, 0.8, 0.35], tail: [0.7, 0.8, 0.5], parent: 'body' },
     { name: 'cornerR', head: [-0.55, 0.8, 0.35], tail: [-0.7, 0.8, 0.5], parent: 'body' },
     ...side('L', 1), ...side('R', -1)],
   weights: [
     { bone: 'body', all: true },
+    { bone: 'belly', sphere: { c: [0, 0.22, 0.05], r0: 0.45, r1: 1, scale: [0.55, 0.24, 0.5] } },
+    { bone: 'back', sphere: { c: [0, 0.95, -0.62], r0: 0.4, r1: 1, scale: [0.7, 0.6, 0.32] } },
+    { bone: 'haunchL', sphere: { c: [0.82, 0.4, -0.15], r0: 0.3, r1: 1, scale: [0.28, 0.26, 0.3] } }, { bone: 'haunchR', sphere: { c: [-0.82, 0.4, -0.15], r0: 0.3, r1: 1, scale: [0.28, 0.26, 0.3] } },
+    { bone: 'cheekL', sphere: { c: [0.85, 0.98, 0.1], r0: 0.4, r1: 1, scale: [0.22, 0.32, 0.42] } }, { bone: 'cheekR', sphere: { c: [-0.85, 0.98, 0.1], r0: 0.4, r1: 1, scale: [0.22, 0.32, 0.42] } },
     { bone: 'top', wedge: { hinge: [HY, HZ], from: [0, 8, 60], to: [150, 50], side: [0.62, 0.1], fade: [0.72, 0.25] } },
+    { bone: 'crown', sphere: { c: [0, 1.55, -0.15], r0: 0.45, r1: 1, scale: [0.55, 0.25, 0.45] } },
     { bone: 'jaw', wedge: { hinge: [HY, HZ], from: [-75, 25], to: [0, 8, 60], side: [0.62, 0.1], fade: [0.72, 0.25] } },
-    { bone: 'tongue', sphere: { c: [0, 0.46, 0.06], r0: 0.88, r1: 1.02, scale: [0.42, 0.22, 0.48] }, halves: [[2, 0.5, 0.06, -1]] },
+    { bone: 'chin', sphere: { c: [0, 0.15, 0.58], r0: 0.45, r1: 1, scale: [0.32, 0.14, 0.2] } },
+    { bone: 'tongue', sphere: { c: [0, 0.48, 0.06], r0: 0.8, r1: 0.96, scale: [0.36, 0.2, 0.48] }, halves: [[2, 0.5, 0.06, -1], [1, 0.38, 0.05, 1]] },
+    { bone: 'tongue2', sphere: { c: [0, 0.48, 0.06], r0: 0.8, r1: 0.96, scale: [0.36, 0.2, 0.48] }, halves: [[2, 0.5, 0.06, -1], [1, 0.38, 0.05, 1], [2, -0.02, 0.1, 1]] },
+    { bone: 'tongue3', sphere: { c: [0, 0.48, 0.06], r0: 0.8, r1: 0.96, scale: [0.36, 0.2, 0.48] }, halves: [[2, 0.5, 0.06, -1], [1, 0.38, 0.05, 1], [2, 0.22, 0.08, 1]] },
+    { bone: 'tongueTip', sphere: { c: [0, 0.48, 0.06], r0: 0.8, r1: 0.96, scale: [0.36, 0.2, 0.48] }, halves: [[2, 0.5, 0.06, -1], [1, 0.38, 0.05, 1], [2, 0.38, 0.06, 1]] },
     { bone: 'lipU', wedge: { hinge: [HY, HZ], from: [9, 7], to: [27, 8], side: [0.62, 0.1], fade: [0.7, 0.15] }, halves: [[2, 0.42, 0.12, 1]] },
+    { bone: 'lipUL', wedge: { hinge: [HY, HZ], from: [9, 7], to: [27, 8], side: [0.62, 0.1], fade: [0.7, 0.15] }, halves: [[2, 0.42, 0.12, 1], [0, 0.1, 0.22, 1]] }, { bone: 'lipUR', wedge: { hinge: [HY, HZ], from: [9, 7], to: [27, 8], side: [0.62, 0.1], fade: [0.7, 0.15] }, halves: [[2, 0.42, 0.12, 1], [0, -0.1, 0.22, -1]] },
     /* the lower lip: its middle dips almost to the floor between the front legs, its sides rise clear of them */
-    { bone: 'lipD', wedge: { hinge: [HY, HZ], from: [-36, 10], to: [-9, 7], side: [0.62, 0.1], fade: [0.7, 0.15] }, halves: [[2, 0.42, 0.12, 1], [1, 0.46, 0.12, 1]] },
-    { bone: 'lipD', wedge: { hinge: [HY, HZ], from: [-40, 10], to: [-9, 7] }, halves: [[2, 0.42, 0.12, 1], [1, 0.16, 0.06, 1]], sphere: { c: [0, 0.3, 0.6], r0: 0.75, r1: 1, scale: [0.36, 0.6, 0.6] } },
+    { bone: 'lipD', wedge: { hinge: [HY, HZ], from: [-36, 10], to: [-9, 7], side: [0.62, 0.1], fade: [0.7, 0.15] }, halves: [[2, 0.46, 0.06, 1], [1, 0.46, 0.12, 1]] },
+    { bone: 'lipD', wedge: { hinge: [HY, HZ], from: [-40, 10], to: [-9, 7] }, halves: [[2, 0.5, 0.06, 1], [1, 0.16, 0.06, 1]], sphere: { c: [0, 0.3, 0.6], r0: 0.75, r1: 1, scale: [0.36, 0.6, 0.6] } },
+    { bone: 'lipDL', wedge: { hinge: [HY, HZ], from: [-36, 10], to: [-9, 7], side: [0.62, 0.1], fade: [0.7, 0.15] }, halves: [[2, 0.46, 0.06, 1], [1, 0.46, 0.12, 1], [0, 0.1, 0.22, 1]] }, { bone: 'lipDR', wedge: { hinge: [HY, HZ], from: [-36, 10], to: [-9, 7], side: [0.62, 0.1], fade: [0.7, 0.15] }, halves: [[2, 0.46, 0.06, 1], [1, 0.46, 0.12, 1], [0, -0.1, 0.22, -1]] },
+    { bone: 'lipDL', wedge: { hinge: [HY, HZ], from: [-40, 10], to: [-9, 7] }, halves: [[2, 0.5, 0.06, 1], [1, 0.16, 0.06, 1], [0, 0.1, 0.2, 1]], sphere: { c: [0, 0.3, 0.6], r0: 0.75, r1: 1, scale: [0.36, 0.6, 0.6] } }, { bone: 'lipDR', wedge: { hinge: [HY, HZ], from: [-40, 10], to: [-9, 7] }, halves: [[2, 0.5, 0.06, 1], [1, 0.16, 0.06, 1], [0, -0.1, 0.2, -1]], sphere: { c: [0, 0.3, 0.6], r0: 0.75, r1: 1, scale: [0.36, 0.6, 0.6] } },
+    { bone: 'fangL', sphere: { c: [0.31, 1.165, 0.63], r0: 0.045, r1: 0.065 } }, { bone: 'fangR', sphere: { c: [-0.3, 1.165, 0.63], r0: 0.045, r1: 0.065 } },
+    { bone: 'fangD', sphere: { c: [0, 0.27, 0.67], r0: 0.04, r1: 0.06 } },
+    { bone: 'ridge', sphere: { c: [0, 1.34, 0.68], r0: 0.4, r1: 1, scale: [0.22, 0.09, 0.16] } },
+    { bone: 'lidL', sphere: { c: [0.29, 1.76, 0.4], r0: 0.4, r1: 1, scale: [0.3, 0.1, 0.26] } }, { bone: 'lidR', sphere: { c: [-0.29, 1.76, 0.4], r0: 0.4, r1: 1, scale: [0.3, 0.1, 0.26] } },
     { bone: 'cornerL', sphere: { c: [0.64, 0.8, 0.45], r0: 0.1, r1: 0.24, scale: [1, 1.6, 1] } }, { bone: 'cornerR', sphere: { c: [-0.64, 0.8, 0.45], r0: 0.1, r1: 0.24, scale: [1, 1.6, 1] } },
     { bone: 'eyeL', sphere: { c: [0.29, 1.5, 0.52], r0: 0.85, r1: 1, scale: [0.3, 0.22, 0.24] } }, { bone: 'eyeR', sphere: { c: [-0.29, 1.5, 0.52], r0: 0.85, r1: 1, scale: [0.3, 0.22, 0.24] } },
     { bone: 'browL', sphere: { c: [0.29, 1.52, 0.52], r0: 0.95, r1: 1.05, scale: [0.32, 0.24, 0.26] }, halves: [[1, 1.6, 0.06, 1]] },
     { bone: 'browR', sphere: { c: [-0.29, 1.52, 0.52], r0: 0.95, r1: 1.05, scale: [0.32, 0.24, 0.26] }, halves: [[1, 1.6, 0.06, 1]] },
-    { bone: 'sprout', halves: [[1, 1.6, 0.04, 1], [2, 0.2, 0.06, -1]] },
+    { bone: 'pupilL', sphere: { c: [0.15, 1.55, 0.68], r0: 0.055, r1: 0.075, scale: [1, 1, 1.6] } }, { bone: 'pupilR', sphere: { c: [-0.11, 1.55, 0.68], r0: 0.055, r1: 0.075, scale: [1, 1, 1.6] } },
+    { bone: 'sprout', halves: [[1, 1.6, 0.04, 1], [2, 0.2, 0.06, -1], [0, -0.07, 0.05, 1], [0, 0.3, 0.05, -1]] },
+    { bone: 'sprout2', halves: [[1, 1.69, 0.03, 1], [2, 0.2, 0.06, -1], [0, -0.07, 0.05, 1], [0, 0.3, 0.05, -1]] },
+    { bone: 'sprout3', halves: [[1, 1.75, 0.03, 1], [2, 0.2, 0.06, -1], [0, -0.07, 0.05, 1], [0, 0.3, 0.05, -1]] },
+    { bone: 'bulb', sphere: { c: [0.14, 1.83, 0], r0: 0.09, r1: 0.12 } },
     { bone: 'finL', sphere: { c: [0.86, 0.8, 0.36], r0: 0.12, r1: 0.26 } },
     { bone: 'finR', sphere: { c: [-0.86, 0.8, 0.36], r0: 0.12, r1: 0.26 } },
     { bone: 'footL', halves: [[1, 0.26, 0.08, -1], [0, 0.33, 0.08, 1], [2, 0.32, 0.1, 1]] },
     { bone: 'footR', halves: [[1, 0.26, 0.08, -1], [0, -0.33, 0.08, -1], [2, 0.32, 0.1, 1]] },
     { bone: 'hindL', halves: [[1, 0.26, 0.08, -1], [0, 0.5, 0.1, 1], [2, 0.32, 0.1, -1]] },
-    { bone: 'hindR', halves: [[1, 0.26, 0.08, -1], [0, -0.5, 0.1, -1], [2, 0.32, 0.1, -1]] }],
+    { bone: 'hindR', halves: [[1, 0.26, 0.08, -1], [0, -0.5, 0.1, -1], [2, 0.32, 0.1, -1]] },
+    { bone: 'toeL', halves: [[1, 0.14, 0.05, -1], [2, 0.62, 0.06, 1], [0, 0.3, 0.06, 1]] }, { bone: 'toeR', halves: [[1, 0.14, 0.05, -1], [2, 0.62, 0.06, 1], [0, -0.3, 0.06, -1]] },
+    { bone: 'hindToeL', halves: [[1, 0.14, 0.05, -1], [0, 0.85, 0.05, 1], [2, 0.3, 0.1, -1]] }, { bone: 'hindToeR', halves: [[1, 0.14, 0.05, -1], [0, -0.85, 0.05, -1], [2, 0.3, 0.1, -1]] }],
   poses: {
     stand: P({ all: {}, root: {}, body: {}, tongue: {}, lipU: {}, lipD: {}, cornerL: {}, cornerR: {}, sprout: {}, leafL: {}, leafR: {}, eyeL: {}, eyeR: {}, browL: {}, browR: {}, finL: {}, finR: {}, footL: {}, footR: {} }, mouth(0), corners(0)),
     /* tucked into a ball: mouth shut, eyes screwed up, fins and feet pulled in, leaves flat */
@@ -252,7 +311,91 @@ const hind = pose => { if (!pose) return; const l = pose.footL, r = pose.footR; 
 Object.values(chomp.poses).forEach(hind);
 Object.values(chomp.clips).forEach(c => c.keys.forEach(k => hind(k.pose)));
 chomp.poses.stand.hindL = {}; chomp.poses.stand.hindR = {};
-const out = path.join(__dirname, '..', '..', 'assets', 'chomp', 'work');
+
+/* ---- the detail layer: the 30 detail bones, worked out from what each key already says ----
+   Every key of every clip gets them, so the whole moveset gains them at once:
+   - the soft body (belly, back, haunches, cheeks, crown) bulges with each squash and swells when he puffs up, and arrives a
+     few frames late, so it wobbles and settles behind the big moves; the chin trails the jaw
+   - the antenna bends along its length with the old sprout pose, each link later than the last, so it whips
+   - the tongue (see tongue()) bends along its length, and its tip trails the swing
+   - pupils shrink to pinpricks when his eyes go wide, cross as each bite lands, look up or down along up and down moves,
+     and drift apart when he is hurt; lids come down as he squints and tilt with a scowl; the ridge between his eyes
+     knits into a frown or lifts in surprise
+   - fangs flash bigger when he snarls and as a bite lands; the upper lip sneers on one side in a snarl
+   - toes splay as he lands his weight and point when he is in the air */
+const HURT = new Set(['Hit', 'HitHeavy', 'LaunchUp', 'Spike', 'Launch', 'Tumble', 'Down', 'Dizzy', 'Held', 'Helpless']);
+const LOOK_UP = new Set(['SnapUp', 'SugarSnap', 'SkyBite', 'ThrowU', 'BubbleBlow', 'RopeToss']);
+const LOOK_DOWN = new Set(['ToeNibble', 'FloorFeast', 'JawDrop', 'ThrowD', 'FastFall']);
+const AIRBORNE = new Set(['Rise', 'AirJump', 'Fall', 'FastFall', 'Helpless', 'BubbleRide', 'FlyingChomp', 'HeelFlick', 'SkyBite', 'JawDrop', 'HungrySpin', 'SwingBite', 'RopeSwing', 'LaunchUp', 'Launch', 'Tumble', 'Spike', 'AirDodge']);
+const LAG = { belly: 2, back: 3, haunchL: 2, haunchR: 2, cheekL: 2, cheekR: 2, crown: 2, chin: 2, sprout2: 2, sprout3: 4, bulb: 6, tongue3: 2, tongueTip: 3 };
+const r2 = v => +v.toFixed(3);
+const detail = (name, clip) => {
+  let st = {}; const F = k => Math.round(k.t * clip.fps), end = F(clip.keys[clip.keys.length - 1]);
+  clip.keys.forEach((k, i) => {
+    if (k.reset) { const z = {}; for (const b in st) z[b] = {}; st = z; }
+    if (k.use) for (const u of [].concat(k.use)) Object.assign(st, chomp.poses[u]);
+    Object.assign(st, k.pose || {});
+    const g = (b, f, j, d) => (st[b] && st[b][f] ? st[b][f][j] : d);
+    const k_ = 1 - g('body', 'scale', 1, 1), w = g('body', 'scale', 0, 1), lunge = g('body', 'scale', 2, 1) - 1;
+    const sq_ = Math.max(-0.4, Math.min(0.6, k_)), puffed = Math.max(0, Math.min(w, 1 - k_) - 1.04);   /* swelling all round, not just squashed */
+    const e = g('eyeL', 'scale', 0, 1), eh = g('eyeL', 'scale', 1, 1), eR = g('eyeR', 'scale', 0, 1);
+    const sp = g('sprout', 'rot', 0, 0), sr = g('sprout', 'rot', 2, 0);
+    const curlU = -g('lipU', 'rot', 0, 0), scowl = g('browL', 'rot', 2, 0) / 0.6, lift = g('browL', 'move', 1, 0) / 0.5, jawP = g('jaw', 'rot', 0, 0);
+    const bite = k.in === 'snap' && Math.abs(k.t - 0.34) < 0.01 && Math.abs(jawP) > 4;
+    const D = {};
+    /* soft body */
+    D.belly = { scale: [r2(1 + 0.35 * sq_ + puffed), r2(1 - 0.2 * sq_), r2(1 + 0.45 * sq_ + puffed)], move: [0, 0, r2(0.05 * Math.max(0, sq_))] };
+    D.back = { scale: [r2(1 + 0.2 * sq_ + puffed * 0.8), 1, r2(1 + 0.3 * sq_ - 0.2 * Math.max(0, lunge))] };
+    D.haunchL = D.haunchR = { scale: [r2(1 + 0.3 * Math.max(0, sq_)), r2(1 - 0.15 * Math.max(0, sq_)), r2(1 + 0.3 * Math.max(0, sq_))] };
+    D.cheekL = D.cheekR = { scale: [r2(1 + 0.4 * Math.max(0, sq_) + 1.6 * puffed), r2(1 + 0.6 * puffed), r2(1 + 0.2 * Math.max(0, sq_) + puffed)] };
+    D.crown = { scale: [r2(1 + 0.15 * sq_), r2(1 - 0.2 * sq_), r2(1 + 0.15 * sq_)] };
+    D.chin = R(r2(jawP * 0.3));
+    /* antenna */
+    D.sprout2 = R(r2(sp * 0.7 + 14 * sq_), 0, r2(sr * 0.7)); D.sprout3 = R(r2(sp * 0.5 + 10 * sq_), 0, r2(sr * 0.5)); D.bulb = R(r2(sp * 0.3), 0, r2(sr * 0.3));
+    /* eyes */
+    const pin = s => (s >= 1.5 ? 0.6 : s >= 1.25 ? 0.8 : 1);
+    let pl = [0, 0, 0], pr = [0, 0, 0];
+    if (LOOK_UP.has(name)) pl = pr = [0, 0.05, 0];
+    if (LOOK_DOWN.has(name)) pl = pr = [0, -0.06, 0.01];
+    if (HURT.has(name)) { pl = [0.05, i % 2 ? 0.02 : -0.02, 0]; pr = [-0.05, i % 2 ? -0.02 : 0.03, 0]; }
+    if (bite) { pl = [-0.04, -0.01, 0]; pr = [0.04, -0.01, 0]; }
+    D.pupilL = { scale: [pin(e), pin(e), 1], move: pl }; D.pupilR = { scale: [pin(eR), pin(eR), 1], move: pr };
+    const shut = Math.max(0, 1 - eh), wide = Math.max(0, e - 1.15);
+    D.lidL = { move: [0, r2(-0.12 * shut + 0.05 * wide), r2(0.03 * shut)], rot: [0, 0, r2(-scowl * 0.5)] };
+    D.lidR = { move: [0, r2(-0.12 * shut + 0.05 * wide), r2(0.03 * shut)], rot: [0, 0, r2(scowl * 0.5)] };
+    D.ridge = { move: [0, r2(Math.max(-0.03, Math.min(0.03, lift * 0.5 - 0.0012 * scowl))), 0], scale: [r2(1 - 0.006 * Math.max(0, scowl)), 1, 1] };
+    /* mouth details */
+    const snarl = curlU > 10;
+    D.fangL = D.fangR = D.fangD = { scale: snarl ? [1.25, 1.25, 1.25] : bite ? [1.15, 1.15, 1.15] : [1, 1, 1] };
+    D.lipUL = snarl ? { move: [0, 0.03, 0.01], rot: [-8, 0, 0] } : { move: [0, 0, 0] };
+    D.lipUR = { move: [0, 0, 0] };
+    D.lipDL = D.lipDR = { move: [0, 0, 0] };
+    /* feet */
+    const toe = AIRBORNE.has(name) ? R(30) : R(r2(-24 * Math.max(0, sq_)));
+    D.toeL = D.toeR = D.hindToeL = D.hindToeR = toe;
+    k.pose = Object.assign(D, k.pose || {});   /* anything a clip set by hand wins */
+    /* overlap: the soft parts arrive a few frames late, but never past the next key or the end of the clip */
+    const room = Math.min(end - F(k), i + 1 < clip.keys.length ? F(clip.keys[i + 1]) - F(k) - 1 : Infinity), lag = {};
+    for (const b in LAG) { const n = Math.min(LAG[b], room); if (n > 0) lag[b] = n; }
+    if (Object.keys(lag).length) k.lag = Object.assign(lag, k.lag || {});
+  });
+};
+/* a few things the rule can't guess: he glances about while idling, follows the fly with his eyes, chews lopsided */
+const touch = (clip, t, pose) => { const k = chomp.clips[clip].keys.find(q => Math.abs(q.t - t) < 0.001); k.pose = Object.assign(k.pose || {}, pose); };
+touch('Idle', 0.6, { pupilL: M(0.035, 0.01, 0), pupilR: M(0.035, 0.01, 0) });
+touch('Idle', 1.2, { pupilL: M(-0.035, 0.015, 0), pupilR: M(-0.035, 0.015, 0) });
+touch('Idle', 1.8, { pupilL: M(0, -0.01, 0), pupilR: M(0, -0.01, 0) });
+touch('Idle2', 0.3, { pupilL: M(0.05, 0.035, 0), pupilR: M(0.05, 0.035, 0), lidL: M(0, 0.03, 0), lidR: M(0, 0.03, 0) });
+touch('Idle2', 0.65, { pupilL: M(-0.05, 0.03, 0), pupilR: M(-0.05, 0.03, 0) });
+touch('Idle2', 0.9, { pupilL: M(-0.035, 0.0, 0), pupilR: M(0.035, 0.0, 0) });
+touch('Idle2', 1.82, { lipDL: M(0, 0.02, 0), lipDR: M(0, -0.01, 0), cheekL: { scale: [1.15, 1.1, 1.1] } });
+touch('Idle2', 2.17, { lipDL: M(0, -0.01, 0), lipDR: M(0, 0.02, 0), cheekR: { scale: [1.15, 1.1, 1.1] } });
+touch('Idle2', 2.4, { tongueTip: R(-30, 30), tongue3: R(-12, 14) });
+touch('Idle2', 2.75, { tongueTip: R(-30, -30), tongue3: R(-12, -14) });
+for (const [name, clip] of Object.entries(chomp.clips)) detail(name, clip);
+Object.assign(chomp.poses.stand, Object.fromEntries(['belly', 'back', 'haunchL', 'haunchR', 'cheekL', 'cheekR', 'crown', 'chin', 'sprout2', 'sprout3', 'bulb', 'tongue2', 'tongue3', 'tongueTip',
+  'pupilL', 'pupilR', 'lidL', 'lidR', 'ridge', 'fangL', 'fangR', 'fangD', 'lipUL', 'lipUR', 'lipDL', 'lipDR', 'toeL', 'toeR', 'hindToeL', 'hindToeR'].map(b => [b, {}])));
+const out =path.join(__dirname, '..', '..', 'assets', 'chomp', 'work');
 fs.mkdirSync(out, { recursive: true });
 fs.writeFileSync(path.join(out, 'rig.json'), JSON.stringify(chomp, null, 1));
 fs.writeFileSync(path.join(out, 'pack.json'), JSON.stringify({ base: 'work/chomp-rigged.glb', texture: 1024, out: 'export/chomp-v1.glb' }, null, 1) + '\n');
@@ -271,7 +414,7 @@ const entry = { file: 'assets/chomp/export/chomp-v1.glb', height: 13, feel: 1,
     swap: { clip: 'Ball', bounce: true }, respawn: { clip: 'Respawn' },
     coalToss: { clip: 'CoalToss' }, coalFlick: { clip: 'CoalFlick' }, antCall: { clip: 'AntCall' }, coalNone: { clip: 'CoalNone' }, ropeToss: { clip: 'RopeToss' }, ropeSwing: { clip: 'RopeSwing' }, bubbleBlow: { clip: 'BubbleBlow' }, bubbleRide: { clip: 'BubbleRide' } },
   strikers: [{ bone: 'jaw', ext: 1.3 }, { bone: 'tongue', ext: 1 }, { bone: 'footL', ext: 1.2 }, { bone: 'footR', ext: 1.2 }],
-  springs: [{ bones: ['sprout'], k: 0.3, d: 0.66, max: 0.6, drag: 0.14 }, { bones: ['leafL'], k: 0.26, d: 0.7, max: 0.7, drag: 0.18 }, { bones: ['leafR'], k: 0.26, d: 0.7, max: 0.7, drag: 0.18 }],
+  springs: [{ bones: ['sprout', 'sprout2', 'sprout3', 'bulb'], k: 0.3, d: 0.66, max: 0.6, drag: 0.16 }, { bones: ['tongue3', 'tongueTip'], k: 0.4, d: 0.62, max: 0.5, drag: 0.1 }],
   attacks: { jab: L('Jab1'), jab2: L('Jab2'), jab3: L('Jab3'), ftilt: L('TongueFlick'), utilt: L('SnapUp'), dtilt: L('ToeNibble'), dash: A('RollingHunger', 0.34, 0.52),
     fsmash: L('MegaChomp'), usmash: L('SugarSnap'), dsmash: A('FloorFeast', 0.34, 0.52, 0, 0.9, { spin: 0.5 }),
     nair: A('HungrySpin', 0.2, 0.6), fair: L('FlyingChomp'), bair: L('HeelFlick'), uair: L('SkyBite'), dair: L('JawDrop'),

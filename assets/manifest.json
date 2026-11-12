@@ -6388,30 +6388,25 @@
   "springs": [
    {
     "bones": [
-     "sprout"
+     "sprout",
+     "sprout2",
+     "sprout3",
+     "bulb"
     ],
     "k": 0.3,
     "d": 0.66,
     "max": 0.6,
-    "drag": 0.14
+    "drag": 0.16
    },
    {
     "bones": [
-     "leafL"
+     "tongue3",
+     "tongueTip"
     ],
-    "k": 0.26,
-    "d": 0.7,
-    "max": 0.7,
-    "drag": 0.18
-   },
-   {
-    "bones": [
-     "leafR"
-    ],
-    "k": 0.26,
-    "d": 0.7,
-    "max": 0.7,
-    "drag": 0.18
+    "k": 0.4,
+    "d": 0.62,
+    "max": 0.5,
+    "drag": 0.1
    }
   ],
   "attacks": {
