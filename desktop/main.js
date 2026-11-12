@@ -2,7 +2,7 @@
 // The game files are served to the window from inside the app through a private app:// address.
 // Networking lives here, in the main process, and reaches the page through preload.js:
 //   - 'direct': UDP between the two machines (same network, or this computer for testing). No account, no server.
-//   - 'eos':    Epic Online Services P2P + Lobbies (desktop/eos.js), once the EOS SDK and the game's product IDs are in place.
+//   - 'eos':    Epic Online Services P2P + Lobbies (desktop/eos.js): internet play through Epic's free relay (desktop/EOS-SETUP.md).
 const { app, BrowserWindow, protocol, ipcMain, Menu } = require('electron');
 const path = require('path'), fs = require('fs'), dgram = require('dgram'), os = require('os');
 
@@ -64,6 +64,7 @@ ipcMain.on('udp-close', (e, id) => { const k = socks.get(id); if (k) { k.s.close
 let eos = null; try { eos = require('./eos.js'); if (!eos.available()) eos = null; } catch (e) { eos = null; }
 ipcMain.handle('eos-available', () => !!eos);
 if (eos) eos.wire(ipcMain, () => win);
+app.on('will-quit', () => { try { if (eos && eos.shutdown) eos.shutdown(); } catch (e) { /* quitting anyway */ } });
 
 app.whenReady().then(() => {
   serve(); Menu.setApplicationMenu(null);
@@ -91,7 +92,7 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => app.quit());
 /* Self-test, for checking a build with nobody at the keyboard: EMBERFALL_AUTOTEST=host|join, EMBERFALL_AUTOFILE=<folder>.
    The host writes its code to <folder>/code.txt; the joiner reads it. Both play the same seeded inputs as tests/net.js for
-   1800 frames over the real connection, then write their checksums and network numbers to <folder>/<role>.json and quit. */
+   1800 frames over the real connection (direct, or Epic with EMBERFALL_AUTOVIA=eos), then write their checksums and network numbers to <folder>/<role>.json and quit. */
 function autotest(role) {
   const dir = process.env.EMBERFALL_AUTOFILE, fsP = fs.promises, me = role === 'host' ? 0 : 1;
   if (role === 'probe') {   /* offline check: the 3D models load and a CPU match runs with no network */
@@ -105,7 +106,7 @@ function autotest(role) {
     const seed = ${me === 0 ? 1000 : 2000}; let s = seed >>> 0; const rnd = () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
     const sc = []; let cur = [0, 0, 0, 0, 0], left = 0;
     for (let k = 0; k < 4000; k++) { if (left-- <= 0) { left = 2 + (rnd() * 18 | 0); const r = rnd(); cur = [Math.round((rnd() * 2 - 1) * 127), Math.round((rnd() * 2 - 1) * 127), r < 0.1 ? (rnd() < 0.5 ? -127 : 127) : 0, 0, rnd() < 0.55 ? 1 << (rnd() * 5 | 0) : 0]; if (rnd() < 0.3) cur[0] = cur[1] = 0; } sc.push(cur.slice()); }
-    const t = window.desktop.getTransports().find(x => x.id === 'direct');
+    const t = window.desktop.getTransports().find(x => x.id === ${JSON.stringify(process.env.EMBERFALL_AUTOVIA || 'direct')});   /* EMBERFALL_AUTOVIA=eos tests the Epic connection */
     let link; if (${me} === 0) { link = await t.host(); window.__code = link.code; } else { link = await t.join(${JSON.stringify('CODE')}); }
     await new Promise(res => { let ok = false; link.onMessage(m => { if (m.t === 'hi' && !ok) { ok = true; link.send({ t: 'hi' }); setTimeout(res, 300); } }); const ping = () => { if (!ok) { link.send({ t: 'hi' }); setTimeout(ping, 200); } }; ping(); });
     TRAINING = false; slots[0] = { dev: 'kb', pick: 2, ready: true }; slots[1] = { dev: 'kb', pick: 5, ready: true }; startMatch(); for (const f of F) f.ctl = new Ctl('cpu');
@@ -118,7 +119,7 @@ function autotest(role) {
     let code = 'CODE';
     if (role === 'join') { for (let k = 0; k < 100 && !fs.existsSync(path.join(dir, 'code.txt')); k++) await new Promise(r => setTimeout(r, 200)); code = (await fsP.readFile(path.join(dir, 'code.txt'), 'utf8')).trim(); }
     const run = win.webContents.executeJavaScript(js.replace(JSON.stringify('CODE'), JSON.stringify(code)));
-    if (role === 'host') { for (let k = 0; k < 50; k++) { const c = await win.webContents.executeJavaScript('window.__code || null'); if (c) { await fsP.writeFile(path.join(dir, 'code.txt'), c); break; } await new Promise(r => setTimeout(r, 100)); } }
+    if (role === 'host') { for (let k = 0; k < 300; k++) { const c = await win.webContents.executeJavaScript('window.__code || null'); if (c) { await fsP.writeFile(path.join(dir, 'code.txt'), c); break; } await new Promise(r => setTimeout(r, 100)); } }
     try { const r = await run; await fsP.writeFile(path.join(dir, role + '.json'), JSON.stringify(r)); } catch (e) { await fsP.writeFile(path.join(dir, role + '.json'), JSON.stringify({ error: String(e) })); }
     app.quit();
   })();
