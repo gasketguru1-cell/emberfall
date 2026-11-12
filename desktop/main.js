@@ -72,6 +72,11 @@ app.whenReady().then(() => {
   const fullscreen = !process.env.EMBERFALL_WINDOWED && !process.env.EMBERFALL_AUTOTEST;
   win = new BrowserWindow({ width: 1280, height: 760, fullscreen, backgroundColor: '#0b0d16', title: 'Emberfall', autoHideMenuBar: true, icon: path.join(__dirname, 'logo', 'icon-256.png'),
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, backgroundThrottling: false } });
+  /* Nintendo's GameCube adapter (057e:0337) over WebUSB: the game may open it without asking (sim.js: GCU). Nothing else. */
+  const isGCU = d => d && d.vendorId === 0x057e && d.productId === 0x0337, ses = win.webContents.session;
+  ses.setPermissionCheckHandler(() => true);   /* Electron's own default, kept: the device handler below is what limits USB */
+  ses.setDevicePermissionHandler(d => d.deviceType === 'usb' && isGCU(d.device));
+  ses.on('select-usb-device', (e, details, pick) => { e.preventDefault(); const d = details.deviceList.find(isGCU); pick(d ? d.deviceId : undefined); });
   win.webContents.on('before-input-event', (e, input) => {
     if (input.type === 'keyDown' && input.key === 'F11' && !input.isAutoRepeat) { win.setFullScreen(!win.isFullScreen()); e.preventDefault(); }
   });

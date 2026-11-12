@@ -53,7 +53,7 @@
   const padNav = { timer: 0, prev: null, active: false, rep: 0,
     start() { if (padNav.timer) return; padNav.prev = null; padNav.timer = setInterval(padNav.tick, 16); },
     stop() { clearInterval(padNav.timer); padNav.timer = 0; },
-    read() { const pads = navigator.getGamepads ? [...navigator.getGamepads()].filter(Boolean) : []; const i = blankIn();
+    read() { const pads = gamepads().filter(Boolean); const i = blankIn();
       for (const p of pads) { const r = readPad(p.index); for (const k of ['atk', 'spc', 'start']) i[k] = i[k] || r[k]; if (Math.abs(r.lx) > Math.abs(i.lx)) i.lx = r.lx; if (Math.abs(r.ly) > Math.abs(i.ly)) i.ly = r.ly; }
       return i; },
     tick() {
@@ -181,7 +181,7 @@
     slots[0] = { dev: 'kb', pick: pick0, ready: true }; slots[1] = { dev: 'kb', pick: pick1, ready: true }; startMatch(stocks, stage);
     frame = 0; tick = 0;   /* counters that run on from earlier matches: level on both machines, so their checksums compare */
     for (const f of F) { f.ctl = new Ctl('cpu'); f.ctl.cFall = true; }   /* people on both ends: the right stick fast-falls */
-    const local = () => { const k = readKb(), pads = navigator.getGamepads ? [...navigator.getGamepads()].filter(Boolean) : [], p = pads.length ? readPad(pads[0].index) : null;
+    const local = () => { const k = readKb(), pads = gamepads().filter(Boolean), p = pads.length ? readPad(pads[0].index) : null;
       if (!p) return k; for (const key in k) if (typeof k[key] === 'boolean') k[key] = k[key] || p[key]; if (Math.abs(p.lx) > Math.abs(k.lx)) k.lx = p.lx; if (Math.abs(p.ly) > Math.abs(k.ly)) k.ly = p.ly; if (Math.abs(p.cx) > Math.abs(k.cx)) k.cx = p.cx; if (Math.abs(p.cy) > Math.abs(k.cy)) k.cy = p.cy; return k; };
     const l = L;
     NET.start(me, { send: m => { m.g = n; if (L === l) l.link.send(m); }, onMessage: fn => { l.handler = fn; } }, { local });
