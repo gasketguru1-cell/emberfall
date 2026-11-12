@@ -473,6 +473,22 @@ function build() {
     const o = v.cOff || (v.cOff = { x: 0, y: 0 }); o.x += (tx - o.x) * 0.35; o.y += (ty - o.y) * 0.35;
     if (Math.abs(o.x) + Math.abs(o.y) > 0.01) { v.root.position.x += o.x; v.root.position.y += o.y; }
   }
+  /* Knell's Thread drawn in the scene: two gold notches on the floor at his feet, lit while held (the HUD shows them too).
+     They hang off his root but are turned back square to the camera, and flare for a moment when one is gained or spent. */
+  const NOTCH = new THREE.CylinderGeometry(0.62, 0.62, 0.32, 3);
+  function threadNotches(v, f) {
+    if (!v.notches) {
+      v.notches = Array.from({ length: KN.max }, (_, k) => { const m = new THREE.Mesh(NOTCH, new THREE.MeshStandardMaterial({ color: 0xffd166, emissive: 0xffb02e, emissiveIntensity: 0, transparent: true, opacity: 0.3, depthWrite: false }));
+        m.rotation.order = 'YXZ'; m.rotation.x = Math.PI / 2; m.position.set((k - (KN.max - 1) / 2) * 1.7, 0.45, 3.2); v.root.add(m); return m; });
+      v.notchN = f.thread; v.notchT = 0;
+    }
+    if (f.thread !== v.notchN) { v.notchN = f.thread; v.notchT = 14; }
+    if (v.notchT > 0) v.notchT--;
+    const flare = v.notchT / 14;
+    v.notches.forEach((m, k) => { const on = k < f.thread; m.material.opacity = on ? 0.95 : 0.22; m.material.emissiveIntensity = on ? 0.9 + flare * 1.6 : 0; m.scale.setScalar(1 + (on ? flare * 0.5 : 0)); });
+    const a = v.root.rotation.y, c = Math.cos(a), s = Math.sin(a);   /* a fixed place in the world: the root's turn taken back out */
+    v.notches.forEach((m, k) => { const dx = -1.05 + k * 2.1; m.position.x = dx * c - 3.2 * s; m.position.z = dx * s + 3.2 * c; m.rotation.y = -a; });
+  }
   /* Fyrdsman's overlays, on top of whatever clip is playing (manifest overlays): the axe's weight landing in his hand when it
      comes home (his arm and chest dip and recover), and the Berserker roar held past the 8-frame move (head back, chest
      heaving, arms flung wide and shaking). Like the springs, a bone the mixer left alone this frame gets its clip value back
@@ -928,6 +944,7 @@ function build() {
       v.pivot.children.forEach(c => { if (c.userData.y0 === undefined) c.userData.y0 = c.position.y; c.position.y = c.userData.y0 - p.oy; });
       if (v.model && v.model.cfg.chargeShake && f.state === 'attack' && f.charge > 0) v.pivot.position.x += Math.sin(tick * 2.3) * v.model.cfg.chargeShake * Math.min(1, 0.4 + f.charge / 30);   /* a held smash trembles with the strain */
       carried(v, f, idx);
+      if (f.form && f.form.knell) threadNotches(v, f);
       if (v.model && v.model.cfg.overlays) fyrdOverlay(v, f);
       const ghost = (f.invuln > 0 && (tick >> 1) % 2) || f.state === 'spot' || f.state === 'airdodge', hot = (f.flash > 0 || (f.hitlag > 0 && f.state === 'hurt')) && !(typeof finalT !== 'undefined' && finalT > 0 && finalT < FINAL_FREEZE - 3);   /* the final-hit freeze shows the fighter, not a white flash */
       for (const m of v.mats) { m.transparent = ghost; m.opacity = ghost ? 0.45 : 1; m.emissive.setHex(hot ? 0xffffff : 0x000000); m.emissiveIntensity = hot ? 0.8 : 0; }

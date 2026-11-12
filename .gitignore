@@ -23,3 +23,6 @@ playtest-results/glb-preview/
 
 # prepared sculpts for Joey (rebuilt from the owner's .blend files by build-joey.sh prep)
 assets/*/work/titan/
+
+# Python bytecode from the Blender tools (retarget pipeline)
+__pycache__/

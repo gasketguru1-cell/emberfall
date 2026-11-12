@@ -12,6 +12,7 @@ function drawHud() {
     if (f.stocks <= 5) for (let k = 0; k < f.stocks; k++) { g.fillStyle = '#ffd98a'; g.beginPath(); g.arc(x - 96 + k * 18, y + 40, 6, 0, TAU); g.fill(); }
     else { g.fillStyle = '#ffd98a'; g.beginPath(); g.arc(x - 96, y + 40, 6, 0, TAU); g.fill(); g.font = 'bold 14px system-ui, sans-serif'; g.fillText('× ' + f.stocks, x - 84, y + 45); }   /* many stocks: one dot and the count */
     if (f.def.transform) drawIntensity(f, x, y);
+    if (f.form && f.form.knell) drawThread(f, x, y);
     else if (f.def.forms.length > 1) f.def.forms.slice(0, f.def.cycle || 99).forEach((fm, k) => { g.fillStyle = k === f.fi % (f.def.cycle || 99) ? '#fff' : 'rgba(255,255,255,.35)'; g.font = (k === f.fi % (f.def.cycle || 99) ? 'bold ' : '') + '12px system-ui, sans-serif'; g.fillText(fm.label || fm.name, x - 102 + k * 42, y + 64); });
     g.textAlign = 'right'; g.font = 'bold 44px system-ui, sans-serif'; g.fillStyle = pctCol(f.pct); const jx = f.flash > 0 ? (Math.random() - 0.5) * 6 : 0; g.fillText(Math.round(f.pct) + '%', x + 106 + jx, y + 52);
   });
@@ -23,6 +24,12 @@ function drawHud() {
   else if (paused) { g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(0, 0, W, H); big('PAUSED', H * 0.42, 80); g.font = 'bold 20px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Start: resume          Special: exit to fighter select          − or Backspace: controls', W / 2, H * 0.42 + 54); }
   drawCMenu();
   if (mode === 'over') { big(overT < 90 ? 'GAME!' : result, H * 0.42, 100); if (overT > 100) { g.font = '22px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Press Start or Attack', W / 2, H * 0.42 + 56); drawUpdateNote(H * 0.42 + 80); } }
+}
+/* Knell's Thread: up to five gold notches in his damage panel, lit when held (also at his feet in the game) */
+function drawThread(f, x, y) {
+  for (let k = 0; k < KN.max; k++) { const nx = x - 102 + k * 19, ny = y + 54; g.beginPath(); g.moveTo(nx, ny); g.lineTo(nx + 16, ny); g.lineTo(nx + 12, ny + 9); g.lineTo(nx + 4, ny + 9); g.closePath();
+    g.fillStyle = k < f.thread ? '#ffd166' : 'rgba(255,209,102,.16)'; g.fill(); g.strokeStyle = 'rgba(255,209,102,.6)'; g.lineWidth = 1; g.stroke(); }
+  if (f.clinkUntil >= frame) { g.font = 'bold 11px system-ui, sans-serif'; g.textAlign = 'left'; g.fillStyle = '#ffd166'; g.fillText('CLINK', x - 52, y + 63); }
 }
 /* Joey's INTENSITY: looks like a power gauge, is really how tired he is. A big bar sitting on top of his damage panel:
    red into orange into white-hot, with moving shine, a kick when it jumps, and flames, shaking and a glow near the top.
@@ -361,6 +368,12 @@ function drawCombo() {
     g.font = '12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('damage dealt', x + w - 14, y + 66);
     if (c.best) { g.fillText('best ' + c.best.hits + ' hits, ' + c.best.dmg.toFixed(1) + '%', x + w - 14, y + 80); }
     g.globalAlpha = 1; y += 94; }
+  /* Knell in training: the move's frame, the class of its dagger, the direction of the move he last linked (Thread comes from a different one), Thread and whether the Hinge is open */
+  for (const f of F) { if (!f.form || !f.form.knell) continue; const m = f.state === 'attack' ? f.move : null, h = m && m.h && m.h.find(q => q.cl && f.mf >= q.f0 && f.mf <= q.f1), CL = { H: 'HIGH', M: 'MID', L: 'LOW' }, w = 230, x = W - 18 - w;
+    const open = !!(m && m.hinge && f.knC && f.mf >= m.hinge[0] && f.mf <= m.hinge[1] && f.thread > 0);
+    g.fillStyle = 'rgba(14,10,26,.78)'; rr(x, y, w, 70, 12); g.fill(); g.textAlign = 'left'; g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#ffd166'; g.fillText('KNELL  ·  Thread ' + f.thread + ' / ' + KN.max + (f.clinkUntil >= frame ? '  ·  CLINK' : ''), x + 14, y + 18);
+    g.font = '12px system-ui, sans-serif'; g.fillStyle = '#e8e2f8'; g.fillText((m ? f.mname + '  frame ' + f.mf : f.state) + (h ? '  ·  ' + CL[h.cl] : ''), x + 14, y + 36);
+    g.fillText('last ' + (f.knLast && frame <= f.knExp ? ({ n: 'NEUTRAL', f: 'FORWARD', u: 'UP', d: 'DOWN', b: 'BACK' }[f.knLast[0]] + (f.knLast[1] === 'H' ? ' HIGH' : f.knLast[1] === 'L' ? ' LOW' : '')) + ' (' + (f.knExp - frame) + ')' : '-') + '  ·  Hinge ' + (f.hingeUsed ? 'used' : open ? 'OPEN' : m && m.hinge ? 'window ' + m.hinge[0] + '-' + m.hinge[1] : 'ready'), x + 14, y + 54); y += 78; }
   g.restore();
 }
 function drawFowlWheel() {
