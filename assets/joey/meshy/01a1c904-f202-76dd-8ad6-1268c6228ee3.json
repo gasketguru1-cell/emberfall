@@ -1,0 +1,35 @@
+{
+  "character": "joey",
+  "endpoint": "image-to-image",
+  "params": {
+    "ai_model": "nano-banana-2-1",
+    "reference_image_urls": [
+      "file:assets/joey/source/photo-normal.png",
+      "file:assets/joey/source/ref-big-front.png",
+      "file:assets/joey/source/ref-big-angled.png"
+    ],
+    "aspect_ratio": "2:3",
+    "prompt": "Full-body character reference photo for building a 3D game model: the same man as in the first photo, with his face completely unchanged (the same eyes and eye spacing, brows, nose, lips, jaw, thin dark mustache, light skin tone, dark curly hair under the same plain red baseball cap worn straight forward), on the absurdly enormous muscular body shown in the other two pictures: gigantic rounded shoulders and traps, a huge chest, very thick upper arms, extremely oversized forearms and big fists, thick heavy legs, the same black and grey camouflage athletic shorts with a white drawstring, barefoot. Keep the head normal human size on top of the huge body. He stands upright facing the camera in a relaxed A-pose: arms hanging down and held clearly away from his sides so there is a gap between arms and body, hands loosely closed, feet apart, neutral calm expression, looking straight at the camera. The whole body from the top of the cap to the soles of the feet in frame, centred. Plain light grey background, soft even studio lighting from the front, no shadows on the floor, no text, no logo."
+  },
+  "estimate": 4,
+  "consumed": 4,
+  "files": [
+    "assets/joey/raw/01a1c904-f202-76dd-8ad6-1268c6228ee3/image_urls.0.png"
+  ],
+  "task": {
+    "id": "01a1c904-f202-76dd-8ad6-1268c6228ee3",
+    "type": "image-to-image",
+    "ai_model": "nano-banana-2-1",
+    "prompt": "Full-body character reference photo for building a 3D game model: the same man as in the first photo, with his face completely unchanged (the same eyes and eye spacing, brows, nose, lips, jaw, thin dark mustache, light skin tone, dark curly hair under the same plain red baseball cap worn straight forward), on the absurdly enormous muscular body shown in the other two pictures: gigantic rounded shoulders and traps, a huge chest, very thick upper arms, extremely oversized forearms and big fists, thick heavy legs, the same black and grey camouflage athletic shorts with a white drawstring, barefoot. Keep the head normal human size on top of the huge body. He stands upright facing the camera in a relaxed A-pose: arms hanging down and held clearly away from his sides so there is a gap between arms and body, hands loosely closed, feet apart, neutral calm expression, looking straight at the camera. The whole body from the top of the cap to the soles of the feet in frame, centred. Plain light grey background, soft even studio lighting from the front, no shadows on the floor, no text, no logo.",
+    "status": "SUCCEEDED",
+    "progress": 100,
+    "created_at": 1794373915027,
+    "started_at": 1794373915040,
+    "finished_at": 1794373932868,
+    "expires_at": 1794633132868,
+    "image_urls": [
+      "https://assets.meshy.ai/9b63c3ed-0b38-42c8-922f-bcc56f30de31/uploads/image_01a1c904-f202-76dd-8ad6-1268c6228ee3_0.png"
+    ],
+    "consumed_credits": 4
+  }
+}

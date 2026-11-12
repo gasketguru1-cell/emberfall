@@ -1,0 +1,17 @@
+evalmachine.<anonymous>:19
+    return { top: r1(top), toTop: at - up + 1, air: down - up, y4: r1(s[up + 3].y - y0), dx: r1(s[down].x - s[up].x) };
+                                                                                                                  ^
+
+TypeError: Cannot read properties of undefined (reading 'x')
+    at jump (evalmachine.<anonymous>:19:115)
+    at evalmachine.<anonymous>:34:34
+    at evalmachine.<anonymous>:53:3
+    at Script.runInThisContext (node:vm:138:12)
+    at Object.runInThisContext (node:vm:318:38)
+    at Object.<anonymous> (C:\Users\rober\smash\tests\movement.js:11:4)
+    at Module._compile (node:internal/modules/cjs/loader:1968:14)
+    at Object..js (node:internal/modules/cjs/loader:2108:10)
+    at Module.load (node:internal/modules/cjs/loader:1690:32)
+    at Module._load (node:internal/modules/cjs/loader:1480:12)
+
+Node.js v26.13.0

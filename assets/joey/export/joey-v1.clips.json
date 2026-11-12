@@ -1,0 +1,167 @@
+{
+ "Idle": {
+  "seconds": 2.4
+ },
+ "Idle2": {
+  "seconds": 2.4
+ },
+ "Walk": {
+  "seconds": 1.133
+ },
+ "Run": {
+  "seconds": 0.733
+ },
+ "Crouch": {
+  "seconds": 0.2
+ },
+ "Rise": {
+  "seconds": 0.4
+ },
+ "Fall": {
+  "seconds": 0.6
+ },
+ "Land": {
+  "seconds": 0.467
+ },
+ "Shield": {
+  "seconds": 0.133
+ },
+ "Hit": {
+  "seconds": 0.6
+ },
+ "Tumble": {
+  "seconds": 0.6
+ },
+ "Down": {
+  "seconds": 0.3
+ },
+ "Dodge": {
+  "seconds": 0.467
+ },
+ "Ledge": {
+  "seconds": 1.4
+ },
+ "Hold": {
+  "seconds": 0.6
+ },
+ "Held": {
+  "seconds": 0.5
+ },
+ "Palm": {
+  "seconds": 0.7
+ },
+ "Curl": {
+  "seconds": 0.8
+ },
+ "Shove": {
+  "seconds": 1.3
+ },
+ "Raise": {
+  "seconds": 1.1
+ },
+ "Press": {
+  "seconds": 1.2
+ },
+ "Toe": {
+  "seconds": 1
+ },
+ "Jog": {
+  "seconds": 1.733
+ },
+ "PR": {
+  "seconds": 2.4
+ },
+ "Clean": {
+  "seconds": 2.333
+ },
+ "Lunge": {
+  "seconds": 2.4
+ },
+ "Jack": {
+  "seconds": 1.267
+ },
+ "Front": {
+  "seconds": 1.5
+ },
+ "Kick": {
+  "seconds": 1.333
+ },
+ "High5": {
+  "seconds": 1.2
+ },
+ "Box": {
+  "seconds": 1.8
+ },
+ "Reach": {
+  "seconds": 1.3
+ },
+ "Shake": {
+  "seconds": 1.4
+ },
+ "Band": {
+  "seconds": 1.9
+ },
+ "Strap": {
+  "seconds": 1.4
+ },
+ "Wheel": {
+  "seconds": 2.2
+ },
+ "Bench": {
+  "seconds": 2.9
+ },
+ "Grow": {
+  "seconds": 3
+ },
+ "Exhaust": {
+  "seconds": 15
+ },
+ "Squat": {
+  "seconds": 0.2
+ },
+ "FastFall": {
+  "seconds": 0.4
+ },
+ "Helpless": {
+  "seconds": 0.4
+ },
+ "LandHard": {
+  "seconds": 0.6
+ },
+ "ShieldHit": {
+  "seconds": 0.3
+ },
+ "HitHeavy": {
+  "seconds": 0.8
+ },
+ "Launch": {
+  "seconds": 0.5
+ },
+ "LaunchUp": {
+  "seconds": 0.6
+ },
+ "Spike": {
+  "seconds": 0.6
+ },
+ "AirDodge": {
+  "seconds": 0.667
+ },
+ "Ball": {
+  "seconds": 0.6
+ },
+ "Respawn": {
+  "seconds": 2.4
+ },
+ "Pummel": {
+  "seconds": 0.3
+ },
+ "ThrowF": {
+  "seconds": 1
+ },
+ "ThrowB": {
+  "seconds": 1.067
+ },
+ "ThrowD": {
+  "seconds": 1.1
+ }
+}

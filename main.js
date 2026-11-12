@@ -10,9 +10,11 @@ function perf() {
 function loop(now) {
   const d = now - last; PERF.dt[PERF.n++ % 600] = d; acc += Math.min(100, d); last = now;
   while (acc >= 1000 / 60) {
-    if (!DBG.step || mode === 'select') step(); else if (DBG.advance > 0) { DBG.advance--; step(); }
+    if (window.NET && NET.session()) { if (mode === 'select') NET.stop(); else NET.tick(); }   /* an online match: net.js steps the game in time with the other machine */
+    else if (!DBG.step || mode === 'select') step(); else if (DBG.advance > 0) { DBG.advance--; step(); }
     acc -= 1000 / 60;
   }
+  SND.frame(mode, paused, F.preview ? null : F);   /* music follows the game; footsteps for anyone running */
   draw(); requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
@@ -30,7 +32,7 @@ let UPDATE_READY = false;
 let MOUSE = null;
 (function () {
   const at = e => { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height }; };
-  addEventListener('pointerdown', e => { const p = at(e); MOUSE = p; if (CMENU) { cmenuClick(p.x, p.y); e.preventDefault(); return; } if (cpuGrab(p.x, p.y)) { e.preventDefault(); try { e.target.setPointerCapture && e.target.setPointerCapture(e.pointerId); } catch (_) { /* fine */ } } });
+  addEventListener('pointerdown', e => { const p = at(e); MOUSE = p; if (CMENU) { cmenuClick(p.x, p.y); e.preventDefault(); return; } if (optClick(p.x, p.y)) { e.preventDefault(); return; } if (cpuGrab(p.x, p.y)) { e.preventDefault(); try { e.target.setPointerCapture && e.target.setPointerCapture(e.pointerId); } catch (_) { /* fine */ } } });
   addEventListener('pointermove', e => { const p = at(e); MOUSE = p; cpuDrag(p.x, p.y); document.body.style.cursor = CPU_TOK.drag ? 'grabbing' : cpuTokOn(p.x, p.y) ? 'grab' : ''; });
   addEventListener('pointerup', e => { const p = at(e); cpuDrop(p.x, p.y); document.body.style.cursor = cpuTokOn(p.x, p.y) ? 'grab' : ''; });
   addEventListener('pointercancel', () => { if (CPU_TOK.drag) { CPU_TOK.drag = false; cpuTokHome(); } });

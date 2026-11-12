@@ -9,17 +9,66 @@ function drawHud() {
     const x = W * (f.idx ? 0.68 : 0.32), y = H - 86, pc = f.idx ? '#6cb4ff' : '#ff7b6c';
     g.fillStyle = 'rgba(10,10,20,.6)'; rr(x - 120, y, 240, 74, 12); g.fill(); g.fillStyle = pc; rr(x - 120, y, 8, 74, 4); g.fill();
     g.textAlign = 'left'; g.font = 'bold 16px system-ui, sans-serif'; g.fillStyle = pc; g.fillText((f.ctl.dev === 'cpu' ? 'CPU ' + (f.ctl.ai.lv || CPU_LEVEL) : 'P' + (f.idx + 1)) + '  ' + f.def.name, x - 102, y + 22);
-    for (let k = 0; k < f.stocks; k++) { g.fillStyle = '#ffd98a'; g.beginPath(); g.arc(x - 96 + k * 18, y + 40, 6, 0, TAU); g.fill(); }
-    if (f.def.forms.length > 1) f.def.forms.slice(0, f.def.cycle || 99).forEach((fm, k) => { g.fillStyle = k === f.fi % (f.def.cycle || 99) ? '#fff' : 'rgba(255,255,255,.35)'; g.font = (k === f.fi % (f.def.cycle || 99) ? 'bold ' : '') + '12px system-ui, sans-serif'; g.fillText(fm.label || fm.name, x - 102 + k * 42, y + 64); });
+    if (f.stocks <= 5) for (let k = 0; k < f.stocks; k++) { g.fillStyle = '#ffd98a'; g.beginPath(); g.arc(x - 96 + k * 18, y + 40, 6, 0, TAU); g.fill(); }
+    else { g.fillStyle = '#ffd98a'; g.beginPath(); g.arc(x - 96, y + 40, 6, 0, TAU); g.fill(); g.font = 'bold 14px system-ui, sans-serif'; g.fillText('× ' + f.stocks, x - 84, y + 45); }   /* many stocks: one dot and the count */
+    if (f.def.transform) drawIntensity(f, x, y);
+    else if (f.def.forms.length > 1) f.def.forms.slice(0, f.def.cycle || 99).forEach((fm, k) => { g.fillStyle = k === f.fi % (f.def.cycle || 99) ? '#fff' : 'rgba(255,255,255,.35)'; g.font = (k === f.fi % (f.def.cycle || 99) ? 'bold ' : '') + '12px system-ui, sans-serif'; g.fillText(fm.label || fm.name, x - 102 + k * 42, y + 64); });
     g.textAlign = 'right'; g.font = 'bold 44px system-ui, sans-serif'; g.fillStyle = pctCol(f.pct); const jx = f.flash > 0 ? (Math.random() - 0.5) * 6 : 0; g.fillText(Math.round(f.pct) + '%', x + 106 + jx, y + 52);
   });
   /* the finishing hit: cinema bars while the game runs slow */
   if (typeof slowT !== 'undefined' && slowT > 0) { const k = Math.min(1, slowT / 10); g.fillStyle = 'rgba(0,0,0,' + (0.82 * k).toFixed(2) + ')'; g.fillRect(0, 0, W, 64 * k); g.fillRect(0, H - 64 * k, W, 64 * k); }
   g.textAlign = 'center';
   if (mode === 'countdown') { const n = countdown > 130 ? '3' : countdown > 90 ? '2' : countdown > 50 ? '1' : 'GO!'; big(n, H * 0.42, 110); }
-  if (paused) { g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(0, 0, W, H); big('PAUSED', H * 0.42, 80); g.font = 'bold 20px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Start: resume          Special: exit to fighter select          − or Backspace: controls', W / 2, H * 0.42 + 54); }
+  if (paused && typeof drawPauseMenu === 'function') { if (!ML.open) drawPauseMenu(); }   /* movelist.js: Resume, Move List, Exit */
+  else if (paused) { g.fillStyle = 'rgba(0,0,0,.5)'; g.fillRect(0, 0, W, H); big('PAUSED', H * 0.42, 80); g.font = 'bold 20px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Start: resume          Special: exit to fighter select          − or Backspace: controls', W / 2, H * 0.42 + 54); }
   drawCMenu();
   if (mode === 'over') { big(overT < 90 ? 'GAME!' : result, H * 0.42, 100); if (overT > 100) { g.font = '22px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('Press Start or Attack', W / 2, H * 0.42 + 56); drawUpdateNote(H * 0.42 + 80); } }
+}
+/* Joey's INTENSITY: looks like a power gauge, is really how tired he is. A big bar sitting on top of his damage panel:
+   red into orange into white-hot, with moving shine, a kick when it jumps, and flames, shaking and a glow near the top.
+   Full, it turns cool blue: TAKE FIVE, then CATCHING BREATH with the 15 seconds draining. Gone once he transforms.
+   HUD_INT keeps only what the drawing needs (the last value and a flash timer), off the fighter, so the game state is untouched. */
+const HUD_INT = [{ k: 0, pop: 0 }, { k: 0, pop: 0 }];
+function drawIntensity(f, x, y) {
+  if (f.tfLatch) { g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#ffd98a'; g.textAlign = 'left'; g.fillText('CRONKY DONG', x - 102, y + 64); return; }
+  const ex = f.exStart >= 0, e = ex ? frame - f.exStart : 0, k = ex ? Math.max(0, 900 - e) / 900 : f.fat / FAT.max, m = HUD_INT[f.idx & 1];
+  if (!ex && k > m.k + 0.004) m.pop = 1; m.k = k; m.pop = Math.max(0, m.pop - 0.06);
+  const hot = !ex && k >= 0.8, bw = 240, bh = 30, sh = hot ? (k - 0.8) * 20 : 0, bx = x - 120 + (Math.random() - 0.5) * sh, by = y - 42 + (Math.random() - 0.5) * sh, fw = bw * k;
+  g.save();
+  /* the plate */
+  g.shadowColor = ex ? 'rgba(120,180,230,.6)' : hot ? 'rgba(255,140,40,' + (0.6 + 0.4 * Math.sin(tick * 0.4)).toFixed(2) + ')' : 'rgba(0,0,0,.5)'; g.shadowBlur = hot ? 22 : 10;
+  g.fillStyle = 'rgba(14,8,18,.85)'; rr(bx - 4, by - 4, bw + 8, bh + 8, 10); g.fill(); g.shadowBlur = 0;
+  g.lineWidth = 2; g.strokeStyle = ex ? '#8fb7d6' : hot ? '#ffcf5a' : '#6a3a2a'; rr(bx - 4, by - 4, bw + 8, bh + 8, 10); g.stroke();
+  /* the fill, clipped to the bar */
+  g.save(); rr(bx, by, bw, bh, 7); g.clip();
+  g.fillStyle = 'rgba(255,255,255,.06)'; g.fillRect(bx, by, bw, bh);
+  if (fw > 0) {
+    const gr = g.createLinearGradient(bx, 0, bx + bw, 0);
+    if (ex) { gr.addColorStop(0, '#2c5a86'); gr.addColorStop(1, '#a9d6f5'); }
+    else { gr.addColorStop(0, '#7a1410'); gr.addColorStop(0.45, '#e0441e'); gr.addColorStop(0.75, '#ff9a2a'); gr.addColorStop(0.92, '#ffe27a'); gr.addColorStop(1, '#fffbe8'); }
+    g.fillStyle = gr; g.fillRect(bx, by, fw, bh);
+    /* moving diagonal shine */
+    g.save(); g.beginPath(); g.rect(bx, by, fw, bh); g.clip(); g.fillStyle = 'rgba(255,255,255,' + (ex ? 0.08 : 0.16) + ')';
+    const off = (tick * (ex ? 0.6 : 1.5 + k * 3)) % 28; for (let sx = bx - 28 + off; sx < bx + fw + 28; sx += 28) { g.beginPath(); g.moveTo(sx, by + bh); g.lineTo(sx + 12, by); g.lineTo(sx + 22, by); g.lineTo(sx + 10, by + bh); g.fill(); }
+    g.restore();
+    g.fillStyle = 'rgba(255,255,255,.28)'; g.fillRect(bx, by + 2, fw, 5);   /* top gloss */
+    if (m.pop > 0) { g.fillStyle = 'rgba(255,255,255,' + (0.55 * m.pop).toFixed(2) + ')'; g.fillRect(bx, by, fw, bh); }   /* the kick when it jumps */
+    g.fillStyle = '#fff'; g.fillRect(bx + fw - 2, by, 3, bh);   /* the leading edge */
+  }
+  g.fillStyle = 'rgba(0,0,0,.35)'; for (let q = 1; q < 10; q++) g.fillRect(bx + bw * q / 10 - 1, by + bh - 8, 2, 8);   /* tenths */
+  g.restore();
+  /* flames off the top of the fill when it runs hot */
+  if (hot && fw > 0) {
+    for (let q = 0; q < 9; q++) { const fx = bx + fw * (0.55 + 0.45 * q / 8), fl = (8 + 14 * (k - 0.8) * 5) * (0.6 + 0.4 * Math.sin(tick * 0.5 + q * 1.7)) * (0.7 + Math.random() * 0.3);
+      g.fillStyle = q % 2 ? 'rgba(255,200,70,.85)' : 'rgba(255,110,30,.8)'; g.beginPath(); g.moveTo(fx - 6, by + 2); g.quadraticCurveTo(fx - 2, by - fl * 0.5, fx + (Math.random() - 0.5) * 3, by - fl); g.quadraticCurveTo(fx + 2, by - fl * 0.5, fx + 6, by + 2); g.fill(); }
+  }
+  /* words */
+  const label = ex ? (e < 90 ? 'TAKE FIVE!' : 'CATCHING BREATH') : k >= 0.95 ? 'MAXED OUT!' : 'INTENSITY';
+  g.textAlign = 'left'; g.font = 'italic 900 ' + (17 + (ex && e < 90 ? 3 : 0)) + 'px system-ui, sans-serif'; g.lineWidth = 4; g.strokeStyle = 'rgba(20,8,10,.9)';
+  g.strokeText(label, bx + 10, by + 22); g.fillStyle = ex ? '#e8f4ff' : k >= 0.95 && Math.sin(tick * 0.6) > 0 ? '#ffe27a' : '#fff'; g.fillText(label, bx + 10, by + 22);
+  const num = ex ? ((900 - e) / 60).toFixed(1) + 's' : Math.round(k * 100) + '%', ns = 20 + m.pop * 8;
+  g.textAlign = 'right'; g.font = '900 ' + ns.toFixed(0) + 'px system-ui, sans-serif'; g.strokeText(num, bx + bw - 8, by + 23); g.fillStyle = ex ? '#cfe4f5' : hot ? '#ffe27a' : '#ffd0a0'; g.fillText(num, bx + bw - 8, by + 23);
+  g.restore();
 }
 function big(t, y, sz) { g.font = `900 ${sz}px system-ui, sans-serif`; g.textAlign = 'center'; g.lineWidth = 10; g.strokeStyle = '#1a1230'; g.strokeText(t, W / 2, y); g.fillStyle = '#ffd98a'; g.fillText(t, W / 2, y); }
 /* Between matches only: a newer finished version of the game is waiting on the server. */
@@ -34,14 +83,18 @@ function drawUpdateNote(y) {
 const TITLE_ART = typeof Image !== 'undefined' ? new Image() : null; if (TITLE_ART) TITLE_ART.src = 'assets/stage/source/concept.webp';
 const TIPS = [
   'Smash: flick the stick with attack, or press attack + special together. Keep attack held to charge it.',
+  'Choose the CPU’s fighter: point at its token, press A to pick it up, and A again on a fighter to put it down.',
   'After a grab, push either stick to throw. Keep the stick still if you want to pummel first.',
   'Wren swaps companions with down + special: Nib is quick, Loom floats, Hod hits hard.',
   'Jump, then shield with a direction just as you leave the ground, to wavedash.',
   'Flick down to drop through a platform. Down while shielding on one drops through too.',
   'Let go of shield just before a hit lands to parry it.',
   'Jump + attack together gives a short-hop aerial. Two jump buttons pressed together always give a short hop.',
+  'Reverse aerial rush: while running, pull back (or pull back as you jump) and you jump facing back but still sliding forward; forward + attack is a back air that keeps the speed.',
+  'Push the right stick forward while dashing or running for a dash attack.',
+  'B-reverse: just after pressing special, pull the stick the other way to turn round; in the air your drift turns round too.',
   'Flick down while falling to fast-fall. Flick the right stick down instead and the left stick stays free to steer.',
-  'Change your buttons or keys on the controls screen: − on a controller, Backspace on the keyboard.',
+  'Change your buttons, keys and the volume on the controls screen: − on a controller, Backspace on the keyboard.',
   'Hold attack to chain jabs. Nib keeps a flurry going for as long as it is held.',
   'Tilt the stick slightly up or down to angle a forward tilt.',
   'You cannot run through an opponent: roll, jump, or hit your way past.',
@@ -52,7 +105,7 @@ const TIPS = [
   'Flint’s down special and Wren’s swap hang in the air once each time you leave the ground.',
   'Back + attack out of a run turns and strikes. Jump on a head to spring off it.',
   'Above 100%, getting up from the ledge is slower and less protected.',
-  'Keyboard tools: B hitboxes · P freeze · O step one frame · M switch 2D / 3D.',
+  'Keyboard tools: B hitboxes · G attack arcs · P freeze · O step one frame · M switch 2D / 3D.',
 ];
 function spaced(px) { if ('letterSpacing' in g) g.letterSpacing = px + 'px'; }
 /* A key cap with its action after it; returns the x where the next one starts. */
@@ -75,16 +128,32 @@ function legendRows() {
 /* The controls screen (sim.js: CMENU), over the fighter select or the pause screen. */
 const ACT_COL = { '': '#6d6885', atk: '#ff7b6c', spc: '#6cb4ff', jmp: '#9be564', shd: '#7fe3e0', grb: '#d59bff' };
 function drawCMenu() {
-  if (!CMENU) return; const m = CMENU, su = setupOf(m.dev), kb = su.type === 'kb', items = cmenuItems(), list = setupsFor(m.dev), ui = 'system-ui, sans-serif';
+  if (!CMENU) return; const m = CMENU, su = setupOf(m.dev), kb = su.type === 'kb', snd = m.page === 'sound', items = cmenuItems(), list = setupsFor(m.dev), ui = 'system-ui, sans-serif';
   g.save(); spaced(0); g.fillStyle = 'rgba(8,6,16,.8)'; g.fillRect(0, 0, W, H);
   g.fillStyle = 'rgba(26,22,46,.98)'; rr(CM.x, CM.y, CM.w, CM.h, 18); g.fill(); g.strokeStyle = 'rgba(255,184,107,.55)'; g.lineWidth = 1.5; g.stroke();
-  g.textAlign = 'left'; g.font = '900 26px ' + ui; g.fillStyle = '#ffd98a'; g.fillText('CONTROLS', CM.x + 30, CM.y + 44);
-  const tw = g.measureText('CONTROLS').width; g.font = '16px ' + ui; g.fillStyle = '#cfc8e8'; g.fillText(devName(m.dev), CM.x + 44 + tw, CM.y + 43);
+  g.textAlign = 'left'; g.font = '900 26px ' + ui; g.fillStyle = '#ffd98a'; g.fillText(snd ? 'SOUND' : 'CONTROLS', CM.x + 30, CM.y + 44);
+  const tw = g.measureText(snd ? 'SOUND' : 'CONTROLS').width; g.font = '16px ' + ui; g.fillStyle = '#cfc8e8'; g.fillText(devName(m.dev), CM.x + 44 + tw, CM.y + 43);
   g.fillStyle = 'rgba(255,255,255,.1)'; rr(CM.done[0], CM.done[1], CM.done[2], CM.done[3], 17); g.fill(); g.textAlign = 'center'; g.font = 'bold 14px ' + ui; g.fillStyle = '#fff'; g.fillText('Done', CM.done[0] + CM.done[2] / 2, CM.done[1] + 22);
   items.forEach((it, n) => {
     const [x, y, w, h] = it.box, on = n === m.row, my = y + h / 2 + 5;
     g.fillStyle = on ? 'rgba(255,217,138,.14)' : 'rgba(255,255,255,.05)'; rr(x, y, w, h, 8); g.fill(); if (on) { g.strokeStyle = '#ffd98a'; g.lineWidth = 2; g.stroke(); }
-    if (it.kind === 'setup') {
+    if (it.kind === 'page') { g.textAlign = 'center'; g.font = 'bold 14px ' + ui; g.fillStyle = on ? '#fff' : '#ffd98a'; g.fillText(it.to === 'sound' ? '♪  Sound' : '‹  Controls', x + w / 2, my); }
+    else if (it.kind === 'vol') {
+      const S = SND.settings, off = S.mute[it.key], v = S[it.key], b = volBar(it.box);
+      g.textAlign = 'left'; g.font = 'bold 17px ' + ui; g.fillStyle = on ? '#fff' : '#d8d2ee'; g.fillText(it.label, x + 18, my + 1);
+      g.fillStyle = 'rgba(255,255,255,.12)'; rr(b[0], b[1], b[2], b[3], 8); g.fill();
+      if (v > 0) { g.fillStyle = off ? '#6d6885' : '#ffb86b'; rr(b[0], b[1], Math.max(16, b[2] * v), b[3], 8); g.fill(); }
+      g.fillStyle = off ? '#8f88ad' : '#fff'; g.beginPath(); g.arc(b[0] + b[2] * v, b[1] + b[3] / 2, 11, 0, TAU); g.fill();
+      g.textAlign = 'right'; g.font = 'bold 15px ' + ui; g.fillStyle = off ? '#8f88ad' : '#fff'; g.fillText(Math.round(v * 100) + '%', b[0] - 16, my + 1);
+      const px = x + w - 128; g.fillStyle = off ? '#ff7b6c' : 'rgba(255,255,255,.1)'; rr(px, y + 10, 112, h - 20, (h - 20) / 2); g.fill();
+      g.textAlign = 'center'; g.font = 'bold 13px ' + ui; g.fillStyle = off ? '#1a1230' : '#d8d2ee'; g.fillText(off ? 'MUTED' : 'Mute', px + 56, my);
+    } else if (it.kind === 'track') {
+      const name = SND.trackName();
+      g.textAlign = 'left'; g.font = 'bold 17px ' + ui; g.fillStyle = on ? '#fff' : '#d8d2ee'; g.fillText('Battle music', x + 18, my + 1);
+      g.textAlign = 'center'; g.font = 'bold 18px ' + ui; g.fillStyle = '#fff'; g.fillText(name, x + w / 2 + 60, my + 2);
+      const nw = g.measureText(name).width; g.fillStyle = '#ffd98a'; g.fillText('‹', x + w / 2 + 60 - nw / 2 - 24, my + 1); g.fillText('›', x + w / 2 + 60 + nw / 2 + 24, my + 1);
+    }
+    else if (it.kind === 'setup') {
       const name = su.name.replace(/\s+/g, ' ');
       g.textAlign = 'left'; g.font = 'bold 12px ' + ui; spaced(2); g.fillStyle = '#ffb86b'; g.fillText('SETUP', x + 16, my); spaced(0);
       g.textAlign = 'center'; g.font = 'bold 22px ' + ui; g.fillStyle = '#fff'; g.fillText(name, x + w / 2, my + 3);
@@ -105,11 +174,13 @@ function drawCMenu() {
     }
   });
   if (m.noteT > 0) { g.globalAlpha = Math.min(1, m.noteT / 30); g.textAlign = 'center'; g.font = '14px ' + ui; g.fillStyle = '#ffd98a'; g.fillText(m.note, CM.x + CM.w / 2, CM.y + 542); g.globalAlpha = 1; }
-  g.textAlign = 'center'; g.font = '13px ' + ui; g.fillStyle = '#8f88ad'; g.fillText('Two jump buttons together: short hop   ·   Right stick down while falling: fast fall', CM.x + CM.w / 2, CM.y + 568);
-  let hx = CM.x + (kb ? 96 : 250); const hy = CM.y + CM.h - 24;
-  for (const [cap, act] of kb ? [['↑ ↓ ← →', 'choose'], ['Enter', 'change a key'], ['Delete', 'clear it'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'change'], ['Y', 'set to nothing'], ['B', 'done']]) hx = keyHint(hx, hy, cap, act) + 8;
+  g.textAlign = 'center'; g.font = '13px ' + ui; g.fillStyle = '#8f88ad'; g.fillText(snd ? 'The music steps back by itself for heavy hits and KOs, and while the game is paused.' : 'Two jump buttons together: short hop   ·   Right stick down while falling: fast fall', CM.x + CM.w / 2, CM.y + 568);
+  let hx = CM.x + (snd ? 190 : kb ? 96 : 250); const hy = CM.y + CM.h - 24;
+  for (const [cap, act] of snd ? (kb ? [['↑ ↓', 'choose'], ['← →', 'quieter / louder'], ['Enter', 'mute'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'quieter / louder'], ['A', 'mute'], ['B', 'done']]) : kb ? [['↑ ↓ ← →', 'choose'], ['Enter', 'change a key'], ['Delete', 'clear it'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'change'], ['Y', 'set to nothing'], ['B', 'done']]) hx = keyHint(hx, hy, cap, act) + 8;
   g.restore();
 }
+/* the forms the fighter select shows: Wren's companions, the first five Fowls; Joey only as himself (his other form is a surprise) */
+function selForms(d) { return d.transform ? d.forms.slice(0, 1) : d.forms.slice(0, d.cycle || 99); }
 function drawSelect(three) {
   const t = tick, PC = ['#ff7b6c', '#6cb4ff'], serif = '"Palatino Linotype", "Book Antiqua", Georgia, serif';
   /* ---- background (2D only; in 3D the live island shows through) ---- */
@@ -126,12 +197,12 @@ function drawSelect(three) {
   g.save(); g.shadowColor = 'rgba(255,130,40,.65)'; g.shadowBlur = 34 + Math.sin(t * 0.05) * 8;
   q = g.createLinearGradient(0, 40, 0, 112); q.addColorStop(0, '#fff6dc'); q.addColorStop(0.5, '#ffc56a'); q.addColorStop(1, '#f0702c');
   g.lineWidth = 7; g.strokeStyle = '#2a1410'; g.lineJoin = 'round'; g.strokeText('EMBERFALL', W / 2 + 6, 104); g.fillStyle = q; g.fillText('EMBERFALL', W / 2 + 6, 104); g.restore();
-  g.font = 'bold 14px system-ui, sans-serif'; spaced(4); g.fillStyle = '#f3dfb6'; g.fillText('3 STOCKS   ·   8 MINUTES   ·   ' + STAGES[STAGE].name.toUpperCase(), W / 2 + 2, 138); spaced(0);
+  g.font = 'bold 14px system-ui, sans-serif'; spaced(4); g.fillStyle = '#f3dfb6'; g.fillText(OPT.stocks + (OPT.stocks === 1 ? ' STOCK' : ' STOCKS') + '   ·   8 MINUTES   ·   ' + STAGES[OPT.stage].name.toUpperCase(), W / 2 + 2, 138); spaced(0);
   for (const dir of [-1, 1]) { q = g.createLinearGradient(W / 2 + dir * 250, 0, W / 2 + dir * 430, 0); q.addColorStop(0, 'rgba(255,170,90,.85)'); q.addColorStop(1, 'rgba(255,170,90,0)'); g.fillStyle = q; g.fillRect(dir > 0 ? W / 2 + 250 : W / 2 - 430, 132, 180, 2); }
 
   /* ---- the roster: one portrait tile for each fighter, with each player's marker on the one they are on ---- */
   { const th = 124, y0 = 158, tw = rosterTile(0)[2];
-    ROSTER.forEach((d, k) => { const x = rosterTile(k)[0], fm = d.forms[d.forms.length > 1 ? Math.floor(t / 170) % (d.cycle || d.forms.length) : 0], on = [0, 1].filter(q => slots[q] && slots[q].pick === k);
+    ROSTER.forEach((d, k) => { const x = rosterTile(k)[0], fm = selForms(d)[Math.floor(t / 170) % selForms(d).length], on = [0, 1].filter(q => slots[q] && slots[q].pick === k);
       q = g.createLinearGradient(0, y0, 0, y0 + th); q.addColorStop(0, 'rgba(46,38,72,.92)'); q.addColorStop(1, 'rgba(18,15,32,.94)'); g.fillStyle = q; rr(x, y0, tw, th, 10); g.fill();
       g.save(); rr(x, y0, tw, th, 10); g.clip(); g.fillStyle = fm.col[0]; g.globalAlpha = 0.16; g.beginPath(); g.arc(x + tw / 2, y0 + th * 0.62, tw * 0.46, 0, TAU); g.fill(); g.globalAlpha = 1;
       const k2 = Math.min(5.2, 74 / (fm.st.h + 3)); g.translate(x + tw / 2, y0 + th - 30); g.scale(k2, -k2); ART[fm.name](fm.col, frame + k * 30, null); g.restore();
@@ -166,14 +237,14 @@ function drawSelect(three) {
     g.textAlign = 'left'; g.font = 'bold 44px ' + serif; g.fillStyle = '#fff'; g.fillText(d.name, x + 52, y + 84);
     const nw = g.measureText(d.name).width; g.font = 'bold 30px system-ui, sans-serif'; g.fillStyle = sl.ready ? 'rgba(255,255,255,.18)' : '#ffd98a'; g.fillText('‹', x + 24, y + 81); g.fillText('›', x + 62 + nw, y + 81);
     g.font = 'italic 16px ' + serif; g.fillStyle = '#f3dfb6'; g.fillText(d.sub, x + 26, y + 110);
-    if (d.forms.length > 1) {   /* the companions; in 3D the one standing on the island is lit */
-      const now = Math.floor(t / 170) % (d.cycle || d.forms.length); let fx = x + 26;
-      d.forms.slice(0, d.cycle || 99).forEach((fm, n) => { g.font = (three && n === now ? 'bold ' : '') + '13px system-ui, sans-serif'; const w = g.measureText(fm.label || fm.name).width + 18; g.fillStyle = three && n === now ? pc : 'rgba(255,255,255,.1)'; rr(fx, y + 120, w, 22, 11); g.fill(); g.fillStyle = three && n === now ? '#16121f' : '#d8d2ee'; g.textAlign = 'center'; g.fillText(fm.label || fm.name, fx + w / 2, y + 135); g.textAlign = 'left'; fx += w + 6; });
+    if (selForms(d).length > 1) {   /* the companions; in 3D the one standing on the island is lit */
+      const now = Math.floor(t / 170) % selForms(d).length; let fx = x + 26;
+      selForms(d).forEach((fm, n) => { g.font = (three && n === now ? 'bold ' : '') + '13px system-ui, sans-serif'; const w = g.measureText(fm.label || fm.name).width + 18; g.fillStyle = three && n === now ? pc : 'rgba(255,255,255,.1)'; rr(fx, y + 120, w, 22, 11); g.fill(); g.fillStyle = three && n === now ? '#16121f' : '#d8d2ee'; g.textAlign = 'center'; g.fillText(fm.label || fm.name, fx + w / 2, y + 135); g.textAlign = 'left'; fx += w + 6; });
     }
-    if (!three) d.forms.slice(0, d.cycle || 99).forEach((fm, n) => { g.save(); g.translate(x + cw - 60 - (d.forms.length - 1 - n) * 62, y + 112); g.scale(3.4, -3.4); ART[fm.name](same ? fm.alt : fm.col, frame, null); g.restore(); });
+    if (!three) selForms(d).forEach((fm, n, a) => { g.save(); g.translate(x + cw - 60 - (a.length - 1 - n) * 62, y + 112); g.scale(3.4, -3.4); ART[fm.name](same ? fm.alt : fm.col, frame, null); g.restore(); });
     g.textAlign = 'right';
     if (sl.ready) { g.fillStyle = '#9be564'; rr(x + cw - 108, y + 118, 88, 26, 13); g.fill(); g.font = 'bold 14px system-ui, sans-serif'; spaced(2); g.fillStyle = '#12200c'; g.textAlign = 'center'; g.fillText('READY', x + cw - 63, y + 136); spaced(0); }
-    else if ((three || d.forms.length === 1) && (d.cycle || d.forms.length) < 4) { g.font = '13px system-ui, sans-serif'; g.fillStyle = '#cfc8e8'; g.fillText('Point at a fighter  ·  Attack to pick', x + cw - 20, y + 136); }
+    else if ((three || selForms(d).length === 1) && selForms(d).length < 4) { g.font = '13px system-ui, sans-serif'; g.fillStyle = '#cfc8e8'; g.fillText('Point at a fighter  ·  Attack to pick', x + cw - 20, y + 136); }
   }
 
   /* ---- start prompt, between the cards ---- */
@@ -199,17 +270,16 @@ function drawSelect(three) {
   g.font = '14px system-ui, sans-serif'; g.fillStyle = 'rgba(255,255,255,' + a.toFixed(2) + ')'; g.fillText(TIPS[n], px + 126, py + 77);
 
   /* ---- hitbox switch (top right) and the note about a newer version (top middle) ---- */
+  if (!SWITCHES) { const w = 168, x = W - 44 - w, y = 20;   /* the switches are hidden: just say how to bring them back */
+    g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = 'rgba(255,255,255,.16)'; g.lineWidth = 1; g.stroke();
+    g.fillStyle = '#ffd166'; g.beginPath(); g.arc(x + 20, y + 17, 10, 0, TAU); g.fill(); g.textAlign = 'center'; g.font = 'bold 15px system-ui, sans-serif'; g.fillStyle = '#2a1208'; g.fillText('+', x + 20, y + 22);
+    g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Show switches', x + 38, y + 22); }
+  if (SWITCHES) {
   { const on = DBG.boxes, w = 214, x = W - 44 - w, y = 20;
     g.fillStyle = 'rgba(20,17,36,.8)'; rr(x - 36, y, w + 36, 34, 17); g.fill(); g.strokeStyle = on ? '#ff6a6a' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.font = '12px system-ui, sans-serif'; g.fillText('Show Hitboxes', x - 22, y + 22);
     g.fillStyle = on ? '#ff6a6a' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
     g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('X / Y  or  B key', x + 130, y + 22); }
-  { const [x, y, w, h] = STAGE_PILL, name = STAGES[STAGE].name;   /* stage pick (top left): point at it and press Attack, or the G key */
-    g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, h, 17); g.fill(); g.strokeStyle = 'rgba(255,184,107,.55)'; g.lineWidth = 1; g.stroke();
-    g.textAlign = 'left'; g.font = 'bold 11px system-ui, sans-serif'; spaced(2); g.fillStyle = '#ffb86b'; g.fillText('STAGE', x + 14, y + 22); spaced(0);
-    g.textAlign = 'center'; g.font = 'bold 15px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(name, x + 142, y + 23);
-    g.font = 'bold 18px system-ui, sans-serif'; g.fillStyle = '#ffd98a'; g.fillText('‹', x + 72, y + 23); g.fillText('›', x + w - 20, y + 23);
-    g.textAlign = 'left'; g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point + A  or  G key', x + 14, y + h + 16); }
   { const on = TRAINING, w = 214, x = W - 44 - w, y = 100;   /* training mode switch */
     g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = on ? '#9be564' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Training', x + 12, y + 22);
@@ -220,6 +290,16 @@ function drawSelect(three) {
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Hit sparks', x + 12, y + 22);
     g.fillStyle = on ? '#ffd166' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
     g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('Shield  or  H key', x + 128, y + 22); }
+  { const on = DBG.arcs, w = 214, x = W - 44 - w, y = 140;   /* attack arcs switch: the circles and sweeps over an attack while it can hit */
+    g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = on ? '#8fd3ff' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
+    g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Attack arcs', x + 12, y + 22);
+    g.fillStyle = on ? '#8fd3ff' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
+    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point + A  or  G key', x + 128, y + 22); }
+  }
+  if (SWITCHES && DESKTOP()) for (const [box, label, hint, col, hot] of [[ONLINE_PILL, 'Online', 'point + A: host or join', '#ffb35c', false], [QUIT_PILL, QUIT_ASK > 0 ? 'Quit?' : 'Quit', QUIT_ASK > 0 ? 'press A again to quit' : 'point + A, twice', '#ff6a6a', QUIT_ASK > 0]]) {   /* desktop app: reachable with a controller's cursor */
+    const [x, y, w] = box; g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = hot ? col : 'rgba(255,255,255,.16)'; g.lineWidth = hot ? 2 : 1; g.stroke();
+    g.textAlign = 'left'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = col; g.fillText(label, x + 12, y + 22);
+    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(hint, x + 80, y + 22); }
   /* ---- each player's cursor: a round token with a pointer at its top left, where it points ---- */
   for (let k = 0; k < 2; k++) { const sl = slots[k]; if (!sl || sl.cx === undefined) continue; const x = sl.cx, y = sl.cy, pc = PC[k];
     g.save(); g.shadowColor = 'rgba(0,0,0,.55)'; g.shadowBlur = 8; g.shadowOffsetY = 2;
@@ -228,15 +308,45 @@ function drawSelect(three) {
     g.strokeStyle = '#fff'; g.lineWidth = 2.5; g.beginPath(); g.arc(x + 24, y + 24, 16, 0, TAU); g.stroke();
     g.textAlign = 'center'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = '#16121f'; g.fillText('P' + (k + 1), x + 24, y + 29); }
   /* ---- the CPU's token, while the second slot is the CPU: drag it with the mouse onto a fighter ---- */
-  if (!slots[1]) { const x = CPU_TOK.x, y = CPU_TOK.y, lift = CPU_TOK.drag ? 4 : 0, hov = CPU_TOK.drag || (MOUSE && cpuTokOn(MOUSE.x, MOUSE.y));
+  if (!slots[1]) { const x = CPU_TOK.x, y = CPU_TOK.y, lift = CPU_TOK.drag ? 4 : 0, hov = CPU_TOK.drag || (MOUSE && cpuTokOn(MOUSE.x, MOUSE.y)) || slots.some(q => q && q.cx !== undefined && cpuTokOn(q.cx, q.cy));
     if (CPU_PICK >= 0 && !CPU_TOK.drag) { const b = rosterTile(CPU_PICK); g.strokeStyle = '#c9c3dc'; g.lineWidth = 3; g.setLineDash([6, 5]); rr(b[0] - 2, b[1] - 2, b[2] + 4, b[3] + 4, 12); g.stroke(); g.setLineDash([]); }
     g.save(); g.shadowColor = 'rgba(0,0,0,.6)'; g.shadowBlur = 10 + lift * 2; g.shadowOffsetY = 2 + lift;
     g.fillStyle = '#c9c3dc'; g.beginPath(); g.moveTo(x, y - lift); g.lineTo(x + 20, y + 7 - lift); g.lineTo(x + 7, y + 20 - lift); g.closePath(); g.fill();
     g.beginPath(); g.arc(x + 24, y + 24 - lift, 18, 0, TAU); g.fill(); g.restore();
     g.strokeStyle = hov ? '#ffd98a' : '#fff'; g.lineWidth = 2.5; g.beginPath(); g.arc(x + 24, y + 24 - lift, 18, 0, TAU); g.stroke();
     g.textAlign = 'center'; g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#16121f'; g.fillText('CPU', x + 24, y + 28 - lift); }
+  drawOptButton();
   g.textAlign = 'center'; drawUpdateNote(14);
+  drawOptions();
   drawCMenu();
+}
+/* the Options button at the top left of the fighter select (sim.js: OPT_PILL), lit while a cursor or the mouse is on it */
+function drawOptButton() {
+  const [x, y, w, h] = OPT_PILL, hot = OPT_UI.open || slots.some(q => q && q.cx !== undefined && inBox(OPT_PILL, q.cx, q.cy)) || (MOUSE && inBox(OPT_PILL, MOUSE.x, MOUSE.y));
+  g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, h, 17); g.fill(); g.strokeStyle = hot ? '#ffd166' : 'rgba(255,255,255,.16)'; g.lineWidth = hot ? 2 : 1; g.stroke();
+  const cx = x + 20, cy = y + 17; g.fillStyle = '#ffd166'; g.beginPath(); for (let k = 0; k < 16; k++) { const a = k * Math.PI / 8, r = k % 2 ? 6 : 9; g.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); } g.closePath(); g.fill();   /* a little cog */
+  g.fillStyle = '#2a1208'; g.beginPath(); g.arc(cx, cy, 3, 0, TAU); g.fill();
+  g.textAlign = 'left'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = '#ffe2a8'; g.fillText('Options', x + 38, y + 22);
+  g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('stocks, stage', x + 108, y + 22);
+}
+/* the Options panel: Stocks and Stage, each with arrows, and Done */
+function drawOptions() {
+  if (!OPT_UI.open) return; const L = optLayout(), [px, py, pw, ph] = L.P;
+  g.fillStyle = 'rgba(6,5,12,.62)'; g.fillRect(0, 0, W, H);
+  g.save(); g.shadowColor = 'rgba(0,0,0,.6)'; g.shadowBlur = 30; g.fillStyle = 'rgba(22,18,38,.97)'; rr(px, py, pw, ph, 18); g.fill(); g.restore();
+  g.strokeStyle = 'rgba(255,209,102,.45)'; g.lineWidth = 2; rr(px, py, pw, ph, 18); g.stroke();
+  g.textAlign = 'center'; g.font = '900 30px system-ui, sans-serif'; spaced(6); g.fillStyle = '#ffd98a'; g.fillText('OPTIONS', W / 2 + 3, py + 56); spaced(0);
+  const vals = [[OPT.stocks + (OPT.stocks === 1 ? ' stock' : ' stocks'), 'per player, 1 to 99', OPT.stocks > 1, OPT.stocks < 99], [STAGES[OPT.stage].name, STAGES.length > 1 ? (OPT.stage + 1) + ' of ' + STAGES.length : 'the only stage, for now', STAGES.length > 1, STAGES.length > 1]];
+  L.rows.forEach((r, k) => { const [bx, by, bw, bh] = r.box, sel = OPT_UI.row === k, [val, sub, canL, canR] = vals[k];
+    g.fillStyle = sel ? 'rgba(255,209,102,.13)' : 'rgba(255,255,255,.04)'; rr(bx, by, bw, bh, 12); g.fill(); if (sel) { g.strokeStyle = '#ffd166'; g.lineWidth = 2; rr(bx, by, bw, bh, 12); g.stroke(); }
+    g.textAlign = 'left'; g.font = 'bold 20px system-ui, sans-serif'; g.fillStyle = sel ? '#fff' : '#d9d3ee'; g.fillText(k ? 'Stage' : 'Stocks', bx + 24, by + 42);
+    for (const [b, d, on] of [[r.l, -1, canL], [r.r, 1, canR]]) { const [ax, ay, aw, ah] = b, mx = ax + aw / 2, my = ay + ah / 2;
+      g.fillStyle = on ? (sel ? '#ffd166' : 'rgba(255,209,102,.55)') : 'rgba(255,255,255,.12)'; g.beginPath(); g.moveTo(mx + d * 9, my); g.lineTo(mx - d * 7, my - 11); g.lineTo(mx - d * 7, my + 11); g.closePath(); g.fill(); }
+    const vx = (r.l[0] + r.l[2] + r.r[0]) / 2; g.textAlign = 'center'; g.font = 'bold 22px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(val, vx, by + 36);
+    g.font = '12px system-ui, sans-serif'; g.fillStyle = '#9d96b8'; g.fillText(sub, vx, by + 56); });
+  { const [dx, dy, dw, dh] = L.done, sel = OPT_UI.row === 2; g.fillStyle = sel ? '#ffd166' : 'rgba(255,209,102,.18)'; rr(dx, dy, dw, dh, 23); g.fill();
+    g.textAlign = 'center'; g.font = 'bold 18px system-ui, sans-serif'; g.fillStyle = sel ? '#2a1208' : '#ffe2a8'; g.fillText('Done', dx + dw / 2, dy + 30); }
+  g.font = '12px system-ui, sans-serif'; g.fillStyle = '#9d96b8'; g.fillText('Stick or arrows: up / down picks, left / right changes   ·   A: change or Done   ·   B or Start: close', W / 2, py + ph - 22);
 }
 /* Training: the true-combo counter at the top right, one panel per player who is landing hits. */
 function drawCombo() {
@@ -255,7 +365,9 @@ function drawCombo() {
 }
 function drawFowlWheel() {
   if (mode !== 'play' && mode !== 'countdown') return;
-  for (const f of F) { if (!f.selOpen || !f.def.fowl) continue; const cx = SX(f.x), cy = SY(f.y + 12), R = 92, r0 = 34;
+  for (const f of F) { if (!f.selOpen || !f.def.fowl || f.state !== 'attack' || !f.move || !f.move.sel) continue;   /* only while the selector itself is running */ const R = 92, r0 = 34;
+    /* above the slingshot rather than over it, so the fighter stays in view, and kept on screen near the edges */
+    const cx = clamp(SX(f.x), R + 8, W - R - 8), cy = clamp(SY(f.y + f.st.h) - R - 10, R + 8, H - R - 8);
     g.save(); g.globalAlpha = 0.95; for (let k = 0; k < 5; k++) { const a0 = -Math.PI / 2 + (k - 0.5) * Math.PI * 2 / 5 + 0.04, a1 = a0 + Math.PI * 2 / 5 - 0.08, fm = f.def.forms[k], on = k === f.selPick;
       g.beginPath(); g.arc(cx, cy, R, a0, a1); g.arc(cx, cy, r0, a1, a0, true); g.closePath(); g.fillStyle = on ? fm.col[0] : 'rgba(18,14,30,.82)'; g.fill(); g.strokeStyle = on ? '#fff' : fm.col[0]; g.lineWidth = on ? 3 : 1.5; g.stroke();
       const am = (a0 + a1) / 2, tx = cx + Math.cos(am) * (R + r0) / 2, ty = cy + Math.sin(am) * (R + r0) / 2; g.textAlign = 'center'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(fm.label || fm.name, tx, ty);

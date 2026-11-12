@@ -5,9 +5,12 @@
   "perDayMax": 150,
   "maxModelAttemptsPerCharacter": 3,
   "keepBalanceAbove": 1000,
-  "note": "tools/meshy.js refuses any task that would break one of these. ceiling = total credits for this phase; perTaskMax = most a single task may cost; perDayMax = most in one calendar day; maxModelAttemptsPerCharacter = 3D generations per character before asking; keepBalanceAbove = never let the account balance fall below this. perDayOverride = a higher daily limit for one named date only, set when the owner asks. 2026-11-10: the owner allowed 150 more credits that day for the Furious Fowls fighter (day limit 300).",
+  "note": "tools/meshy.js refuses any task that would break one of these. ceiling = total credits for this phase; perTaskMax = most a single task may cost; perDayMax = most in one calendar day; maxModelAttemptsPerCharacter = 3D generations per character before asking; keepBalanceAbove = never let the account balance fall below this. perDayOverride = a higher daily limit for one named date only, set when the owner asks. 2026-11-10: the owner allowed 150 more credits that day for the Furious Fowls fighter (day limit 300). Later on 2026-11-10 the owner gave a 40-credit spend for Chomp Chomp's model and animation (day limit 338 for that date only). The same day, in another session, the owner allowed 30 for the Brand model (\"yeah spend the 30 credits\"); the two sessions did not see each other's spend, so the day's real total is 362 (298 + 30 Brand + 34 Chomp Chomp) and this limit is left at 338. 2026-11-11: the owner gave 90 credits for the Joey fighter and said to raise the limit by 90 for that day only. The phase was already 14 over its ceiling (464 of 450, from the two sessions on 2026-11-10), so ceilingOverride lets the phase reach 554 (464 + 90) on 2026-11-11 only; the day limit of 150 already covers 90.",
   "perDayOverride": {
     "2026-11-09": 240,
-    "2026-11-10": 300
+    "2026-11-10": 338
+  },
+  "ceilingOverride": {
+    "2026-11-11": 554
   }
 }

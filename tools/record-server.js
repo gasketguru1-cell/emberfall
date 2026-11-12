@@ -17,6 +17,14 @@ http.createServer((req, res) => {
       const od = path.join(outRoot, safe(u.searchParams.get('dir'))); fs.mkdirSync(od, { recursive: true }); const out = path.join(od, clip + '.webm');
       fs.writeFileSync(out, raw); res.writeHead(200, cors); return res.end('wrote ' + out + ' (' + raw.length + ' bytes)');
     }
+    if (u.pathname === '/afile') {   /* an animation-overhaul clip: playtest-results/animation-overhaul/<dir>/<clip>.webm */
+      const od = path.join(root, 'playtest-results', 'animation-overhaul', safe(u.searchParams.get('dir'))); fs.mkdirSync(od, { recursive: true }); const out = path.join(od, clip + '.webm');
+      fs.writeFileSync(out, raw); res.writeHead(200, cors); return res.end('wrote ' + out + ' (' + raw.length + ' bytes)');
+    }
+    if (u.pathname === '/png') {   /* a still from the running game: playtest-results/<dir>/<clip>.png */
+      const od = path.join(root, 'playtest-results', safe(u.searchParams.get('dir'))); fs.mkdirSync(od, { recursive: true }); const out = path.join(od, clip + '.png');
+      fs.writeFileSync(out, Buffer.from(body.slice(body.indexOf(',') + 1), 'base64')); res.writeHead(200, cors); return res.end('wrote ' + out);
+    }
     if (u.pathname === '/frame') {
       const dir = path.join(frames, clip); fs.mkdirSync(dir, { recursive: true });
       const n = String(+u.searchParams.get('i')).padStart(5, '0'), b64 = body.slice(body.indexOf(',') + 1);

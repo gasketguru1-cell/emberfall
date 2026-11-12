@@ -1,0 +1,116 @@
+{
+ "Idle": {
+  "seconds": 2.8
+ },
+ "Walk": {
+  "seconds": 1
+ },
+ "Run": {
+  "seconds": 0.7
+ },
+ "Crouch": {
+  "seconds": 0.2
+ },
+ "Rise": {
+  "seconds": 0.4
+ },
+ "Fall": {
+  "seconds": 0.5
+ },
+ "Land": {
+  "seconds": 0.4
+ },
+ "Shield": {
+  "seconds": 0.15
+ },
+ "Hit": {
+  "seconds": 0.6
+ },
+ "Tumble": {
+  "seconds": 0.6
+ },
+ "Down": {
+  "seconds": 0.3
+ },
+ "Dodge": {
+  "seconds": 0.4
+ },
+ "Ledge": {
+  "seconds": 1.2
+ },
+ "Hold": {
+  "seconds": 0.6
+ },
+ "Held": {
+  "seconds": 0.5
+ },
+ "Jab": {
+  "seconds": 0.5
+ },
+ "Drive": {
+  "seconds": 0.9
+ },
+ "Reach": {
+  "seconds": 0.8
+ },
+ "Cut2": {
+  "seconds": 0.317
+ },
+ "Cut3": {
+  "seconds": 0.433
+ },
+ "Ember": {
+  "seconds": 0.4
+ },
+ "Brim": {
+  "seconds": 0.417
+ },
+ "Low": {
+  "seconds": 0.383
+ },
+ "Cleave": {
+  "seconds": 0.8
+ },
+ "Lift": {
+  "seconds": 0.767
+ },
+ "Sweep": {
+  "seconds": 0.7
+ },
+ "FloorSweep": {
+  "seconds": 0.783
+ },
+ "Wheel": {
+  "seconds": 0.4
+ },
+ "Ward": {
+  "seconds": 0.55
+ },
+ "About": {
+  "seconds": 0.633
+ },
+ "Arc": {
+  "seconds": 0.45
+ },
+ "Drop": {
+  "seconds": 0.683
+ },
+ "LipCut": {
+  "seconds": 0.767
+ },
+ "Thrust": {
+  "seconds": 0.633
+ },
+ "ThrustLong": {
+  "seconds": 0.867
+ },
+ "Bash": {
+  "seconds": 0.633
+ },
+ "RiseCut": {
+  "seconds": 0.417
+ },
+ "Step": {
+  "seconds": 0.65
+ }
+}

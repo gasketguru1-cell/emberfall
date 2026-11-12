@@ -12,7 +12,7 @@ let seed = seed0; Math.random = () => { seed = (seed * 1664525 + 1013904223) >>>
 for (const f of ['hitboxes.js', 'sim.js', 'anim.js', 'render2d.js', 'hud.js']) vm.runInThisContext(fs.readFileSync(path.join(root, f), 'utf8'), { filename: f });
 vm.runInThisContext(`
 (function () {
-  const KNOWN = new Set(['idle', 'dash', 'run', 'brake', 'jsq', 'wd', 'air', 'helpless', 'airdodge', 'land', 'attack', 'shield', 'shieldstun', 'shieldoff', 'spot', 'roll', 'rebound', 'hurt', 'down', 'held', 'broken', 'hold', 'throw', 'ledge', 'respawn', 'dead']);
+  const KNOWN = new Set(['grow', 'carry', 'buried', 'exhaust', 'idle', 'dash', 'run', 'brake', 'jsq', 'wd', 'air', 'helpless', 'airdodge', 'land', 'attack', 'shield', 'shieldstun', 'shieldoff', 'spot', 'roll', 'rebound', 'hurt', 'down', 'held', 'broken', 'hold', 'throw', 'ledge', 'respawn', 'dead']);
   const rnd = Math.random, pick = a => a[rnd() * a.length | 0];
   /* One random "hand": every control keeps a value for a random while, then picks another. Styles differ per match. */
   function hand(style) {
@@ -44,7 +44,7 @@ vm.runInThisContext(`
           if (!KNOWN.has(f.state)) note(m, 'unknown state ' + f.state); seen.add(f.state);
           if (f.grounded && !f.plat) note(m, f.form.name + ' grounded without a platform in ' + f.state);
           if (f.state === 'attack') { if (!f.move) note(m, f.form.name + ' attacking with no move'); else moves.add(f.form.name + ':' + f.mname); }
-          if (f.state === 'held') { const o = F[1 - k]; if (!(o.victim === f && (o.state === 'hold' || o.state === 'throw'))) note(m, f.form.name + ' is held by nobody (other is ' + o.state + ')'); }
+          if (f.state === 'held') { const o = F[1 - k]; if (!(o.victim === f && (o.state === 'hold' || o.state === 'throw' || o.state === 'carry'))) note(m, f.form.name + ' is held by nobody (other is ' + o.state + ')'); }
           if (f.state === 'hold' && !f.victim && f.sf > 1) note(m, f.form.name + ' holding nobody');
           if (f.stocks > stocks[k]) note(m, f.form.name + ' gained a stock'); if (f.stocks < stocks[k]) kos++; stocks[k] = f.stocks;
           if (f.pct < 0 || f.shieldHp > SHIELD.hp + 0.01) note(m, f.form.name + ' pct ' + f.pct + ' shield ' + f.shieldHp);

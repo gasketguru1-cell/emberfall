@@ -100,5 +100,65 @@
  },
  "Vise": {
   "seconds": 1.133
+ },
+ "IdleFiddle": {
+  "seconds": 3.033
+ },
+ "Respawn": {
+  "seconds": 2.033
+ },
+ "AirJump": {
+  "seconds": 0.533
+ },
+ "FastFall": {
+  "seconds": 0.433
+ },
+ "Helpless": {
+  "seconds": 0.633
+ },
+ "LandHard": {
+  "seconds": 0.5
+ },
+ "ShieldHit": {
+  "seconds": 0.333
+ },
+ "HitHeavy": {
+  "seconds": 0.833
+ },
+ "LaunchUp": {
+  "seconds": 0.633
+ },
+ "Spike": {
+  "seconds": 0.633
+ },
+ "Launch": {
+  "seconds": 0.533
+ },
+ "AirDodge": {
+  "seconds": 0.533
+ },
+ "Roll": {
+  "seconds": 0.533
+ },
+ "Pummel": {
+  "seconds": 0.433
+ },
+ "ThrowF": {
+  "seconds": 0.767
+ },
+ "ThrowB": {
+  "seconds": 0.833
+ },
+ "ThrowU": {
+  "seconds": 0.833
+ },
+ "ThrowD": {
+  "seconds": 0.767
+ },
+ "Jab2": {
+  "seconds": 0.533
+ },
+ "GetupSwing": {
+  "seconds": 1.033
  }
 }

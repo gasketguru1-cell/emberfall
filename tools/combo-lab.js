@@ -23,7 +23,7 @@
   A.dash = { ground: 1, min: 8, inp(i, k, f, o) { if (k < 8) i.lx = toward(f, o); } };
   for (const t of ['f', 'b', 'u', 'd']) A['grab_' + t] = { ground: 1, max: 80, inp(i, k, f, o) { if (k === 0) f.face = toward(f, o); if (press(k, 0)) i.grb = true; if (f.state === 'hold' && f.sf > 2) { if (t === 'f') i.lx = f.face; else if (t === 'b') i.lx = -f.face; else if (t === 'u') i.ly = 1; else i.ly = -1; } } };
   A.bag_it = { min: 3, max: 80, inp(i, k, f, o) { if (press(k, 0)) { i.lx = toward(f, o); i.spc = true; } } };
-  const aerial = (stick, back) => (i, f, o) => { const d = toward(f, o); if (stick === 'f') i.lx = f.face; else if (stick === 'b') i.lx = -f.face; else if (stick === 'u') i.ly = 1; else if (stick === 'd') i.ly = -1; i.atk = true; };
+  const aerial = (stick, back) => (i, f, o) => { const d = toward(f, o); if (stick === 'n') { i.lx = 0; i.ly = 0; } else if (stick === 'f') i.lx = f.face; else if (stick === 'b') i.lx = -f.face; else if (stick === 'u') i.ly = 1; else if (stick === 'd') i.ly = -1; i.atk = true; };
   for (const [nm, st] of [['nair', 'n'], ['fair', 'f'], ['bair', 'b'], ['uair', 'u'], ['dair', 'd']]) {
     A['sh_' + nm] = { min: 7, max: 60, inp(i, k, f, o) { if (k === 0) f.face = st === 'b' ? -toward(f, o) : toward(f, o); if (press(k, 0)) i.jmp = true; if (k > 1) drift(i, f, o); if (press(k, 4)) aerial(st)(i, f, o); } };
     A['fh_' + nm] = { min: 12, max: 70, inp(i, k, f, o) { if (k === 0) f.face = st === 'b' ? -toward(f, o) : toward(f, o); if (k < 12) i.jmp = true; if (k > 1) drift(i, f, o); if (press(k, 9)) aerial(st)(i, f, o); } };
@@ -31,7 +31,7 @@
     A['dj_' + nm] = { air: 1, min: 6, max: 60, inp(i, k, f, o) { drift(i, f, o); if (press(k, 0)) i.jmp = true; if (press(k, 3)) aerial(st)(i, f, o); } };
     A['ff_' + nm] = { air: 1, max: 60, inp(i, k, f, o) { drift(i, f, o); if (press(k, 0)) aerial(st)(i, f, o); if (k > 3 && f.vy <= 0 && k < 8) i.ly = k % 2 ? -1 : 0; } };
   }
-  A.sh_double_nair = { min: 22, max: 60, inp(i, k, f, o) { if (press(k, 0)) i.jmp = true; if (k > 1) drift(i, f, o); if (press(k, 4) || press(k, 19)) i.atk = true; } };
+  A.sh_double_nair = { min: 22, max: 60, inp(i, k, f, o) { if (press(k, 0)) i.jmp = true; if (k > 1) drift(i, f, o); if (press(k, 4) || press(k, 19)) { i.atk = true; i.lx = 0; i.ly = 0; } } };   /* the stick centred on the press, or it is a forward air */
   A.wait4 = { min: 4, max: 4, inp() {} }; A.wait10 = { min: 10, max: 10, inp() {} };
   A.jump = { min: 6, max: 6, inp(i, k, f, o) { if (k < 4) i.jmp = true; drift(i, f, o); } };
   A.ff = { air: 1, min: 6, max: 40, inp(i, k, f, o) { i.ly = k % 3 === 0 ? -1 : 0; drift(i, f, o); }, done: f => f.grounded };

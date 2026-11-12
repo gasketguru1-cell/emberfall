@@ -1,0 +1,13 @@
+pass  Potato Sack v Furious Fowls       LAN               checks agreed 120  rollbacks 0 (deepest 0, 0.00 ms each), waits 0
+pass  Potato Sack v Furious Fowls       60 ms, 2% loss    checks agreed 120  rollbacks 111 (deepest 2, 0.25 ms each), waits 0
+pass  Potato Sack v Furious Fowls       120 ms, 5% loss   checks agreed 120  rollbacks 149, slowed 4 (deepest 5, 0.47 ms each), waits 0
+pass  Potato Sack v Furious Fowls       60 ms, clock +5%  checks agreed 120  rollbacks 10, slowed 88 (deepest 1, 0.50 ms each), waits 0
+pass  Furious Fowls v Furious Fowls     60 ms, 2% loss    checks agreed 120  rollbacks 115 (deepest 2, 0.37 ms each), waits 0
+pass  Potato Sack v Potato Sack         60 ms, 2% loss    checks agreed 120  rollbacks 106 (deepest 2, 0.20 ms each), waits 0
+pass  Flint v Wren                      60 ms, 2% loss    checks agreed 120  rollbacks 110 (deepest 2, 0.22 ms each), waits 0
+pass  Wren v Potato Sack                60 ms, 2% loss    checks agreed 120  rollbacks 127 (deepest 2, 0.23 ms each), waits 0
+pass  Potato Sack v Sprocket            60 ms, 2% loss    checks agreed 120  rollbacks 113 (deepest 2, 0.19 ms each), waits 0
+pass  Sprocket v Scuttle                60 ms, 2% loss    checks agreed 120  rollbacks 121 (deepest 2, 0.21 ms each), waits 0
+pass  Scuttle v Furious Fowls           60 ms, 2% loss    checks agreed 120  rollbacks 117 (deepest 2, 0.29 ms each), waits 0
+pass  Furious Fowls v Flint             60 ms, 2% loss    checks agreed 120  rollbacks 110 (deepest 2, 0.23 ms each), waits 0
+all 12 netplay runs match the offline game exactly

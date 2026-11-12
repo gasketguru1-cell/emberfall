@@ -122,11 +122,25 @@ vm.runInThisContext(`
     check('clank: equal smashes cancel, nobody is hurt', both && a.pct === 0 && b.pct === 0, 'both recoiled: ' + both + ', damage ' + a.pct + ' / ' + b.pct);
   }
 
+  /* ---- Hitstun: Ultimate's (0.4 x knockback, one frame less, at least 4) times the combo ease ---- */
+  {
+    const [a, v] = setup(FL, FL, -40, 40); const hs = kb => { airborne(v, 40, 40); v.launch(kb, Math.PI / 4, 1); return v.hitstun; };
+    const h100 = hs(100), h10 = hs(10), ult100 = Math.floor(100 * 0.4) - 1;
+    check('hitstun: Ultimate’s rule, made longer for easier combos', COMBO_EASE > 1 && h100 === Math.floor(100 * 0.4 * COMBO_EASE) - 1 && h100 > ult100 && h10 === 4, 'at 100 knockback ' + h100 + ' frames (Ultimate ' + ult100 + '); at 10 knockback ' + h10 + ' (at least 4)');
+  }
+
   /* ---- Ledge protection: more after a long time in the air, less when damaged ---- */
   {
     const grab = (airT, pct) => { const [f] = setup(FL, FL, 0, -40); airborne(f, EDGE + f.st.w / 2 + 3, -6); f.vy = -0.5; f.airT = airT; f.pct = pct; let inv = null; let open = 0; run(12, () => { if (f.state === 'ledge') { if (f.invuln === 0 && f.sf <= 2) open++; if (f.sf === 2 && inv === null) { inv = f.invuln + 2; return false; } } }); grab.open = open; return inv; };
     const short = grab(20, 0), long = grab(300, 0), worn = grab(20, 120);
     check('ledge: protection grows with air time, shrinks with damage', short !== null && long > short + 15 && worn < short - 10 && worn >= 7, 'frames protected: short hop ' + short + ', long fall ' + long + ', at 120% ' + worn);
+    /* Ultimate's numbers (SmashWiki "Edge"): 60 x a/300 + 44 - 44 x p/120, between 23 and 123 */
+    const mid = grab(150, 60);
+    check('ledge: protection follows the Ultimate formula', short === 48 && long === 104 && worn === 23 && mid === 52, 'short hop ' + short + ' (48), long fall ' + long + ' (104), at 120% ' + worn + ' (23), 150 frames at 60% ' + mid + ' (52)');
+    /* regrabs before landing or being hit: 0.8, then 0.5, then nothing */
+    const [f] = setup(FL, FL, 0, -40); const got = [];
+    for (let k = 0; k < 4; k++) { f.invuln = 0; airborne(f, EDGE + f.st.w / 2 + 3, -6); f.vy = -0.5; f.airT = 150; f.ledgeCd = 0; let inv = null; run(12, () => { if (f.state === 'ledge' && f.sf === 2) { inv = f.invuln + 2; return false; } }); got.push(inv); f.set('air'); }
+    check('ledge: regrabs earn 0.8, then 0.5, then no protection', got[0] === 74 && got[1] === 59 && got[2] === 37 && got[3] === 2, 'grabs in one airtime: ' + got.join(', ') + ' (74, 59, 37, none)');
   }
   /* ---- Ledge get-ups are slower above 100% ---- */
   {
@@ -221,6 +235,10 @@ vm.runInThisContext(`
     const floor = (shield, lx) => { const [a, v] = setup(FL, FL, -60, 0); airborne(v, 0, 22); v.launch(120, -Math.PI / 2, 1); const seen = [];
       SCRIPT[1] = (i, tt) => { if (shield && tt < 2) i.shd = true; i.lx = lx; }; run(30, () => { if (seen[seen.length - 1] !== v.state) seen.push(v.state); }); return seen.join('>'); };
     const none = floor(false, 0), tech = floor(true, 0), roll = floor(true, 1);
+    const late = (n) => { const [a, v] = setup(FL, FL, -60, 0); airborne(v, 0, 80); v.launch(120, -Math.PI / 2, 1); let land = -1;
+      SCRIPT[1] = (i, tt) => { if (tt === n) i.shd = true; }; run(30, () => { if (land < 0 && v.state !== 'hurt') land = t; }); return { st: v.state, land }; };
+    const probe = late(-1); let teched = 0; for (let n = probe.land - 18; n <= probe.land + 2; n++) if (late(n).st !== 'down') teched++;
+    check('tech: the window is 11 frames, as in Ultimate', teched === 11, teched + ' press frames tech (11)');
     check('tech: shield before hitting the floor', /hurt>down/.test(none) && /hurt>land/.test(tech) && /hurt>roll/.test(roll), 'nothing: ' + none + ' | shield: ' + tech + ' | shield + direction: ' + roll);
   }
   {
@@ -246,6 +264,41 @@ vm.runInThisContext(`
     check('right stick down while falling: a fast-falling down air', dn.ff && dn.mv === 'dair' && dn.glint === 4, dn.mv + ', fast fall ' + dn.ff + ', glint sparks ' + dn.glint);
     check('right stick down in the middle of an aerial: fast fall, same aerial', mid.ff && mid.mv === 'nair', mid.mv + ', fast fall ' + mid.ff);
     check('right stick sideways: no fast fall', !side.ff && side.mv === 'fair', side.mv + ', fast fall ' + side.ff);
+    /* B-reverse: special pressed while drifting right, stick pulled left a frame or two later: turned round, drift reversed. Too late, or an up special: nothing. */
+    const brev = (late, up, wave) => { const [f] = setup(FL, FL, 0, 60); f.ctl.cFall = true; airborne(f, 0, 40); f.face = 1; f.vx = 1; f.vy = 0.5; let face0 = 0, vx0 = 0, puff = 0;
+      SCRIPT[0] = (i, tt) => { if (tt === 1) { i.spc = true; if (up) i.ly = 1; if (wave) i.lx = -1; } if (tt >= 1 + late && tt < 1 + late + 3) { i.lx = wave ? 1 : -1; i.ly = 0; } };
+      run(late + 6, (tt) => { puff = Math.max(puff, PART.filter(p => p.col === '#a8e0ff').length); }); return { face: f.face, vx: +f.vx.toFixed(2), mv: f.mname, puff }; };
+    const rv = brev(2), late = brev(9), up = brev(2, true), wave = brev(2, false, true);
+    check('B-reverse: stick back just after special turns round and reverses the drift', rv.face === -1 && rv.vx < 0 && rv.mv === 'nspec' && rv.puff === 6, 'face ' + rv.face + ', vx ' + rv.vx + ', ' + rv.mv + ', swirl ' + rv.puff);
+    check('B-reverse after a turnaround special: a wavebounce (facing forward, drifting back)', wave.face === 1 && wave.vx < 0 && wave.puff === 6, 'face ' + wave.face + ', vx ' + wave.vx);
+    /* Reverse aerial rush: run right, pull back (a turnaround skid, or during the jump's start-up), jump: facing left but still going right, so
+       forward on the stick (right) with attack is a back air that carries the run's speed. */
+    const rarT = (how) => { const [f] = setup(FL, FL, -60, 60); f.ctl.cFall = true; let lift = null, bair = null, st0 = '';
+      SCRIPT[0] = (i, tt) => { if (tt < 2) return; if (tt < 28) i.lx = 1;
+        else if (how === 'skid') { if (tt < 30) i.lx = -1; else if (tt < 32) { i.lx = -1; i.jmp = true; } }
+        else if (tt < 30) { i.lx = tt === 28 ? 1 : -1; i.jmp = true; }
+        if (tt >= 40 && tt < 44) { i.lx = 1; if (tt === 40) i.atk = true; } };
+      run(56, () => { if (t === 27) st0 = f.state; if (!lift && !f.grounded) lift = { face: f.face, vx: +f.vx.toFixed(2) }; if (f.state === 'attack' && f.mname === 'bair' && !bair) bair = 1; if (bair && f.state === 'attack' && f.mname === 'bair') bair = { vx: +f.vx.toFixed(2) }; }); return { st0, lift, bair, top: f.st.jumpXMax }; };
+    for (const how of ['skid', 'jumpsquat']) { const r = rarT(how);
+      check('reverse aerial rush (' + how + '): jump facing back, run speed kept, back air keeps it', r.st0 === 'run' && r.lift && r.lift.face === -1 && r.lift.vx >= r.top * 0.85 && r.bair && r.bair.vx > r.top * 0.7, r.st0 + ', lift-off ' + JSON.stringify(r.lift) + ', back air ' + JSON.stringify(r.bair) + ' (jump speed limit ' + r.top + ')'); }
+    /* Getting hit always gives the up special back: Potato Sack's once-per-trip blast, used and then hit, is ready again; not hit, it stays spent. */
+    const upAgain = (hit) => { const [f] = setup(SACK, FL, 0, 80); airborne(f, 0, 70); let first = '', second = '';
+      SCRIPT[0] = (i, tt) => { if (tt === 1 || tt === 90) { i.spc = true; i.ly = 1; } };
+      run(89, () => { if (!first && f.state === 'attack') first = f.mname; }); f.move = null; airborne(f, 0, 70); if (hit) f.launch(30, 1.2, 1);
+      run(40, () => { if (f.state === 'hurt') return; f.vy = 0; f.y = 70; }); SCRIPT[0] = (i) => { i.spc = true; i.ly = 1; }; run(3, () => { if (!second && f.state === 'attack') second = f.mname; });
+      return { first, second, used: f.blastUsed }; };
+    const hitUp = upAgain(true), noHit = upAgain(false);
+    check('hit after an up special: the up special is back (the Potato Sack blast)', hitUp.first === 'uspec' && hitUp.second === 'uspec', 'first ' + hitUp.first + ', after the hit ' + (hitUp.second || 'nothing'));
+    check('no hit: a once-per-trip up special stays spent', noHit.first === 'uspec' && noHit.second !== 'uspec', 'first ' + noHit.first + ', again ' + (noHit.second || 'nothing'));
+    /* The right stick forward while dashing or running: a dash attack. Backward: still a turnaround forward tilt. Standing: a forward tilt. */
+    const cDash = (frames, dir) => { const [f] = setup(FL, FL, -60, 60); f.ctl.cFall = true; let mv = '';
+      SCRIPT[0] = (i, tt) => { if (tt < 2) return; if (tt < 2 + frames) i.lx = 1; else if (tt < 2 + frames + 2) { i.lx = frames ? 1 : 0; i.cx = dir; } };
+      run(frames + 10, () => { if (!mv && f.state === 'attack') mv = f.mname; }); return mv; };
+    const inDash = cDash(4, 1), inRun = cDash(24, 1), backRun = cDash(24, -1), stand = cDash(0, 1);
+    check('right stick forward in a dash or a run: a dash attack', inDash === 'dash' && inRun === 'dash', 'dash ' + inDash + ', run ' + inRun);
+    check('right stick back in a run, or standing: a forward tilt', backRun === 'ftilt' && stand === 'ftilt', 'back ' + backRun + ', standing ' + stand);
+    check('B-reverse: too late does nothing', late.face === 1, 'face ' + late.face);
+    check('B-reverse: not for up specials', up.face === 1 || up.mv !== 'uspec', up.mv + ', face ' + up.face);
     check('jump: tap for a short hop, hold for a full one', short.top > 8 && short.top < full.top * 0.6, 'heights ' + short.top + ' and ' + full.top);
     check('jump + attack together: a short-hop aerial', macro.sh === 'nair (short-hop, weaker) in the air', String(macro.sh));
   }
@@ -476,9 +529,34 @@ vm.runInThisContext(`
     /* two neutral airs in one short hop */
     { const [s] = setup(SACK, FL, -40, 60); let nairs = 0, last = ''; SCRIPT[0] = (i, tt) => { if (tt === 2 || tt === 3) i.jmp = true; if (tt === 6 || tt === 7 || tt === 22 || tt === 23) i.atk = true; }; run(60, () => { const tag = s.state === 'attack' ? s.mname + s.mf : ''; if (s.state === 'attack' && s.mname === 'nair' && s.mf === 1) nairs++; });
       check('Potato Sack: two neutral airs fit in one short hop', nairs === 2, nairs + ' neutral airs before landing'); }
-    /* up special bursts on frame 5 */
-    { const [s] = setup(SACK, FL, 0, 60); let at = -1; SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = 1; i.spc = true; } }; run(20, () => { if (at < 0 && PROJ.some(p => p.kind === 'blast')) at = s.mf; });
-      check('Potato Sack: Hot Potato bursts on frame 5', at === 5, 'burst on frame ' + at); }
+    /* neutral air: three carrying hits and a finisher, the opponent taken along with him rising or falling */
+    { const drag = (pct, vy) => { const [s, o] = setup(SACK, FL, 0, 3); airborne(s, 0, 40); airborne(o, 3, 38); o.ctl = new Ctl('none'); o.pct = pct; s.startMove('nair'); s.vy = vy;
+        let hits = 0, was = o.pct, gapMax = 0, sy0 = s.y, oy0 = o.y, oyAt9 = 0, syAt9 = 0;
+        run(90, () => { if (o.pct > was + 0.3) { hits++; was = o.pct; } if (s.state === 'attack' && s.mname === 'nair' && s.mf >= 4 && s.mf <= 9 && o.state === 'hurt') gapMax = Math.max(gapMax, Math.hypot(s.x - o.x, s.y - o.y)); if (s.mf === 9 && !syAt9) { syAt9 = s.y; oyAt9 = o.y; } if (s.state === 'attack') s.vy = vy; });
+        return { hits, dmg: o.pct - pct, gapMax, sMove: syAt9 - sy0, oMove: oyAt9 - oy0, away: Math.hypot(o.x - s.x, o.y - s.y), pct: o.pct }; };
+      const rise = drag(30, 0.9), fall = drag(30, -1.6), late = drag(130, -1.6);
+      check('Potato Sack: neutral air hits four times (three carrying hits and a finisher)', rise.hits === 4 && fall.hits === 4 && rise.dmg > 8 && rise.dmg < 10.5, 'rising: ' + rise.hits + ' hits, ' + rise.dmg.toFixed(1) + '%; falling: ' + fall.hits + ' hits');
+      check('Potato Sack: neutral air drags the opponent with him, up or down', rise.gapMax < 9 && fall.gapMax < 9 && Math.sign(rise.oMove) === Math.sign(rise.sMove) && Math.sign(fall.oMove) === Math.sign(fall.sMove) && Math.abs(fall.oMove) > Math.abs(fall.sMove) * 0.5,
+        'rising: he moved ' + rise.sMove.toFixed(1) + ', they moved ' + rise.oMove.toFixed(1) + ', never more than ' + rise.gapMax.toFixed(1) + ' apart; falling: ' + fall.sMove.toFixed(1) + ' / ' + fall.oMove.toFixed(1) + ', at most ' + fall.gapMax.toFixed(1) + ' apart');
+      /* toned down: only the first neutral air of an airtime drags */
+      { const [s2, o2] = setup(SACK, FL, 0, 3); airborne(s2, 0, 40); airborne(o2, 3, 38); o2.ctl = new Ctl('none'); o2.x = 200; s2.startMove('nair'); run(3); const first = s2.nairDrag; run(20); airborne(s2, 0, 40); s2.startMove('nair'); run(3); const second = s2.nairDrag; s2.touchDown(MAIN); airborne(s2, 0, 40); s2.startMove('nair'); run(3); const again = s2.nairDrag;
+        check('Potato Sack: only the first neutral air of each airtime drags', first === true && second === false && again === true, 'first: ' + first + ', second in the same air: ' + second + ', after landing: ' + again); }
+      check('Potato Sack: neutral air finisher launches them away', late.away > 25, 'at 130%: ' + late.away.toFixed(1) + ' units apart 90 frames after the start'); }
+    /* up special: a flaming potato thrown up on frame 4 falls back on him and bursts there */
+    { const [s] = setup(SACK, FL, 0, 60); let at = -1, thrown = -1, top = 0, bx = 0, by = 0; SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = 1; i.spc = true; } };
+      run(40, () => { const sp = PROJ.find(p => p.kind === 'hotspud'); if (sp) { if (thrown < 0) thrown = s.mf; top = Math.max(top, sp.y - s.y); } if (at < 0) { const b = PROJ.find(p => p.kind === 'blast'); if (b) { at = s.mf; bx = b.x - s.x; by = b.y - s.y; } } });
+      check('Potato Sack: Hot Potato throws a potato up on frame 4 that falls back on him and bursts there', thrown === 4 && at >= 16 && at <= 24 && top > 15 && Math.abs(bx) < 0.5 && by > 2 && by < 7, 'thrown on frame ' + thrown + ', rose to ' + top.toFixed(1) + ' over his feet, burst on frame ' + at + ' at his middle (' + bx.toFixed(1) + ', ' + by.toFixed(1) + ')'); }
+    /* the potato bursts early on an opponent in its way: both are sent flying, with the same burst */
+    { const [s, o] = setup(SACK, FL, 0, 60); o.ctl = new Ctl('none'); airborne(o, 0, 21); o.vy = 0; let at = -1; const p0 = s.pct;
+      SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = 1; i.spc = true; } }; run(4); airborne(o, 0, 21);
+      run(40, () => { if (o.state !== 'hurt' && at < 0) { o.y = 21; o.vy = 0; } if (at < 0 && PROJ.some(p => p.kind === 'blast')) at = s.mf; });
+      const [s2, o2] = setup(SACK, FL, 0, 5); o2.ctl = new Ctl('none'); SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = 1; i.spc = true; } }; run(60);
+      check('Potato Sack: an opponent in the potato’s way sets it off early, sending both flying with the same burst', at > 4 && at < 12 && o.pct > 10 && o.state === 'hurt' && s.state === 'hurt' && s.pct - p0 === 12 && Math.abs(o.pct - o2.pct) < 0.01,
+        'burst on frame ' + at + '; opponent ' + o.pct.toFixed(1) + '% (a neighbour on the ground takes ' + o2.pct.toFixed(1) + '%), sack ' + s.state + ' +' + (s.pct - p0) + '%'); }
+    /* his body carries the burst from frame 3: a neighbour is hit then, once; he is launched only when the potato lands on him */
+    { const [s, o] = setup(SACK, FL, 0, 5); o.ctl = new Ctl('none'); s.startMove('uspec'); let hitAt = -1, hits = 0, was = o.pct, launchedAt = -1, stateAtHit = '';
+      run(60, () => { if (o.pct > was + 0.01) { hits++; was = o.pct; if (hitAt < 0) { hitAt = s.mf; stateAtHit = s.state; } } if (launchedAt < 0 && s.state === 'hurt') launchedAt = s.mf; });
+      check('Potato Sack: Hot Potato’s body burst hits from frame 3, once, and he flies only when the potato lands', hitAt === 3 && hits === 1 && stateAtHit === 'attack' && launchedAt >= 16, 'hit on frame ' + hitAt + ' (' + hits + ' hit), launched on frame ' + launchedAt); }
     /* tumble with down held goes through a soft platform; without it he lands as before */
     { const thru = down => { const [s] = setup(SACK, FL, 0, 60); airborne(s, -42, 36); SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.ly = -1; i.spc = true; } else if (tt >= 4 && tt < 9) { i.lx = 1; } if (down && tt >= 9) i.ly = -1; }; let onPlat = false; run(60, () => { if (s.plat && s.plat.soft) onPlat = true; }); return onPlat; };
       const held = thru(true), plain = thru(false);
@@ -575,6 +653,13 @@ vm.runInThisContext(`
     { const [f] = setup(FOW, FL, 0, 60); SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) i.spc = true; }; let shots = 0; run(30, () => { shots = Math.max(shots, PROJ.length); }); const tapped = f.form.label;
       const [g] = setup(FOW, FL, 0, 60); let open = false; SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 30) { i.spc = true; if (tt > 12) { i.lx = -0.6; i.ly = -0.8; } } }; run(50, () => { if (g.selOpen) open = true; });
       check('Furious Fowls: neutral special taps to the next bird, or opens a wheel to point at one', tapped === 'Bolt' && open && g.form.label === 'Pip' && shots === 0, 'tap: ' + tapped + '; held and pointed down-left: ' + g.form.label + ' (wheel opened: ' + open + '); shots fired: ' + shots); }
+    /* The wheel: a stick springing back through the opposite slice does not change the pick; pointing does not drift the
+       slingshot in the air; a hit while the wheel is open closes it for good; the swap takes six frames after release. */
+    { const [f] = setup(FOW, FL, 0, 60); SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 30) { i.spc = true; if (tt > 12 && tt < 28) i.lx = 1; if (tt === 28) i.lx = -1; } }; let endAt = 0; run(50, () => { if (!endAt && f.state !== 'attack') endAt = t; });
+      const bounceKept = f.form.label === 'Bolt';
+      const [g] = setup(FOW, FL, 0, 60); airborne(g, 0, 60); SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 30) { i.spc = true; if (tt > 12) i.lx = -1; } }; const x0 = g.x; run(26); const drift = Math.abs(g.x - x0);
+      const [h, o] = setup(FOW, FL, 0, 12); SCRIPT[0] = (i, tt) => { if (tt >= 2) i.spc = true; if (tt > 12) i.ly = -1; }; run(14); const wasOpen = h.selOpen; applyHit(o, h, { d: 8, a: 45, b: 40, k: 60 }, -1, o.x, false, false); run(30); const stuck = h.selOpen;
+      check('Furious Fowls: the bird wheel ignores a stick bouncing back, does not drift, and closes when hit', bounceKept && drift < 0.5 && wasOpen && !stuck && endAt > 0, 'pointed at Bolt then a one-frame bounce the other way: ' + f.form.label + '; drift while pointing in the air: ' + drift.toFixed(2) + '; wheel open before the hit ' + wasOpen + ', after ' + stuck); }
     /* Side B: the living bird, no flight timer, the slingshot left behind */
     { const [f] = setup(FOW, FL, -40, 60); f.pct = 37; SCRIPT[0] = (i, tt) => { if (tap(2)(tt)) { i.lx = 1; i.spc = true; } }; let flew = 0, left = null, endedBy = ''; run(150, () => { if (f.flying) flew++; if (f.sling && !left) left = f.sling.x; if (!endedBy && flew && !f.flying) endedBy = f.grounded ? 'landing' : f.state; });
       check('Furious Fowls: side special fires the bird, which flies until it lands', left !== null && Math.abs(left + 40) < 1 && f.fi === 5 && flew > 25 && endedBy === 'landing' && f.pct === 37, 'slingshot stayed at ' + (left === null ? '-' : left.toFixed(0)) + '; the bird flew ' + flew + ' frames and stopped by ' + endedBy + '; damage still ' + f.pct + '%');
@@ -609,6 +694,11 @@ vm.runInThisContext(`
     { const [f, o] = setup(BIRD(4), FL, 0, 40); o.ctl = new Ctl('none'); SCRIPT[0] = (i, tt) => { if (tap(2)(tt) || tap(40)(tt)) { i.ly = -1; i.spc = true; } }; let nests = 0; run(60, () => { nests = Math.max(nests, PROJ.filter(p => p.kind === 'nest').length); });
       const nest = PROJ.find(p => p.kind === 'nest'); o.x = nest ? nest.x + 6 : 40; SCRIPT[1] = (i) => { i.lx = -0.6; }; let lifted = false; run(60, () => { if (o.vy > 0.5 && o.pct > 0) lifted = true; });
       check('Furious Fowls: Pearl’s Nest Marker plants one nest that lifts whoever walks in', nests === 1 && lifted, nests + ' nest after two presses; the opponent walking in was lifted: ' + lifted); }
+    /* a bird alone has five tiny air jumps that mostly carry it sideways */
+    { const [f] = setup(FOW, FL, 0, 60); bird(f, 5); f.jumps = f.st.jumps; airborne(f, 0, 60); const x0 = f.x; let top = 60, fast = 0, t = 0;
+      SCRIPT[0] = (i, tt) => { i.lx = 1; if (tt % 12 === 2 && tt < 72) i.jmp = true; };
+      run(74, () => { top = Math.max(top, f.y); fast = Math.max(fast, f.vx); });
+      check('Furious Fowls: a bird alone flutters with five tiny hops, mostly sideways', f.def.forms[5].st.jumps === 5 && f.def.forms[0].st.jumps === 1 && f.jumps === 0 && top - 60 < 6 && fast > f.st.airSpeed * 1.3, 'jumps alone ' + f.def.forms[5].st.jumps + ' (slingshot ' + f.def.forms[0].st.jumps + '), left after six presses ' + f.jumps + '; rose at most ' + (top - 60).toFixed(1) + ' above where it started; sideways burst ' + fast.toFixed(2) + ' vs air speed ' + f.st.airSpeed + '; travelled ' + (f.x - x0).toFixed(0)); }
     /* bird-alone specials */
     { const vault = second => { const [f] = setup(FOW, FL, 0, 60); bird(f, 5); airborne(f, 0, 20); let top = 20; SCRIPT[0] = (i, tt) => { if (tap(2)(tt) || (second && tap(24)(tt))) { i.ly = 1; i.spc = true; } }; run(60, () => { top = Math.max(top, f.y); }); return top - 20; };
       const one = vault(false), two = vault(true);
@@ -636,8 +726,8 @@ vm.runInThisContext(`
   /* ---- Training mode: endless stocks, no clock, and a true-combo counter ---- */
   {
     const was = TRAINING; TRAINING = true;
-    const [f, o] = setup(FL, FL, 0, 9); o.ctl = new Ctl('none'); o.pct = 70; const tm = timer;   /* at 70% each jab still holds the target in hitstun for the next */ let most = 0; SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 40) i.atk = true; }; run(70, () => { most = Math.max(most, COMBO[0].hits); });
-    const chain = COMBO[0].last; SCRIPT[0] = (i, tt) => { if (tap(120)(tt)) i.atk = true; }; run(80); const lone = COMBO[0].last;
+    const [f, o] = setup(FL, FL, 0, 9); o.ctl = new Ctl('none'); o.pct = 70; const tm = timer;   /* at 70% each jab still holds the target in hitstun for the next */ let most = 0; SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 22) i.atk = true; }; run(100, () => { most = Math.max(most, COMBO[0].hits); });   /* long enough for the last jab's hitstun to run out */
+    const chain = COMBO[0].last; SCRIPT[0] = (i, tt) => { if (tap(140)(tt)) i.atk = true; }; run(80); const lone = COMBO[0].last;
     check('training: a jab string counts as one true combo, with its damage', chain && chain.hits >= 2 && Math.abs(chain.dmg - (o.pct - 70) + (lone ? lone.dmg : 0)) < 0.01 && most === chain.hits, chain ? chain.hits + ' hits for ' + chain.dmg.toFixed(1) + '%' : 'nothing counted');
     check('training: a hit after the target recovers starts a new combo', lone && lone.hits === 1 && COMBO[0].best.hits === chain.hits, lone ? 'next hit: ' + lone.hits + ' hit, best kept at ' + COMBO[0].best.hits : 'nothing counted');
     airborne(o, 400, 50); run(20); check('training: no clock, and stocks never run out', o.stocks === STOCKS && timer === tm, 'stocks ' + o.stocks + ' after a KO; clock ' + (timer === tm ? 'stopped' : 'running'));

@@ -12,7 +12,7 @@ vm.runInThisContext(`
 (function () {
   let fail = 0; const say = (ok, t) => { console.log((ok ? 'ok   ' : 'FAIL ') + t); if (!ok) fail++; };
   STAGES.forEach((S, k) => {
-    setStage(k, false);
+    OPT.stage = k; useStage(k);
     say(PLATS.length === S.plats.length + 1 && PLATS[0] === MAIN, S.name + ': ' + S.plats.length + ' soft platform(s) over the main floor');
     say(fs.existsSync(path.join(root, S.cfg)) && fs.existsSync(path.join(root, JSON.parse(fs.readFileSync(path.join(root, S.cfg), 'utf8')).file)), S.name + ': stage file and model are on disk');
     say(PLATS.slice(1).every(p => p.x0 < p.x1 && p.x0 >= -EDGE && p.x1 <= EDGE && p.y > 0 && p.y < BLAST.t - 40), S.name + ': platforms sit over the floor');
@@ -25,7 +25,7 @@ vm.runInThisContext(`
     say(!bad && done === ROSTER.length, S.name + ': ' + done + ' of ' + ROSTER.length + ' CPU matches finished, ' + bad + ' bad states');
     say(landed > 0, S.name + ': fighters stood on a soft platform (' + landed + ' frames)');
   });
-  setStage(0, false); mode = 'select'; slots[0] = slots[1] = null;
+  OPT.stage = 0; useStage(0); mode = 'select'; slots[0] = slots[1] = null;
   console.log(fail ? fail + ' FAILED' : 'all stage checks passed'); if (fail) process.exitCode = 1;
 })();
 `, { filename: 'stages-run' });

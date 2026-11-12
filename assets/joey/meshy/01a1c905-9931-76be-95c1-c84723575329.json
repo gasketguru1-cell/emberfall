@@ -1,0 +1,58 @@
+{
+  "character": "joey",
+  "endpoint": "image-to-3d",
+  "params": {
+    "input_task_id": "01a1c904-d98e-7620-a186-9972e1ea977e",
+    "ai_model": "latest",
+    "model_type": "standard",
+    "should_texture": true,
+    "enable_pbr": false,
+    "texture_resolution": "2k",
+    "should_remesh": true,
+    "topology": "triangle",
+    "target_polycount": 40000,
+    "symmetry_mode": "off",
+    "target_formats": [
+      "glb"
+    ]
+  },
+  "estimate": 30,
+  "consumed": 30,
+  "files": [
+    "assets/joey/raw/01a1c905-9931-76be-95c1-c84723575329/model_url.glb",
+    "assets/joey/raw/01a1c905-9931-76be-95c1-c84723575329/model_urls.glb",
+    "assets/joey/raw/01a1c905-9931-76be-95c1-c84723575329/thumbnail_url.png",
+    "assets/joey/raw/01a1c905-9931-76be-95c1-c84723575329/texture_urls.0.base_color.png"
+  ],
+  "task": {
+    "id": "01a1c905-9931-76be-95c1-c84723575329",
+    "type": "image-to-3d",
+    "name": "",
+    "art_style": "",
+    "object_prompt": "",
+    "style_prompt": "",
+    "negative_prompt": "",
+    "texture_prompt": "",
+    "texture_image_url": "",
+    "text_style_prompt": "",
+    "image_style_url": "",
+    "status": "SUCCEEDED",
+    "created_at": 1794373950287,
+    "progress": 100,
+    "started_at": 1794373950298,
+    "finished_at": 1794373990265,
+    "expires_at": 1794633190265,
+    "task_error": null,
+    "model_url": "https://assets.meshy.ai/9b63c3ed-0b38-42c8-922f-bcc56f30de31/tasks/01a1c905-9931-76be-95c1-c84723575329/output/model.glb",
+    "model_urls": {
+      "glb": "https://assets.meshy.ai/9b63c3ed-0b38-42c8-922f-bcc56f30de31/tasks/01a1c905-9931-76be-95c1-c84723575329/output/model.glb"
+    },
+    "thumbnail_url": "https://assets.meshy.ai/9b63c3ed-0b38-42c8-922f-bcc56f30de31/tasks/01a1c905-9931-76be-95c1-c84723575329/output/preview.png",
+    "texture_urls": [
+      {
+        "base_color": "https://assets.meshy.ai/9b63c3ed-0b38-42c8-922f-bcc56f30de31/tasks/01a1c905-9931-76be-95c1-c84723575329/output/texture_0.png"
+      }
+    ],
+    "consumed_credits": 30
+  }
+}

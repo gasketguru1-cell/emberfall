@@ -1,0 +1,5 @@
+{
+ "base": "work/joey-big-rigged.glb",
+ "texture": 2048,
+ "out": "export/cronky-v1.glb"
+}

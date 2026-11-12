@@ -1,0 +1,9 @@
+0 | Flint v Flint | 10360 | FLINT WINS | 1:140.91 0:144.14 | 23 states
+1 | Wren v Scuttle | 7683 | WREN WINS | 1:29.99 0:171.33 | 23 states
+2 | Flint v Potato Sack | 13133 | POTATO SACK WINS | 0:142.27 1:64.56 | 23 states
+3 | Wren v Sprocket | 9040 | SPROCKET WINS | 0:166.26 1:111.35 | 23 states
+4 | Flint v Potato Sack | 11816 | POTATO SACK WINS | 0:169.76 1:66.64 | 24 states
+5 | Wren v Scuttle | 8221 | SCUTTLE WINS | 0:127.70 1:18.90 | 23 states
+ok: no bad states
+(node:11324) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)

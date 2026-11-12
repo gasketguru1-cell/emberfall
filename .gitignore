@@ -10,3 +10,16 @@ assets/*/work/*.glb
 
 # recorded playtest clips stay on disk, out of git (about 120 MB)
 playtest-results/**/*.webm
+build/
+dist/
+desktop/eos/
+assets/*/work/*.blend
+assets/_backup-anim-v1/
+
+# local logs
+dist-release.log
+tools/daily-snapshot.log
+playtest-results/glb-preview/
+
+# prepared sculpts for Joey (rebuilt from the owner's .blend files by build-joey.sh prep)
+assets/*/work/titan/
