@@ -1,0 +1,257 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chomp Chomp Discovery Album</title>
+<style>
+:root{--bg:#f6f3ee;--panel:#fff;--ink:#1d1a16;--mute:#6b645a;--line:#e3ddd3;--accent:#c4501b;--accent2:#8a5a00;--code:#f1ece4}
+@media (prefers-color-scheme:dark){:root{--bg:#141210;--panel:#1d1a17;--ink:#f1ece4;--mute:#a59d92;--line:#302b26;--accent:#ff8a4c;--accent2:#ffd166;--code:#26221e}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:40px 20px 24px;max-width:1240px;margin:auto}h1{font-size:34px;margin:0 0 6px;letter-spacing:-.01em}header p{color:var(--mute);margin:4px 0;max-width:820px}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}nav div{max-width:1240px;margin:auto;padding:10px 20px;display:flex;gap:16px;overflow-x:auto;white-space:nowrap}
+nav a{color:var(--mute);text-decoration:none;font-size:14px}nav a:hover{color:var(--accent)}
+section{max-width:1240px;margin:auto;padding:28px 20px 8px}h2{font-size:22px;margin:0 0 4px}.blurb{color:var(--mute);margin:0 0 16px;max-width:820px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;outline:none}
+.card:hover,.card:focus{border-color:var(--accent)}
+.thumb{position:relative;aspect-ratio:16/9;background:#000}.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.play{position:absolute;inset:0;margin:auto;width:54px;height:54px;border-radius:50%;background:rgba(0,0,0,.55)}.play:after{content:"";position:absolute;left:21px;top:16px;border-left:18px solid #fff;border-top:11px solid transparent;border-bottom:11px solid transparent}
+.rank{position:absolute;left:10px;top:10px;background:var(--accent);color:#fff;font-weight:700;font-size:13px;padding:2px 8px;border-radius:6px}
+.body{padding:12px 14px 14px}.body h3{margin:0 0 6px;font-size:16px}
+.chip{display:inline-block;font-size:12px;color:var(--accent2);border:1px solid var(--line);border-radius:999px;padding:0 8px;margin-bottom:6px}
+.route{display:block;background:var(--code);border-radius:6px;padding:6px 8px;font:12px/1.45 ui-monospace,Consolas,monospace;word-break:break-word;margin:4px 0 8px}
+ul{margin:0;padding-left:18px}li{margin:2px 0;font-size:14px}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:10px}.strip img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:4px;display:block}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}.modal.on{display:flex}
+.modal video{max-width:min(1280px,100%);max-height:90vh;width:100%;background:#000;border-radius:8px}
+.close{position:absolute;right:18px;top:12px;color:#fff;font-size:30px;background:none;border:0;cursor:pointer}
+footer{max-width:1240px;margin:auto;padding:24px 20px 48px;color:var(--mute);font-size:13px}
+@media (max-width:420px){.grid{grid-template-columns:1fr}h1{font-size:27px}}
+</style></head><body>
+<header><h1>Chomp Chomp Discovery Album</h1>
+<p>Chomp Chomp tested in the real Emberfall engine: 51 search jobs, 6.49 million route branches and 274 million simulated frames, then every result replayed under DI, SDI, escape attempts, the level-9 CPU and late inputs. Every clip here was recorded from the game itself.</p><p>No game code, balance or mechanic was changed, and no glitch was fixed. Each zero-to-death is true only against the DI shown on its card; the level-9 CPU escapes all of them. The brief arrived cut off at &quot;Explore thousands&quot;, read here as exploring thousands of routes.</p></header>
+<nav><div><a href="#top">Top discoveries</a><a href="#Zero-to-Deaths">Zero-to-deaths</a><a href="#Kill-Confirms">Kill confirms</a><a href="#Coal-Rope-Ant">Coal, rope and ant</a><a href="#Ledgetraps">Ledgetraps</a><a href="#Edgeguards">Edgeguards</a><a href="#Movement-Tech">Movement</a><a href="#Glitches">Glitches</a><a href="README.md">Full report</a></div></nav>
+<section id="top"><h2>Top discoveries, ranked</h2><p class="blurb">Ranked by how much each changes how Chomp is played, weighted toward what holds up under DI and human timing.</p>
+<div class="grid"><article class="card big" data-src="Kill-Confirms/K05-Knell-110pct-coalH-grab-d-fsmash.webm" tabindex="0">
+  <div class="thumb"><img src="Kill-Confirms/stills/K05-Knell-110pct-coalH-grab-d-fsmash-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#1</span></div>
+  <div class="body"><h3>Knell at 110%: coal, down throw, fsmash</h3><span class="chip">no DI</span>
+  <code class="route">coalH grab_d fsmash</code>
+  <ul><li>True against all 9 DI directions (34 of 270 defenders with SDI and escape attempts added)</li><li>Inputs 1 frame late: 30/30; 2 frames: 20/30</li><li>Also kills at 90, 100, 120 and 130%</li><li>Also works on Potato Sack</li></ul>
+  <div class="strip"><img src="Kill-Confirms/stills/K05-Knell-110pct-coalH-grab-d-fsmash-1.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K05-Knell-110pct-coalH-grab-d-fsmash-2.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K05-Knell-110pct-coalH-grab-d-fsmash-3.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K05-Knell-110pct-coalH-grab-d-fsmash-4.png" alt="" loading="lazy"></div></div></article><article class="card big" data-src="Glitches/G01-wall-swing-pop.webm" tabindex="0">
+  <div class="thumb"><img src="Glitches/stills/G01-wall-swing-pop-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#2</span></div>
+  <div class="body"><h3>Wall-swing pop</h3>
+  
+  <ul><li>Swinging while pinned against the island's side wall keeps the swing running</li><li>Once he rises past the floor he snaps to where the swing would be: up to 49.9 units in one frame, onto the stage</li><li>256 of 360 tested routes from below the ledge did it</li><li>Not fixed</li></ul>
+  <div class="strip"><img src="Glitches/stills/G01-wall-swing-pop-1.png" alt="" loading="lazy"><img src="Glitches/stills/G01-wall-swing-pop-2.png" alt="" loading="lazy"><img src="Glitches/stills/G01-wall-swing-pop-3.png" alt="" loading="lazy"><img src="Glitches/stills/G01-wall-swing-pop-4.png" alt="" loading="lazy"></div></div></article><article class="card big" data-src="Zero-to-Deaths/Z02-Flint-coal-set-fsmash-92pct.webm" tabindex="0">
+  <div class="thumb"><img src="Zero-to-Deaths/stills/Z02-Flint-coal-set-fsmash-92pct-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#3</span></div>
+  <div class="body"><h3>Flint, 8 hits, 92% (coal already down)</h3><span class="chip">no DI</span>
+  <code class="route">ant w28 fsmash ro_f hop fair ff cush ro_f w5 bite rf6 grab_u fh nair ro_f hop dair</code>
+  <ul><li>Starts with a coal Chomp tossed earlier lying on the floor</li><li>The opener (ant, fsmash, rope-out fair: 3 hits, 42%) is true against all 9 DIs and 20/20 at 1 frame late</li><li>The whole route: no DI only, 1/30 at 1 frame late</li></ul>
+  <div class="strip"><img src="Zero-to-Deaths/stills/Z02-Flint-coal-set-fsmash-92pct-1.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z02-Flint-coal-set-fsmash-92pct-2.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z02-Flint-coal-set-fsmash-92pct-3.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z02-Flint-coal-set-fsmash-92pct-4.png" alt="" loading="lazy"></div></div></article><article class="card big" data-src="Ledgetraps/L01-reactive-ant-vs-neutral-getup.webm" tabindex="0">
+  <div class="thumb"><img src="Ledgetraps/stills/L01-reactive-ant-vs-neutral-getup-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#4</span></div>
+  <div class="body"><h3>Neutral getup: caught</h3>
+  
+  <ul><li>Coal tossed to the ledge (lands at x 60), Chomp waits at x 20, 48 units away</li><li>Ant called 12 frames after the foe leaves the ledge</li><li>Caught every time against Flint, Sack and Knell</li></ul>
+  <div class="strip"><img src="Ledgetraps/stills/L01-reactive-ant-vs-neutral-getup-1.png" alt="" loading="lazy"><img src="Ledgetraps/stills/L01-reactive-ant-vs-neutral-getup-2.png" alt="" loading="lazy"><img src="Ledgetraps/stills/L01-reactive-ant-vs-neutral-getup-3.png" alt="" loading="lazy"><img src="Ledgetraps/stills/L01-reactive-ant-vs-neutral-getup-4.png" alt="" loading="lazy"></div></div></article><article class="card big" data-src="Coal-Rope-Ant/T05-ant-interrupts-a-grab.webm" tabindex="0">
+  <div class="thumb"><img src="Coal-Rope-Ant/stills/T05-ant-interrupts-a-grab-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#5</span></div>
+  <div class="body"><h3>The ant beats a grab</h3>
+  
+  <ul><li>Grabs never cut the rope: a grab started on the rope line is interrupted by the ant</li><li>Same result against Flint and Knell</li></ul>
+  <div class="strip"><img src="Coal-Rope-Ant/stills/T05-ant-interrupts-a-grab-1.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T05-ant-interrupts-a-grab-2.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T05-ant-interrupts-a-grab-3.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T05-ant-interrupts-a-grab-4.png" alt="" loading="lazy"></div></div></article><article class="card big" data-src="Zero-to-Deaths/Z07-Knell-77pct.webm" tabindex="0">
+  <div class="thumb"><img src="Zero-to-Deaths/stills/Z07-Knell-77pct-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#6</span></div>
+  <div class="body"><h3>Knell, 8 hits, 77%</h3><span class="chip">no DI</span>
+  <code class="route">coalH grab_f ant sh fair ro_f w2 bite ftilt ro_f hop dair</code>
+  <ul><li>True against: no DI only (1 of 18 test defenders)</li><li>Inputs 1 frame late: 20/30 still work; 2 frames late: 4/30</li><li>The most timing-tolerant of the zero-to-deaths</li><li>Level-9 CPU escapes it</li></ul>
+  <div class="strip"><img src="Zero-to-Deaths/stills/Z07-Knell-77pct-1.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z07-Knell-77pct-2.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z07-Knell-77pct-3.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z07-Knell-77pct-4.png" alt="" loading="lazy"></div></div></article><article class="card big" data-src="Zero-to-Deaths/Z03-Sack-12-hit-120pct.webm" tabindex="0">
+  <div class="thumb"><img src="Zero-to-Deaths/stills/Z03-Sack-12-hit-120pct-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#7</span></div>
+  <div class="body"><h3>Potato Sack, 12 hits, 120%</h3><span class="chip">no DI</span>
+  <code class="route">coalH grab_f ant sh fair ro_f w4 hop fair ff w9 bair ro_b w9 hop nair fair rf12 grab_u fh uair dj dair</code>
+  <ul><li>The longest one found: 12 hits</li><li>True against: no DI only</li><li>Frame-perfect: 0/30 with inputs 1 frame late</li><li>Level-9 CPU escapes it</li></ul>
+  <div class="strip"><img src="Zero-to-Deaths/stills/Z03-Sack-12-hit-120pct-1.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z03-Sack-12-hit-120pct-2.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z03-Sack-12-hit-120pct-3.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z03-Sack-12-hit-120pct-4.png" alt="" loading="lazy"></div></div></article><article class="card big" data-src="Coal-Rope-Ant/T01-relay-across-the-stage.webm" tabindex="0">
+  <div class="thumb"><img src="Coal-Rope-Ant/stills/T01-relay-across-the-stage-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#8</span></div>
+  <div class="body"><h3>Coal relay across the stage</h3>
+  <code class="route">coalH relay relay relay</code>
+  <ul><li>Relay window: 3 frames either side of the mark; 1 frame off or less adds speed</li><li>Plain toss lands 33 units away (7.6%); 3 perfect relays: 101 units (8.8%); high toss + 3 perfect relays: 119 units (10.5%)</li><li>Relays 2 frames off still relay but add nothing (7.6%)</li></ul>
+  <div class="strip"><img src="Coal-Rope-Ant/stills/T01-relay-across-the-stage-1.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T01-relay-across-the-stage-2.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T01-relay-across-the-stage-3.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T01-relay-across-the-stage-4.png" alt="" loading="lazy"></div></div></article><article class="card big" data-src="Coal-Rope-Ant/T02-ant-anti-air-full-hop.webm" tabindex="0">
+  <div class="thumb"><img src="Coal-Rope-Ant/stills/T02-ant-anti-air-full-hop-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#9</span></div>
+  <div class="body"><h3>Ant anti-air with a full hop</h3>
+  
+  <ul><li>Chomp full hops 20 frames after calling the ant: the rope swings up and the ant meets the jumping foe (8.8%)</li><li>Hopping at 26, 32 or 38 frames missed</li><li>The rope keeps the ant's progress, so moving Chomp swings the ant around the coal</li></ul>
+  <div class="strip"><img src="Coal-Rope-Ant/stills/T02-ant-anti-air-full-hop-1.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T02-ant-anti-air-full-hop-2.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T02-ant-anti-air-full-hop-3.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T02-ant-anti-air-full-hop-4.png" alt="" loading="lazy"></div></div></article><article class="card big" data-src="Coal-Rope-Ant/T04-rope-is-a-ramp-not-a-hitbox.webm" tabindex="0">
+  <div class="thumb"><img src="Coal-Rope-Ant/stills/T04-rope-is-a-ramp-not-a-hitbox-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#10</span></div>
+  <div class="body"><h3>The rope is a ramp, not a hitbox</h3>
+  
+  <ul><li>The rope never deals damage</li><li>A foe falling onto a sloped rope is slowed from 1.55 to about 0.3 per frame and slides down it toward the coal</li><li>A flat rope on the floor never blocks walking; jumping lifts the rope over a standing foe</li></ul>
+  <div class="strip"><img src="Coal-Rope-Ant/stills/T04-rope-is-a-ramp-not-a-hitbox-1.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T04-rope-is-a-ramp-not-a-hitbox-2.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T04-rope-is-a-ramp-not-a-hitbox-3.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T04-rope-is-a-ramp-not-a-hitbox-4.png" alt="" loading="lazy"></div></div></article><article class="card big" data-src="Edgeguards/E01-ledge-fsmash-vs-cpu-100pct.webm" tabindex="0">
+  <div class="thumb"><img src="Edgeguards/stills/E01-ledge-fsmash-vs-cpu-100pct-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#11</span></div>
+  <div class="body"><h3>Ledge fsmash kills at 100%</h3>
+  
+  <ul><li>Kills 4/4 at 100% against Flint and Potato Sack, and at 80% against Knell, with the level-9 CPU recovering</li><li>Hanging the coal off-stage with the ant hits the recovering CPU often (6–15%) but never stopped it recovering</li><li>Off-stage rope bite, fair and cushion only add kills against Knell (40–60%)</li></ul>
+  <div class="strip"><img src="Edgeguards/stills/E01-ledge-fsmash-vs-cpu-100pct-1.png" alt="" loading="lazy"><img src="Edgeguards/stills/E01-ledge-fsmash-vs-cpu-100pct-2.png" alt="" loading="lazy"><img src="Edgeguards/stills/E01-ledge-fsmash-vs-cpu-100pct-3.png" alt="" loading="lazy"><img src="Edgeguards/stills/E01-ledge-fsmash-vs-cpu-100pct-4.png" alt="" loading="lazy"></div></div></article></div></section>
+<section id="Zero-to-Deaths"><h2>Zero-to-deaths</h2><p class="blurb">From 0% to a KO with the game's own combo counter never resetting. Each one is frame-perfect and true only against the DI it was found with; the list under each clip says what holds and what doesn't.</p><div class="grid"><article class="card" data-src="Zero-to-Deaths/Z07-Knell-77pct.webm" tabindex="0">
+  <div class="thumb"><img src="Zero-to-Deaths/stills/Z07-Knell-77pct-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#6</span></div>
+  <div class="body"><h3>Knell, 8 hits, 77%</h3><span class="chip">no DI</span>
+  <code class="route">coalH grab_f ant sh fair ro_f w2 bite ftilt ro_f hop dair</code>
+  <ul><li>True against: no DI only (1 of 18 test defenders)</li><li>Inputs 1 frame late: 20/30 still work; 2 frames late: 4/30</li><li>The most timing-tolerant of the zero-to-deaths</li><li>Level-9 CPU escapes it</li></ul>
+  <div class="strip"><img src="Zero-to-Deaths/stills/Z07-Knell-77pct-1.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z07-Knell-77pct-2.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z07-Knell-77pct-3.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z07-Knell-77pct-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Zero-to-Deaths/Z03-Sack-12-hit-120pct.webm" tabindex="0">
+  <div class="thumb"><img src="Zero-to-Deaths/stills/Z03-Sack-12-hit-120pct-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#7</span></div>
+  <div class="body"><h3>Potato Sack, 12 hits, 120%</h3><span class="chip">no DI</span>
+  <code class="route">coalH grab_f ant sh fair ro_f w4 hop fair ff w9 bair ro_b w9 hop nair fair rf12 grab_u fh uair dj dair</code>
+  <ul><li>The longest one found: 12 hits</li><li>True against: no DI only</li><li>Frame-perfect: 0/30 with inputs 1 frame late</li><li>Level-9 CPU escapes it</li></ul>
+  <div class="strip"><img src="Zero-to-Deaths/stills/Z03-Sack-12-hit-120pct-1.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z03-Sack-12-hit-120pct-2.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z03-Sack-12-hit-120pct-3.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z03-Sack-12-hit-120pct-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Zero-to-Deaths/Z06-Knell-rope-bite-111pct.webm" tabindex="0">
+  <div class="thumb"><img src="Zero-to-Deaths/stills/Z06-Knell-rope-bite-111pct-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Knell, 11 hits, 111%</h3><span class="chip">DI in</span>
+  <code class="route">coalH grab_f ant rs w4 bite rf6 utilt ftilt ro_f w3 hop w6 fair dash ro_f hop uair dj dair</code>
+  <ul><li>True against: DI in only</li><li>Inputs 1 frame late: 2/30</li><li>Uses the ant then Rope Swing straight into the bite</li></ul>
+  <div class="strip"><img src="Zero-to-Deaths/stills/Z06-Knell-rope-bite-111pct-1.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z06-Knell-rope-bite-111pct-2.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z06-Knell-rope-bite-111pct-3.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z06-Knell-rope-bite-111pct-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Zero-to-Deaths/Z09-Sprocket-108pct.webm" tabindex="0">
+  <div class="thumb"><img src="Zero-to-Deaths/stills/Z09-Sprocket-108pct-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Sprocket, 11 hits, 108%</h3><span class="chip">DI out</span>
+  <code class="route">coalH grab_f ant sh fair ro_f hop fair ff w9 bair ro_b w4 hop uair utilt fh nair ro_b hop dair</code>
+  <ul><li>True against: DI out only</li><li>The first 3 links (6 hits, 53%) hold against 6 of 9 DIs, and 20/20 at 1 frame late</li><li>Inputs 1 frame late for the whole route: 1/30</li></ul>
+  <div class="strip"><img src="Zero-to-Deaths/stills/Z09-Sprocket-108pct-1.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z09-Sprocket-108pct-2.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z09-Sprocket-108pct-3.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z09-Sprocket-108pct-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Zero-to-Deaths/Z08-Sprocket-101pct.webm" tabindex="0">
+  <div class="thumb"><img src="Zero-to-Deaths/stills/Z08-Sprocket-101pct-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Sprocket, 10 hits, 101%</h3><span class="chip">DI in</span>
+  <code class="route">coalH grab_f ant w28 ftilt ro_f w9 bite rf6 grab_u fh fair w3 dj nair ro_f hop dair</code>
+  <ul><li>True against: DI in only</li><li>Inputs 1 frame late: 1/30</li></ul>
+  <div class="strip"><img src="Zero-to-Deaths/stills/Z08-Sprocket-101pct-1.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z08-Sprocket-101pct-2.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z08-Sprocket-101pct-3.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z08-Sprocket-101pct-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Zero-to-Deaths/Z01-Flint-dash-ant-92pct.webm" tabindex="0">
+  <div class="thumb"><img src="Zero-to-Deaths/stills/Z01-Flint-dash-ant-92pct-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Flint, 9 hits, 92%</h3><span class="chip">DI out</span>
+  <code class="route">coal grab_f ant w28 dash ro_f w3 hop w6 fair fh nair ro_f w2 bite dj dair</code>
+  <ul><li>True against: DI out only</li><li>Opens with the plain (untilted) toss</li><li>Inputs 1 frame late: 0/30</li></ul>
+  <div class="strip"><img src="Zero-to-Deaths/stills/Z01-Flint-dash-ant-92pct-1.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z01-Flint-dash-ant-92pct-2.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z01-Flint-dash-ant-92pct-3.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z01-Flint-dash-ant-92pct-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Zero-to-Deaths/Z04-Sack-double-dtilt-92pct.webm" tabindex="0">
+  <div class="thumb"><img src="Zero-to-Deaths/stills/Z04-Sack-double-dtilt-92pct-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Potato Sack, 10 hits, 92%</h3><span class="chip">DI in</span>
+  <code class="route">coalH grab_f ant w28 sh fair ro_f bite grab_f rf12 dtilt dtilt ro_f hop dair</code>
+  <ul><li>True against: DI in only</li><li>Inputs 1 frame late: 7/30</li></ul>
+  <div class="strip"><img src="Zero-to-Deaths/stills/Z04-Sack-double-dtilt-92pct-1.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z04-Sack-double-dtilt-92pct-2.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z04-Sack-double-dtilt-92pct-3.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z04-Sack-double-dtilt-92pct-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Zero-to-Deaths/Z05-Sack-grab-up-89pct.webm" tabindex="0">
+  <div class="thumb"><img src="Zero-to-Deaths/stills/Z05-Sack-grab-up-89pct-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Potato Sack, 9 hits, 89%</h3><span class="chip">DI out</span>
+  <code class="route">coalH grab_f ant sh fair ro_f w2 bite grab_u fh nair ro_f hop dair</code>
+  <ul><li>True against: DI out only</li><li>Inputs 1 frame late: 0/30 for the whole route; the first 4 links survive 10/20</li></ul>
+  <div class="strip"><img src="Zero-to-Deaths/stills/Z05-Sack-grab-up-89pct-1.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z05-Sack-grab-up-89pct-2.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z05-Sack-grab-up-89pct-3.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z05-Sack-grab-up-89pct-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Zero-to-Deaths/Z02-Flint-coal-set-fsmash-92pct.webm" tabindex="0">
+  <div class="thumb"><img src="Zero-to-Deaths/stills/Z02-Flint-coal-set-fsmash-92pct-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#3</span></div>
+  <div class="body"><h3>Flint, 8 hits, 92% (coal already down)</h3><span class="chip">no DI</span>
+  <code class="route">ant w28 fsmash ro_f hop fair ff cush ro_f w5 bite rf6 grab_u fh nair ro_f hop dair</code>
+  <ul><li>Starts with a coal Chomp tossed earlier lying on the floor</li><li>The opener (ant, fsmash, rope-out fair: 3 hits, 42%) is true against all 9 DIs and 20/20 at 1 frame late</li><li>The whole route: no DI only, 1/30 at 1 frame late</li></ul>
+  <div class="strip"><img src="Zero-to-Deaths/stills/Z02-Flint-coal-set-fsmash-92pct-1.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z02-Flint-coal-set-fsmash-92pct-2.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z02-Flint-coal-set-fsmash-92pct-3.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z02-Flint-coal-set-fsmash-92pct-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Zero-to-Deaths/Z10-Knell-coal-set-84pct.webm" tabindex="0">
+  <div class="thumb"><img src="Zero-to-Deaths/stills/Z10-Knell-coal-set-84pct-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Knell, 7 hits, 84% (coal already down)</h3><span class="chip">no DI</span>
+  <code class="route">ant w28 fsmash ro_f w9 bite dtilt ro_f w5 bite rf6 jab ro_f hop dair</code>
+  <ul><li>True against: no DI and DI in (4 of 18 test defenders)</li><li>Opener ant &gt; fsmash &gt; rope bite: true against all 9 DIs</li></ul>
+  <div class="strip"><img src="Zero-to-Deaths/stills/Z10-Knell-coal-set-84pct-1.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z10-Knell-coal-set-84pct-2.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z10-Knell-coal-set-84pct-3.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z10-Knell-coal-set-84pct-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Zero-to-Deaths/Z12-Sprocket-coal-set-82pct.webm" tabindex="0">
+  <div class="thumb"><img src="Zero-to-Deaths/stills/Z12-Sprocket-coal-set-82pct-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Sprocket, 7 hits, 82% (coal already down)</h3><span class="chip">DI out</span>
+  <code class="route">ant fsmash ro_f w5 bite rf6 dtilt ro_f w5 bite wf4 ftilt ro_f hop dair</code>
+  <ul><li>True against: DI out only</li><li>Opener ant &gt; fsmash: true against all 9 DIs</li></ul>
+  <div class="strip"><img src="Zero-to-Deaths/stills/Z12-Sprocket-coal-set-82pct-1.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z12-Sprocket-coal-set-82pct-2.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z12-Sprocket-coal-set-82pct-3.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z12-Sprocket-coal-set-82pct-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Zero-to-Deaths/Z11-Sack-coal-set-81pct.webm" tabindex="0">
+  <div class="thumb"><img src="Zero-to-Deaths/stills/Z11-Sack-coal-set-81pct-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Potato Sack, 7 hits, 81% (coal already down)</h3><span class="chip">DI in</span>
+  <code class="route">ant fsmash ro_f w5 bite wf4 ftilt ro_f w9 hop fair ff cush ro_f hop dair</code>
+  <ul><li>True against: DI in only</li><li>Opener ant &gt; fsmash &gt; rope bite: true against 7 of 9 DIs</li></ul>
+  <div class="strip"><img src="Zero-to-Deaths/stills/Z11-Sack-coal-set-81pct-1.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z11-Sack-coal-set-81pct-2.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z11-Sack-coal-set-81pct-3.png" alt="" loading="lazy"><img src="Zero-to-Deaths/stills/Z11-Sack-coal-set-81pct-4.png" alt="" loading="lazy"></div></div></article></div></section>
+<section id="Kill-Confirms"><h2>Kill confirms</h2><p class="blurb">Short confirms from a coal hit into a kill, at the percent shown.</p><div class="grid"><article class="card" data-src="Kill-Confirms/K05-Knell-110pct-coalH-grab-d-fsmash.webm" tabindex="0">
+  <div class="thumb"><img src="Kill-Confirms/stills/K05-Knell-110pct-coalH-grab-d-fsmash-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#1</span></div>
+  <div class="body"><h3>Knell at 110%: coal, down throw, fsmash</h3><span class="chip">no DI</span>
+  <code class="route">coalH grab_d fsmash</code>
+  <ul><li>True against all 9 DI directions (34 of 270 defenders with SDI and escape attempts added)</li><li>Inputs 1 frame late: 30/30; 2 frames: 20/30</li><li>Also kills at 90, 100, 120 and 130%</li><li>Also works on Potato Sack</li></ul>
+  <div class="strip"><img src="Kill-Confirms/stills/K05-Knell-110pct-coalH-grab-d-fsmash-1.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K05-Knell-110pct-coalH-grab-d-fsmash-2.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K05-Knell-110pct-coalH-grab-d-fsmash-3.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K05-Knell-110pct-coalH-grab-d-fsmash-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Kill-Confirms/K02-Sack-110pct-coalH-grab-d-fsmash.webm" tabindex="0">
+  <div class="thumb"><img src="Kill-Confirms/stills/K02-Sack-110pct-coalH-grab-d-fsmash-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Potato Sack at 110%: coal, down throw, fsmash</h3><span class="chip">no DI</span>
+  <code class="route">coalH grab_d fsmash</code>
+  <ul><li>True against 6 of 9 DI directions</li><li>Inputs 1 frame late: 30/30; 2 frames: 22/30</li><li>Works at 100–130%</li></ul>
+  <div class="strip"><img src="Kill-Confirms/stills/K02-Sack-110pct-coalH-grab-d-fsmash-1.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K02-Sack-110pct-coalH-grab-d-fsmash-2.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K02-Sack-110pct-coalH-grab-d-fsmash-3.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K02-Sack-110pct-coalH-grab-d-fsmash-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Kill-Confirms/K01-Sack-110pct-coalH-dtilt-usmash.webm" tabindex="0">
+  <div class="thumb"><img src="Kill-Confirms/stills/K01-Sack-110pct-coalH-dtilt-usmash-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Potato Sack at 110%: coal, dtilt, usmash</h3><span class="chip">DI in</span>
+  <code class="route">coalH dtilt usmash</code>
+  <ul><li>True against DI in and DI up-in</li><li>Inputs up to 2 frames late: 30/30</li><li>Also works on Sprocket</li></ul>
+  <div class="strip"><img src="Kill-Confirms/stills/K01-Sack-110pct-coalH-dtilt-usmash-1.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K01-Sack-110pct-coalH-dtilt-usmash-2.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K01-Sack-110pct-coalH-dtilt-usmash-3.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K01-Sack-110pct-coalH-dtilt-usmash-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Kill-Confirms/K08-Flint-110pct-coalH-grab-u-nair-fair.webm" tabindex="0">
+  <div class="thumb"><img src="Kill-Confirms/stills/K08-Flint-110pct-coalH-grab-u-nair-fair-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Flint at 110%: coal, up throw, nair, rope-hop fair</h3><span class="chip">DI out</span>
+  <code class="route">coalH grab_u fh w4 nair ro_f w9 hop fair</code>
+  <ul><li>True against DI out only</li><li>Inputs 1 frame late: 30/30</li><li>Works 90–110%</li></ul>
+  <div class="strip"><img src="Kill-Confirms/stills/K08-Flint-110pct-coalH-grab-u-nair-fair-1.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K08-Flint-110pct-coalH-grab-u-nair-fair-2.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K08-Flint-110pct-coalH-grab-u-nair-fair-3.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K08-Flint-110pct-coalH-grab-u-nair-fair-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Kill-Confirms/K12-Knell-80pct-coalL-dtilt-ant-dash-attack.webm" tabindex="0">
+  <div class="thumb"><img src="Kill-Confirms/stills/K12-Knell-80pct-coalL-dtilt-ant-dash-attack-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Knell at 80%: coal, dtilt, ant, dash attack</h3><span class="chip">DI out</span>
+  <code class="route">coalL dtilt ant w28 dash</code>
+  <ul><li>The ant joins a kill confirm</li><li>True against DI out and down-out</li><li>Inputs 1 frame late: 20/30; 3 frames: 12/30</li><li>Works 60–80%</li></ul>
+  <div class="strip"><img src="Kill-Confirms/stills/K12-Knell-80pct-coalL-dtilt-ant-dash-attack-1.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K12-Knell-80pct-coalL-dtilt-ant-dash-attack-2.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K12-Knell-80pct-coalL-dtilt-ant-dash-attack-3.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K12-Knell-80pct-coalL-dtilt-ant-dash-attack-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Kill-Confirms/K07-Flint-80pct-coalH-utilt-bair-dair.webm" tabindex="0">
+  <div class="thumb"><img src="Kill-Confirms/stills/K07-Flint-80pct-coalH-utilt-bair-dair-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Flint at 80%: coal, utilt, bair, rope-hop dair</h3><span class="chip">DI in</span>
+  <code class="route">coalH utilt fh w4 bair ro_b w9 hop dair</code>
+  <ul><li>True against DI in only</li><li>Frame-tight: 3/30 at 1 frame late</li></ul>
+  <div class="strip"><img src="Kill-Confirms/stills/K07-Flint-80pct-coalH-utilt-bair-dair-1.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K07-Flint-80pct-coalH-utilt-bair-dair-2.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K07-Flint-80pct-coalH-utilt-bair-dair-3.png" alt="" loading="lazy"><img src="Kill-Confirms/stills/K07-Flint-80pct-coalH-utilt-bair-dair-4.png" alt="" loading="lazy"></div></div></article></div></section>
+<section id="Coal-Rope-Ant"><h2>Coal, rope and ant</h2><p class="blurb">How the coal, the rope and the ant really behave, measured in the engine.</p><div class="grid"><article class="card" data-src="Coal-Rope-Ant/T01-relay-across-the-stage.webm" tabindex="0">
+  <div class="thumb"><img src="Coal-Rope-Ant/stills/T01-relay-across-the-stage-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#8</span></div>
+  <div class="body"><h3>Coal relay across the stage</h3>
+  <code class="route">coalH relay relay relay</code>
+  <ul><li>Relay window: 3 frames either side of the mark; 1 frame off or less adds speed</li><li>Plain toss lands 33 units away (7.6%); 3 perfect relays: 101 units (8.8%); high toss + 3 perfect relays: 119 units (10.5%)</li><li>Relays 2 frames off still relay but add nothing (7.6%)</li></ul>
+  <div class="strip"><img src="Coal-Rope-Ant/stills/T01-relay-across-the-stage-1.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T01-relay-across-the-stage-2.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T01-relay-across-the-stage-3.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T01-relay-across-the-stage-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Coal-Rope-Ant/T02-ant-anti-air-full-hop.webm" tabindex="0">
+  <div class="thumb"><img src="Coal-Rope-Ant/stills/T02-ant-anti-air-full-hop-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#9</span></div>
+  <div class="body"><h3>Ant anti-air with a full hop</h3>
+  
+  <ul><li>Chomp full hops 20 frames after calling the ant: the rope swings up and the ant meets the jumping foe (8.8%)</li><li>Hopping at 26, 32 or 38 frames missed</li><li>The rope keeps the ant's progress, so moving Chomp swings the ant around the coal</li></ul>
+  <div class="strip"><img src="Coal-Rope-Ant/stills/T02-ant-anti-air-full-hop-1.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T02-ant-anti-air-full-hop-2.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T02-ant-anti-air-full-hop-3.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T02-ant-anti-air-full-hop-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Coal-Rope-Ant/T03-ant-no-hop-misses.webm" tabindex="0">
+  <div class="thumb"><img src="Coal-Rope-Ant/stills/T03-ant-no-hop-misses-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>The same call without the hop</h3>
+  
+  <ul><li>The ant runs under the jumping foe: no hit</li></ul>
+  <div class="strip"><img src="Coal-Rope-Ant/stills/T03-ant-no-hop-misses-1.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T03-ant-no-hop-misses-2.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T03-ant-no-hop-misses-3.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T03-ant-no-hop-misses-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Coal-Rope-Ant/T04-rope-is-a-ramp-not-a-hitbox.webm" tabindex="0">
+  <div class="thumb"><img src="Coal-Rope-Ant/stills/T04-rope-is-a-ramp-not-a-hitbox-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#10</span></div>
+  <div class="body"><h3>The rope is a ramp, not a hitbox</h3>
+  
+  <ul><li>The rope never deals damage</li><li>A foe falling onto a sloped rope is slowed from 1.55 to about 0.3 per frame and slides down it toward the coal</li><li>A flat rope on the floor never blocks walking; jumping lifts the rope over a standing foe</li></ul>
+  <div class="strip"><img src="Coal-Rope-Ant/stills/T04-rope-is-a-ramp-not-a-hitbox-1.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T04-rope-is-a-ramp-not-a-hitbox-2.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T04-rope-is-a-ramp-not-a-hitbox-3.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T04-rope-is-a-ramp-not-a-hitbox-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Coal-Rope-Ant/T05-ant-interrupts-a-grab.webm" tabindex="0">
+  <div class="thumb"><img src="Coal-Rope-Ant/stills/T05-ant-interrupts-a-grab-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#5</span></div>
+  <div class="body"><h3>The ant beats a grab</h3>
+  
+  <ul><li>Grabs never cut the rope: a grab started on the rope line is interrupted by the ant</li><li>Same result against Flint and Knell</li></ul>
+  <div class="strip"><img src="Coal-Rope-Ant/stills/T05-ant-interrupts-a-grab-1.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T05-ant-interrupts-a-grab-2.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T05-ant-interrupts-a-grab-3.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T05-ant-interrupts-a-grab-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Coal-Rope-Ant/T06-sack-dtilt-cuts-the-rope.webm" tabindex="0">
+  <div class="thumb"><img src="Coal-Rope-Ant/stills/T06-sack-dtilt-cuts-the-rope-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>A damaging attack cuts the rope</h3>
+  
+  <ul><li>Any active damaging hitbox near the rope cuts it</li><li>Potato Sack's jab, ftilt and dtilt cut it when started 4–20 frames after the call; Flint's dtilt 4–24</li><li>Flint's jab and ftilt lose to the ant; Knell loses to it with everything tested</li></ul>
+  <div class="strip"><img src="Coal-Rope-Ant/stills/T06-sack-dtilt-cuts-the-rope-1.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T06-sack-dtilt-cuts-the-rope-2.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T06-sack-dtilt-cuts-the-rope-3.png" alt="" loading="lazy"><img src="Coal-Rope-Ant/stills/T06-sack-dtilt-cuts-the-rope-4.png" alt="" loading="lazy"></div></div></article></div></section>
+<section id="Ledgetraps"><h2>Ledgetraps</h2><p class="blurb">Coal tossed to the ledge, then the ant called on reaction. The opponent is scripted to pick each getup 25 frames after grabbing the ledge.</p><div class="grid"><article class="card" data-src="Ledgetraps/L01-reactive-ant-vs-neutral-getup.webm" tabindex="0">
+  <div class="thumb"><img src="Ledgetraps/stills/L01-reactive-ant-vs-neutral-getup-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#4</span></div>
+  <div class="body"><h3>Neutral getup: caught</h3>
+  
+  <ul><li>Coal tossed to the ledge (lands at x 60), Chomp waits at x 20, 48 units away</li><li>Ant called 12 frames after the foe leaves the ledge</li><li>Caught every time against Flint, Sack and Knell</li></ul>
+  <div class="strip"><img src="Ledgetraps/stills/L01-reactive-ant-vs-neutral-getup-1.png" alt="" loading="lazy"><img src="Ledgetraps/stills/L01-reactive-ant-vs-neutral-getup-2.png" alt="" loading="lazy"><img src="Ledgetraps/stills/L01-reactive-ant-vs-neutral-getup-3.png" alt="" loading="lazy"><img src="Ledgetraps/stills/L01-reactive-ant-vs-neutral-getup-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Ledgetraps/L02-reactive-ant-vs-roll.webm" tabindex="0">
+  <div class="thumb"><img src="Ledgetraps/stills/L02-reactive-ant-vs-roll-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Ledge roll: caught</h3>
+  
+  <ul><li>Caught every time</li></ul>
+  <div class="strip"><img src="Ledgetraps/stills/L02-reactive-ant-vs-roll-1.png" alt="" loading="lazy"><img src="Ledgetraps/stills/L02-reactive-ant-vs-roll-2.png" alt="" loading="lazy"><img src="Ledgetraps/stills/L02-reactive-ant-vs-roll-3.png" alt="" loading="lazy"><img src="Ledgetraps/stills/L02-reactive-ant-vs-roll-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Ledgetraps/L03-reactive-ant-vs-ledge-jump.webm" tabindex="0">
+  <div class="thumb"><img src="Ledgetraps/stills/L03-reactive-ant-vs-ledge-jump-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Ledge jump: caught</h3>
+  
+  <ul><li>Caught every time; drop then double jump was caught too</li></ul>
+  <div class="strip"><img src="Ledgetraps/stills/L03-reactive-ant-vs-ledge-jump-1.png" alt="" loading="lazy"><img src="Ledgetraps/stills/L03-reactive-ant-vs-ledge-jump-2.png" alt="" loading="lazy"><img src="Ledgetraps/stills/L03-reactive-ant-vs-ledge-jump-3.png" alt="" loading="lazy"><img src="Ledgetraps/stills/L03-reactive-ant-vs-ledge-jump-4.png" alt="" loading="lazy"></div></div></article><article class="card" data-src="Ledgetraps/L04-getup-attack-beats-the-trap.webm" tabindex="0">
+  <div class="thumb"><img src="Ledgetraps/stills/L04-getup-attack-beats-the-trap-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Getup attack gets through</h3>
+  
+  <ul><li>Gets through 3 times out of 4 (Flint, Sack); Knell's is caught</li><li>Standing at the ledge (x 46) with only fsmash covers the same options; the ant's gain is doing it from 48 units away</li></ul>
+  <div class="strip"><img src="Ledgetraps/stills/L04-getup-attack-beats-the-trap-1.png" alt="" loading="lazy"><img src="Ledgetraps/stills/L04-getup-attack-beats-the-trap-2.png" alt="" loading="lazy"><img src="Ledgetraps/stills/L04-getup-attack-beats-the-trap-3.png" alt="" loading="lazy"><img src="Ledgetraps/stills/L04-getup-attack-beats-the-trap-4.png" alt="" loading="lazy"></div></div></article></div></section>
+<section id="Edgeguards"><h2>Edgeguards</h2><p class="blurb">Against the game's level-9 CPU, which takes over as soon as Chomp's hit lands.</p><div class="grid"><article class="card" data-src="Edgeguards/E01-ledge-fsmash-vs-cpu-100pct.webm" tabindex="0">
+  <div class="thumb"><img src="Edgeguards/stills/E01-ledge-fsmash-vs-cpu-100pct-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#11</span></div>
+  <div class="body"><h3>Ledge fsmash kills at 100%</h3>
+  
+  <ul><li>Kills 4/4 at 100% against Flint and Potato Sack, and at 80% against Knell, with the level-9 CPU recovering</li><li>Hanging the coal off-stage with the ant hits the recovering CPU often (6–15%) but never stopped it recovering</li><li>Off-stage rope bite, fair and cushion only add kills against Knell (40–60%)</li></ul>
+  <div class="strip"><img src="Edgeguards/stills/E01-ledge-fsmash-vs-cpu-100pct-1.png" alt="" loading="lazy"><img src="Edgeguards/stills/E01-ledge-fsmash-vs-cpu-100pct-2.png" alt="" loading="lazy"><img src="Edgeguards/stills/E01-ledge-fsmash-vs-cpu-100pct-3.png" alt="" loading="lazy"><img src="Edgeguards/stills/E01-ledge-fsmash-vs-cpu-100pct-4.png" alt="" loading="lazy"></div></div></article></div></section>
+<section id="Movement-Tech"><h2>Movement</h2><p class="blurb">Rope Swing as movement.</p><div class="grid"><article class="card" data-src="Movement-Tech/M01-four-rope-chain-and-bite.webm" tabindex="0">
+  <div class="thumb"><img src="Movement-Tech/stills/M01-four-rope-chain-and-bite-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></div>
+  <div class="body"><h3>Four Rope Swings and the bite</h3>
+  
+  <ul><li>133 units with the stick untouched; 218 holding forward, enough to carry him off the far side</li><li>Rope Swing, wait 20, hop: 76 units; 4 swings and a hop: 122</li></ul>
+  <div class="strip"><img src="Movement-Tech/stills/M01-four-rope-chain-and-bite-1.png" alt="" loading="lazy"><img src="Movement-Tech/stills/M01-four-rope-chain-and-bite-2.png" alt="" loading="lazy"><img src="Movement-Tech/stills/M01-four-rope-chain-and-bite-3.png" alt="" loading="lazy"><img src="Movement-Tech/stills/M01-four-rope-chain-and-bite-4.png" alt="" loading="lazy"></div></div></article></div></section>
+<section id="Glitches"><h2>Glitches</h2><p class="blurb">Reported, not fixed.</p><div class="grid"><article class="card" data-src="Glitches/G01-wall-swing-pop.webm" tabindex="0">
+  <div class="thumb"><img src="Glitches/stills/G01-wall-swing-pop-2.png" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="rank">#2</span></div>
+  <div class="body"><h3>Wall-swing pop</h3>
+  
+  <ul><li>Swinging while pinned against the island's side wall keeps the swing running</li><li>Once he rises past the floor he snaps to where the swing would be: up to 49.9 units in one frame, onto the stage</li><li>256 of 360 tested routes from below the ledge did it</li><li>Not fixed</li></ul>
+  <div class="strip"><img src="Glitches/stills/G01-wall-swing-pop-1.png" alt="" loading="lazy"><img src="Glitches/stills/G01-wall-swing-pop-2.png" alt="" loading="lazy"><img src="Glitches/stills/G01-wall-swing-pop-3.png" alt="" loading="lazy"><img src="Glitches/stills/G01-wall-swing-pop-4.png" alt="" loading="lazy"></div></div></article></div></section>
+<footer>Testing tools: tools/chomp-lab.js, chomp-node.js, chomp-search.js, chomp-verify.js, chomp-record.js and chomp-album.js. The full report, with every table and what remains unverified, is README.md in this folder. 2026-11-12.</footer>
+<div class="modal" id="m"><button class="close" aria-label="Close">&times;</button><video id="v" controls playsinline></video></div>
+<script>
+const m=document.getElementById('m'),v=document.getElementById('v');
+const open=s=>{v.src=s;m.classList.add('on');v.play().catch(()=>{});},shut=()=>{v.pause();v.removeAttribute('src');v.load();m.classList.remove('on');};
+document.querySelectorAll('.card').forEach(c=>{c.addEventListener('click',()=>open(c.dataset.src));c.addEventListener('keydown',e=>{if(e.key==='Enter')open(c.dataset.src);});});
+m.addEventListener('click',e=>{if(e.target===m||e.target.classList.contains('close'))shut();});document.addEventListener('keydown',e=>{if(e.key==='Escape')shut();});
+</script></body></html>
