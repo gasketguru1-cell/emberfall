@@ -25,6 +25,7 @@ back = lambda v: [round(v[0], 4), round(v[2], 4), round(-v[1], 4)]   # Blender -
 bones = {b['name']: b for b in spec['bones']}
 head = lambda n: conv(bones[n]['head'])
 MIRROR = opt.get('mirror') == '1'   # --mirror 1 writes <name>_M.json, the capture mirrored left for right
+ROOTHANDS = opt.get('handspace') == 'root'   # --handspace root: for rigs whose hand targets hang from the root, not the chest
 tool_axis = Vector(json.loads(opt['toolaxis'])) if opt.get('toolaxis') else Vector((0, -1, 0))
 
 # the rig's own lengths
@@ -65,6 +66,11 @@ for f in files:
         k['hips']['move'] = back((pos('Hips') - rpos('Hips')) * kleg)
         cq = qd('Spine2').inverted()
         for s, side in (('L', 'Left'), ('R', 'Right')):
+            if ROOTHANDS:   # targets that hang from the root (Joey / Cronky Dong): the shoulder moves as the capture's does (scaled like the legs), the arm reaches out from it in world axes
+                tgt = head('arm' + s) + (pos(side + 'Arm') - rpos(side + 'Arm')) * kleg + (pos(side + 'Hand') - pos(side + 'Arm')) * (S_ARM[s] / m_arm[s])
+                k['c_hand' + s] = {'move': back(tgt - head('c_hand' + s))}
+                k['c_foot' + s] = {'move': back((pos(side + 'Foot') - rpos(side + 'Foot')) * kleg)}
+                continue
             v = cq @ (pos(side + 'Hand') - pos(side + 'Arm')) * (S_ARM[s] / m_arm[s])
             tgt = head('arm' + s) + v
             k['c_hand' + s] = {'move': back(tgt - head('c_hand' + s))}

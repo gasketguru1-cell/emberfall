@@ -266,8 +266,15 @@ for ik in spec.get('ik', []):
     c = rig.pose.bones[ik['bone']].constraints.new('IK'); c.target = rig; c.subtarget = ik['name']; c.chain_count = ik.get('chain', 2)
 if spec.get('ik'): print('rig: %d IK chains' % len(spec['ik']))
 for cr in spec.get('copyrot', []):
-    c = rig.pose.bones[cr['bone']].constraints.new('COPY_ROTATION'); c.target = rig; c.subtarget = cr['from']; c.target_space = 'WORLD'; c.owner_space = 'WORLD'; c.mix_mode = 'REPLACE'
+    c = rig.pose.bones[cr['bone']].constraints.new('COPY_ROTATION'); c.target = rig; c.subtarget = cr['from']
+    c.target_space = c.owner_space = cr.get('space', 'WORLD'); c.mix_mode = cr.get('mix', 'REPLACE'); c.influence = cr.get('influence', 1.0)
+    if cr.get('axes'): c.use_x, c.use_y, c.use_z = ('X' in cr['axes'], 'Y' in cr['axes'], 'Z' in cr['axes'])
 if spec.get('copyrot'): print('rig: %d aimed bones' % len(spec['copyrot']))
+# "track": [ { "bone", "target": bone, "headtail": 0..1 } ]   the bone points at a point on another bone, turning the short way
+# from its parent (an upper-arm twist helper that follows the arm's swing but not its twist)
+for tk in spec.get('track', []):
+    c = rig.pose.bones[tk['bone']].constraints.new('DAMPED_TRACK'); c.target = rig; c.subtarget = tk['target']; c.head_tail = tk.get('headtail', 1.0)
+if spec.get('track'): print('rig: %d tracking helpers' % len(spec['track']))
 
 # ---- animation ----
 def delta(rot):
@@ -301,12 +308,114 @@ def fcurves_of(act):
 
 rest = {b.name: b.matrix_local.to_3x3() for b in arm.bones}
 restdir = {b.name: (b.tail_local - b.head_local).normalized() for b in arm.bones}
+# "share": { "<bone>": [ [bone, fraction], ... ] }   a pose's turn of that bone is spread over a chain (fractions summing to 1);
+#          its move and scale stay on the bone itself
+SHARE = spec.get('share', {})
+# "clavicles": [ { "bone", "target": hand control, "rest": [x,y,z] where the wrist rests, "k": share, "max": degrees } ]
+#          each key turns the collarbone a share of the way toward where the hand is reaching, seen from the chest (a
+#          shrug when the hand is high, the shoulder rolling forward into a reach and back as the arm goes behind)
+AUTO_CLAV = spec.get('clavicles', [])
+# "toes": [ { "bone", "foot": foot bone, "floor": rest height of the tip above the floor, "near": height } ]   while the ball of
+#          the foot is within "near" of the floor, the toes bend up just enough to keep their tip on or above it (push-off, landing)
+AUTO_TOE = spec.get('toes', [])
+lastq = {}
+def turn_of(bname, tr):
+    D = delta(tr.get('rot', [0, 0, 0]))
+    if tr.get('qb'): D = D @ Quaternion(tr['qb']).to_matrix()   # a turn given directly in Blender's axes (motion capture, tools/blender/mocap.py); "rot" adds on top
+    if tr.get('aim'):
+        tgt = conv(tr['aim']).normalized(); A = restdir[bname].rotation_difference(tgt).to_matrix()
+        if tr.get('twist'): A = Quaternion(tgt, math.radians(tr['twist'])).to_matrix() @ A
+        D = D @ A
+    if tr.get('spin'):   # "spin": degrees about the bone's own rest line (a forearm or wrist turning the palm over)
+        D = D @ Quaternion(restdir[bname], math.radians(tr['spin'])).to_matrix()
+    return D
+def put(bname, D, tr, fb):
+    pb = rig.pose.bones[bname]; R = rest[bname]
+    q = (R.inverted() @ D @ R).to_quaternion()
+    if bname in lastq and lastq[bname].dot(q) < 0: q.negate()   # keep to the near side of the last key, so a turn goes the short way round
+    lastq[bname] = q.copy(); pb.rotation_quaternion = q
+    pb.location = R.inverted() @ conv(tr.get('move', [0, 0, 0]))
+    pb.scale = bone_scale(R, tr.get('scale', [1, 1, 1]))
+    pb.keyframe_insert('rotation_quaternion', frame=fb); pb.keyframe_insert('location', frame=fb); pb.keyframe_insert('scale', frame=fb)
+def frame_delta(bn):   # how far a bone has turned from rest, in the armature's axes
+    return (rig.pose.bones[bn].matrix.to_3x3().normalized() @ arm.bones[bn].matrix_local.to_3x3().inverted()).to_quaternion()
+# "meet": { "<clip>": { "at": [t0, t1], "fade": seconds, "gap": metres, "hands": [right, left], "targets": [right, left] } }
+#          a true clap: between t0 and t1 the two wrists are brought level, side by side "gap" apart (bone line to bone
+#          line, so the palms press flat together), and each hand is turned palm in (its own +x), fingers pointing forward;
+#          over the last "fade" seconds it lets go into the clip's own motion
+MEET = spec.get('meet', {})
+_palm = {}
+def palm_normal(bone, sg):
+    """which way the palm faces, in the hand bone's own axes: the flattest direction of the hand's own vertices (the
+    palm and fingers together), turned toward the body (at rest, in the A-pose, the palms face the thighs)"""
+    if bone in _palm: return _palm[bone]
+    import numpy as np
+    me = mesh; gi = me.vertex_groups[bone].index; Mi = arm.bones[bone].matrix_local.inverted(); W = me.matrix_world
+    pts = [Mi @ (W @ v.co) for v in me.data.vertices if any(g.group == gi and g.weight > 0.5 for g in v.groups)]
+    P = np.array([p[:] for p in pts]); P -= P.mean(0); ev, evec = np.linalg.eigh(P.T @ P); n = Vector(evec[:, 0])
+    inward = arm.bones[bone].matrix_local.to_3x3().inverted() @ (RIGHT * sg)
+    if n.dot(inward) < 0: n = -n
+    _palm[bone] = n; print('rig: %s palm faces %s in its own axes' % (bone, tuple(round(c, 2) for c in n))); return n
+def palms(c, f, t):
+    t0, t1 = c['at']; fade = c.get('fade', 0.15)
+    w = 0.0 if t < t0 - 1e-6 or t > t1 + 1e-6 else min(1.0, (t1 - t) / fade) if fade > 0 else 1.0
+    hr, hl = (rig.pose.bones[n] for n in c['hands']); tr_, tl = (rig.pose.bones[n] for n in c['targets'])
+    if w > 0:
+        a, b_ = hr.head.copy(), hl.head.copy(); m = (a + b_) / 2; g = c['gap'] / 2
+        m.y = max(a.y, b_.y) + 0.02   # level at the shorter reach (forward is -y), a little inside it so both arms get there
+        for tb, want in ((tr_, m - RIGHT * g), (tl, m + RIGHT * g)):
+            tgt = tb.head.lerp(want, w)
+            tb.location = arm.bones[tb.name].matrix_local.to_3x3().inverted() @ (tgt - arm.bones[tb.name].head_local)
+            tb.keyframe_insert('location', frame=f)
+        bpy.context.scene.frame_set(f)
+    for pb, sg in ((hr, 1), (hl, -1)):
+        if w <= 0: pb.rotation_quaternion = Quaternion(); pb.keyframe_insert('rotation_quaternion', frame=f); continue
+        n = palm_normal(pb.name, sg); yl = Vector((0, 1, 0)); n = (n - yl * n.dot(yl)).normalized()
+        Bl = Matrix((n, yl, n.cross(yl))).transposed()                       # palm, finger line, side: in the bone's own axes
+        tn = RIGHT * sg; Bt = Matrix((tn, FWD, tn.cross(FWD))).transposed()   # where they should point: palm in, fingers ahead
+        Wd = (Bt @ Bl.transposed()).to_quaternion()
+        cur = pb.matrix.to_quaternion(); want = cur.slerp(Wd, w)
+        M4 = want.to_matrix().to_4x4(); M4.translation = pb.matrix.translation; pb.matrix = M4
+        pb.keyframe_insert('rotation_quaternion', frame=f)
+def automatic(state, f, cname=None, t=0.0):
+    bpy.context.scene.frame_set(f)   # the keys just made, evaluated (with the IK), so the reach and the feet are where this key puts them
+    mc = MEET.get(cname)
+    if mc: palms(mc, f, t)
+    for c in AUTO_CLAV:
+        if c['bone'] in state: continue
+        par = arm.bones[c['bone']].parent.name; X = frame_delta(par); Xm = rig.pose.bones[par].matrix
+        H = arm.bones[c['bone']].head_local
+        # the hand target as the chest at rest would see it
+        p = arm.bones[par].matrix_local @ Xm.inverted() @ rig.pose.bones[c['target']].head
+        q = (conv(c['rest']) - H).rotation_difference(p - H)
+        ang = min(q.angle * c.get('k', 0.3), math.radians(c.get('max', 25)))
+        Dc = Quaternion(q.axis, ang).to_matrix() if q.angle > 1e-5 else Matrix.Identity(3)
+        put(c['bone'], Dc, {}, f)
+    if mc and AUTO_CLAV:   # the collarbones moved the arms: turn the hands again from where the forearms now are
+        bpy.context.scene.frame_set(f); palms(mc, f, t)
+    for c in AUTO_TOE:
+        if c['bone'] in state: continue
+        ft = c['foot']; X = frame_delta(ft); Xi = X.inverted()
+        Mf = rig.pose.bones[ft].matrix; Mf0 = arm.bones[ft].matrix_local
+        tb = arm.bones[c['bone']]; ball = Mf @ Mf0.inverted() @ tb.head_local; tip = Mf @ Mf0.inverted() @ tb.tail_local
+        Ma = rig.pose.bones['all'].matrix @ arm.bones['all'].matrix_local.inverted(); n = (Ma.to_3x3() @ UP).normalized(); o = Ma @ Vector((0, 0, 0))
+        ht = lambda v: (v - o).dot(n)
+        best = 0.0
+        if ht(ball) < c.get('near', 0.08) and ht(tip) < c['floor']:
+            ax = (Mf.to_3x3().normalized() @ Mf0.to_3x3().inverted() @ RIGHT).normalized(); v = tip - ball
+            for sgn in (1, -1):
+                for d in range(2, 72, 2):
+                    if ht(ball + Quaternion(ax, sgn * math.radians(d)) @ v) >= c['floor']:
+                        if not best or d < abs(best): best = sgn * d
+                        break
+        Qw = Quaternion(ax, math.radians(best)) if best else Quaternion()
+        put(c['bone'], (Xi @ Qw @ X).to_matrix(), {}, f)
 ad = rig.animation_data_create(); scene = bpy.context.scene; last = 1
 for name, clip in spec.get('clips', {}).items():
     fps = clip.get('fps', 30); scene.render.fps = fps
     act = bpy.data.actions.new(name); ad.action = act
     for pb in rig.pose.bones: pb.rotation_mode = 'QUATERNION'; pb.rotation_quaternion = Quaternion(); pb.location = Vector(); pb.scale = Vector((1, 1, 1))
-    state = {}; lastq = {}; eases = []; prevf = None; prevb = {}; beases = []
+    state = {}; lastq.clear(); eases = []; prevf = None; prevb = {}; beases = []
     for key in clip['keys']:
         f = round(key['t'] * fps) + 1; last = max(last, f)
         if key.get('reset'): state = {b: {} for b in state}
@@ -321,21 +430,13 @@ for name, clip in spec.get('clips', {}).items():
             if bname in prevb and fb <= prevb[bname]: fb = prevb[bname] + 1
             if key.get('in') and bname in prevb and bname in lag: beases.append((bname, prevb[bname], key['in']))
             prevb[bname] = fb; last = max(last, fb)
-            pb = rig.pose.bones[bname]; R = rest[bname]
-            D = delta(tr.get('rot', [0, 0, 0]))
-            if tr.get('qb'): D = D @ Quaternion(tr['qb']).to_matrix()   # a turn given directly in Blender's axes (motion capture, tools/blender/mocap.py); "rot" adds on top
-            if tr.get('aim'):
-                tgt = conv(tr['aim']).normalized(); A = restdir[bname].rotation_difference(tgt).to_matrix()
-                if tr.get('twist'): A = Quaternion(tgt, math.radians(tr['twist'])).to_matrix() @ A
-                D = D @ A
-            if tr.get('spin'):   # "spin": degrees about the bone's own rest line (a forearm or wrist turning the palm over)
-                D = D @ Quaternion(restdir[bname], math.radians(tr['spin'])).to_matrix()
-            q = (R.inverted() @ D @ R).to_quaternion()
-            if bname in lastq and lastq[bname].dot(q) < 0: q.negate()   # keep to the near side of the last key, so a turn goes the short way round
-            lastq[bname] = q.copy(); pb.rotation_quaternion = q
-            pb.location = R.inverted() @ conv(tr.get('move', [0, 0, 0]))
-            pb.scale = bone_scale(R, tr.get('scale', [1, 1, 1]))
-            pb.keyframe_insert('rotation_quaternion', frame=fb); pb.keyframe_insert('location', frame=fb); pb.keyframe_insert('scale', frame=fb)
+            if bname in SHARE:   # the turn spread over a chain of bones (a spine that curves, a neck that bends with the head)
+                Dq = turn_of(bname, tr).to_quaternion()
+                for tb, fr in SHARE[bname]:
+                    put(tb, Quaternion().slerp(Dq, fr).to_matrix(), tr if tb == bname else {}, fb)
+                continue
+            put(bname, turn_of(bname, tr), tr, fb)
+        if AUTO_CLAV or AUTO_TOE or name in MEET: automatic(state, f, name, key['t'])
         if key.get('in') and prevf is not None: eases.append((prevf, key['in']))
         prevf = f
     fcs = fcurves_of(act)

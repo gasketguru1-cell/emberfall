@@ -196,5 +196,8 @@
  },
  "LedgeAtk": {
   "seconds": 1.133
+ },
+ "ClapCap": {
+  "seconds": 1.867
  }
 }

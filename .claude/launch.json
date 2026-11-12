@@ -2,6 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     { "name": "emberfall", "runtimeExecutable": "node", "runtimeArgs": ["serve.js"], "port": 8317 },
-    { "name": "emberfall-check", "runtimeExecutable": "node", "runtimeArgs": ["-e", "process.env.EMBERFALL_PORT='8327';require('./serve.js')"], "port": 8327 }
+    { "name": "emberfall-check", "runtimeExecutable": "node", "runtimeArgs": ["-e", "process.env.EMBERFALL_PORT='8327';require('./serve.js')"], "port": 8327 },
+    { "name": "emberfall-anim", "runtimeExecutable": "node", "runtimeArgs": ["-e", "process.env.EMBERFALL_PORT='8341';require('./serve.js')"], "port": 8341, "autoPort": false }
   ]
 }
