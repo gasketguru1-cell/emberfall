@@ -125,15 +125,15 @@ function keyHint(x, y, cap, action) {
 }
 /* The controls shown under the fighter select: whatever the keyboard's setup and the first controller's setup say right now. */
 function legendRows() {
-  const pm = setupOf(allDevs().find(d => d !== 'kb') || 'pad0').map, km = setupOf('kb').map;
-  const pb = a => PAD_ROWS.filter(r => pm[r[0]] === a).map(r => r[2]).join(' / ') || '—';
+  const pd = allDevs().find(d => d !== 'kb') || 'pad0', pm = setupOf(pd).map, km = setupOf('kb').map, ps = pd;
+  const pb = a => padRowsFor(pd).filter(r => pm[r[0]] === a).map(r => padCap(r[2], ps)).join(' / ') || '—';
   const kk = (...n) => n.map(x => km[x]).filter(Boolean).map(keyName).join(' / ') || '—';
   const four = (u, l, d, r) => km[u] + km[l] + km[d] + km[r] === 'ArrowUpArrowLeftArrowDownArrowRight' ? 'Arrows' : [u, l, d, r].map(x => keyName(km[x])).join(' ');
-  return [['CONTROLLER', [['Stick', 'Move'], [pb('atk'), 'Attack'], [pb('spc'), 'Special'], [pb('jmp'), 'Jump'], [pb('shd'), 'Shield'], [pb('grb'), 'Grab'], ['R Stick', 'Tilt'], ['+', 'Start'], ['−', 'Controls']]],
+  return [['CONTROLLER', [['Stick', 'Move'], [pb('atk'), 'Attack'], [pb('spc'), 'Special'], [pb('jmp'), 'Jump'], [pb('shd'), 'Shield'], [pb('grb'), 'Grab'], ['R Stick', 'Tilt'], [padCap('+', ps), 'Start'], [padCap('−', ps), 'Controls']]],
           ['KEYBOARD', [[four('up', 'left', 'down', 'right'), 'Move'], [kk('atk'), 'Attack'], [kk('spc'), 'Special'], [kk('jmp', 'jmp2'), 'Jump'], [kk('shd', 'shd2'), 'Shield'], [kk('grb', 'grb2'), 'Grab'], [four('cu', 'cl', 'cd', 'cr'), 'Tilt'], [kk('walk'), 'Walk'], ['Enter', 'Start'], ['Bksp', 'Controls']]]];
 }
 /* The controls screen (sim.js: CMENU), over the fighter select or the pause screen. */
-const ACT_COL = { '': '#6d6885', atk: '#ff7b6c', spc: '#6cb4ff', jmp: '#9be564', shd: '#7fe3e0', grb: '#d59bff' };
+const ACT_COL = { mod: '#f2c14e', '': '#6d6885', atk: '#ff7b6c', spc: '#6cb4ff', jmp: '#9be564', shd: '#7fe3e0', grb: '#d59bff' };
 function drawCMenu() {
   if (!CMENU) return; const m = CMENU, su = setupOf(m.dev), kb = su.type === 'kb', snd = m.page === 'sound', items = cmenuItems(), list = setupsFor(m.dev), ui = 'system-ui, sans-serif';
   g.save(); spaced(0); g.fillStyle = 'rgba(8,6,16,.8)'; g.fillRect(0, 0, W, H);
@@ -166,7 +166,9 @@ function drawCMenu() {
       g.textAlign = 'center'; g.font = 'bold 22px ' + ui; g.fillStyle = '#fff'; g.fillText(name, x + w / 2, my + 3);
       const nw = g.measureText(name).width; g.fillStyle = '#ffd98a'; g.fillText('‹', x + w / 2 - nw / 2 - 26, my + 2); g.fillText('›', x + w / 2 + nw / 2 + 26, my + 2);
       g.textAlign = 'right'; g.font = '13px ' + ui; g.fillStyle = '#b9b2d6'; g.fillText((su.fixed ? 'built-in' : su.touched ? 'your own' : 'your own, not changed yet') + '  ·  ' + (list.indexOf(su) + 1) + ' of ' + list.length, x + w - 16, my);
-    } else if (it.kind === 'reset') { g.textAlign = 'center'; g.font = 'bold 14px ' + ui; g.fillStyle = on ? '#fff' : '#d8d2ee'; g.fillText('Reset ' + su.name + ' to the standard layout', x + w / 2, my); }
+    } else if (it.kind === 'socd') { g.textAlign = 'center'; g.font = 'bold 14px ' + ui; g.fillStyle = on ? '#fff' : '#d8d2ee'; g.fillText('Left + right together:  ' + (SOCD.mode === 'last' ? 'last pressed wins' : 'neither (neutral)'), x + w / 2, my); }
+    else if (it.kind === 'teach') { const q = padObj(m.dev), has = q && TAUGHT[q.id]; g.textAlign = 'center'; g.font = 'bold 14px ' + ui; g.fillStyle = on ? '#fff' : has ? '#9be564' : '#d8d2ee'; g.fillText(has ? 'Buttons taught ✓  (teach again)' : 'Teach this controller its buttons', x + w / 2, my); }
+    else if (it.kind === 'reset') { g.textAlign = 'center'; g.font = 'bold 14px ' + ui; g.fillStyle = on ? '#fff' : '#d8d2ee'; g.fillText('Reset ' + su.name + ' to the standard layout', x + w / 2, my); }
     else {
       g.textAlign = 'left'; g.font = '15px ' + ui; g.fillStyle = on ? '#fff' : '#d8d2ee'; g.fillText(it.label, x + 14, my);
       if (kb) {
@@ -180,10 +182,21 @@ function drawCMenu() {
       }
     }
   });
+  if (m.teach) {   /* teaching: one big question at a time */
+    const t = m.teach, [, what, hint] = TEACH_STEPS[t.step], bx = CM.x + 30, by = CM.y + 124, bw = CM.w - 60, bh = 400;
+    g.fillStyle = 'rgba(16,13,30,.97)'; rr(bx, by, bw, bh, 14); g.fill(); g.strokeStyle = '#ffd98a'; g.lineWidth = 2; g.stroke();
+    g.textAlign = 'center'; g.font = 'bold 13px ' + ui; spaced(2); g.fillStyle = '#ffb86b'; g.fillText('TEACHING  ·  STEP ' + (t.step + 1) + ' OF ' + TEACH_STEPS.length, W / 2, by + 52); spaced(0);
+    const ask = typeof TEACH_STEPS[t.step][0] === 'string' ? what : 'Press ' + what;
+    g.font = '900 30px ' + ui; g.fillStyle = t.rel ? '#8f88ad' : '#fff'; g.fillText(t.rel ? 'Let go of everything…' : ask, W / 2, by + 150);
+    g.font = '16px ' + ui; g.fillStyle = '#cfc8e8'; if (!t.rel && hint) g.fillText(hint, W / 2, by + 190);
+    g.fillStyle = 'rgba(255,255,255,.1)'; rr(bx + 120, by + 250, bw - 240, 10, 5); g.fill(); g.fillStyle = '#ffb86b'; rr(bx + 120, by + 250, (bw - 240) * t.step / TEACH_STEPS.length, 10, 5); g.fill();
+    g.font = '14px ' + ui; g.fillStyle = '#9d96b8'; g.fillText('No such button?  Press one you already taught to skip it.', W / 2, by + 310);
+    g.fillText('Escape, Delete or a click stops without changing anything.', W / 2, by + 334);
+  }
   if (m.noteT > 0) { g.globalAlpha = Math.min(1, m.noteT / 30); g.textAlign = 'center'; g.font = '14px ' + ui; g.fillStyle = '#ffd98a'; g.fillText(m.note, CM.x + CM.w / 2, CM.y + 542); g.globalAlpha = 1; }
   g.textAlign = 'center'; g.font = '13px ' + ui; g.fillStyle = '#8f88ad'; g.fillText(snd ? 'The music steps back by itself for heavy hits and KOs, and while the game is paused.' : 'Two jump buttons together: short hop   ·   Right stick down while falling: fast fall', CM.x + CM.w / 2, CM.y + 568);
   let hx = CM.x + (snd ? 190 : kb ? 96 : 250); const hy = CM.y + CM.h - 24;
-  for (const [cap, act] of snd ? (kb ? [['↑ ↓', 'choose'], ['← →', 'quieter / louder'], ['Enter', 'mute'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'quieter / louder'], ['A', 'mute'], ['B', 'done']]) : kb ? [['↑ ↓ ← →', 'choose'], ['Enter', 'change a key'], ['Delete', 'clear it'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'change'], ['Y', 'set to nothing'], ['B', 'done']]) hx = keyHint(hx, hy, cap, act) + 8;
+  for (const [cap, act] of snd ? (kb ? [['↑ ↓', 'choose'], ['← →', 'quieter / louder'], ['Enter', 'mute'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'quieter / louder'], [padCap('A', m.dev), 'mute'], [padCap('B', m.dev), 'done']]) : kb ? [['↑ ↓ ← →', 'choose'], ['Enter', 'change a key'], ['Delete', 'clear it'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'change'], [padCap('Y', m.dev), 'set to nothing / forget'], [padCap('B', m.dev), 'done']]) hx = keyHint(hx, hy, cap, act) + 8;
   g.restore();
 }
 /* the forms the fighter select shows: Wren's companions, the first five Fowls; Joey only as himself (his other form is a surprise) */
@@ -274,7 +287,7 @@ function drawSelect(three) {
   });
   const n = Math.floor(t / 420) % TIPS.length, ph = (t % 420) / 420, a = Math.min(1, ph * 8, (1 - ph) * 8);
   g.textAlign = 'left'; g.font = 'bold 11px system-ui, sans-serif'; spaced(2); g.fillStyle = '#ffb86b'; g.fillText('TIP', px + 18, py + 77); spaced(0);
-  g.font = '14px system-ui, sans-serif'; g.fillStyle = 'rgba(255,255,255,' + a.toFixed(2) + ')'; g.fillText(TIPS[n], px + 126, py + 77);
+  g.font = '14px system-ui, sans-serif'; g.fillStyle = 'rgba(255,255,255,' + a.toFixed(2) + ')'; g.fillText(TIPS[n].replace(/(press|and) A\b/g, (s, w) => w + ' ' + padCap('A')), px + 126, py + 77);
 
   /* ---- hitbox switch (top right) and the note about a newer version (top middle) ---- */
   if (!SWITCHES) { const w = 168, x = W - 44 - w, y = 20;   /* the switches are hidden: just say how to bring them back */
@@ -286,12 +299,12 @@ function drawSelect(three) {
     g.fillStyle = 'rgba(20,17,36,.8)'; rr(x - 36, y, w + 36, 34, 17); g.fill(); g.strokeStyle = on ? '#ff6a6a' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.font = '12px system-ui, sans-serif'; g.fillText('Show Hitboxes', x - 22, y + 22);
     g.fillStyle = on ? '#ff6a6a' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
-    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('X / Y  or  B key', x + 130, y + 22); }
+    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(padCap('X') + ' / ' + padCap('Y') + '  or  B key', x + 130, y + 22); }
   { const on = TRAINING, w = 214, x = W - 44 - w, y = 100;   /* training mode switch */
     g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = on ? '#9be564' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Training', x + 12, y + 22);
     g.fillStyle = on ? '#9be564' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
-    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point + A  or  T key', x + 128, y + 22); }
+    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point + ' + padCap('A') + '  or  T key', x + 128, y + 22); }
   { const on = DBG.fx, w = 214, x = W - 44 - w, y = 60;   /* hit effects switch: the sparks and flash where a hit lands */
     g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = on ? '#ffd166' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Hit sparks', x + 12, y + 22);
@@ -301,9 +314,9 @@ function drawSelect(three) {
     g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = on ? '#8fd3ff' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Attack arcs', x + 12, y + 22);
     g.fillStyle = on ? '#8fd3ff' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
-    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point + A  or  G key', x + 128, y + 22); }
+    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point + ' + padCap('A') + '  or  G key', x + 128, y + 22); }
   }
-  if (SWITCHES && DESKTOP()) for (const [box, label, hint, col, hot] of [[ONLINE_PILL, 'Online', 'point + A: host or join', '#ffb35c', false], [QUIT_PILL, QUIT_ASK > 0 ? 'Quit?' : 'Quit', QUIT_ASK > 0 ? 'press A again to quit' : 'point + A, twice', '#ff6a6a', QUIT_ASK > 0]]) {   /* desktop app: reachable with a controller's cursor */
+  if (SWITCHES && DESKTOP()) for (const [box, label, hint, col, hot] of [[ONLINE_PILL, 'Online', 'point + ' + padCap('A') + ': host or join', '#ffb35c', false], [QUIT_PILL, QUIT_ASK > 0 ? 'Quit?' : 'Quit', QUIT_ASK > 0 ? 'press ' + padCap('A') + ' again to quit' : 'point + A, twice', '#ff6a6a', QUIT_ASK > 0]]) {   /* desktop app: reachable with a controller's cursor */
     const [x, y, w] = box; g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = hot ? col : 'rgba(255,255,255,.16)'; g.lineWidth = hot ? 2 : 1; g.stroke();
     g.textAlign = 'left'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = col; g.fillText(label, x + 12, y + 22);
     g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(hint, x + 80, y + 22); }
@@ -334,26 +347,51 @@ function drawOptButton() {
   const cx = x + 20, cy = y + 17; g.fillStyle = '#ffd166'; g.beginPath(); for (let k = 0; k < 16; k++) { const a = k * Math.PI / 8, r = k % 2 ? 6 : 9; g.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); } g.closePath(); g.fill();   /* a little cog */
   g.fillStyle = '#2a1208'; g.beginPath(); g.arc(cx, cy, 3, 0, TAU); g.fill();
   g.textAlign = 'left'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = '#ffe2a8'; g.fillText('Options', x + 38, y + 22);
-  g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('stocks, stage', x + 108, y + 22);
+  g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('stage, controllers', x + 104, y + 22);
 }
-/* the Options panel: Stocks and Stage, each with arrows, and Done */
+/* the Options panel: Stocks and Stage, each with arrows; the Controllers box (what is plugged in, what kind it is, the setup
+   it uses; A or a click opens its controls screen); Done */
+const KIND_COL = { ps: '#5b8cff', nin: '#ff5a5a', joy: '#ff5a5a', gc: '#9b7bff', x: '#5fd068', kb: '#d9d3ee' };
 function drawOptions() {
   if (!OPT_UI.open) return; const L = optLayout(), [px, py, pw, ph] = L.P;
   g.fillStyle = 'rgba(6,5,12,.62)'; g.fillRect(0, 0, W, H);
   g.save(); g.shadowColor = 'rgba(0,0,0,.6)'; g.shadowBlur = 30; g.fillStyle = 'rgba(22,18,38,.97)'; rr(px, py, pw, ph, 18); g.fill(); g.restore();
   g.strokeStyle = 'rgba(255,209,102,.45)'; g.lineWidth = 2; rr(px, py, pw, ph, 18); g.stroke();
-  g.textAlign = 'center'; g.font = '900 30px system-ui, sans-serif'; spaced(6); g.fillStyle = '#ffd98a'; g.fillText('OPTIONS', W / 2 + 3, py + 56); spaced(0);
+  g.textAlign = 'center'; g.font = '900 30px system-ui, sans-serif'; spaced(6); g.fillStyle = '#ffd98a'; g.fillText('OPTIONS', W / 2 + 3, py + 52); spaced(0);
   const vals = [[OPT.stocks + (OPT.stocks === 1 ? ' stock' : ' stocks'), 'per player, 1 to 99', OPT.stocks > 1, OPT.stocks < 99], [STAGES[OPT.stage].name, STAGES.length > 1 ? (OPT.stage + 1) + ' of ' + STAGES.length : 'the only stage, for now', STAGES.length > 1, STAGES.length > 1]];
-  L.rows.forEach((r, k) => { const [bx, by, bw, bh] = r.box, sel = OPT_UI.row === k, [val, sub, canL, canR] = vals[k];
+  /* the Controllers box behind its rows */
+  { const [cx, cy, cw, ch] = L.cbox; g.fillStyle = 'rgba(255,255,255,.03)'; rr(cx, cy, cw, ch, 14); g.fill(); g.strokeStyle = 'rgba(255,255,255,.1)'; g.lineWidth = 1; rr(cx, cy, cw, ch, 14); g.stroke();
+    g.textAlign = 'left'; g.font = '900 13px system-ui, sans-serif'; spaced(3); g.fillStyle = '#ffd98a'; g.fillText('CONTROLLERS', cx + 14, cy + 24); spaced(0);
+    g.textAlign = 'right'; g.font = '12px system-ui, sans-serif'; g.fillStyle = '#9d96b8'; g.fillText('what is plugged in  ·  A or a click: set up its buttons', cx + cw - 14, cy + 24); }
+  L.rows.forEach((r, k) => { const [bx, by, bw, bh] = r.box, sel = OPT_UI.row === k;
+    if (r.kind === 'done') { g.fillStyle = sel ? '#ffd166' : 'rgba(255,209,102,.18)'; rr(bx, by, bw, bh, 23); g.fill();
+      g.textAlign = 'center'; g.font = 'bold 18px system-ui, sans-serif'; g.fillStyle = sel ? '#2a1208' : '#ffe2a8'; g.fillText('Done', bx + bw / 2, by + 30); return; }
     g.fillStyle = sel ? 'rgba(255,209,102,.13)' : 'rgba(255,255,255,.04)'; rr(bx, by, bw, bh, 12); g.fill(); if (sel) { g.strokeStyle = '#ffd166'; g.lineWidth = 2; rr(bx, by, bw, bh, 12); g.stroke(); }
-    g.textAlign = 'left'; g.font = 'bold 20px system-ui, sans-serif'; g.fillStyle = sel ? '#fff' : '#d9d3ee'; g.fillText(k ? 'Stage' : 'Stocks', bx + 24, by + 42);
-    for (const [b, d, on] of [[r.l, -1, canL], [r.r, 1, canR]]) { const [ax, ay, aw, ah] = b, mx = ax + aw / 2, my = ay + ah / 2;
-      g.fillStyle = on ? (sel ? '#ffd166' : 'rgba(255,209,102,.55)') : 'rgba(255,255,255,.12)'; g.beginPath(); g.moveTo(mx + d * 9, my); g.lineTo(mx - d * 7, my - 11); g.lineTo(mx - d * 7, my + 11); g.closePath(); g.fill(); }
-    const vx = (r.l[0] + r.l[2] + r.r[0]) / 2; g.textAlign = 'center'; g.font = 'bold 22px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(val, vx, by + 36);
-    g.font = '12px system-ui, sans-serif'; g.fillStyle = '#9d96b8'; g.fillText(sub, vx, by + 56); });
-  { const [dx, dy, dw, dh] = L.done, sel = OPT_UI.row === 2; g.fillStyle = sel ? '#ffd166' : 'rgba(255,209,102,.18)'; rr(dx, dy, dw, dh, 23); g.fill();
-    g.textAlign = 'center'; g.font = 'bold 18px system-ui, sans-serif'; g.fillStyle = sel ? '#2a1208' : '#ffe2a8'; g.fillText('Done', dx + dw / 2, dy + 30); }
-  g.font = '12px system-ui, sans-serif'; g.fillStyle = '#9d96b8'; g.fillText('Stick or arrows: up / down picks, left / right changes   ·   A: change or Done   ·   B or Start: close', W / 2, py + ph - 22);
+    const my = by + bh / 2;
+    if (r.kind === 'stocks' || r.kind === 'stage') { const [val, sub, canL, canR] = vals[k];
+      g.textAlign = 'left'; g.font = 'bold 20px system-ui, sans-serif'; g.fillStyle = sel ? '#fff' : '#d9d3ee'; g.fillText(k ? 'Stage' : 'Stocks', bx + 24, my + 7);
+      for (const [b, d, on] of [[r.l, -1, canL], [r.r, 1, canR]]) { const [ax, ay, aw, ah] = b, mx = ax + aw / 2, ny = ay + ah / 2;
+        g.fillStyle = on ? (sel ? '#ffd166' : 'rgba(255,209,102,.55)') : 'rgba(255,255,255,.12)'; g.beginPath(); g.moveTo(mx + d * 9, ny); g.lineTo(mx - d * 7, ny - 11); g.lineTo(mx - d * 7, ny + 11); g.closePath(); g.fill(); }
+      const vx = (r.l[0] + r.l[2] + r.r[0]) / 2; g.textAlign = 'center'; g.font = 'bold 21px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(val, vx, my + 2);
+      g.font = '12px system-ui, sans-serif'; g.fillStyle = '#9d96b8'; g.fillText(sub, vx, my + 19); return; }
+    let name, kind, right, col;
+    if (r.kind === 'dev') {
+      const d = r.dev, p = padObj(d), grp = d === 'kb' ? 'kb' : kindGroup(padKind(p)), su = setupOf(d), who = devPlayer(d);
+      name = d === 'kb' ? 'Keyboard' : devName(d); col = KIND_COL[grp] || KIND_COL.x;
+      kind = d === 'kb' ? 'and the mouse' : p && TAUGHT[p.id] ? 'buttons taught on the controls screen' : grp === 'x' && padKind(p) === 'other' ? (p.mapping === 'standard' ? 'read as a standard controller' : 'unknown layout: teach it its buttons') : 'buttons named its own way';
+      right = (who ? who + '  ·  ' : '') + su.name + '   Set up ›';
+    } else {
+      const n = GCU.pads.filter(Boolean).length; name = 'GameCube adapter (Nintendo, USB)'; col = KIND_COL.gc;
+      kind = GCU.dev ? 'connected  ·  ' + (n ? n + (n === 1 ? ' controller' : ' controllers') + ' in it' : 'nothing plugged into its ports') : GCU.err ? GCU.err : 'Windows needs the WinUSB driver on it first (Zadig, as for Dolphin)';
+      right = GCU.dev ? 'Ports = controllers 5 to 8' : DESKTOP() ? 'Find it ›' : 'Connect ›';
+    }
+    const big = bh >= 36;
+    g.fillStyle = col; g.beginPath(); g.arc(bx + 20, my, 6, 0, TAU); g.fill();
+    g.textAlign = 'left'; g.font = 'bold ' + (big ? 16 : 14) + 'px system-ui, sans-serif'; g.fillStyle = sel ? '#fff' : '#e6e0f6'; g.fillText(name, bx + 36, big ? my - 2 : my + 5);
+    if (big) { g.font = '12px system-ui, sans-serif'; g.fillStyle = GCU.err && r.kind === 'gcu' ? '#ff9b8a' : '#9d96b8'; g.fillText(kind, bx + 36, my + 14); }
+    g.textAlign = 'right'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = sel ? '#ffd166' : '#b9b2d6'; g.fillText(right, bx + bw - 16, my + 5);
+  });
+  g.textAlign = 'center'; g.font = '12px system-ui, sans-serif'; g.fillStyle = '#9d96b8'; g.fillText('Stick or arrows: up / down picks, left / right changes   ·   A: change, set up or Done   ·   B or Start: close', W / 2, py + ph - 22);
 }
 /* Training: the true-combo counter at the top right, one panel per player who is landing hits. */
 function drawCombo() {

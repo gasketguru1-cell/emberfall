@@ -96,3 +96,4 @@ Nothing here blocks work; these are things only a person at the machine can judg
   - [ ] Tilt (a courier on a mountain ram with a lamplighter's pole; the mounted fighter, the owner's document for fighter 02): concept picture only. Same wait.
   - The three documents describe existing characters; these three take the documents' numbers and kind of play, with their own names, looks and moves.
   - For a new two-legged fighter, copy `tools/blender/sprocket.js`: hand and foot targets, `copyrot` for a held tool, `rigid` boxes. To look at poses, hold a pose with `tick++; draw();` a dozen times (the picture blends by tick), and put a marker bone at a tool's tip so `tools/measure.html` measures the tip.
+- 2026-11-12: Knell — every aerial (n/f/b/u/d) has a Hinge window from its first hit to its end, and the Hinge cancels into any aerial from frame 5 (9 if shielded): aerial > Hinge > aerial chains while Thread lasts. Not committed until "commit to live".

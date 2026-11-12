@@ -2,7 +2,7 @@
 // The game files are served to the window from inside the app through a private app:// address.
 // Networking lives here, in the main process, and reaches the page through preload.js:
 //   - 'direct': UDP between the two machines (same network, or this computer for testing). No account, no server.
-//   - 'eos':    Epic Online Services P2P + Lobbies (desktop/eos.js), once the EOS SDK and the game's product IDs are in place.
+//   - 'eos':    Epic Online Services P2P + Lobbies (desktop/eos.js): internet play through Epic's free relay (desktop/EOS-SETUP.md).
 const { app, BrowserWindow, protocol, ipcMain, Menu } = require('electron');
 const path = require('path'), fs = require('fs'), dgram = require('dgram'), os = require('os');
 
@@ -64,6 +64,7 @@ ipcMain.on('udp-close', (e, id) => { const k = socks.get(id); if (k) { k.s.close
 let eos = null; try { eos = require('./eos.js'); if (!eos.available()) eos = null; } catch (e) { eos = null; }
 ipcMain.handle('eos-available', () => !!eos);
 if (eos) eos.wire(ipcMain, () => win);
+app.on('will-quit', () => { try { if (eos && eos.shutdown) eos.shutdown(); } catch (e) { /* quitting anyway */ } });
 
 app.whenReady().then(() => {
   serve(); Menu.setApplicationMenu(null);
@@ -71,12 +72,21 @@ app.whenReady().then(() => {
   const fullscreen = !process.env.EMBERFALL_WINDOWED && !process.env.EMBERFALL_AUTOTEST;
   win = new BrowserWindow({ width: 1280, height: 760, fullscreen, backgroundColor: '#0b0d16', title: 'Emberfall', autoHideMenuBar: true, icon: path.join(__dirname, 'logo', 'icon-256.png'),
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, backgroundThrottling: false } });
+  /* Nintendo's GameCube adapter (057e:0337) over WebUSB: the game may open it without asking (sim.js: GCU). Nothing else. */
+  const isGCU = d => d && d.vendorId === 0x057e && d.productId === 0x0337, ses = win.webContents.session;
+  ses.setPermissionCheckHandler(() => true);   /* Electron's own default, kept: the device handler below is what limits USB */
+  ses.setDevicePermissionHandler(d => d.deviceType === 'usb' && isGCU(d.device));
+  ses.on('select-usb-device', (e, details, pick) => { e.preventDefault(); const d = details.deviceList.find(isGCU); pick(d ? d.deviceId : undefined); });
   win.webContents.on('before-input-event', (e, input) => {
     if (input.type === 'keyDown' && input.key === 'F11' && !input.isAutoRepeat) { win.setFullScreen(!win.isFullScreen()); e.preventDefault(); }
   });
   /* The DEV copy (started from the project, not installed): its title and a badge say so, so it is never mistaken for
-     the installed game. It plays the project's files as they are saved. */
+     the installed game. It plays the project's files as they are saved, read when the game loads, so F5 reloads it to
+     pick up new work without closing the window (the installed game ignores F5). */
   if (!app.isPackaged) {
+    win.webContents.on('before-input-event', (e, input) => {
+      if (input.type === 'keyDown' && input.key === 'F5' && !input.isAutoRepeat) { win.webContents.reloadIgnoringCache(); e.preventDefault(); }
+    });
     let branch = ''; try { branch = require('child_process').execSync('git branch --show-current', { cwd: path.join(__dirname, '..'), stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch (e) { /* no git */ }
     const title = `Emberfall DEV - live from your project${branch ? ' (' + branch + ')' : ''}`;
     win.setTitle(title);
@@ -91,7 +101,7 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => app.quit());
 /* Self-test, for checking a build with nobody at the keyboard: EMBERFALL_AUTOTEST=host|join, EMBERFALL_AUTOFILE=<folder>.
    The host writes its code to <folder>/code.txt; the joiner reads it. Both play the same seeded inputs as tests/net.js for
-   1800 frames over the real connection, then write their checksums and network numbers to <folder>/<role>.json and quit. */
+   1800 frames over the real connection (direct, or Epic with EMBERFALL_AUTOVIA=eos), then write their checksums and network numbers to <folder>/<role>.json and quit. */
 function autotest(role) {
   const dir = process.env.EMBERFALL_AUTOFILE, fsP = fs.promises, me = role === 'host' ? 0 : 1;
   if (role === 'probe') {   /* offline check: the 3D models load and a CPU match runs with no network */
@@ -101,11 +111,35 @@ function autotest(role) {
       await fsP.writeFile(path.join(dir, 'probe.json'), JSON.stringify(r)); app.quit(); })();
     return;
   }
+  if (role === 'menu-host' || role === 'menu-join') {   /* the ONLINE menu itself, as a player uses it: host shows a code, join types it;
+       reports whether the two linked and every status the menu showed on the way (a failed join must say why within 20 s) */
+    (async () => {
+      await new Promise(r => setTimeout(r, 5000));
+      let code = '';
+      if (role === 'menu-join') { for (let k = 0; k < 300 && !fs.existsSync(path.join(dir, 'code.txt')); k++) await new Promise(r => setTimeout(r, 200)); code = (await fsP.readFile(path.join(dir, 'code.txt'), 'utf8')).trim(); }
+      const via = JSON.stringify(process.env.EMBERFALL_AUTOVIA || 'eos');
+      await win.webContents.executeJavaScript(`(() => { openOnline(); const v = document.getElementById('on-via'); v.value = ${via};
+        if (${JSON.stringify(role)} === 'menu-host') document.getElementById('on-host').click();
+        else { document.getElementById('on-join').click(); document.getElementById('on-code').value = ${JSON.stringify(code)}; document.getElementById('on-go').click(); } })()`);
+      const seen = [], t0 = Date.now(); let linked = false;
+      while (Date.now() - t0 < (role === 'menu-host' ? 90000 : 45000)) {
+        const s = await win.webContents.executeJavaScript(`({ st: document.getElementById('on-st').textContent, code: document.getElementById('on-codev').textContent, line: window.__online.line(), linked: !!(window.__online.state() && window.__online.state().linked) })`);
+        if (role === 'menu-host' && s.code && !fs.existsSync(path.join(dir, 'code.txt'))) await fsP.writeFile(path.join(dir, 'code.txt'), s.code);
+        for (const t of [s.st, s.line]) if (t && seen[seen.length - 1] !== t && !seen.includes(t)) seen.push(((Date.now() - t0) / 1000).toFixed(1) + 's ' + t);
+        if (s.linked) { linked = true; await new Promise(r => setTimeout(r, 1500)); break; }
+        if (role === 'menu-join' && !s.line.startsWith('Online') && seen.length > 1 && /Could not/.test(s.st)) break;
+        await new Promise(r => setTimeout(r, 250));
+      }
+      let log = ''; try { log = fs.readFileSync(eos && eos.logPath, 'utf8'); } catch (e) { /* none */ }
+      await fsP.writeFile(path.join(dir, role + '.json'), JSON.stringify({ role, linked, seen, log }, null, 1)); app.quit();
+    })();
+    return;
+  }
   const js = `(async () => {
     const seed = ${me === 0 ? 1000 : 2000}; let s = seed >>> 0; const rnd = () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
     const sc = []; let cur = [0, 0, 0, 0, 0], left = 0;
     for (let k = 0; k < 4000; k++) { if (left-- <= 0) { left = 2 + (rnd() * 18 | 0); const r = rnd(); cur = [Math.round((rnd() * 2 - 1) * 127), Math.round((rnd() * 2 - 1) * 127), r < 0.1 ? (rnd() < 0.5 ? -127 : 127) : 0, 0, rnd() < 0.55 ? 1 << (rnd() * 5 | 0) : 0]; if (rnd() < 0.3) cur[0] = cur[1] = 0; } sc.push(cur.slice()); }
-    const t = window.desktop.getTransports().find(x => x.id === 'direct');
+    const t = window.desktop.getTransports().find(x => x.id === ${JSON.stringify(process.env.EMBERFALL_AUTOVIA || 'direct')});   /* EMBERFALL_AUTOVIA=eos tests the Epic connection */
     let link; if (${me} === 0) { link = await t.host(); window.__code = link.code; } else { link = await t.join(${JSON.stringify('CODE')}); }
     await new Promise(res => { let ok = false; link.onMessage(m => { if (m.t === 'hi' && !ok) { ok = true; link.send({ t: 'hi' }); setTimeout(res, 300); } }); const ping = () => { if (!ok) { link.send({ t: 'hi' }); setTimeout(ping, 200); } }; ping(); });
     TRAINING = false; slots[0] = { dev: 'kb', pick: 2, ready: true }; slots[1] = { dev: 'kb', pick: 5, ready: true }; startMatch(); for (const f of F) f.ctl = new Ctl('cpu');
@@ -118,7 +152,7 @@ function autotest(role) {
     let code = 'CODE';
     if (role === 'join') { for (let k = 0; k < 100 && !fs.existsSync(path.join(dir, 'code.txt')); k++) await new Promise(r => setTimeout(r, 200)); code = (await fsP.readFile(path.join(dir, 'code.txt'), 'utf8')).trim(); }
     const run = win.webContents.executeJavaScript(js.replace(JSON.stringify('CODE'), JSON.stringify(code)));
-    if (role === 'host') { for (let k = 0; k < 50; k++) { const c = await win.webContents.executeJavaScript('window.__code || null'); if (c) { await fsP.writeFile(path.join(dir, 'code.txt'), c); break; } await new Promise(r => setTimeout(r, 100)); } }
+    if (role === 'host') { for (let k = 0; k < 300; k++) { const c = await win.webContents.executeJavaScript('window.__code || null'); if (c) { await fsP.writeFile(path.join(dir, 'code.txt'), c); break; } await new Promise(r => setTimeout(r, 100)); } }
     try { const r = await run; await fsP.writeFile(path.join(dir, role + '.json'), JSON.stringify(r)); } catch (e) { await fsP.writeFile(path.join(dir, role + '.json'), JSON.stringify({ error: String(e) })); }
     app.quit();
   })();

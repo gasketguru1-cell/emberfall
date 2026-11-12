@@ -1,8 +1,8 @@
 {
   "name": "emberfall",
-  "version": "1.0.8",
+  "version": "1.0.12",
   "scripts": {
-    "test": "node tests/headless.js && node tests/rules.js && node tests/fuzz.js 20 && node tests/net.js && node tests/chomp.js && node tests/brand.js && node tests/joey.js && node tests/vargan.js && node tests/sack.js && node tests/knell.js && node tests/kestrel.js && node tests/movelist.js",
+    "test": "node tests/headless.js && node tests/rules.js && node tests/fuzz.js 20 && node tests/net.js && node tests/chomp.js && node tests/brand.js && node tests/joey.js && node tests/vargan.js && node tests/sack.js && node tests/knell.js && node tests/kestrel.js && node tests/movelist.js && node tests/pspad.js",
     "start": "node serve.js",
     "desktop": "electron .",
     "dist": "node tools/stage-desktop.js && electron-builder --win nsis",
@@ -11,6 +11,7 @@
   "type": "commonjs",
   "private": "true",
   "dependencies": {
+    "koffi": "3.3.3",
     "three": "^0.187.0"
   },
   "devDependencies": {
@@ -48,7 +49,8 @@
         "from": "desktop/eos",
         "to": "eos",
         "filter": [
-          "**/*"
+          "EOSSDK-Win64-Shipping.dll",
+          "config.json"
         ]
       }
     ],
@@ -67,7 +69,11 @@
       "createDesktopShortcut": "always",
       "createStartMenuShortcut": true,
       "shortcutName": "Emberfall"
-    }
+    },
+    "asarUnpack": [
+      "node_modules/koffi/**",
+      "node_modules/@koromix/**"
+    ]
   },
   "emberfall": {
     "releaseRepo": "gasketguru1-cell/emberfall-releases"

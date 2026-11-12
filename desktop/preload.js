@@ -1,5 +1,6 @@
 // Gives the game page its network transports, and nothing else from the computer.
-// Each transport: { id, label, host() -> link, join(code) -> link }; a link: { code, send(obj), onMessage(fn) (adds a listener), close() }.
+// Each transport: { id, label, host() -> link, join(code) -> link }; a link: { code, send(obj), onMessage(fn) (adds a listener), close() },
+// and an Epic link also has logPath (its connection log) and note(text) (adds a line to that log).
 const { contextBridge, ipcRenderer } = require('electron');
 const listeners = new Map();
 ipcRenderer.on('udp-msg', (e, id, msg) => { for (const fn of listeners.get(id) || []) fn(msg); });
@@ -10,8 +11,9 @@ function udpLink(r) {
 const direct = { id: 'direct', label: 'Direct (same network)', host: async () => udpLink(await ipcRenderer.invoke('udp-open', 'host')), join: async code => udpLink(await ipcRenderer.invoke('udp-open', 'join', code)) };
 const eosL = new Map();
 ipcRenderer.on('eos-msg', (e, id, msg) => { for (const fn of eosL.get(id) || []) fn(msg); });
-function eosLink(r) { eosL.set(r.id, []); return { code: r.code, send: m => ipcRenderer.send('eos-send', r.id, m), onMessage: fn => eosL.get(r.id).push(fn), close: () => { ipcRenderer.send('eos-close', r.id); eosL.delete(r.id); } }; }
-const eos = { id: 'eos', label: 'Internet (Epic Online Services)', host: async () => eosLink(await ipcRenderer.invoke('eos-host')), join: async code => eosLink(await ipcRenderer.invoke('eos-join', code)) };
+function eosLink(r, logPath) { eosL.set(r.id, []); return { code: r.code, logPath, note: s => ipcRenderer.send('eos-note', s), send: m => ipcRenderer.send('eos-send', r.id, m), onMessage: fn => eosL.get(r.id).push(fn), close: () => { ipcRenderer.send('eos-close', r.id); eosL.delete(r.id); } }; }
+const eos = { id: 'eos', label: 'Internet (Epic Online Services)', host: async () => eosLink(await ipcRenderer.invoke('eos-host'), await ipcRenderer.invoke('eos-log-path')),
+  join: async code => eosLink(await ipcRenderer.invoke('eos-join', code), await ipcRenderer.invoke('eos-log-path')) };
 /* EOS is offered first when it is set up; direct is always there */
 const transports = [direct];
 ipcRenderer.invoke('eos-available').then(ok => { if (ok) transports.unshift(eos); });
@@ -51,7 +53,7 @@ try {
   if (info && info.dev) {
     const badge = () => {
       const b = document.createElement('div');
-      b.textContent = `DEV COPY · live from project${info.branch ? ' · ' + info.branch : ''} · v${info.version}`;
+      b.textContent = `DEV COPY · live from project${info.branch ? ' · ' + info.branch : ''} · v${info.version} · F5 reloads`;
       b.style.cssText = 'position:fixed;left:10px;top:8px;z-index:99998;pointer-events:none;padding:3px 9px;border-radius:6px;' +
         'background:rgba(255,138,61,0.88);color:#0b0d16;font:800 12px/1.3 system-ui,sans-serif;letter-spacing:0.04em;opacity:0.85';
       document.body.appendChild(b);
