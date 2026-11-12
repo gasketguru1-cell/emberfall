@@ -119,6 +119,7 @@ function setSwitches(on) { SWITCHES = !!on; try { localStorage.setItem('emberfal
 const STAGES = [   /* plats: the soft platforms, [left, right, height] each; cfg: the file the 3D renderer reads the model and look from */
   { id: 'forge', name: 'The Forge Isle', plats: [[-44, -15, 26], [15, 44, 26]], cfg: 'assets/stage/export/stage.json' },
   { id: 'valinor', name: 'Valinor', plats: [[-20, 20, 26]], cfg: 'assets/stage-valinor/export/stage.json' },   /* one platform over the middle */
+  { id: 'valinor-flat', name: 'Valinor (no platforms)', plats: [], cfg: 'assets/stage-valinor/export/stage.json' },   /* the same island and look, bare floor */
 ];
 const OPT = { stocks: 3, stage: 0 };
 try { const o = JSON.parse(localStorage.getItem('emberfall.options') || '{}'); if (o.stocks >= 1 && o.stocks <= 99) OPT.stocks = o.stocks | 0; if (o.stage >= 0 && o.stage < STAGES.length) OPT.stage = o.stage | 0; } catch (e) { /* no storage */ }

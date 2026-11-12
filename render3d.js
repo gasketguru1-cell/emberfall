@@ -68,7 +68,7 @@ function build() {
      floor and its rim the ledges, and may give its own look (sky, lights, platform colours). A stage is fetched the first time
      it is shown; until its model has arrived the plain stand-in shows. LOOK0 is the forge island's dawn. ---- */
   const LOOK0 = { sky: '#b4bcdc', fog: '#b7bedb', hemi: ['#cdd6ff', '#6b5a58', 0.8], key: ['#ffd9b0', 2.3], rim: ['#ffb7c8', 1.5], fill: ['#ffd9b0', 0.7], slab: '#8a8079', band: '#a8623a', line: ['#ffb060', '#ff8a30'], ember: '#ff9a44' };
-  const SHOWN = STAGES.map(() => ({ cfg: null, model: null, back: null, asked: false })); let shownStage = -1;
+  const byCfg = {}, SHOWN = STAGES.map(q => byCfg[q.cfg] || (byCfg[q.cfg] = { cfg: null, model: null, back: null, asked: false }));   /* stages that share a file share its model */ let shownStage = -1;
   function loadStage(k) {
     const S = SHOWN[k]; if (S.asked) return; S.asked = true;
     fetch(STAGES[k].cfg).then(r => r.ok ? r.json() : null).then(cfg => {
@@ -85,7 +85,7 @@ function build() {
   function applyStage() {
     const k = STAGE_ON, S = SHOWN[k]; loadStage(k); shownStage = k;
     const L = Object.assign({}, LOOK0, S.cfg && S.cfg.look);
-    SHOWN.forEach((q, n) => { if (q.model) q.model.visible = n === k; }); plain.visible = !S.model; R3.stage = S.model;
+    SHOWN.forEach(q => { if (q.model) q.model.visible = q === S; }); plain.visible = !S.model; R3.stage = S.model;
     backdrop.material.map = S.back; backdrop.material.color.set(S.back ? '#ffffff' : L.sky); backdrop.material.needsUpdate = true;
     scene.background.set(L.sky); scene.fog.color.set(L.fog);
     hemi.color.set(L.hemi[0]); hemi.groundColor.set(L.hemi[1]); hemi.intensity = L.hemi[2];

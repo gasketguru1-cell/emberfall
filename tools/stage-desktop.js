@@ -8,6 +8,10 @@ const copy = rel => { const to = path.join(out, rel); fs.mkdirSync(path.dirname(
 const files = ['index.html', 'hitboxes.js', 'sim.js', 'anim.js', 'net.js', 'render2d.js', 'hud.js', 'movelist.js', 'finalhit.js', 'main.js', 'online.js', 'render3d.js',
   'assets/manifest.json', 'assets/stage/export/stage.json', 'assets/stage/export/backdrop.jpg', 'assets/stage/source/concept.webp',
   'node_modules/three/build/three.module.js', 'node_modules/three/build/three.core.js'];
+/* every script the game page loads (so a new one, like audio.js, can't be left out), and everything the sound needs */
+for (const m of fs.readFileSync(path.join(root, 'index.html'), 'utf8').matchAll(/<script[^>]*\ssrc="([^"]+)"/g)) if (!files.includes(m[1])) files.push(m[1]);
+const addDir = rel => { for (const e of fs.readdirSync(path.join(root, rel), { withFileTypes: true })) { if (e.isDirectory()) addDir(rel + '/' + e.name); else files.push(rel + '/' + e.name); } };
+if (fs.existsSync(path.join(root, 'assets/audio'))) addDir('assets/audio');
 const stage = JSON.parse(fs.readFileSync(path.join(root, 'assets/stage/export/stage.json'), 'utf8')); files.push(stage.file);
 /* every other stage (assets/stage-<name>/export/stage.json): its file, its model and its backdrop */
 for (const d of fs.readdirSync(path.join(root, 'assets'))) { const rel = 'assets/' + d + '/export/stage.json'; if (!d.startsWith('stage-') || !fs.existsSync(path.join(root, rel))) continue;

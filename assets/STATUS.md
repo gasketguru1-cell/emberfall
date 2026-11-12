@@ -227,6 +227,7 @@ Two fighters standing on the same ground cannot walk or run through each other. 
 - **Stage pick:** Options on the start screen, Stage row. The choice is remembered. Online matches always play on the Forge Isle for now (only the stock count is sent between the two sides).
 - **Stage table:** `STAGES` in `sim.js`. Every stage is the same island underneath (floor half-width `EDGE`, ledges, rock, blast lines); a stage sets its soft platforms and names its own file for the look. `useStage(k)` puts a stage's platforms in place (the start screen and the start of a match call it).
 - **Valinor:** the owner's model (Meshy "Molten Warlord's Arena", cut from 2.5 million to 100,000 triangles in Blender, 5 MB) and the owner's backdrop picture. One soft platform over the middle (x -20 to 20, height 26); that layout was my pick, not the owner's. Files in `assets/stage-valinor/`: `export/stage.json` places the model and sets the red sky, lights, lava glow and platform colours. To rebuild the model file: `node tools/stage.mjs assets/stage-valinor/raw/valinor.glb stage-valinor`.
+- **Valinor (no platforms):** a third stage in the table, the same model and look as Valinor with a bare floor (they share one stage file, so the model loads once).
 - The 2D fallback view (M) draws the old dusk island on every stage, with the right platforms.
 - `tests/stages.js` checks every stage: files on disk, platforms over the floor, a CPU match per fighter with no bad states.
 

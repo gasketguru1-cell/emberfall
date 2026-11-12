@@ -23,7 +23,7 @@ vm.runInThisContext(`
       if (mode === 'over') done++;
     }
     say(!bad && done === ROSTER.length, S.name + ': ' + done + ' of ' + ROSTER.length + ' CPU matches finished, ' + bad + ' bad states');
-    say(landed > 0, S.name + ': fighters stood on a soft platform (' + landed + ' frames)');
+    if (S.plats.length) say(landed > 0, S.name + ': fighters stood on a soft platform (' + landed + ' frames)'); else say(landed === 0, S.name + ': no soft platform to stand on');
   });
   OPT.stage = 0; useStage(0); mode = 'select'; slots[0] = slots[1] = null;
   console.log(fail ? fail + ' FAILED' : 'all stage checks passed'); if (fail) process.exitCode = 1;
