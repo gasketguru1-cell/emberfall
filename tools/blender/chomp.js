@@ -1,23 +1,28 @@
 // Writes the skeleton and animation spec for Chomp Chomp (assets/chomp/work/rig.json), which tools/blender/rig.py turns
 // into a rigged, animated model, and adds his entry to the game's manifest.
 //   bash tools/blender/build-chomp.sh     (runs this, then Blender, then the packer)
-// He is a ball with a mouth: the top of his head and his jaw both hinge at the back of the mouth, so it can shut, grin or
-// gape far wider than it was modelled. His weights are placed by rule (rig.py "weights"), not worked out by Blender.
+// He is a ball with a mouth (the owner's "Magma Munchkin" model, 2026-11-11: charcoal skin, glowing eyes, a furnace mouth,
+// an antenna and four stubby legs): the top of his head and his jaw both hinge at the back of the mouth, so it can shut,
+// grin or gape far wider than it was modelled. His weights are placed by rule (rig.py "weights"), not worked out by Blender.
 // Everything here is picture only: the moves' timing, reach and damage live in sim.js and are not touched.
 const fs = require('fs'), path = require('path');
 const TEST = process.argv.includes('--test');   /* write the spec only, leave the manifest alone */
 const R = (p, y, r) => ({ rot: [p, y || 0, r || 0] }), M = (x, y, z) => ({ move: [x, y, z] });
-const HY = 0.78, HZ = 0;   /* the jaw hinge: height, forward */
-const C = [0.88, 0];       /* the middle of the ball: height, forward */
+const HY = 0.78, HZ = -0.4;   /* the jaw hinge: height, forward */
+const C = [0.95, 0];       /* the middle of the ball: height, forward */
+/* The model has no brows or fins: a "brow" is the upper lid of his big glowing eye, a "fin" the glowing stud on his side and
+   the cheek round it. His feet are his two front legs; the hind legs step opposite them (see hind() below). */
 const side = (s, x) => [
-  { name: 'eye' + s, head: [0.152 * x, 1.145, 0.58], tail: [0.152 * x, 1.145, 0.73], parent: 'top' },
-  { name: 'brow' + s, head: [0.165 * x, 1.27, 0.52], tail: [0.165 * x, 1.27, 0.66], parent: 'top' },
-  { name: 'fin' + s, head: [0.78 * x, 0.6, 0], tail: [0.95 * x, 0.48, 0], parent: 'body' },
-  { name: 'foot' + s, head: [0.26 * x, 0.22, 0.02], tail: [0.28 * x, 0.04, 0.2], parent: 'root' }];
+  { name: 'eye' + s, head: [0.29 * x, 1.5, 0.35], tail: [0.29 * x, 1.5, 0.55], parent: 'top' },
+  { name: 'brow' + s, head: [0.29 * x, 1.5, 0.4], tail: [0.29 * x, 1.5, 0.6], parent: 'eye' + s },
+  { name: 'fin' + s, head: [0.6 * x, 0.8, 0.3], tail: [0.85 * x, 0.8, 0.42], parent: 'body' },
+  { name: 'foot' + s, head: [0.57 * x, 0.3, 0.55], tail: [0.6 * x, 0.04, 0.72], parent: 'body' },
+  { name: 'hind' + s, head: [0.8 * x, 0.3, -0.12], tail: [0.86 * x, 0.04, -0.08], parent: 'body' }];
 /* A somersault for the whole-body bone: pitch it by deg (positive tips his face down) keeping the ball's middle in place; x, y, z then move him. */
 const flip = (deg, x, y, z) => { const a = deg * Math.PI / 180, cs = Math.cos(a), sn = Math.sin(a); return { rot: [deg, 0, 0], move: [x || 0, C[0] - (C[0] * cs - C[1] * sn) + (y || 0), C[1] - (C[0] * sn + C[1] * cs) + (z || 0)] }; };
 /* The mouth: 0 shut, 1 as modelled (wide open), up to about 1.8 for a gape no jaw should manage. */
-const mouth = g => g <= 1 ? { jaw: R(-42 * (1 - g)), top: R(14 * (1 - g)) } : { jaw: R(40 * (g - 1)), top: R(-50 * (g - 1)) };
+/* (this model's lower lip sits just above his front legs, so the head does most of the shutting and the jaw little) */
+const mouth = g => g <= 1 ? { jaw: R(-10 * (1 - g)), top: R(32 * (1 - g)) } : { jaw: R(26 * (g - 1)), top: R(-50 * (g - 1)) };
 /* Squash (k > 0) and stretch (k < 0) of the ball, with an optional lean: pitch, yaw, roll. */
 const sq = (k, p, y, r) => ({ scale: [1 + k * 0.5, 1 - k, 1 + k * 0.5], rot: [p || 0, y || 0, r || 0] });
 const lg = k => ({ scale: [1 - k * 0.35, 1 - k * 0.35, 1 + k], rot: [0, 0, 0] });   /* stretched along the way his mouth points: a lunge */
@@ -27,7 +32,9 @@ const eyes2 = (l, r) => ({ eyeL: { scale: [l, l, 1] }, eyeR: { scale: [r, r, 1] 
 const brows = (dy, a) => ({ browL: { rot: [0, 0, (a || 0) * 0.6], move: [0, dy * 0.5, 0] }, browR: { rot: [0, 0, -(a || 0) * 0.6], move: [0, dy * 0.5, 0] } });   /* a > 0 scowls, a < 0 worries */
 const fins = (up, fwd, upR) => ({ finL: R(0, -(fwd || 0), up), finR: R(0, fwd || 0, -(upR === undefined ? up : upR)) });
 const leaves = (a, p, r) => ({ sprout: R(p || 0, 0, r || 0), leafL: R(0, 0, a), leafR: R(0, 0, -a) });   /* a > 0 lifts both leaves, a < 0 folds them down; p bends the sprout forward */
-const tongue = (len, yaw, pitch) => ({ tongue: { scale: [len > 2 ? 0.75 : 1, len > 2 ? 0.75 : 1, len], rot: [pitch === undefined ? -10 : pitch, yaw || 0, 0] } });
+/* len is how far the tongue reaches as the old, short tongue measured it; this one lies the whole length of the mouth floor,
+   so it stretches about a third as much for the same reach */
+const tongue = (len, yaw, pitch) => ({ tongue: { scale: [len > 2 ? 0.75 : 1, len > 2 ? 0.75 : 1, 1 + (len - 1) * 0.36], rot: [pitch === undefined ? -10 : pitch, yaw || 0, 0] } });
 const feet = (ly, lz, ry, rz, out) => ({ footL: M(out || 0, ly, lz), footR: M(-(out || 0), ry === undefined ? ly : ry, rz === undefined ? lz : rz) });
 const root = (x, y, z) => ({ root: M(x, y, z) });
 const P = (...parts) => Object.assign({}, ...parts);
@@ -50,32 +57,34 @@ const scamper = (() => { const keys = [], n = 8, dt = 0.1;   /* eight steps per 
 const shieldPose = P({ body: puff(1.08, 0.94) }, mouth(0), eyes(1.25, 0.2), brows(-0.03, 16), fins(10, 70), leaves(-58));
 const chomp = {
   note: 'Chomp Chomp: metres after prep (feet on y = 0, facing +Z). Joint positions were measured from the generated mesh.',
-  prep: { yaw: 0, translate: [0, 0.952, 0] },
+  prep: { yaw: 0, translate: [0, 0.953, 0] },
   bones: [
     { name: 'all', head: [0, 0, 0], tail: [0, 0.15, 0], parent: null, deform: false },
     { name: 'root', head: [0, 0.6, 0], tail: [0, 0.8, 0], parent: 'all', deform: false },
     { name: 'body', head: [0, 0.2, 0], tail: [0, 0.75, 0], parent: 'root' },
-    { name: 'top', head: [0, HY, HZ], tail: [0, 1.4, 0.1], parent: 'body' },
-    { name: 'jaw', head: [0, HY, HZ], tail: [0, 0.45, 0.5], parent: 'body' },
-    { name: 'tongue', head: [0, 0.5, 0.1], tail: [0, 0.5, 0.42], parent: 'jaw' },
-    { name: 'sprout', head: [0, 1.54, 0], tail: [0, 1.68, 0], parent: 'top' },
-    { name: 'leafL', head: [0.02, 1.7, 0], tail: [0.34, 1.84, 0], parent: 'sprout' },
-    { name: 'leafR', head: [-0.02, 1.66, 0], tail: [-0.32, 1.76, 0], parent: 'sprout' },
+    { name: 'top', head: [0, HY, HZ], tail: [0, 1.45, 0.2], parent: 'body' },
+    { name: 'jaw', head: [0, HY, HZ], tail: [0, 0.3, 0.55], parent: 'body' },
+    { name: 'tongue', head: [0, 0.45, -0.42], tail: [0, 0.5, 0.5], parent: 'jaw' },
+    /* the antenna takes the old leaf sprout's moves and spring; the leaf bones stay so old poses still load, but weigh nothing */
+    { name: 'sprout', head: [0, 1.55, 0], tail: [0.1, 1.85, 0], parent: 'top' },
+    { name: 'leafL', head: [0.02, 1.8, 0], tail: [0.2, 1.85, 0], parent: 'sprout', deform: false },
+    { name: 'leafR', head: [-0.02, 1.8, 0], tail: [-0.2, 1.85, 0], parent: 'sprout', deform: false },
     ...side('L', 1), ...side('R', -1)],
   weights: [
     { bone: 'body', all: true },
-    { bone: 'top', wedge: { hinge: [HY, HZ], from: [-6, 8, 70], to: [150, 50], side: [0.47, 0.14], fade: [0.56, 0.3] } },
-    { bone: 'jaw', wedge: { hinge: [HY, HZ], from: [-105, 40], to: [-6, 8, 70], side: [0.47, 0.14], fade: [0.56, 0.3] } },
-    { bone: 'tongue', sphere: { c: [0, 0.47, 0.25], r0: 0.19, r1: 0.24, scale: [1.3, 0.52, 1] }, halves: [[2, 0.435, 0.03, -1]] },
-    { bone: 'eyeL', dark: true, sphere: { c: [0.152, 1.145, 0.64], r0: 0.085, r1: 0.095, scale: [1, 1, 3] } }, { bone: 'eyeR', dark: true, sphere: { c: [-0.152, 1.145, 0.64], r0: 0.085, r1: 0.095, scale: [1, 1, 3] } },
-    { bone: 'browL', dark: true, sphere: { c: [0.165, 1.275, 0.6], r0: 0.055, r1: 0.065, scale: [2, 1, 4] } }, { bone: 'browR', dark: true, sphere: { c: [-0.165, 1.275, 0.6], r0: 0.055, r1: 0.065, scale: [2, 1, 4] } },
-    { bone: 'sprout', halves: [[1, 1.59, 0.03, 1]] },
-    { bone: 'leafL', halves: [[1, 1.62, 0.03, 1], [0, 0.07, 0.05, 1]] },
-    { bone: 'leafR', halves: [[1, 1.6, 0.03, 1], [0, -0.07, 0.05, -1]] },
-    { bone: 'finL', halves: [[0, 0.8, 0.08, 1], [1, 0.3, 0.05, 1], [1, 0.75, 0.05, -1]] },
-    { bone: 'finR', halves: [[0, -0.8, 0.08, -1], [1, 0.3, 0.05, 1], [1, 0.75, 0.05, -1]] },
-    { bone: 'footL', halves: [[1, 0.2, 0.06, -1], [0, 0, 0.04, 1]] },
-    { bone: 'footR', halves: [[1, 0.2, 0.06, -1], [0, 0, 0.04, -1]] }],
+    { bone: 'top', wedge: { hinge: [HY, HZ], from: [0, 8, 60], to: [150, 50], side: [0.62, 0.1], fade: [0.72, 0.25] } },
+    { bone: 'jaw', wedge: { hinge: [HY, HZ], from: [-75, 25], to: [0, 8, 60], side: [0.62, 0.1], fade: [0.72, 0.25] } },
+    { bone: 'tongue', sphere: { c: [0, 0.46, 0.06], r0: 0.88, r1: 1.02, scale: [0.42, 0.22, 0.48] }, halves: [[2, 0.5, 0.06, -1]] },
+    { bone: 'eyeL', sphere: { c: [0.29, 1.5, 0.52], r0: 0.85, r1: 1, scale: [0.3, 0.22, 0.24] } }, { bone: 'eyeR', sphere: { c: [-0.29, 1.5, 0.52], r0: 0.85, r1: 1, scale: [0.3, 0.22, 0.24] } },
+    { bone: 'browL', sphere: { c: [0.29, 1.52, 0.52], r0: 0.95, r1: 1.05, scale: [0.32, 0.24, 0.26] }, halves: [[1, 1.6, 0.06, 1]] },
+    { bone: 'browR', sphere: { c: [-0.29, 1.52, 0.52], r0: 0.95, r1: 1.05, scale: [0.32, 0.24, 0.26] }, halves: [[1, 1.6, 0.06, 1]] },
+    { bone: 'sprout', halves: [[1, 1.6, 0.04, 1], [2, 0.2, 0.06, -1]] },
+    { bone: 'finL', sphere: { c: [0.86, 0.8, 0.36], r0: 0.12, r1: 0.26 } },
+    { bone: 'finR', sphere: { c: [-0.86, 0.8, 0.36], r0: 0.12, r1: 0.26 } },
+    { bone: 'footL', halves: [[1, 0.26, 0.08, -1], [0, 0.33, 0.08, 1], [2, 0.32, 0.1, 1]] },
+    { bone: 'footR', halves: [[1, 0.26, 0.08, -1], [0, -0.33, 0.08, -1], [2, 0.32, 0.1, 1]] },
+    { bone: 'hindL', halves: [[1, 0.26, 0.08, -1], [0, 0.5, 0.1, 1], [2, 0.32, 0.1, -1]] },
+    { bone: 'hindR', halves: [[1, 0.26, 0.08, -1], [0, -0.5, 0.1, -1], [2, 0.32, 0.1, -1]] }],
   poses: {
     stand: P({ all: {}, root: {}, body: {}, tongue: {}, sprout: {}, leafL: {}, leafR: {}, eyeL: {}, eyeR: {}, browL: {}, browR: {}, finL: {}, finR: {}, footL: {}, footR: {} }, mouth(0.36)),
     /* tucked into a ball: mouth shut, eyes screwed up, fins and feet pulled in, leaves flat */
@@ -218,6 +227,12 @@ const chomp = {
       { t: 0.35, pose: P({ body: sq(-0.04, 0, 0, -9) }, fins(-10, 30, 60), feet(0, -0.08, 0.1, 0.1), leaves(20, 0, 14)) }, { t: 0.7, pose: P({ body: sq(0.02, 0, 0, 9) }, fins(60, 30, -10), feet(0.1, 0.1, 0, -0.08), leaves(20, 0, -14)) }] },
   },
 };
+/* The hind legs step opposite the front ones (a trot): wherever a pose places a front foot, the other side's hind leg goes
+   the same way. Done once here so the clips themselves read as they always did. */
+const hind = pose => { if (!pose) return; const l = pose.footL, r = pose.footR; if (l && !pose.hindR) pose.hindR = l; if (r && !pose.hindL) pose.hindL = r; };
+Object.values(chomp.poses).forEach(hind);
+Object.values(chomp.clips).forEach(c => c.keys.forEach(k => hind(k.pose)));
+chomp.poses.stand.hindL = {}; chomp.poses.stand.hindR = {};
 const out = path.join(__dirname, '..', '..', 'assets', 'chomp', 'work');
 fs.mkdirSync(out, { recursive: true });
 fs.writeFileSync(path.join(out, 'rig.json'), JSON.stringify(chomp, null, 1));

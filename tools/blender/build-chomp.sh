@@ -7,7 +7,9 @@ cd "$(dirname "$0")/../.."
 B="${BLENDER:-/c/Program Files/Blender Foundation/Blender 5.2/blender.exe}"
 dir=assets/chomp
 node tools/blender/chomp.js $CHOMP_ARGS | tail -2
-mesh=$(ls -S "$dir"/raw/*/model_url.glb | head -1)
+src="${CHOMP_MESH:-$dir/raw/magma/model_url.glb}"   # the owner's Magma Munchkin (Downloads/Meshy_AI_Magma_Munchkin_1112031337_texture.glb)
+mesh="$dir/work/chomp-90k.glb"   # the same, cut from 298k to about 90k triangles (made once)
+[ "$mesh" -nt "$src" ] || "$B" -b --factory-startup --python tools/blender/decimate.py -- --glb "$src" --out "$mesh" --faces 90000 2>&1 | grep -E "decimate:|Error" || true
 blend="$(cygpath -w "$PWD/$dir/work/chomp-anim.blend")"
 "$B" -b --factory-startup --python tools/blender/rig.py -- --mesh "$mesh" --spec "$dir/work/rig.json" --out "$dir/work/chomp-rigged.glb" --start 0 --blend "$blend" 2>&1 | grep -E "Error|Traceback|rig: wrote|rig: weights|rig: no base|holds|unweighted|line [0-9]" || true
 if [ "$1" = preview ]; then
