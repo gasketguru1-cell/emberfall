@@ -487,6 +487,15 @@ vm.runInThisContext(`
     check('Potato Sack: any action comes out the frame after the burst', quick.cut && quick.cut.at <= 12 && quick.cut.vx > 2 && /attack>jsq/.test(jumpOut.seen) && /attack>shield/.test(shieldOut.seen), (quick.cut ? quick.cut.move + ' on frame ' + quick.cut.at + ' moving at ' + quick.cut.vx : 'no attack') + '; jump: ' + jumpOut.seen + '; shield: ' + shieldOut.seen);
     const after = tum(12, [1, 0], (i, tt, f) => { if (f.grounded && f.burstKind === 'slide' && tt > 6) i.atk = true; }, 40);
     check('Potato Sack: can act the moment a dive touches down', after.cut && !/down|land/.test(after.seen), after.cut ? after.cut.move + ' on frame ' + after.cut.at + ' (' + after.seen + ')' : 'no attack came out (' + after.seen + ')');
+    { const res = []; for (const [btn, h, dirs] of [['atk', 14, [1, -1]], ['atk', 20, [0, 0]], ['spc', 14, [1, -1]], ['shd', 10, [1, -1]], ['cx', 20, [1, 0]], ['grb', 14, [0, -1]]]) {
+        let pressAt = -1, lagged = false, landed = false, seen = [];
+        tum(h, dirs, (i, tt, f) => { if (pressAt < 0 && !f.grounded && tt > 8 && f.y + f.vy * 3 <= 0.5) pressAt = tt; if (pressAt >= 0 && tt < pressAt + 2) { if (btn === 'cx') i.cx = 1; else i[btn] = true; }
+          if (f.grounded) landed = true; if (landed && f.state === 'land') lagged = true; const nm = f.state + (f.state === 'attack' ? ':' + f.mname : ''); if (seen[seen.length - 1] !== nm) seen.push(nm); }, 60);
+        res.push([btn, pressAt >= 0 && landed && !lagged, seen.join('>')]); }
+      check('Potato Sack: a press just before a tumble lands is done on the ground the moment he lands, with no landing lag', res.every(r => r[1]), res.map(r => r[0] + ': ' + r[2]).join(' / ')); }
+    { const sp = {}; for (const btn of ['atk', 'cx']) { let pressAt = -1, v = null; tum(40, [1, 0], (i, tt, f) => { if (pressAt < 0 && !f.grounded && tt > 8 && f.y + f.vy * 3 <= 26.5 && f.x > -30) pressAt = tt; if (pressAt >= 0 && tt < pressAt + 2) { if (btn === 'cx') i.cx = 1; else i.atk = true; }
+          if (v === null && f.grounded && f.state === 'attack' && f.mname !== 'dspec' && f.mf === 3) v = Math.abs(f.vx); }, 40); sp[btn] = v; }
+      check('Potato Sack: a move that comes out as a tumble lands keeps his speed', sp.atk > 1.2 && sp.cx > 1.2, 'attack: ' + (sp.atk && sp.atk.toFixed(2)) + ', right stick: ' + (sp.cx && sp.cx.toFixed(2)) + ' on its third frame'); }
     const turn = tum(false, [1, 0], (i, tt) => { if (tt >= 14) i.lx = -1; }, 30), keep = tum(false, [1, 0], (i, tt) => { if (tt >= 12) i.lx = 1; }, 30);
     check('Potato Sack: a push the other way ends a slide, holding the same way does not', turn.dx < keep.dx - 8 && turn.kind === 'slide', 'turned back after ' + turn.dx.toFixed(1) + ' units, kept going for ' + keep.dx.toFixed(1));
     check('Potato Sack: tumble with no direction hangs in the air', hang.kind === 'stall' && hang.rise < 1, 'kind ' + hang.kind + ', rose ' + hang.rise.toFixed(1));

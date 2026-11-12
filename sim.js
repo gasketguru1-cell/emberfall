@@ -520,6 +520,7 @@ class Ctl {
     this.xT = 99; this.yT = 99; this.xFired = true; this.yFired = true;
     this.dashDir = 0; this.downBuf = 0; this.downNow = false; this.upNow = false; this.cPress = false; this.cDown = false; this.cFall = dev !== 'cpu'; this.shdAge = 99; this.jmp2Age = 99;
     this.tfAge = 99; this.tfReq = false;
+    this.age = { atk: 99, spc: 99, jmp: 99, shd: 99, grb: 99, c: 99 };   /* frames since each button (c: the right stick) was last pressed */
   }
   poll(raw) {
     this.p = this.c; this.c = raw; const c = raw, p = this.p;
@@ -537,6 +538,7 @@ class Ctl {
     }
     this.ySmash = (ay >= 0.8 && this.yT <= 5) || (c.sm && ay >= 0.5);
     this.cPress = Math.hypot(c.cx, c.cy) >= 0.5 && Math.hypot(p.cx, p.cy) < 0.5;
+    for (const k in this.buf) this.age[k] = c[k] && !p[k] ? 0 : Math.min(99, this.age[k] + 1); this.age.c = this.cPress ? 0 : Math.min(99, this.age.c + 1);
     this.cDown = this.cFall && c.cy <= -0.55 && !(p.cy <= -0.55) && -c.cy >= Math.abs(c.cx);   /* the right stick flicked down: fast-falls, as a flick of the left stick does (people only: the CPU plays as it did) */
     this.jmp2Age = c.jmp2 ? 0 : Math.min(99, this.jmp2Age + 1);   /* frames since two jump buttons were last held together */
     /* The transform double tap (Joey's guide): two presses of the transform action, released in between, the second no more
@@ -872,6 +874,8 @@ const SACK = {
         if (n === 59 && !f.spudOut && PROJ.some(p => p.owner === f.idx && p.kind === 'hotspud')) f.mf = 58;   /* waits for the potato: the move ends only by the burst */ } },
       dspec: { t: 38, burst: 1, cancel: 7, nodrift: 1, h: [], on(f, n, i) {
         if (n === 1) { f.burstKind = ''; if (!f.grounded) f.burstUsed = true; }
+        if (n === 1 && f.ctl.age) for (const k in f.ctl.age) f.ctl.age[k] = 99;   /* only presses from here on count for the landing below */
+        if (!f.grounded) f.tumbled = true;   /* off the ground out of a tumble: a landing soon after a press has no lag (land) */
         if (n < 6 && !f.grounded) { f.vy = Math.max(f.vy, -0.3); f.vx *= 0.9; }
         if (n === 6) {
           const x = Math.abs(i.lx) > 0.4 ? sgn(i.lx) : 0, up = i.ly > 0.5 && Math.abs(i.ly) >= Math.abs(i.lx);
@@ -2452,7 +2456,7 @@ class Fighter {
     this.move = null; this.mf = 0; this.charge = 0; this.hitG = new Set(); this.parriedBy = null; this.victim = null; this.lag = 0; this.flash = 0;
     this.stale = []; this.staled = false; this.staleM = 1; this.shortHop = false; this.moveSH = false; this.shMacro = false; this.grabImm = 0; this.ledgeGrabs = 0;
     this.dodgeStale = 0; this.dodgeT = 0; this.ds = 0; this.tumble = false; this.techT = 0; this.techLock = 0; this.pumT = 0; this.pumHit = 0; this.downBack = false; this.wdHold = false;
-    this.chargeT = 0; this.stalled = false; this.stallOk = false; this.cAir = null; this.hopT = 0; this.airUse = {}; this.flying = false; this.selOpen = false; this.sling = null; this.dairUsed = false; this.upC = 0; this.upGo = 0; this.flyV = null; this.flyB = false; this.dove = false; this.burstKind = ''; this.burstX = 0; this.burstDown = false; this.burstUsed = false; this.blastUsed = false; this.swapLock = 0; this.slingUsed = false; this.thermal = false; this.recoil = false; this.bigStone = false; this.armorLeft = 99; this.castHit = false; this.linkT = 0; this.linkBy = -1; this.helpLag = 0; this.guarded = false;
+    this.chargeT = 0; this.stalled = false; this.stallOk = false; this.cAir = null; this.hopT = 0; this.airUse = {}; this.flying = false; this.selOpen = false; this.sling = null; this.dairUsed = false; this.upC = 0; this.upGo = 0; this.flyV = null; this.flyB = false; this.dove = false; this.burstKind = ''; this.tumbled = false; this.burstX = 0; this.burstDown = false; this.burstUsed = false; this.blastUsed = false; this.swapLock = 0; this.slingUsed = false; this.thermal = false; this.recoil = false; this.bigStone = false; this.armorLeft = 99; this.castHit = false; this.linkT = 0; this.linkBy = -1; this.helpLag = 0; this.guarded = false;
     this.fat = 0; this.fatGain = false; this.restT = 0; this.exPend = false; this.exStart = -1; this.paceX = null; this.paceDir = 1;   /* INTENSITY: per stock */
     this.punchC = 0; this.punchUse = 0; this.buryT = 0; this.slapMore = false; this.tether = null; this.adFaf = 0; this.spinVx = 0;   /* per stock: a stored punch charge goes with the stock */
     this.berserk = false; this.bzAcc = 0; this.axe = null; this.axeAway = false; this.recallArm = true; this.recallN = 0; this.metX = 0;   /* Fyrdsman: per stock (a KO puts the axe back in his hand and ends Berserker) */
@@ -2639,9 +2643,16 @@ class Fighter {
     }
     this.vy -= s.grav; const mf = this.ff ? s.ffall : s.fall; if (this.vy < -mf) this.vy = -mf;
   }
-  touchDown(p, fromLedge) { if (!fromLedge) this.ledgeGrabs = 0; this.airUse = {}; this.flying = false; this.grounded = true; this.plat = p; this.y = p.y; this.vy = 0; this.jr = 0; this.stalled = false; this.burstUsed = false; this.blastUsed = false; this.slingUsed = false; this.dairUsed = false; this.wallJumps = 0; this.jumps = this.st.jumps ?? 1; this.airdodged = false; this.sideUsed = false; this.ff = false; this.shortHop = false; }
+  touchDown(p, fromLedge) { if (!fromLedge) this.ledgeGrabs = 0; this.tumbled = false; this.airUse = {}; this.flying = false; this.grounded = true; this.plat = p; this.y = p.y; this.vy = 0; this.jr = 0; this.stalled = false; this.burstUsed = false; this.blastUsed = false; this.slingUsed = false; this.dairUsed = false; this.wallJumps = 0; this.jumps = this.st.jumps ?? 1; this.airdodged = false; this.sideUsed = false; this.ff = false; this.shortHop = false; }
   land(p) {
-    const st = this.state, hard = this.ff; this.touchDown(p); if (st !== 'hurt') sfx(hard ? 'land_hard' : 'land_soft', this.x);
+    const st = this.state, hard = this.ff, tum = this.tumbled; this.tumbled = false; this.touchDown(p); if (st !== 'hurt') sfx(hard ? 'land_hard' : 'land_soft', this.x);
+    /* Potato Sack, out of a tumble (the owner, 2026-11-12): anything pressed in the last buffer window before he lands is done on
+       the ground the frame he lands, with no landing lag; whatever it had started in the air (an aerial, a special, an air dodge) is dropped */
+    if (tum && (st === 'air' || st === 'airdodge' || (st === 'attack' && !this.move.burst))) {
+      const c = this.ctl, ks = Object.keys(c.age).filter(k => c.age[k] <= T.buffer);
+      if (ks.length) { for (const k of ks) if (k === 'c') c.cPress = true; else c.buf[k] = Math.max(c.buf[k], T.buffer - c.age[k], 1);
+        const vx = this.vx; this.move = null; this.lag = 0; this.set('idle'); this.groundActs(false); this.vx = vx; return; }   /* whatever comes out keeps his speed, as a tumble slide does */
+    }
     if (st === 'attack' && this.move.burst) {   /* a tumble never falls over: a dive that reaches the floor carries on as a slide, anything else lands ready to act */
       if (this.burstKind === 'dive') { this.burstKind = 'slide'; spark(this.x, this.y, '#ddd', 8, 1.2); } else { this.move = null; this.set('idle'); }
     }
