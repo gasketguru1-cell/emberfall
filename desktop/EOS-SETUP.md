@@ -1,26 +1,31 @@
-# Setting up Epic Online Services for Emberfall (free, one time)
+# Epic Online Services for Emberfall
 
-Online play over the internet uses Epic Online Services: anonymous device login (no Epic account for players), a private lobby for the invite code, and peer-to-peer traffic with Epic's free relay when a direct path is blocked. Epic charges nothing for these. Only the game's owner does these steps, once. Players never do anything.
+Online play over the internet uses Epic Online Services: anonymous device login (no Epic account for players), a lobby that turns the host's code into the host's player id, and peer-to-peer traffic with Epic's free relay when a direct path is blocked. Epic charges nothing for these.
 
-## What only you can do (about 15 minutes)
+## Status: set up (2026-11-11)
 
-1. Sign in or create a free account at https://dev.epicgames.com/portal and accept the developer terms. This is the one step that needs your sign-in.
-2. Create a product (name it Emberfall). The portal makes a Sandbox and a Deployment for it.
-3. Go to Product Settings, then Clients:
-   - Add a **Client Policy** of type *Peer2Peer*, or a custom policy that allows **Connect**, **Lobbies** and **P2P** without user-required login.
-   - Add a **Client** that uses that policy.
-4. Go to the SDK download page and download **EOS SDK for C (Windows)**, the latest version.
-5. Put the files here:
-   - `desktop/eos/EOSSDK-Win64-Shipping.dll`, taken from the SDK's `Bin` folder.
-   - The SDK's `Include` folder, copied to `desktop/eos/Include/`. Claude needs this to write the binding against your exact SDK version.
-   - `desktop/eos/config.json`:
-     ```json
-     { "productId": "...", "sandboxId": "...", "deploymentId": "...", "clientId": "...", "clientSecret": "..." }
-     ```
+- Epic Developer Portal: organization **Emberfall**, product **Emberfall**, client **Emberfall Game** using the client policy **Emberfall Peer2Peer** (Epic's Peer2Peer template).
+- SDK: EOS C SDK **1.19.2.1** (CL 58105819). `desktop/eos.js` is written against its headers.
+- On this PC, in `desktop/eos/` (kept out of git):
+  - `EOSSDK-Win64-Shipping.dll` from the SDK's `Bin` folder
+  - `Include/`, the SDK's headers, for checking the binding against a new SDK version
+  - `config.json` with the product, sandbox, deployment and client ids and the client secret
 
-`desktop/eos/` is kept out of git, so the client secret stays on your machine. It ends up inside the app you send to friends, which is normal for EOS client credentials: the Peer2Peer policy only allows what the game does.
+The installer ships the DLL and `config.json` only. The client secret ends up inside the app you give to friends, which is normal for EOS client credentials: the Peer2Peer policy only allows what a game client does.
 
-Then tell Claude it's in place. Claude will write the binding in `desktop/eos.js`, test host and join between two copies, and rebuild the installer.
+## Changing the SDK version
+
+The structures in `desktop/eos.js` are copied from the 1.19.2.1 headers, each with the `ApiVersion` it was written for. Before swapping in a newer DLL, put the new `Include/` folder in `desktop/eos/` and compare the structures `desktop/eos.js` uses against it. A mismatch crashes the game instead of failing politely.
+
+## Testing
+
+Two copies on one PC normally share one Epic player id (Epic ties it to the Windows user), so they can't connect to each other. For a test, start the second copy with `EMBERFALL_EOS_NEW_DEVICE=1` and its own `EMBERFALL_EOS_CACHE` folder: it throws the device id away and signs in as a new anonymous player. The desktop self-test does this:
+
+```
+EMBERFALL_AUTOVIA=eos EMBERFALL_AUTOTEST=host|join EMBERFALL_AUTOFILE=<folder>
+```
+
+`EMBERFALL_EOS_LOG=1` prints Epic's detailed log.
 
 ## What stays free
 

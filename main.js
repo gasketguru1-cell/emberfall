@@ -10,7 +10,7 @@ function perf() {
 function loop(now) {
   const d = now - last; PERF.dt[PERF.n++ % 600] = d; acc += Math.min(100, d); last = now;
   while (acc >= 1000 / 60) {
-    if (window.NET && NET.session()) { if (mode === 'select') NET.stop(); else NET.tick(); }   /* an online match: net.js steps the game in time with the other machine */
+    if (window.NET && NET.session()) { if (mode === 'select') { NET.stop(); if (LOBBY) LOBBY.ended(); } else NET.tick(); }   /* an online match: net.js steps the game in time with the other machine */
     else if (!DBG.step || mode === 'select') step(); else if (DBG.advance > 0) { DBG.advance--; step(); }
     acc -= 1000 / 60;
   }

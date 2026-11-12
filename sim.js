@@ -3197,12 +3197,14 @@ let tick = 0;   /* counts every step of a match, countdown and finish included; 
 let mode = 'select', frame = 0, timer = MATCH_FRAMES, countdown = 0, paused = false, overT = 0, result = '';
 let PAUSED_BY = 0, PAUSE_SEL = 0;   /* who pressed Start, and the pause menu's highlighted line (movelist.js draws and runs the menu) */
 let slots = [null, null], DEVS = {};
+let LOBBY = null;   /* online.js: set while linked to a friend; the fighter select then readies this player instead of starting a match */
+function selectGo() { if (LOBBY && LOBBY.linked()) LOBBY.ready(); else startMatch(); }
 const cam = { x: 0, y: 30, s: 3.4 };
 function devCtl(dev) { return DEVS[dev] || (DEVS[dev] = new Ctl(dev)); }
 function allDevs() { const d = ['kb']; const gp = navigator.getGamepads ? navigator.getGamepads() : []; for (let n = 0; n < gp.length && n < 4; n++) if (gp[n]) d.push('pad' + n); return d; }
-function startMatch(stocks) {   /* stocks: an online match plays with the host's count; otherwise the options' */
+function startMatch(stocks, stage) {   /* stocks, stage: an online match plays with the host's choices; otherwise the options' */
   STOCKS = stocks >= 1 ? stocks | 0 : OPT.stocks;
-  useStage(stocks >= 1 ? 0 : OPT.stage);   /* online matches stay on the Forge Isle: both sides must stand on the same platforms, and only the stock count is sent */
+  useStage(stage >= 0 && stage < STAGES.length ? stage | 0 : OPT.stage);   /* online: the host's stage, sent with the start message, so both sides stand on the same platforms */
   const s0 = slots[0], s1 = slots[1] || { dev: 'cpu', pick: CPU_PICK >= 0 ? CPU_PICK : Math.random() * ROSTER.length | 0 };   /* the CPU's token, or random */
   const c0 = devCtl(s0.dev), c1 = s1.dev === 'cpu' ? new Ctl('cpu') : devCtl(s1.dev);
   for (const c of [c0, c1]) { c.tfAge = 99; c.tfReq = false; }
@@ -3302,7 +3304,7 @@ function stepSelect() {
     if (c.pressed('atk') && !CPU_TOK.drag && cpuTokOn(sl.cx, sl.cy)) { sl.tok = true; sfx('fighter_select'); continue; }
     /* + (Start, or the + key) while pointing at a fighter opens its move list; once everyone is ready, Start fights instead */
     if (typeof mlOpen === 'function' && dev === 'kb' && mlPlusKey()) { if (over >= 0) mlOpen(ROSTER[over], 0, c, 0, true); else setSwitches(!SWITCHES); continue; }
-    if (c.pressed('start')) { if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; } if (typeof mlOpen === 'function' && over >= 0) { mlOpen(ROSTER[over], 0, c, 0, true); continue; } setSwitches(!SWITCHES); continue; }   /* anywhere else: hide or show the switches */
+    if (c.pressed('start')) { if (slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { selectGo(); return; } if (typeof mlOpen === 'function' && over >= 0) { mlOpen(ROSTER[over], 0, c, 0, true); continue; } setSwitches(!SWITCHES); continue; }   /* anywhere else: hide or show the switches */
     else if (c.pressed('atk')) {
       if (inBox(OPT_PILL, sl.cx, sl.cy)) { optOpen(); continue; }
       if (SWITCHES && DESKTOP() && inBox(ONLINE_PILL, sl.cx, sl.cy)) { if (window.openOnline) window.openOnline(); beep(600, 0.05, 'square', 0.03); continue; }
@@ -3311,7 +3313,7 @@ function stepSelect() {
       if (SWITCHES && inBox(ARC_PILL, sl.cx, sl.cy)) { setArcs(!DBG.arcs); beep(DBG.arcs ? 700 : 420, 0.05, 'square', 0.03); }
       else if (onCpu) { setCpuLevel(CPU_LEVEL + 1 > 9 ? 0 : CPU_LEVEL + 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
       else if (over >= 0) { sl.pick = over; sl.ready = true; sfx('ready'); }
-      else if (sl.ready && slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { startMatch(); return; }
+      else if (sl.ready && slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)) { selectGo(); return; }
     } else if (c.pressed('spc')) {
       if (onCpu) { setCpuLevel(CPU_LEVEL - 1 < 0 ? 9 : CPU_LEVEL - 1); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
       else if (sl.ready) { sl.ready = false; sfx('cancel'); }
