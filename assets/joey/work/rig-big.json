@@ -1589,6 +1589,26 @@
    "out": 6
   }
  ],
+ "legcut": {
+  "R": [
+   "thighR",
+   "thighTwR",
+   "shinR",
+   "kneeR",
+   "footR",
+   "shinTwR",
+   "toeR"
+  ],
+  "L": [
+   "thighL",
+   "thighTwL",
+   "shinL",
+   "kneeL",
+   "footL",
+   "shinTwL",
+   "toeL"
+  ]
+ },
  "meet": {
   "ClapCap": {
    "at": [

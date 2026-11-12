@@ -7423,6 +7423,15 @@
   "file": "assets/joey/export/cronky-v1.glb",
   "height": 24.4,
   "feel": 1,
+  "stickLegs": {
+   "moves": [
+    "bair",
+    "dair"
+   ],
+   "line": 0.3,
+   "outline": 0.34,
+   "color": "#161616"
+  },
   "clips": {
    "idle": {
     "clip": "Idle"

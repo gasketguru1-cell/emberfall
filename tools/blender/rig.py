@@ -556,6 +556,75 @@ if opt.get('shots'):   # pictures of chosen clips at chosen times, from her righ
     for tr in ad.nla_tracks: tr.mute = False
     bpy.data.objects.remove(co, do_unlink=True)
     print('rig: shots in ' + sdir)
+# ---- "legcut": { "R": [bones], "L": [bones] }: the bare legs below the shorts become their own mesh, "legs" (the game draws
+# stick legs in their place, tools/blender/joey.js stickLegs). A face goes to the legs when its vertices hang mostly from
+# that side's leg bones and its texture there is skin. The openings left in the shorts are capped, each by a fan of
+# triangles from the cut to its middle, coloured from the shorts beside it (the mesh is split along its texture seams, so
+# the cut is not one closed loop).
+if spec.get('legcut'):
+    import bmesh
+    import numpy as np
+    lc = spec['legcut']; me = mesh.data
+    img = next(n for n in me.materials[0].node_tree.nodes if n.type == 'TEX_IMAGE' and any(l.to_socket.name == 'Base Color' for l in n.outputs[0].links)).image
+    IW, IH = img.size; PX = np.array(img.pixels[:], dtype=np.float32).reshape(IH, IW, -1)[:, :, :3]
+    def skin_at(u, v):
+        r, g, b = PX[min(IH - 1, max(0, int(v * IH))), int(u * IW) % IW]; mx = max(r, g, b); mn = min(r, g, b)
+        if mx < 0.12 or (mx - mn) / mx < 0.16 or (mx - mn) / mx > 0.8: return False
+        hue = (((g - b) / (mx - mn)) * 60) % 360 if mx == r else (2 + (b - r) / (mx - mn)) * 60 if mx == g else (4 + (r - g) / (mx - mn)) * 60
+        return 5 <= hue <= 55
+    gi = {g.name: g.index for g in mesh.vertex_groups}
+    legw = {s: np.zeros(len(me.vertices)) for s in lc}
+    for v in me.vertices:
+        for g in v.groups:
+            for s, names in lc.items():
+                if mesh.vertex_groups[g.group].name in names: legw[s][v.index] += g.weight
+    uvl = me.uv_layers.active.data
+    side_of = {}
+    for p in me.polygons:
+        for s in lc:
+            if np.mean([legw[s][i] for i in p.vertices]) < 0.5: continue
+            uvs = [uvl[li].uv for li in p.loop_indices]; cu = sum((Vector(u) for u in uvs), Vector((0, 0))) / len(uvs)
+            hits = sum(skin_at(u.x, u.y) for u in uvs) + 2 * skin_at(cu.x, cu.y)
+            if hits * 2 > len(uvs) + 2: side_of[p.index] = s
+    print('rig: legcut %s' % ', '.join('%s %d faces' % (s, sum(1 for v in side_of.values() if v == s)) for s in lc))
+    legs = mesh.copy(); legs.data = me.copy(); legs.name = legs.data.name = 'legs'; bpy.context.collection.objects.link(legs)
+    # body: drop the leg faces, then cap the cut
+    bm = bmesh.new(); bm.from_mesh(me); bm.faces.ensure_lookup_table(); uvb = bm.loops.layers.uv.active; dl = bm.verts.layers.deform.verify()
+    cuts = {s: [] for s in lc}
+    for e in bm.edges:
+        fs = e.link_faces; sides = {side_of.get(f.index) for f in fs}
+        body = [f for f in fs if f.index not in side_of]
+        if body and len(sides - {None}) == 1 and len(fs) == 2:
+            f0 = body[0]; uv = sum((l[uvb].uv for l in f0.loops), Vector((0, 0))) / len(f0.loops)
+            cuts[(sides - {None}).pop()].append((e.verts[0].co.copy(), e.verts[1].co.copy(), e.verts[0], e.verts[1], uv.copy(), f0.normal.copy()))
+    legctr = {s: sum((me.vertices[i].co for p in me.polygons if side_of.get(p.index) == s for i in p.vertices), Vector()) for s in lc}
+    for s in lc:
+        n = sum(len(me.polygons[k].vertices) for k, v in side_of.items() if v == s); legctr[s] = legctr[s] / max(1, n)
+    bmesh.ops.delete(bm, geom=[bm.faces[k] for k in side_of], context='FACES_ONLY')
+    for s, ed in cuts.items():
+        if not ed: continue
+        vs = {v for c in ed for v in c[2:4]}; ctr = sum((v.co for v in vs), Vector()) / len(vs)
+        mid = bm.verts.new(ctr); w = {}
+        for v in vs:
+            for k, x in v[dl].items(): w[k] = w.get(k, 0) + x / len(vs)
+        for k, x in w.items(): mid[dl][k] = x
+        out = (legctr[s] - ctr).normalized()
+        for a, b, va, vb, uv, _ in ed:
+            try: f = bm.faces.new((va, vb, mid))
+            except ValueError: continue
+            f.normal_update()
+            if f.normal.dot(out) < 0: f.normal_flip()
+            for l in f.loops: l[uvb].uv = uv
+            f.smooth = True
+        print('rig: legcut cap %s: %d triangles' % (s, len(ed)))
+    bmesh.ops.delete(bm, geom=[e for e in bm.edges if not e.link_faces], context='EDGES')
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context='VERTS')
+    bm.to_mesh(me); bm.free()
+    # legs: only the leg faces
+    bm = bmesh.new(); bm.from_mesh(legs.data); bm.faces.ensure_lookup_table()
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.index not in side_of], context='FACES')
+    bm.to_mesh(legs.data); bm.free()
+    print('rig: legcut: body %d faces, legs %d faces' % (len(me.polygons), len(legs.data.polygons)))
 if opt.get('blend'):   # also keep the rigged, animated scene as a .blend, for opening and editing in Blender
     bpy.ops.wm.save_as_mainfile(filepath=opt['blend'])
     print('rig: saved ' + opt['blend'])

@@ -529,7 +529,8 @@ function aposeX(T) {
     share: { spine: [['spine', 0.34], ['spine2', 0.33], ['spine3', 0.33]], head: [['neck', 0.25], ['neck2', 0.25], ['head', 0.5]] },
     clavicles: S.map((s, k) => ({ bone: 'clav' + s, target: 'c_hand' + s, rest: T.wri[k], k: 0.4, max: 30 })),
     toes: S.map(s => ({ bone: 'toe' + s, foot: 'foot' + s, floor: 0.015, near: 0.07 })),
-    feet: S.map(s => ({ bone: 'foot' + s, side: s === 'R' ? -1 : 1, out: 6 })),   /* the model's feet are sculpted splayed: stand them nearly straight */
+    feet: S.map(s => ({ bone: 'foot' + s, side: s === 'R' ? -1 : 1, out: 6 })),
+    legcut: Object.fromEntries(S.map(s => [s, ['thigh', 'thighTw', 'shin', 'knee', 'foot', 'shinTw', 'toe'].map(n => n + s)])),   /* the bare legs are their own mesh: the game draws stick legs instead (stickLegs) */   /* the model's feet are sculpted splayed: stand them nearly straight */
     /* the forward smash's clap: palms pressed flat together from the strike until the hands part (bone lines 0.065 apart,
        measured on the rendered clap: closer and the hands pass into each other) */
     meet: { ClapCap: { at: [0.73, 1.4], fade: 0.2, gap: 0.055, toein: 6, hands: ['handR', 'handL'], targets: ['c_handR', 'c_handL'] } },
@@ -933,6 +934,7 @@ cur.Joey = { file: 'assets/joey/export/joey-v1.glb', height: 13.5, feel: 1,
     grab: A('Reach', 0.37, 0.43, 0, 1.3), dgrab: A('Reach', 0.37, 0.43, 0, 1.3), pgrab: A('Reach', 0.37, 0.43, 0, 1.3), getup: A('Lunge', 0.77, 0.8, 0, 1.6), ledgeatk: A('Shove', 0.5, 0.57, 0, 1.3),
     nspec: A('Shake', 0.73, 0.8, 0, 1.4), sspec: A('Band', 0.8, 0.9, 0, 1.9), uspec: A('Strap', 0.33, 0.55, 0, 1.4), dspec: A('Wheel', 0.6, 1.07, 0, 2.2), '*': A('Palm', 0.23, 0.27, 0, 0.7) } };
 cur['Cronky Dong'] = { file: 'assets/joey/export/cronky-v1.glb', height: 24.4, feel: 1,
+  stickLegs: { moves: ['bair', 'dair'], line: 0.3, outline: 0.34, color: '#161616' },   /* stick legs below the shorts; the kick and the stomp show the legs' outline instead */
   clips: Object.assign(common(0.12), { throw: { clip: 'Toss', from: 0, to: 1.4 }, carry: { clip: 'Carry' }, carryWalk: { clip: 'CarryWalk' }, punchWind: { clip: 'Wind' }, buried: { clip: 'Buried' },
     brake: { clip: 'Skid', from: 0, to: 0.4 }, jumpsquat: { clip: 'Squat', from: 0, to: 0.1 }, crouch: { clip: 'Crouch', at: 0.15 }, rise: { clip: 'Rise', from: 0, to: 0.45 }, airjump: { clip: 'AirJump', from: 0, to: 0.48 },
     fastfall: { clip: 'FastFall' }, helpless: { clip: 'Helpless' }, land: { clip: 'Land', from: 0, to: 0.4 }, landHard: { clip: 'LandHard', from: 0, to: 0.65 }, shieldHit: { clip: 'ShieldHit', from: 0, to: 0.3 },
