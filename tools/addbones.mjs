@@ -208,11 +208,12 @@ async function run(name, listOnly, flag) {
     const last = c.bones[c.bones.length - 1], tip = V(B[last].tail).applyMatrix4(world(made[last]).invert());
     const o = { bones: c.bones }; for (const k of ['k', 'd', 'max', 'drag']) if (c[k] !== undefined) o[k] = c[k]; o.tip = [tip.x, tip.y, tip.z].map(v => +v.toFixed(4)); return o;
   });
-  const mine = new Set(spec.bones.map(b => b.name));
+  const mine = new Set(spec.bones.map(b => b.name)), have = new Set(joints.map(j => j.getName()));
   for (const e of spec.manifest) {
     const m = man[e]; if (!m) { console.log('addbones: no manifest entry ' + e); continue; }
-    m.file = spec.out; /* an old chain goes if it holds a new bone or shares a bone with a new chain (a chain made longer replaces it) */
-    const taken = new Set(springs.flatMap(c => c.bones)); m.springs = (m.springs || []).filter(c => !c.bones.some(b => mine.has(b) || taken.has(b))).concat(springs);
+    m.file = spec.out; /* an old chain goes if it holds a new bone, shares a bone with a new chain (a chain made longer
+                          replaces it) or names a bone the model doesn't have (left from an earlier spec) */
+    const taken = new Set(springs.flatMap(c => c.bones)); m.springs = (m.springs || []).filter(c => !c.bones.some(b => mine.has(b) || taken.has(b) || !have.has(b))).concat(springs);
   }
   fs.writeFileSync(path.join(ROOT, 'assets/manifest.json'), JSON.stringify(man, null, 1) + '\n');
   const idle = spec.bones.filter(b => !used[b.name]).map(b => b.name), thin = spec.bones.filter(b => used[b.name] && used[b.name] < 10).map(b => b.name);
