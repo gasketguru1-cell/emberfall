@@ -153,10 +153,11 @@ function stick(x, y) { const m = Math.hypot(x, y); if (m === 0 || m <= PAD.deadz
 /* ---------- Control setups ----------
    A setup says which key or button does what. The keyboard and each controller use one setup each. The built-in setups
    cannot be changed; the three Custom ones of each kind can. Which setup each device uses, and the Custom ones, are kept
-   between visits. Start, the controls screen (Backspace, or - on a controller) and the debug keys are never remapped. */
+   between visits. Start, the controls screen (Backspace, or - / Create / the touchpad on a controller) and the debug keys are never remapped. */
 const KB_ROWS = [['left', 'Move left'], ['right', 'Move right'], ['up', 'Move up'], ['down', 'Move down'], ['walk', 'Walk (hold)'], ['atk', 'Attack'], ['spc', 'Special'], ['jmp', 'Jump'], ['jmp2', 'Jump (second key)'],
   ['shd', 'Shield'], ['shd2', 'Shield (second key)'], ['grb', 'Grab'], ['grb2', 'Grab (second key)'], ['cu', 'Tilt stick up'], ['cd', 'Tilt stick down'], ['cl', 'Tilt stick left'], ['cr', 'Tilt stick right'], ['tf', 'Transform (tap twice)']];
 const PAD_ROWS = [[0, 'A  (bottom button)', 'A'], [1, 'B  (right button)', 'B'], [2, 'X  (left button)', 'X'], [3, 'Y  (top button)', 'Y'], [4, 'L  (left bumper)', 'L'], [5, 'R  (right bumper)', 'R'], [6, 'ZL  (left trigger)', 'ZL'], [7, 'ZR  (right trigger)', 'ZR'], [10, 'Left stick click', 'L click'], [11, 'Right stick click', 'R click']];
+const PS_LONG = { A: '✕  Cross (bottom button)', B: '○  Circle (right button)', X: '□  Square (left button)', Y: '△  Triangle (top button)', L: 'L1  (left bumper)', R: 'R1  (right bumper)', ZL: 'L2  (left trigger)', ZR: 'R2  (right trigger)', 'L click': 'L3  (left stick click)', 'R click': 'R3  (right stick click)' };
 const PAD_ACTS = ['', 'atk', 'spc', 'jmp', 'shd', 'grb'], ACT_NAME = { '': 'Nothing', atk: 'Attack', spc: 'Special', jmp: 'Jump', shd: 'Shield', grb: 'Grab' };
 const KB_STD = { left: 'ArrowLeft', right: 'ArrowRight', up: 'ArrowUp', down: 'ArrowDown', walk: 'ShiftLeft', atk: 'KeyZ', spc: 'KeyX', jmp: 'KeyC', jmp2: 'KeyV', shd: 'KeyQ', shd2: 'KeyW', grb: 'KeyA', grb2: 'KeyS', cu: 'KeyI', cd: 'KeyK', cl: 'KeyJ', cr: 'KeyL', tf: 'KeyE' };
 const KB_WASD = { left: 'KeyA', right: 'KeyD', up: 'KeyW', down: 'KeyS', walk: 'ShiftLeft', atk: 'KeyJ', spc: 'KeyK', jmp: 'Space', jmp2: 'KeyL', shd: 'KeyU', shd2: '', grb: 'KeyI', grb2: '', cu: 'ArrowUp', cd: 'ArrowDown', cl: 'ArrowLeft', cr: 'ArrowRight', tf: 'KeyE' };
@@ -191,17 +192,42 @@ function readKb() {
   i.start = !!keys.Enter; i.sel = !!keys.Backspace;
   return i;
 }
+/* ---------- PlayStation controllers (PS5 DualSense, PS4 DualShock 4) ----------
+   Chrome and the desktop app usually hand a PlayStation pad over in the "standard" layout, the same button numbers as any
+   other pad (cross 0, circle 1, square 2, triangle 3, L1/R1 4/5, L2/R2 6/7, Create 8, Options 9, L3/R3 10/11, touchpad 17).
+   Some browsers and Bluetooth set-ups give the raw layout instead (square 0, cross 1, circle 2, triangle 3, ..., PS 12,
+   touchpad 13, the right stick on axes 2 and 5, the D-pad as one "hat" axis). padRead turns either into the standard one,
+   so the rest of the game never sees the difference. The touchpad click opens the controls screen like Create does, and
+   PlayStation pads are shown with their own button names. */
+const PS_RE = /054c|playstation|dualsense|dualshock|wireless controller/i;
+function padPS(p) { return !!(p && PS_RE.test(p.id || '')); }
+function padRead(p) {
+  const B = p.buttons, A = p.axes, pr = f => !!(B[f] && B[f].pressed), val = f => (B[f] ? B[f].value || (B[f].pressed ? 1 : 0) : 0);
+  if (p.mapping === 'standard' || !padPS(p)) return { b: pr, v: val, ax: [A[0] || 0, A[1] || 0, A[2] || 0, A[3] || 0], touch: pr(17) };
+  const FROM = [1, 2, 0, 3, 4, 5, 6, 7, 8, 9, 10, 11, -1, -1, -1, -1, 12, 13];   /* standard button -> raw button */
+  const hat = A.length > 9 ? A[9] : 9, dir = Math.abs(hat) > 1.05 ? -1 : Math.round((hat + 1) * 3.5);   /* hat: 0 up, 2 right, 4 down, 6 left, odd = diagonals */
+  const dp = [dir === 7 || dir === 0 || dir === 1, dir >= 3 && dir <= 5, dir >= 5 && dir <= 7, dir >= 1 && dir <= 3];   /* up, down, left, right */
+  const b = k => (k >= 12 && k <= 15 ? dp[k - 12] : FROM[k] >= 0 && pr(FROM[k]));
+  const v = k => (k >= 12 && k <= 15 ? (dp[k - 12] ? 1 : 0) : FROM[k] >= 0 ? val(FROM[k]) : 0);
+  return { b, v, ax: [A[0] || 0, A[1] || 0, A[2] || 0, A.length > 5 ? A[5] || 0 : A[3] || 0], touch: b(17) };
+}
+function padGet(n) { const p = navigator.getGamepads ? navigator.getGamepads()[n] : null; return p ? padRead(p) : null; }
+function anyPS() { const gp = navigator.getGamepads ? navigator.getGamepads() : []; for (let n = 0; n < gp.length; n++) if (padPS(gp[n])) return true; return false; }
+function devPS(dev) { return !!dev && dev.startsWith('pad') && padPS(navigator.getGamepads ? navigator.getGamepads()[+dev.slice(3)] : null); }
+/* Button names: by default the letters printed on Xbox / Switch pads; the PlayStation names on a PlayStation pad. */
+const PS_CAP = { A: '✕', B: '○', X: '□', Y: '△', L: 'L1', R: 'R1', ZL: 'L2', ZR: 'R2', '+': 'Options', '−': 'Create', 'L click': 'L3', 'R click': 'R3' };
+function padCap(name, ps) { return (ps === undefined ? anyPS() : ps) ? PS_CAP[name] || name : name; }
 function padInfo(n) { const p = navigator.getGamepads ? navigator.getGamepads()[n] : null; return p ? p.id : ''; }
 function readPad(n) {
   const p = navigator.getGamepads ? navigator.getGamepads()[n] : null, i = blankIn();
   if (!p) return i;
-  const b = k => !!(p.buttons[k] && (p.buttons[k].pressed || p.buttons[k].value > PAD.trigger)), ax = k => p.axes[k] || 0;
+  const r = padRead(p), b = k => r.b(k) || r.v(k) > PAD.trigger, ax = k => r.ax[k];
   [i.lx, i.ly] = stick(ax(0), -ax(1)); [i.cx, i.cy] = stick(ax(2), -ax(3));
   if (b(14)) i.lx = -1; if (b(15)) i.lx = 1; if (b(12)) i.ly = 1; if (b(13)) i.ly = -1; i.tf = b(13);   /* the D-pad's down button is also the transform action */
   const m = Math.hypot(i.lx, i.ly); if (m > 1) { i.lx /= m; i.ly /= m; }
   const map = setupOf('pad' + n).map; let jumps = 0;
   for (const k in map) { const a = map[k]; if (a && b(+k)) { i[a] = true; if (a === 'jmp') jumps++; } }
-  i.jmp2 = jumps >= 2; i.start = b(9); i.sel = b(8);
+  i.jmp2 = jumps >= 2; i.start = b(9); i.sel = b(8) || r.touch;   /* PlayStation: Options starts; Create or the touchpad opens the controls screen */
   return i;
 }
 /* ---------- The controls screen ----------
@@ -213,7 +239,7 @@ const KEY_NO = /^(Enter|Backspace|Delete|Tab|Escape|Equal|NumpadAdd|Control|Alt|
 function menuRaw(dev) {
   if (dev === 'kb') return { x: (keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0), y: (keys.ArrowDown ? 1 : 0) - (keys.ArrowUp ? 1 : 0), ok: !!(keys.Enter || keys.Space), back: !!(keys.Backspace || keys.Escape), clear: !!keys.Delete };
   const p = navigator.getGamepads ? navigator.getGamepads()[+dev.slice(3)] : null; if (!p) return { x: 0, y: 0, ok: false, back: true, clear: false };   /* unplugged: leave */
-  const b = k => !!(p.buttons[k] && p.buttons[k].pressed), ax = k => p.axes[k] || 0;
+  const r = padRead(p), b = k => r.b(k) || (k === 8 && r.touch), ax = k => r.ax[k];
   return { x: b(15) || ax(0) > 0.55 ? 1 : b(14) || ax(0) < -0.55 ? -1 : 0, y: b(13) || ax(1) > 0.55 ? 1 : b(12) || ax(1) < -0.55 ? -1 : 0, ok: b(0), back: b(1) || b(8) || b(9), clear: b(3) };
 }
 function openCMenu(dev) { CMENU = { dev, page: 'controls', row: 0, capture: false, wait: false, closing: false, note: '', noteT: 0, prev: menuRaw(dev), rep: 0 }; sfx('confirm'); }
@@ -230,7 +256,7 @@ function cmenuItems() {   /* the rows, each with the box it is drawn in (the mou
   }
   const su = setupOf(CMENU.dev), items = [{ kind: 'setup', box: [CM.x + 30, CM.y + 68, CM.w - 60, 46] }];
   if (su.type === 'kb') { const cw = (CM.w - 80) / 2; KB_ROWS.forEach(([key, label], n) => items.push({ kind: 'bind', key, label, box: [CM.x + 30 + (n >= 9 ? cw + 20 : 0), CM.y + 134 + (n % 9) * 36, cw, 32] })); }
-  else PAD_ROWS.forEach(([key, label], n) => items.push({ kind: 'bind', key, label, box: [CM.x + 170, CM.y + 130 + n * 33, CM.w - 340, 29] }));
+  else { const ps = devPS(CMENU.dev); PAD_ROWS.forEach(([key, label, short], n) => items.push({ kind: 'bind', key, label: ps ? PS_LONG[short] : label, box: [CM.x + 170, CM.y + 130 + n * 33, CM.w - 340, 29] })); }
   if (!su.fixed) items.push({ kind: 'reset', box: [CM.x + CM.w / 2 - 160, CM.y + 476, 320, 34] });
   if (typeof SND !== 'undefined') items.push({ kind: 'page', to: 'sound', box: CM_TAB });   /* last, so the rows above keep their numbers */
   return items;
@@ -297,7 +323,10 @@ function rumble(ctl, ms, strength) {
   try { const p = navigator.getGamepads()[+ctl.dev.slice(3)]; if (p && p.vibrationActuator) p.vibrationActuator.playEffect('dual-rumble', { duration: ms, strongMagnitude: strength, weakMagnitude: strength * 0.6 }); } catch (e) { /* no rumble */ }
 }
 function readDev(dev) { return dev === 'kb' ? readKb() : readPad(+dev.slice(3)); }
-function devName(dev) { return dev === 'kb' ? 'Keyboard' : dev === 'cpu' ? 'CPU' : 'Controller ' + (+dev.slice(3) + 1); }
+function devName(dev) {
+  if (dev === 'kb' || dev === 'cpu') return dev === 'kb' ? 'Keyboard' : 'CPU';
+  const n = +dev.slice(3), id = padInfo(n); return (padPS({ id }) ? (/0ce6|0df2|dualsense/i.test(id) ? 'PS5 controller ' : 'PlayStation controller ') : 'Controller ') + (n + 1);
+}
 
 class Ctl {
   constructor(dev) {

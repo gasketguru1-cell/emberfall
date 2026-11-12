@@ -125,11 +125,11 @@ function keyHint(x, y, cap, action) {
 }
 /* The controls shown under the fighter select: whatever the keyboard's setup and the first controller's setup say right now. */
 function legendRows() {
-  const pm = setupOf(allDevs().find(d => d !== 'kb') || 'pad0').map, km = setupOf('kb').map;
-  const pb = a => PAD_ROWS.filter(r => pm[r[0]] === a).map(r => r[2]).join(' / ') || '—';
+  const pd = allDevs().find(d => d !== 'kb') || 'pad0', pm = setupOf(pd).map, km = setupOf('kb').map, ps = devPS(pd);
+  const pb = a => PAD_ROWS.filter(r => pm[r[0]] === a).map(r => padCap(r[2], ps)).join(' / ') || '—';
   const kk = (...n) => n.map(x => km[x]).filter(Boolean).map(keyName).join(' / ') || '—';
   const four = (u, l, d, r) => km[u] + km[l] + km[d] + km[r] === 'ArrowUpArrowLeftArrowDownArrowRight' ? 'Arrows' : [u, l, d, r].map(x => keyName(km[x])).join(' ');
-  return [['CONTROLLER', [['Stick', 'Move'], [pb('atk'), 'Attack'], [pb('spc'), 'Special'], [pb('jmp'), 'Jump'], [pb('shd'), 'Shield'], [pb('grb'), 'Grab'], ['R Stick', 'Tilt'], ['+', 'Start'], ['−', 'Controls']]],
+  return [['CONTROLLER', [['Stick', 'Move'], [pb('atk'), 'Attack'], [pb('spc'), 'Special'], [pb('jmp'), 'Jump'], [pb('shd'), 'Shield'], [pb('grb'), 'Grab'], ['R Stick', 'Tilt'], [padCap('+', ps), 'Start'], [padCap('−', ps), 'Controls']]],
           ['KEYBOARD', [[four('up', 'left', 'down', 'right'), 'Move'], [kk('atk'), 'Attack'], [kk('spc'), 'Special'], [kk('jmp', 'jmp2'), 'Jump'], [kk('shd', 'shd2'), 'Shield'], [kk('grb', 'grb2'), 'Grab'], [four('cu', 'cl', 'cd', 'cr'), 'Tilt'], [kk('walk'), 'Walk'], ['Enter', 'Start'], ['Bksp', 'Controls']]]];
 }
 /* The controls screen (sim.js: CMENU), over the fighter select or the pause screen. */
@@ -183,7 +183,7 @@ function drawCMenu() {
   if (m.noteT > 0) { g.globalAlpha = Math.min(1, m.noteT / 30); g.textAlign = 'center'; g.font = '14px ' + ui; g.fillStyle = '#ffd98a'; g.fillText(m.note, CM.x + CM.w / 2, CM.y + 542); g.globalAlpha = 1; }
   g.textAlign = 'center'; g.font = '13px ' + ui; g.fillStyle = '#8f88ad'; g.fillText(snd ? 'The music steps back by itself for heavy hits and KOs, and while the game is paused.' : 'Two jump buttons together: short hop   ·   Right stick down while falling: fast fall', CM.x + CM.w / 2, CM.y + 568);
   let hx = CM.x + (snd ? 190 : kb ? 96 : 250); const hy = CM.y + CM.h - 24;
-  for (const [cap, act] of snd ? (kb ? [['↑ ↓', 'choose'], ['← →', 'quieter / louder'], ['Enter', 'mute'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'quieter / louder'], ['A', 'mute'], ['B', 'done']]) : kb ? [['↑ ↓ ← →', 'choose'], ['Enter', 'change a key'], ['Delete', 'clear it'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'change'], ['Y', 'set to nothing'], ['B', 'done']]) hx = keyHint(hx, hy, cap, act) + 8;
+  for (const [cap, act] of snd ? (kb ? [['↑ ↓', 'choose'], ['← →', 'quieter / louder'], ['Enter', 'mute'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'quieter / louder'], [padCap('A', devPS(m.dev)), 'mute'], [padCap('B', devPS(m.dev)), 'done']]) : kb ? [['↑ ↓ ← →', 'choose'], ['Enter', 'change a key'], ['Delete', 'clear it'], ['Backspace', 'done'], ['Mouse', 'works too']] : [['Stick', 'choose'], ['← →', 'change'], [padCap('Y', devPS(m.dev)), 'set to nothing'], [padCap('B', devPS(m.dev)), 'done']]) hx = keyHint(hx, hy, cap, act) + 8;
   g.restore();
 }
 /* the forms the fighter select shows: Wren's companions, the first five Fowls; Joey only as himself (his other form is a surprise) */
@@ -274,7 +274,7 @@ function drawSelect(three) {
   });
   const n = Math.floor(t / 420) % TIPS.length, ph = (t % 420) / 420, a = Math.min(1, ph * 8, (1 - ph) * 8);
   g.textAlign = 'left'; g.font = 'bold 11px system-ui, sans-serif'; spaced(2); g.fillStyle = '#ffb86b'; g.fillText('TIP', px + 18, py + 77); spaced(0);
-  g.font = '14px system-ui, sans-serif'; g.fillStyle = 'rgba(255,255,255,' + a.toFixed(2) + ')'; g.fillText(TIPS[n], px + 126, py + 77);
+  g.font = '14px system-ui, sans-serif'; g.fillStyle = 'rgba(255,255,255,' + a.toFixed(2) + ')'; g.fillText(TIPS[n].replace(/(press|and) A\b/g, (s, w) => w + ' ' + padCap('A')), px + 126, py + 77);
 
   /* ---- hitbox switch (top right) and the note about a newer version (top middle) ---- */
   if (!SWITCHES) { const w = 168, x = W - 44 - w, y = 20;   /* the switches are hidden: just say how to bring them back */
@@ -286,12 +286,12 @@ function drawSelect(three) {
     g.fillStyle = 'rgba(20,17,36,.8)'; rr(x - 36, y, w + 36, 34, 17); g.fill(); g.strokeStyle = on ? '#ff6a6a' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.font = '12px system-ui, sans-serif'; g.fillText('Show Hitboxes', x - 22, y + 22);
     g.fillStyle = on ? '#ff6a6a' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
-    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('X / Y  or  B key', x + 130, y + 22); }
+    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(padCap('X') + ' / ' + padCap('Y') + '  or  B key', x + 130, y + 22); }
   { const on = TRAINING, w = 214, x = W - 44 - w, y = 100;   /* training mode switch */
     g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = on ? '#9be564' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Training', x + 12, y + 22);
     g.fillStyle = on ? '#9be564' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
-    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point + A  or  T key', x + 128, y + 22); }
+    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point + ' + padCap('A') + '  or  T key', x + 128, y + 22); }
   { const on = DBG.fx, w = 214, x = W - 44 - w, y = 60;   /* hit effects switch: the sparks and flash where a hit lands */
     g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = on ? '#ffd166' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Hit sparks', x + 12, y + 22);
@@ -301,9 +301,9 @@ function drawSelect(three) {
     g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = on ? '#8fd3ff' : 'rgba(255,255,255,.16)'; g.lineWidth = on ? 2 : 1; g.stroke();
     g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#e6e0f6'; g.fillText('Attack arcs', x + 12, y + 22);
     g.fillStyle = on ? '#8fd3ff' : '#55506a'; rr(x + 80, y + 8, 40, 18, 9); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(on ? x + 111 : x + 89, y + 17, 6.5, 0, TAU); g.fill();
-    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point + A  or  G key', x + 128, y + 22); }
+    g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText('point + ' + padCap('A') + '  or  G key', x + 128, y + 22); }
   }
-  if (SWITCHES && DESKTOP()) for (const [box, label, hint, col, hot] of [[ONLINE_PILL, 'Online', 'point + A: host or join', '#ffb35c', false], [QUIT_PILL, QUIT_ASK > 0 ? 'Quit?' : 'Quit', QUIT_ASK > 0 ? 'press A again to quit' : 'point + A, twice', '#ff6a6a', QUIT_ASK > 0]]) {   /* desktop app: reachable with a controller's cursor */
+  if (SWITCHES && DESKTOP()) for (const [box, label, hint, col, hot] of [[ONLINE_PILL, 'Online', 'point + ' + padCap('A') + ': host or join', '#ffb35c', false], [QUIT_PILL, QUIT_ASK > 0 ? 'Quit?' : 'Quit', QUIT_ASK > 0 ? 'press ' + padCap('A') + ' again to quit' : 'point + A, twice', '#ff6a6a', QUIT_ASK > 0]]) {   /* desktop app: reachable with a controller's cursor */
     const [x, y, w] = box; g.fillStyle = 'rgba(20,17,36,.8)'; rr(x, y, w, 34, 17); g.fill(); g.strokeStyle = hot ? col : 'rgba(255,255,255,.16)'; g.lineWidth = hot ? 2 : 1; g.stroke();
     g.textAlign = 'left'; g.font = 'bold 13px system-ui, sans-serif'; g.fillStyle = col; g.fillText(label, x + 12, y + 22);
     g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(hint, x + 80, y + 22); }
