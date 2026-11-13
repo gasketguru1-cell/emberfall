@@ -82,7 +82,7 @@ vm.runInThisContext(`(function () {
       for (const L of CCPU.log) { if (!L.best) continue; r.picks++; if (L.route) r.routeLinks++; if (L.route) r.routes[L.best] = (r.routes[L.best] || 0) + 1; }
       r.landed += CCPU.stats.landed - st0.landed; r.dropped += CCPU.stats.dropped - st0.dropped;
       if (CL) { const ev = CCPU.ev.map(e => Object.assign({}, e, { at: e.frame - F0 })); for (const e of ev) console.log('EV', process.env.SEED, kind, g, JSON.stringify(e));
-        if (ev.some(e => (e.kind === 'spike' && e.n >= 2) || e.kind === 'sui' || e.kind === 'trump' || (e.kind === 'rec' && e.ropes >= 2)))
+        if (process.env.CLIPALL || ev.some(e => (e.kind === 'spike' && e.n >= 2) || e.kind === 'sui' || e.kind === 'trump' || (e.kind === 'rec' && e.ropes >= 2)))
           FS.writeFileSync(CL + '/' + (process.env.SEED || 977) + '-' + kind + '-' + fn + '-g' + g + '.json', JSON.stringify({ seed: process.env.SEED, kind, fn, g, chomp: CI, foe: FOE[fn], stocks: STOCKS, stage: OPT.stage, lv: F[0].ctl.ai.lv, foeLv: F[1].ctl.ai.lv, foeDev: F[1].ctl.dev, ev, chk: CHK, f0: F0, tick0: TK0, opt: OPT, inp: IN, kos: [F[0].kos, F[1].kos], win: w === 0 }));
         IN = null; }
       all.push({ kind, fn, g, win: w === 0, combos }); if (ARGS.dump) for (const L of CCPU.log) console.log(JSON.stringify(L));

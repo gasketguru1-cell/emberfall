@@ -18,7 +18,7 @@
     F[0].ctl.ai.lv = J.lv; F[1].ctl.ai.lv = J.foeLv; frame = J.f0 || 0; tick = J.tick0 || 0;
     const n = [0, 0]; PRO_SIM = f => { const a = J.inp[f.idx][n[f.idx]++]; return a ? dec(a) : blankIn(); };
     const ck = new Map(J.chk.map(c => [c[0], c]));
-    return { n, opt0, check() { const c = ck.get(n[1]); if (!c) return null; const d = Math.max(Math.abs(F[0].x - c[1]), Math.abs(F[0].y - c[2]), Math.abs(F[1].x - c[3]), Math.abs(F[1].y - c[4])); return d > 0.01 ? 'off by ' + d.toFixed(3) + ' at ' + n[1] : null; } };
+    return { n, opt0, check() { const c = ck.get(n[1] + 1); if (!c) return null;   /* saved as fighter 1 asked for its input that frame: before the step, so after step k it is entry k + 1 */ const d = Math.max(Math.abs(F[0].x - c[1]), Math.abs(F[0].y - c[2]), Math.abs(F[1].x - c[3]), Math.abs(F[1].y - c[4])); return d > 0.01 ? 'off by ' + d.toFixed(3) + ' at ' + n[1] : null; } };
   };
   CRP.stop = function (s) { PRO_SIM = null; Object.assign(OPT, s.opt0); mode = 'select'; };
   /* played through without drawing: does it still match the test's match? */

@@ -258,7 +258,7 @@ const CCPU = (() => {
   const learn = new Map();
   function newPlan(f, o, list, kind, hist) {
     const s = NET.save();
-    return { hist: hist || [], kind, root: s, ki: f.idx, list, n: 0, res: [], tails: null, pct0: o.pct, hits0: COMBO[f.idx].hits, kos0: f.kos, dies0: o.kos, age: 0, human: o.ctl.dev !== 'cpu', vx0: o.x, last: o.stocks <= 1, run0: FUN ? st(f).run || 0 : 0 };
+    return { hist: hist || [], kind, root: s, ki: f.idx, list, n: 0, res: [], tails: null, pct0: o.pct, hits0: COMBO[f.idx].hits, kos0: f.kos, dies0: o.kos, age: 0, tk: tick, human: o.ctl.dev !== 'cpu', vx0: o.x, last: o.stocks <= 1, run0: FUN ? st(f).run || 0 : 0 };
   }
   const bad = P => { const f = F[P.ki], o = F[1 - P.ki]; return o.kos > P.dies0 || f.state === 'hurt' || f.state === 'held' || f.state === 'dead' || f.state === 'respawn'; };
   /* ---- the spike: a down air (straight down) landing with them out past the ledge or under the stage. Chomp is hungry for it:
@@ -448,7 +448,7 @@ const CCPU = (() => {
     return false;
   }
   function work(P, n) {
-    const now = P.age === 0 ? P.root : NET.save();
+    const now = P.age === 0 && P.tk === tick ? P.root : NET.save();   /* a plan made after this frame's input (a chase, the way back) first works the next frame: its root is a frame behind */
     quiet(); const fr0 = K.stats.frames, t0 = CLOCK.now(); deadline = K.ms ? t0 + K.ms * 1.6 : 0;
     try {
       while (K.stats.frames - fr0 < n && !(K.ms && CLOCK.now() - t0 > K.ms)) {
