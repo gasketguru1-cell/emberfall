@@ -3305,7 +3305,7 @@ const CPU_LV = [null,
   { tempo: 0.8, guard: 0.62, tech: 0.76, punish: 0.78, air: 1, nap: 0, napLen: 0, mash: 7 },
   { tempo: 0.62, guard: 0.8, tech: 0.94, punish: 0.92, air: 1, nap: 0, napLen: 0, mash: 6 },
   { tempo: 0.5, guard: 0.9, tech: 1, punish: 1, air: 1, nap: 0, napLen: 0, mash: 4 },
-  { tempo: 0.5, guard: 0.9, tech: 1, punish: 1, air: 1, nap: 0, napLen: 0, mash: 4, funny: 1 }];   /* 11: Funny mode. Level 10 in every number and every planner; Knell's planner (knellcpu.js) then goes for combos into Dair spikes off the stage, and hardly kills any other way */
+  { tempo: 0.5, guard: 0.9, tech: 1, punish: 1, air: 1, nap: 0, napLen: 0, mash: 4, funny: 1 }];   /* 11: Funny mode. Level 10 in every number and every planner; Knell's planner (knellcpu.js) and Chomp Chomp's (chompcpu.js) then go for combos into down-air spikes off the stage, and hardly kill any other way */
 const cpuLvName = v => CPU_LV[v] && CPU_LV[v].funny ? 'FUNNY' : String(v);
 const CPU_MAX = CPU_LV.length - 1;
 let PRO_SIM = null;   /* set by cpu10.js only while it plays options out ahead of time: then it supplies every fighter's input */
