@@ -3305,7 +3305,7 @@ const CPU_LV = [null,
   { tempo: 0.8, guard: 0.62, tech: 0.76, punish: 0.78, air: 1, nap: 0, napLen: 0, mash: 7 },
   { tempo: 0.62, guard: 0.8, tech: 0.94, punish: 0.92, air: 1, nap: 0, napLen: 0, mash: 6 },
   { tempo: 0.5, guard: 0.9, tech: 1, punish: 1, air: 1, nap: 0, napLen: 0, mash: 4 },
-  { tempo: 0.5, guard: 0.9, tech: 1, punish: 1, air: 1, nap: 0, napLen: 0, mash: 4, funny: 1 }];   /* 11: Funny mode. Level 10 in every number and every planner; Knell's planner (knellcpu.js) then goes for combos into Dair spikes off the stage, and hardly kills any other way */
+  { tempo: 0.5, guard: 0.9, tech: 1, punish: 1, air: 1, nap: 0, napLen: 0, mash: 4, funny: 1 }];   /* 11: Funny mode. Level 10 in every number and every planner; Knell's planner (knellcpu.js) and Chomp Chomp's (chompcpu.js) then go for combos into down-air spikes off the stage, and hardly kill any other way */
 const cpuLvName = v => CPU_LV[v] && CPU_LV[v].funny ? 'FUNNY' : String(v);
 const CPU_MAX = CPU_LV.length - 1;
 let PRO_SIM = null;   /* set by cpu10.js only while it plays options out ahead of time: then it supplies every fighter's input */
@@ -3314,8 +3314,8 @@ try { const raw = localStorage.getItem('emberfall.cpulevel'), v = +raw; if (raw 
 function setCpuLevel(v) { CPU_LEVEL = clamp(Math.round(v), 0, CPU_MAX); try { localStorage.setItem('emberfall.cpulevel', String(CPU_LEVEL)); } catch (e) { /* no storage */ } }
 const NAP_STATES = { idle: 1, dash: 1, run: 1, brake: 1, land: 1, wd: 1 };
 function cpuInput(f, o, m) {
-  if (!m.lv && CPU_LEVEL === 0) return blankIn();   /* level 0: a target that does nothing at all, for testing moves on */
-  const lv = m.lv || CPU_LEVEL;
+  const lv = m.lv ?? CPU_LEVEL;   /* m.lv: this CPU's own level (a player who handed their fighter over sets it on their card) */
+  if (!lv) return blankIn();   /* level 0: a target that does nothing at all, for testing moves on */
   if (lv >= 10 && typeof cpuPro === 'function') { const r = cpuPro(f, o, m); if (r) return r; }   /* Furious Fowls at level 10: its planner (cpu10.js), when it has something to do */
   const kp = lv < 10 ? null : f.def.name === 'Knell' && typeof KCPU !== 'undefined' && KCPU ? KCPU : f.def.name === 'Chomp Chomp' && typeof CCPU !== 'undefined' && CCPU ? CCPU : null;
   if (kp) { const k = kp.input(f, o, m); if (k) return k; }   /* Knell or Chomp Chomp at level 10: a follow-up it has planned (knellcpu.js, chompcpu.js) */
@@ -3481,7 +3481,7 @@ function startMatch(stocks, stage) {   /* stocks, stage: an online match plays w
   const s0 = slots[0], s1 = slots[1] || { dev: 'cpu', pick: CPU_PICK >= 0 ? CPU_PICK : Math.random() * ROSTER.length | 0 };   /* the CPU's token, or random */
   /* a player who handed their fighter to the CPU (the button on their card) watches: their controller still pauses and leaves */
   WATCH = []; const online = LOBBY && LOBBY.linked();
-  const ctlFor = (s, k) => { if (s.cpu && !online) { WATCH.push({ ctl: devCtl(s.dev), idx: k }); return new Ctl('cpu'); } return s.dev === 'cpu' ? new Ctl('cpu') : devCtl(s.dev); };
+  const ctlFor = (s, k) => { if (s.cpu && !online) { WATCH.push({ ctl: devCtl(s.dev), idx: k }); const c = new Ctl('cpu'); c.ai.lv = s.lv ?? CPU_LEVEL; return c; } return s.dev === 'cpu' ? new Ctl('cpu') : devCtl(s.dev); };
   const c0 = ctlFor(s0, 0), c1 = ctlFor(s1, 1);
   for (const c of [c0, c1]) { c.tfAge = 99; c.tfReq = false; }
   F = [new Fighter(0, ROSTER[s0.pick], c0, false), new Fighter(1, ROSTER[s1.pick], c1, s1.pick === s0.pick)];
@@ -3514,11 +3514,15 @@ function cpuStep(d, wrap) { const m = CPU_LV.length - 1, v = CPU_LEVEL + d; if (
 /* everyone in is ready: the READY TO FIGHT banner across the middle (pointed at with A, or clicked, it starts the match) */
 const FIGHT_BAR = [0, 362, W, 64];
 /* the button on each player's card that hands their fighter to the CPU (and back): two CPUs can then fight while you watch */
-function cpuToggleBox(k) { return [(k ? W - 44 - 460 : 44) + 140, 446 + 12, 132, 28]; }
+function cpuToggleBox(k) { return [(k ? W - 44 - 460 : 44) + 176, 446 + 12, 116, 28]; }
+/* while the CPU plays a card's fighter, − and + either side of that button set that CPU's own level */
+function cardLvBox(k, d) { const b = cpuToggleBox(k); return d < 0 ? [b[0] - 32, b[1], 28, 28] : [b[0] + b[2] + 4, b[1], 28, 28]; }
+function cardLvAt(x, y) { for (let n = 0; n < 2; n++) if (slots[n] && slots[n].cpu) for (const d of [-1, 1]) if (inBox(cardLvBox(n, d), x, y)) return { n, d }; return null; }
+function cardLvStep(n, d) { const sl = slots[n], v = (sl.lv ?? CPU_LEVEL) + d; if (v < 0 || v > CPU_MAX) { beep(220, 0.04, 'square', 0.02); return; } sl.lv = v; beep(360 + v * 40, 0.04, 'square', 0.03); }
 function cpuToggle(k) {
   const sl = slots[k]; if (!sl) return;
   if (LOBBY && LOBBY.linked()) { beep(220, 0.04, 'square', 0.02); selToast('Online, everyone plays their own fighter', '#ffb35c'); return; }
-  sl.cpu = !sl.cpu; sfx('toggle'); selToast(sl.cpu ? 'P' + (k + 1) + "'s fighter: the CPU plays it" : 'P' + (k + 1) + ' plays again', '#8fd3ff');
+  sl.cpu = !sl.cpu; if (sl.cpu && sl.lv === undefined) sl.lv = CPU_LEVEL; sfx('toggle'); selToast(sl.cpu ? 'P' + (k + 1) + "'s fighter: the CPU plays it" : 'P' + (k + 1) + ' plays again', '#8fd3ff');
 }
 function selReady() { return !!(slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)); }
 /* The bar along the top of the fighter select: Options and Training at the left; the display switches, then Online and Quit
@@ -3551,6 +3555,7 @@ function selClick(x, y) {
   if (!slots[1] && inBox(CPU_MINUS, x, y)) { cpuStep(-1); return true; }
   if (!slots[1] && inBox(CPU_PLUS, x, y)) { cpuStep(1); return true; }
   for (let n = 0; n < 2; n++) if (slots[n] && inBox(cpuToggleBox(n), x, y)) { cpuToggle(n); return true; }
+  { const lb = cardLvAt(x, y); if (lb) { cardLvStep(lb.n, lb.d); return true; } }
   const k = tileUnder(x, y);
   if (k >= 0) { let sl = slots.find(q => q && q.dev === 'kb');
     if (!sl) { const n = slots[0] ? (slots[1] ? -1 : 1) : 0; if (n < 0) return false; sl = slots[n] = { dev: 'kb', pick: k, ready: false }; }
@@ -3560,7 +3565,7 @@ function selClick(x, y) {
   return false;
 }
 /* what the mouse can press here, for the pointer shape */
-function selHot(x, y) { if (mode !== 'select' || UI_MODAL || CMENU || (typeof ML !== 'undefined' && ML.open)) return false; if (OPT_UI.open) return true; return inBox(OPT_PILL, x, y) || !!chipAt(x, y) || tileUnder(x, y) >= 0 || (!slots[1] && (inBox(CPU_MINUS, x, y) || inBox(CPU_PLUS, x, y))) || [0, 1].some(n => slots[n] && inBox(cpuToggleBox(n), x, y)) || (selReady() && inBox(FIGHT_BAR, x, y)); }
+function selHot(x, y) { if (mode !== 'select' || UI_MODAL || CMENU || (typeof ML !== 'undefined' && ML.open)) return false; if (OPT_UI.open) return true; return inBox(OPT_PILL, x, y) || !!chipAt(x, y) || tileUnder(x, y) >= 0 || (!slots[1] && (inBox(CPU_MINUS, x, y) || inBox(CPU_PLUS, x, y))) || [0, 1].some(n => slots[n] && inBox(cpuToggleBox(n), x, y)) || !!cardLvAt(x, y) || (selReady() && inBox(FIGHT_BAR, x, y)); }
 /* The Options button, and the Options panel it opens (drawn by hud.js from the same boxes). Rows: Stocks, Stage, then the
    Controllers box (the keyboard and every controller plugged in, each opening its controls screen, and Nintendo's GameCube
    adapter), then Done. */
@@ -3656,7 +3661,8 @@ function stepSelect() {
       const chip = chipAt(sl.cx, sl.cy); if (chip) { chip.act(); continue; }   /* the bar along the top */
       if (!slots[1] && inBox(CPU_MINUS, sl.cx, sl.cy)) { cpuStep(-1); continue; }
       if (!slots[1] && inBox(CPU_PLUS, sl.cx, sl.cy)) { cpuStep(1); continue; }
-      { const n = slots.indexOf(sl); if (inBox(cpuToggleBox(n), sl.cx, sl.cy)) { cpuToggle(n); continue; } }   /* your own card's CPU button */
+      { const n = slots.indexOf(sl); if (inBox(cpuToggleBox(n), sl.cx, sl.cy)) { cpuToggle(n); continue; }   /* your own card's CPU button, and its level */
+        const lb = cardLvAt(sl.cx, sl.cy); if (lb && lb.n === n) { cardLvStep(n, lb.d); continue; } }
       if (onCpu) cpuStep(1, true);   /* anywhere else on the CPU card: A raises the level, B lowers it (both go round) */
       else if (over >= 0) { sl.pick = over; sl.ready = true; sfx('ready'); }
       else if (sl.ready && selReady()) { selectGo(); return; }   /* ready, pointing at nothing (the banner, say): fight */
