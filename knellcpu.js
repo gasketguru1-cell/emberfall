@@ -10,13 +10,15 @@
    without resetting, so every hit it picks is a true combo against that prediction. Of those it takes the best for damage, the
    Thread he keeps, the frames he is left ahead and above all a KO with the opponent still in hitstun. The work is spread over the
    frames of hitlag and the Hinge, when Knell could not press anything anyway, so the choice is made before his first chance to act.
+   He is hungry for spikes: carrying them out past a ledge, getting above them, and a Dair whose tip drives them down off the
+   stage all score well, and a spike that takes the stock beats any other KO.
    In neutral, whenever the level-9 brain decides to attack, the planner picks which opener to throw the same way.
    The route tokens are the ones of tools/knell-lab.js (the routes in playtest-results/knell/README.md).
    Needs net.js (the snapshots); without it Knell at level 10 is level 9. */
 const KCPU = (() => {
   if (typeof NET === 'undefined') return undefined;
   /* budget: frames of play-ahead per frame of the match; ms: and no more than this long (in a browser), so the game keeps its 60 fps */
-  const K = { budget: 140, ms: typeof window !== 'undefined' ? 5 : 0, stats: { plans: 0, openers: 0, picked: 0, none: 0, sims: 0, frames: 0, kos: 0, landed: 0, dropped: 0, fragile: 0 }, log: null };
+  const K = { budget: 140, ms: typeof window !== 'undefined' ? 5 : 0, stats: { plans: 0, openers: 0, picked: 0, none: 0, sims: 0, frames: 0, kos: 0, spikes: 0, spikeKOs: 0, edges: 0, edgeKOs: 0, landed: 0, dropped: 0, fragile: 0 }, log: null };
 
   /* ---- tokens: what a player presses for each step of a route (as in tools/knell-lab.js) ---- */
   const toward = (f, o) => sgn(o.x - f.x) || f.face;
@@ -53,7 +55,9 @@ const KCPU = (() => {
   A.hf = hinge(1, 0); A.hb = hinge(-1, 0); A.hu = hinge(0, 1);
   A.ff = { ok: f => !f.grounded && f.vy <= 0 && (free(f) || f.state === 'attack'), inp(i, k) { if (k === 0) i.ly = -1; }, done: k => k >= 1 };
   const WAIT = {};
-  const tok = t => { if (/^w\d+$/.test(t)) { if (!WAIT[t]) { const n = +t.slice(1); WAIT[t] = { ok: () => true, inp() {}, done: k => k >= n }; } return WAIT[t]; } return A[t]; };
+  const tok = t => { if (/^w\d+$/.test(t)) { if (!WAIT[t]) { const n = +t.slice(1); WAIT[t] = { ok: () => true, inp() {}, done: k => k >= n }; } return WAIT[t]; }
+    if (/^g\d+$/.test(t)) { if (!WAIT[t]) { const n = +t.slice(1); WAIT[t] = { ok: () => true, inp(i, k, f, o) { i.lx = toward(f, o); }, done: k => k >= n }; } return WAIT[t]; }   /* gN: run (or drift) toward them for N frames */
+    return A[t]; };
 
   /* ---- the executor: where Knell is in the steps he chose. A plain object, so it is copied along with a snapshot. ---- */
   const exec = (toks, late, patience) => ({ toks: toks.slice(), idx: 0, cur: null, k: -1, wait: 0, holdT: 0, drift: 1, failed: -1, late: late || 0, patience: patience || 40, a0: 0, a1: 0, p: 0 });
@@ -113,11 +117,19 @@ const KCPU = (() => {
 
   /* The follow-ups to try, best first. A Hinge only when it has a Thread to spend and the move that hit has its window. */
   const GROUND = ['ftiltH', 'usmash', 'fsmash', 'utilt', 'dtilt', 'ftilt', 'ftiltL', 'jab', 'dsmash', 'sh nair', 'sh fairH', 'sh fair', 'sh uair', 'sh dair', 'sh bair', 'fh uair', 'fh nair', 'dash'];
-  const AIR = ['fairH', 'dair', 'bair', 'nair', 'uair', 'fair', 'fairL', 'dj uair', 'dj fairH', 'dj nair', 'dj bair', 'dj fair',
+  const AIR = ['fairH', 'dair', 'bair', 'nair', 'uair', 'fair', 'fairL', 'dj uair', 'dj fairH', 'dj nair', 'dj bair', 'dj fair', 'dj dair',
     'ff usmash', 'ff fsmash', 'ff ftiltH', 'ff utilt', 'ff dtilt', 'ff dsmash'];   /* the last: drop to the floor and hit from there (the way out of an air loop into a finisher) */
   /* chase links: let the launch carry them, then run, jump or drift after them and hit again. These are what make a combo travel. */
   const CHASE_G = ['w8 dash', 'w14 dash', 'w12 sh fairH'];
-  const CHASE_A = ['w8 fairH', 'w14 fairH', 'w12 nair', 'w10 dj fairH', 'w16 dj fairH', 'w14 dj fair', 'w20 dj uair'];
+  const CHASE_A = ['w8 fairH', 'w14 fairH', 'w12 nair', 'w10 dj fairH', 'w16 dj fairH', 'w14 dj fair', 'w20 dj uair', 'w6 dair', 'w10 dj dair', 'w16 dj dair'];   /* the last three: follow them out and come down on top with the Dair's tip */
+  /* the edge-guard: they are off the stage after a launch; run off after them, jump and come down on top with the Dair's tip.
+     Each starts with EW frames of waiting: Knell holds still (drifting toward them in the air) while these are played ahead. */
+  const EW = 8;
+  const EDGE_G = ['g6 fh dair', 'g12 fh dair', 'g12 fh w8 dair', 'g20 fh w6 dair', 'g6 fh dj dair', 'g12 fh dj dair', 'g20 fh w8 dj dair', 'g6 fh w12 dj dair',
+    'g28 dair', 'g28 w8 dair', 'g24 dj dair', 'g30 w6 dj dair', 'sh dair', 'fh w14 dj dair'];
+  const EDGE_A = ['dair', 'w6 dair', 'w12 dair', 'w20 dair', 'dj dair', 'w6 dj dair', 'w12 dj dair', 'w20 dj dair', 'ff dair', 'g10 dair', 'g10 dj dair'];
+  const offStage = o => !o.grounded && (Math.abs(o.x) > EDGE + 6 || (Math.abs(o.x) > EDGE && o.y < -6)) && o.state !== 'dead' && o.state !== 'respawn' && o.state !== 'ledge';
+  const edgeList = f => (f.grounded ? EDGE_G : EDGE_A).map(r => ({ pre: '', rest: ['w' + EW].concat(r.split(' ')), key: 'edge|' + r, pri: 0 }));
   const OPEN = ['dtilt', 'jab', 'ftiltH', 'ftilt', 'utilt', 'sh nair', 'ftiltL', 'grab_f', 'grab_b', 'dash'];
   const OPEN_KILL = ['fsmash', 'usmash', 'dsmash'];
   const learn = new Map();   /* how often each follow-up has worked after each move: tried in that order next time */
@@ -158,23 +170,26 @@ const KCPU = (() => {
     const p = prefix(P, c.pre); if (!p) return null;
     NET.load(p.snap); const e = cpE(p.e); e.toks.push(...c.rest); if (!c.pre) e.late = c.late || 0;
     const f = F[P.ki], v = F[1 - P.ki], ci = P.ki; K.stats.sims++;
-    let prev = COMBO[ci].hits, vs = v.state, t = p.t;
+    let prev = COMBO[ci].hits, vs = v.state, t = p.t, spk = false;
     const why = K.why && /w[0-9]/.test(c.key) ? r => { K.why[r] = (K.why[r] || 0) + 1; return null; } : () => null;   /* testing */
     for (let k = 0; k < 100; k++, t++) {
       simFrame(ci, e, p.first && k === 0);
-      if (f.kos > P.kos0) return vs === 'hurt' || v.state === 'hurt' ? { c, ko: true, t, score: 1000 - t } : null;
+      if (f.kos > P.kos0) return vs === 'hurt' || v.state === 'hurt' || spk ? { c, ko: true, t, spike: spk, score: 1000 - t + (spk ? SPIKE_KO : 0) } : null;
       if (bad(P)) return why('bad'); if (e.failed >= 0) return why('failed:' + e.toks[e.failed]);
-      const h = COMBO[ci].hits; if (h < prev) return why('dropped@' + e.cur + ':' + k); prev = h; vs = v.state;
+      const h = COMBO[ci].hits; if (h < prev) return why('dropped@' + e.cur + ':' + k);
+      if (h > prev && spiked(v)) spk = true; else if (h > prev) spk = false;
+      prev = h; vs = v.state;
       if (finished(e)) {
         if (h <= P.hits0 || f.knCS) return why(f.knCS ? 'shield' : 'missed');
         const adv = v.state === 'hurt' ? (v.hitstun - v.sf) - (f.state === 'attack' && f.move ? (f.move.hinge && f.thread > 0 ? Math.max(0, f.move.hinge[0] - f.mf) : f.move.t - f.mf) : 0) : -10;
         let sc = (v.pct - P.pct0) + f.thread * 7 + clamp(adv, -10, 30) * 0.35;
         /* past kill percents, carrying them toward a blast zone (out past a ledge, or up) counts too: the setup for the kill */
         const kp = clamp((v.pct - 70) / 80, 0, 1); sc += kp * (Math.max(0, Math.abs(v.x) - 20) * 0.25 + Math.max(0, v.y - 20) * 0.15);
-        if (!f.grounded && Math.abs(f.x) > EDGE + 6 && f.y < 4) sc -= f.jumps > 0 ? 6 : 20;   /* chasing out past the ledge low, with nothing to come back on */
+        if (!f.grounded && Math.abs(f.x) > EDGE + 6 && f.y < 4) sc -= f.jumps > 0 ? (Math.abs(v.x) > EDGE && v.state === 'hurt' ? 0 : 6) : 20;   /* following them out for the spike, with a jump left, is fine */   /* chasing out past the ledge low, with nothing to come back on */
         sc += style(P, c, v);
         if (K.why && /w[0-9]/.test(c.key)) K.why.OK = (K.why.OK || 0) + 1;
-        return { c, ko: false, t, score: sc, snap: v.pct >= 50, e: cpE(e), speed: Math.hypot(v.vx, v.vy), pct: v.pct };
+        if (spk) sc += spikeDepth(v) * SPIKE_HIT;   /* a spike that hasn't taken the stock yet is worth as much as it is deep (at the ledge they just come back) */   /* a spike off the stage that has not taken the stock yet still leaves them low and out of reach */
+        return { c, ko: false, t, score: sc, snap: v.pct >= 50 || spk, spike: spk, e: cpE(e), speed: Math.hypot(v.vx, v.vy), pct: v.pct };
       }
     }
     return null;
@@ -183,7 +198,7 @@ const KCPU = (() => {
      score, and a move not yet used in this combo scores a little. The Dair/Bair Thread loop is an extension only: one pass of it
      is fine, every further pass costs more, so he leaves it for a carry or a finisher. */
   const LOOP = { dair: 1, bair: 1 };
-  const newHist = (f, o) => ({ moves: [], x0: o.x, dir: Math.abs(o.x) > 10 ? -sgn(o.x) : (sgn(o.x - f.x) || f.face || 1) });
+  const newHist = (f, o) => ({ moves: [], x0: o.x, dir: Math.abs(o.x) > 10 ? sgn(o.x) : (sgn(o.x - f.x) || f.face || 1) });   /* toward the nearer ledge (the spike is off it); from the middle, the way he is hitting them */
   const last = c => c.rest[c.rest.length - 1];
   function style(P, c, v) {
     if (K.plain) return 0;   /* testing: the old scoring, for comparison */
@@ -192,7 +207,7 @@ const KCPU = (() => {
       let n = 0; for (let k = 1; k < H.length; k++) if (LOOP[H[k]] && LOOP[H[k - 1]]) n++;
       sc -= n * 16; }
     const used = H.filter(m => m === mv).length; sc += used ? -4 * used : 4;
-    /* travel: the combo has a heading (across the stage, toward the far side from where it began); ground gained along it scores,
+    /* travel: the combo has a heading (across the stage, toward the nearer ledge, where the spike is); ground gained along it scores,
        for the opponent carried and for Knell following */
     const d = P.hist.dir, f = F[P.ki];
     sc += Math.max(-10, (v.x - P.vx0) * d) * 0.8 + Math.max(-6, (f.x - P.fx0) * d) * 0.3;
@@ -201,8 +216,21 @@ const KCPU = (() => {
        it has run, so a finisher wins out over circling the middle of the stage */
     if (v.pct >= 100) { const w = clamp((v.pct - 100) / 50, 0.3, 1) * (1 + Math.max(0, H.length - 8) * 0.2);
       sc += w * (Math.hypot(v.vx, v.vy) * 2 + Math.max(0, Math.abs(v.x) - 30) * 0.3 + Math.max(0, v.y - 30) * 0.2); }
+    /* the spike setup: what he is hungry for is a chain that ends with the Dair's tip driving them down off a ledge. Carrying
+       them out past the ledge, still in hitstun and in the air, scores; more with Knell above them and a jump left to get there
+       and back (the Dair has to come down on top of them) */
+    const off = Math.abs(v.x) - EDGE;
+    if (off > 2 && !v.grounded && v.state === 'hurt') {
+      sc += Math.min(off, 40) / 40 * SETUP_OFF;
+      if (f.y > v.y + 2 && Math.abs(f.x - v.x) < 14 && (f.jumps > 0 || f.y > 0)) sc += SETUP_ABOVE * (0.3 + 0.7 * spikeDepth(v));   /* above them, most of all where a spike would kill */
+    }
     return sc;
   }
+  /* the Dair's tip sent them down, off the stage (over the stage they would only bounce off the floor) */
+  const SPIKE_KO = 200, SPIKE_HIT = 40, SETUP_OFF = 12, SETUP_ABOVE = 16;
+  /* 0 at the ledge at stage height, 1 when they are 20 below it or 30 out: deep enough that a spike kills (measured: a Dair spike from there took the stock of Joey, Potato Sack and Sprocket at any damage) */
+  const spikeDepth = v => clamp(Math.max((-v.y - 2) / 18, (Math.abs(v.x) - EDGE - 8) / 22), 0, 1);
+  const spiked = v => !v.grounded && v.state === 'hurt' && v.vy < -0.8 && Math.abs(v.x) > EDGE + 3;
   /* after the best few: does the launch alone take the stock, still in hitstun? Nothing more is pressed. */
   function tail(P, r) {
     /* replayed from the shared start rather than kept as a snapshot of its own: a snapshot copies the whole match, and many of
@@ -210,7 +238,7 @@ const KCPU = (() => {
     const r2 = leaf(P, r.c); if (!r2 || r2.ko) return !!(r2 && r2.ko); const e = cpE(r2.e); e.drift = 0; const f = F[P.ki], v = F[1 - P.ki]; let prev = COMBO[P.ki].hits, vs = v.state;
     for (let k = 0; k < 110; k++) {
       simFrame(P.ki, e, false);
-      if (f.kos > P.kos0) return vs === 'hurt';
+      if (f.kos > P.kos0) return vs === 'hurt' || !!r2.spike;   /* a spike off stage counts even once hitstun is over: too low to come back */
       if (bad(P)) return false;
       const h = COMBO[P.ki].hits; if (h < prev) return false; prev = h; vs = v.state;
     }
@@ -225,8 +253,9 @@ const KCPU = (() => {
         if (P.n < P.list.length) { P.cur = { q: 'leaf', it: P.list[P.n] }; const r = leaf(P, P.list[P.n++]); if (r) P.res.push(r); continue; }
         /* the kill check: the hardest-hitting few (every smash among them), more of them the higher the damage */
         if (!P.tails) { const smash = r => /smash/.test(r.c.rest[r.c.rest.length - 1]) ? 50 : 0;
-          P.tails = P.res.filter(r => !r.ko && r.snap).sort((a, b) => (b.speed + smash(b)) - (a.speed + smash(a))).slice(0, P.pct0 >= 150 ? 10 : P.pct0 >= 100 ? 6 : 3); }
-        if (P.tails.length) { const r = P.tails.shift(); P.cur = { q: 'tail', it: r, r }; if (tail(P, r)) { r.ko = true; r.score = 900 - r.t; } continue; }
+          const spikes = P.res.filter(r => !r.ko && r.spike).sort((a, b) => b.score - a.score).slice(0, 4);   /* every spike gets its kill check, whatever the damage */
+          P.tails = spikes.concat(P.res.filter(r => !r.ko && r.snap && !r.spike).sort((a, b) => (b.speed + smash(b)) - (a.speed + smash(a))).slice(0, P.pct0 >= 150 ? 10 : P.pct0 >= 100 ? 6 : 3)); }
+        if (P.tails.length) { const r = P.tails.shift(); P.cur = { q: 'tail', it: r, r }; if (tail(P, r)) { r.ko = true; r.score = 900 - r.t + (r.spike ? SPIKE_KO : 0); } continue; }
         if (P.human) {   /* the fragility check, best first, until one holds up against both */
           if (!P.rob) P.rob = P.res.slice().sort((a, b) => b.score - a.score).slice(0, 5).flatMap(r => POLS.map(p => ({ r, p })));
           if (P.rob.length) { const q = P.rob.shift(); if (q.r.fragile) continue; P.cur = { q: 'rob', it: q, r: q };
@@ -246,18 +275,19 @@ const KCPU = (() => {
   }
   function pick(P) {
     const sc = r => r.score - (r.fragile ? 60 : 0);   /* a sure follow-up beats a better one they can DI out of */
-    let best = null; for (const r of P.res) if (!best || sc(r) > sc(best)) best = r;
+    let best = null; for (const r of P.res) if ((P.kind !== 'edge' || r.ko) && (!best || sc(r) > sc(best))) best = r;   /* an edge-guard only for a spike that takes the stock */
     for (const r of P.res) { const l = learn.get(r.c.key) || { ok: 0, bad: 0 }; l.ok++; learn.set(r.c.key, l); }
     for (let n = 0; n < P.n; n++) { const c = P.list[n]; if (!P.res.some(r => r.c === c)) { const l = learn.get(c.key) || { ok: 0, bad: 0 }; l.bad++; learn.set(c.key, l); } }
-    if (best) { K.stats.picked++; if (best.ko) K.stats.kos++; } else K.stats.none++;
-    if (K.log) K.log.push({ frame, kind: P.kind, mv: F[P.ki].mname, tried: P.n, of: P.list.length, ok: P.res.length, vpct: +F[1 - P.ki].pct.toFixed(0), res: K.dbg ? P.res.map(r => r.c.key.split('|')[1].trim() + ' ' + r.score.toFixed(0) + (r.ko ? ' KO' : '') + ' v' + r.speed.toFixed(1)).join(', ') : undefined, best: best && (best.c.pre + ' ' + best.c.rest.join(' ')).trim(), ko: best && best.ko, fragile: best && !!best.fragile, score: best && +best.score.toFixed(1) });
+    if (best && P.kind === 'edge') K.stats.edgeKOs++;
+    if (best) { K.stats.picked++; if (best.ko) K.stats.kos++; if (best.spike) { K.stats.spikes++; if (best.ko) K.stats.spikeKOs++; } } else K.stats.none++;
+    if (K.log) K.log.push({ frame, kind: P.kind, mv: F[P.ki].mname, tried: P.n, of: P.list.length, ok: P.res.length, vpct: +F[1 - P.ki].pct.toFixed(0), vx: +F[1 - P.ki].x.toFixed(0), vy: +F[1 - P.ki].y.toFixed(0), res: K.dbg ? P.res.map(r => r.c.key.split('|')[1].trim() + ' ' + r.score.toFixed(0) + (r.ko ? ' KO' : '') + ' v' + r.speed.toFixed(1)).join(', ') : undefined, best: best && (best.c.pre + ' ' + best.c.rest.join(' ')).trim(), ko: best && best.ko, fragile: best && !!best.fragile, spike: best && !!best.spike, score: best && +best.score.toFixed(1) });
     P.chosen = best ? last(best.c) : null;
     return best ? exec((best.c.pre ? [best.c.pre] : []).concat(best.c.rest), best.c.pre ? 0 : best.c.late || 0) : null;
   }
 
   /* ---- each frame, from cpuInput ---- */
   const S = new WeakMap();
-  const st = f => { let s = S.get(f.ctl); if (!s) S.set(f.ctl, s = { e: null, issued: false, plan: null, act: -1, freeKey: -1, hist: null, hh: 0 }); return s; };
+  const st = f => { let s = S.get(f.ctl); if (!s) S.set(f.ctl, s = { e: null, issued: false, plan: null, act: -1, freeKey: -1, hist: null, hh: 0, edgeAt: 0 }); return s; };
   let busy = false;
   K.input = function (f, o, m) {
     if (busy || NET.resim || F.length !== 2) return null;
@@ -274,14 +304,18 @@ const KCPU = (() => {
       if (f.state === 'attack' && f.knC && !f.knCS && s.act !== f.knAct && f.move && !f.move.burst) { s.act = f.knAct; s.plan = newPlan(f, o, followUps(f), 'confirm', s.hist); K.stats.plans++; }
       else if (free(f) && s.freeKey !== hits) { s.freeKey = hits; const l = followUps(f).filter(c => !c.pre); for (const c of l.slice()) l.push(Object.assign({}, c, { late: 6, key: c.key + '+6' })); s.plan = newPlan(f, o, l, 'free', s.hist); K.stats.plans++; }
     }
+    /* they are off the stage, low or far enough out that a spike would kill, and Knell is free: plan the edge-guard (not too often: he holds still while it is worked out, and each one is a few hundred frames of play-ahead) */
+    if (!s.plan && free(f) && frame >= s.edgeAt && offStage(o) && spikeDepth(o) > 0.25 && Math.abs(o.x - f.x) < 60 && (f.grounded || f.y > -12 || f.jumps > 0) && o.invuln <= 0) {
+      s.edgeAt = frame + 40; s.plan = newPlan(f, o, edgeList(f), 'edge', s.hist); K.stats.edges++; }
     if (s.plan) {
       const P = s.plan; busy = true; let done;
       try { done = work(P, K.budget); } finally { busy = false; }
       P.age++;
       /* choose once everything is tried, or as soon as Knell could act (the next frame would be too late) */
       const could = hingeable(f) || hingeReady(f) || free(f) || jabNext(f, 'jab') || jabNext(f, 'jab2') || f.state !== 'attack';
-      if (done || could || P.age > 45) {
+      if (P.kind === 'edge' ? (done || P.age >= EW) : (done || could || P.age > 45)) {
         s.plan = null; busy = true; let e; try { e = pick(P); } finally { busy = false; }
+        if (e && P.kind === 'edge') { const left = EW + 1 - P.age; if (left > 0) e.toks[0] = 'w' + left; else e.toks.shift(); }   /* the frames already held while it was worked out */
         if (P.chosen) P.hist.moves.push(P.chosen);
         if (e) { s.e = e; e.h0 = COMBO[f.idx].hits; s.issued = true; return input(s.e, f, o); }
         return null;
