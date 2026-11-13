@@ -8,7 +8,7 @@ function drawHud() {
   F.forEach(f => {
     const x = W * (f.idx ? 0.68 : 0.32), y = H - 86, pc = f.idx ? '#6cb4ff' : '#ff7b6c';
     g.fillStyle = 'rgba(10,10,20,.6)'; rr(x - 120, y, 240, 74, 12); g.fill(); g.fillStyle = pc; rr(x - 120, y, 8, 74, 4); g.fill();
-    g.textAlign = 'left'; g.font = 'bold 16px system-ui, sans-serif'; g.fillStyle = pc; g.fillText((f.ctl.dev === 'cpu' ? 'CPU ' + cpuLvName(f.ctl.ai.lv || CPU_LEVEL) : 'P' + (f.idx + 1)) + '  ' + f.def.name, x - 102, y + 22);
+    g.textAlign = 'left'; g.font = 'bold 16px system-ui, sans-serif'; g.fillStyle = pc; g.fillText((f.ctl.dev === 'cpu' ? 'CPU ' + cpuLvName(f.ctl.ai.lv ?? CPU_LEVEL) : 'P' + (f.idx + 1)) + '  ' + f.def.name, x - 102, y + 22);
     if (f.stocks <= 5) for (let k = 0; k < f.stocks; k++) { g.fillStyle = '#ffd98a'; g.beginPath(); g.arc(x - 96 + k * 18, y + 40, 6, 0, TAU); g.fill(); }
     else { g.fillStyle = '#ffd98a'; g.beginPath(); g.arc(x - 96, y + 40, 6, 0, TAU); g.fill(); g.font = 'bold 14px system-ui, sans-serif'; g.fillText('× ' + f.stocks, x - 84, y + 45); }   /* many stocks: one dot and the count */
     if (f.def.transform) drawIntensity(f, x, y);
@@ -310,13 +310,16 @@ function drawSelect(three) {
       continue;
     }
     const d = ROSTER[sl.pick], same = k && slots[0] && slots[0].pick === sl.pick, nf = selForms(d).length;
-    g.textAlign = 'right'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(devName(sl.dev) + '  ·  ' + setupOf(sl.dev).name.replace(/\s+/g, ' '), x + cw - 20, y + 30);
+    g.textAlign = 'right'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(sl.cpu ? devName(sl.dev) : devName(sl.dev) + '  ·  ' + setupOf(sl.dev).name.replace(/\s+/g, ' '), x + cw - 20, y + 30);   /* shorter while the level buttons are out */
     /* who plays this fighter: you, or the CPU (click, or point and press Attack, to switch; two CPUs then fight while you watch) */
     { const b = cpuToggleBox(k), hot = pointed(b) || (sl.cx !== undefined && inBox(b, sl.cx, sl.cy));
       g.fillStyle = sl.cpu ? (hot ? '#b8e4ff' : '#8fd3ff') : hot ? 'rgba(143,211,255,.28)' : 'rgba(255,255,255,.08)'; rr(b[0], b[1], b[2], b[3], 14); g.fill();
       g.strokeStyle = sl.cpu ? '#8fd3ff' : 'rgba(143,211,255,.5)'; g.lineWidth = 1; g.stroke();
       g.textAlign = 'center'; g.font = 'bold 12px system-ui, sans-serif'; spaced(1); g.fillStyle = sl.cpu ? '#0e1a26' : '#cfe9ff';
-      g.fillText(sl.cpu ? 'CPU PLAYS  ·  LV ' + cpuLvName(CPU_LEVEL) : 'YOU PLAY  ·  CPU?', b[0] + b[2] / 2, b[1] + 19); spaced(0); }
+      const lv = sl.lv ?? CPU_LEVEL; g.fillText(sl.cpu ? 'CPU  ·  LV ' + cpuLvName(lv) : 'YOU PLAY  ·  CPU?', b[0] + b[2] / 2, b[1] + 19); spaced(0);
+      if (sl.cpu) for (const [dd, glyph, off] of [[-1, '−', lv <= 0], [1, '+', lv >= CPU_MAX]]) { const lb = cardLvBox(k, dd), h = !off && (pointed(lb) || (sl.cx !== undefined && inBox(lb, sl.cx, sl.cy)));   /* this CPU's own level */
+        g.fillStyle = h ? 'rgba(255,217,138,.9)' : off ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.12)'; rr(lb[0], lb[1], lb[2], lb[3], 8); g.fill(); g.strokeStyle = off ? 'rgba(255,255,255,.1)' : 'rgba(255,255,255,.3)'; g.lineWidth = 1; g.stroke();
+        g.font = 'bold 20px system-ui, sans-serif'; g.fillStyle = h ? '#1a1230' : off ? '#5a5570' : '#fff'; g.fillText(glyph, lb[0] + lb[2] / 2, lb[1] + 21); } }
     g.textAlign = 'left'; g.font = 'bold 44px ' + serif; g.fillStyle = '#fff'; g.fillText(d.name, x + 24, y + 84);
     g.font = 'italic 16px ' + serif; g.fillStyle = '#f3dfb6'; g.fillText(d.sub, x + 26, y + 110);
     if (nf > 1) {   /* the companions; in 3D the one standing on the island is lit */
