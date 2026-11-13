@@ -696,7 +696,7 @@ vm.runInThisContext(`
       const fl = spin(0, 6, 0), bo = spin(1, 6, 0), ci = spin(2, 6, 0), under = spin(0, 0, -12), bar = SPIN.Rusty;
       check('Furious Fowls: Sling Spin lands its light hits and a finisher, per bird', fl.hits === 5 && bo.hits === 6 && ci.hits === 4, 'Flint ' + fl.hits + ' hits for ' + fl.pct.toFixed(1) + '%, Bolt ' + bo.hits + ' for ' + bo.pct.toFixed(1) + '%, Cinder ' + ci.hits + ' for ' + ci.pct.toFixed(1) + '% (4+1, 5+1, 3+1 expected)');
       check('Furious Fowls: the handle end of the spin hits too', under.hits >= 2, 'a target below the rig was hit ' + under.hits + ' times');
-      const a0 = FM[0].moves.nair.spinAt(null, bar.s), a1 = FM[0].moves.nair.spinAt(null, bar.w0 + bar.n * bar.re + 1);
+      const nr = FM[0].moves.nair, a0 = nr.spinAt(null, nr.spinS), a1 = nr.spinAt(null, nr.spinEnd);
       check('Furious Fowls: the rig turns end over end, twice round for Flint', Math.abs(a1 - a0 - Math.PI * 4) < 0.01, 'turned ' + ((a1 - a0) / Math.PI / 2).toFixed(2) + ' times'); }
     /* Catapult Cyclone: charge tiers set the hit count and damage */
     { const cy = hold => { const [f, o] = setup(FOW, FL, 0, 0.5); airborne(o, 0.5, 12); o.ctl = new Ctl('none'); let hits = 0, was = 0, y0 = o.y; SCRIPT[0] = (i, tt) => { if (tt >= 2 && tt < 9 + hold) { i.ly = 1; i.spc = true; } else if (tt >= 9 + hold) i.ly = 1; }; run(220, () => { if (o.pct > was + 0.01) { hits++; was = o.pct; } if (hits < 2) { o.y = y0 + Math.max(0, f.y - 2); o.x = f.x + 0.5; o.vx = o.vy = 0; } }); return { hits, pct: o.pct }; };
