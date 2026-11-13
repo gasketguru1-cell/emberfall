@@ -5,7 +5,7 @@ const fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '..'), out = path.join(root, 'build', 'game');
 fs.rmSync(out, { recursive: true, force: true });
 const copy = rel => { const to = path.join(out, rel); fs.mkdirSync(path.dirname(to), { recursive: true }); fs.copyFileSync(path.join(root, rel), to); };
-const files = ['index.html', 'hitboxes.js', 'sim.js', 'anim.js', 'net.js', 'knellcpu.js', 'render2d.js', 'hud.js', 'movelist.js', 'finalhit.js', 'main.js', 'online.js', 'render3d.js',
+const files = ['index.html', 'hitboxes.js', 'sim.js', 'anim.js', 'net.js', 'knellcpu.js', 'chompcpu.js', 'render2d.js', 'hud.js', 'movelist.js', 'finalhit.js', 'main.js', 'online.js', 'render3d.js',
   'assets/manifest.json', 'assets/stage/export/stage.json', 'assets/stage/export/backdrop.jpg', 'assets/stage/source/concept.webp',
   'node_modules/three/build/three.module.js', 'node_modules/three/build/three.core.js'];
 /* every script the game page loads (so a new one, like audio.js, can't be left out), and everything the sound needs */
