@@ -310,6 +310,12 @@ function drawSelect(three) {
     }
     const d = ROSTER[sl.pick], same = k && slots[0] && slots[0].pick === sl.pick, nf = selForms(d).length;
     g.textAlign = 'right'; g.font = '13px system-ui, sans-serif'; g.fillStyle = '#b9b2d6'; g.fillText(devName(sl.dev) + '  ·  ' + setupOf(sl.dev).name.replace(/\s+/g, ' '), x + cw - 20, y + 30);
+    /* who plays this fighter: you, or the CPU (click, or point and press Attack, to switch; two CPUs then fight while you watch) */
+    { const b = cpuToggleBox(k), hot = pointed(b) || (sl.cx !== undefined && inBox(b, sl.cx, sl.cy));
+      g.fillStyle = sl.cpu ? (hot ? '#b8e4ff' : '#8fd3ff') : hot ? 'rgba(143,211,255,.28)' : 'rgba(255,255,255,.08)'; rr(b[0], b[1], b[2], b[3], 14); g.fill();
+      g.strokeStyle = sl.cpu ? '#8fd3ff' : 'rgba(143,211,255,.5)'; g.lineWidth = 1; g.stroke();
+      g.textAlign = 'center'; g.font = 'bold 12px system-ui, sans-serif'; spaced(1); g.fillStyle = sl.cpu ? '#0e1a26' : '#cfe9ff';
+      g.fillText(sl.cpu ? 'CPU PLAYS  ·  LV ' + CPU_LEVEL : 'YOU PLAY  ·  CPU?', b[0] + b[2] / 2, b[1] + 19); spaced(0); }
     g.textAlign = 'left'; g.font = 'bold 44px ' + serif; g.fillStyle = '#fff'; g.fillText(d.name, x + 24, y + 84);
     g.font = 'italic 16px ' + serif; g.fillStyle = '#f3dfb6'; g.fillText(d.sub, x + 26, y + 110);
     if (nf > 1) {   /* the companions; in 3D the one standing on the island is lit */

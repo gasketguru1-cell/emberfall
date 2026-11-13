@@ -652,10 +652,10 @@ function mlOpen(def, sec, ctl, page, sel) {
 }
 function mlClose() { ML.open = false; beep(420, 0.06, 'triangle', 0.04); }
 /* where the move list opens for a fighter in a match: the companion or bird that is out */
-function mlOpenFor(f) {
+function mlOpenFor(f, ctl) {   /* ctl: whose controller turns the pages (a watcher's, when the CPU plays f) */
   const def = f.def; let sec = 0, page = 0;
   if (def.fowl) { if (f.fi < 5) sec = f.fi; else { sec = 5; page = f.fi - 5; } } else if (def.forms.length > 1) sec = f.fi % def.forms.length;
-  mlOpen(def, sec, f.ctl, page);
+  mlOpen(def, sec, ctl || f.ctl, page);
 }
 function mlTurn(d) { const n = ML.flat.length, to = clamp(ML.at + d, 0, n - 1); if (to !== ML.at) { ML.at = to; ML.t = 0; beep(520 + (d > 0 ? 60 : 0), 0.035, 'square', 0.025); } }
 function mlSection(d) { const si = ML.flat[ML.at].si + d; if (si < 0 || si >= ML.secs.length) return; ML.at = ML.flat.findIndex(q => q.si === si); ML.t = 0; beep(600, 0.04, 'triangle', 0.03); }
@@ -681,12 +681,12 @@ const PAUSE_ITEMS = ['Resume', 'Move List', 'Controls', 'Exit to fighter select'
 function pauseMenuStep(starter) {
   if (ML.open) { if (ML.ctl) mlInput(ML.ctl); return 'held'; }
   if (starter) return null;   /* Start: the usual resume */
-  for (const f of F) { if (f.ctl.dev === 'cpu') continue; const c = f.ctl;
-    if (c.dev === 'kb' && mlPlusKey()) { mlOpenFor(f); return 'held'; }
+  for (const { f, ctl: c } of people()) {
+    if (c.dev === 'kb' && mlPlusKey()) { mlOpenFor(f, c); return 'held'; }
     const up = c.c.ly > 0.6 && !(c.p.ly > 0.6), dn = c.c.ly < -0.6 && !(c.p.ly < -0.6);
     if (up || dn) { PAUSE_SEL = (PAUSE_SEL + (dn ? 1 : -1) + PAUSE_ITEMS.length) % PAUSE_ITEMS.length; beep(480, 0.03, 'square', 0.02); return 'held'; }
     if (c.pressed('atk')) { if (PAUSE_SEL === 0) return 'resume'; if (PAUSE_SEL === 3) return 'exit'; if (PAUSE_SEL === 2) { openCMenu(c.dev); return 'held'; }   /* the controls screen (sim.js), for whoever chose it */
-      mlOpenFor(F[PAUSED_BY] && F[PAUSED_BY].ctl.dev !== 'cpu' ? F[PAUSED_BY] : f); return 'held'; }
+      mlOpenFor(F[PAUSED_BY] || f, c); return 'held'; }
   }
   return null;
 }

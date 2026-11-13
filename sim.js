@@ -3461,6 +3461,10 @@ let mode = 'select', frame = 0, timer = MATCH_FRAMES, countdown = 0, paused = fa
 let PAUSED_BY = 0, PAUSE_SEL = 0;   /* who pressed Start, and the pause menu's highlighted line (movelist.js draws and runs the menu) */
 let slots = [null, null], DEVS = {};
 let LOBBY = null;   /* online.js: set while linked to a friend; the fighter select then readies this player instead of starting a match */
+/* WATCH: the controllers of players whose fighter the CPU plays ({ ctl, idx }). people(): everyone who can pause, leave or
+   use the menus in a match: each fighter played by a person, and each watcher (with the fighter they handed over). */
+let WATCH = [];
+function people() { const out = []; for (const f of F) if (f.ctl.dev !== 'cpu') out.push({ ctl: f.ctl, f }); for (const w of WATCH) if (F[w.idx]) out.push({ ctl: w.ctl, f: F[w.idx] }); return out; }
 function selectGo() { if (LOBBY && LOBBY.linked()) LOBBY.ready(); else startMatch(); }
 const cam = { x: 0, y: 30, s: 3.4 };
 function devCtl(dev) { return DEVS[dev] || (DEVS[dev] = new Ctl(dev)); }
@@ -3469,7 +3473,10 @@ function startMatch(stocks, stage) {   /* stocks, stage: an online match plays w
   STOCKS = stocks >= 1 ? stocks | 0 : OPT.stocks;
   useStage(stage >= 0 && stage < STAGES.length ? stage | 0 : OPT.stage);   /* online: the host's stage, sent with the start message, so both sides stand on the same platforms */
   const s0 = slots[0], s1 = slots[1] || { dev: 'cpu', pick: CPU_PICK >= 0 ? CPU_PICK : Math.random() * ROSTER.length | 0 };   /* the CPU's token, or random */
-  const c0 = devCtl(s0.dev), c1 = s1.dev === 'cpu' ? new Ctl('cpu') : devCtl(s1.dev);
+  /* a player who handed their fighter to the CPU (the button on their card) watches: their controller still pauses and leaves */
+  WATCH = []; const online = LOBBY && LOBBY.linked();
+  const ctlFor = (s, k) => { if (s.cpu && !online) { WATCH.push({ ctl: devCtl(s.dev), idx: k }); return new Ctl('cpu'); } return s.dev === 'cpu' ? new Ctl('cpu') : devCtl(s.dev); };
+  const c0 = ctlFor(s0, 0), c1 = ctlFor(s1, 1);
   for (const c of [c0, c1]) { c.tfAge = 99; c.tfReq = false; }
   F = [new Fighter(0, ROSTER[s0.pick], c0, false), new Fighter(1, ROSTER[s1.pick], c1, s1.pick === s0.pick)];
   for (const c of COMBO) Object.assign(c, { hits: 0, dmg: 0, last: null, best: null, t: 0 });
@@ -3500,6 +3507,13 @@ const CPU_MINUS = [CPU_CARD[0] + 286, CPU_CARD[1] + 46, 40, 40], CPU_PLUS = [CPU
 function cpuStep(d, wrap) { const m = CPU_LV.length - 1, v = CPU_LEVEL + d; if (!wrap && (v < 0 || v > m)) { beep(220, 0.04, 'square', 0.02); return; } setCpuLevel(v > m ? 0 : v < 0 ? m : v); beep(360 + CPU_LEVEL * 40, 0.04, 'square', 0.03); }
 /* everyone in is ready: the READY TO FIGHT banner across the middle (pointed at with A, or clicked, it starts the match) */
 const FIGHT_BAR = [0, 362, W, 64];
+/* the button on each player's card that hands their fighter to the CPU (and back): two CPUs can then fight while you watch */
+function cpuToggleBox(k) { return [(k ? W - 44 - 460 : 44) + 140, 446 + 12, 132, 28]; }
+function cpuToggle(k) {
+  const sl = slots[k]; if (!sl) return;
+  if (LOBBY && LOBBY.linked()) { beep(220, 0.04, 'square', 0.02); selToast('Online, everyone plays their own fighter', '#ffb35c'); return; }
+  sl.cpu = !sl.cpu; sfx('toggle'); selToast(sl.cpu ? 'P' + (k + 1) + "'s fighter: the CPU plays it" : 'P' + (k + 1) + ' plays again', '#8fd3ff');
+}
 function selReady() { return !!(slots[0] && slots[0].ready && (!slots[1] || slots[1].ready)); }
 /* The bar along the top of the fighter select: Options and Training at the left; the display switches, then Online and Quit
    (desktop app) at the right. + (Start) away from a fighter hides all but Options. Each chip says where it is, what it
@@ -3530,6 +3544,7 @@ function selClick(x, y) {
   const chip = chipAt(x, y); if (chip) { chip.act(); return true; }
   if (!slots[1] && inBox(CPU_MINUS, x, y)) { cpuStep(-1); return true; }
   if (!slots[1] && inBox(CPU_PLUS, x, y)) { cpuStep(1); return true; }
+  for (let n = 0; n < 2; n++) if (slots[n] && inBox(cpuToggleBox(n), x, y)) { cpuToggle(n); return true; }
   const k = tileUnder(x, y);
   if (k >= 0) { let sl = slots.find(q => q && q.dev === 'kb');
     if (!sl) { const n = slots[0] ? (slots[1] ? -1 : 1) : 0; if (n < 0) return false; sl = slots[n] = { dev: 'kb', pick: k, ready: false }; }
@@ -3539,7 +3554,7 @@ function selClick(x, y) {
   return false;
 }
 /* what the mouse can press here, for the pointer shape */
-function selHot(x, y) { if (mode !== 'select' || UI_MODAL || CMENU || (typeof ML !== 'undefined' && ML.open)) return false; if (OPT_UI.open) return true; return inBox(OPT_PILL, x, y) || !!chipAt(x, y) || tileUnder(x, y) >= 0 || (!slots[1] && (inBox(CPU_MINUS, x, y) || inBox(CPU_PLUS, x, y))) || (selReady() && inBox(FIGHT_BAR, x, y)); }
+function selHot(x, y) { if (mode !== 'select' || UI_MODAL || CMENU || (typeof ML !== 'undefined' && ML.open)) return false; if (OPT_UI.open) return true; return inBox(OPT_PILL, x, y) || !!chipAt(x, y) || tileUnder(x, y) >= 0 || (!slots[1] && (inBox(CPU_MINUS, x, y) || inBox(CPU_PLUS, x, y))) || [0, 1].some(n => slots[n] && inBox(cpuToggleBox(n), x, y)) || (selReady() && inBox(FIGHT_BAR, x, y)); }
 /* The Options button, and the Options panel it opens (drawn by hud.js from the same boxes). Rows: Stocks, Stage, then the
    Controllers box (the keyboard and every controller plugged in, each opening its controls screen, and Nintendo's GameCube
    adapter), then Done. */
@@ -3635,6 +3650,7 @@ function stepSelect() {
       const chip = chipAt(sl.cx, sl.cy); if (chip) { chip.act(); continue; }   /* the bar along the top */
       if (!slots[1] && inBox(CPU_MINUS, sl.cx, sl.cy)) { cpuStep(-1); continue; }
       if (!slots[1] && inBox(CPU_PLUS, sl.cx, sl.cy)) { cpuStep(1); continue; }
+      { const n = slots.indexOf(sl); if (inBox(cpuToggleBox(n), sl.cx, sl.cy)) { cpuToggle(n); continue; } }   /* your own card's CPU button */
       if (onCpu) cpuStep(1, true);   /* anywhere else on the CPU card: A raises the level, B lowers it (both go round) */
       else if (over >= 0) { sl.pick = over; sl.ready = true; sfx('ready'); }
       else if (sl.ready && selReady()) { selectGo(); return; }   /* ready, pointing at nothing (the banner, say): fight */
@@ -3647,6 +3663,7 @@ function stepSelect() {
 }
 function pollMatch() {
   for (const f of F) f.ctl.poll(PRO_SIM ? PRO_SIM(f) : f.ctl.dev === 'cpu' ? (mode === 'play' ? cpuInput(f, F[1 - f.idx], f.ctl.ai) : blankIn()) : readDev(f.ctl.dev));
+  for (const w of WATCH) w.ctl.poll(readDev(w.ctl.dev));
 }
 function finish(text) { result = text; mode = 'over'; overT = 0; }   /* the victory sound plays as the mode changes (audio.js) */
 function resetFighters() {
@@ -3655,19 +3672,19 @@ function resetFighters() {
   beep(520, 0.08, 'triangle', 0.05, 1.4);
 }
 function stepPlay() {
-  const starter = F.find(f => f.ctl.dev !== 'cpu' && f.ctl.pressed('start'));
+  const P = people(), starter = P.find(p => p.ctl.pressed('start'));
   const quit = () => { paused = false; mode = 'select'; for (const s of slots) if (s) s.ready = false; F = []; PROJ = []; PART = []; POPS = []; sfx('cancel'); };
   if (paused && typeof pauseMenuStep === 'function') {   /* the pause menu and the move list (movelist.js) */
     const r = pauseMenuStep(starter); if (r === 'held') return; if (r === 'resume') { paused = false; return; } if (r === 'exit') { quit(); return; } }
-  if (starter) { paused = !paused; sfx(paused ? 'pause' : 'resume'); if (paused) { PAUSED_BY = starter.idx; PAUSE_SEL = 0; } return; }
+  if (starter) { paused = !paused; sfx(paused ? 'pause' : 'resume'); if (paused) { PAUSED_BY = starter.f.idx; PAUSE_SEL = 0; } return; }
   if (paused) {   /* paused: Special leaves the match and goes back to the fighter select */
-    const cm = F.find(f => f.ctl.dev !== 'cpu' && f.ctl.pressed('sel')); if (cm) { openCMenu(cm.ctl.dev); return; }
-    if (F.some(f => f.ctl.dev !== 'cpu' && f.ctl.pressed('spc'))) quit();
+    const cm = P.find(p => p.ctl.pressed('sel')); if (cm) { openCMenu(cm.ctl.dev); return; }
+    if (P.some(p => p.ctl.pressed('spc'))) quit();
     return;
   }
   /* Testing shortcut: attack + special + grab (A + B + L or R on a controller, Z + X + A or S on the keyboard) pressed together puts both
      fighters back where a match starts, with full stocks and no damage. The clock keeps running. */
-  if (F.some(f => f.ctl.dev !== 'cpu' && f.ctl.c.atk && f.ctl.c.spc && f.ctl.c.grb && !(f.ctl.p.atk && f.ctl.p.spc && f.ctl.p.grb))) { resetFighters(); return; }
+  if (P.some(({ ctl: c }) => c.c.atk && c.c.spc && c.c.grb && !(c.p.atk && c.p.spc && c.p.grb))) { resetFighters(); return; }
   if (finalT > 0) { finalT--; if (!finalT) shake = 10; return; }   /* the final hit: everything stands still on the red screen */
   if (slowT > 0) { slowT--; if (slowT % 3) return; }   /* one step in three while the finishing hit plays out */
   frame++;
@@ -3726,7 +3743,7 @@ function step() {
   pollMatch(); if (!paused) tick++;
   if (mode === 'countdown') { countdown--; if (countdown === 130 || countdown === 90 || countdown === 50) sfx('count_3_2_1'); if (countdown === 10) sfx('go'); if (countdown <= 10) mode = 'play'; }
   else if (mode === 'play') stepPlay();
-  else if (mode === 'over') { overT++; if (overT < 90) { for (const f of F) { if (overT % 3 === 0) f.update(); } } if (overT > 100 && F.some(f => f.ctl.dev !== 'cpu' && (f.ctl.pressed('start') || f.ctl.pressed('atk')))) { mode = 'select'; for (const s of slots) if (s) s.ready = false; F = []; } }
+  else if (mode === 'over') { overT++; if (overT < 90) { for (const f of F) { if (overT % 3 === 0) f.update(); } } if (overT > 100 && people().some(p => p.ctl.pressed('start') || p.ctl.pressed('atk'))) { mode = 'select'; for (const s of slots) if (s) s.ready = false; F = []; } }
   stepFx();
 }
 
