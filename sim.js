@@ -3285,7 +3285,7 @@ function updateProj() {
 }
 
 /* ---------- CPU opponent ---------- */
-/* CPU level, 1 (easiest) to 10. Level 10 is everything at its sharpest; for Knell it adds the combo planner of knellcpu.js, and for Furious Fowls the one in cpu10.js. Level 7 is the CPU exactly as it played before levels existed, and the one every test uses.
+/* CPU level, 1 (easiest) to 10. Level 10 is everything at its sharpest; for Knell it adds the combo planner of knellcpu.js, for Chomp Chomp the one in chompcpu.js, and for Furious Fowls the one in cpu10.js. Level 7 is the CPU exactly as it played before levels existed, and the one every test uses.
    tempo: how long it waits between attacks (x its usual wait)   guard: chance it shields an attack it sees coming
    tech: chance it techs a hard landing   punish: chance it grabs a shield   air: chance it takes an opening in the air
    nap: chance each second that it stops attacking for napLen frames and only walks
@@ -3311,8 +3311,8 @@ function cpuInput(f, o, m) {
   if (!m.lv && CPU_LEVEL === 0) return blankIn();   /* level 0: a target that does nothing at all, for testing moves on */
   const lv = m.lv || CPU_LEVEL;
   if (lv === 10 && typeof cpuPro === 'function') { const r = cpuPro(f, o, m); if (r) return r; }   /* Furious Fowls at level 10: its planner (cpu10.js), when it has something to do */
-  const kp = lv === 10 && f.def.name === 'Knell' && typeof KCPU !== 'undefined' && KCPU ? KCPU : null;
-  if (kp) { const k = kp.input(f, o, m); if (k) return k; }   /* Knell at level 10: a follow-up it has planned (knellcpu.js) */
+  const kp = lv !== 10 ? null : f.def.name === 'Knell' && typeof KCPU !== 'undefined' && KCPU ? KCPU : f.def.name === 'Chomp Chomp' && typeof CCPU !== 'undefined' && CCPU ? CCPU : null;
+  if (kp) { const k = kp.input(f, o, m); if (k) return k; }   /* Knell or Chomp Chomp at level 10: a follow-up it has planned (knellcpu.js, chompcpu.js) */
   const L = CPU_LV[lv], before = m.cd > 0 ? m.cd - 1 : 0; let i = cpuBrain(f, o, m, L);
   if (m.cd > before && L.tempo !== 1) m.cd = Math.max(1, Math.round(m.cd * L.tempo));   /* a wait it has just set itself */
   if (L.nap > 0) {
