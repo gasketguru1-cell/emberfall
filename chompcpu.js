@@ -121,6 +121,18 @@ const CCPU = (() => {
   A.dairF = { atk: 1, ok: aOK, inp(i, k, f, o, e) { if (k === 0) { e.mv = null; e.fq = 0; } steer(i, f, o);
     if (k < 3) { i.ly = -1; if (k === 0) { i.atk = true; i.lx = 0; } return; }
     if (e.fq === 0 && f.vy <= 0) { e.fq = 1; return; } if (e.fq === 1) { i.ly = -1; e.fq = 2; } }, done: atkDone };
+  /* the ledge trap: off the ledge on their side (taking it from them: the trump), then let go or jump up from it */
+  A.offW = { ok: gOK, inp(i, k, f, o) { i.lx = 0.45 * (sgn(o.x) || f.face); }, done: (k, f) => !f.grounded || k > 90 };   /* walked off, slow enough to take the ledge on the way down */
+  A.lgrab = { ok: () => true, inp(i) { i.lx = 0; i.ly = 0; }, done: (k, f) => f.state === 'ledge' || k > 30 };
+  A.ldrop = { ok: f => f.state === 'ledge' && f.sf > 8, inp(i) { i.ly = -1; i.lx = 0; }, done: (k, f) => f.state !== 'ledge' || k > 4 };
+  A.ljmp = { ok: f => f.state === 'ledge' && f.sf > 8, inp(i, k) { if (k === 0) i.jmp = true; }, done: (k, f) => f.state !== 'ledge' || k > 4 };
+  /* the way back: the Rope Swing toward the stage, the next rope chained on (rr), off it with a hop, and the bubble (up, pop) */
+  const homeX = f => -sgn(f.x) || f.face;
+  A.rsH = { ok: f => free(f) && !f.grounded && !f.airUse.rope, inp(i, k, f) { if (k === 0) { i.spc = true; i.lx = homeX(f); i.ly = 0; } }, done: (k, f) => (f.mname === 'sspec' && f.rsGo) || k > 30 };
+  A.rr = { ok: f => f.mname === 'sspec' && f.rsGo && f.rsT > ROPE.gap && f.rsN < ROPE.max, inp(i, k) { if (k === 0) i.spc = true; }, done: k => k >= 1 };
+  A.hopR = { ok: f => f.mname === 'sspec' && f.rsGo && f.rsT > ROPE.off, inp(i, k) { if (k === 0) i.jmp = true; }, done: k => k >= 1 };
+  A.up = { ok: aOK, inp(i, k) { if (k === 0) { i.spc = true; i.lx = 0; i.ly = 1; } }, done: (k, f) => (f.mname === 'uspec' && f.bubble) || k > 12 };
+  A.pop = { ok: f => f.mname === 'uspec' && f.bubble && f.mf > 15, inp(i, k, f) { if (k === 0) { i.spc = true; i.lx = 0.7 * homeX(f); i.ly = 0.7; } }, done: k => k >= 1 };
   const NUM = {};
   const tok = t => {
     if (A[t]) return A[t]; if (NUM[t]) return NUM[t];
@@ -133,7 +145,7 @@ const CCPU = (() => {
   };
 
   /* ---- the executor: where Chomp is in the steps he chose. A plain object, so it is copied along with a snapshot. ---- */
-  const exec = (toks, late, patience) => ({ toks: toks.slice(), idx: 0, cur: null, k: -1, wait: 0, holdT: 0, drift: 1, failed: -1, late: late || 0, patience: patience || 40, mv: null, p: 0 });
+  const exec = (toks, late, patience, home) => ({ toks: toks.slice(), idx: 0, cur: null, k: -1, wait: 0, holdT: 0, drift: 1, failed: -1, late: late || 0, patience: patience || 40, mv: null, p: 0, home: home ? 1 : 0 });
   const cpE = e => Object.assign({}, e, { toks: e.toks.slice() });
   function nextTok(e) {
     while (e.idx < e.toks.length) { const t = e.toks[e.idx++]; if (!tok(t)) { e.failed = e.idx - 1; e.cur = null; e.idx = e.toks.length; return; } e.cur = t; e.k = -1; e.wait = e.idx === 1 && t !== 'relay' ? e.late : 0; e.holdT = 0; return; }
@@ -141,7 +153,8 @@ const CCPU = (() => {
   }
   function input(e, f, o) {
     const i = blankIn();
-    if (e.drift && !f.grounded) { const dx = o.x - f.x; i.lx = Math.abs(dx) > 2 ? sgn(dx) * e.drift : 0; }
+    if (e.home) { if (!f.grounded && f.state !== 'ledge') i.lx = homeX(f); }   /* the way back: held toward the stage throughout */
+    else if (e.drift && !f.grounded && f.state !== 'ledge') { const dx = o.x - f.x; i.lx = Math.abs(dx) > 2 ? sgn(dx) * e.drift : 0; }
     if (e.cur === null && e.idx < e.toks.length) nextTok(e);
     if (e.cur !== null) {
       const a = tok(e.cur);
@@ -218,12 +231,14 @@ const CCPU = (() => {
   function loud() { const q = quietSave; shake = q.shake; NET.resim = q.resim; sparkOff = q.sparkOff; hush = false; quietSave = null; }
   /* A person's next inputs can't be read: the best picks are played again against DI and SDI held away from Chomp and toward him
      (with the escape buttons mashed as hitstun ends). A pick that only works if they hold still is marked fragile. */
-  let pol = null, polAll = false; const POLS = [{ name: 'out', d: -1 }, { name: 'in', d: 1 }], GPOLS = POLS.concat([{ name: 'still', d: 0 }]);
+  let pol = null, polAll = false, polBot = null; const POLS = [{ name: 'out', d: -1 }, { name: 'in', d: 1 }];
+  const GPOLS = [-1, -0.5, 0, 0.5, 1].map(d => ({ name: 'g' + d, d })).concat([-1, 0, 1].map(d => ({ name: 'q' + d, d, mash: false })));
+  const SURE = 6;   /* a last-stock spike is taken when it holds up against at least 6 of the 8 (75%) */
   function polIn(v, a) {
     const i = blankIn(), tw = sgn(a.x - v.x) || 1, hurt = v.state === 'hurt' || v.hitlag > 0 || v.state === 'held';
     if (hurt) i.lx = pol.d * tw;
     if (v.hitlag > 0 && frame % 2) i.lx = 0;
-    if (!hurt && frame % 2 === 0) i[['jmp', 'shd', 'atk'][Math.floor(frame / 2) % 3]] = true;
+    if (!hurt && pol.mash !== false && frame % 2 === 0) i[['jmp', 'shd', 'atk'][Math.floor(frame / 2) % 3]] = true;
     return i;
   }
   const CLOCK = typeof performance !== 'undefined' ? performance : Date, LATE = { late: true }; let deadline = 0, dn = 0;
@@ -231,7 +246,7 @@ const CCPU = (() => {
     if (deadline && (++dn & 7) === 0 && CLOCK.now() > deadline) throw LATE;
     for (const g of F) {
       if (first && g.idx < ci) continue;
-      const i = g.idx === ci ? input(e, g, F[1 - ci]) : g.ctl.dev === 'cpu' && !polAll ? cpuInput(g, F[1 - g.idx], g.ctl.ai) : pol ? polIn(g, F[ci]) : Object.assign({}, g.ctl.c);
+      const i = g.idx === ci ? input(e, g, F[1 - ci]) : polBot ? cpuInput(g, F[ci], polBot) : g.ctl.dev === 'cpu' && !polAll ? cpuInput(g, F[1 - g.idx], g.ctl.ai) : pol ? polIn(g, F[ci]) : Object.assign({}, g.ctl.c);
       g.ctl.poll(i);
     }
     if (!paused) tick++;
@@ -243,7 +258,7 @@ const CCPU = (() => {
   const learn = new Map();
   function newPlan(f, o, list, kind, hist) {
     const s = NET.save();
-    return { hist: hist || [], kind, root: s, ki: f.idx, list, n: 0, res: [], tails: null, pct0: o.pct, hits0: COMBO[f.idx].hits, kos0: f.kos, dies0: o.kos, age: 0, human: o.ctl.dev !== 'cpu', vx0: o.x, last: o.stocks <= 1 };
+    return { hist: hist || [], kind, root: s, ki: f.idx, list, n: 0, res: [], tails: null, pct0: o.pct, hits0: COMBO[f.idx].hits, kos0: f.kos, dies0: o.kos, age: 0, tk: tick, human: o.ctl.dev !== 'cpu', vx0: o.x, last: o.stocks <= 1, run0: FUN ? st(f).run || 0 : 0 };
   }
   const bad = P => { const f = F[P.ki], o = F[1 - P.ki]; return o.kos > P.dies0 || f.state === 'hurt' || f.state === 'held' || f.state === 'dead' || f.state === 'respawn'; };
   /* ---- the spike: a down air (straight down) landing with them out past the ledge or under the stage. Chomp is hungry for it:
@@ -257,6 +272,14 @@ const CCPU = (() => {
   let FUN = false;
   const SPIKE_F = 1600, BORED = 190, KILLP = 70;
   const spikeV = () => FUN ? SPIKE_F : SPIKE;
+  /* Funny mode: spikes in a row (one trip off the stage, them never back on the ground or the ledge) multiply: the second spike's
+     kill is worth 3 times a single one, the third 9 times. A spike that only sets up the next (still off the stage, still tumbling,
+     and he gets back) is worth 0.4 of the kill it would lead to, so with one spike in he goes for the second only when there is
+     no kill now, and with two in he goes for the third over the double kill. */
+  const MULT = [1, 1, 3, 9];
+  const mul = n => FUN ? MULT[Math.min(Math.max(n, 1), 3)] : 1;
+  const spikeN = n => spikeV() * mul(n);
+  const offSt = v => !v.grounded && v.state !== 'ledge' && (Math.abs(v.x) > EDGE + 2 || v.y < -4);
   const dull = (sp, v) => FUN && !sp && v.pct < BORED;   /* a kill Funny mode will not take */
   /* Funny mode's last word: on their last stock a spike he can't come back from is still on offer, when it is a deep one (the
      hit far under the stage or far out) and it takes the match before he falls himself. Worth a little less than a spike he lives
@@ -311,10 +334,10 @@ const CCPU = (() => {
     return out;
   }
   /* plays one candidate to its last hit; null if it misses, is shielded, lets the combo drop or gets Chomp hit */
-  function leaf(P, c, keep) {
+  function leaf(P, c, keep, plain) {
     NET.load(P.root); const e = exec(c.toks, c.late || 0, c.patience || 40);
     const f = F[P.ki], v = F[1 - P.ki], ci = P.ki; K.stats.sims++;
-    let prev = COMBO[ci].hits, vs = v.state, t = 0, settle = -1, sp = false, h0 = P.hits0, got = false, deep = false, hx, hy;
+    let prev = COMBO[ci].hits, vs = v.state, t = 0, settle = -1, sp = false, h0 = P.hits0, got = false, deep = false, hx, hy, nsp = 0;
     const fresh = !hurtNow(v);   /* they are not in a combo: the counter of the last one may still run down to nothing first */
     const lim = c.lim || 140;
     for (let k = 0; k < (deep ? lim + 120 : lim); k++, t++) {
@@ -326,14 +349,14 @@ const CCPU = (() => {
         if (dull(sp, v)) return why(c, 'dull-ko');
         const up = alive(f);
         if (!home(P)) {   /* a kill he falls after is not one he wants, but on their last stock a grand one ends the match first */
-          if (suiOK(P, up, sp, hx, hy)) return { c, ko: true, spike: true, sui: true, t, score: 1000 - t + spikeV() - SUI + drama(hx, hy) };
+          if (suiOK(P, up, sp, hx, hy)) return { c, ko: true, spike: true, sui: true, t, nsp, score: 1000 - t + spikeN((P.run0 || 0) + nsp) - SUI + drama(hx, hy) };
           return why(c, 'no-way-back'); }
-        return { c, ko: true, spike: sp, t, score: 1000 - t + (sp ? spikeV() : 0) };
+        return { c, ko: true, spike: sp, t, nsp, score: 1000 - t + (sp ? spikeN((P.run0 || 0) + nsp) : 0) };
       }
       if (bad(P) || e.failed >= 0) return why(c, bad(P) ? 'bad' : 'failed:' + e.toks[e.failed]);
       const h = COMBO[ci].hits;
       if (h < prev) { if (sp && got && sunk(v)) { deep = true; prev = h; } else if ((fresh || P.kind === 'open') && !got) { h0 = 0; prev = 0; } else return why(c, 'dropped@' + e.cur); }   /* spiked under, or a new combo: not a dropped one */
-      if (h > prev) { sp = spiked(f, v); got = true; if (sp) { hx = f.x; hy = f.y; } } prev = h; vs = v.state;
+      if (h > prev) { sp = spiked(f, v); got = true; if (sp) { hx = f.x; hy = f.y; nsp++; } } prev = h; vs = v.state;
       if (deep) continue;   /* spiked too deep to come back: play on to the blast line */
       if (finished(e)) {
         /* a link that ends in a coal or ant on its way (a toss): give it a little longer to land */
@@ -349,10 +372,46 @@ const CCPU = (() => {
         sc += c.bonus || 0;
         if (FUN && !sp && v.pct >= KILLP && v.pct < BORED && v.state === 'hurt' && dies(P, e)) return why(c, 'dull-ko');   /* it would take the stock the dull way, later */
         if (keep) keep.snap = NET.save();
-        return { c, ko: false, t, score: sc, h, vp: v.pct, snap: v.pct >= 50 || sp, speed: Math.hypot(v.vx, v.vy) + (sp ? 40 : 0), sp, hx, hy, e: cpE(e) };
+        const res = { c, ko: false, t, score: sc, h, vp: v.pct, snap: v.pct >= 50 || sp, speed: Math.hypot(v.vx, v.vy) + (sp ? 40 : 0), sp, hx, hy, nsp, e: cpE(e) };
+        /* Funny mode's chase: a spike that leaves them tumbling off the stage sets up the next, if he can still get back from here */
+        if (FUN && P.chase && !plain && sp && v.state === 'hurt' && offSt(v) && home(P)) { res.setup = true; res.score = 0.4 * (1000 + spikeN((P.run0 || 0) + nsp + 1)); }
+        return res;
       }
     }
     return why(c, 'long');
+  }
+  /* Funny mode, off the stage: each way back (ropes chained toward the stage, then a hop, the jump, the bubble) played out with
+     the stick held toward the stage. One that gets him to the ledge or onto the stage without being hit counts; the most ropes,
+     then the soonest, wins. None: the level-10 brain brings him back as before. */
+  function recLeaf(P, c) {
+    const a = recRun(P, c); if (!a) return null;
+    try { polBot = { lv: 9 }; if (!recRun(P, c)) { K.stats.recUnsafe = (K.stats.recUnsafe || 0) + 1; return why(c, 'rec-guarded'); } } finally { polBot = null; }
+    return a;
+  }
+  function recRun(P, c) {
+    NET.load(P.root); const e = exec(c.toks, c.late || 0, 30, true), f = F[P.ki]; K.stats.sims++;
+    let ropes = 0, up = false;
+    for (let t = 0; t < 260; t++) {
+      simFrame(P.ki, e, t === 0);
+      if (f.state === 'hurt' || f.state === 'held' || f.state === 'dead' || f.state === 'respawn') return why(c, 'rec-hit');
+      if (e.failed >= 0) return why(c, 'rec-failed:' + e.toks[e.failed]);
+      if (f.mname === 'sspec' && f.rsGo) ropes = Math.max(ropes, f.rsN || 0);
+      if (f.mname === 'uspec') up = true;
+      if (f.state === 'ledge' || (f.grounded && f.plat === MAIN && Math.abs(f.x) < EDGE)) return { c, ko: false, rec: true, t, ropes, score: 1000 - t + 70 * Math.min(ropes, 3) + (up ? 40 : 0) };
+    }
+    return why(c, 'rec-long');
+  }
+  const REC = (() => { const out = [];
+    for (const n of [1, 2, 3, 0]) for (const g of [10, 18]) for (const end of ['hopR up', 'hopR dj up', 'hopR dj w10 up', 'hopR w12 up', 'hopR dj', 'hopR w8 dj', 'hopR w12 dj w6 up'])
+      out.push(['rsH'].concat(Array(n).fill(['w' + g, 'rr']).flat(), ['w' + (n ? g : 14)], end.split(' ')).join(' '));
+    return [...new Set(out)].concat(['dj rsH w10 rr w10 hopR up', 'dj rsH w10 rr w10 rr w10 hopR up', 'up', 'dj up', 'dj w10 up']); })();
+  function startRec(f, o, s) {
+    if (s.plan || frame < (s.recT || 0)) return false;
+    const D = f.y < -40 ? 4 : 10;   /* he holds toward the stage while it plans: D frames, as the plans' own wait */
+    const list = REC.filter(x => x.split(' ')[0] !== 'rsH' || !f.airUse.rope).map(x => cand(x, [], 'rec', { late: D, home: 1 }));
+    const P = newPlan(f, o, order(list), 'free', []); P.rec = true; P.cap = D; P.rq = []; P.tails = []; P.gq = []; P.dq = []; P.rob = [];
+    s.plan = P; s.hist = []; s.key = ''; s.recT = frame + 40; K.stats.plans++;
+    return true;
   }
   /* the rest of a known route played out in full: how far it gets against this opponent (it stops where the combo drops) */
   function roll(P, toks) {
@@ -376,7 +435,7 @@ const CCPU = (() => {
   const why = (c, r) => { if (K.why) { const k = c.link + ' => ' + r; K.why[k] = (K.why[k] || 0) + 1; } return null; };
   /* after the best few: does the launch alone take the stock, still in hitstun? Nothing more is pressed. */
   function tail(P, r) {
-    const r2 = leaf(P, r.c); if (!r2 || r2.ko) return !!(r2 && r2.ko);
+    const r2 = leaf(P, r.c, null, true); if (!r2 || r2.ko) return !!(r2 && r2.ko);
     const e = cpE(r2.e); e.drift = 0; const f = F[P.ki], v = F[1 - P.ki]; let prev = COMBO[P.ki].hits, vs = v.state, deep = false;
     for (let k = 0; k < (deep ? 230 : 110); k++) {
       simFrame(P.ki, e, false);
@@ -389,12 +448,13 @@ const CCPU = (() => {
     return false;
   }
   function work(P, n) {
-    const now = P.age === 0 ? P.root : NET.save();
+    const now = P.age === 0 && P.tk === tick ? P.root : NET.save();   /* a plan made after this frame's input (a chase, the way back) first works the next frame: its root is a frame behind */
     quiet(); const fr0 = K.stats.frames, t0 = CLOCK.now(); deadline = K.ms ? t0 + K.ms * 1.6 : 0;
     try {
       while (K.stats.frames - fr0 < n && !(K.ms && CLOCK.now() - t0 > K.ms)) {
         if (P.chase && P.n < P.list.length && (P.list[P.n].late || 0) < P.age) { P.n++; continue; }
-        if (P.n < P.list.length) { P.cur = { q: 'leaf' }; const r = leaf(P, P.list[P.n++]); if (r) P.res.push(r); continue; }
+        if (P.rec && P.n < P.list.length && (P.list[P.n].late || 0) < P.age) { P.n++; continue; }
+        if (P.n < P.list.length) { P.cur = { q: 'leaf' }; const r = P.rec ? recLeaf(P, P.list[P.n++]) : leaf(P, P.list[P.n++]); if (r) P.res.push(r); continue; }
         /* each known route that carries on from here, played to its end: its next link is credited with where it really leads */
         if (!P.rq) { P.rq = []; const L = P.hist.length;
           for (const rt of RL) { if (rt.length <= L + 1) continue; let ok = true; for (let k = 0; k < L; k++) if (rt[k] !== P.hist[k]) { ok = false; break; }
@@ -407,18 +467,18 @@ const CCPU = (() => {
         if (!P.tails) { const sm = r => /smash/.test(r.c.last) ? 50 : 0;
           P.tails = P.res.filter(r => !r.ko && r.snap && !(FUN && !r.sp && P.pct0 < BORED)).sort((a, b) => (b.speed + sm(b)) - (a.speed + sm(a))).slice(0, P.pct0 >= 150 || FUN ? 10 : P.pct0 >= 90 ? 6 : 3); }
         if (P.tails.length) { const r = P.tails.shift(); P.cur = { q: 'tail', r }; const t = tail(P, r);
-          if (t) { r.ko = true; r.spike = r.sp; r.score = 900 - r.t + (r.c.bonus || 0) + (r.sp ? spikeV() : 0); if (t === 'sui') { r.sui = true; r.viaTail = true; r.score += drama(r.hx, r.hy) - SUI; } } continue; }
+          if (t) { r.ko = true; r.setup = false; r.spike = r.sp; r.score = 900 - r.t + (r.c.bonus || 0) + (r.sp ? spikeN((P.run0 || 0) + (r.nsp || 1)) : 0); if (t === 'sui') { r.sui = true; r.viaTail = true; r.score += drama(r.hx, r.hy) - SUI; } } continue; }
         /* a last-stock spike he won't come back from: played again against each way they might DI (a CPU too); one that fails any is gone */
         if (FUN && !P.gq) P.gq = P.res.filter(r => r.sui).flatMap(r => GPOLS.map(p => ({ r, p })));
-        if (P.gq && P.gq.length) { const j = P.gq.shift(); if (j.r.gone) continue; P.cur = { q: 'sure', j }; pol = j.p; polAll = true; let ok;
-          try { ok = j.r.viaTail ? !!tail(P, j.r) : !!((x => x && x.ko)(leaf(P, j.r.c))); } finally { pol = null; polAll = false; }
-          if (!ok) { j.r.gone = true; P.res = P.res.filter(x => x !== j.r); K.stats.unsure = (K.stats.unsure || 0) + 1; }
-          else if ((j.r.gn = (j.r.gn || 0) + 1) === GPOLS.length) { j.r.sure = true; j.r.safe = true; }
+        if (P.gq && P.gq.length) { const j = P.gq.shift(); if (j.r.gone || j.r.sure) continue; P.cur = { q: 'sure', j }; pol = j.p; polAll = true; let ok;
+          try { ok = j.r.viaTail ? !!tail(P, j.r) : !!((x => x && x.ko)(leaf(P, j.r.c, null, true))); } finally { pol = null; polAll = false; }
+          if (!ok) { if ((j.r.gf = (j.r.gf || 0) + 1) > GPOLS.length - SURE) { j.r.gone = true; P.res = P.res.filter(x => x !== j.r); K.stats.unsure = (K.stats.unsure || 0) + 1; } }
+          else if ((j.r.gn = (j.r.gn || 0) + 1) >= SURE) { j.r.sure = true; j.r.safe = true; }
           continue; }
         /* a second link from where each of the best few ends: a link is worth what it leads to (the planner looks two links ahead) */
         /* a chase: each kill on offer, best first, played again as a miss; one he would not get back from is dropped */
-        if (P.chase && !P.sq) P.sq = P.res.filter(r => r.ko && !r.sui).sort((a, b) => b.score - a.score).slice(0, 6);
-        if (P.sq && P.sq.length) { const r = P.sq.shift(); P.cur = { q: 'safe', r }; if (whiff(P, r.c)) r.safe = true; else { r.ko = false; K.stats.unsafe = (K.stats.unsafe || 0) + 1; } continue; }
+        if (P.chase && !P.sq) P.sq = P.res.filter(r => (r.ko || r.setup) && !r.sui).sort((a, b) => b.score - a.score).slice(0, 6);
+        if (P.sq && P.sq.length) { const r = P.sq.shift(); P.cur = { q: 'safe', r }; if (whiff(P, r.c)) r.safe = true; else { r.ko = false; r.setup = false; K.stats.unsafe = (K.stats.unsafe || 0) + 1; } continue; }
         if (!P.dq) { P.dq = [];
           const top = P.res.filter(r => !r.ko).sort((a, b) => b.score - a.score).slice(0, P.kind === 'open' ? 4 : 3);
           for (const r of top) P.dq.push({ r, q: 'init' }); }
@@ -426,7 +486,7 @@ const CCPU = (() => {
           if (j.q === 'init') { const k = {}; const r2 = leaf(P, j.r.c, k);
             P.dq.shift();
             if (r2 && k.snap) { const hist = P.hist.concat(j.r.c.links);
-              const C = { root: k.snap, ki: P.ki, kind: 'confirm', hits0: r2.h, pct0: r2.vp, kos0: P.kos0, dies0: P.dies0, human: P.human, hist };
+              const C = { root: k.snap, ki: P.ki, kind: 'confirm', hits0: r2.h, pct0: r2.vp, kos0: P.kos0, dies0: P.dies0, human: P.human, hist, run0: (P.run0 || 0) + (r2.nsp || 0) };
               NET.load(k.snap); const list = followUps(F[P.ki], F[1 - P.ki], hist, 'confirm').slice(0, 28);
               j.r.kids = { C, n: list.length, best: null };
               for (const c of list) P.dq.push({ r: j.r, q: 'kid', c, C }); }
@@ -446,22 +506,23 @@ const CCPU = (() => {
       return false;
     } catch (x) {
       if (x !== LATE) throw x;
-      const c = P.cur; if (c && c.q === 'leaf') P.n--; else if (c && c.q === 'tail') P.tails.unshift(c.r); else if (c && c.q === 'rob') P.rob.unshift(c.r); else if (c && c.q === 'safe') P.sq.unshift(c.r); else if (c && c.q === 'sure') P.gq.unshift(c.j);
+      polBot = null; const c = P.cur; if (c && c.q === 'leaf') P.n--; else if (c && c.q === 'tail') P.tails.unshift(c.r); else if (c && c.q === 'rob') P.rob.unshift(c.r); else if (c && c.q === 'safe') P.sq.unshift(c.r); else if (c && c.q === 'sure') P.gq.unshift(c.j);
       /* a deep job stays at the head of its queue and runs again */
       pol = null; polAll = false; return false;
     } finally { deadline = 0; P.cur = null; NET.load(now); loud(); }
   }
   function pick(P) {
     const sc = r => r.score - (r.fragile ? 60 : 0);   /* a sure link beats a better one they can DI out of */
-    const live = r => (!P.chase || (r.ko && r.safe)) && (!r.sui || r.sure) && (P.kind !== 'free' || (r.c.late || 0) >= P.age);   /* a wait that has already gone by is no longer on offer; a chase is for the kill only */
+    const live = r => (!P.chase || ((r.ko || r.setup) && r.safe)) && (!P.rec || r.rec) && (!r.sui || r.sure) && (P.kind !== 'free' || (r.c.late || 0) >= P.age);   /* a wait that has already gone by is no longer on offer; a chase is for the kill only */
     let best = null; for (const r of P.res) if (live(r) && (!best || sc(r) > sc(best))) best = r;
     for (const r of P.res) { const l = learn.get(r.c.key) || { ok: 0, bad: 0 }; l.ok++; learn.set(r.c.key, l); }
     for (let n = 0; n < P.n; n++) { const c = P.list[n]; if (!P.res.some(r => r.c === c)) { const l = learn.get(c.key) || { ok: 0, bad: 0 }; l.bad++; learn.set(c.key, l); } }
-    if (best) { K.stats.picked++; if (P.chase) K.stats.chases++; if (best.ko) K.stats.kos++; if (best.ko && best.spike) K.stats.spikes++; if (best.sui) K.stats.sui = (K.stats.sui || 0) + 1; if (best.c.route) K.stats.routed++; } else K.stats.none++;
+    if (best) { K.stats.picked++; if (P.chase) K.stats.chases++; if (best.ko) K.stats.kos++; if (best.ko && best.spike) K.stats.spikes++; if (best.sui) K.stats.sui = (K.stats.sui || 0) + 1; if (best.setup) K.stats.setups = (K.stats.setups || 0) + 1; if (best.rec) K.stats.recs = (K.stats.recs || 0) + 1; if (/ lgrab /.test(best.c.link)) K.stats.trumps = (K.stats.trumps || 0) + 1;
+      if (K.ev) K.ev.push({ frame, kind: best.rec ? 'rec' : best.sui ? 'sui' : best.setup ? 'setup' : / lgrab /.test(best.c.link) ? 'trump' : P.chase ? 'chase' : P.kind, link: best.c.link, ko: !!best.ko, run: P.run0 || 0, ropes: best.ropes }); if (best.c.route) K.stats.routed++; } else K.stats.none++;
     if (K.log) K.log.push({ frame, kind: P.chase ? 'chase' : P.kind, mv: F[P.ki].mname, tried: P.n, of: P.list.length, ok: P.res.length, vpct: +F[1 - P.ki].pct.toFixed(0), vx: Math.round(F[1 - P.ki].x), vy: Math.round(F[1 - P.ki].y), best: best && best.c.link, route: best && !!best.c.route, ko: best && best.ko, spike: best && !!best.spike, fragile: best && !!best.fragile, score: best && +best.score.toFixed(1),
       res: K.dbg ? P.res.map(r => r.c.link + ' ' + r.score.toFixed(0) + (r.ko ? ' KO' : '') + (r.fragile ? ' f' : '')).join(', ') : undefined });
     P.chosen = best ? best.c : null; P.best = best; P.next = best && best.next || null;
-    return best ? exec(best.c.toks, Math.max(0, (best.c.late || 0) - (P.kind === 'free' ? P.age : 0)), best.c.patience || 40) : null;
+    return best ? exec(best.c.toks, Math.max(0, (best.c.late || 0) - (P.kind === 'free' ? P.age : 0)), best.c.patience || 40, best.c.home) : null;
   }
   /* a candidate: a link (or links, for an opener), and what makes it worth more */
   function cand(link, hist, kind, extra) {
@@ -544,10 +605,15 @@ const CCPU = (() => {
     if (K.off || busy || NET.resim || F.length !== 2 || online() || mode !== 'play') return null;
     FUN = funnyLv(m);
     const s = st(f);
+    { const hh = COMBO[f.idx].hits;   /* the spike run: spikes landed since they were last on the ground or the ledge */
+      if (hh > (s.rh || 0) && spiked(f, o)) { s.run = (s.run || 0) + 1; if (FUN) { if (s.run === 2) K.stats.dbl = (K.stats.dbl || 0) + 1; if (s.run === 3) K.stats.tri = (K.stats.tri || 0) + 1; }
+        if (K.ev) K.ev.push({ frame, kind: 'spike', n: s.run, pct: Math.round(o.pct), x: Math.round(o.x), y: Math.round(o.y) }); }
+      s.rh = hh; if (o.grounded || o.state === 'ledge' || gone(o)) s.run = 0; }
     if (s.e && s.issued) after(s.e, f);
     s.issued = false;
     if (f.state === 'hurt' || f.state === 'held' || gone(f) || gone(o)) { s.e = null; s.plan = null; s.goal = null; return null; }
     if (s.e && (finished(s.e) || s.e.failed >= 0)) { if (s.e.h0 !== undefined) { if (COMBO[f.idx].hits > s.e.h0 && s.e.failed < 0) K.stats.landed++; else K.stats.dropped++; } s.e = null; }
+    if (s.e && s.e.home && (f.state === 'ledge' || f.grounded)) s.e = null;   /* back: the brain takes it from here */
     if (s.e) { s.issued = true; return input(s.e, f, o); }
     const hits = COMBO[f.idx].hits, hurt = o.state === 'hurt' || o.hitlag > 0;
     if (hits < s.hh || hits === 0) s.hist = []; s.hh = hits;
@@ -555,7 +621,8 @@ const CCPU = (() => {
     if (!s.plan && hurt && hits > 0) {
       const key = hits + ':' + f.mname + ':' + f.state;
       const inMove = (f.state === 'attack' && f.hitG && f.hitG.size > 0) || f.state === 'throw', isFree = free(f);
-      if ((inMove || isFree || f.state === 'land') && s.key !== key) { s.key = key; s.plan = newPlan(f, o, aim(followUps(f, o, s.hist, isFree ? 'free' : 'confirm'), s.next), isFree ? 'free' : 'confirm', s.hist); s.next = null; K.stats.plans++; }
+      if (FUN && s.setup && isFree && !f.grounded && offSt(o) && s.key !== key && (s.chaseT = 0, s.setup = false, startChase(f, o, s))) s.key = key;   /* a spike that set up the next: after them again */
+      else if ((inMove || isFree || f.state === 'land') && s.key !== key) { s.key = key; s.plan = newPlan(f, o, aim(followUps(f, o, s.hist, isFree ? 'free' : 'confirm'), s.next), isFree ? 'free' : 'confirm', s.hist); s.next = null; K.stats.plans++; }
     }
     if (s.plan) {
       const P = s.plan; busy = true; let done;
@@ -563,8 +630,9 @@ const CCPU = (() => {
       P.age++;
       const could = roOK(f) || free(f) || jabNext(f, 'jab') || jabNext(f, 'jab2') || (f.state !== 'attack' && f.state !== 'land' && f.state !== 'hold' && f.state !== 'throw');
       let go = done || P.age > (P.chase ? P.cap : 45);
-      if (!go && P.chase) {   /* a chase: go once the best kill still on offer is due, or nothing later is left to try */
-        let b = null; for (const r of P.res) if (r.ko && r.safe && (r.c.late || 0) >= P.age && (!b || r.score > b.score)) b = r;
+      if (P.rec) go = done || P.age >= P.cap;
+      else if (!go && P.chase) {   /* a chase: go once the best kill still on offer is due, or nothing later is left to try */
+        let b = null; for (const r of P.res) if ((r.ko || r.setup) && r.safe && (r.c.late || 0) >= P.age && (!b || r.score > b.score)) b = r;
         let more = false; for (let n = P.n; n < P.list.length && !more; n++) if ((P.list[n].late || 0) > P.age) more = true;
         go = (!more && P.tails && !P.tails.length && P.gq && !P.gq.length && P.sq && !P.sq.length) || (b && (b.c.late || 0) <= P.age);
       } else if (!go && P.kind === 'free') {   /* free: pick once the best still on offer is due now, or nothing later is left to try */
@@ -574,11 +642,11 @@ const CCPU = (() => {
       } else if (!go) go = could;
       if (go) {
         s.plan = null; busy = true; let e; try { e = pick(P); } finally { busy = false; }
-        if (P.chosen) s.hist = s.hist.concat(P.chosen.links); s.next = P.next;
+        if (P.chosen) s.hist = s.hist.concat(P.chosen.links); s.next = P.next; s.setup = !!(P.best && P.best.setup);
         if (e) { s.e = e; e.h0 = COMBO[f.idx].hits; s.issued = true; return input(s.e, f, o); }
         return null;
       }
-      return input(exec([], 0), f, o);
+      return input(exec([], 0, 40, P.rec), f, o);
     }
     return null;
   };
@@ -607,10 +675,14 @@ const CCPU = (() => {
   /* on their last stock: the dives down under the stage after them, for the spike he won't come back from */
   const CH_GL = ['off s8 dairF', 'off s16 dairF', 'off ff s8 dairF', 'off ff s16 dairF', 'off ff s26 dairF', 'off ff s36 dairF', 'off ff s20 dj s4 dairF'];
   const CH_AL = ['s28 dairF', 'ff s20 dairF', 'ff s30 dairF', 'ff s40 dairF'];
-  function startChase(f, o, s) {
+  /* the ledge trap: they hang on the ledge. Off the ledge after them, which takes it from them (the trump pops them off it, no
+     ledge protection), then down off it or up with a ledge jump, the jump and a steered down air: a spike off a trump. */
+  const LEDGE_L = ['ldrop dj dairF', 'ldrop dj s4 dairF', 'ldrop dj s10 dairF', 'ldrop s4 dj s4 dairF', 'w4 ldrop dj s6 dairF', 'ldrop dairF', 'ldrop s6 dairF',
+    'ljmp dairF', 'ljmp s6 dairF', 'ljmp s12 dairF', 'ljmp s6 dj s4 dairF', 'ldrop ff dairF', 'ldrop ff s4 dairF', 'ldrop s3 ff dairF', 'ldrop ff s8 dj dairF'].flatMap(x => ['offW lgrab ' + x, 'off ff lgrab ' + x]);
+  function startChase(f, o, s, only) {
     if (s.plan || frame < (s.chaseT || 0)) return false;
-    const gr = f.grounded, lates = gr ? [0, 5, 10, 15, 20, 26, 32] : [0, 4, 8, 12];
-    const base = (gr ? CH_G : CH_A).concat(o.stocks <= 1 ? (gr ? CH_GL : CH_AL) : []).filter(x => startable(x, f)).map(x => cand(x, [], 'chase', { lim: 220 }));
+    const gr = f.grounded, lates = only ? [0, 4, 8, 14, 20] : gr ? [0, 5, 10, 15, 20, 26, 32] : [0, 4, 8, 12];
+    const base = (only || (gr ? CH_G : CH_A).concat(o.stocks <= 1 ? (gr ? CH_GL : CH_AL) : [])).filter(x => startable(x, f)).map(x => cand(x, [], 'chase', { lim: 220 }));
     if (!base.length) return false;
     const list = []; for (const L of lates) for (const c of base) list.push(L ? Object.assign({}, c, { late: L, key: c.key + '+' + L }) : c);
     const P = newPlan(f, o, list, 'free', []); P.chase = true; P.cap = gr ? 34 : 14; P.rq = []; P.dq = []; P.rob = [];   /* the tails stay: a spike's link ends at the hit, the tail plays it on to the blast line */
@@ -680,6 +752,7 @@ const CCPU = (() => {
         s.e = exec(['ant'], 0, 6); s.e.h0 = COMBO[f.idx].hits; s.issued = true; K.stats.traps++; s.hist = []; return input(s.e, f, o);
       }
       if (s.ledgeT >= 0 && frame - s.ledgeT > 40) s.ledgeT = -1;
+      if (FUN && o.state === 'ledge' && o.pct >= 80 && f.stocks >= o.stocks && Math.abs(f.x - side * EDGE) < 52 && s.nt % 2 === 0 && startChase(f, o, s, LEDGE_L)) return blankIn();   /* Funny mode: the trump into a spike first, the coal trap if none */
       if (o.state === 'ledge') {
         const spot = side * 20;
         if (!c && frame >= (f.coalReady || 0)) {
@@ -715,6 +788,8 @@ const CCPU = (() => {
     if (FUN && !f.grounded && free(f) && f.jumps > 0 && !o.grounded && o.state !== 'ledge' && (Math.abs(o.x) > EDGE + 2 || o.y < -4) && Math.abs(o.x - f.x) < 90 && Math.abs(o.y - f.y) < 90) {
       if (startChase(f, o, s)) return i;
     }
+    /* Funny mode, off the stage himself: back with the ropes and the bubble (none found: the brain's own way back) */
+    if (FUN && !f.grounded && free(f) && f.state !== 'ledge' && (Math.abs(f.x) > EDGE + 30 || f.y < -30) && !f.airUse.rope && startRec(f, o, s)) { const j = blankIn(); j.lx = homeX(f); return j; }
     if (!f.grounded || !free(f) || o.invuln > 0 || threat) return i;
     /* a coal lying down: stand so they are between him and the coal, then the ant and what follows */
     if (c && c.st === 'ground' && !a && o.grounded && Math.abs(c.x - o.x) < 70) {

@@ -32,6 +32,7 @@
     };
     return r;
   }
+  CREC._rec = rec;   /* tools/chomp-replay.js films with it too */
   CREC.clip = async function (name, dir, route, sit, defender, cap) {
     const r = rec();
     const o = Object.assign({ lead: 80, tail: 150, settleCam: 1, koTail: 160 }, sit); if (defender) o.def = defender === 'cpu9' || typeof defender === 'function' ? defender : CLAB.defender(defender);   /* a function: e.g. CLAB.cpuAfterHit() */
