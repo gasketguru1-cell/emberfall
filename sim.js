@@ -1063,18 +1063,22 @@ function rigEnds(a, theta, back, sc, mates) {
    rig's and it is drawn gently back toward the rig's middle if it drifts far out. Weak enough that SDI and DI still decide where it goes. */
 function fowlCarry(f) { const o = opp(f); if (!o || o.dragBy !== f.idx || o.state !== 'hurt' || o.hitlag > 0) return; const cx = f.x - o.x, cy = f.y + FP - (o.y + o.st.h / 2), dd = Math.hypot(cx, cy);
   o.vx = appr(o.vx, f.vx, 0.35); o.vy = appr(o.vy, f.vy, 0.35); if (dd > 6) { o.vx += cx / dd * 0.18; o.vy += cy / dd * 0.18; } }
+/* The whole spin runs in SPIN_TIME of the frames in its SPIN row (the owner, 2026-11-12: 0.7): start-up, the dragging hits, the
+   finisher's start and the recovery all come sooner, and the rig turns the same number of times, faster. Hits, damage, launch,
+   size, landing lag and the auto-cancel margin are unchanged. Each light hit keeps at least one frame and the finisher two. */
+const SPIN_TIME = 0.7;
 function makeSpin(name) {
-  const P = SPIN[name], fin0 = P.w0 + P.n * P.re, fin1 = fin0 + 1, t = fin1 + P.rec;
-  const spinAt = (f, mf) => mf < P.s ? -0.35 * mf / P.s : mf <= fin1 ? Math.PI * 2 * P.turns * (mf - P.s) / (fin1 - P.s) : 0.18 * Math.sin((mf - fin1) * 0.9) * Math.exp(-(mf - fin1) / 5);
+  const P = SPIN[name], T = x => Math.round(x * SPIN_TIME), s = Math.max(1, T(P.s)), w0 = T(P.w0), fin0 = T(P.w0 + P.n * P.re), fin1 = fin0 + 1, t = fin1 + T(P.rec);
+  const spinAt = (f, mf) => mf < s ? -0.35 * mf / s : mf <= fin1 ? Math.PI * 2 * P.turns * (mf - s) / (fin1 - s) : 0.18 * Math.sin((mf - fin1) * 0.9 / SPIN_TIME) * Math.exp(-(mf - fin1) / (5 * SPIN_TIME));
   const at = (a, back) => rigEnds(a, spinAt(a, a.mf - (back || 0)), back, P.sc, P.mates);
   const h = [];
-  for (let k = 0; k < P.n; k++) h.push({ f0: P.w0 + k * P.re, f1: P.w0 + k * P.re + P.re - 1, g: k + 1, x: 0, y: FP, r: 6 * P.sc, at, d: P.hd, drag: 1, a: 0, b: 22, k: 0 });
+  for (let k = 0; k < P.n; k++) { const a0 = T(P.w0 + k * P.re); h.push({ f0: a0, f1: Math.max(a0, T(P.w0 + (k + 1) * P.re) - 1), g: k + 1, x: 0, y: FP, r: 6 * P.sc, at, d: P.hd, drag: 1, a: 0, b: 22, k: 0 }); }
   h.push({ f0: fin0, f1: fin1, g: 50, x: 0, y: FP, r: 6 * P.sc, at, d: P.fin, a: P.fa, b: P.fb, k: P.fk });
-  return { t, air: 1, ll: P.ll, ac: fin1 + 3, spin: 1, spinAt, h,
+  return { t, air: 1, ll: P.ll, ac: fin1 + 3, spin: 1, spinAt, spinS: s, spinEnd: fin1, h,
     on(f, n) {
-      if (P.lift && n >= P.w0 && n <= fin1) f.vy = Math.max(f.vy, 0.1);   /* Pearl's spin floats */
-      if (n >= P.w0 && n < fin0) fowlCarry(f);
-      if (P.mates && n === P.s) for (const ph of [2.1, -2.1]) pipMate(f, (o, p) => { const th = spinAt(o, o.mf) + ph; return [o.x + 9 * Math.sin(th) * o.face, o.y + FP + 9 * Math.cos(th)]; }, fin1 - P.s + 1);
+      if (P.lift && n >= w0 && n <= fin1) f.vy = Math.max(f.vy, 0.1);   /* Pearl's spin floats */
+      if (n >= w0 && n < fin0) fowlCarry(f);
+      if (P.mates && n === s) for (const ph of [2.1, -2.1]) pipMate(f, (o, p) => { const th = spinAt(o, o.mf) + ph; return [o.x + 9 * Math.sin(th) * o.face, o.y + FP + 9 * Math.cos(th)]; }, fin1 - s + 1);
     } };
 }
 const CY = {   /* Catapult Cyclone, per bird: speed, turn per frame, size, hit damage, hits, finisher */
