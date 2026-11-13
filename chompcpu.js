@@ -117,6 +117,7 @@ const CCPU = (() => {
   /* steering for the chase: toward where they will be when a down air's hit comes out (sN: N frames of it), and the down air with
      a fast-fall flicked in once he is falling (dairF), still steering */
   const steer = (i, f, o) => { const dx = (o.x + o.vx * DAIR_F) - (f.x + f.vx * DAIR_F); i.lx = Math.abs(dx) > 1.5 ? clamp(dx / 6, -1, 1) : 0; };
+  A.off = { ok: gOK, inp(i, k, f, o) { i.lx = sgn(o.x) || f.face; }, done: (k, f) => !f.grounded || k > 40 };   /* off the ledge on their side, no jump */
   A.dairF = { atk: 1, ok: aOK, inp(i, k, f, o, e) { if (k === 0) { e.mv = null; e.fq = 0; } steer(i, f, o);
     if (k < 3) { i.ly = -1; if (k === 0) { i.atk = true; i.lx = 0; } return; }
     if (e.fq === 0 && f.vy <= 0) { e.fq = 1; return; } if (e.fq === 1) { i.ly = -1; e.fq = 2; } }, done: atkDone };
@@ -217,7 +218,7 @@ const CCPU = (() => {
   function loud() { const q = quietSave; shake = q.shake; NET.resim = q.resim; sparkOff = q.sparkOff; hush = false; quietSave = null; }
   /* A person's next inputs can't be read: the best picks are played again against DI and SDI held away from Chomp and toward him
      (with the escape buttons mashed as hitstun ends). A pick that only works if they hold still is marked fragile. */
-  let pol = null; const POLS = [{ name: 'out', d: -1 }, { name: 'in', d: 1 }];
+  let pol = null, polAll = false; const POLS = [{ name: 'out', d: -1 }, { name: 'in', d: 1 }], GPOLS = POLS.concat([{ name: 'still', d: 0 }]);
   function polIn(v, a) {
     const i = blankIn(), tw = sgn(a.x - v.x) || 1, hurt = v.state === 'hurt' || v.hitlag > 0 || v.state === 'held';
     if (hurt) i.lx = pol.d * tw;
@@ -230,7 +231,7 @@ const CCPU = (() => {
     if (deadline && (++dn & 7) === 0 && CLOCK.now() > deadline) throw LATE;
     for (const g of F) {
       if (first && g.idx < ci) continue;
-      const i = g.idx === ci ? input(e, g, F[1 - ci]) : g.ctl.dev === 'cpu' ? cpuInput(g, F[1 - g.idx], g.ctl.ai) : pol ? polIn(g, F[ci]) : Object.assign({}, g.ctl.c);
+      const i = g.idx === ci ? input(e, g, F[1 - ci]) : g.ctl.dev === 'cpu' && !polAll ? cpuInput(g, F[1 - g.idx], g.ctl.ai) : pol ? polIn(g, F[ci]) : Object.assign({}, g.ctl.c);
       g.ctl.poll(i);
     }
     if (!paused) tick++;
@@ -242,7 +243,7 @@ const CCPU = (() => {
   const learn = new Map();
   function newPlan(f, o, list, kind, hist) {
     const s = NET.save();
-    return { hist: hist || [], kind, root: s, ki: f.idx, list, n: 0, res: [], tails: null, pct0: o.pct, hits0: COMBO[f.idx].hits, kos0: f.kos, dies0: o.kos, age: 0, human: o.ctl.dev !== 'cpu', vx0: o.x };
+    return { hist: hist || [], kind, root: s, ki: f.idx, list, n: 0, res: [], tails: null, pct0: o.pct, hits0: COMBO[f.idx].hits, kos0: f.kos, dies0: o.kos, age: 0, human: o.ctl.dev !== 'cpu', vx0: o.x, last: o.stocks <= 1 };
   }
   const bad = P => { const f = F[P.ki], o = F[1 - P.ki]; return o.kos > P.dies0 || f.state === 'hurt' || f.state === 'held' || f.state === 'dead' || f.state === 'respawn'; };
   /* ---- the spike: a down air (straight down) landing with them out past the ledge or under the stage. Chomp is hungry for it:
@@ -257,6 +258,14 @@ const CCPU = (() => {
   const SPIKE_F = 1600, BORED = 190, KILLP = 70;
   const spikeV = () => FUN ? SPIKE_F : SPIKE;
   const dull = (sp, v) => FUN && !sp && v.pct < BORED;   /* a kill Funny mode will not take */
+  /* Funny mode's last word: on their last stock a spike he can't come back from is still on offer, when it is a deep one (the
+     hit far under the stage or far out) and it takes the match before he falls himself. Worth a little less than a spike he lives
+     through, and only taken once it holds up against every way they might DI (sure). */
+  const SUI = 300;
+  const grand = (hx, hy) => hy < -15 || Math.abs(hx) > EDGE + 12;
+  const drama = (hx, hy) => clamp(-hy, 0, 120) + clamp(Math.abs(hx) - EDGE, 0, 100);
+  const alive = f => f.state !== 'dead' && f.state !== 'respawn';
+  const suiOK = (P, up, sp, hx, hy) => FUN && P.last && sp && hy !== undefined && up && grand(hx, hy);   /* up: he was still in the air as they went */
   const hurtNow = v => v.state === 'hurt' || v.hitlag > 0 || v.state === 'held';
   const sunk = v => v.y < (v.jumps > 0 ? -55 : -35);   /* out of the spike's hitstun this far under the stage: they are not coming back */
   const spiked = (f, v) => f.mname === 'dair' && (Math.abs(v.x) > EDGE + 1 || v.y < -3);
@@ -305,7 +314,7 @@ const CCPU = (() => {
   function leaf(P, c, keep) {
     NET.load(P.root); const e = exec(c.toks, c.late || 0, c.patience || 40);
     const f = F[P.ki], v = F[1 - P.ki], ci = P.ki; K.stats.sims++;
-    let prev = COMBO[ci].hits, vs = v.state, t = 0, settle = -1, sp = false, h0 = P.hits0, got = false, deep = false;
+    let prev = COMBO[ci].hits, vs = v.state, t = 0, settle = -1, sp = false, h0 = P.hits0, got = false, deep = false, hx, hy;
     const fresh = !hurtNow(v);   /* they are not in a combo: the counter of the last one may still run down to nothing first */
     const lim = c.lim || 140;
     for (let k = 0; k < (deep ? lim + 120 : lim); k++, t++) {
@@ -315,13 +324,16 @@ const CCPU = (() => {
            come back (sunk), or when it is a CPU's own recovery that failed */
         if (vs !== 'hurt' && v.state !== 'hurt' && !(sp && (deep || (!P.human && !pol)))) return why(c, 'ko-free');
         if (dull(sp, v)) return why(c, 'dull-ko');
-        if (!home(P)) return why(c, 'no-way-back');   /* a kill he falls after is not one he wants */
+        const up = alive(f);
+        if (!home(P)) {   /* a kill he falls after is not one he wants, but on their last stock a grand one ends the match first */
+          if (suiOK(P, up, sp, hx, hy)) return { c, ko: true, spike: true, sui: true, t, score: 1000 - t + spikeV() - SUI + drama(hx, hy) };
+          return why(c, 'no-way-back'); }
         return { c, ko: true, spike: sp, t, score: 1000 - t + (sp ? spikeV() : 0) };
       }
       if (bad(P) || e.failed >= 0) return why(c, bad(P) ? 'bad' : 'failed:' + e.toks[e.failed]);
       const h = COMBO[ci].hits;
       if (h < prev) { if (sp && got && sunk(v)) { deep = true; prev = h; } else if ((fresh || P.kind === 'open') && !got) { h0 = 0; prev = 0; } else return why(c, 'dropped@' + e.cur); }   /* spiked under, or a new combo: not a dropped one */
-      if (h > prev) { sp = spiked(f, v); got = true; } prev = h; vs = v.state;
+      if (h > prev) { sp = spiked(f, v); got = true; if (sp) { hx = f.x; hy = f.y; } } prev = h; vs = v.state;
       if (deep) continue;   /* spiked too deep to come back: play on to the blast line */
       if (finished(e)) {
         /* a link that ends in a coal or ant on its way (a toss): give it a little longer to land */
@@ -337,7 +349,7 @@ const CCPU = (() => {
         sc += c.bonus || 0;
         if (FUN && !sp && v.pct >= KILLP && v.pct < BORED && v.state === 'hurt' && dies(P, e)) return why(c, 'dull-ko');   /* it would take the stock the dull way, later */
         if (keep) keep.snap = NET.save();
-        return { c, ko: false, t, score: sc, h, vp: v.pct, snap: v.pct >= 50 || sp, speed: Math.hypot(v.vx, v.vy) + (sp ? 40 : 0), sp, e: cpE(e) };
+        return { c, ko: false, t, score: sc, h, vp: v.pct, snap: v.pct >= 50 || sp, speed: Math.hypot(v.vx, v.vy) + (sp ? 40 : 0), sp, hx, hy, e: cpE(e) };
       }
     }
     return why(c, 'long');
@@ -368,7 +380,7 @@ const CCPU = (() => {
     const e = cpE(r2.e); e.drift = 0; const f = F[P.ki], v = F[1 - P.ki]; let prev = COMBO[P.ki].hits, vs = v.state, deep = false;
     for (let k = 0; k < (deep ? 230 : 110); k++) {
       simFrame(P.ki, e, false);
-      if (f.kos > P.kos0) return (vs === 'hurt' || deep) && !dull(r2.sp, v) && home(P);
+      if (f.kos > P.kos0) { if (!(vs === 'hurt' || deep) || dull(r2.sp, v)) return false; const up = alive(f); if (home(P)) return true; return suiOK(P, up, r2.sp, r2.hx, r2.hy) ? 'sui' : false; }
       if (bad(P)) return false;
       const h = COMBO[P.ki].hits;
       if (h < prev) { if (r2.sp && sunk(v)) deep = true; else return false; }   /* out of a spike's hitstun too deep to come back */
@@ -394,10 +406,18 @@ const CCPU = (() => {
           continue; }
         if (!P.tails) { const sm = r => /smash/.test(r.c.last) ? 50 : 0;
           P.tails = P.res.filter(r => !r.ko && r.snap && !(FUN && !r.sp && P.pct0 < BORED)).sort((a, b) => (b.speed + sm(b)) - (a.speed + sm(a))).slice(0, P.pct0 >= 150 || FUN ? 10 : P.pct0 >= 90 ? 6 : 3); }
-        if (P.tails.length) { const r = P.tails.shift(); P.cur = { q: 'tail', r }; if (tail(P, r)) { r.ko = true; r.spike = r.sp; r.score = 900 - r.t + (r.c.bonus || 0) + (r.sp ? spikeV() : 0); } continue; }
+        if (P.tails.length) { const r = P.tails.shift(); P.cur = { q: 'tail', r }; const t = tail(P, r);
+          if (t) { r.ko = true; r.spike = r.sp; r.score = 900 - r.t + (r.c.bonus || 0) + (r.sp ? spikeV() : 0); if (t === 'sui') { r.sui = true; r.viaTail = true; r.score += drama(r.hx, r.hy) - SUI; } } continue; }
+        /* a last-stock spike he won't come back from: played again against each way they might DI (a CPU too); one that fails any is gone */
+        if (FUN && !P.gq) P.gq = P.res.filter(r => r.sui).flatMap(r => GPOLS.map(p => ({ r, p })));
+        if (P.gq && P.gq.length) { const j = P.gq.shift(); if (j.r.gone) continue; P.cur = { q: 'sure', j }; pol = j.p; polAll = true; let ok;
+          try { ok = j.r.viaTail ? !!tail(P, j.r) : !!((x => x && x.ko)(leaf(P, j.r.c))); } finally { pol = null; polAll = false; }
+          if (!ok) { j.r.gone = true; P.res = P.res.filter(x => x !== j.r); K.stats.unsure = (K.stats.unsure || 0) + 1; }
+          else if ((j.r.gn = (j.r.gn || 0) + 1) === GPOLS.length) { j.r.sure = true; j.r.safe = true; }
+          continue; }
         /* a second link from where each of the best few ends: a link is worth what it leads to (the planner looks two links ahead) */
         /* a chase: each kill on offer, best first, played again as a miss; one he would not get back from is dropped */
-        if (P.chase && !P.sq) P.sq = P.res.filter(r => r.ko).sort((a, b) => b.score - a.score).slice(0, 6);
+        if (P.chase && !P.sq) P.sq = P.res.filter(r => r.ko && !r.sui).sort((a, b) => b.score - a.score).slice(0, 6);
         if (P.sq && P.sq.length) { const r = P.sq.shift(); P.cur = { q: 'safe', r }; if (whiff(P, r.c)) r.safe = true; else { r.ko = false; K.stats.unsafe = (K.stats.unsafe || 0) + 1; } continue; }
         if (!P.dq) { P.dq = [];
           const top = P.res.filter(r => !r.ko).sort((a, b) => b.score - a.score).slice(0, P.kind === 'open' ? 4 : 3);
@@ -426,18 +446,18 @@ const CCPU = (() => {
       return false;
     } catch (x) {
       if (x !== LATE) throw x;
-      const c = P.cur; if (c && c.q === 'leaf') P.n--; else if (c && c.q === 'tail') P.tails.unshift(c.r); else if (c && c.q === 'rob') P.rob.unshift(c.r); else if (c && c.q === 'safe') P.sq.unshift(c.r);
+      const c = P.cur; if (c && c.q === 'leaf') P.n--; else if (c && c.q === 'tail') P.tails.unshift(c.r); else if (c && c.q === 'rob') P.rob.unshift(c.r); else if (c && c.q === 'safe') P.sq.unshift(c.r); else if (c && c.q === 'sure') P.gq.unshift(c.j);
       /* a deep job stays at the head of its queue and runs again */
-      pol = null; return false;
+      pol = null; polAll = false; return false;
     } finally { deadline = 0; P.cur = null; NET.load(now); loud(); }
   }
   function pick(P) {
     const sc = r => r.score - (r.fragile ? 60 : 0);   /* a sure link beats a better one they can DI out of */
-    const live = r => (!P.chase || (r.ko && r.safe)) && (P.kind !== 'free' || (r.c.late || 0) >= P.age);   /* a wait that has already gone by is no longer on offer; a chase is for the kill only */
+    const live = r => (!P.chase || (r.ko && r.safe)) && (!r.sui || r.sure) && (P.kind !== 'free' || (r.c.late || 0) >= P.age);   /* a wait that has already gone by is no longer on offer; a chase is for the kill only */
     let best = null; for (const r of P.res) if (live(r) && (!best || sc(r) > sc(best))) best = r;
     for (const r of P.res) { const l = learn.get(r.c.key) || { ok: 0, bad: 0 }; l.ok++; learn.set(r.c.key, l); }
     for (let n = 0; n < P.n; n++) { const c = P.list[n]; if (!P.res.some(r => r.c === c)) { const l = learn.get(c.key) || { ok: 0, bad: 0 }; l.bad++; learn.set(c.key, l); } }
-    if (best) { K.stats.picked++; if (P.chase) K.stats.chases++; if (best.ko) K.stats.kos++; if (best.ko && best.spike) K.stats.spikes++; if (best.c.route) K.stats.routed++; } else K.stats.none++;
+    if (best) { K.stats.picked++; if (P.chase) K.stats.chases++; if (best.ko) K.stats.kos++; if (best.ko && best.spike) K.stats.spikes++; if (best.sui) K.stats.sui = (K.stats.sui || 0) + 1; if (best.c.route) K.stats.routed++; } else K.stats.none++;
     if (K.log) K.log.push({ frame, kind: P.chase ? 'chase' : P.kind, mv: F[P.ki].mname, tried: P.n, of: P.list.length, ok: P.res.length, vpct: +F[1 - P.ki].pct.toFixed(0), vx: Math.round(F[1 - P.ki].x), vy: Math.round(F[1 - P.ki].y), best: best && best.c.link, route: best && !!best.c.route, ko: best && best.ko, spike: best && !!best.spike, fragile: best && !!best.fragile, score: best && +best.score.toFixed(1),
       res: K.dbg ? P.res.map(r => r.c.link + ' ' + r.score.toFixed(0) + (r.ko ? ' KO' : '') + (r.fragile ? ' f' : '')).join(', ') : undefined });
     P.chosen = best ? best.c : null; P.best = best; P.next = best && best.next || null;
@@ -546,7 +566,7 @@ const CCPU = (() => {
       if (!go && P.chase) {   /* a chase: go once the best kill still on offer is due, or nothing later is left to try */
         let b = null; for (const r of P.res) if (r.ko && r.safe && (r.c.late || 0) >= P.age && (!b || r.score > b.score)) b = r;
         let more = false; for (let n = P.n; n < P.list.length && !more; n++) if ((P.list[n].late || 0) > P.age) more = true;
-        go = (!more && P.tails && !P.tails.length && P.sq && !P.sq.length) || (b && (b.c.late || 0) <= P.age);
+        go = (!more && P.tails && !P.tails.length && P.gq && !P.gq.length && P.sq && !P.sq.length) || (b && (b.c.late || 0) <= P.age);
       } else if (!go && P.kind === 'free') {   /* free: pick once the best still on offer is due now, or nothing later is left to try */
         let b = null; for (const r of P.res) if ((r.c.late || 0) >= P.age && (!b || r.score - (r.fragile ? 60 : 0) > b.score - (b.fragile ? 60 : 0))) b = r;
         let more = false; for (let n = P.n; n < P.list.length && !more; n++) if ((P.list[n].late || 0) > P.age) more = true;
@@ -584,10 +604,13 @@ const CCPU = (() => {
   const CH_G = ['sh dairF', 'sh s4 dairF', 'sh s8 dairF', 'sh s14 dairF', 'sh s20 dairF', 'fh dairF', 'fh s6 dairF', 'fh s12 dairF', 'fh s18 dairF', 'fh s24 dairF',
     'sh s6 dair', 'fh s12 dair', 'fh dj s6 dairF', 'fh s10 dj s4 dairF', 'aim', 'aimL', 'sh aim', 'fh aim', 'fh aimL', 'rf3 aim', 'rf3 aimL'];
   const CH_A = ['dairF', 's3 dairF', 's6 dairF', 's10 dairF', 's14 dairF', 's20 dairF', 'ff s6 dairF', 'ff s12 dairF', 'dj dairF', 'dj s4 dairF', 'dj s10 dairF', 'dj s16 dairF', 'aim', 'aimL', 'dair'];
+  /* on their last stock: the dives down under the stage after them, for the spike he won't come back from */
+  const CH_GL = ['off s8 dairF', 'off s16 dairF', 'off ff s8 dairF', 'off ff s16 dairF', 'off ff s26 dairF', 'off ff s36 dairF', 'off ff s20 dj s4 dairF'];
+  const CH_AL = ['s28 dairF', 'ff s20 dairF', 'ff s30 dairF', 'ff s40 dairF'];
   function startChase(f, o, s) {
     if (s.plan || frame < (s.chaseT || 0)) return false;
     const gr = f.grounded, lates = gr ? [0, 5, 10, 15, 20, 26, 32] : [0, 4, 8, 12];
-    const base = (gr ? CH_G : CH_A).filter(x => startable(x, f)).map(x => cand(x, [], 'chase', { lim: 220 }));
+    const base = (gr ? CH_G : CH_A).concat(o.stocks <= 1 ? (gr ? CH_GL : CH_AL) : []).filter(x => startable(x, f)).map(x => cand(x, [], 'chase', { lim: 220 }));
     if (!base.length) return false;
     const list = []; for (const L of lates) for (const c of base) list.push(L ? Object.assign({}, c, { late: L, key: c.key + '+' + L }) : c);
     const P = newPlan(f, o, list, 'free', []); P.chase = true; P.cap = gr ? 34 : 14; P.rq = []; P.dq = []; P.rob = [];   /* the tails stay: a spike's link ends at the hit, the tail plays it on to the blast line */
