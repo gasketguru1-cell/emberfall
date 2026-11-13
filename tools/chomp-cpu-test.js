@@ -18,7 +18,15 @@ for (const f of ['hitboxes.js', 'sim.js', 'net.js', 'knellcpu.js', 'chompcpu.js'
 const per = +process.argv[2] || 4, foes = (process.argv[3] || 'flint,sack,sprocket,knell').split(','), kinds = (process.argv[4] || 'human,cpu9').split(','), off = process.argv[5] === 'off';
 global.FS = fs; global.ARGS = { per, foes, kinds, off, out: process.env.OUT || '', dump: !!process.env.DUMP, why: !!process.env.WHY };
 vm.runInThisContext(`(function () {
-  CCPU.ms = 0; CCPU.off = ARGS.off; CCPU.dbg = !!process.env.DBG; CCPU.log = []; if (ARGS.why) CCPU.why = {};
+  CCPU.ms = 0; CCPU.off = ARGS.off;
+  /* CLIPS=dir: Funny mode's moments (spikes in a row, trumps, last-stock spikes, rope recoveries) logged, and each match that has
+     one saved with every frame's input for both fighters, so tools/chomp-replay.js can play it again in a tab and film it */
+  const CL = process.env.CLIPS; let IN = null, CHK = null, F0 = 0, TK0 = 0;
+  if (CL) { CCPU.ev = []; const poll0 = Ctl.prototype.poll;
+    Ctl.prototype.poll = function (raw) { if (IN && !NET.resim && F[0] && (this === F[0].ctl || this === F[1].ctl)) { const k = this === F[0].ctl ? 0 : 1;
+      IN[k].push([raw.lx, raw.ly, raw.cx, raw.cy, (raw.atk ? 1 : 0) | (raw.spc ? 2 : 0) | (raw.jmp ? 4 : 0) | (raw.shd ? 8 : 0) | (raw.grb ? 16 : 0) | (raw.sm ? 32 : 0) | (raw.jmp2 ? 64 : 0) | (raw.tf ? 128 : 0) | (raw.start ? 256 : 0) | (raw.sel ? 512 : 0)]);
+      if (k === 1 && IN[1].length % 30 === 0) CHK.push([IN[1].length, +F[0].x.toFixed(3), +F[0].y.toFixed(3), +F[1].x.toFixed(3), +F[1].y.toFixed(3)]); }
+      return poll0.call(this, raw); }; } CCPU.dbg = !!process.env.DBG; CCPU.log = []; if (ARGS.why) CCPU.why = {};
   const idx = n => ROSTER.findIndex(d => d.name === n);
   const FOE = { flint: idx('Flint'), sack: idx('Potato Sack'), sprocket: idx('Sprocket'), knell: idx('Knell'), joey: ROSTER.findIndex(d => /Joey/.test(d.name)), fyrd: ROSTER.findIndex(d => /Fyrd/.test(d.name)) };
   const CI = idx('Chomp Chomp');
@@ -48,7 +56,7 @@ vm.runInThisContext(`(function () {
       slots[0] = { dev: 'kb', pick: CI, ready: true }; slots[1] = { dev: 'kb', pick: FOE[fn], ready: true };
       startMatch(); F[0].ctl = new Ctl('cpu'); F[1].ctl = new Ctl(kind === 'human' ? 'bot' : 'cpu'); F[0].noSwap = F[1].noSwap = true;
       F[0].ctl.ai.lv = +process.env.LV || 10; if (kind !== 'human') F[1].ctl.ai.lv = +kind.slice(3);
-      const st0 = Object.assign({}, CCPU.stats); CCPU.log.length = 0;
+      const st0 = Object.assign({}, CCPU.stats); CCPU.log.length = 0; if (CL) { IN = [[], []]; CHK = []; F0 = frame; TK0 = tick; CCPU.ev.length = 0; }
       let dies0 = F[1].kos, lastPct = 0, lastMv = '?', prev = 0, best = 0, bd = 0, n = 0, prevH = 0, lastSp = false, kos0 = F[0].kos;
       const combos = [];
       while (mode !== 'over' && n < 8 * 3600 + 400) {
@@ -73,6 +81,10 @@ vm.runInThisContext(`(function () {
       for (const [h, d] of combos) { r.combos++; r.hits += h; r.dmg += d; if (h >= 4) r.long++; r.max = Math.max(r.max, h); }
       for (const L of CCPU.log) { if (!L.best) continue; r.picks++; if (L.route) r.routeLinks++; if (L.route) r.routes[L.best] = (r.routes[L.best] || 0) + 1; }
       r.landed += CCPU.stats.landed - st0.landed; r.dropped += CCPU.stats.dropped - st0.dropped;
+      if (CL) { const ev = CCPU.ev.map(e => Object.assign({}, e, { at: e.frame - F0 })); for (const e of ev) console.log('EV', process.env.SEED, kind, g, JSON.stringify(e));
+        if (ev.some(e => (e.kind === 'spike' && e.n >= 2) || e.kind === 'sui' || e.kind === 'trump' || (e.kind === 'rec' && e.ropes >= 2)))
+          FS.writeFileSync(CL + '/' + (process.env.SEED || 977) + '-' + kind + '-' + fn + '-g' + g + '.json', JSON.stringify({ seed: process.env.SEED, kind, fn, g, chomp: CI, foe: FOE[fn], stocks: STOCKS, stage: OPT.stage, lv: F[0].ctl.ai.lv, foeLv: F[1].ctl.ai.lv, foeDev: F[1].ctl.dev, ev, chk: CHK, f0: F0, tick0: TK0, opt: OPT, inp: IN, kos: [F[0].kos, F[1].kos], win: w === 0 }));
+        IN = null; }
       all.push({ kind, fn, g, win: w === 0, combos }); if (ARGS.dump) for (const L of CCPU.log) console.log(JSON.stringify(L));
     }
     rows[kind + ' ' + fn] = { 'win %': Math.round(r.wins / r.games * 100), 'stock lead': +(r.stockLead / r.games).toFixed(2), 'combos/game': +(r.combos / r.games).toFixed(1), 'avg hits': +(r.hits / Math.max(1, r.combos)).toFixed(2), 'avg %': +(r.dmg / Math.max(1, r.combos)).toFixed(1), '4+ hits': r.long, 'longest': r.max,
