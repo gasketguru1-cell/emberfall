@@ -8,7 +8,7 @@ function drawHud() {
   F.forEach(f => {
     const x = W * (f.idx ? 0.68 : 0.32), y = H - 86, pc = f.idx ? '#6cb4ff' : '#ff7b6c';
     g.fillStyle = 'rgba(10,10,20,.6)'; rr(x - 120, y, 240, 74, 12); g.fill(); g.fillStyle = pc; rr(x - 120, y, 8, 74, 4); g.fill();
-    g.textAlign = 'left'; g.font = 'bold 16px system-ui, sans-serif'; g.fillStyle = pc; g.fillText((f.ctl.dev === 'cpu' ? 'CPU ' + (f.ctl.ai.lv || CPU_LEVEL) : 'P' + (f.idx + 1)) + '  ' + f.def.name, x - 102, y + 22);
+    g.textAlign = 'left'; g.font = 'bold 16px system-ui, sans-serif'; g.fillStyle = pc; g.fillText((f.ctl.dev === 'cpu' ? 'CPU ' + cpuLvName(f.ctl.ai.lv || CPU_LEVEL) : 'P' + (f.idx + 1)) + '  ' + f.def.name, x - 102, y + 22);
     if (f.stocks <= 5) for (let k = 0; k < f.stocks; k++) { g.fillStyle = '#ffd98a'; g.beginPath(); g.arc(x - 96 + k * 18, y + 40, 6, 0, TAU); g.fill(); }
     else { g.fillStyle = '#ffd98a'; g.beginPath(); g.arc(x - 96, y + 40, 6, 0, TAU); g.fill(); g.font = 'bold 14px system-ui, sans-serif'; g.fillText('× ' + f.stocks, x - 84, y + 45); }   /* many stocks: one dot and the count */
     if (f.def.transform) drawIntensity(f, x, y);
@@ -294,7 +294,7 @@ function drawSelect(three) {
         g.font = '13px system-ui, sans-serif'; g.fillStyle = '#8f88ad'; g.fillText('or click a fighter', x + cw / 2, y + 138); continue; }
       /* empty second slot: the CPU, the spot its token rests on, and its level with − and + */
       g.font = 'bold 34px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText('CPU', x + 24, y + 80);
-      g.font = '15px system-ui, sans-serif'; g.fillStyle = '#d8d2ee'; g.fillText(CPU_LEVEL === 0 ? 'stands still, for testing' : CPU_PICK >= 0 ? 'plays ' + ROSTER[CPU_PICK].name : 'random fighter', x + 24, y + 106);
+      g.font = '15px system-ui, sans-serif'; g.fillStyle = '#d8d2ee'; g.fillText(CPU_LEVEL === 0 ? 'stands still, for testing' : CPU_LV[CPU_LEVEL] && CPU_LV[CPU_LEVEL].funny ? (CPU_PICK >= 0 ? ROSTER[CPU_PICK].name + ', ' : '') + 'funny mode: spikes!' : CPU_PICK >= 0 ? 'plays ' + ROSTER[CPU_PICK].name : 'random fighter', x + 24, y + 106);
       { const [dx, dy] = CPU_DOCK, free = CPU_PICK >= 0 || CPU_TOK.drag; g.strokeStyle = 'rgba(201,195,220,' + (free ? 0.75 : 0.35) + ')'; g.lineWidth = 2; g.setLineDash([5, 4]); g.beginPath(); g.arc(dx, dy, 22, 0, TAU); g.stroke(); g.setLineDash([]);
         g.textAlign = 'center'; g.font = '12px system-ui, sans-serif'; g.fillStyle = '#9d96b8'; g.fillText(free ? 'drop here for random' : 'drag to a fighter', dx, dy + 40); }
       { const m = CPU_LV.length - 1, cx = (CPU_MINUS[0] + CPU_PLUS[0] + CPU_PLUS[2]) / 2;
@@ -302,7 +302,8 @@ function drawSelect(three) {
         for (const [b, glyph, off] of [[CPU_MINUS, '−', CPU_LEVEL <= 0], [CPU_PLUS, '+', CPU_LEVEL >= m]]) { const hot = !off && pointed(b);
           g.fillStyle = hot ? 'rgba(255,217,138,.9)' : off ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.12)'; rr(b[0], b[1], b[2], b[3], 10); g.fill(); g.strokeStyle = off ? 'rgba(255,255,255,.1)' : 'rgba(255,255,255,.3)'; g.lineWidth = 1; g.stroke();
           g.font = 'bold 26px system-ui, sans-serif'; g.fillStyle = hot ? '#1a1230' : off ? '#5a5570' : '#fff'; g.fillText(glyph, b[0] + b[2] / 2, b[1] + b[3] / 2 + 9); }
-        g.font = '900 40px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(String(CPU_LEVEL), cx, CPU_MINUS[1] + 35);
+        if (CPU_LV[CPU_LEVEL] && CPU_LV[CPU_LEVEL].funny) { g.font = '900 21px system-ui, sans-serif'; g.fillStyle = '#ffd98a'; g.fillText('FUNNY', cx, CPU_MINUS[1] + 28); }
+        else { g.font = '900 40px system-ui, sans-serif'; g.fillStyle = '#fff'; g.fillText(String(CPU_LEVEL), cx, CPU_MINUS[1] + 35); }
         const bx = CPU_MINUS[0], bw = CPU_PLUS[0] + CPU_PLUS[2] - bx, sw = (bw - (m - 1) * 3) / m;
         for (let n = 1; n <= m; n++) { g.fillStyle = n <= CPU_LEVEL ? pc : 'rgba(255,255,255,.16)'; rr(bx + (n - 1) * (sw + 3), y + 100, sw, 7, 3); g.fill(); } }
       g.textAlign = 'left'; g.font = '13px system-ui, sans-serif'; g.fillStyle = 'rgba(255,255,255,' + (0.45 + 0.3 * pulse).toFixed(2) + ')'; g.fillText('Another controller?  Press Attack to join', x + 24, y + 140);
@@ -315,7 +316,7 @@ function drawSelect(three) {
       g.fillStyle = sl.cpu ? (hot ? '#b8e4ff' : '#8fd3ff') : hot ? 'rgba(143,211,255,.28)' : 'rgba(255,255,255,.08)'; rr(b[0], b[1], b[2], b[3], 14); g.fill();
       g.strokeStyle = sl.cpu ? '#8fd3ff' : 'rgba(143,211,255,.5)'; g.lineWidth = 1; g.stroke();
       g.textAlign = 'center'; g.font = 'bold 12px system-ui, sans-serif'; spaced(1); g.fillStyle = sl.cpu ? '#0e1a26' : '#cfe9ff';
-      g.fillText(sl.cpu ? 'CPU PLAYS  ·  LV ' + CPU_LEVEL : 'YOU PLAY  ·  CPU?', b[0] + b[2] / 2, b[1] + 19); spaced(0); }
+      g.fillText(sl.cpu ? 'CPU PLAYS  ·  LV ' + cpuLvName(CPU_LEVEL) : 'YOU PLAY  ·  CPU?', b[0] + b[2] / 2, b[1] + 19); spaced(0); }
     g.textAlign = 'left'; g.font = 'bold 44px ' + serif; g.fillStyle = '#fff'; g.fillText(d.name, x + 24, y + 84);
     g.font = 'italic 16px ' + serif; g.fillStyle = '#f3dfb6'; g.fillText(d.sub, x + 26, y + 110);
     if (nf > 1) {   /* the companions; in 3D the one standing on the island is lit */
@@ -340,7 +341,7 @@ function drawSelect(three) {
     g.font = 'bold 12px system-ui, sans-serif'; g.fillStyle = 'rgba(42,18,8,.8)'; g.fillText((slots.some(q => q && q.dev !== 'kb') ? padCap('+', slots.find(q => q && q.dev !== 'kb').dev) + ' / Start' : 'Start') + '  ·  Enter  ·  or click here', W / 2, by + 56);
     g.restore(); }
   else { SEL_GO_T = 0; if (slots[0]) {
-    const part = n => { const sl = slots[n]; return sl ? ['P' + (n + 1) + (sl.ready ? '  ready ✓' : '  choosing…'), sl.ready ? '#9be564' : PC[n]] : ['CPU  level ' + CPU_LEVEL, '#c9c3dc']; };
+    const part = n => { const sl = slots[n]; return sl ? ['P' + (n + 1) + (sl.ready ? '  ready ✓' : '  choosing…'), sl.ready ? '#9be564' : PC[n]] : ['CPU  level ' + cpuLvName(CPU_LEVEL), '#c9c3dc']; };
     const parts = [part(0), part(1)]; g.font = 'bold 14px system-ui, sans-serif'; const ws = parts.map(([s]) => g.measureText(s).width), tw = ws[0] + ws[1] + 44, bx = W / 2 - tw / 2;
     g.fillStyle = 'rgba(20,17,36,.78)'; rr(bx - 14, 378, tw + 28, 32, 16); g.fill(); g.strokeStyle = 'rgba(255,255,255,.14)'; g.lineWidth = 1; g.stroke();
     g.textAlign = 'left'; let px = bx; parts.forEach(([s, c], n) => { g.fillStyle = c; g.fillText(s, px, 399); px += ws[n]; if (!n) { g.fillStyle = '#6d6885'; g.fillText('·', px + 18, 399); px += 44; } }); g.textAlign = 'center'; } }
