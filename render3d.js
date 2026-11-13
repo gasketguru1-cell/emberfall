@@ -246,7 +246,10 @@ function build() {
       const c = rig.seat.getWorldPosition(new THREE.Vector3()); rig.grp.worldToLocal(c);
       if (!rig.seatRest) rig.seatRest = new THREE.Vector3(0.2, 10.6, 0);
       /* pulls are along the stage (the slingshot's own frame before its turn to show the fork), so turn them into the fork's frame */
-      const off = c.clone().sub(rig.seatRest), ca = Math.cos(0.95), sa = Math.sin(0.95); c.x += rig.px * ca; c.z += rig.px * sa; c.y += rig.py; off.x += rig.px * ca; off.z += rig.px * sa; off.y += rig.py;
+      const ca = Math.cos(0.95), sa = Math.sin(0.95);
+      /* a fling (forward, back and up air): the pouch is put exactly at a place along the stage, wherever the bent trunk has the seat */
+      if (want.abs) { rig.px = want.abs[0] - (c.x * ca + c.z * sa); rig.py = want.abs[1] - c.y; if (step) { rig.pvx = 0; rig.pvy = 0; } }
+      const off = c.clone().sub(rig.seatRest); c.x += rig.px * ca; c.z += rig.px * sa; c.y += rig.py; off.x += rig.px * ca; off.z += rig.px * sa; off.y += rig.py;
       rig.pouch.position.copy(c); rig.pouch.rotation.z = clamp(rig.pvx * -0.3, -0.6, 0.6);
       const thinB = 1 / (1 + Math.hypot(rig.px, rig.py) * 0.08);   /* stretched bands get thinner */
       rig.tips.forEach((tp, i) => { const a = tp.getWorldPosition(new THREE.Vector3()); rig.grp.worldToLocal(a); const b = c.clone().add(rig.ends ? rig.ends[i] : new THREE.Vector3(0.1, -0.6, i ? -1.4 : 1.4)), m = rig.bands[i];
@@ -261,8 +264,24 @@ function build() {
   const SLING_ATK = { jab: [0.15, 0.25], jab2: [0.15, 0.3], jab3: [0.3, 0.55], ftilt: [0.35, 0.5], dtilt: [0.2, 0.45, 0.78], utilt: [0.2, -0.2, 1.18], dash: [0.2, 0.6],
     fsmash: [0.6, 0.8], usmash: [0.3, -0.3, 1.25], dsmash: [0.25, 0.1, 0.72], fair: [0.3, 0.55], bair: [-0.3, -0.6], uair: [0.1, -0.2, 1.2], dair: [0.1, 0.2, 0.8], grab: [0.2, 0.45], dgrab: [0.2, 0.5], pgrab: [0.3, 0.5], getup: [0.2, 0.5, 0.8] };
   const phase01 = (a, b) => b > 0 ? Math.min(1, Math.max(0, a / b)) : 1;
+  /* Forward, back and up air (the owner, 2026-11-12): the bird rears the other way in the pouch to gather momentum, then the
+     bands spring it out, still in the pouch, to the move's hitbox for its active frames, and the pouch twangs back after.
+     rear: how far the pouch is drawn the other way, along the stage and up; lean: how the trunk leans while drawing and
+     while striking; sq: the trunk's squash while drawing. The last 3 frames before the hit are the release. */
+  const SLING_FLING = { fair: { rear: [-4.5, -0.8], lean: [-0.3, 0.3], sq: 0.9 }, bair: { rear: [4.5, -0.8], lean: [0.3, -0.3], sq: 0.9 }, uair: { rear: [0, -4.5], lean: [0, 0], sq: 0.82 } };
+  const FLING_LIFT = 1.2;   /* the bird sits this far above the pouch's middle, so the pouch goes this far below the hitbox */
+  function slingFling(f, rig, w, P) {
+    const h = f.move.h[0], n = f.mf, f0 = h.f0, f1 = h.f1, go = Math.max(1, f0 - 3), seat = rig.seatRest || new THREE.Vector3(0.2, 10.6, 0);
+    const sx = seat.x * Math.cos(0.95) + seat.z * Math.sin(0.95), sy = seat.y, tgt = [h.x, h.y - FLING_LIFT], back = [sx + P.rear[0], sy + P.rear[1]];
+    rig.fling = n <= f1 + 12;   /* the bird follows the pouch the whole way out and while it snaps back */
+    if (n < go) { const e = Math.sin(phase01(n, go - 1) * Math.PI / 2); w.abs = [sx + P.rear[0] * e, sy + P.rear[1] * e]; w.bend = P.lean[0] * e; w.sq = 1 - (1 - P.sq) * e; }   /* rearing back */
+    else if (n < f0) { const u = phase01(n - go + 1, f0 - go + 1), e = u * u; w.abs = [back[0] + (tgt[0] - back[0]) * e, back[1] + (tgt[1] - back[1]) * e]; w.bend = P.lean[1] * u; w.sq = 1.06; }   /* the bands let go */
+    else if (n <= f1) { const k = phase01(n - f0, Math.max(1, f1 - f0)); w.abs = [tgt[0] + (tgt[0] - sx) * 0.04 * Math.sin(k * Math.PI), tgt[1] + (tgt[1] - sy) * 0.04 * Math.sin(k * Math.PI)]; w.bend = P.lean[1]; w.sq = 1.08; }   /* out at the hitbox, stretched a hair further mid-strike */
+    else if (n <= f1 + 5) { const u = (n - f1) / 5, e = 1 - (1 - u) * (1 - u); w.abs = [tgt[0] + (sx - tgt[0]) * e, tgt[1] + (sy - tgt[1]) * e]; w.bend = P.lean[1] * (1 - u) * 0.5; w.sq = 0.94; }   /* the bands draw the pouch home */
+    else { if (n === f1 + 6) rig.k = { px: -P.rear[0] * 0.25, py: -P.rear[1] * 0.25, sq: -0.04 }; w.sq = 0.97; }   /* and it twangs a little past and settles */
+  }
   function slingWant(f, rig) {
-    const s = f.state, w = { bend: 0, sq: 1, px: 0, py: 0, feet: null, footX: 0 }, fr = tick, vxF = f.vx * f.face;
+    const s = f.state, w = { bend: 0, sq: 1, px: 0, py: 0, feet: null, footX: 0 }, fr = tick, vxF = f.vx * f.face; rig.fling = false;
     if (s === 'idle') { w.sq = 1 + Math.sin(fr * 0.07) * 0.02; w.bend = Math.sin(fr * 0.035) * 0.04; w.py = Math.sin(fr * 0.07 + 1) * 0.3;
       if (f.ctl.c.ly < CROUCH_Y) { w.sq = 0.78; w.bend = 0.1; }
       if (Math.abs(f.vx) > 0.2) { w.bend = clamp(vxF * 0.12, -0.25, 0.25); w.feet = [Math.max(0, Math.sin(fr * 0.4)) * 0.8, Math.max(0, -Math.sin(fr * 0.4)) * 0.8]; } }
@@ -283,6 +302,7 @@ function build() {
       if (m.fowlUp && !f.upGo) { const c = (f.upC || 0) / 45; w.px = -2 - 5 * c; w.py = -1.5 - 2.5 * c; w.bend = -0.15 - 0.35 * c; w.sq = 0.92 - 0.12 * c; }   /* Catapult Cyclone charging: bands stretch, trunk leans back */
       else if (m.spin) { w.py = 2.6; w.sq = 1.1; }   /* end over end: the pouch is flung outward */
       else if (f.mname === 'sspec') { const k = phase01(f.mf, m.t); w.px = k < 0.6 ? -5 * k / 0.6 : 0; w.py = k < 0.6 ? -1.5 : 0; w.bend = k < 0.6 ? -0.25 : 0.1; }   /* aiming: drawn back, then let go */
+      else if (SLING_FLING[f.mname] && m.h.length) slingFling(f, rig, w, SLING_FLING[f.mname]);
       else if (f.mname === 'nspec') { w.sq = 1 + Math.sin(fr * 0.3) * 0.04; w.py = Math.sin(fr * 0.3) * 0.6; }   /* the selector open: the pouch jiggles */
       else if (tbl && a.mode === 'marks') { const [wind, hit, sq] = tbl, e = a.seg === 0 ? Math.sin(a.v * Math.PI / 2) : 1;
         if (a.seg === 0) { w.bend = -wind * e; w.sq = 1 - 0.1 * e; w.px = -1.5 * e; } else if (a.seg === 1) { w.bend = hit; w.sq = sq || 1; w.px = 1.5; } else { w.bend = hit * (1 - a.v) * 0.4; w.sq = 1 + ((sq || 1) - 1) * (1 - a.v); } }
@@ -994,8 +1014,8 @@ function build() {
         const off = rig.drive(slingWant(f, rig), step);
         /* the bird rides the pouch: move it by the pouch's offset, carried into the fighter's own turned frame */
         if (v.obj && !spinning) {   /* the pouch's movement in the play plane, carried into the fighter's own turned frame (depth ignored) */
-          const wo = new THREE.Vector3(off.x, off.y, off.z); rig.grp.localToWorld(wo); const w0 = new THREE.Vector3(); rig.grp.localToWorld(w0); wo.sub(w0); wo.z = 0; if (wo.length() > 3.5) wo.setLength(3.5);
-          v.root.updateWorldMatrix(true, false); wo.applyMatrix3(new THREE.Matrix3().setFromMatrix4(v.root.matrixWorld).invert()); v.obj.position.set(wo.x * 0.85, (v.obj.userData.y0 !== undefined ? v.obj.userData.y0 : (v.model.cfg.lift || 0)) - p.oy + wo.y * 0.85, wo.z * 0.85); }   /* keeping the pivot's own height correction */
+          const wo = new THREE.Vector3(off.x, off.y, off.z); rig.grp.localToWorld(wo); const w0 = new THREE.Vector3(); rig.grp.localToWorld(w0); wo.sub(w0); wo.z = 0; const ride = rig.fling ? 1 : 0.85; if (!rig.fling && wo.length() > 3.5) wo.setLength(3.5);   /* in a fling the bird goes all the way out with the pouch */
+          v.root.updateWorldMatrix(true, false); wo.applyMatrix3(new THREE.Matrix3().setFromMatrix4(v.root.matrixWorld).invert()); v.obj.position.set(wo.x * ride, (v.obj.userData.y0 !== undefined ? v.obj.userData.y0 : (v.model.cfg.lift || 0)) - p.oy + wo.y * ride, wo.z * ride); }   /* keeping the pivot's own height correction */
       } else if (v.prop) {
         v.root.updateWorldMatrix(true, true); v.hand.getWorldPosition(v.prop.position);
         v.prop.rotation.z = clamp(-f.vx * 0.12, -0.5, 0.5) + Math.sin(frame * 0.12 + idx) * 0.05;

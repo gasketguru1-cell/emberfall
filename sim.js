@@ -1019,6 +1019,18 @@ const FN = {
   Pearl: { jab: [[4, 5, 2], [6, 7, 2], [9, 11, 3.5]], jr: 16, ftilt: [8, 12, 7.5, 16], utilt: [8, 12, 7, 17], dtilt: [7, 11, 6.5, 16], dash: [11, 18, 8, 21], fsmash: [19, 23, 16, 36], usmash: [14, 19, 13, 31], dsmash: [16, 21, 13, 32],
     fair: [8, 14, 8, 17, 11], bair: [8, 14, 9, 18, 12], uair: [7, 15, 8, 16, 10], dair: [12, 20, 8, 22, 16], grab: 9, thr: [8, 9, 9, 7], pum: 1.5, geo: 1.05, reach: 1 },
 };
+/* Forward, back and up air in the slingshot (the owner, 2026-11-12): the bird rears the other way in the pouch, then the bands fling
+   it out to the strike, still in the pouch. The bird's hitbox is unchanged and listed first, so it wins; the two bands, stretched
+   from the fork's top to the bird, hit too as a sour spot: same frames, angle and knockback values, 60% of the damage. One hit
+   between them (same group). The bands are a row of small circles along that line. */
+const BAND_TOP = [0, 13.6], BAND_R = 2.4, BAND_SOUR = 0.6;
+function fowlBands(mv) {
+  const h = mv.h[0], [x0, y0] = BAND_TOP, tx = h.x, ty = h.y, n = Math.max(2, Math.ceil(Math.hypot(tx - x0, ty - y0) / 2));
+  const band = Object.assign({}, h, { x: +((x0 + tx) / 2).toFixed(1), y: +((y0 + ty) / 2).toFixed(1), r: BAND_R, d: +(h.d * BAND_SOUR).toFixed(2), part: 'band',
+    at(a, back) { const ox = a.x - (back ? (a.x - a.px) * back : 0), oy = a.y - (back ? (a.y - a.py) * back : 0), out = [];
+      for (let i = 0; i <= n; i++) { const u = i / n; out.push([ox + (x0 + (tx - x0) * u) * a.face, oy + y0 + (ty - y0) * u, BAND_R]); } return out; } });
+  delete band.in; mv.h.push(band);
+}
 function fowlApplyNormals(m, row) {
   ['jab', 'jab2', 'jab3'].forEach((k, n) => { const q = row.jab[n], mv = m[k], h = mv.h[0]; h.f0 = q[0]; h.f1 = q[1]; h.d = q[2]; mv.t = q[1] + (n < 2 ? 10 : row.jr); if (mv.chain !== undefined) mv.chain = q[1] + 1; });
   for (const k of ['ftilt', 'utilt', 'dtilt', 'dash', 'fsmash', 'usmash', 'dsmash', 'fair', 'bair', 'uair']) { const q = row[k], mv = m[k], h = mv.h[0], len = q[1] - q[0];
@@ -1307,6 +1319,7 @@ const FOWLS = { name: 'Furious Fowls', sub: 'five birds and a slingshot', fowl: 
       dcounter: { t: 22, h: [{ f0: 2, f1: 4, x: 7, y: 9, r: 5.5, d: 10, a: 40, b: 50, k: 80 }], on(f, n) { if (n === 5) { f.vx = -f.face * 1; if (f.grounded) { f.grounded = false; f.plat = null; } f.vy = 1.2; } } },   /* the counter: a 10% snap, then a small rebound back and up */
     }, { jabs: 3 }), Object.assign({}, C, { down_air: null }), FW, 7.5, 3);
     fowlApplyNormals(m, FN[nm]);
+    for (const k of ['fair', 'bair', 'uair']) fowlBands(m[k]);
     m.nair = makeSpin(nm);
     const q = FN[nm].dair, t = q[1] + q[3];
     if (nm === 'Rusty') { const d0 = C.down_air_wooden_red_dummy; m.dair = { t, air: 1, ll: q[4], ac: q[1] + 9, h: [], on(f, n) { if (n === q[0]) { shoot(f, { kind: 'dummy', tag: 'fowldown', max: 1, ox: 0.01, oy: 7.5 - 0.45 * FW, vx: 0, vy: -2.6, r: 0.22 * FW, life: 40, lateAt: 5, lateH: { d: 8, a: 70, b: 30, k: 60 }, h: { d: q[2], a: d0.ang, b: d0.b, k: d0.k } }); if (!f.dairUsed) { f.dairUsed = true; f.vy = Math.max(f.vy, 0) + 1.35; } } } }; }
